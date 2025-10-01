@@ -96,7 +96,7 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
     {
       key: "movement_date",
       label: "Fecha",
-      width: "16.67%",
+      width: "16.666%",
       sortable: true,
       sortType: "date" as const,
       render: (item: any) => {
@@ -111,7 +111,7 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
     {
       key: "functional_unit",
       label: "Unidad Funcional",
-      width: "16.67%",
+      width: "16.667%",
       render: (item: any) => {
         // Get all functional units from movement_clients
         const units = item.movement_clients?.map((mc: any) => 
@@ -138,7 +138,7 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
     {
       key: "contact",
       label: "Contacto",
-      width: "16.67%",
+      width: "16.667%",
       render: (item: any) => {
         // Get all contacts from movement_clients
         const contacts = item.movement_clients?.map((mc: any) => {
@@ -166,7 +166,7 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
     {
       key: "wallet",
       label: "Billetera",
-      width: "16.67%",
+      width: "16.667%",
       render: (item: any) => {
         if (!item.wallet?.name) {
           return <div className="text-sm text-muted-foreground">Sin billetera</div>
@@ -182,7 +182,7 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
     {
       key: "amount",
       label: "Monto",
-      width: "16.67%",
+      width: "16.667%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -199,7 +199,7 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
     {
       key: "exchange_rate",
       label: "Cotización",
-      width: "16.67%",
+      width: "16.666%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
