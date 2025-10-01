@@ -21,6 +21,10 @@ interface Budget {
   discount_pct?: number
   tax_pct?: number
   tax_label?: string
+  // Calculated totals
+  total?: number
+  labor_total?: number
+  materials_total?: number
   currency?: {
     id: string
     code: string

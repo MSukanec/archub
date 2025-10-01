@@ -70,7 +70,7 @@ export function BudgetItems({
     {
       key: 'name',
       label: 'Nombre',
-      width: '30%',
+      width: '25%',
       render: (budget: any) => (
         <div>
           <div className="font-medium text-sm">{budget.name}</div>
@@ -85,7 +85,7 @@ export function BudgetItems({
     {
       key: 'version',
       label: 'Versión',
-      width: '10%',
+      width: '7%',
       render: (budget: any) => (
         <span className="text-sm">v{budget.version}</span>
       )
@@ -93,7 +93,7 @@ export function BudgetItems({
     {
       key: 'currency',
       label: 'Moneda',
-      width: '10%',
+      width: '7%',
       render: (budget: any) => (
         <div className="text-sm font-medium">
           {budget.currency?.code || 'N/A'}
@@ -101,9 +101,29 @@ export function BudgetItems({
       )
     },
     {
+      key: 'materials',
+      label: 'Materiales',
+      width: '11%',
+      render: (budget: any) => (
+        <div className="text-sm font-medium text-blue-700">
+          {budget.currency?.symbol || '$'} {formatCurrency(budget.materials_total || 0)}
+        </div>
+      )
+    },
+    {
+      key: 'labor',
+      label: 'Mano de Obra',
+      width: '11%',
+      render: (budget: any) => (
+        <div className="text-sm font-medium text-orange-700">
+          {budget.currency?.symbol || '$'} {formatCurrency(budget.labor_total || 0)}
+        </div>
+      )
+    },
+    {
       key: 'total',
       label: 'Total',
-      width: '15%',
+      width: '11%',
       render: (budget: any) => (
         <div className="text-sm">
           <div className="font-medium text-green-700">
@@ -120,7 +140,7 @@ export function BudgetItems({
     {
       key: 'created_at',
       label: 'Creado',
-      width: '10%',
+      width: '8%',
       sortable: true,
       sortType: 'date' as const,
       render: (budget: any) => (
@@ -132,7 +152,7 @@ export function BudgetItems({
     {
       key: 'status',
       label: 'Estado',
-      width: '10%',
+      width: '8%',
       render: (budget: any) => {
         const getStatusBadge = (status: string) => {
           switch (status) {
@@ -154,7 +174,7 @@ export function BudgetItems({
     {
       key: 'actions',
       label: 'Acciones',
-      width: '15%',
+      width: '12%',
       render: (budget: any) => (
         <div className="flex items-center gap-1">
           <Button

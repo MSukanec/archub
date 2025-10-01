@@ -231,30 +231,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: "Failed to fetch budgets" });
       }
 
-      // Calcular el total para cada presupuesto
+      // Calcular el total, materiales y mano de obra para cada presupuesto
       const budgetsWithTotals = await Promise.all(
         (budgets || []).map(async (budget) => {
           const { data: items, error: itemsError } = await authenticatedSupabase
             .from('budget_items')
-            .select('unit_price, quantity, markup_pct, tax_pct')
+            .select(`
+              unit_price, 
+              quantity, 
+              markup_pct, 
+              tax_pct,
+              construction_task_id,
+              labor_unit_cost,
+              material_unit_cost
+            `)
             .eq('budget_id', budget.id);
 
           if (itemsError) {
             console.error(`Error fetching items for budget ${budget.id}:`, itemsError);
-            return { ...budget, total: 0 };
+            return { ...budget, total: 0, labor_total: 0, materials_total: 0 };
           }
 
-          // Calcular total sumando todos los items
-          const total = (items || []).reduce((sum, item) => {
-            const subtotal = (item.unit_price || 0) * (item.quantity || 1);
+          let total = 0;
+          let laborTotal = 0;
+          let materialsTotal = 0;
+
+          // Calcular totales para cada item
+          for (const item of items || []) {
+            const quantity = item.quantity || 1;
+            
+            // Calcular el total del item (con markup y tax)
+            const subtotal = (item.unit_price || 0) * quantity;
             const markupAmount = subtotal * ((item.markup_pct || 0) / 100);
             const taxableAmount = subtotal + markupAmount;
             const taxAmount = taxableAmount * ((item.tax_pct || 0) / 100);
             const itemTotal = taxableAmount + taxAmount;
-            return sum + itemTotal;
-          }, 0);
+            total += itemTotal;
 
-          return { ...budget, total };
+            // Calcular mano de obra y materiales (sin markup ni tax, solo costo base)
+            const laborCost = (item.labor_unit_cost || 0) * quantity;
+            const materialCost = (item.material_unit_cost || 0) * quantity;
+            
+            laborTotal += laborCost;
+            materialsTotal += materialCost;
+          }
+
+          return { 
+            ...budget, 
+            total,
+            labor_total: laborTotal,
+            materials_total: materialsTotal
+          };
         })
       );
 
