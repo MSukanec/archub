@@ -283,23 +283,23 @@ export default function Projects() {
           additionalButtons={[
             <Button
               key="go-to-project"
-              variant="ghost"
+              variant="default"
               size="sm"
               onClick={() => handleSelectProject(project.id)}
-              className="h-8 w-8 p-0"
-              title="Ir al proyecto"
+              className="h-8 gap-2"
             >
               <ArrowRight className="h-4 w-4" />
+              <span>Ir al proyecto</span>
             </Button>,
             <Button
               key="view"
-              variant="ghost"
+              variant="default"
               size="sm"
               onClick={() => handleViewDetail(project.id)}
-              className="h-8 w-8 p-0"
-              title="Ver detalle"
+              className="h-8 gap-2"
             >
               <Eye className="h-4 w-4" />
+              <span>Ver detalle</span>
             </Button>
           ]}
         />
