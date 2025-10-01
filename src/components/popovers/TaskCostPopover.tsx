@@ -75,8 +75,8 @@ export const TaskCostPopover = ({ task, showCost = false, cost_scope }: TaskCost
         
         <Button
           variant="ghost"
-          size="icon-sm"
-          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+          size="sm"
+          className="h-4 w-4 p-0 text-[var(--accent-2)] hover:text-[var(--accent-2)] opacity-70 hover:opacity-100"
           onClick={() => setIsOpen(true)}
         >
           <Info className="h-3 w-3" />
