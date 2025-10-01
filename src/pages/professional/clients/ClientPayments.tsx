@@ -96,13 +96,13 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
     {
       key: "movement_date",
       label: "Fecha",
-      width: "20%",
+      width: "1fr",
       sortable: true,
       sortType: "date" as const,
       render: (item: any) => {
         const date = new Date(item.movement_date + 'T00:00:00')
         return (
-          <div className="text-sm">
+          <div className="text-sm truncate">
             {formatDate(date)}
           </div>
         )
@@ -111,7 +111,7 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
     {
       key: "contact",
       label: "Contacto",
-      width: "20%",
+      width: "1fr",
       render: (item: any) => {
         // Get all contacts and units from movement_clients
         const contactsData = item.movement_clients?.map((mc: any) => {
@@ -128,17 +128,17 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
         const firstContact = contactsData[0]
         
         return (
-          <div>
-            <div className="text-sm">
+          <div className="min-w-0">
+            <div className="text-sm truncate">
               {firstContact.name}
             </div>
             {firstContact.unit && (
-              <div className="text-xs text-muted-foreground">
+              <div className="text-xs text-muted-foreground truncate">
                 U.F. {firstContact.unit}
               </div>
             )}
             {contactsData.length > 1 && (
-              <div className="text-xs text-muted-foreground">
+              <div className="text-xs text-muted-foreground truncate">
                 +{contactsData.length - 1} más
               </div>
             )}
@@ -149,14 +149,14 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
     {
       key: "wallet",
       label: "Billetera",
-      width: "20%",
+      width: "1fr",
       render: (item: any) => {
         if (!item.wallet?.name) {
           return <div className="text-sm text-muted-foreground">Sin billetera</div>
         }
         
         return (
-          <div className="text-sm">
+          <div className="text-sm truncate">
             {item.wallet.name}
           </div>
         )
@@ -165,7 +165,7 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
     {
       key: "amount",
       label: "Monto",
-      width: "20%",
+      width: "1fr",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -173,7 +173,7 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
         const currencySymbol = item.currency?.symbol || '$'
         
         return (
-          <div className="text-sm font-medium">
+          <div className="text-sm font-medium truncate">
             {currencySymbol} {amount.toLocaleString('es-AR')}
           </div>
         )
@@ -182,7 +182,7 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
     {
       key: "exchange_rate",
       label: "Cotización",
-      width: "20%",
+      width: "1fr",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -192,7 +192,7 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
         
         // Siempre mostrar cotización en pesos argentinos
         return (
-          <div className="text-sm">
+          <div className="text-sm truncate">
             $ {item.exchange_rate.toLocaleString('es-AR')}
           </div>
         )

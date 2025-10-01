@@ -344,7 +344,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "contact",
       label: "Nombre Completo",
-      width: "14.28%",
+      width: "1fr",
       sortable: true,
       sortType: "string" as const,
       render: (item: any) => {
@@ -357,10 +357,10 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         const unit = item.unit?.trim()
 
         return (
-          <div>
-            <div className="text-sm font-medium">{displayName}</div>
+          <div className="min-w-0">
+            <div className="text-sm font-medium truncate">{displayName}</div>
             {unit && (
-              <div className="text-xs text-muted-foreground">
+              <div className="text-xs text-muted-foreground truncate">
                 U.F. {unit}
               </div>
             )}
@@ -371,7 +371,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "commitment",
       label: "Compromiso Inicial",
-      width: "14.28%", 
+      width: "1fr", 
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -382,7 +382,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         }
         
         return (
-          <div className="text-sm font-medium">
+          <div className="text-sm font-medium truncate">
             {item.currency?.symbol || '$'} {Math.floor(committedAmount).toLocaleString()}
           </div>
         )
@@ -391,12 +391,12 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "totalPaid",
       label: "Pago a la Fecha",
-      width: "14.28%",
+      width: "1fr",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
         return (
-          <div className="text-sm">
+          <div className="text-sm truncate">
             {item.currency?.symbol || '$'} {Math.floor(item.totalPaid || 0).toLocaleString()}
           </div>
         )
@@ -405,7 +405,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "remainingAmount",
       label: "Monto Restante",
-      width: "14.28%",
+      width: "1fr",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -413,7 +413,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         const isNegative = remaining < 0
         
         return (
-          <div className={`text-sm font-medium ${isNegative ? 'text-green-600' : 'text-muted-foreground'}`}>
+          <div className={`text-sm font-medium truncate ${isNegative ? 'text-green-600' : 'text-muted-foreground'}`}>
             {item.currency?.symbol || '$'} {Math.floor(Math.abs(remaining)).toLocaleString()}
             {isNegative && ' (excedente)'}
           </div>
@@ -423,7 +423,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "paymentPercentage",
       label: "% de Pago",
-      width: "14.28%",
+      width: "1fr",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -447,7 +447,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "totalPercentage",
       label: "% del Total",
-      width: "14.28%",
+      width: "1fr",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -474,7 +474,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "actions",
       label: "Acciones",
-      width: "14.32%",
+      width: "1fr",
       render: (item: any) => {
         return (
           <div className="flex items-center gap-1">
