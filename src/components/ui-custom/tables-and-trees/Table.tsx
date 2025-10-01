@@ -750,9 +750,18 @@ export function Table<T = any>({
   };
 
   const getGridTemplateColumns = () => {
-    const baseColumns = columns
-      .map((col) => col.width || "minmax(0, 1fr)")
-      .join(" ");
+    // Check if all columns have the same width
+    const widths = columns.map(col => col.width || "minmax(0, 1fr)");
+    const allSameWidth = widths.every(w => w === widths[0]);
+    
+    let baseColumns: string;
+    if (allSameWidth && widths[0] !== "minmax(0, 1fr)") {
+      // If all have same width (percentage or px), use repeat with 1fr for equal distribution
+      baseColumns = `repeat(${columns.length}, minmax(0, 1fr))`;
+    } else {
+      baseColumns = widths.join(" ");
+    }
+    
     return selectable ? `40px ${baseColumns}` : baseColumns;
   };
 
