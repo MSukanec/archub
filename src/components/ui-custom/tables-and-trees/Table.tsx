@@ -788,7 +788,7 @@ export function Table<T = any>({
         {/* Desktop loading skeleton */}
         <div className="hidden lg:block">
           <div
-            className="grid gap-4 p-4 bg-muted/50 rounded-lg"
+            className="grid gap-2 p-4 bg-muted/50 rounded-lg"
             style={{ gridTemplateColumns: getGridTemplateColumns() }}
           >
             {columns.map((_, index) => (
@@ -798,7 +798,7 @@ export function Table<T = any>({
           {Array.from({ length: 5 }).map((_, index) => (
             <div
               key={index}
-              className="grid gap-4 p-4 border rounded-lg"
+              className="grid gap-2 p-4 border rounded-lg"
               style={{ gridTemplateColumns: getGridTemplateColumns() }}
             >
               {columns.map((_, colIndex) => (
@@ -860,7 +860,7 @@ export function Table<T = any>({
         {/* Column Headers - Fila inferior con títulos de columnas */}
         <div
           className={cn(
-            "grid gap-4 px-4 py-3 text-xs font-medium border-b"
+            "grid gap-2 px-4 py-3 text-xs font-medium border-b"
           )}
           style={{ 
             gridTemplateColumns: getGridTemplateColumns(),
@@ -929,7 +929,7 @@ export function Table<T = any>({
                 {/* Header de grupo */}
                 {renderGroupHeader && (
                   <div className={cn(
-                    "grid gap-4 px-4 py-3",
+                    "grid gap-2 px-4 py-3",
                     mode === "budget" && "border-b border-[var(--table-row-border)]",
                     mode === "construction" && "border-b border-[var(--table-row-border)]",
                     mode === "default" && "border-b border-[var(--table-header-border)]",
@@ -950,7 +950,7 @@ export function Table<T = any>({
                   <div
                     key={getItemId(item)}
                     className={cn(
-                      "group relative grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
+                      "group relative grid gap-2 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
                       index < groupRows.length - 1 ? "border-b border-[var(--table-row-border)]" : "",
                       getRowClassName?.(item),
                     )}
@@ -996,7 +996,7 @@ export function Table<T = any>({
               <div
                 key={getItemId(item)}
                 className={cn(
-                  "group relative grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
+                  "group relative grid gap-2 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
                   index < paginatedData.length - 1
                     ? "border-b border-[var(--table-row-border)]"
                     : "",
@@ -1039,7 +1039,7 @@ export function Table<T = any>({
           {/* 🆕 FILA DE TOTALES */}
           {renderFooterRow && hasFilteredData && (
             <div className={cn(
-              "grid gap-4 px-4 py-3",
+              "grid gap-2 px-4 py-3",
               mode === "budget" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)]",
               mode === "construction" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)]",
               mode === "default" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)]",

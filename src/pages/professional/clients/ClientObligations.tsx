@@ -344,7 +344,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "contact",
       label: "Nombre Completo",
-      width: "1fr",
+      width: "14.29%",
       sortable: true,
       sortType: "string" as const,
       render: (item: any) => {
@@ -371,7 +371,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "commitment",
       label: "Compromiso Inicial",
-      width: "1fr", 
+      width: "14.29%", 
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -391,7 +391,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "totalPaid",
       label: "Pago a la Fecha",
-      width: "1fr",
+      width: "14.29%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -405,7 +405,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "remainingAmount",
       label: "Monto Restante",
-      width: "1fr",
+      width: "14.29%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -423,7 +423,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "paymentPercentage",
       label: "% de Pago",
-      width: "1fr",
+      width: "14.29%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -447,7 +447,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "totalPercentage",
       label: "% del Total",
-      width: "1fr",
+      width: "14.29%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -474,7 +474,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "actions",
       label: "Acciones",
-      width: "1fr",
+      width: "14.29%",
       render: (item: any) => {
         return (
           <div className="flex items-center gap-1">
