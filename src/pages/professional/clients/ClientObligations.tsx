@@ -342,22 +342,9 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
   // Table columns for commitments
   const contactSummaryColumns = [
     {
-      key: "unit",
-      label: "U.F.",
-      width: "12%",
-      sortable: true,
-      sortType: "string" as const,
-      render: (item: any) => {
-        if (!item.unit || item.unit.trim() === '') {
-          return <div className="text-sm text-muted-foreground">-</div>
-        }
-        return <div className="text-sm">{item.unit}</div>
-      }
-    },
-    {
       key: "contact",
       label: "Nombre Completo",
-      width: "16%",
+      width: "18%",
       sortable: true,
       sortType: "string" as const,
       render: (item: any) => {
@@ -367,16 +354,24 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
 
         const displayName = item.contacts.company_name || 
                            `${item.contacts.first_name || ''} ${item.contacts.last_name || ''}`.trim()
+        const unit = item.unit?.trim()
 
         return (
-          <div className="text-sm font-medium">{displayName}</div>
+          <div>
+            <div className="text-sm font-medium">{displayName}</div>
+            {unit && (
+              <div className="text-xs text-muted-foreground">
+                U.F. {unit}
+              </div>
+            )}
+          </div>
         )
       }
     },
     {
       key: "commitment",
       label: "Compromiso Inicial",
-      width: "13%", 
+      width: "14.5%", 
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -396,7 +391,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "totalPaid",
       label: "Pago a la Fecha",
-      width: "13%",
+      width: "14.5%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -410,7 +405,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "remainingAmount",
       label: "Monto Restante",
-      width: "13%",
+      width: "14.5%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -428,7 +423,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "paymentPercentage",
       label: "% de Pago",
-      width: "11%",
+      width: "12.5%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -452,7 +447,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "totalPercentage",
       label: "% del Total",
-      width: "11%",
+      width: "12.5%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -479,7 +474,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "actions",
       label: "Acciones",
-      width: "11%",
+      width: "13.5%",
       render: (item: any) => {
         return (
           <div className="flex items-center gap-1">
