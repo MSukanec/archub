@@ -154,8 +154,8 @@ export default function TaskList() {
         <Badge 
           variant={task.is_system ? "default" : "secondary"}
           className={`text-xs ${task.is_system 
-            ? 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900 dark:text-green-300' 
-            : 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90'
+            ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90' 
+            : 'bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300'
           }`}
         >
           {task.is_system ? 'Sistema' : 'Organización'}
