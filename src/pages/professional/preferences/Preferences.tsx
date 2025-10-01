@@ -10,6 +10,7 @@ import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { DataBasicTab } from './DataBasicTab';
 import { MembersTab } from './MembersTab';
 import { FinancesTab } from './FinancesTab';
+import { PartnersTab } from './PartnersTab';
 
 export default function Preferences() {
   const [activeTab, setActiveTab] = useState('basic');
@@ -38,6 +39,11 @@ export default function Preferences() {
       id: 'finances',
       label: 'Finanzas',
       isActive: activeTab === 'finances'
+    },
+    {
+      id: 'partners',
+      label: 'Socios',
+      isActive: activeTab === 'partners'
     }
   ];
 
@@ -72,6 +78,8 @@ export default function Preferences() {
         return <MembersTab />;
       case 'finances':
         return <FinancesTab />;
+      case 'partners':
+        return <PartnersTab />;
       default:
         return <DataBasicTab />;
     }

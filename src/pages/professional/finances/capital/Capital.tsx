@@ -13,7 +13,6 @@ import { useToast } from '@/hooks/use-toast'
 
 import { CapitalDashboard } from './CapitalDashboard'
 import { CapitalHistory } from './CapitalHistory'
-import { PartnersTab } from './PartnersTab'
 import DashboardTab from './DashboardTab'
 
 interface CapitalMovement {
@@ -310,11 +309,6 @@ export default function FinancesCapitalMovements() {
       id: "details",
       label: "Detalle de Aportes/Retiros",
       isActive: activeTab === "details"
-    },
-    {
-      id: "partners",
-      label: "Socios",
-      isActive: activeTab === "partners"
     }
   ]
 
@@ -392,10 +386,6 @@ export default function FinancesCapitalMovements() {
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
-          )}
-
-          {activeTab === "partners" && (
-            <PartnersTab />
           )}
         </div>
       )}
