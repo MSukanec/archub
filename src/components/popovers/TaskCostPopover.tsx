@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Eye, Package, X, Wrench } from 'lucide-react'
+import { Info, Package, X, Wrench } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useTaskMaterials } from '@/hooks/use-generated-tasks'
 import { useTaskLabor } from '@/hooks/use-task-labor'
@@ -79,7 +79,7 @@ export const TaskCostPopover = ({ task, showCost = false, cost_scope }: TaskCost
           className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
           onClick={() => setIsOpen(true)}
         >
-          <Eye className="h-4 w-4" />
+          <Info className="h-3 w-3" />
         </Button>
       </div>
 
