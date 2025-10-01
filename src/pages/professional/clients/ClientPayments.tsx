@@ -91,12 +91,12 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
     enabled: !!organizationId && !!projectId && !!supabase
   })
 
-  // Detailed table columns (Fecha, Unidad Funcional, Contacto, Billetera, Monto, Cotización)
+  // Detailed table columns (Fecha, Contacto, Billetera, Monto, Cotización)
   const detailColumns = [
     {
       key: "movement_date",
       label: "Fecha",
-      width: "16.666%",
+      width: "20%",
       sortable: true,
       sortType: "date" as const,
       render: (item: any) => {
@@ -109,54 +109,37 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
       }
     },
     {
-      key: "functional_unit",
-      label: "Unidad Funcional",
-      width: "16.667%",
-      render: (item: any) => {
-        // Get all functional units from movement_clients
-        const units = item.movement_clients?.map((mc: any) => 
-          mc.project_clients?.unit
-        ).filter(Boolean) || []
-
-        if (units.length === 0) {
-          return <div className="text-sm text-muted-foreground">Sin unidad</div>
-        }
-
-        // Show first unit, indicate if there are more
-        return (
-          <div className="text-sm">
-            {units[0]}
-            {units.length > 1 && (
-              <div className="text-xs text-muted-foreground">
-                +{units.length - 1} más
-              </div>
-            )}
-          </div>
-        )
-      }
-    },
-    {
       key: "contact",
       label: "Contacto",
-      width: "16.667%",
+      width: "20%",
       render: (item: any) => {
-        // Get all contacts from movement_clients
-        const contacts = item.movement_clients?.map((mc: any) => {
+        // Get all contacts and units from movement_clients
+        const contactsData = item.movement_clients?.map((mc: any) => {
           const contact = mc.project_clients?.contacts
-          return contact?.company_name || contact?.full_name || `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim()
-        }).filter(Boolean) || []
+          const unit = mc.project_clients?.unit
+          const contactName = contact?.company_name || contact?.full_name || `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim()
+          return { name: contactName, unit }
+        }).filter((c: any) => c.name) || []
 
-        if (contacts.length === 0) {
+        if (contactsData.length === 0) {
           return <div className="text-sm text-muted-foreground">Sin contacto</div>
         }
 
-        // Show first contact, indicate if there are more
+        const firstContact = contactsData[0]
+        
         return (
-          <div className="text-sm">
-            {contacts[0]}
-            {contacts.length > 1 && (
+          <div>
+            <div className="text-sm">
+              {firstContact.name}
+            </div>
+            {firstContact.unit && (
               <div className="text-xs text-muted-foreground">
-                +{contacts.length - 1} más
+                U.F. {firstContact.unit}
+              </div>
+            )}
+            {contactsData.length > 1 && (
+              <div className="text-xs text-muted-foreground">
+                +{contactsData.length - 1} más
               </div>
             )}
           </div>
@@ -166,7 +149,7 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
     {
       key: "wallet",
       label: "Billetera",
-      width: "16.667%",
+      width: "20%",
       render: (item: any) => {
         if (!item.wallet?.name) {
           return <div className="text-sm text-muted-foreground">Sin billetera</div>
@@ -182,7 +165,7 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
     {
       key: "amount",
       label: "Monto",
-      width: "16.667%",
+      width: "20%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -199,7 +182,7 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
     {
       key: "exchange_rate",
       label: "Cotización",
-      width: "16.666%",
+      width: "20%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
