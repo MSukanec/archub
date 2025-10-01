@@ -163,11 +163,13 @@ export function BudgetItems({
             onClick={() => handleView(budget)}
             className="h-8"
           >
+            <Edit className="h-4 w-4 mr-1.5" />
             Editar
           </Button>
           <TableActionButtons
             onEdit={() => handleEdit(budget)}
             onDelete={() => handleDelete(budget)}
+            editLabel="Edición Rápida"
           />
         </div>
       )
