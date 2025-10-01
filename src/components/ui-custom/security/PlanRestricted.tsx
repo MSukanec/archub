@@ -79,6 +79,15 @@ export function PlanRestricted({
     return <>{children}</>;
   }
 
+  // ADMIN BYPASS: Los administradores siempre pueden acceder aunque se vea disabled
+  if (isAdmin) {
+    return (
+      <div className="opacity-40">
+        {children}
+      </div>
+    );
+  }
+
   // CASO: COMING SOON - Solo deshabilitar sin decoración
   if (reason === "coming_soon") {
     return (

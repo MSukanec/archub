@@ -314,7 +314,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
 
         { icon: Users, label: 'Personal', href: '/construction/personnel' },
-        { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
+        { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts', restricted: true },
 
         { icon: Package2, label: 'Materiales', href: '/construction/materials' },
         { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
@@ -368,7 +368,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     subsections: {
       general: [
         { icon: Info, label: 'Información', href: '/general/info' },
-        { icon: Users, label: 'Clientes', href: '/clients' }
+        { icon: Users, label: 'Clientes', href: '/clients', restricted: true }
       ],
       diseno: [
         { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' }
@@ -377,7 +377,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
 
         { icon: Users, label: 'Personal', href: '/construction/personnel' },
-        { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
+        { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts', restricted: true },
 
         { icon: Package2, label: 'Materiales', href: '/construction/materials' },
         { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
@@ -531,10 +531,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             return (
               <div key={index}>
                 {isRestricted ? (
-                  <PlanRestricted reason="general_mode" functionName={item.label}>
+                  <PlanRestricted reason="coming_soon">
                     <button
+                      onClick={() => handleSectionLevelClick(item)}
                       className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] opacity-50 shadow-button-normal"
-                      disabled
                     >
                       {item.icon && <item.icon className="h-5 w-5" />}
                       {item.label}
@@ -573,10 +573,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             return (
               <div key={index}>
                 {isRestricted ? (
-                  <PlanRestricted reason="general_mode" functionName={item.label}>
+                  <PlanRestricted reason="coming_soon">
                     <button
+                      onClick={() => handleSubsectionLevelClick(item)}
                       className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] opacity-50 shadow-button-normal"
-                      disabled
                     >
                       {item.icon && <item.icon className="h-5 w-5" />}
                       {item.label}
