@@ -113,15 +113,15 @@ export function PartnersTab() {
               {partners.map((partner) => {
                 const contact = partner.contacts;
                 const fullName = `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim();
-                const displayName = fullName || contact?.company_name || contact?.email || 'Sin nombre';
+                const displayName = contact?.company_name || fullName || contact?.email || 'Sin nombre';
                 
                 return (
                   <Card key={partner.id} className="p-4">
                     <CardContent className="p-0">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarFallback>
+                          <Avatar className="h-10 w-10 bg-[var(--accent)]/10">
+                            <AvatarFallback className="bg-transparent text-[var(--accent)] font-medium">
                               {getInitials(displayName)}
                             </AvatarFallback>
                           </Avatar>
@@ -133,7 +133,7 @@ export function PartnersTab() {
                               </h4>
                             </div>
                             <p className="text-xs text-muted-foreground">
-                              {fullName ? (contact?.email || 'Sin email') : 'Clic para editar nombre'}
+                              {contact?.email || 'Sin email'}
                             </p>
                           </div>
                         </div>
