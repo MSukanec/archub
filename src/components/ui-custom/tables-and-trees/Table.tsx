@@ -455,7 +455,7 @@ export function Table<T = any>({
               <div 
                 className={cn(
                   "inline-flex items-center justify-start whitespace-nowrap rounded-lg text-xs",
-                  "bg-transparent text-[var(--button-ghost-text)] hover:bg-transparent hover:text-[var(--button-ghost-hover-text)] border border-[var(--main-sidebar-border)]",
+                  "bg-transparent text-[var(--button-ghost-text)] hover:bg-transparent hover:text-[var(--button-ghost-hover-text)] border border-[var(--button-ghost-border)] hover:border-[var(--button-ghost-hover-border)]",
                   "h-8 px-2 py-2 gap-1.5 w-96",
                   "focus-within:ring-0 focus-within:outline-none"
                 )}
