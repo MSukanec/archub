@@ -33,8 +33,7 @@ export default function Analysis() {
   }
 
   const handleNewMaterial = () => {
-    // TODO: Implementar modal para nuevo material
-    console.log('Crear nuevo material')
+    openModal('material-form', {})
   }
 
   const handleNewLabor = () => {

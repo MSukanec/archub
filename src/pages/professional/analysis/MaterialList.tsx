@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react'
 import { ComboBox as ComboBoxWriteField } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
+import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons'
 import { useMaterials, Material, useDeleteMaterial } from '@/hooks/use-materials'
-import { Package, Edit, Trash2, Copy } from 'lucide-react'
+import { Package } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
@@ -78,13 +79,17 @@ export default function MaterialList() {
   }, [materials, groupingType, filterByCategory, filterByMaterialType]);
 
   const handleEdit = (material: Material) => {
-    // TODO: Implementar modal para editar material
-    console.log('Editar material:', material)
+    openModal('material-form', {
+      editingMaterial: material,
+      isDuplicating: false
+    })
   }
 
   const handleDuplicate = (material: Material) => {
-    // TODO: Implementar duplicación de material
-    console.log('Duplicar material:', material)
+    openModal('material-form', {
+      editingMaterial: material,
+      isDuplicating: true
+    })
   }
 
   const handleDelete = (material: Material) => {
@@ -161,6 +166,22 @@ export default function MaterialList() {
   // Base columns definition
   const baseColumns = [
     {
+      key: 'is_system',
+      label: 'Tipo',
+      width: '11%',
+      render: (material: Material) => (
+        <Badge 
+          variant={material.is_system ? "default" : "secondary"}
+          className={`text-xs ${material.is_system 
+            ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90' 
+            : 'bg-[var(--accent-2)] text-white hover:bg-[var(--accent-2)]/90'
+          }`}
+        >
+          {material.is_system ? 'Sistema' : 'Organización'}
+        </Badge>
+      )
+    },
+    {
       key: 'category',
       label: 'Categoría',
       width: '20%',
@@ -218,22 +239,6 @@ export default function MaterialList() {
       )
     },
     {
-      key: 'is_system',
-      label: 'Tipo',
-      width: '11%',
-      render: (material: Material) => (
-        <Badge 
-          variant={material.is_system ? "default" : "secondary"}
-          className={`text-xs ${material.is_system 
-            ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90' 
-            : 'bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300'
-          }`}
-        >
-          {material.is_system ? 'Sistema' : 'Organización'}
-        </Badge>
-      )
-    },
-    {
       key: 'actions',
       label: 'Acciones',
       width: '16%',
@@ -243,39 +248,18 @@ export default function MaterialList() {
         
         if (!canEdit) {
           return (
-            <div className="flex items-center justify-center h-7">
+            <div className="flex items-center justify-center h-8">
               <span className="text-xs text-muted-foreground">-</span>
             </div>
           );
         }
         
         return (
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleEdit(material)}
-              className="h-7 w-7 p-0"
-            >
-              <Edit className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleDuplicate(material)}
-              className="h-7 w-7 p-0"
-            >
-              <Copy className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleDelete(material)}
-              className="h-7 w-7 p-0"
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
-          </div>
+          <TableActionButtons
+            onEdit={() => handleEdit(material)}
+            onDuplicate={() => handleDuplicate(material)}
+            onDelete={() => handleDelete(material)}
+          />
         );
       }
     }
