@@ -102,7 +102,9 @@ export default function Analysis() {
       {
         id: 'products',
         label: 'Productos',
-        isActive: activeTab === 'products'
+        isActive: activeTab === 'products',
+        isRestricted: true,
+        restrictionReason: 'coming_soon'
       }
     ],
     onTabChange: handleTabChange
