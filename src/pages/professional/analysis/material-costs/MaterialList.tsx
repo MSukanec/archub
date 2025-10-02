@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react'
+import { useLocation } from 'wouter'
 import { ComboBox as ComboBoxWriteField } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons'
 import { useMaterials, Material, useDeleteMaterial } from '@/hooks/use-materials'
-import { Package } from 'lucide-react'
+import { Package, Eye } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
@@ -20,6 +21,7 @@ export default function MaterialList() {
   const deleteMaterialMutation = useDeleteMaterial()
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
+  const [, navigate] = useLocation()
 
   // Filter materials and add groupKey for grouping
   const filteredMaterials = useMemo(() => {
@@ -77,6 +79,10 @@ export default function MaterialList() {
       }
     });
   }, [materials, groupingType, filterByCategory, filterByMaterialType]);
+
+  const handleView = (materialId: string) => {
+    navigate(`/analysis/materials/${materialId}`)
+  }
 
   const handleEdit = (material: Material) => {
     openModal('material-form', {
@@ -243,22 +249,26 @@ export default function MaterialList() {
       label: 'Acciones',
       width: '16%',
       render: (material: Material) => {
-        // Solo mostrar acciones para materiales que pertenecen a la organización (no del sistema)
+        // Solo mostrar acciones de edición para materiales que pertenecen a la organización (no del sistema)
         const canEdit = !material.is_system;
-        
-        if (!canEdit) {
-          return (
-            <div className="flex items-center justify-center h-8">
-              <span className="text-xs text-muted-foreground">-</span>
-            </div>
-          );
-        }
         
         return (
           <TableActionButtons
-            onEdit={() => handleEdit(material)}
-            onDuplicate={() => handleDuplicate(material)}
-            onDelete={() => handleDelete(material)}
+            onEdit={canEdit ? () => handleEdit(material) : undefined}
+            onDuplicate={canEdit ? () => handleDuplicate(material) : undefined}
+            onDelete={canEdit ? () => handleDelete(material) : undefined}
+            additionalButtons={[
+              <Button
+                key="view"
+                variant="default"
+                size="sm"
+                onClick={() => handleView(material.id)}
+                className="h-8 px-3 gap-2"
+              >
+                <Eye className="h-3.5 w-3.5" />
+                Ver Detalle
+              </Button>
+            ]}
           />
         );
       }

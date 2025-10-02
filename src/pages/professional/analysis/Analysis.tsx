@@ -5,7 +5,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { BarChart3, CheckSquare, Package2, Users, Plus } from 'lucide-react'
 import TaskList from './TaskList'
 import ProductList from './ProductList'
-import MaterialList from './MaterialList'
+import MaterialList from './material-costs/MaterialList'
 import LaborList from './LaborList'
 
 export default function Analysis() {

@@ -71,6 +71,7 @@ import Products from "@/pages/providers/products/Products";
 // Analysis Pages
 import Analysis from "@/pages/professional/analysis/Analysis";
 import TaskView from "@/pages/professional/analysis/TaskView";
+import MaterialsView from "@/pages/professional/analysis/material-costs/MaterialsView";
 import GeneralCosts from "@/pages/professional/finances/general-costs/GeneralCosts";
 
 
@@ -147,6 +148,7 @@ function Router() {
         <Route path="/construction/materials" component={Materials} />
         <Route path="/analysis" component={Analysis} />
         <Route path="/analysis/:id" component={TaskView} />
+        <Route path="/analysis/materials/:id" component={MaterialsView} />
         
 
 

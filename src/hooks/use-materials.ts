@@ -86,6 +86,25 @@ export function useMaterials() {
   })
 }
 
+export function useMaterial(materialId: string) {
+  return useQuery({
+    queryKey: ['material', materialId],
+    queryFn: async () => {
+      if (!supabase || !materialId) throw new Error('Supabase not initialized or no material ID')
+      
+      const { data, error } = await supabase
+        .from('materials_view')
+        .select('*')
+        .eq('id', materialId)
+        .single()
+      
+      if (error) throw error
+      return data as Material
+    },
+    enabled: !!materialId && !!supabase
+  })
+}
+
 export function useCreateMaterial() {
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
