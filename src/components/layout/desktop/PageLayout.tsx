@@ -457,7 +457,7 @@ export function PageLayout({
                   // Si la tab está restringida, envolverla con PlanRestricted
                   if (tab.isRestricted && tab.restrictionReason) {
                     return (
-                      <PlanRestricted key={tab.id} reason={tab.restrictionReason}>
+                      <PlanRestricted key={tab.id} feature={tab.restrictionReason}>
                         {tabContent}
                       </PlanRestricted>
                     );

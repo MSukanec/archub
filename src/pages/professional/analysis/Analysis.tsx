@@ -3,7 +3,6 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { BarChart3, CheckSquare, Package2, Users, Plus } from 'lucide-react'
-import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
 import TaskList from './TaskList'
 import ProductList from './ProductList'
 import MaterialList from './material-costs/MaterialList'
@@ -104,7 +103,7 @@ export default function Analysis() {
         label: 'Productos',
         isActive: activeTab === 'products',
         isRestricted: true,
-        restrictionReason: 'coming_soon'
+        restrictionReason: 'products_analysis'
       }
     ],
     onTabChange: handleTabChange
@@ -116,11 +115,7 @@ export default function Analysis() {
         {activeTab === 'tasks' && <TaskList />}
         {activeTab === 'labor' && <LaborList onNewLabor={handleNewLabor} />}
         {activeTab === 'materials' && <MaterialList />}
-        {activeTab === 'products' && (
-          <PlanRestricted reason="coming_soon">
-            <ProductList />
-          </PlanRestricted>
-        )}
+        {activeTab === 'products' && <ProductList />}
       </div>
     </Layout>
   )

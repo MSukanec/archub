@@ -33,6 +33,14 @@ export function usePlanFeatures(): PlanFeatures {
       return featureValue > 0;
     }
     
+    // Features específicas con restricción por nombre de plan
+    const planName = currentPlan?.name?.toLowerCase();
+    
+    // Products Analysis - solo para Pro y superiores
+    if (feature === 'products_analysis') {
+      return planName !== 'free';
+    }
+    
     // Si la feature no está definida, permitir por defecto (compatibilidad)
     return true;
   };

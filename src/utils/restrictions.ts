@@ -90,6 +90,15 @@ export const restrictionMessages: Record<string, RestrictionMessage> = {
     backgroundColor: 'hsl(213, 100%, 30%)',
     borderColor: 'hsl(213, 100%, 30%)',
   },
+  products_analysis: {
+    message: "El análisis de productos está disponible solo en el plan PRO.",
+    actionLabel: "Actualizar a Pro",
+    actionUrl: "/billing",
+    planType: 'pro',
+    iconColor: 'white',
+    backgroundColor: 'hsl(213, 100%, 30%)',
+    borderColor: 'hsl(213, 100%, 30%)',
+  },
 };
 
 export function getRestrictionMessage(key: string): RestrictionMessage {
