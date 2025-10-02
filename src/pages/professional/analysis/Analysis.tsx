@@ -4,7 +4,6 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { BarChart3, CheckSquare, Package2, Users, Plus } from 'lucide-react'
 import TaskList from './TaskList'
-import ProductList from './ProductList'
 import MaterialList from './material-costs/MaterialList'
 import LaborList from './LaborList'
 
@@ -28,10 +27,6 @@ export default function Analysis() {
     openModal('analysis-task', {})
   }
 
-  const handleNewProduct = () => {
-    openModal('custom-product')
-  }
-
   const handleNewMaterial = () => {
     openModal('material-form', {})
   }
@@ -49,13 +44,6 @@ export default function Analysis() {
           label: "Crear Tarea Personalizada",
           icon: Plus,
           onClick: handleNewTask,
-          variant: "default" as const
-        }
-      case 'products':
-        return {
-          label: "Nuevo Producto Personalizado", 
-          icon: Plus,
-          onClick: handleNewProduct,
           variant: "default" as const
         }
       case 'materials':
@@ -97,13 +85,6 @@ export default function Analysis() {
         id: 'materials',
         label: 'Materiales',
         isActive: activeTab === 'materials'
-      },
-      {
-        id: 'products',
-        label: 'Productos',
-        isActive: activeTab === 'products',
-        isRestricted: true,
-        restrictionReason: 'products_analysis'
       }
     ],
     onTabChange: handleTabChange
@@ -115,7 +96,6 @@ export default function Analysis() {
         {activeTab === 'tasks' && <TaskList />}
         {activeTab === 'labor' && <LaborList onNewLabor={handleNewLabor} />}
         {activeTab === 'materials' && <MaterialList />}
-        {activeTab === 'products' && <ProductList />}
       </div>
     </Layout>
   )
