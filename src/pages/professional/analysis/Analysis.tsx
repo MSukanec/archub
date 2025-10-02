@@ -4,6 +4,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { BarChart3, CheckSquare, Package2, Users, Plus } from 'lucide-react'
 import TaskList from './TaskList'
+import ProductList from './ProductList'
 import MaterialList from './MaterialList'
 import LaborList from './LaborList'
 
@@ -27,8 +28,13 @@ export default function Analysis() {
     openModal('analysis-task', {})
   }
 
-  const handleNewMaterial = () => {
+  const handleNewProduct = () => {
     openModal('custom-product')
+  }
+
+  const handleNewMaterial = () => {
+    // TODO: Implementar modal para nuevo material
+    console.log('Crear nuevo material')
   }
 
   const handleNewLabor = () => {
@@ -46,9 +52,16 @@ export default function Analysis() {
           onClick: handleNewTask,
           variant: "default" as const
         }
-      case 'materials':
+      case 'products':
         return {
           label: "Nuevo Producto Personalizado", 
+          icon: Plus,
+          onClick: handleNewProduct,
+          variant: "default" as const
+        }
+      case 'materials':
+        return {
+          label: "Nuevo Material",
           icon: Plus,
           onClick: handleNewMaterial,
           variant: "default" as const
@@ -77,6 +90,11 @@ export default function Analysis() {
         isActive: activeTab === 'tasks'
       },
       {
+        id: 'products',
+        label: 'Productos',
+        isActive: activeTab === 'products'
+      },
+      {
         id: 'materials',
         label: 'Materiales',
         isActive: activeTab === 'materials'
@@ -94,6 +112,7 @@ export default function Analysis() {
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
         {activeTab === 'tasks' && <TaskList />}
+        {activeTab === 'products' && <ProductList />}
         {activeTab === 'materials' && <MaterialList />}
         {activeTab === 'labor' && <LaborList onNewLabor={handleNewLabor} />}
       </div>

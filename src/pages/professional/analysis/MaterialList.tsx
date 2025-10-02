@@ -1,55 +1,38 @@
 import { useState, useMemo } from 'react'
 import { ComboBox as ComboBoxWriteField } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
-import { useProducts, Product, useDeleteProduct } from '@/hooks/use-products'
-import MaterialRow from '@/components/ui/data-row/rows/MaterialRow'
-import { Package, Edit, Trash2, Copy, ExternalLink, Image } from 'lucide-react'
+import { useMaterials, Material, useDeleteMaterial } from '@/hooks/use-materials'
+import { Package, Edit, Trash2, Copy } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/media/ImageLightbox'
 import { cn } from '@/lib/utils'
 
 export default function MaterialList() {
-  const [dataType, setDataType] = useState("todos")
-  const [lightboxImages, setLightboxImages] = useState<string[]>([])
-  const [groupingType, setGroupingType] = useState('category')  // Por defecto agrupar por categoría
+  const [groupingType, setGroupingType] = useState('category')
   const [filterByCategory, setFilterByCategory] = useState("all")
-  const [filterByMaterial, setFilterByMaterial] = useState("all")
-  const [filterByBrand, setFilterByBrand] = useState("all")
+  const [filterByMaterialType, setFilterByMaterialType] = useState("all")
   
-  const { data: products = [], isLoading: productsLoading } = useProducts()
-  const deleteProductMutation = useDeleteProduct()
+  const { data: materials = [], isLoading: materialsLoading } = useMaterials()
+  const deleteMaterialMutation = useDeleteMaterial()
   const { openModal } = useGlobalModalStore()
-  const { showDeleteConfirmation } = useDeleteConfirmation()
   const { data: userData } = useCurrentUser()
-  const { isOpen, currentIndex, openLightbox, closeLightbox } = useImageLightbox(lightboxImages)
 
-  // Filter products (sin búsqueda, solo filtros) and add groupKey for grouping
-  const filteredProducts = useMemo(() => {
-    let filtered = products.filter(product => {
+  // Filter materials and add groupKey for grouping
+  const filteredMaterials = useMemo(() => {
+    let filtered = materials.filter(material => {
       // Filtro por categoría
       if (filterByCategory !== "all") {
-        const hierarchy = product.category_hierarchy || 'Sin categoría';
-        const category = hierarchy.split(' > ')[0];
-        if (category !== filterByCategory) {
+        if ((material.category_name || 'Sin categoría') !== filterByCategory) {
           return false;
         }
       }
 
-      // Filtro por material
-      if (filterByMaterial !== "all") {
-        if ((product.material || 'Sin material') !== filterByMaterial) {
-          return false;
-        }
-      }
-
-      // Filtro por marca
-      if (filterByBrand !== "all") {
-        if ((product.brand || 'Sin marca') !== filterByBrand) {
+      // Filtro por tipo de material
+      if (filterByMaterialType !== "all") {
+        if ((material.material_type || 'Sin tipo') !== filterByMaterialType) {
           return false;
         }
       }
@@ -57,114 +40,90 @@ export default function MaterialList() {
       return true;
     });
 
-    const productsWithGroupKey = filtered.map(product => {
+    const materialsWithGroupKey = filtered.map(material => {
       let groupKey = '';
       
       switch (groupingType) {
-        case 'material':
-          groupKey = product.material || 'Sin material';
-          break;
         case 'category':
-          const hierarchy = product.category_hierarchy || 'Sin categoría';
-          // Extraer solo la primera categoría (antes del primer " > ")
-          groupKey = hierarchy.split(' > ')[0];
+          groupKey = material.category_name || 'Sin categoría';
+          break;
+        case 'material_type':
+          groupKey = material.material_type || 'Sin tipo';
           break;
         default:
           groupKey = '';
       }
       
       return {
-        ...product,
+        ...material,
         groupKey
       };
     });
 
     // Ordenar según el tipo de agrupación
-    return productsWithGroupKey.sort((a, b) => {
+    return materialsWithGroupKey.sort((a, b) => {
       switch (groupingType) {
-        case 'material':
-          const materialA = a.material || 'Sin material';
-          const materialB = b.material || 'Sin material';
-          return materialA.localeCompare(materialB);
         case 'category':
-          const categoryA = a.groupKey;
-          const categoryB = b.groupKey;
+          const categoryA = a.category_name || 'Sin categoría';
+          const categoryB = b.category_name || 'Sin categoría';
           return categoryA.localeCompare(categoryB);
+        case 'material_type':
+          const typeA = a.material_type || 'Sin tipo';
+          const typeB = b.material_type || 'Sin tipo';
+          return typeA.localeCompare(typeB);
         default:
           return a.name.localeCompare(b.name);
       }
     });
-  }, [products, groupingType, filterByCategory, filterByMaterial, filterByBrand]);
+  }, [materials, groupingType, filterByCategory, filterByMaterialType]);
 
-  // Data type selector options
-  const dataTypeOptions = [
-    { value: "todos", label: "Todos" }
-  ]
-
-  const handleEdit = (product: Product) => {
-    openModal('custom-product', { editingProduct: product, isEditing: true })
+  const handleEdit = (material: Material) => {
+    // TODO: Implementar modal para editar material
+    console.log('Editar material:', material)
   }
 
-  const handleDuplicate = (product: Product) => {
-    // Create a duplicate object with "Copia" added to the name
-    const duplicateProduct = {
-      ...product,
-      id: undefined, // Remove ID so it creates a new product
-      name: `${product.name} - Copia`,
-      created_at: undefined, // Remove created_at
-      updated_at: undefined  // Remove updated_at
-    }
-    openModal('custom-product', { editingProduct: duplicateProduct, isDuplicating: true })
+  const handleDuplicate = (material: Material) => {
+    // TODO: Implementar duplicación de material
+    console.log('Duplicar material:', material)
   }
 
-  const handleDelete = (product: Product) => {
+  const handleDelete = (material: Material) => {
     openModal('delete-confirmation', {
       mode: 'dangerous',
-      title: 'Eliminar Producto',
-      description: `¿Estás seguro que deseas eliminar el producto "${product.name}"? Esta acción no se puede deshacer.`,
-      itemName: product.name,
-      destructiveActionText: 'Eliminar Producto',
-      onDelete: () => deleteProductMutation.mutate(product.id),
-      isLoading: deleteProductMutation.isPending
+      title: 'Eliminar Material',
+      description: `¿Estás seguro que deseas eliminar el material "${material.name}"? Esta acción no se puede deshacer.`,
+      itemName: material.name,
+      destructiveActionText: 'Eliminar Material',
+      onDelete: () => deleteMaterialMutation.mutate(material.id),
+      isLoading: deleteMaterialMutation.isPending
     })
   }
 
   // Get unique options for filters
   const categoryOptions = useMemo(() => {
     const categories = new Set<string>();
-    products.forEach(product => {
-      const hierarchy = product.category_hierarchy || 'Sin categoría';
-      const category = hierarchy.split(' > ')[0];
-      categories.add(category);
+    materials.forEach(material => {
+      categories.add(material.category_name || 'Sin categoría');
     });
     return Array.from(categories).sort();
-  }, [products]);
+  }, [materials]);
 
-  const materialOptions = useMemo(() => {
-    const materials = new Set<string>();
-    products.forEach(product => {
-      materials.add(product.material || 'Sin material');
+  const materialTypeOptions = useMemo(() => {
+    const types = new Set<string>();
+    materials.forEach(material => {
+      types.add(material.material_type || 'Sin tipo');
     });
-    return Array.from(materials).sort();
-  }, [products]);
-
-  const brandOptions = useMemo(() => {
-    const brands = new Set<string>();
-    products.forEach(product => {
-      brands.add(product.brand || 'Sin marca');
-    });
-    return Array.from(brands).sort();
-  }, [products]);
+    return Array.from(types).sort();
+  }, [materials]);
 
   // Clear filters function
   const handleClearFilters = () => {
     setFilterByCategory("all");
-    setFilterByMaterial("all");
-    setFilterByBrand("all");
+    setFilterByMaterialType("all");
   };
 
   // Check if any filters are active
-  const isFilterActive = filterByCategory !== "all" || filterByMaterial !== "all" || filterByBrand !== "all";
+  const isFilterActive = filterByCategory !== "all" || filterByMaterialType !== "all";
 
   // Filter content component
   const renderFilterContent = () => (
@@ -184,29 +143,15 @@ export default function MaterialList() {
       </div>
 
       <div>
-        <label className="text-xs font-medium mb-2 block">Material</label>
+        <label className="text-xs font-medium mb-2 block">Tipo</label>
         <ComboBoxWriteField
-          value={filterByMaterial}
-          onValueChange={setFilterByMaterial}
+          value={filterByMaterialType}
+          onValueChange={setFilterByMaterialType}
           options={[
-            { value: "all", label: "Todos los materiales" },
-            ...materialOptions.map(material => ({ value: material, label: material }))
+            { value: "all", label: "Todos los tipos" },
+            ...materialTypeOptions.map(type => ({ value: type, label: type }))
           ]}
-          placeholder="Todos los materiales"
-          className="w-full"
-        />
-      </div>
-
-      <div>
-        <label className="text-xs font-medium mb-2 block">Marca</label>
-        <ComboBoxWriteField
-          value={filterByBrand}
-          onValueChange={setFilterByBrand}
-          options={[
-            { value: "all", label: "Todas las marcas" },
-            ...brandOptions.map(brand => ({ value: brand, label: brand }))
-          ]}
-          placeholder="Todas las marcas"
+          placeholder="Todos los tipos"
           className="w-full"
         />
       </div>
@@ -218,29 +163,27 @@ export default function MaterialList() {
     {
       key: 'category',
       label: 'Categoría',
-      width: '18%',
-      render: (product: Product) => (
+      width: '20%',
+      render: (material: Material) => (
         <span className="text-sm font-medium">
-          {(() => {
-            const hierarchy = product.category_hierarchy || 'Sin categoría';
-            // Extraer solo la primera categoría (antes del primer " > ")
-            return hierarchy.split(' > ')[0];
-          })()}
+          {material.category_name || 'Sin categoría'}
         </span>
       )
     },
     {
-      key: 'material',
-      label: 'Material',
+      key: 'name',
+      label: 'Nombre',
       width: '25%',
-      render: (product: Product) => (
+      render: (material: Material) => (
         <div className="flex flex-col">
           <span className="text-sm font-semibold">
-            {product.brand ? `${product.brand} - ${product.name}` : product.name}
+            {material.name}
           </span>
-          <span className="text-xs text-muted-foreground">
-            {product.material || 'Sin material'}
-          </span>
+          {material.material_type && (
+            <span className="text-xs text-muted-foreground">
+              {material.material_type}
+            </span>
+          )}
         </div>
       )
     },
@@ -248,87 +191,27 @@ export default function MaterialList() {
       key: 'unit',
       label: 'Unidad',
       width: '12%',
-      render: (product: Product) => (
+      render: (material: Material) => (
         <Badge variant="secondary" className="text-xs">
-          {product.unit || 'N/A'}
+          {material.unit_of_computation || material.unit_description || 'N/A'}
         </Badge>
-      )
-    },
-    {
-      key: 'url',
-      label: 'Link',
-      width: '7%',
-      render: (product: Product) => (
-        <div className="flex items-center">
-          {product.url ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => window.open(product.url, '_blank')}
-              className="h-7 px-2"
-            >
-              <ExternalLink className="h-3 w-3 mr-1" />
-              Link
-            </Button>
-          ) : (
-            <span className="text-xs text-muted-foreground">-</span>
-          )}
-        </div>
-      )
-    },
-    {
-      key: 'image',
-      label: 'Imagen',
-      width: '7%',
-      render: (product: Product) => (
-        <div className="flex items-center">
-          {product.image_url ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setLightboxImages([product.image_url!])
-                openLightbox(0)
-              }}
-              className="h-7 w-7 p-0"
-            >
-              <img
-                src={product.image_url}
-                alt={product.name}
-                className="h-6 w-6 object-cover rounded"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  const parent = target.parentElement;
-                  if (parent) {
-                    parent.innerHTML = '<Image className="h-3 w-3 text-muted-foreground" />';
-                  }
-                }}
-              />
-            </Button>
-          ) : (
-            <div className="flex items-center justify-center h-7 w-7">
-              <Image className="h-3 w-3 text-muted-foreground" />
-            </div>
-          )}
-        </div>
       )
     },
     {
       key: 'avg_price',
       label: 'Precio Promedio',
       width: '16%',
-      render: (product: Product) => (
+      render: (material: Material) => (
         <div className="flex flex-col gap-1">
           <span className="text-sm font-mono">
-            {product.avg_price !== null && product.avg_price !== undefined ? 
-              `ARS ${product.avg_price.toFixed(2)}` : 
+            {material.avg_price !== null && material.avg_price !== undefined ? 
+              `ARS ${material.avg_price.toFixed(2)}` : 
               '-'
             }
           </span>
-          {product.providers_count && product.providers_count > 0 && (
+          {material.product_count && material.product_count > 0 && (
             <span className="text-xs text-muted-foreground">
-              {product.providers_count} proveedor{product.providers_count > 1 ? 'es' : ''}
+              {material.product_count} producto{material.product_count > 1 ? 's' : ''}
             </span>
           )}
         </div>
@@ -337,26 +220,26 @@ export default function MaterialList() {
     {
       key: 'is_system',
       label: 'Tipo',
-      width: '9%',
-      render: (product: Product) => (
+      width: '11%',
+      render: (material: Material) => (
         <Badge 
-          variant={product.is_system ? "default" : "secondary"}
-          className={`text-xs ${product.is_system 
+          variant={material.is_system ? "default" : "secondary"}
+          className={`text-xs ${material.is_system 
             ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90' 
             : 'bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300'
           }`}
         >
-          {product.is_system ? 'Sistema' : 'Organización'}
+          {material.is_system ? 'Sistema' : 'Organización'}
         </Badge>
       )
     },
     {
       key: 'actions',
       label: 'Acciones',
-      width: '11%',
-      render: (product: Product) => {
+      width: '16%',
+      render: (material: Material) => {
         // Solo mostrar acciones para materiales que pertenecen a la organización (no del sistema)
-        const canEdit = !product.is_system;
+        const canEdit = !material.is_system;
         
         if (!canEdit) {
           return (
@@ -371,7 +254,7 @@ export default function MaterialList() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleEdit(product)}
+              onClick={() => handleEdit(material)}
               className="h-7 w-7 p-0"
             >
               <Edit className="h-3 w-3" />
@@ -379,7 +262,7 @@ export default function MaterialList() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleDuplicate(product)}
+              onClick={() => handleDuplicate(material)}
               className="h-7 w-7 p-0"
             >
               <Copy className="h-3 w-3" />
@@ -387,7 +270,7 @@ export default function MaterialList() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleDelete(product)}
+              onClick={() => handleDelete(material)}
               className="h-7 w-7 p-0"
             >
               <Trash2 className="h-3 w-3" />
@@ -403,7 +286,7 @@ export default function MaterialList() {
     const groupingOptions = [
       { value: 'none', label: 'No Agrupar' },
       { value: 'category', label: 'Agrupar por Categoría' },
-      { value: 'material', label: 'Agrupar por Material' }
+      { value: 'material_type', label: 'Agrupar por Tipo' }
     ];
 
     return (
@@ -415,7 +298,7 @@ export default function MaterialList() {
               key={option.value}
               variant={groupingType === option.value ? "secondary" : "ghost"}
               size="sm"
-              onClick={() => setGroupingType(option.value as 'none' | 'category' | 'material')}
+              onClick={() => setGroupingType(option.value as 'none' | 'category' | 'material_type')}
               className={cn(
                 "w-full justify-start text-xs font-normal h-8",
                 groupingType === option.value ? "button-secondary-pressed hover:bg-secondary" : ""
@@ -430,7 +313,7 @@ export default function MaterialList() {
   };
 
   // Select columns based on grouping type
-  const productsColumns = useMemo(() => {
+  const materialsColumns = useMemo(() => {
     // For no grouping, use all base columns
     if (groupingType === 'none') {
       return baseColumns;
@@ -438,30 +321,30 @@ export default function MaterialList() {
     
     // Filter columns for grouping - hide the grouped column
     return baseColumns.filter(column => {
-      if (groupingType === 'material' && column.key === 'material') return false;
       if (groupingType === 'category' && column.key === 'category') return false;
+      if (groupingType === 'material_type' && column.key === 'material_type') return false;
       return true;
     });
   }, [groupingType]);
 
   return (
     <div className="space-y-6">
-      {/* Products Table */}
+      {/* Materials Table */}
       <div className="w-full">
-        {productsLoading ? (
+        {materialsLoading ? (
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--accent)]" />
           </div>
-        ) : products.length === 0 ? (
+        ) : materials.length === 0 ? (
           <EmptyState
             icon={<Package />}
-            title="No hay productos registrados"
-            description="Comienza agregando productos al catálogo desde el panel de administración."
+            title="No hay materiales registrados"
+            description="Comienza agregando materiales al catálogo desde el panel de administración."
           />
         ) : (
           <Table
-            data={filteredProducts}
-            columns={productsColumns}
+            data={filteredMaterials}
+            columns={materialsColumns}
             groupBy={groupingType === 'none' ? undefined : 'groupKey'}
             topBar={{
               renderFilterContent: renderFilterContent,
@@ -470,33 +353,11 @@ export default function MaterialList() {
               isGroupingActive: groupingType !== 'none',
               onClearFilters: handleClearFilters
             }}
-            renderCard={(product) => (
-              <MaterialRow
-                material={{
-                  id: product.id,
-                  name: product.name, // MODELO
-                  material_name: product.material, // MATERIAL
-                  brand: product.brand,
-                  category: (() => {
-                    const hierarchy = product.category_hierarchy || 'Sin categoría';
-                    // Extraer solo la primera categoría (antes del primer " > ")
-                    return hierarchy.split(' > ')[0];
-                  })(),
-                  unit: product.unit,
-                  price: product.avg_price || product.default_price,
-                  image_url: product.image_url,
-                  is_system: product.is_system || false,
-                  created_at: product.created_at
-                }}
-                onClick={() => handleEdit(product)}
-                density="normal"
-              />
-            )}
             renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => {
               return (
                 <>
                   <div className="col-span-full text-sm font-medium">
-                    {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Producto' : 'Productos'})
+                    {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Material' : 'Materiales'})
                   </div>
                 </>
               );
@@ -504,7 +365,7 @@ export default function MaterialList() {
             emptyState={
               <EmptyState
                 icon={<Package />}
-                title="No se encontraron productos"
+                title="No se encontraron materiales"
                 description="Intenta ajustar los filtros de búsqueda."
               />
             }
@@ -512,14 +373,6 @@ export default function MaterialList() {
           />
         )}
       </div>
-
-      {/* Image Lightbox */}
-      <ImageLightbox
-        isOpen={isOpen}
-        images={lightboxImages}
-        currentIndex={currentIndex}
-        onClose={closeLightbox}
-      />
     </div>
   )
 }
