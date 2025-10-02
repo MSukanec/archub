@@ -3,6 +3,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { BarChart3, CheckSquare, Package2, Users, Plus } from 'lucide-react'
+import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
 import TaskList from './TaskList'
 import ProductList from './ProductList'
 import MaterialList from './material-costs/MaterialList'
@@ -89,9 +90,9 @@ export default function Analysis() {
         isActive: activeTab === 'tasks'
       },
       {
-        id: 'products',
-        label: 'Productos',
-        isActive: activeTab === 'products'
+        id: 'labor',
+        label: 'Mano de Obra',
+        isActive: activeTab === 'labor'
       },
       {
         id: 'materials',
@@ -99,9 +100,9 @@ export default function Analysis() {
         isActive: activeTab === 'materials'
       },
       {
-        id: 'labor',
-        label: 'Mano de Obra',
-        isActive: activeTab === 'labor'
+        id: 'products',
+        label: 'Productos',
+        isActive: activeTab === 'products'
       }
     ],
     onTabChange: handleTabChange
@@ -111,9 +112,13 @@ export default function Analysis() {
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
         {activeTab === 'tasks' && <TaskList />}
-        {activeTab === 'products' && <ProductList />}
-        {activeTab === 'materials' && <MaterialList />}
         {activeTab === 'labor' && <LaborList onNewLabor={handleNewLabor} />}
+        {activeTab === 'materials' && <MaterialList />}
+        {activeTab === 'products' && (
+          <PlanRestricted reason="coming_soon">
+            <ProductList />
+          </PlanRestricted>
+        )}
       </div>
     </Layout>
   )
