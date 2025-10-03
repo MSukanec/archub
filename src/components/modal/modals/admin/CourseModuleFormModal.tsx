@@ -100,7 +100,7 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/courses'] });
+      queryClient.invalidateQueries({ queryKey: ['all-course-modules'] });
       toast({
         title: 'Módulo creado',
         description: 'El módulo se creó correctamente.'
@@ -135,7 +135,7 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/courses'] });
+      queryClient.invalidateQueries({ queryKey: ['all-course-modules'] });
       toast({
         title: 'Módulo actualizado',
         description: 'Los cambios se guardaron correctamente.'

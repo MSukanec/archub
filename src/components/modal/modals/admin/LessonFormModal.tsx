@@ -146,7 +146,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/courses'] });
+      queryClient.invalidateQueries({ queryKey: ['all-lessons'] });
       toast({
         title: 'Lección creada',
         description: 'La lección se creó correctamente.'
@@ -184,7 +184,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/courses'] });
+      queryClient.invalidateQueries({ queryKey: ['all-lessons'] });
       toast({
         title: 'Lección actualizada',
         description: 'Los cambios se guardaron correctamente.'
