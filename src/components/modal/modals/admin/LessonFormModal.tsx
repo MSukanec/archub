@@ -43,13 +43,14 @@ interface Lesson {
 interface LessonFormModalProps {
   modalData?: {
     lesson?: Lesson;
+    courseId?: string;
     isEditing?: boolean;
   };
   onClose: () => void;
 }
 
 export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
-  const { lesson, isEditing = false } = modalData || {};
+  const { lesson, courseId, isEditing = false } = modalData || {};
   const { setPanel } = useModalPanelStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -122,6 +123,12 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
     setPanel('edit');
   }, [lesson, form, setPanel]);
 
+  useEffect(() => {
+    if (courseId && !lesson) {
+      setSelectedCourseId(courseId);
+    }
+  }, [courseId, lesson]);
+
   const handleClose = () => {
     form.reset();
     onClose();
@@ -145,8 +152,17 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
       
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: async (_, variables) => {
+      const { data: moduleData } = await supabase
+        .from('course_modules')
+        .select('course_id')
+        .eq('id', variables.module_id)
+        .single();
+      
       queryClient.invalidateQueries({ queryKey: ['all-lessons'] });
+      if (moduleData?.course_id) {
+        queryClient.invalidateQueries({ queryKey: ['course-lessons', moduleData.course_id] });
+      }
       toast({
         title: 'Lección creada',
         description: 'La lección se creó correctamente.'
@@ -183,8 +199,17 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
       
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: async (_, variables) => {
+      const { data: moduleData } = await supabase
+        .from('course_modules')
+        .select('course_id')
+        .eq('id', variables.module_id)
+        .single();
+      
       queryClient.invalidateQueries({ queryKey: ['all-lessons'] });
+      if (moduleData?.course_id) {
+        queryClient.invalidateQueries({ queryKey: ['course-lessons', moduleData.course_id] });
+      }
       toast({
         title: 'Lección actualizada',
         description: 'Los cambios se guardaron correctamente.'

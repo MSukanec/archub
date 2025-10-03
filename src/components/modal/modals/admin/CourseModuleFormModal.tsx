@@ -37,13 +37,14 @@ interface CourseModule {
 interface CourseModuleFormModalProps {
   modalData?: {
     module?: CourseModule;
+    courseId?: string;
     isEditing?: boolean;
   };
   onClose: () => void;
 }
 
 export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormModalProps) {
-  const { module, isEditing = false } = modalData || {};
+  const { module, courseId, isEditing = false } = modalData || {};
   const { setPanel } = useModalPanelStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -53,7 +54,7 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
   const form = useForm<CourseModuleFormData>({
     resolver: zodResolver(courseModuleSchema),
     defaultValues: {
-      course_id: module?.course_id || '',
+      course_id: module?.course_id || courseId || '',
       title: module?.title || '',
       description: module?.description || '',
       sort_index: module?.sort_index || 0,
@@ -70,7 +71,7 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       });
     } else {
       form.reset({
-        course_id: '',
+        course_id: courseId || '',
         title: '',
         description: '',
         sort_index: 0,
@@ -99,8 +100,9 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['all-course-modules'] });
+      queryClient.invalidateQueries({ queryKey: ['course-modules', variables.course_id] });
       toast({
         title: 'Módulo creado',
         description: 'El módulo se creó correctamente.'
@@ -134,8 +136,9 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['all-course-modules'] });
+      queryClient.invalidateQueries({ queryKey: ['course-modules', variables.course_id] });
       toast({
         title: 'Módulo actualizado',
         description: 'Los cambios se guardaron correctamente.'
