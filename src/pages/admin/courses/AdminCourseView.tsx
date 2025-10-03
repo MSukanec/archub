@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { useParams, useLocation } from "wouter";
-import { BookOpen } from 'lucide-react';
+import { BookOpen, FolderPlus, FileVideo } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import AdminCourseContentTab from './tabs/AdminCourseContentTab';
+import { Button } from '@/components/ui/button';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 export default function AdminCourseView() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState('Datos del Curso');
+  const { openModal } = useGlobalModalStore();
   
   // Get course data
   const { data: course, isLoading } = useQuery({
@@ -68,6 +71,16 @@ export default function AdminCourseView() {
     enabled: !!id && !!supabase
   });
 
+  const handleCreateModule = () => {
+    if (!id) return;
+    openModal('course-module', { courseId: id });
+  };
+
+  const handleCreateLesson = () => {
+    if (!id) return;
+    openModal('lesson', { courseId: id });
+  };
+
   const headerTabs = [
     {
       id: 'Datos del Curso',
@@ -90,7 +103,27 @@ export default function AdminCourseView() {
     },
     isViewMode: true,
     tabs: headerTabs,
-    onTabChange: setActiveTab
+    onTabChange: setActiveTab,
+    actions: [
+      <Button
+        key="create-module"
+        onClick={handleCreateModule}
+        className="h-8 px-3 text-xs"
+        data-testid="button-create-module"
+      >
+        <FolderPlus className="w-4 h-4 mr-1" />
+        Agregar Módulo
+      </Button>,
+      <Button
+        key="create-lesson"
+        onClick={handleCreateLesson}
+        className="h-8 px-3 text-xs"
+        data-testid="button-create-lesson"
+      >
+        <FileVideo className="w-4 h-4 mr-1" />
+        Agregar Lección
+      </Button>
+    ]
   };
 
   if (isLoading) {
