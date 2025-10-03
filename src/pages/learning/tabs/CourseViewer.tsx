@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Play, BookOpen } from 'lucide-react'
@@ -58,7 +58,11 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
     enabled: !!courseId && !!supabase && modules.length > 0
   });
 
-  // Activar el sidebar cuando el componente se monta - DEBE IR ANTES DE LOS RETURNS
+  // Crear strings estables de IDs para evitar re-renders innecesarios
+  const moduleIdsString = useMemo(() => modules.map(m => m.id).join(','), [modules]);
+  const lessonIdsString = useMemo(() => lessons.map(l => l.id).join(','), [lessons]);
+
+  // Activar el sidebar cuando hay datos
   useEffect(() => {
     if (modules.length > 0 || lessons.length > 0) {
       setVisible(true);
@@ -72,7 +76,7 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
       setCurrentLesson(undefined);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modules, lessons]);
+  }, [moduleIdsString, lessonIdsString]);
 
   // Seleccionar automáticamente la primera lección cuando se cargan las lecciones
   useEffect(() => {
@@ -81,7 +85,7 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
       setCurrentLesson(firstLesson.id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lessons.length, currentLessonId]);
+  }, [lessonIdsString, currentLessonId]);
 
   // Group lessons by module
   const getLessonsForModule = (moduleId: string) => {
