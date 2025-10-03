@@ -6,15 +6,16 @@ import {
   BookOpen,
   Play
 } from "lucide-react";
+import { useCourseSidebarStore } from "@/stores/sidebarStore";
 
 interface CourseSidebarProps {
   modules: any[];
   lessons: any[];
   currentLessonId?: string;
-  onLessonClick: (lessonId: string) => void;
 }
 
-export function CourseSidebar({ modules, lessons, currentLessonId, onLessonClick }: CourseSidebarProps) {
+export function CourseSidebar({ modules, lessons, currentLessonId }: CourseSidebarProps) {
+  const { setCurrentLesson } = useCourseSidebarStore();
   const [isDocked, setIsDocked] = useState(true);
   const [isHovered, setHovered] = useState(false);
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
@@ -118,7 +119,7 @@ export function CourseSidebar({ modules, lessons, currentLessonId, onLessonClick
                         return (
                           <button
                             key={lesson.id}
-                            onClick={() => onLessonClick(lesson.id)}
+                            onClick={() => setCurrentLesson(lesson.id)}
                             className={cn(
                               "w-full h-9 rounded-md cursor-pointer transition-colors flex items-center group px-3 my-[2px]",
                               isActive 

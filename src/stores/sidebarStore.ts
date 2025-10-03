@@ -52,11 +52,9 @@ interface CourseSidebarState {
   modules: any[]
   lessons: any[]
   currentLessonId?: string
-  onLessonClick?: (lessonId: string) => void
   setVisible: (visible: boolean) => void
   setData: (modules: any[], lessons: any[]) => void
   setCurrentLesson: (lessonId?: string) => void
-  setOnLessonClick: (callback?: (lessonId: string) => void) => void
 }
 
 export const useCourseSidebarStore = create<CourseSidebarState>()((set) => ({
@@ -64,9 +62,7 @@ export const useCourseSidebarStore = create<CourseSidebarState>()((set) => ({
   modules: [],
   lessons: [],
   currentLessonId: undefined,
-  onLessonClick: undefined,
   setVisible: (visible: boolean) => set({ isVisible: visible }),
   setData: (modules: any[], lessons: any[]) => set({ modules, lessons }),
   setCurrentLesson: (lessonId?: string) => set({ currentLessonId: lessonId }),
-  setOnLessonClick: (callback?: (lessonId: string) => void) => set({ onLessonClick: callback }),
 }))

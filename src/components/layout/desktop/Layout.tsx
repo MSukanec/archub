@@ -78,7 +78,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { showActionBar } = useActionBarMobile();
   const isMobile = useMobile();
   const { isDocked, isHovered } = useSidebarStore();
-  const { isVisible: isCourseSidebarVisible, modules, lessons, currentLessonId, onLessonClick } = useCourseSidebarStore();
+  const { isVisible: isCourseSidebarVisible, modules, lessons, currentLessonId } = useCourseSidebarStore();
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
@@ -188,7 +188,6 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                     modules={modules}
                     lessons={lessons}
                     currentLessonId={currentLessonId}
-                    onLessonClick={onLessonClick || (() => {})}
                   />
                 </div>
               </div>

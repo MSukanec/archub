@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Play, BookOpen } from 'lucide-react'
@@ -11,8 +11,7 @@ interface CourseViewerProps {
 }
 
 export default function CourseViewer({ courseId }: CourseViewerProps) {
-  const [currentLessonId, setCurrentLessonId] = useState<string | undefined>(undefined);
-  const { setVisible, setData, setCurrentLesson, setOnLessonClick } = useCourseSidebarStore();
+  const { setVisible, setData, setCurrentLesson, currentLessonId } = useCourseSidebarStore();
   
   // Get course modules and lessons
   const { data: modules = [], isLoading: modulesLoading } = useQuery({
@@ -59,17 +58,11 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
     enabled: !!courseId && !!supabase && modules.length > 0
   });
 
-  // Función para manejar el click en las lecciones - usar useCallback para evitar recreación
-  const handleLessonClick = useCallback((lessonId: string) => {
-    setCurrentLessonId(lessonId);
-  }, []);
-
   // Activar el sidebar cuando el componente se monta - DEBE IR ANTES DE LOS RETURNS
   useEffect(() => {
     if (modules.length > 0 || lessons.length > 0) {
       setVisible(true);
       setData(modules, lessons);
-      setOnLessonClick(handleLessonClick);
     }
 
     // Desactivar el sidebar cuando el componente se desmonta
@@ -77,26 +70,18 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
       setVisible(false);
       setData([], []);
       setCurrentLesson(undefined);
-      setOnLessonClick(undefined);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modules, lessons, handleLessonClick]);
+  }, [modules, lessons]);
 
   // Seleccionar automáticamente la primera lección cuando se cargan las lecciones
   useEffect(() => {
     if (lessons.length > 0 && !currentLessonId) {
       const firstLesson = lessons[0];
-      setCurrentLessonId(firstLesson.id);
-    }
-  }, [lessons.length, currentLessonId]);
-
-  // Actualizar la lección actual en el store (solo cuando cambia currentLessonId)
-  useEffect(() => {
-    if (currentLessonId) {
-      setCurrentLesson(currentLessonId);
+      setCurrentLesson(firstLesson.id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentLessonId]);
+  }, [lessons.length, currentLessonId]);
 
   // Group lessons by module
   const getLessonsForModule = (moduleId: string) => {
@@ -210,7 +195,7 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
                             <div 
                               key={lesson.id}
                               className="px-4 py-3 hover:bg-muted/20 cursor-pointer transition-colors"
-                              onClick={() => handleLessonClick(lesson.id)}
+                              onClick={() => setCurrentLesson(lesson.id)}
                               data-testid={`lesson-card-${lesson.id}`}
                             >
                               <div className="flex items-center justify-between">
