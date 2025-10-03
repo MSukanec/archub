@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Badge } from '@/components/ui/badge'
-import { BookOpen, FileText, Eye, Play, List } from 'lucide-react'
+import { BookOpen, FileText, Play, List } from 'lucide-react'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
 
 interface CourseDataTabProps {
@@ -145,6 +145,13 @@ export default function CourseDataTab({ courseId }: CourseDataTabProps) {
                 {courseData?.cover_url || '-'}
               </div>
             </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Estado del Curso</label>
+              <div className="text-sm text-foreground px-3 py-2 bg-muted/30 rounded-md">
+                {courseData?.is_active ? 'Activo - Curso disponible' : 'Inactivo - Curso pausado'}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -170,43 +177,6 @@ export default function CourseDataTab({ courseId }: CourseDataTabProps) {
               <label className="text-sm font-medium">Descripción Completa</label>
               <div className="text-sm text-foreground px-3 py-2 bg-muted/30 rounded-md min-h-[200px] whitespace-pre-wrap">
                 {courseData?.long_description || '-'}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <hr className="border-t border-[var(--section-divider)] my-8" />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column - Configuración */}
-        <div>
-          <div className="flex items-center gap-2 mb-6">
-            <Eye className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="text-lg font-semibold">Configuración de Visibilidad</h2>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Control de acceso y visibilidad del curso.
-          </p>
-        </div>
-
-        {/* Right Column - Configuración Content */}
-        <div>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Visibilidad</label>
-              <div className="text-sm text-foreground px-3 py-2 bg-muted/30 rounded-md">
-                {courseData?.visibility === 'public' && 'Público - Visible para todos'}
-                {courseData?.visibility === 'private' && 'Privado - Solo usuarios autorizados'}
-                {courseData?.visibility === 'draft' && 'Borrador - No visible'}
-                {!courseData?.visibility && '-'}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Estado del Curso</label>
-              <div className="text-sm text-foreground px-3 py-2 bg-muted/30 rounded-md">
-                {courseData?.is_active ? 'Activo - Curso disponible' : 'Inactivo - Curso pausado'}
               </div>
             </div>
           </div>
