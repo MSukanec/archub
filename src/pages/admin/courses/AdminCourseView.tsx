@@ -5,10 +5,9 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import CourseDataTab from './tabs/CourseDataTab';
-import CourseViewer from './tabs/CourseViewer';
+import AdminCourseContentTab from './tabs/AdminCourseContentTab';
 
-export default function CourseView() {
+export default function AdminCourseView() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState('Datos del Curso');
@@ -42,9 +41,9 @@ export default function CourseView() {
       isActive: activeTab === 'Datos del Curso'
     },
     {
-      id: 'Visor',
-      label: 'Visor',
-      isActive: activeTab === 'Visor'
+      id: 'Contenido del Curso',
+      label: 'Contenido del Curso',
+      isActive: activeTab === 'Contenido del Curso'
     }
   ];
 
@@ -53,7 +52,7 @@ export default function CourseView() {
     title: course?.title || "Curso",
     showBackButton: true,
     onBackClick: () => {
-      navigate('/learning/courses');
+      navigate('/admin/courses');
     },
     isViewMode: true,
     tabs: headerTabs,
@@ -88,9 +87,9 @@ export default function CourseView() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'Datos del Curso':
-        return <CourseDataTab courseId={id} />;
-      case 'Visor':
-        return <CourseViewer courseId={id} />;
+        return <AdminCourseContentTab courseId={id} />;
+      case 'Contenido del Curso':
+        return <AdminCourseContentTab courseId={id} />;
       default:
         return null;
     }
