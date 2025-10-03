@@ -66,6 +66,9 @@ import { IndirectModal } from '../modals/construction/IndirectModal';
 import { GeneralCostsModal } from '../modals/organizations/GeneralCostsModal';
 import { AdminLaborModal } from '../modals/admin/AdminLaborModal';
 import { CostModal } from '../modals/admin/CostModal';
+import { CourseFormModal } from '../modals/admin/CourseFormModal';
+import { CourseModuleFormModal } from '../modals/admin/CourseModuleFormModal';
+import { LessonFormModal } from '../modals/admin/LessonFormModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -226,6 +229,12 @@ export function ModalFactory() {
       return <AdminLaborModal modalData={data || {}} onClose={closeModal} />;
     case 'cost-modal':
       return <CostModal modalData={data || {}} onClose={closeModal} />;
+    case 'course':
+      return <CourseFormModal modalData={data || undefined} onClose={closeModal} />;
+    case 'course-module':
+      return <CourseModuleFormModal modalData={data || undefined} onClose={closeModal} />;
+    case 'lesson':
+      return <LessonFormModal modalData={data || undefined} onClose={closeModal} />;
     default:
       return null;
   }

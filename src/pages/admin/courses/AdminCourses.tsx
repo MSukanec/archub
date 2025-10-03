@@ -62,35 +62,30 @@ export default function AdminCourses() {
     enabled: !!supabase
   });
 
-  // Create course mutation (fake for now)
-  const createCourseMutation = useMutation({
-    mutationFn: async () => {
-      toast({
-        title: "Función en desarrollo",
-        description: "La creación de cursos se implementará próximamente"
-      })
-    }
-  });
+  // Modal handlers
+  const handleCreateCourse = () => {
+    openModal('course', {});
+  };
 
-  // Create module mutation (fake for now)
-  const createModuleMutation = useMutation({
-    mutationFn: async () => {
-      toast({
-        title: "Función en desarrollo",
-        description: "La creación de módulos se implementará próximamente"
-      })
-    }
-  });
+  const handleEditCourse = (course: any) => {
+    openModal('course', { course, isEditing: true });
+  };
 
-  // Create lesson mutation (fake for now)
-  const createLessonMutation = useMutation({
-    mutationFn: async () => {
-      toast({
-        title: "Función en desarrollo",
-        description: "La creación de lecciones se implementará próximamente"
-      })
-    }
-  });
+  const handleCreateModule = () => {
+    openModal('course-module', {});
+  };
+
+  const handleEditModule = (module: any) => {
+    openModal('course-module', { module, isEditing: true });
+  };
+
+  const handleCreateLesson = () => {
+    openModal('lesson', {});
+  };
+
+  const handleEditLesson = (lesson: any) => {
+    openModal('lesson', { lesson, isEditing: true });
+  };
 
   // Course columns
   const courseColumns = [
@@ -148,7 +143,7 @@ export default function AdminCourses() {
       label: 'Acciones',
       render: (course: any) => (
         <TableActionButtons
-          onEdit={() => toast({ title: "Editar curso", description: "Función en desarrollo" })}
+          onEdit={() => handleEditCourse(course)}
           onDelete={() => toast({ title: "Eliminar curso", description: "Función en desarrollo" })}
         />
       )
@@ -199,7 +194,7 @@ export default function AdminCourses() {
       label: 'Acciones',
       render: (module: any) => (
         <TableActionButtons
-          onEdit={() => toast({ title: "Editar módulo", description: "Función en desarrollo" })}
+          onEdit={() => handleEditModule(module)}
           onDelete={() => toast({ title: "Eliminar módulo", description: "Función en desarrollo" })}
         />
       )
@@ -262,7 +257,7 @@ export default function AdminCourses() {
       label: 'Acciones',
       render: (lesson: any) => (
         <TableActionButtons
-          onEdit={() => toast({ title: "Editar lección", description: "Función en desarrollo" })}
+          onEdit={() => handleEditLesson(lesson)}
           onDelete={() => toast({ title: "Eliminar lección", description: "Función en desarrollo" })}
         />
       )
@@ -294,7 +289,7 @@ export default function AdminCourses() {
       activeTab === 'courses' && (
         <Button
           key="create-course"
-          onClick={() => createCourseMutation.mutate()}
+          onClick={handleCreateCourse}
           className="h-8 px-3 text-xs"
         >
           <Plus className="w-4 h-4 mr-1" />
@@ -304,7 +299,7 @@ export default function AdminCourses() {
       activeTab === 'modules' && (
         <Button
           key="create-module"
-          onClick={() => createModuleMutation.mutate()}
+          onClick={handleCreateModule}
           className="h-8 px-3 text-xs"
         >
           <FolderPlus className="w-4 h-4 mr-1" />
@@ -314,7 +309,7 @@ export default function AdminCourses() {
       activeTab === 'lessons' && (
         <Button
           key="create-lesson"
-          onClick={() => createLessonMutation.mutate()}
+          onClick={handleCreateLesson}
           className="h-8 px-3 text-xs"
         >
           <FileVideo className="w-4 h-4 mr-1" />
@@ -360,7 +355,7 @@ export default function AdminCourses() {
                 description="Comienza creando tu primer curso de capacitación"
                 action={
                   <Button
-                    onClick={() => createCourseMutation.mutate()}
+                    onClick={handleCreateCourse}
                     className="mt-4"
                   >
                     <Plus className="w-4 h-4 mr-2" />
@@ -395,7 +390,7 @@ export default function AdminCourses() {
                 description="Los módulos organizan las lecciones dentro de un curso"
                 action={
                   <Button
-                    onClick={() => createModuleMutation.mutate()}
+                    onClick={handleCreateModule}
                     className="mt-4"
                   >
                     <FolderPlus className="w-4 h-4 mr-2" />
@@ -430,7 +425,7 @@ export default function AdminCourses() {
                 description="Las lecciones contienen el contenido de video del curso"
                 action={
                   <Button
-                    onClick={() => createLessonMutation.mutate()}
+                    onClick={handleCreateLesson}
                     className="mt-4"
                   >
                     <FileVideo className="w-4 h-4 mr-2" />

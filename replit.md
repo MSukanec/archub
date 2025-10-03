@@ -43,7 +43,7 @@ Preferred communication style: Simple, everyday language.
 - **Access Control**: Implemented `PlanRestricted` component system with admin bypass for features like Subcontracts and Clients.
 - **Project Dashboard**: Comprehensive dashboard with KPIs, execution health, financial pulse, and documentation compliance.
 - **Learning Module**: New "Capacitaciones" module with course management, including courses, modules, and lessons, with Vimeo integration placeholders.
-- **Admin Course Management**: AdminCourses page at /admin/courses with three-tab interface (Cursos, Módulos, Lecciones) for administrative course management. Tables display courses with visibility/status, modules with course hierarchy, and lessons with Vimeo integration. "Cursos" button added to admin sidebar below "Productos".
+- **Admin Course Management**: AdminCourses page at /admin/courses with three-tab interface (Cursos, Módulos, Lecciones) for administrative course management. Tables display courses with visibility/status, modules with course hierarchy, and lessons with Vimeo integration. "Cursos" button added to admin sidebar below "Productos". Full CRUD functionality implemented with modals: CourseFormModal (create/edit courses with slug, title, descriptions, cover, visibility, active status), CourseModuleFormModal (create/edit modules with course selection, title, description, sort order), and LessonFormModal (create/edit lessons with cascading course/module selection, Vimeo ID, duration, free preview, sort order, active status). All modals registered in ModalFactory and integrated with AdminCourses page.
 - **Cost System**: Three-tier cost system for budget items (Archub Cost, Organization Cost, Independent Cost) with drag-and-drop reordering.
 
 ## External Dependencies
