@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { 
   PanelRightOpen,
@@ -22,18 +22,27 @@ export function CourseSidebar({ modules, lessons, currentLessonId }: CourseSideb
   
   const isExpanded = isDocked || isHovered;
 
+  // Auto-abrir el módulo que contiene la lección actual
+  useEffect(() => {
+    if (currentLessonId && lessons.length > 0) {
+      const currentLesson = lessons.find(l => l.id === currentLessonId);
+      if (currentLesson) {
+        setExpandedModules(new Set([currentLesson.module_id]));
+      }
+    }
+  }, [currentLessonId, lessons]);
+
   const handleDockToggle = () => {
     setIsDocked(!isDocked);
   };
 
   const toggleModule = (moduleId: string) => {
-    const newExpanded = new Set(expandedModules);
-    if (newExpanded.has(moduleId)) {
-      newExpanded.delete(moduleId);
+    // Solo permitir un acordeón abierto a la vez
+    if (expandedModules.has(moduleId)) {
+      setExpandedModules(new Set());
     } else {
-      newExpanded.add(moduleId);
+      setExpandedModules(new Set([moduleId]));
     }
-    setExpandedModules(newExpanded);
   };
 
   return (
@@ -59,7 +68,7 @@ export function CourseSidebar({ modules, lessons, currentLessonId }: CourseSideb
           isExpanded ? "px-4" : "px-0 flex items-center justify-center"
         )}>
           {isExpanded ? (
-            <h3 className="text-sm font-semibold text-[var(--main-sidebar-fg)]">
+            <h3 className="text-sm font-semibold text-white">
               Contenido del Curso
             </h3>
           ) : (
@@ -76,6 +85,7 @@ export function CourseSidebar({ modules, lessons, currentLessonId }: CourseSideb
             {modules.map((module) => {
               const moduleLessons = lessons.filter(l => l.module_id === module.id);
               const isModuleExpanded = expandedModules.has(module.id);
+              const hasActiveLesson = moduleLessons.some(l => l.id === currentLessonId);
               
               return (
                 <div key={module.id}>
@@ -89,13 +99,26 @@ export function CourseSidebar({ modules, lessons, currentLessonId }: CourseSideb
                   >
                     {isExpanded ? (
                       <>
-                        <BookOpen className="w-[18px] h-[18px] flex-shrink-0 text-[var(--main-sidebar-fg)] group-hover:text-white" />
-                        <span className="ml-3 text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate flex-1 text-left">
+                        <BookOpen className={cn(
+                          "w-[18px] h-[18px] flex-shrink-0",
+                          hasActiveLesson 
+                            ? "text-[var(--accent)]" 
+                            : "text-[var(--main-sidebar-fg)] group-hover:text-white"
+                        )} />
+                        <span className={cn(
+                          "ml-3 text-sm font-medium truncate flex-1 text-left",
+                          hasActiveLesson
+                            ? "text-[var(--accent)]"
+                            : "text-[var(--main-sidebar-fg)] group-hover:text-white"
+                        )}>
                           {module.title}
                         </span>
                         <svg 
                           className={cn(
-                            "w-4 h-4 text-[var(--main-sidebar-fg)] group-hover:text-white transition-transform flex-shrink-0",
+                            "w-4 h-4 transition-transform flex-shrink-0",
+                            hasActiveLesson
+                              ? "text-[var(--accent)]"
+                              : "text-[var(--main-sidebar-fg)] group-hover:text-white",
                             isModuleExpanded && "rotate-90"
                           )}
                           fill="none" 
@@ -106,7 +129,10 @@ export function CourseSidebar({ modules, lessons, currentLessonId }: CourseSideb
                         </svg>
                       </>
                     ) : (
-                      <BookOpen className="w-[18px] h-[18px] text-[var(--main-sidebar-fg)]" />
+                      <BookOpen className={cn(
+                        "w-[18px] h-[18px]",
+                        hasActiveLesson ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]"
+                      )} />
                     )}
                   </button>
 
@@ -131,7 +157,7 @@ export function CourseSidebar({ modules, lessons, currentLessonId }: CourseSideb
                             <Play 
                               className={cn(
                                 "w-[16px] h-[16px] flex-shrink-0",
-                                isActive ? "text-white" : "text-[var(--main-sidebar-fg)] group-hover:text-white"
+                                isActive ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)] group-hover:text-white"
                               )}
                             />
                             <span 
