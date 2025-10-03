@@ -58,12 +58,10 @@ import Activity from "@/pages/professional/organization/Activity";
 
 // Admin Pages
 import AdminCommunity from "@/pages/admin/community/AdminCommunity";
-
-
-
 import AdminCosts from "@/pages/admin/costs/AdminCosts";
 import AdminTasks from "@/pages/admin/tasks/AdminTasks";
 import AdminGeneral from "@/pages/admin/general/AdminGeneral";
+import AdminCourses from "@/pages/admin/courses/AdminCourses";
 
 // Provider Pages  
 import Products from "@/pages/providers/products/Products";
@@ -209,6 +207,12 @@ function Router() {
         <Route path="/admin/general">
           <AuthAdmin>
             <AdminGeneral />
+          </AuthAdmin>
+        </Route>
+
+        <Route path="/admin/courses">
+          <AuthAdmin>
+            <AdminCourses />
           </AuthAdmin>
         </Route>
 

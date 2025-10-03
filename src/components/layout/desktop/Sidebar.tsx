@@ -84,6 +84,7 @@ export function Sidebar() {
         { id: 'tasks', label: 'Tareas', icon: ListTodo, href: '/admin/tasks' },
         { id: 'general', label: 'General', icon: Settings, href: '/admin/general' },
         { id: 'products', label: 'Productos', icon: Package, href: '/providers/products' },
+        { id: 'courses', label: 'Cursos', icon: BookOpen, href: '/admin/courses' },
       ];
     } else if (sidebarLevel === 'learning') {
       return [
