@@ -134,28 +134,17 @@ export default function SelectMode() {
 
       return { previousUserData };
     },
-    onSuccess: async (data, userType) => {
-      console.log('SelectMode: SUCCESS - Forcing RPC refresh to get updated onboarding status');
-      
-      // Clear any potentially stale cache first
-      await queryClient.cancelQueries({ queryKey: ['current-user'] });
-      await queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      
-      // Force immediate refetch to ensure fresh data is loaded
-      await queryClient.refetchQueries({ queryKey: ['current-user'] });
-      
-      // Small delay to ensure all state is synchronized
-      await new Promise(resolve => setTimeout(resolve, 100));
+    onSuccess: (data, userType) => {
+      console.log('SelectMode: SUCCESS - Navigating immediately');
       
       // Set the bypass flag to prevent future onboarding redirects
-      console.log('SelectMode: Completed onboarding, preventing future redirects');
       localStorage.setItem('onboarding_bypass', 'true');
       localStorage.setItem('onboarding_bypass_user_id', userData?.user?.id || '');
       
-      // Reset completion flag to allow normal flow
+      // Reset completion flag
       setCompletingOnboarding(false);
       
-      // Navigate based on user type
+      // Navigate IMMEDIATELY - optimistic update already happened in onMutate
       if (userType === 'learner') {
         setSidebarContext('learning');
         navigate('/learning/dashboard');
@@ -163,8 +152,6 @@ export default function SelectMode() {
         setSidebarContext('organization');
         navigate('/organization/dashboard');
       }
-      
-      console.log('SelectMode: Navigation completed with fresh user data');
     },
     onError: (err, userType, context) => {
       // Reset the flag on error
