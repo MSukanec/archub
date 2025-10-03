@@ -11,11 +11,11 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
-import { Building, Package, Hammer, Eye, CheckCircle, Loader2 } from "lucide-react";
+import { Building, Package, Hammer, Eye, CheckCircle, Loader2, GraduationCap } from "lucide-react";
 import { HelpPopover } from "@/components/ui-custom/HelpPopover";
 
 interface ModeOption {
-  type: 'professional' | 'provider' | 'worker' | 'visitor';
+  type: 'professional' | 'learning' | 'provider' | 'worker' | 'visitor';
   title: string;
   description: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -31,22 +31,29 @@ const modeOptions: ModeOption[] = [
     color: "bg-[var(--accent)]"
   },
   {
+    type: "learning",
+    title: "Capacitaciones",
+    description: "Accede a cursos, materiales educativos y recursos de formación profesional",
+    icon: GraduationCap,
+    color: "bg-[var(--accent)]"
+  },
+  {
     type: "provider",
-    title: "Proveedor de Materiales",
+    title: "Proveedores",
     description: "Administra catálogo de productos, cotizaciones y seguimiento de entregas a obras",
     icon: Package,
     color: "bg-[var(--accent)]"
   },
   {
     type: "worker",
-    title: "Mano de Obra",
+    title: "Contratistas",
     description: "Registra avances, reporta incidencias y coordina tareas con el equipo del proyecto",
     icon: Hammer,
     color: "bg-[var(--accent)]"
   },
   {
     type: "visitor",
-    title: "Solo Exploración",
+    title: "Visitantes",
     description: "Explora las funcionalidades sin comprometerte con datos de proyectos reales",
     icon: Eye,
     color: "bg-[var(--accent)]"
@@ -57,6 +64,8 @@ function getHelpDescription(type: string): string {
   switch (type) {
     case 'professional':
       return 'Modo ideal para arquitectos, ingenieros, constructoras y estudios. Incluye gestión completa de proyectos, equipos, presupuestos, cronogramas y documentación técnica profesional. Puedes cambiar el modo después.';
+    case 'learning':
+      return 'Accede a una plataforma completa de capacitación y desarrollo profesional. Encuentra cursos especializados, materiales educativos y recursos para mejorar tus habilidades en la construcción.';
     case 'provider':
       return 'Diseñado para empresas proveedoras de materiales y equipos. Permite gestionar catálogos, enviar cotizaciones, rastrear entregas y coordinar con múltiples obras simultáneamente.';
     case 'worker':
@@ -127,7 +136,7 @@ export default function SelectMode() {
 
       return { previousUserData };
     },
-    onSuccess: async () => {
+    onSuccess: async (data, userType) => {
       console.log('SelectMode: SUCCESS - Forcing RPC refresh to get updated onboarding status');
       
       // Clear any potentially stale cache first
@@ -148,9 +157,14 @@ export default function SelectMode() {
       // Reset completion flag to allow normal flow
       setCompletingOnboarding(false);
       
-      // Navigate immediately with React Router
-      setSidebarContext('organization');
-      navigate('/organization/dashboard');
+      // Navigate based on user type
+      if (userType === 'learning') {
+        setSidebarContext('learning');
+        navigate('/learning/dashboard');
+      } else {
+        setSidebarContext('organization');
+        navigate('/organization/dashboard');
+      }
       
       console.log('SelectMode: Navigation completed with fresh user data');
     },
@@ -212,11 +226,11 @@ export default function SelectMode() {
           </CardHeader>
           
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
               {modeOptions.map((mode) => {
                 const Icon = mode.icon;
                 const isSelected = selectedMode === mode.type;
-                const isAvailable = mode.type === 'professional'; // Solo profesional está disponible
+                const isAvailable = mode.type === 'professional' || mode.type === 'learning';
                 const isLoading = updateUserTypeMutation.isPending;
                 
                 const cardContent = (
