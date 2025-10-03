@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Play, BookOpen } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
+import VimeoPlayer from '@/components/video/VimeoPlayer'
 
 interface CourseViewerProps {
   courseId?: string;
@@ -58,13 +59,13 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
     enabled: !!courseId && !!supabase && modules.length > 0
   });
 
+  // Función para manejar el click en las lecciones - usar useCallback para evitar recreación
+  const handleLessonClick = useCallback((lessonId: string) => {
+    setCurrentLessonId(lessonId);
+  }, []);
+
   // Activar el sidebar cuando el componente se monta - DEBE IR ANTES DE LOS RETURNS
   useEffect(() => {
-    const handleLessonClick = (lessonId: string) => {
-      setCurrentLessonId(lessonId);
-      setCurrentLesson(lessonId);
-    };
-
     if (modules.length > 0 || lessons.length > 0) {
       setVisible(true);
       setData(modules, lessons);
@@ -78,12 +79,22 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
       setCurrentLesson(undefined);
       setOnLessonClick(undefined);
     };
-  }, [modules, lessons, setVisible, setData, setCurrentLesson, setOnLessonClick]);
+  }, [modules, lessons, setVisible, setData, setCurrentLesson, setOnLessonClick, handleLessonClick]);
 
-  // Actualizar la lección actual en el store
+  // Seleccionar automáticamente la primera lección cuando se cargan las lecciones
   useEffect(() => {
-    setCurrentLesson(currentLessonId);
-  }, [currentLessonId, setCurrentLesson]);
+    if (lessons.length > 0 && !currentLessonId) {
+      const firstLesson = lessons[0];
+      setCurrentLessonId(firstLesson.id);
+    }
+  }, [lessons.length, currentLessonId]);
+
+  // Actualizar la lección actual en el store (solo cuando cambia currentLessonId)
+  useEffect(() => {
+    if (currentLessonId) {
+      setCurrentLesson(currentLessonId);
+    }
+  }, [currentLessonId]);
 
   // Group lessons by module
   const getLessonsForModule = (moduleId: string) => {
@@ -97,10 +108,6 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
 
-  const handleLessonClick = (lessonId: string) => {
-    setCurrentLessonId(lessonId);
-    setCurrentLesson(lessonId);
-  };
 
   if (!courseId) {
     return (
@@ -120,23 +127,40 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
     )
   }
 
+  // Encontrar la lección actual
+  const currentLesson = lessons.find(l => l.id === currentLessonId);
+
   return (
     <div className="space-y-6 p-6">
-          {/* Placeholder for video player */}
-          <div className="bg-muted/20 rounded-lg border-2 border-dashed border-muted-foreground/20 aspect-video flex items-center justify-center">
-            <div className="text-center">
-              <Play className="h-16 w-16 mx-auto mb-4 text-muted-foreground/40" />
-              <p className="text-lg font-medium text-muted-foreground">Visor de Video (Vimeo)</p>
-              <p className="text-sm text-muted-foreground/60 mt-2">
-                El reproductor de Vimeo se integrará próximamente
-              </p>
-              {currentLessonId && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  Lección seleccionada: {currentLessonId}
-                </p>
-              )}
+          {/* Vimeo Video Player */}
+          {currentLesson?.vimeo_video_id ? (
+            <div>
+              <VimeoPlayer 
+                vimeoId={currentLesson.vimeo_video_id}
+                onProgress={(sec, pct) => {
+                  // Aquí podrías guardar el progreso si lo necesitas
+                  console.log(`Progress: ${sec}s (${pct}%)`);
+                }}
+              />
+              <div className="mt-4">
+                <h2 className="text-xl font-semibold">{currentLesson.title}</h2>
+                {currentLesson.duration_sec && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Duración: {formatDuration(currentLesson.duration_sec)}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="bg-muted/20 rounded-lg border-2 border-dashed border-muted-foreground/20 aspect-video flex items-center justify-center">
+              <div className="text-center">
+                <Play className="h-16 w-16 mx-auto mb-4 text-muted-foreground/40" />
+                <p className="text-lg font-medium text-muted-foreground">
+                  {currentLessonId ? 'Esta lección no tiene video disponible' : 'Selecciona una lección para comenzar'}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Course Content */}
           <div className="space-y-4">
