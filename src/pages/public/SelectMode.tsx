@@ -15,7 +15,7 @@ import { Building, Package, Hammer, Eye, CheckCircle, Loader2, GraduationCap } f
 import { HelpPopover } from "@/components/ui-custom/HelpPopover";
 
 interface ModeOption {
-  type: 'professional' | 'learning' | 'provider' | 'worker' | 'visitor';
+  type: 'professional' | 'learner' | 'provider' | 'worker' | 'visitor';
   title: string;
   description: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -31,7 +31,7 @@ const modeOptions: ModeOption[] = [
     color: "bg-[var(--accent)]"
   },
   {
-    type: "learning",
+    type: "learner",
     title: "Capacitaciones",
     description: "Accede a cursos, materiales educativos y recursos de formación profesional",
     icon: GraduationCap,
@@ -64,7 +64,7 @@ function getHelpDescription(type: string): string {
   switch (type) {
     case 'professional':
       return 'Modo ideal para arquitectos, ingenieros, constructoras y estudios. Incluye gestión completa de proyectos, equipos, presupuestos, cronogramas y documentación técnica profesional. Puedes cambiar el modo después.';
-    case 'learning':
+    case 'learner':
       return 'Accede a una plataforma completa de capacitación y desarrollo profesional. Encuentra cursos especializados, materiales educativos y recursos para mejorar tus habilidades en la construcción.';
     case 'provider':
       return 'Diseñado para empresas proveedoras de materiales y equipos. Permite gestionar catálogos, enviar cotizaciones, rastrear entregas y coordinar con múltiples obras simultáneamente.';
@@ -158,7 +158,7 @@ export default function SelectMode() {
       setCompletingOnboarding(false);
       
       // Navigate based on user type
-      if (userType === 'learning') {
+      if (userType === 'learner') {
         setSidebarContext('learning');
         navigate('/learning/dashboard');
       } else {
@@ -230,7 +230,7 @@ export default function SelectMode() {
               {modeOptions.map((mode) => {
                 const Icon = mode.icon;
                 const isSelected = selectedMode === mode.type;
-                const isAvailable = mode.type === 'professional' || mode.type === 'learning';
+                const isAvailable = mode.type === 'professional' || mode.type === 'learner';
                 const isLoading = updateUserTypeMutation.isPending;
                 
                 const cardContent = (
