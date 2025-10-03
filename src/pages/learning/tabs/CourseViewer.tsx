@@ -12,6 +12,7 @@ interface CourseViewerProps {
 export default function CourseViewer({ courseId }: CourseViewerProps) {
   const [currentLessonId, setCurrentLessonId] = useState<string | undefined>(undefined);
   const { setVisible, setData, setCurrentLesson, setOnLessonClick } = useCourseSidebarStore();
+  
   // Get course modules and lessons
   const { data: modules = [], isLoading: modulesLoading } = useQuery({
     queryKey: ['course-modules', courseId],
@@ -57,23 +58,32 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
     enabled: !!courseId && !!supabase && modules.length > 0
   });
 
-  if (!courseId) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">No hay curso seleccionado</p>
-      </div>
-    )
-  }
+  // Activar el sidebar cuando el componente se monta - DEBE IR ANTES DE LOS RETURNS
+  useEffect(() => {
+    const handleLessonClick = (lessonId: string) => {
+      setCurrentLessonId(lessonId);
+      setCurrentLesson(lessonId);
+    };
 
-  if (modulesLoading || lessonsLoading) {
-    return (
-      <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="h-24 bg-muted/20 rounded-lg animate-pulse" />
-        ))}
-      </div>
-    )
-  }
+    if (modules.length > 0 || lessons.length > 0) {
+      setVisible(true);
+      setData(modules, lessons);
+      setOnLessonClick(handleLessonClick);
+    }
+
+    // Desactivar el sidebar cuando el componente se desmonta
+    return () => {
+      setVisible(false);
+      setData([], []);
+      setCurrentLesson(undefined);
+      setOnLessonClick(undefined);
+    };
+  }, [modules, lessons, setVisible, setData, setCurrentLesson, setOnLessonClick]);
+
+  // Actualizar la lección actual en el store
+  useEffect(() => {
+    setCurrentLesson(currentLessonId);
+  }, [currentLessonId, setCurrentLesson]);
 
   // Group lessons by module
   const getLessonsForModule = (moduleId: string) => {
@@ -92,27 +102,23 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
     setCurrentLesson(lessonId);
   };
 
-  // Activar el sidebar cuando el componente se monta
-  useEffect(() => {
-    if (modules.length > 0 || lessons.length > 0) {
-      setVisible(true);
-      setData(modules, lessons);
-      setOnLessonClick(handleLessonClick);
-    }
+  if (!courseId) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-muted-foreground">No hay curso seleccionado</p>
+      </div>
+    )
+  }
 
-    // Desactivar el sidebar cuando el componente se desmonta
-    return () => {
-      setVisible(false);
-      setData([], []);
-      setCurrentLesson(undefined);
-      setOnLessonClick(undefined);
-    };
-  }, [modules, lessons]);
-
-  // Actualizar la lección actual en el store
-  useEffect(() => {
-    setCurrentLesson(currentLessonId);
-  }, [currentLessonId]);
+  if (modulesLoading || lessonsLoading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-24 bg-muted/20 rounded-lg animate-pulse" />
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6 p-6">
