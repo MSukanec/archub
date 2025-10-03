@@ -6,7 +6,9 @@ import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { BookOpen, FileText, Eye } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { BookOpen, FileText, Eye, Play, List } from 'lucide-react'
+import { useCourseSidebarStore } from '@/stores/sidebarStore'
 
 interface CourseDataTabProps {
   courseId?: string;
@@ -15,6 +17,7 @@ interface CourseDataTabProps {
 export default function CourseDataTab({ courseId }: CourseDataTabProps) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const { setCurrentLesson } = useCourseSidebarStore()
 
   // Form states
   const [title, setTitle] = useState('')
@@ -45,6 +48,52 @@ export default function CourseDataTab({ courseId }: CourseDataTabProps) {
       return data;
     },
     enabled: !!courseId && !!supabase
+  });
+
+  // Get course modules
+  const { data: modules = [] } = useQuery({
+    queryKey: ['course-modules', courseId],
+    queryFn: async () => {
+      if (!courseId || !supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('course_modules')
+        .select('*')
+        .eq('course_id', courseId)
+        .order('sort_index', { ascending: true });
+        
+      if (error) {
+        console.error('Error fetching course modules:', error);
+        throw error;
+      }
+      
+      return data || [];
+    },
+    enabled: !!courseId && !!supabase
+  });
+
+  // Get lessons
+  const { data: lessons = [] } = useQuery({
+    queryKey: ['lessons', courseId],
+    queryFn: async () => {
+      if (!courseId || !supabase || modules.length === 0) return [];
+      
+      const moduleIds = modules.map(m => m.id);
+      
+      const { data, error } = await supabase
+        .from('lessons')
+        .select('*')
+        .in('module_id', moduleIds)
+        .order('sort_index', { ascending: true});
+        
+      if (error) {
+        console.error('Error fetching lessons:', error);
+        throw error;
+      }
+      
+      return data || [];
+    },
+    enabled: !!courseId && !!supabase && modules.length > 0
   });
 
   // Auto-save mutation for course data
@@ -110,6 +159,18 @@ export default function CourseDataTab({ courseId }: CourseDataTabProps) {
       setIsActive(courseData.is_active ?? true);
     }
   }, [courseData]);
+
+  // Helper functions
+  const getLessonsForModule = (moduleId: string) => {
+    return lessons.filter(lesson => lesson.module_id === moduleId);
+  }
+
+  const formatDuration = (seconds: number | null) => {
+    if (!seconds) return 'Sin duración';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
 
   if (!courseId) {
     return (
@@ -257,6 +318,105 @@ export default function CourseDataTab({ courseId }: CourseDataTabProps) {
               </select>
             </div>
           </div>
+        </div>
+      </div>
+
+      <hr className="border-t border-[var(--section-divider)] my-8" />
+
+      {/* Course Content Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column - Content Description */}
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <List className="h-5 w-5 text-[var(--accent)]" />
+            <h2 className="text-lg font-semibold">Contenido del Curso</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Estructura completa del curso organizada en módulos y lecciones. Los módulos agrupan contenido relacionado, mientras que cada lección representa una unidad específica de aprendizaje.
+          </p>
+        </div>
+
+        {/* Right Column - Content List */}
+        <div>
+          {modules.length === 0 ? (
+            <div className="text-center py-8 bg-muted/10 rounded-lg">
+              <BookOpen className="h-12 w-12 mx-auto mb-3 text-muted-foreground/40" />
+              <p className="text-muted-foreground">No hay módulos disponibles en este curso</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {modules.map((module, index) => {
+                const moduleLessons = getLessonsForModule(module.id);
+                
+                return (
+                  <div key={module.id} className="border rounded-lg overflow-hidden">
+                    {/* Module Header */}
+                    <div className="bg-muted/30 px-4 py-3 border-b">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-semibold">
+                            Módulo {index + 1}: {module.title}
+                          </h3>
+                          {module.description && (
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {module.description}
+                            </p>
+                          )}
+                        </div>
+                        <Badge variant="outline">
+                          {moduleLessons.length} {moduleLessons.length === 1 ? 'lección' : 'lecciones'}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {/* Module Lessons */}
+                    <div className="divide-y">
+                      {moduleLessons.length === 0 ? (
+                        <div className="px-4 py-6 text-center text-sm text-muted-foreground">
+                          No hay lecciones en este módulo
+                        </div>
+                      ) : (
+                        moduleLessons.map((lesson, lessonIndex) => (
+                          <div 
+                            key={lesson.id}
+                            className="px-4 py-3 hover:bg-muted/20 cursor-pointer transition-colors"
+                            onClick={() => setCurrentLesson(lesson.id)}
+                            data-testid={`lesson-card-${lesson.id}`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+                                  <Play className="h-4 w-4 text-[var(--accent)]" />
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium">
+                                    {lessonIndex + 1}. {lesson.title}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {formatDuration(lesson.duration_sec)}
+                                    {lesson.free_preview && (
+                                      <Badge variant="outline" className="ml-2 text-xs">
+                                        Vista previa gratis
+                                      </Badge>
+                                    )}
+                                  </p>
+                                </div>
+                              </div>
+                              {lesson.vimeo_video_id && (
+                                <Badge variant="secondary" className="text-xs">
+                                  ID: {lesson.vimeo_video_id}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>
