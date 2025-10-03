@@ -145,28 +145,24 @@ export default function AdminCourses() {
       )
     },
     {
-      key: 'view',
-      label: '',
-      render: (course: any) => (
-        <Button
-          variant="default"
-          size="sm"
-          onClick={() => handleViewCourse(course.id)}
-          className="h-8 px-3 text-xs"
-          data-testid={`button-view-course-${course.id}`}
-        >
-          Editar
-        </Button>
-      )
-    },
-    {
       key: 'actions',
       label: 'Acciones',
       render: (course: any) => (
-        <TableActionButtons
-          onEdit={() => handleEditCourse(course)}
-          onDelete={() => toast({ title: "Eliminar curso", description: "Función en desarrollo" })}
-        />
+        <div className="flex items-center gap-2">
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => handleViewCourse(course.id)}
+            className="h-8 px-3 text-xs"
+            data-testid={`button-view-course-${course.id}`}
+          >
+            Editar
+          </Button>
+          <TableActionButtons
+            onEdit={() => handleEditCourse(course)}
+            onDelete={() => toast({ title: "Eliminar curso", description: "Función en desarrollo" })}
+          />
+        </div>
       )
     }
   ];
