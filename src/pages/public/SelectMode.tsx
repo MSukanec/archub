@@ -86,27 +86,6 @@ export default function SelectMode() {
   const [selectedMode, setSelectedMode] = useState<string | null>(null);
   const [hasFinished, setHasFinished] = useState(false);
 
-  // Fast redirect if onboarding already completed
-  useEffect(() => {
-    if (userData?.preferences?.onboarding_completed && userData?.preferences?.last_user_type) {
-      const userType = userData.preferences.last_user_type;
-      console.log('SelectMode: User already completed onboarding, fast redirecting to dashboard');
-      
-      // Set bypass flags
-      localStorage.setItem('onboarding_bypass', 'true');
-      localStorage.setItem('onboarding_bypass_user_id', userData.user?.id || '');
-      
-      // Navigate immediately based on user type
-      if (userType === 'learner') {
-        setSidebarContext('learning');
-        navigate('/learning/dashboard');
-      } else {
-        setSidebarContext('organization');
-        navigate('/organization/dashboard');
-      }
-    }
-  }, [userData, navigate, setSidebarContext]);
-
   // Mutation for updating user type
   const updateUserTypeMutation = useMutation({
     mutationFn: async (userType: string) => {
