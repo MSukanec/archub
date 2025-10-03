@@ -267,6 +267,7 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={handleClose}
+      columns={1}
     />
   );
 }

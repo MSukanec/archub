@@ -291,6 +291,7 @@ export default function AdminCourses() {
           key="create-course"
           onClick={handleCreateCourse}
           className="h-8 px-3 text-xs"
+          data-testid="button-create-course"
         >
           <Plus className="w-4 h-4 mr-1" />
           Nuevo Curso
@@ -301,6 +302,7 @@ export default function AdminCourses() {
           key="create-module"
           onClick={handleCreateModule}
           className="h-8 px-3 text-xs"
+          data-testid="button-create-module"
         >
           <FolderPlus className="w-4 h-4 mr-1" />
           Nuevo Módulo
@@ -311,6 +313,7 @@ export default function AdminCourses() {
           key="create-lesson"
           onClick={handleCreateLesson}
           className="h-8 px-3 text-xs"
+          data-testid="button-create-lesson"
         >
           <FileVideo className="w-4 h-4 mr-1" />
           Nueva Lección

@@ -402,6 +402,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={handleClose}
+      columns={1}
     />
   );
 }
