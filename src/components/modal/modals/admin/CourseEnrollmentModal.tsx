@@ -1,18 +1,20 @@
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Users } from 'lucide-react';
-import { FormModalHeader } from '../../form/FormModalHeader';
-import { FormModalFooter } from '../../form/FormModalFooter';
-import { FormModalLayout } from '../../form/FormModalLayout';
-import { useModalPanelStore } from '../../form/modalPanelStore';
+
+import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
+import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
+import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
+import { useModalPanelStore } from '@/components/modal/form/modalPanelStore';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { useEffect, useState } from 'react';
-import { Input } from '@/components/ui/input';
 
 const enrollmentSchema = z.object({
   user_id: z.string().min(1, 'El usuario es requerido'),
@@ -45,11 +47,14 @@ interface CourseEnrollmentModalProps {
 }
 
 export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentModalProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  
   const { enrollment, isEditing = false } = modalData || {};
+
+  // Hooks
   const { setPanel } = useModalPanelStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [isLoading, setIsLoading] = useState(false);
 
   // Fetch users
   const { data: users = [] } = useQuery({
@@ -87,18 +92,25 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
     enabled: !!supabase
   });
 
+  // Force edit mode when modal opens
+  useEffect(() => {
+    setPanel('edit');
+  }, [setPanel]);
+
+  // Form setup
   const form = useForm<EnrollmentFormData>({
     resolver: zodResolver(enrollmentSchema),
     defaultValues: {
-      user_id: enrollment?.user_id || '',
-      course_id: enrollment?.course_id || '',
-      status: (enrollment?.status as any) || 'active',
-      expires_at: enrollment?.expires_at ? new Date(enrollment.expires_at).toISOString().split('T')[0] : '',
+      user_id: '',
+      course_id: '',
+      status: 'active',
+      expires_at: '',
     }
   });
 
+  // Load editing data
   useEffect(() => {
-    if (enrollment) {
+    if (isEditing && enrollment) {
       form.reset({
         user_id: enrollment.user_id || '',
         course_id: enrollment.course_id || '',
@@ -113,13 +125,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
         expires_at: '',
       });
     }
-    setPanel('edit');
-  }, [enrollment, form, setPanel]);
-
-  const handleClose = () => {
-    form.reset();
-    onClose();
-  };
+  }, [isEditing, enrollment, form]);
 
   const createEnrollmentMutation = useMutation({
     mutationFn: async (data: EnrollmentFormData) => {
@@ -143,7 +149,8 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
         title: "Inscripción creada",
         description: "El alumno ha sido inscrito exitosamente"
       });
-      handleClose();
+      onClose();
+      form.reset();
     },
     onError: (error: any) => {
       toast({
@@ -176,7 +183,8 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
         title: "Inscripción actualizada",
         description: "La inscripción ha sido actualizada exitosamente"
       });
-      handleClose();
+      onClose();
+      form.reset();
     },
     onError: (error: any) => {
       toast({
@@ -189,44 +197,34 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
 
   const onSubmit = async (data: EnrollmentFormData) => {
     setIsLoading(true);
+    
     try {
-      if (isEditing) {
+      if (isEditing && enrollment) {
         await updateEnrollmentMutation.mutateAsync(data);
       } else {
         await createEnrollmentMutation.mutateAsync(data);
       }
+    } catch (error) {
+      console.error('Error saving enrollment:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const headerContent = (
-    <FormModalHeader 
-      title={isEditing ? 'Editar Inscripción' : 'Nueva Inscripción'}
-      icon={Users}
-    />
-  );
+  // View panel (not needed for this modal as it's always in edit mode)
+  const viewPanel = null;
 
-  const footerContent = (
-    <FormModalFooter
-      leftLabel="Cancelar"
-      onLeftClick={handleClose}
-      rightLabel={isEditing ? 'Guardar Cambios' : 'Inscribir Alumno'}
-      onRightClick={form.handleSubmit(onSubmit)}
-      showLoadingSpinner={isLoading}
-    />
-  );
-
-  const editContent = (
+  // Edit panel with form
+  const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {/* User Selection */}
         <FormField
           control={form.control}
           name="user_id"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Usuario</FormLabel>
+              <FormLabel>Usuario *</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 value={field.value}
@@ -256,7 +254,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
           name="course_id"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Curso</FormLabel>
+              <FormLabel>Curso *</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 value={field.value}
@@ -286,7 +284,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
           name="status"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Estado</FormLabel>
+              <FormLabel>Estado *</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger data-testid="select-status">
@@ -327,13 +325,30 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
     </Form>
   );
 
+  const headerContent = (
+    <FormModalHeader 
+      title={isEditing ? "Editar Inscripción" : "Nueva Inscripción"}
+      icon={Users}
+    />
+  );
+
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={onClose}
+      rightLabel={isEditing ? "Actualizar" : "Inscribir"}
+      onRightClick={form.handleSubmit(onSubmit)}
+    />
+  );
+
   return (
-    <FormModalLayout 
-      onClose={handleClose}
-      header={headerContent}
-      footer={footerContent}
-    >
-      {editContent}
-    </FormModalLayout>
+    <FormModalLayout
+      columns={1}
+      viewPanel={viewPanel}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      onClose={onClose}
+    />
   );
 }
