@@ -34,6 +34,40 @@ export default function AdminCourseView() {
     enabled: !!id && !!supabase
   });
 
+  const { data: modules = [] } = useQuery({
+    queryKey: ['course-modules', id],
+    queryFn: async () => {
+      if (!id || !supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('course_modules')
+        .select('*')
+        .eq('course_id', id)
+        .order('sort_index', { ascending: true });
+        
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!id && !!supabase
+  });
+
+  const { data: lessons = [] } = useQuery({
+    queryKey: ['course-lessons', id],
+    queryFn: async () => {
+      if (!id || !supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('lessons')
+        .select('*, course_modules!inner(course_id)')
+        .eq('course_modules.course_id', id)
+        .order('sort_index', { ascending: true });
+        
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!id && !!supabase
+  });
+
   const headerTabs = [
     {
       id: 'Datos del Curso',
@@ -87,9 +121,9 @@ export default function AdminCourseView() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'Datos del Curso':
-        return <AdminCourseContentTab courseId={id} />;
+        return <AdminCourseContentTab courseId={id} modules={modules} lessons={lessons} />;
       case 'Contenido del Curso':
-        return <AdminCourseContentTab courseId={id} />;
+        return <AdminCourseContentTab courseId={id} modules={modules} lessons={lessons} />;
       default:
         return null;
     }
