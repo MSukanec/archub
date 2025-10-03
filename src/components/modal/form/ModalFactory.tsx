@@ -69,6 +69,7 @@ import { CostModal } from '../modals/admin/CostModal';
 import { CourseFormModal } from '../modals/admin/CourseFormModal';
 import { CourseModuleFormModal } from '../modals/admin/CourseModuleFormModal';
 import { LessonFormModal } from '../modals/admin/LessonFormModal';
+import { CourseEnrollmentModal } from '../modals/admin/CourseEnrollmentModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -235,6 +236,8 @@ export function ModalFactory() {
       return <CourseModuleFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'lesson':
       return <LessonFormModal modalData={data || undefined} onClose={closeModal} />;
+    case 'course-enrollment':
+      return <CourseEnrollmentModal modalData={data || undefined} onClose={closeModal} />;
     default:
       return null;
   }

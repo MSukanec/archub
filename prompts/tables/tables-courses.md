@@ -56,3 +56,22 @@ create table public.lessons (
 ) TABLESPACE pg_default;
 
 create index IF not exists lessons_module_id_sort_index_idx on public.lessons using btree (module_id, sort_index) TABLESPACE pg_default;
+
+Tabla COURSE_ENROLLMENTS:
+
+create table public.course_enrollments (
+  id uuid not null default gen_random_uuid (),
+  user_id uuid not null,
+  course_id uuid not null,
+  status text not null default 'active'::text,
+  started_at timestamp with time zone not null default now(),
+  expires_at timestamp with time zone null,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  constraint course_enrollments_pkey primary key (id),
+  constraint enroll_unique unique (user_id, course_id),
+  constraint course_enrollments_course_id_fkey foreign KEY (course_id) references courses (id) on delete CASCADE,
+  constraint course_enrollments_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create index IF not exists course_enrollments_user_id_course_id_idx on public.course_enrollments using btree (user_id, course_id) TABLESPACE pg_default;

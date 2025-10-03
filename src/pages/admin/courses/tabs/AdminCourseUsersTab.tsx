@@ -1,0 +1,158 @@
+import { Button } from '@/components/ui/button'
+import { Plus, Users } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
+import { Table } from '@/components/ui-custom/tables-and-trees/Table'
+import { Badge } from '@/components/ui/badge'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
+import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons'
+import { EmptyState } from '@/components/ui-custom/security/EmptyState'
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+
+export default function AdminCourseUsersTab() {
+  const { toast } = useToast()
+  const { openModal } = useGlobalModalStore()
+
+  // Fetch enrollments with user and course data
+  const { data: enrollments = [], isLoading } = useQuery({
+    queryKey: ['course-enrollments'],
+    queryFn: async () => {
+      if (!supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('course_enrollments')
+        .select(`
+          *,
+          users(full_name, email),
+          courses(title, slug)
+        `)
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!supabase
+  });
+
+  const handleCreateEnrollment = () => {
+    openModal('course-enrollment', {});
+  };
+
+  const handleEditEnrollment = (enrollment: any) => {
+    openModal('course-enrollment', { enrollment, isEditing: true });
+  };
+
+  const columns = [
+    {
+      key: 'user',
+      label: 'Usuario',
+      render: (enrollment: any) => (
+        <div>
+          <div className="font-medium text-sm">{enrollment.users?.full_name || 'Sin nombre'}</div>
+          <div className="text-xs text-muted-foreground">{enrollment.users?.email || 'Sin email'}</div>
+        </div>
+      )
+    },
+    {
+      key: 'course',
+      label: 'Curso',
+      render: (enrollment: any) => (
+        <div>
+          <div className="font-medium text-sm">{enrollment.courses?.title || 'Sin título'}</div>
+          <div className="text-xs text-muted-foreground">{enrollment.courses?.slug || 'Sin slug'}</div>
+        </div>
+      )
+    },
+    {
+      key: 'status',
+      label: 'Estado',
+      render: (enrollment: any) => {
+        const colors = {
+          active: '#22c55e',
+          completed: '#3b82f6',
+          expired: '#ef4444',
+          cancelled: '#6b7280'
+        }
+        const labels = {
+          active: 'Activo',
+          completed: 'Completado',
+          expired: 'Expirado',
+          cancelled: 'Cancelado'
+        }
+        return (
+          <Badge style={{ backgroundColor: colors[enrollment.status as keyof typeof colors] || '#6b7280', color: 'white' }}>
+            {labels[enrollment.status as keyof typeof labels] || enrollment.status}
+          </Badge>
+        )
+      }
+    },
+    {
+      key: 'started_at',
+      label: 'Inicio',
+      render: (enrollment: any) => (
+        <div className="text-sm text-muted-foreground">
+          {format(new Date(enrollment.started_at), 'dd/MM/yyyy', { locale: es })}
+        </div>
+      )
+    },
+    {
+      key: 'expires_at',
+      label: 'Expiración',
+      render: (enrollment: any) => (
+        <div className="text-sm text-muted-foreground">
+          {enrollment.expires_at 
+            ? format(new Date(enrollment.expires_at), 'dd/MM/yyyy', { locale: es })
+            : 'Sin expiración'
+          }
+        </div>
+      )
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      render: (enrollment: any) => (
+        <TableActionButtons
+          onEdit={() => handleEditEnrollment(enrollment)}
+          onDelete={() => toast({ title: "Eliminar inscripción", description: "Función en desarrollo" })}
+        />
+      )
+    }
+  ];
+
+  return (
+    <>
+      {enrollments.length > 0 ? (
+        <Table
+          data={enrollments}
+          columns={columns}
+          isLoading={isLoading}
+          emptyState={
+            <EmptyState
+              icon={<Users className="w-12 h-12" />}
+              title="No hay alumnos inscritos"
+              description="Comienza inscribiendo alumnos a los cursos"
+            />
+          }
+        />
+      ) : (
+        <EmptyState
+          icon={<Users className="w-12 h-12" />}
+          title="No hay alumnos inscritos"
+          description="Comienza inscribiendo alumnos a los cursos disponibles"
+          action={
+            <Button
+              onClick={handleCreateEnrollment}
+              className="mt-4"
+              data-testid="button-create-enrollment-empty"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Inscribir Alumno
+            </Button>
+          }
+        />
+      )}
+    </>
+  )
+}
