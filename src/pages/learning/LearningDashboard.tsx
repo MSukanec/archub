@@ -17,7 +17,7 @@ export default function LearningDashboard() {
   };
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
         <div className="text-center py-12">
           <h2 className="text-2xl font-semibold mb-4">Bienvenido a Capacitaciones</h2>
