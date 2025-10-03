@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Play, BookOpen } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { CourseSidebar } from '@/components/layout/CourseSidebar'
+import { useCourseSidebarStore } from '@/stores/sidebarStore'
 
 interface CourseViewerProps {
   courseId?: string;
@@ -11,6 +11,7 @@ interface CourseViewerProps {
 
 export default function CourseViewer({ courseId }: CourseViewerProps) {
   const [currentLessonId, setCurrentLessonId] = useState<string | undefined>(undefined);
+  const { setVisible, setData, setCurrentLesson, setOnLessonClick } = useCourseSidebarStore();
   // Get course modules and lessons
   const { data: modules = [], isLoading: modulesLoading } = useQuery({
     queryKey: ['course-modules', courseId],
@@ -88,13 +89,33 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
 
   const handleLessonClick = (lessonId: string) => {
     setCurrentLessonId(lessonId);
+    setCurrentLesson(lessonId);
   };
 
+  // Activar el sidebar cuando el componente se monta
+  useEffect(() => {
+    if (modules.length > 0 || lessons.length > 0) {
+      setVisible(true);
+      setData(modules, lessons);
+      setOnLessonClick(handleLessonClick);
+    }
+
+    // Desactivar el sidebar cuando el componente se desmonta
+    return () => {
+      setVisible(false);
+      setData([], []);
+      setCurrentLesson(undefined);
+      setOnLessonClick(undefined);
+    };
+  }, [modules, lessons]);
+
+  // Actualizar la lección actual en el store
+  useEffect(() => {
+    setCurrentLesson(currentLessonId);
+  }, [currentLessonId]);
+
   return (
-    <div className="flex h-[calc(100vh-3rem)]">
-      {/* Contenido Principal */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6">
           {/* Placeholder for video player */}
           <div className="bg-muted/20 rounded-lg border-2 border-dashed border-muted-foreground/20 aspect-video flex items-center justify-center">
             <div className="text-center">
@@ -195,16 +216,6 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
               </div>
             )}
           </div>
-        </div>
-      </div>
-
-      {/* Sidebar Derecho */}
-      <CourseSidebar 
-        modules={modules}
-        lessons={lessons}
-        currentLessonId={currentLessonId}
-        onLessonClick={handleLessonClick}
-      />
     </div>
   )
 }

@@ -12,12 +12,14 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import {
   useSidebarStore,
   useSecondarySidebarStore,
+  useCourseSidebarStore,
 } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { ActionBarMobile } from "@/components/layout/mobile/ActionBarMobile";
 import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileContext";
 import { useMobile } from "@/hooks/use-mobile";
 import { HeaderMobile } from "@/components/layout/mobile/HeaderMobile";
+import { CourseSidebar } from "@/components/layout/CourseSidebar";
 
 interface Tab {
   id: string;
@@ -76,6 +78,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { showActionBar } = useActionBarMobile();
   const isMobile = useMobile();
   const { isDocked, isHovered } = useSidebarStore();
+  const { isVisible: isCourseSidebarVisible, modules, lessons, currentLessonId, onLessonClick } = useCourseSidebarStore();
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
@@ -129,7 +132,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
             </div>
 
             {/* Main Content Area with rounded corners and framing effect */}
-            <div className="flex-1 pr-3 pb-3">
+            <div className={`flex-1 ${isCourseSidebarVisible ? '' : 'pr-3'} pb-3`}>
               <main
                 className={`h-full flex flex-col rounded-2xl overflow-hidden ${!isDocked ? 'w-full' : ''}`}
                 style={{ 
@@ -176,6 +179,20 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                 )}
               </main>
             </div>
+
+            {/* Course Sidebar - Right side, only visible when activated */}
+            {isCourseSidebarVisible && !isMobile && (
+              <div className="flex-shrink-0 pr-3 pb-3">
+                <div className="h-full rounded-2xl overflow-hidden">
+                  <CourseSidebar
+                    modules={modules}
+                    lessons={lessons}
+                    currentLessonId={currentLessonId}
+                    onLessonClick={onLessonClick || (() => {})}
+                  />
+                </div>
+              </div>
+            )}
 
           </div>
         </div>
