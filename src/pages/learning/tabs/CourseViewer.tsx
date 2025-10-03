@@ -132,7 +132,7 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
   const currentLesson = lessons.find(l => l.id === currentLessonId);
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
       {/* Vimeo Video Player */}
       {currentLesson?.vimeo_video_id ? (
         <div>
