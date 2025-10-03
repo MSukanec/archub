@@ -75,3 +75,21 @@ create table public.course_enrollments (
 ) TABLESPACE pg_default;
 
 create index IF not exists course_enrollments_user_id_course_id_idx on public.course_enrollments using btree (user_id, course_id) TABLESPACE pg_default;
+
+Tabla COURSE_LESSON_PROGRESS:
+
+create table public.course_lesson_progress (
+  id uuid not null default gen_random_uuid (),
+  user_id uuid not null,
+  lesson_id uuid not null,
+  progress_pct numeric(5, 2) not null default 0,
+  last_position_sec integer not null default 0,
+  completed_at timestamp with time zone null,
+  updated_at timestamp with time zone not null default now(),
+  constraint lesson_progress_pkey primary key (id),
+  constraint lesson_progress_unique unique (user_id, lesson_id),
+  constraint lesson_progress_lesson_id_fkey foreign KEY (lesson_id) references course_lessons (id) on delete CASCADE,
+  constraint lesson_progress_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create index IF not exists lesson_progress_user_id_lesson_id_idx on public.course_lesson_progress using btree (user_id, lesson_id) TABLESPACE pg_default;
