@@ -20,7 +20,8 @@ const lessonSchema = z.object({
   module_id: z.string().min(1, 'El módulo es requerido'),
   title: z.string().min(1, 'El título es requerido'),
   vimeo_video_id: z.string().optional(),
-  duration_sec: z.number().min(0, 'La duración debe ser mayor o igual a 0').optional(),
+  duration_minutes: z.number().min(0, 'Los minutos deben ser mayor o igual a 0').optional(),
+  duration_seconds: z.number().min(0, 'Los segundos deben ser mayor o igual a 0').max(59, 'Los segundos deben ser menor a 60').optional(),
   free_preview: z.boolean().default(false),
   sort_index: z.number().min(0, 'El orden debe ser mayor o igual a 0').default(0),
   is_active: z.boolean().default(true),
@@ -80,7 +81,8 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
       module_id: lesson?.module_id || '',
       title: lesson?.title || '',
       vimeo_video_id: lesson?.vimeo_video_id || '',
-      duration_sec: lesson?.duration_sec || 0,
+      duration_minutes: lesson?.duration_sec ? Math.floor(lesson.duration_sec / 60) : 0,
+      duration_seconds: lesson?.duration_sec ? lesson.duration_sec % 60 : 0,
       free_preview: lesson?.free_preview || false,
       sort_index: lesson?.sort_index || 0,
       is_active: lesson?.is_active ?? true,
@@ -104,7 +106,8 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
         module_id: lesson.module_id || '',
         title: lesson.title || '',
         vimeo_video_id: lesson.vimeo_video_id || '',
-        duration_sec: lesson.duration_sec || 0,
+        duration_minutes: lesson.duration_sec ? Math.floor(lesson.duration_sec / 60) : 0,
+        duration_seconds: lesson.duration_sec ? lesson.duration_sec % 60 : 0,
         free_preview: lesson.free_preview || false,
         sort_index: lesson.sort_index || 0,
         is_active: lesson.is_active ?? true,
@@ -114,7 +117,8 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
         module_id: '',
         title: '',
         vimeo_video_id: '',
-        duration_sec: 0,
+        duration_minutes: 0,
+        duration_seconds: 0,
         free_preview: false,
         sort_index: 0,
         is_active: true,
@@ -138,13 +142,15 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
     mutationFn: async (data: LessonFormData) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
+      const totalSeconds = (data.duration_minutes || 0) * 60 + (data.duration_seconds || 0);
+      
       const { error } = await supabase
         .from('lessons')
         .insert({
           module_id: data.module_id,
           title: data.title,
           vimeo_video_id: data.vimeo_video_id,
-          duration_sec: data.duration_sec,
+          duration_sec: totalSeconds,
           free_preview: data.free_preview,
           sort_index: data.sort_index,
           is_active: data.is_active,
@@ -183,13 +189,15 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
     mutationFn: async (data: LessonFormData) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
+      const totalSeconds = (data.duration_minutes || 0) * 60 + (data.duration_seconds || 0);
+      
       const { error } = await supabase
         .from('lessons')
         .update({
           module_id: data.module_id,
           title: data.title,
           vimeo_video_id: data.vimeo_video_id,
-          duration_sec: data.duration_sec,
+          duration_sec: totalSeconds,
           free_preview: data.free_preview,
           sort_index: data.sort_index,
           is_active: data.is_active,
@@ -316,15 +324,35 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
           )}
         />
 
+        <FormField
+          control={form.control}
+          name="vimeo_video_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>ID de Video Vimeo</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="123456789" data-testid="input-lesson-vimeo" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="vimeo_video_id"
+            name="duration_minutes"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>ID de Video Vimeo</FormLabel>
+                <FormLabel>Minutos</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="123456789" data-testid="input-lesson-vimeo" />
+                  <Input 
+                    type="number" 
+                    {...field} 
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                    placeholder="0" 
+                    data-testid="input-lesson-minutes" 
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -333,17 +361,17 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
 
           <FormField
             control={form.control}
-            name="duration_sec"
+            name="duration_seconds"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Duración (segundos)</FormLabel>
+                <FormLabel>Segundos</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 
                     {...field} 
                     onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                     placeholder="0" 
-                    data-testid="input-lesson-duration" 
+                    data-testid="input-lesson-seconds" 
                   />
                 </FormControl>
                 <FormMessage />
