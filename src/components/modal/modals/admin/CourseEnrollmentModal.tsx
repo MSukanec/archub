@@ -11,6 +11,7 @@ import { useModalPanelStore } from '@/components/modal/form/modalPanelStore';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
 
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
@@ -91,6 +92,17 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
     },
     enabled: !!supabase
   });
+
+  // Transform users and courses to ComboBox options
+  const userOptions = users.map((user: any) => ({
+    value: user.id,
+    label: `${user.full_name} (${user.email})`
+  }));
+
+  const courseOptions = courses.map((course: any) => ({
+    value: course.id,
+    label: course.title
+  }));
 
   // Force edit mode when modal opens
   useEffect(() => {
@@ -218,61 +230,47 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* User Selection */}
+        {/* User Selection with ComboBox */}
         <FormField
           control={form.control}
           name="user_id"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Usuario *</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value}
-                disabled={isEditing}
-              >
-                <FormControl>
-                  <SelectTrigger data-testid="select-user">
-                    <SelectValue placeholder="Selecciona un usuario" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {users.map((user: any) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.full_name} ({user.email})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <ComboBox
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  options={userOptions}
+                  placeholder="Selecciona un usuario"
+                  searchPlaceholder="Buscar usuario..."
+                  emptyMessage="No se encontraron usuarios"
+                  disabled={isEditing}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Course Selection */}
+        {/* Course Selection with ComboBox */}
         <FormField
           control={form.control}
           name="course_id"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Curso *</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value}
-                disabled={isEditing}
-              >
-                <FormControl>
-                  <SelectTrigger data-testid="select-course">
-                    <SelectValue placeholder="Selecciona un curso" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {courses.map((course: any) => (
-                    <SelectItem key={course.id} value={course.id}>
-                      {course.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <ComboBox
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  options={courseOptions}
+                  placeholder="Selecciona un curso"
+                  searchPlaceholder="Buscar curso..."
+                  emptyMessage="No se encontraron cursos"
+                  disabled={isEditing}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

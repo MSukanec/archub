@@ -60,7 +60,7 @@ export default function AdminCourseView() {
       if (!id || !supabase) return [];
       
       const { data, error } = await supabase
-        .from('lessons')
+        .from('course_lessons')
         .select('*, course_modules!inner(course_id)')
         .eq('course_modules.course_id', id)
         .order('sort_index', { ascending: true });

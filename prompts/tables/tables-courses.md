@@ -38,9 +38,9 @@ create table public.courses (
   constraint courses_created_by_fkey foreign KEY (created_by) references users (id) on delete set null
 ) TABLESPACE pg_default;
 
-Tabla LESSONS:
+Tabla COURSE_LESSONS:
 
-create table public.lessons (
+create table public.course_lessons (
   id uuid not null default gen_random_uuid (),
   module_id uuid not null,
   title text not null,
@@ -55,7 +55,7 @@ create table public.lessons (
   constraint lessons_module_id_fkey foreign KEY (module_id) references course_modules (id) on delete CASCADE
 ) TABLESPACE pg_default;
 
-create index IF not exists lessons_module_id_sort_index_idx on public.lessons using btree (module_id, sort_index) TABLESPACE pg_default;
+create index IF not exists lessons_module_id_sort_index_idx on public.course_lessons using btree (module_id, sort_index) TABLESPACE pg_default;
 
 Tabla COURSE_ENROLLMENTS:
 

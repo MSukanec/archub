@@ -145,7 +145,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
       const totalSeconds = (data.duration_minutes || 0) * 60 + (data.duration_seconds || 0);
       
       const { error } = await supabase
-        .from('lessons')
+        .from('course_lessons')
         .insert({
           module_id: data.module_id,
           title: data.title,
@@ -192,7 +192,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
       const totalSeconds = (data.duration_minutes || 0) * 60 + (data.duration_seconds || 0);
       
       const { error } = await supabase
-        .from('lessons')
+        .from('course_lessons')
         .update({
           module_id: data.module_id,
           title: data.title,

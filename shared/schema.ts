@@ -631,7 +631,7 @@ export const course_modules = pgTable("course_modules", {
   updated_at: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const lessons = pgTable("lessons", {
+export const course_lessons = pgTable("course_lessons", {
   id: uuid("id").primaryKey().defaultRandom(),
   module_id: uuid("module_id").notNull(),
   title: text("title").notNull(),
@@ -657,7 +657,7 @@ export const insertCourseModuleSchema = createInsertSchema(course_modules).omit(
   updated_at: true,
 });
 
-export const insertLessonSchema = createInsertSchema(lessons).omit({
+export const insertLessonSchema = createInsertSchema(course_lessons).omit({
   id: true,
   created_at: true,
   updated_at: true,
@@ -668,5 +668,5 @@ export type Course = typeof courses.$inferSelect;
 export type InsertCourse = z.infer<typeof insertCourseSchema>;
 export type CourseModule = typeof course_modules.$inferSelect;
 export type InsertCourseModule = z.infer<typeof insertCourseModuleSchema>;
-export type Lesson = typeof lessons.$inferSelect;
+export type Lesson = typeof course_lessons.$inferSelect;
 export type InsertLesson = z.infer<typeof insertLessonSchema>;

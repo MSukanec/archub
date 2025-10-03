@@ -43,7 +43,7 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
       const moduleIds = modules.map(m => m.id);
       
       const { data, error } = await supabase
-        .from('lessons')
+        .from('course_lessons')
         .select('*')
         .in('module_id', moduleIds)
         .order('sort_index', { ascending: true });
