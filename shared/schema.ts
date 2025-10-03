@@ -605,3 +605,68 @@ export type SubcontractTask = typeof subcontract_tasks.$inferSelect;
 export type InsertSubcontractTask = z.infer<typeof insertSubcontractTaskSchema>;
 export type SubcontractBid = typeof subcontract_bids.$inferSelect;
 export type InsertSubcontractBid = z.infer<typeof insertSubcontractBidSchema>;
+
+// Learning/Courses Tables
+export const courses = pgTable("courses", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  short_description: text("short_description"),
+  long_description: text("long_description"),
+  cover_url: text("cover_url"),
+  is_active: boolean("is_active").notNull().default(true),
+  visibility: text("visibility").notNull().default("public"),
+  created_by: uuid("created_by"),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const course_modules = pgTable("course_modules", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  course_id: uuid("course_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  sort_index: integer("sort_index").notNull().default(0),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const lessons = pgTable("lessons", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  module_id: uuid("module_id").notNull(),
+  title: text("title").notNull(),
+  vimeo_video_id: text("vimeo_video_id"),
+  duration_sec: integer("duration_sec"),
+  free_preview: boolean("free_preview").notNull().default(false),
+  sort_index: integer("sort_index").notNull().default(0),
+  is_active: boolean("is_active").notNull().default(true),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Schemas for courses
+export const insertCourseSchema = createInsertSchema(courses).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export const insertCourseModuleSchema = createInsertSchema(course_modules).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export const insertLessonSchema = createInsertSchema(lessons).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+// Types for courses
+export type Course = typeof courses.$inferSelect;
+export type InsertCourse = z.infer<typeof insertCourseSchema>;
+export type CourseModule = typeof course_modules.$inferSelect;
+export type InsertCourseModule = z.infer<typeof insertCourseModuleSchema>;
+export type Lesson = typeof lessons.$inferSelect;
+export type InsertLesson = z.infer<typeof insertLessonSchema>;

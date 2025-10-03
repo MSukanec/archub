@@ -77,6 +77,7 @@ import GeneralCosts from "@/pages/professional/finances/general-costs/GeneralCos
 // Learning Pages
 import LearningDashboard from "@/pages/learning/LearningDashboard";
 import CourseList from "@/pages/learning/CourseList";
+import CourseView from "@/pages/learning/CourseView";
 
 
 
@@ -157,6 +158,7 @@ function Router() {
         {/* Learning Routes */}
         <Route path="/learning/dashboard" component={LearningDashboard} />
         <Route path="/learning/courses" component={CourseList} />
+        <Route path="/learning/courses/:id" component={CourseView} />
 
         {/* Finances Routes */}
         <Route path="/finances/dashboard" component={FinancesCapitalMovements} />
