@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
 import { HierarchicalTree } from '@/components/ui-custom/tables-and-trees/HierarchicalTree';
 import { useToast } from '@/hooks/use-toast';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -20,6 +22,7 @@ interface TreeNode {
 export default function AdminCourseContentTab({ courseId, modules = [], lessons = [] }: AdminCourseContentTabProps) {
   const { toast } = useToast();
   const { openModal } = useGlobalModalStore();
+  const queryClient = useQueryClient();
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   // Transform modules and lessons into tree structure
@@ -65,8 +68,93 @@ export default function AdminCourseContentTab({ courseId, modules = [], lessons 
     });
   };
 
+  const reorderModuleMutation = useMutation({
+    mutationFn: async ({ moduleId, newIndex }: { moduleId: string; newIndex: number }) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      const { error } = await supabase
+        .from('course_modules')
+        .update({ sort_index: newIndex })
+        .eq('id', moduleId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['course-modules', courseId] });
+      toast({ title: 'Orden actualizado', description: 'El orden de los módulos se actualizó correctamente.' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error', description: error.message || 'No se pudo actualizar el orden.', variant: 'destructive' });
+    }
+  });
+
+  const moveLessonMutation = useMutation({
+    mutationFn: async ({ lessonId, newModuleId, newIndex }: { lessonId: string; newModuleId: string; newIndex: number }) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      const { error } = await supabase
+        .from('lessons')
+        .update({ 
+          module_id: newModuleId,
+          sort_index: newIndex 
+        })
+        .eq('id', lessonId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['course-lessons', courseId] });
+      toast({ title: 'Lección movida', description: 'La lección se movió correctamente.' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error', description: error.message || 'No se pudo mover la lección.', variant: 'destructive' });
+    }
+  });
+
   const handleTemplate = (node: TreeNode) => {
     // No usado para cursos
+  };
+
+  const handleReorder = (reorderedItems: TreeNode[]) => {
+    // Reordenar módulos en el nivel superior
+    reorderedItems.forEach((item, index) => {
+      if (item.type === 'module' && item.order !== index) {
+        reorderModuleMutation.mutate({ moduleId: item.id, newIndex: index });
+      }
+      
+      // Reordenar lecciones dentro de cada módulo
+      if (item.children) {
+        item.children.forEach((child, childIndex) => {
+          if (child.type === 'lesson' && child.order !== childIndex) {
+            moveLessonMutation.mutate({ 
+              lessonId: child.id, 
+              newModuleId: item.id, 
+              newIndex: childIndex 
+            });
+          }
+        });
+      }
+    });
+  };
+
+  const handleParentChange = (childId: string, newParentId: string | null) => {
+    // Solo aplicable a lecciones (children)
+    const lesson = lessons.find(l => l.id === childId);
+    if (!lesson || !newParentId) return;
+    
+    // Encontrar el nuevo módulo
+    const newModule = modules.find(m => m.id === newParentId);
+    if (!newModule) return;
+    
+    // Calcular nuevo índice (al final del módulo)
+    const lessonsInNewModule = lessons.filter(l => l.module_id === newParentId);
+    const newIndex = lessonsInNewModule.length;
+    
+    moveLessonMutation.mutate({ 
+      lessonId: childId, 
+      newModuleId: newParentId, 
+      newIndex 
+    });
   };
 
   if (!courseId) {
@@ -97,7 +185,9 @@ export default function AdminCourseContentTab({ courseId, modules = [], lessons 
         onEdit={handleEdit}
         onDelete={handleDelete}
         onTemplate={handleTemplate}
-        enableDragAndDrop={false}
+        enableDragAndDrop={true}
+        onReorder={handleReorder}
+        onParentChange={handleParentChange}
         showOrderNumber={false}
       />
     </div>
