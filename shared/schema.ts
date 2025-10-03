@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, uuid, jsonb, real, unique } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, uuid, jsonb, real, unique, numeric } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -644,6 +644,18 @@ export const course_lessons = pgTable("course_lessons", {
   updated_at: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const course_lesson_progress = pgTable("course_lesson_progress", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  user_id: uuid("user_id").notNull(),
+  lesson_id: uuid("lesson_id").notNull(),
+  progress_pct: numeric("progress_pct", { precision: 5, scale: 2 }).notNull().default("0"),
+  last_position_sec: integer("last_position_sec").notNull().default(0),
+  completed_at: timestamp("completed_at", { withTimezone: true }),
+  updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  lesson_progress_unique: unique().on(table.user_id, table.lesson_id),
+}));
+
 // Schemas for courses
 export const insertCourseSchema = createInsertSchema(courses).omit({
   id: true,
@@ -663,6 +675,13 @@ export const insertLessonSchema = createInsertSchema(course_lessons).omit({
   updated_at: true,
 });
 
+export const insertCourseLessonProgressSchema = createInsertSchema(course_lesson_progress).omit({
+  id: true,
+  updated_at: true,
+});
+
+export const selectCourseLessonProgressSchema = createInsertSchema(course_lesson_progress);
+
 // Types for courses
 export type Course = typeof courses.$inferSelect;
 export type InsertCourse = z.infer<typeof insertCourseSchema>;
@@ -670,3 +689,5 @@ export type CourseModule = typeof course_modules.$inferSelect;
 export type InsertCourseModule = z.infer<typeof insertCourseModuleSchema>;
 export type Lesson = typeof course_lessons.$inferSelect;
 export type InsertLesson = z.infer<typeof insertLessonSchema>;
+export type CourseLessonProgress = typeof course_lesson_progress.$inferSelect;
+export type InsertCourseLessonProgress = z.infer<typeof insertCourseLessonProgressSchema>;

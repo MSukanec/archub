@@ -4,9 +4,12 @@ import {
   PanelRightOpen,
   PanelRightClose,
   BookOpen,
-  Play
+  Play,
+  Circle,
+  CheckCircle2
 } from "lucide-react";
 import { useCourseSidebarStore } from "@/stores/sidebarStore";
+import { useQuery } from "@tanstack/react-query";
 
 interface CourseSidebarProps {
   modules: any[];
@@ -21,6 +24,20 @@ export function CourseSidebar({ modules, lessons, currentLessonId }: CourseSideb
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   
   const isExpanded = isDocked || isHovered;
+
+  // Get courseId from first module
+  const courseId = modules.length > 0 ? modules[0].course_id : null;
+
+  // Fetch progress for all lessons in the course
+  const { data: progressData } = useQuery<any[]>({
+    queryKey: ['/api/courses', courseId, 'progress'],
+    enabled: !!courseId
+  });
+
+  // Create a map of lesson progress for quick lookup
+  const progressMap = new Map(
+    (progressData || []).map((p: any) => [p.lesson_id, p])
+  );
 
   // Auto-abrir el módulo que contiene la lección actual
   useEffect(() => {
@@ -141,6 +158,8 @@ export function CourseSidebar({ modules, lessons, currentLessonId }: CourseSideb
                     <div className="ml-4 border-l border-[var(--main-sidebar-border)] pl-2 my-1">
                       {moduleLessons.map((lesson) => {
                         const isActive = currentLessonId === lesson.id;
+                        const progress = progressMap.get(lesson.id);
+                        const isCompleted = progress && progress.completed_at;
                         
                         return (
                           <button
@@ -168,6 +187,22 @@ export function CourseSidebar({ modules, lessons, currentLessonId }: CourseSideb
                             >
                               {lesson.title}
                             </span>
+                            {/* Progress Circle */}
+                            {isCompleted ? (
+                              <CheckCircle2 
+                                className="w-[16px] h-[16px] flex-shrink-0 ml-2"
+                                style={{ color: 'var(--accent)' }}
+                                data-testid={`progress-complete-${lesson.id}`}
+                              />
+                            ) : (
+                              <Circle 
+                                className={cn(
+                                  "w-[16px] h-[16px] flex-shrink-0 ml-2",
+                                  isActive ? "text-white/50" : "text-[var(--main-sidebar-fg)]/30"
+                                )}
+                                data-testid={`progress-incomplete-${lesson.id}`}
+                              />
+                            )}
                           </button>
                         );
                       })}

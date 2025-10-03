@@ -1,10 +1,13 @@
 import { useEffect, useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { Play, BookOpen } from 'lucide-react'
+import { Play, BookOpen, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
 import VimeoPlayer from '@/components/video/VimeoPlayer'
+import { apiRequest, queryClient } from '@/lib/queryClient'
+import { useToast } from '@/hooks/use-toast'
 
 interface CourseViewerProps {
   courseId?: string;
@@ -12,6 +15,7 @@ interface CourseViewerProps {
 
 export default function CourseViewer({ courseId }: CourseViewerProps) {
   const { setVisible, setData, setCurrentLesson, currentLessonId } = useCourseSidebarStore();
+  const { toast } = useToast();
   
   // Get course modules and lessons
   const { data: modules = [], isLoading: modulesLoading } = useQuery({
@@ -56,6 +60,77 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
       return data || [];
     },
     enabled: !!courseId && !!supabase && modules.length > 0
+  });
+
+  // Create ordered flat list of lessons based on module and lesson sort_index
+  const orderedLessons = useMemo(() => {
+    if (modules.length === 0 || lessons.length === 0) return [];
+    
+    const ordered: any[] = [];
+    modules.forEach(module => {
+      const moduleLessons = lessons
+        .filter(l => l.module_id === module.id)
+        .sort((a, b) => a.sort_index - b.sort_index);
+      ordered.push(...moduleLessons);
+    });
+    
+    return ordered;
+  }, [modules, lessons]);
+
+  // Find current lesson index and navigation info
+  const navigationInfo = useMemo(() => {
+    if (!currentLessonId || orderedLessons.length === 0) {
+      return { currentIndex: -1, hasPrev: false, hasNext: false, prevLesson: null, nextLesson: null };
+    }
+    
+    const currentIndex = orderedLessons.findIndex(l => l.id === currentLessonId);
+    
+    return {
+      currentIndex,
+      hasPrev: currentIndex > 0,
+      hasNext: currentIndex < orderedLessons.length - 1,
+      prevLesson: currentIndex > 0 ? orderedLessons[currentIndex - 1] : null,
+      nextLesson: currentIndex < orderedLessons.length - 1 ? orderedLessons[currentIndex + 1] : null,
+    };
+  }, [currentLessonId, orderedLessons]);
+
+  // Mark lesson as complete mutation
+  const markCompleteMutation = useMutation({
+    mutationFn: async (lessonId: string) => {
+      const response = await fetch(`/api/lessons/${lessonId}/progress`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          completed_at: new Date().toISOString(),
+          progress_pct: 100,
+          last_position_sec: 0
+        }),
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to mark lesson as complete');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/courses', courseId, 'progress'] });
+      toast({
+        title: 'Lección completada',
+        description: 'Has marcado esta lección como completa'
+      });
+    },
+    onError: (error) => {
+      console.error('Error marking lesson as complete:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo marcar la lección como completa',
+        variant: 'destructive'
+      });
+    }
   });
 
   // Crear strings estables de IDs para evitar re-renders innecesarios
@@ -131,8 +206,65 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
   // Encontrar la lección actual
   const currentLesson = lessons.find(l => l.id === currentLessonId);
 
+  // Navigation handlers
+  const handlePrevious = () => {
+    if (navigationInfo.prevLesson) {
+      setCurrentLesson(navigationInfo.prevLesson.id);
+    }
+  };
+
+  const handleNext = () => {
+    if (navigationInfo.nextLesson) {
+      setCurrentLesson(navigationInfo.nextLesson.id);
+    }
+  };
+
+  const handleMarkComplete = () => {
+    if (currentLessonId) {
+      markCompleteMutation.mutate(currentLessonId);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* Action Header */}
+      {currentLesson && (
+        <div className="flex items-center justify-between gap-4 pb-4 border-b">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePrevious}
+            disabled={!navigationInfo.hasPrev}
+            data-testid="button-previous-lesson"
+          >
+            <ChevronLeft className="w-4 h-4 mr-1" />
+            Anterior
+          </Button>
+          
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleMarkComplete}
+            disabled={markCompleteMutation.isPending}
+            data-testid="button-mark-complete"
+          >
+            <CheckCircle className="w-4 h-4 mr-1" />
+            {markCompleteMutation.isPending ? 'Marcando...' : 'Marcar como Completa'}
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNext}
+            disabled={!navigationInfo.hasNext}
+            data-testid="button-next-lesson"
+          >
+            Siguiente
+            <ChevronRight className="w-4 h-4 ml-1" />
+          </Button>
+        </div>
+      )}
+
       {/* Vimeo Video Player */}
       {currentLesson?.vimeo_video_id ? (
         <div>

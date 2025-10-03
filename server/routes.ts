@@ -1733,7 +1733,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       console.error("Error in award endpoint:", error);
-      res.status(500).json({ error: "Internal server error", details: error.message });
+      res.status(500).json({ error: "Internal server error", details: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -1794,7 +1794,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       console.error("Error in subcontract-bid-tasks endpoint:", error);
-      res.status(500).json({ error: "Internal server error", details: error.message });
+      res.status(500).json({ error: "Internal server error", details: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -1910,6 +1910,154 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting subcontract:", error);
       res.status(500).json({ error: "Failed to delete subcontract" });
+    }
+  });
+
+  // POST /api/lessons/:lessonId/progress - Mark lesson progress/complete
+  app.post("/api/lessons/:lessonId/progress", async (req, res) => {
+    try {
+      const { lessonId } = req.params;
+      const { progress_pct, last_position_sec, completed_at } = req.body;
+      
+      // Get the authorization token from headers
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const token = authHeader.substring(7);
+      
+      // Create authenticated Supabase client
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+      
+      // Get current user
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      // Upsert progress
+      const { data, error } = await authenticatedSupabase
+        .from('course_lesson_progress')
+        .upsert({
+          user_id: user.id,
+          lesson_id: lessonId,
+          progress_pct: progress_pct || 0,
+          last_position_sec: last_position_sec || 0,
+          completed_at: completed_at || null,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,lesson_id'
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Error upserting lesson progress:", error);
+        return res.status(500).json({ error: "Failed to update progress" });
+      }
+      
+      res.json(data);
+    } catch (error) {
+      console.error("Error updating lesson progress:", error);
+      res.status(500).json({ error: "Failed to update progress" });
+    }
+  });
+
+  // GET /api/courses/:courseId/progress - Get all lesson progress for a course
+  app.get("/api/courses/:courseId/progress", async (req, res) => {
+    try {
+      const { courseId } = req.params;
+      
+      // Get the authorization token from headers
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const token = authHeader.substring(7);
+      
+      // Create authenticated Supabase client
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+      
+      // Get current user
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      // Get all modules for the course
+      const { data: modules, error: modulesError } = await authenticatedSupabase
+        .from('course_modules')
+        .select('id')
+        .eq('course_id', courseId);
+      
+      if (modulesError || !modules) {
+        console.error("Error fetching modules:", modulesError);
+        return res.status(500).json({ error: "Failed to fetch course modules" });
+      }
+      
+      const moduleIds = modules.map(m => m.id);
+      
+      if (moduleIds.length === 0) {
+        return res.json([]);
+      }
+      
+      // Get all lessons for these modules
+      const { data: lessons, error: lessonsError } = await authenticatedSupabase
+        .from('course_lessons')
+        .select('id')
+        .in('module_id', moduleIds);
+      
+      if (lessonsError || !lessons) {
+        console.error("Error fetching lessons:", lessonsError);
+        return res.status(500).json({ error: "Failed to fetch lessons" });
+      }
+      
+      const lessonIds = lessons.map(l => l.id);
+      
+      if (lessonIds.length === 0) {
+        return res.json([]);
+      }
+      
+      // Get progress for all lessons
+      const { data: progress, error: progressError } = await authenticatedSupabase
+        .from('course_lesson_progress')
+        .select('*')
+        .eq('user_id', user.id)
+        .in('lesson_id', lessonIds);
+      
+      if (progressError) {
+        console.error("Error fetching progress:", progressError);
+        return res.status(500).json({ error: "Failed to fetch progress" });
+      }
+      
+      res.json(progress || []);
+    } catch (error) {
+      console.error("Error fetching course progress:", error);
+      res.status(500).json({ error: "Failed to fetch progress" });
     }
   });
 
