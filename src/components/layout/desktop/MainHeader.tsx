@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ChevronDown, Building2, FolderOpen, Slash } from "lucide-react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectsLite } from "@/hooks/use-projects-lite";
 import { useProject } from "@/hooks/use-projects";
@@ -198,13 +198,15 @@ export function MainHeader() {
       {/* Left side: Logo and navigation */}
       <div className="flex items-center gap-2">
         {/* Logo - Perfectly aligned with sidebar icons at 24px from left edge */}
-        <div className="shrink-0 w-12 h-12 flex items-center justify-center">
-          <img 
-            src="/ArchubLogo.png" 
-            alt="Archub" 
-            className="h-8 w-auto"
-          />
-        </div>
+        <Link href="/select-mode">
+          <div className="shrink-0 w-12 h-12 flex items-center justify-center cursor-pointer">
+            <img 
+              src="/ArchubLogo.png" 
+              alt="Archub" 
+              className="h-8 w-auto"
+            />
+          </div>
+        </Link>
 
         {/* Organization selector */}
         <div className="flex items-center gap-1">
