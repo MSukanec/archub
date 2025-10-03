@@ -48,7 +48,7 @@ export const user_preferences = pgTable("user_preferences", {
   last_project_id: uuid("last_project_id"),
   last_budget_id: uuid("last_budget_id"),
   last_kanban_board_id: uuid("last_kanban_board_id"),
-  last_user_type: text("last_user_type", { enum: ["professional", "provider", "worker", "visitor"] }),
+  last_user_type: text("last_user_type", { enum: ["professional", "learning", "provider", "worker", "visitor"] }),
   onboarding_completed: boolean("onboarding_completed").default(false),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),

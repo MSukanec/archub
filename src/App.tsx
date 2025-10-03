@@ -74,6 +74,10 @@ import TaskView from "@/pages/professional/analysis/TaskView";
 import MaterialsView from "@/pages/professional/analysis/material-costs/MaterialsView";
 import GeneralCosts from "@/pages/professional/finances/general-costs/GeneralCosts";
 
+// Learning Pages
+import LearningDashboard from "@/pages/learning/LearningDashboard";
+import CourseList from "@/pages/learning/CourseList";
+
 
 
 
@@ -150,7 +154,9 @@ function Router() {
         <Route path="/analysis/:id" component={TaskView} />
         <Route path="/analysis/materials/:id" component={MaterialsView} />
         
-
+        {/* Learning Routes */}
+        <Route path="/learning/dashboard" component={LearningDashboard} />
+        <Route path="/learning/courses" component={CourseList} />
 
         {/* Finances Routes */}
         <Route path="/finances/dashboard" component={FinancesCapitalMovements} />
