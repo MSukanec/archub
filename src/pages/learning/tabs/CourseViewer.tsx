@@ -79,7 +79,8 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
       setCurrentLesson(undefined);
       setOnLessonClick(undefined);
     };
-  }, [modules, lessons, setVisible, setData, setCurrentLesson, setOnLessonClick, handleLessonClick]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modules, lessons, handleLessonClick]);
 
   // Seleccionar automáticamente la primera lección cuando se cargan las lecciones
   useEffect(() => {
@@ -94,6 +95,7 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
     if (currentLessonId) {
       setCurrentLesson(currentLessonId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentLessonId]);
 
   // Group lessons by module
