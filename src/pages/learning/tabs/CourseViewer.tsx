@@ -87,6 +87,16 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lessonIdsString, currentLessonId]);
 
+  // Log de confirmación cuando cambia la lección activa (Paso 3 del prompt)
+  useEffect(() => {
+    if (!currentLessonId) return;
+    const currentLesson = lessons.find(l => l.id === currentLessonId);
+    if (currentLesson) {
+      console.log('📚 Lección activa ->', currentLesson.title, 
+                  'Vimeo ID ->', currentLesson.vimeo_video_id || 'sin video');
+    }
+  }, [currentLessonId, lessons]);
+
   // Group lessons by module
   const getLessonsForModule = (moduleId: string) => {
     return lessons.filter(lesson => lesson.module_id === moduleId);
