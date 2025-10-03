@@ -14,6 +14,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useLocation } from 'wouter'
 
 export default function AdminCourses() {
   const [activeTab, setActiveTab] = useState('courses')
@@ -21,6 +22,7 @@ export default function AdminCourses() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { openModal } = useGlobalModalStore()
+  const [, navigate] = useLocation()
   
   const { data: courses = [], isLoading: coursesLoading } = useCourses()
 
@@ -87,6 +89,10 @@ export default function AdminCourses() {
     openModal('lesson', { lesson, isEditing: true });
   };
 
+  const handleViewCourse = (courseId: string) => {
+    navigate(`/admin/courses/${courseId}`);
+  };
+
   // Course columns
   const courseColumns = [
     {
@@ -136,6 +142,21 @@ export default function AdminCourses() {
         <div className="text-sm text-muted-foreground">
           {format(new Date(course.created_at), 'dd/MM/yyyy', { locale: es })}
         </div>
+      )
+    },
+    {
+      key: 'view',
+      label: '',
+      render: (course: any) => (
+        <Button
+          variant="default"
+          size="sm"
+          onClick={() => handleViewCourse(course.id)}
+          className="h-8 px-3 text-xs"
+          data-testid={`button-view-course-${course.id}`}
+        >
+          Editar
+        </Button>
       )
     },
     {
