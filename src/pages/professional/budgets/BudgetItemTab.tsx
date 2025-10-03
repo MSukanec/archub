@@ -101,29 +101,9 @@ export function BudgetItems({
       )
     },
     {
-      key: 'materials',
-      label: 'Materiales',
-      width: '11%',
-      render: (budget: any) => (
-        <div className="text-sm font-medium text-blue-700">
-          {budget.currency?.symbol || '$'} {formatCurrency(budget.materials_total || 0)}
-        </div>
-      )
-    },
-    {
-      key: 'labor',
-      label: 'Mano de Obra',
-      width: '11%',
-      render: (budget: any) => (
-        <div className="text-sm font-medium text-orange-700">
-          {budget.currency?.symbol || '$'} {formatCurrency(budget.labor_total || 0)}
-        </div>
-      )
-    },
-    {
       key: 'total',
       label: 'Total',
-      width: '11%',
+      width: '15%',
       render: (budget: any) => (
         <div className="text-sm">
           <div className="font-medium text-green-700">

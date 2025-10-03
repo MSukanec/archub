@@ -231,7 +231,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: "Failed to fetch budgets" });
       }
 
-      // Calcular el total, materiales y mano de obra para cada presupuesto
+      // Calcular el total para cada presupuesto
       const budgetsWithTotals = await Promise.all(
         (budgets || []).map(async (budget) => {
           const { data: items, error: itemsError } = await authenticatedSupabase
@@ -240,21 +240,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               unit_price, 
               quantity, 
               markup_pct, 
-              tax_pct,
-              construction_task_id,
-              labor_unit_cost,
-              material_unit_cost
+              tax_pct
             `)
             .eq('budget_id', budget.id);
 
           if (itemsError) {
             console.error(`Error fetching items for budget ${budget.id}:`, itemsError);
-            return { ...budget, total: 0, labor_total: 0, materials_total: 0 };
+            return { ...budget, total: 0 };
           }
 
           let total = 0;
-          let laborTotal = 0;
-          let materialsTotal = 0;
 
           // Calcular totales para cada item
           for (const item of items || []) {
@@ -267,20 +262,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const taxAmount = taxableAmount * ((item.tax_pct || 0) / 100);
             const itemTotal = taxableAmount + taxAmount;
             total += itemTotal;
-
-            // Calcular mano de obra y materiales (sin markup ni tax, solo costo base)
-            const laborCost = (item.labor_unit_cost || 0) * quantity;
-            const materialCost = (item.material_unit_cost || 0) * quantity;
-            
-            laborTotal += laborCost;
-            materialsTotal += materialCost;
           }
 
           return { 
             ...budget, 
-            total,
-            labor_total: laborTotal,
-            materials_total: materialsTotal
+            total
           };
         })
       );
