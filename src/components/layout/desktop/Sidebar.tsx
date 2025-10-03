@@ -25,7 +25,9 @@ import {
   Package,
   Layers,
   ListTodo,
-  User
+  User,
+  GraduationCap,
+  BookOpen
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
@@ -82,6 +84,11 @@ export function Sidebar() {
         { id: 'tasks', label: 'Tareas', icon: ListTodo, href: '/admin/tasks' },
         { id: 'general', label: 'General', icon: Settings, href: '/admin/general' },
         { id: 'products', label: 'Productos', icon: Package, href: '/providers/products' },
+      ];
+    } else if (sidebarLevel === 'learning') {
+      return [
+        { id: 'dashboard', label: 'Dashboard', icon: GraduationCap, href: '/learning/dashboard' },
+        { id: 'courses', label: 'Cursos', icon: BookOpen, href: '/learning/courses' },
       ];
     }
     
