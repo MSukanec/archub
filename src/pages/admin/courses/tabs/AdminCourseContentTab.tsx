@@ -81,6 +81,7 @@ export default function AdminCourseContentTab({ courseId, modules = [], lessons 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['course-modules', courseId] });
+      queryClient.invalidateQueries({ queryKey: ['all-course-modules'] });
       toast({ title: 'Orden actualizado', description: 'El orden de los módulos se actualizó correctamente.' });
     },
     onError: (error: any) => {
@@ -104,6 +105,7 @@ export default function AdminCourseContentTab({ courseId, modules = [], lessons 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['course-lessons', courseId] });
+      queryClient.invalidateQueries({ queryKey: ['all-lessons'] });
       toast({ title: 'Lección movida', description: 'La lección se movió correctamente.' });
     },
     onError: (error: any) => {

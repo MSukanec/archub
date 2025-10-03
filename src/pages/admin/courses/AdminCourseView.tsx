@@ -83,11 +83,6 @@ export default function AdminCourseView() {
 
   const headerTabs = [
     {
-      id: 'Datos del Curso',
-      label: 'Datos del Curso',
-      isActive: activeTab === 'Datos del Curso'
-    },
-    {
       id: 'Contenido del Curso',
       label: 'Contenido del Curso',
       isActive: activeTab === 'Contenido del Curso'
@@ -152,14 +147,7 @@ export default function AdminCourseView() {
   }
 
   const renderTabContent = () => {
-    switch (activeTab) {
-      case 'Datos del Curso':
-        return <AdminCourseContentTab courseId={id} modules={modules} lessons={lessons} />;
-      case 'Contenido del Curso':
-        return <AdminCourseContentTab courseId={id} modules={modules} lessons={lessons} />;
-      default:
-        return null;
-    }
+    return <AdminCourseContentTab courseId={id} modules={modules} lessons={lessons} />;
   };
 
   return (
