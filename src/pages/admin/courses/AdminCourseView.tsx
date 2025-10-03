@@ -5,7 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import AdminCourseContentTab from './tabs/AdminCourseContentTab';
+import AdminCourseDataTab from './view/AdminCourseDataTab';
+import AdminCourseContentTab from './view/AdminCourseContentTab';
 import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
@@ -83,6 +84,11 @@ export default function AdminCourseView() {
 
   const headerTabs = [
     {
+      id: 'Datos del Curso',
+      label: 'Datos del Curso',
+      isActive: activeTab === 'Datos del Curso'
+    },
+    {
       id: 'Contenido del Curso',
       label: 'Contenido del Curso',
       isActive: activeTab === 'Contenido del Curso'
@@ -147,7 +153,14 @@ export default function AdminCourseView() {
   }
 
   const renderTabContent = () => {
-    return <AdminCourseContentTab courseId={id} modules={modules} lessons={lessons} />;
+    switch (activeTab) {
+      case 'Datos del Curso':
+        return <AdminCourseDataTab courseId={id} />;
+      case 'Contenido del Curso':
+        return <AdminCourseContentTab courseId={id} modules={modules} lessons={lessons} />;
+      default:
+        return <AdminCourseDataTab courseId={id} />;
+    }
   };
 
   return (

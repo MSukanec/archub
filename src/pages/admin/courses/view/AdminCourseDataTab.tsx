@@ -10,11 +10,11 @@ import { Badge } from '@/components/ui/badge'
 import { BookOpen, FileText, Eye, Play, List } from 'lucide-react'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
 
-interface CourseDataTabProps {
+interface AdminCourseDataTabProps {
   courseId?: string;
 }
 
-export default function CourseDataTab({ courseId }: CourseDataTabProps) {
+export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setCurrentLesson } = useCourseSidebarStore()

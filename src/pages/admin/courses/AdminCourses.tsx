@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { BookOpen, Plus, Users } from 'lucide-react'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import AdminCourseUsersTab from './tabs/AdminCourseUsersTab'
-import AdminCourseListTab from './tabs/AdminCourseListTab'
+import AdminCourseUsersTab from './view/AdminCourseUsersTab'
+import AdminCourseListTab from './view/AdminCourseListTab'
 
 export default function AdminCourses() {
   const [activeTab, setActiveTab] = useState('users')

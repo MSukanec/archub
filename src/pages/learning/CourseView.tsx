@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import CourseDataTab from './tabs/CourseDataTab';
+import AdminCourseDataTab from '../admin/courses/view/AdminCourseDataTab';
 import CourseViewer from './tabs/CourseViewer';
 
 export default function CourseView() {
@@ -88,7 +88,7 @@ export default function CourseView() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'Datos del Curso':
-        return <CourseDataTab courseId={id} />;
+        return <AdminCourseDataTab courseId={id} />;
       case 'Visor':
         return <CourseViewer courseId={id} />;
       default:
