@@ -1940,11 +1940,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       );
       
-      // Get current user
+      // Get current user from Supabase Auth
       const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
       
       if (userError || !user) {
         return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      // Ensure user exists in the users table
+      const { data: existingUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+      
+      // If user doesn't exist in users table, create them
+      if (!existingUser) {
+        const { error: createUserError } = await authenticatedSupabase
+          .from('users')
+          .insert({
+            id: user.id,
+            email: user.email,
+            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+        
+        if (createUserError) {
+          console.error("Error creating user in users table:", createUserError);
+          // Continue anyway - the user might have been created by a concurrent request
+        }
       }
       
       // Upsert progress

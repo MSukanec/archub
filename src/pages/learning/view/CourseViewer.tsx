@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useCallback } from 'react'
+import { useEffect, useMemo, useCallback, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Play, BookOpen, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -101,6 +101,51 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
       nextLesson: currentIndex < orderedLessons.length - 1 ? orderedLessons[currentIndex + 1] : null,
     };
   }, [currentLessonId, orderedLessons]);
+
+  // Save progress mutation (for auto-save while watching)
+  const saveProgressMutation = useMutation({
+    mutationFn: async ({ lessonId, sec, pct }: { lessonId: string, sec: number, pct: number }) => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const response = await fetch(`/api/lessons/${lessonId}/progress`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          progress_pct: pct,
+          last_position_sec: sec,
+          completed_at: null
+        }),
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save progress');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/courses', courseId, 'progress'] });
+    }
+  });
+
+  // Throttle progress saves to avoid too many requests
+  const lastSaveTime = useRef(0);
+  const SAVE_THROTTLE_MS = 5000; // Save every 5 seconds max
+
+  const handleVideoProgress = useCallback((sec: number, pct: number) => {
+    if (!currentLessonId) return;
+    
+    const now = Date.now();
+    if (now - lastSaveTime.current >= SAVE_THROTTLE_MS) {
+      lastSaveTime.current = now;
+      saveProgressMutation.mutate({ lessonId: currentLessonId, sec, pct });
+    }
+  }, [currentLessonId, saveProgressMutation.mutate]);
 
   // Mark lesson as complete mutation
   const markCompleteMutation = useMutation({
@@ -267,10 +312,7 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
         <div>
           <VimeoPlayer 
             vimeoId={currentLesson.vimeo_video_id}
-            onProgress={(sec, pct) => {
-              // Aquí podrías guardar el progreso si lo necesitas
-              console.log(`Progress: ${sec}s (${pct}%)`);
-            }}
+            onProgress={handleVideoProgress}
           />
           <div className="mt-4">
             <h2 className="text-xl font-semibold">{currentLesson.title}</h2>
