@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import { HierarchicalTree } from '@/components/ui-custom/tables-and-trees/HierarchicalTree';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { supabase } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AdminCourseContentTabProps {
   courseId?: string;
@@ -13,10 +17,14 @@ interface TreeNode {
   children?: TreeNode[];
   order?: number;
   type?: 'module' | 'lesson';
+  module_id?: string; // Para saber a qué módulo pertenece una lección
 }
 
 export default function AdminCourseContentTab({ courseId, modules = [], lessons = [] }: AdminCourseContentTabProps) {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const { openModal } = useGlobalModalStore();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Transform modules and lessons into tree structure
   const treeData: TreeNode[] = modules.map((module) => ({
@@ -31,6 +39,7 @@ export default function AdminCourseContentTab({ courseId, modules = [], lessons 
         name: lesson.title,
         type: 'lesson' as const,
         order: lesson.sort_index,
+        module_id: module.id,
       })),
   }));
 
@@ -42,6 +51,119 @@ export default function AdminCourseContentTab({ courseId, modules = [], lessons 
       newExpanded.add(categoryId);
     }
     setExpandedCategories(newExpanded);
+  };
+
+  const handleEdit = (node: TreeNode) => {
+    if (node.type === 'module') {
+      // Encontrar el módulo completo en los datos originales
+      const moduleData = modules.find(m => m.id === node.id);
+      openModal('course-module', {
+        module: moduleData,
+        courseId,
+        isEditing: true,
+      });
+    } else if (node.type === 'lesson') {
+      // Encontrar la lección completa en los datos originales
+      const lessonData = lessons.find(l => l.id === node.id);
+      openModal('lesson', {
+        lesson: lessonData,
+        courseId,
+        isEditing: true,
+      });
+    }
+  };
+
+  const handleReorder = async (reorderedItems: TreeNode[]) => {
+    try {
+      if (!supabase) {
+        throw new Error('Supabase no está configurado');
+      }
+
+      // Actualizar el orden de todos los elementos reordenados
+      const updates: PromiseLike<any>[] = [];
+
+      reorderedItems.forEach((item, index) => {
+        if (item.type === 'module') {
+          // Actualizar módulo
+          updates.push(
+            supabase
+              .from('course_modules')
+              .update({ sort_index: index })
+              .eq('id', item.id)
+          );
+        } else if (item.type === 'lesson') {
+          // Actualizar lección
+          updates.push(
+            supabase
+              .from('course_lessons')
+              .update({ sort_index: index })
+              .eq('id', item.id)
+          );
+        }
+      });
+
+      await Promise.all(updates);
+
+      // Invalidar cache para refrescar los datos
+      await queryClient.invalidateQueries({ queryKey: ['course-modules', courseId] });
+      await queryClient.invalidateQueries({ queryKey: ['lessons', courseId] });
+
+      toast({
+        title: 'Orden actualizado',
+        description: 'El orden de los elementos se actualizó correctamente',
+      });
+    } catch (error) {
+      console.error('Error al actualizar el orden:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'No se pudo actualizar el orden de los elementos',
+      });
+    }
+  };
+
+  const handleParentChange = async (childId: string, newParentId: string | null) => {
+    try {
+      if (!supabase) {
+        throw new Error('Supabase no está configurado');
+      }
+
+      // Solo permitir cambiar el módulo padre de las lecciones
+      const lesson = lessons.find(l => l.id === childId);
+      if (!lesson) return;
+
+      if (!newParentId) {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Las lecciones deben pertenecer a un módulo',
+        });
+        return;
+      }
+
+      // Actualizar el module_id de la lección
+      const { error } = await supabase
+        .from('course_lessons')
+        .update({ module_id: newParentId })
+        .eq('id', childId);
+
+      if (error) throw error;
+
+      // Invalidar cache
+      await queryClient.invalidateQueries({ queryKey: ['lessons', courseId] });
+
+      toast({
+        title: 'Lección movida',
+        description: 'La lección se movió al nuevo módulo correctamente',
+      });
+    } catch (error) {
+      console.error('Error al cambiar el módulo padre:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'No se pudo mover la lección al nuevo módulo',
+      });
+    }
   };
 
   if (!courseId) {
@@ -66,11 +188,13 @@ export default function AdminCourseContentTab({ courseId, modules = [], lessons 
         categories={treeData}
         expandedCategories={expandedCategories}
         onToggleExpanded={handleToggleExpanded}
-        onEdit={() => {}}
+        onEdit={handleEdit}
         onDelete={() => {}}
         onTemplate={() => {}}
-        enableDragAndDrop={false}
-        showOrderNumber={false}
+        enableDragAndDrop={true}
+        showOrderNumber={true}
+        onReorder={handleReorder}
+        onParentChange={handleParentChange}
       />
     </div>
   );
