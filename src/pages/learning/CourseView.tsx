@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useParams, useLocation } from "wouter";
-import { BookOpen } from 'lucide-react';
+import { BookOpen, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import CourseDataTab from './view/CourseDataTab';
@@ -48,6 +49,16 @@ export default function CourseView() {
     }
   ];
 
+  // State to hold CourseViewer navigation data
+  const [navigationState, setNavigationState] = useState<{
+    hasPrev: boolean;
+    hasNext: boolean;
+    onPrevious: () => void;
+    onNext: () => void;
+    onMarkComplete: () => void;
+    isMarkingComplete: boolean;
+  } | null>(null);
+
   const headerProps = {
     icon: BookOpen,
     title: course?.title || "Curso",
@@ -57,7 +68,44 @@ export default function CourseView() {
     },
     isViewMode: true,
     tabs: headerTabs,
-    onTabChange: setActiveTab
+    onTabChange: setActiveTab,
+    ...(activeTab === 'Visor' && navigationState && {
+      actions: [
+        <Button
+          key="previous"
+          variant="outline"
+          size="sm"
+          onClick={navigationState.onPrevious}
+          disabled={!navigationState.hasPrev}
+          data-testid="button-previous-lesson"
+        >
+          <ChevronLeft className="w-4 h-4 mr-1" />
+          Anterior
+        </Button>,
+        <Button
+          key="complete"
+          variant="default"
+          size="sm"
+          onClick={navigationState.onMarkComplete}
+          disabled={navigationState.isMarkingComplete}
+          data-testid="button-mark-complete"
+        >
+          <CheckCircle className="w-4 h-4 mr-1" />
+          {navigationState.isMarkingComplete ? 'Marcando...' : 'Marcar como Completa'}
+        </Button>,
+        <Button
+          key="next"
+          variant="outline"
+          size="sm"
+          onClick={navigationState.onNext}
+          disabled={!navigationState.hasNext}
+          data-testid="button-next-lesson"
+        >
+          Siguiente
+          <ChevronRight className="w-4 h-4 ml-1" />
+        </Button>
+      ]
+    })
   };
 
   if (isLoading) {
@@ -90,7 +138,7 @@ export default function CourseView() {
       case 'Datos del Curso':
         return <CourseDataTab courseId={id} />;
       case 'Visor':
-        return <CourseViewer courseId={id} />;
+        return <CourseViewer courseId={id} onNavigationStateChange={setNavigationState} />;
       default:
         return null;
     }

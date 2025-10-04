@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useCallback } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Play, BookOpen, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -11,9 +11,17 @@ import { useToast } from '@/hooks/use-toast'
 
 interface CourseViewerProps {
   courseId?: string;
+  onNavigationStateChange?: (state: {
+    hasPrev: boolean;
+    hasNext: boolean;
+    onPrevious: () => void;
+    onNext: () => void;
+    onMarkComplete: () => void;
+    isMarkingComplete: boolean;
+  } | null) => void;
 }
 
-export default function CourseViewer({ courseId }: CourseViewerProps) {
+export default function CourseViewer({ courseId, onNavigationStateChange }: CourseViewerProps) {
   const { setVisible, setData, setCurrentLesson, currentLessonId } = useCourseSidebarStore();
   const { toast } = useToast();
   
@@ -172,6 +180,43 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
     }
   }, [currentLessonId, lessons]);
 
+  // Navigation handlers with useCallback
+  const handlePrevious = useCallback(() => {
+    if (navigationInfo.prevLesson) {
+      setCurrentLesson(navigationInfo.prevLesson.id);
+    }
+  }, [navigationInfo.prevLesson, setCurrentLesson]);
+
+  const handleNext = useCallback(() => {
+    if (navigationInfo.nextLesson) {
+      setCurrentLesson(navigationInfo.nextLesson.id);
+    }
+  }, [navigationInfo.nextLesson, setCurrentLesson]);
+
+  const handleMarkComplete = useCallback(() => {
+    if (currentLessonId) {
+      markCompleteMutation.mutate(currentLessonId);
+    }
+  }, [currentLessonId, markCompleteMutation]);
+
+  // Update navigation state whenever it changes
+  useEffect(() => {
+    if (onNavigationStateChange) {
+      if (currentLessonId && orderedLessons.length > 0) {
+        onNavigationStateChange({
+          hasPrev: navigationInfo.hasPrev,
+          hasNext: navigationInfo.hasNext,
+          onPrevious: handlePrevious,
+          onNext: handleNext,
+          onMarkComplete: handleMarkComplete,
+          isMarkingComplete: markCompleteMutation.isPending
+        });
+      } else {
+        onNavigationStateChange(null);
+      }
+    }
+  }, [currentLessonId, navigationInfo.hasPrev, navigationInfo.hasNext, orderedLessons.length, markCompleteMutation.isPending, onNavigationStateChange, handlePrevious, handleNext, handleMarkComplete]);
+
   // Group lessons by module
   const getLessonsForModule = (moduleId: string) => {
     return lessons.filter(lesson => lesson.module_id === moduleId);
@@ -206,64 +251,8 @@ export default function CourseViewer({ courseId }: CourseViewerProps) {
   // Encontrar la lección actual
   const currentLesson = lessons.find(l => l.id === currentLessonId);
 
-  // Navigation handlers
-  const handlePrevious = () => {
-    if (navigationInfo.prevLesson) {
-      setCurrentLesson(navigationInfo.prevLesson.id);
-    }
-  };
-
-  const handleNext = () => {
-    if (navigationInfo.nextLesson) {
-      setCurrentLesson(navigationInfo.nextLesson.id);
-    }
-  };
-
-  const handleMarkComplete = () => {
-    if (currentLessonId) {
-      markCompleteMutation.mutate(currentLessonId);
-    }
-  };
-
   return (
     <div className="space-y-6">
-      {/* Action Header */}
-      {currentLesson && (
-        <div className="flex items-center justify-between gap-4 pb-4 border-b">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePrevious}
-            disabled={!navigationInfo.hasPrev}
-            data-testid="button-previous-lesson"
-          >
-            <ChevronLeft className="w-4 h-4 mr-1" />
-            Anterior
-          </Button>
-          
-          <Button
-            variant="default"
-            size="sm"
-            onClick={handleMarkComplete}
-            disabled={markCompleteMutation.isPending}
-            data-testid="button-mark-complete"
-          >
-            <CheckCircle className="w-4 h-4 mr-1" />
-            {markCompleteMutation.isPending ? 'Marcando...' : 'Marcar como Completa'}
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleNext}
-            disabled={!navigationInfo.hasNext}
-            data-testid="button-next-lesson"
-          >
-            Siguiente
-            <ChevronRight className="w-4 h-4 ml-1" />
-          </Button>
-        </div>
-      )}
 
       {/* Vimeo Video Player */}
       {currentLesson?.vimeo_video_id ? (
