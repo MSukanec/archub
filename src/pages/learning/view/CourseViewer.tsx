@@ -105,10 +105,17 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
   // Mark lesson as complete mutation
   const markCompleteMutation = useMutation({
     mutationFn: async (lessonId: string) => {
+      // Get the Supabase session token
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('No active session');
+      }
+
       const response = await fetch(`/api/lessons/${lessonId}/progress`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({
           completed_at: new Date().toISOString(),
@@ -119,7 +126,8 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
       });
       
       if (!response.ok) {
-        throw new Error('Failed to mark lesson as complete');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to mark lesson as complete');
       }
       
       return response.json();
@@ -197,7 +205,7 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
     if (currentLessonId) {
       markCompleteMutation.mutate(currentLessonId);
     }
-  }, [currentLessonId, markCompleteMutation]);
+  }, [currentLessonId, markCompleteMutation.mutate]);
 
   // Update navigation state whenever it changes
   useEffect(() => {
