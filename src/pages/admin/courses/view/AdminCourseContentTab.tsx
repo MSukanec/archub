@@ -106,7 +106,7 @@ export default function AdminCourseContentTab({ courseId, modules = [], lessons 
 
       // Invalidar cache para refrescar los datos
       await queryClient.invalidateQueries({ queryKey: ['course-modules', courseId] });
-      await queryClient.invalidateQueries({ queryKey: ['lessons', courseId] });
+      await queryClient.invalidateQueries({ queryKey: ['course-lessons', courseId] });
 
       toast({
         title: 'Orden actualizado',
@@ -150,7 +150,7 @@ export default function AdminCourseContentTab({ courseId, modules = [], lessons 
       if (error) throw error;
 
       // Invalidar cache
-      await queryClient.invalidateQueries({ queryKey: ['lessons', courseId] });
+      await queryClient.invalidateQueries({ queryKey: ['course-lessons', courseId] });
 
       toast({
         title: 'Lección movida',
