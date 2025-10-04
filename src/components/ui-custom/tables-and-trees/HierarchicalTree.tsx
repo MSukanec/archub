@@ -360,8 +360,8 @@ export function HierarchicalTree({
             
             {/* Category name and badges */}
             <div className="flex items-center space-x-2 flex-1">
-              {/* Order number badge - ONLY show for TOP LEVEL items (level 0) */}
-              {showOrderNumber && category.order && currentLevel === 0 && (
+              {/* Order number badge - Show for all levels when enabled */}
+              {showOrderNumber && category.order !== undefined && (
                 <Badge variant="outline" className="text-xs px-2 py-1 bg-primary/10 text-primary border-primary/20">
                   {category.order}
                 </Badge>
@@ -514,8 +514,8 @@ export function HierarchicalTree({
   };
   
   const renderCategory = (category: CategoryTreeNode, currentLevel: number) => {
-    if (enableDragAndDrop && currentLevel === 0) {
-      // Only enable drag-drop for top-level items
+    if (enableDragAndDrop) {
+      // Enable drag-drop for all levels
       return <SortableItem key={category.id} category={category} currentLevel={currentLevel} />;
     } else {
       // Regular rendering without drag-drop
