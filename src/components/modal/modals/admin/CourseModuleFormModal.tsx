@@ -57,7 +57,7 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       course_id: module?.course_id || courseId || '',
       title: module?.title || '',
       description: module?.description || '',
-      sort_index: module?.sort_index || 0,
+      sort_index: module?.sort_index ?? undefined,
     }
   });
 
@@ -67,14 +67,14 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
         course_id: module.course_id || '',
         title: module.title || '',
         description: module.description || '',
-        sort_index: module.sort_index || 0,
+        sort_index: module.sort_index ?? undefined,
       });
     } else {
       form.reset({
         course_id: courseId || '',
         title: '',
         description: '',
-        sort_index: 0,
+        sort_index: undefined,
       });
     }
     setPanel('edit');
@@ -251,8 +251,9 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
                 <Input 
                   type="number" 
                   {...field} 
-                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                  placeholder="0" 
+                  value={field.value ?? ''}
+                  onChange={(e) => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value))}
+                  placeholder="Ej: 0, 1, 2..." 
                   data-testid="input-module-sort" 
                 />
               </FormControl>

@@ -81,10 +81,10 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
       module_id: lesson?.module_id || '',
       title: lesson?.title || '',
       vimeo_video_id: lesson?.vimeo_video_id || '',
-      duration_minutes: lesson?.duration_sec ? Math.floor(lesson.duration_sec / 60) : 0,
-      duration_seconds: lesson?.duration_sec ? lesson.duration_sec % 60 : 0,
+      duration_minutes: lesson?.duration_sec ? Math.floor(lesson.duration_sec / 60) : undefined,
+      duration_seconds: lesson?.duration_sec ? lesson.duration_sec % 60 : undefined,
       free_preview: lesson?.free_preview || false,
-      sort_index: lesson?.sort_index || 0,
+      sort_index: lesson?.sort_index ?? undefined,
       is_active: lesson?.is_active ?? true,
     }
   });
@@ -106,10 +106,10 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
         module_id: lesson.module_id || '',
         title: lesson.title || '',
         vimeo_video_id: lesson.vimeo_video_id || '',
-        duration_minutes: lesson.duration_sec ? Math.floor(lesson.duration_sec / 60) : 0,
-        duration_seconds: lesson.duration_sec ? lesson.duration_sec % 60 : 0,
+        duration_minutes: lesson.duration_sec ? Math.floor(lesson.duration_sec / 60) : undefined,
+        duration_seconds: lesson.duration_sec ? lesson.duration_sec % 60 : undefined,
         free_preview: lesson.free_preview || false,
-        sort_index: lesson.sort_index || 0,
+        sort_index: lesson.sort_index ?? undefined,
         is_active: lesson.is_active ?? true,
       });
     } else {
@@ -117,10 +117,10 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
         module_id: '',
         title: '',
         vimeo_video_id: '',
-        duration_minutes: 0,
-        duration_seconds: 0,
+        duration_minutes: undefined,
+        duration_seconds: undefined,
         free_preview: false,
-        sort_index: 0,
+        sort_index: undefined,
         is_active: true,
       });
     }
@@ -349,8 +349,9 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
                   <Input 
                     type="number" 
                     {...field} 
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                    placeholder="0" 
+                    value={field.value ?? ''}
+                    onChange={(e) => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value))}
+                    placeholder="Ej: 5" 
                     data-testid="input-lesson-minutes" 
                   />
                 </FormControl>
@@ -369,8 +370,9 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
                   <Input 
                     type="number" 
                     {...field} 
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                    placeholder="0" 
+                    value={field.value ?? ''}
+                    onChange={(e) => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value))}
+                    placeholder="Ej: 30" 
                     data-testid="input-lesson-seconds" 
                   />
                 </FormControl>
@@ -390,8 +392,9 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
                 <Input 
                   type="number" 
                   {...field} 
-                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                  placeholder="0" 
+                  value={field.value ?? ''}
+                  onChange={(e) => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value))}
+                  placeholder="Ej: 0, 1, 2..." 
                   data-testid="input-lesson-sort" 
                 />
               </FormControl>
