@@ -2,13 +2,16 @@ import { useEffect, useRef } from "react";
 import Player from "@vimeo/player";
 
 type Props = { 
-  vimeoId: string; 
+  vimeoId: string;
+  initialPosition?: number;
   onProgress?: (sec: number, pct: number) => void 
 };
 
-export default function VimeoPlayer({ vimeoId, onProgress }: Props) {
+export default function VimeoPlayer({ vimeoId, initialPosition = 0, onProgress }: Props) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<Player | null>(null);
+  const lastLoadedVideoRef = useRef<string | null>(null);
+  const lastAppliedPositionRef = useRef<number>(0);
   
   // 1) Crear el player una sola vez (sin vimeoId en dependencias)
   useEffect(() => {
@@ -19,7 +22,9 @@ export default function VimeoPlayer({ vimeoId, onProgress }: Props) {
 
     // Configurar eventos básicos
     player.on("timeupdate", (e: any) => {
-      onProgress?.(Math.floor(e.seconds), Math.round(e.percent * 100));
+      const currentSec = Math.floor(e.seconds);
+      lastAppliedPositionRef.current = currentSec;
+      onProgress?.(currentSec, Math.round(e.percent * 100));
     });
     
     player.on("pause", () => {
@@ -43,19 +48,39 @@ export default function VimeoPlayer({ vimeoId, onProgress }: Props) {
   useEffect(() => {
     if (!playerRef.current || !vimeoId) return;
     
-    console.log('🎬 Cambiando a video Vimeo ID:', vimeoId);
-    
-    playerRef.current.loadVideo(vimeoId)
-      .then(() => {
-        console.log('✅ Video cargado exitosamente:', vimeoId);
-        // Aquí podrías cargar el progreso guardado si lo tienes:
-        // const lastPosition = progressMap[currentLessonId]?.last_position_sec ?? 0;
-        // if (lastPosition > 0) playerRef.current?.setCurrentTime(lastPosition);
-      })
-      .catch((error) => {
-        console.error('❌ Error al cargar video Vimeo:', error);
-      });
-  }, [vimeoId]);
+    // Load video if it's a new ID
+    if (lastLoadedVideoRef.current !== vimeoId) {
+      console.log('🎬 Cambiando a video Vimeo ID:', vimeoId);
+      
+      playerRef.current.loadVideo(vimeoId)
+        .then(async () => {
+          console.log('✅ Video cargado exitosamente:', vimeoId);
+          lastLoadedVideoRef.current = vimeoId;
+          
+          // Restore position on new video load
+          if (initialPosition > 0) {
+            await playerRef.current?.setCurrentTime(initialPosition);
+            lastAppliedPositionRef.current = initialPosition;
+            console.log('⏱️ Posición restaurada a:', initialPosition, 'segundos');
+          }
+        })
+        .catch((error) => {
+          console.error('❌ Error al cargar video Vimeo:', error);
+        });
+    }
+    // If same video but position changed significantly, seek
+    else if (initialPosition > 0 && Math.abs(initialPosition - lastAppliedPositionRef.current) > 2) {
+      // Only seek if position changed by more than 2 seconds (avoid auto-save micro-seeks)
+      playerRef.current.setCurrentTime(initialPosition)
+        .then(() => {
+          lastAppliedPositionRef.current = initialPosition;
+          console.log('⏱️ Posición actualizada a:', initialPosition, 'segundos');
+        })
+        .catch((error) => {
+          console.error('❌ Error al actualizar posición:', error);
+        });
+    }
+  }, [vimeoId, initialPosition]);
 
   return (
     <iframe

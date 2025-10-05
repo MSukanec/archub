@@ -70,6 +70,17 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
     enabled: !!courseId && !!supabase && modules.length > 0
   });
 
+  // Fetch progress for all lessons in the course
+  const { data: progressData } = useQuery<any[]>({
+    queryKey: ['/api/courses', courseId, 'progress'],
+    enabled: !!courseId
+  });
+
+  // Create a map of lesson progress for quick lookup
+  const progressMap = useMemo(() => {
+    return new Map((progressData || []).map((p: any) => [p.lesson_id, p]));
+  }, [progressData]);
+
   // Create ordered flat list of lessons based on module and lesson sort_index
   const orderedLessons = useMemo(() => {
     if (modules.length === 0 || lessons.length === 0) return [];
@@ -135,7 +146,7 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
 
   // Throttle progress saves to avoid too many requests
   const lastSaveTime = useRef(0);
-  const SAVE_THROTTLE_MS = 5000; // Save every 5 seconds max
+  const SAVE_THROTTLE_MS = 8000; // Save every 8 seconds max
 
   const handleVideoProgress = useCallback((sec: number, pct: number) => {
     if (!currentLessonId) return;
@@ -304,6 +315,10 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
 
   // Encontrar la lección actual
   const currentLesson = lessons.find(l => l.id === currentLessonId);
+  
+  // Obtener progreso de la lección actual
+  const currentProgress = currentLessonId ? progressMap.get(currentLessonId) : null;
+  const initialPosition = currentProgress?.last_position_sec || 0;
 
   return (
     <div className="space-y-6">
@@ -313,6 +328,7 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
         <div>
           <VimeoPlayer 
             vimeoId={currentLesson.vimeo_video_id}
+            initialPosition={initialPosition}
             onProgress={handleVideoProgress}
           />
           <div className="mt-4">

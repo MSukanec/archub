@@ -1995,15 +1995,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Upsert progress
+      // Auto-complete when progress >= 95%
+      const normalizedProgress = progress_pct || 0;
+      const shouldAutoComplete = normalizedProgress >= 95;
+      const finalIsCompleted = is_completed !== undefined ? is_completed : shouldAutoComplete;
+      const finalCompletedAt = (finalIsCompleted || shouldAutoComplete) ? (completed_at || new Date().toISOString()) : null;
+      
       const { data, error } = await authenticatedSupabase
         .from('course_lesson_progress')
         .upsert({
           user_id: user.id,
           lesson_id: lessonId,
-          progress_pct: progress_pct || 0,
+          progress_pct: normalizedProgress,
           last_position_sec: last_position_sec || 0,
-          completed_at: completed_at || null,
-          is_completed: is_completed !== undefined ? is_completed : false,
+          completed_at: finalCompletedAt,
+          is_completed: finalIsCompleted,
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'user_id,lesson_id'
