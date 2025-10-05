@@ -165,7 +165,8 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
         body: JSON.stringify({
           completed_at: new Date().toISOString(),
           progress_pct: 100,
-          last_position_sec: 0
+          last_position_sec: 0,
+          is_completed: true
         }),
         credentials: 'include'
       });

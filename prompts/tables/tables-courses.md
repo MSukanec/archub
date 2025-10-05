@@ -86,6 +86,7 @@ create table public.course_lesson_progress (
   last_position_sec integer not null default 0,
   completed_at timestamp with time zone null,
   updated_at timestamp with time zone not null default now(),
+  is_completed boolean null default false,
   constraint lesson_progress_pkey primary key (id),
   constraint lesson_progress_unique unique (user_id, lesson_id),
   constraint lesson_progress_lesson_id_fkey foreign KEY (lesson_id) references course_lessons (id) on delete CASCADE,

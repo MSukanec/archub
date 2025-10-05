@@ -159,7 +159,7 @@ export function CourseSidebar({ modules, lessons, currentLessonId }: CourseSideb
                       {moduleLessons.map((lesson) => {
                         const isActive = currentLessonId === lesson.id;
                         const progress = progressMap.get(lesson.id);
-                        const isCompleted = progress && progress.completed_at;
+                        const isCompleted = progress && progress.is_completed;
                         
                         return (
                           <button

@@ -1917,7 +1917,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/lessons/:lessonId/progress", async (req, res) => {
     try {
       const { lessonId } = req.params;
-      const { progress_pct, last_position_sec, completed_at } = req.body;
+      const { progress_pct, last_position_sec, completed_at, is_completed } = req.body;
       
       // Get the authorization token from headers
       const authHeader = req.headers.authorization;
@@ -2003,6 +2003,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           progress_pct: progress_pct || 0,
           last_position_sec: last_position_sec || 0,
           completed_at: completed_at || null,
+          is_completed: is_completed !== undefined ? is_completed : false,
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'user_id,lesson_id'
