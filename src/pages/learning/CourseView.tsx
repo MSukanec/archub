@@ -73,7 +73,7 @@ export default function CourseView() {
       actions: [
         <Button
           key="previous"
-          variant="outline"
+          variant="secondary"
           size="sm"
           onClick={navigationState.onPrevious}
           disabled={!navigationState.hasPrev}
@@ -95,7 +95,7 @@ export default function CourseView() {
         </Button>,
         <Button
           key="next"
-          variant="outline"
+          variant="secondary"
           size="sm"
           onClick={navigationState.onNext}
           disabled={!navigationState.hasNext}
