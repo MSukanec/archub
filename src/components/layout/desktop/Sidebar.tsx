@@ -143,7 +143,7 @@ export function Sidebar() {
                     if (item.id === 'subcontracts') return { show: true, text: 'Ejecución' };
                     if (item.id === 'logs') return { show: true, text: 'Comercialización' };
                   } else if (sidebarLevel === 'learning') {
-                    if (item.id === 'courses') return { show: true, text: 'Capacitaciones' };
+                    if (item.id === 'dashboard') return { show: true, text: 'Capacitaciones' };
                   }
                   return { show: false, text: '' };
                 };
