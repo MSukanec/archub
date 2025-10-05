@@ -1956,12 +1956,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If user doesn't exist in users table, create them
       if (!existingUser) {
+        // First, get the default role_id (assuming there's a "user" or similar role)
+        const { data: defaultRole } = await authenticatedSupabase
+          .from('roles')
+          .select('id')
+          .or('name.eq.user,name.eq.User,name.eq.estudiante,name.eq.Estudiante')
+          .limit(1)
+          .single();
+        
+        // If no specific role found, try to get any role
+        const roleId = defaultRole?.id || (await authenticatedSupabase
+          .from('roles')
+          .select('id')
+          .limit(1)
+          .single()
+          .then(r => r.data?.id));
+        
+        if (!roleId) {
+          console.error("No role found in database - cannot create user");
+          return res.status(500).json({ error: "Database configuration error: no roles available" });
+        }
+        
         const { error: createUserError } = await authenticatedSupabase
           .from('users')
           .insert({
             id: user.id,
             email: user.email,
             full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario',
+            role_id: roleId,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           });
