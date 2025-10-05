@@ -652,7 +652,7 @@ export const course_lesson_progress = pgTable("course_lesson_progress", {
   last_position_sec: integer("last_position_sec").notNull().default(0),
   completed_at: timestamp("completed_at", { withTimezone: true }),
   updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-  is_completed: boolean("is_completed").default(false),
+  is_completed: boolean("is_completed"),
 }, (table) => ({
   lesson_progress_unique: unique().on(table.user_id, table.lesson_id),
 }));
