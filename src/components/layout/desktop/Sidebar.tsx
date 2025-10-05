@@ -88,8 +88,8 @@ export function Sidebar() {
       ];
     } else if (sidebarLevel === 'learning') {
       return [
-        { id: 'dashboard', label: 'Dashboard', icon: GraduationCap, href: '/learning/dashboard' },
-        { id: 'courses', label: 'Cursos', icon: BookOpen, href: '/learning/courses' },
+        { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/learning/dashboard' },
+        { id: 'courses', label: 'Cursos', icon: GraduationCap, href: '/learning/courses' },
       ];
     }
     
@@ -142,6 +142,8 @@ export function Sidebar() {
                     if (item.id === 'budgets') return { show: true, text: 'Recursos' };
                     if (item.id === 'subcontracts') return { show: true, text: 'Ejecución' };
                     if (item.id === 'logs') return { show: true, text: 'Comercialización' };
+                  } else if (sidebarLevel === 'learning') {
+                    if (item.id === 'courses') return { show: true, text: 'Capacitaciones' };
                   }
                   return { show: false, text: '' };
                 };
