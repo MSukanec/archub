@@ -2188,18 +2188,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       );
       
-      // Get current user
-      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      // Get current auth user
+      const { data: { user: authUser }, error: authUserError } = await authenticatedSupabase.auth.getUser();
       
-      if (userError || !user) {
+      if (authUserError || !authUser) {
         return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      // Get the user record from the users table
+      const { data: userRecord, error: userRecordError } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('email', authUser.email)
+        .single();
+      
+      if (userRecordError || !userRecord) {
+        console.error("Error fetching user record:", userRecordError);
+        return res.json([]);
       }
       
       // Get all enrollments for this user
       const { data: enrollments, error: enrollmentsError } = await authenticatedSupabase
         .from('course_enrollments')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('user_id', userRecord.id);
       
       if (enrollmentsError) {
         console.error("Error fetching user enrollments:", enrollmentsError);
