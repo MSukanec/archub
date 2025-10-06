@@ -57,6 +57,7 @@ export default function CourseView() {
     onNext: () => void;
     onMarkComplete: () => void;
     isMarkingComplete: boolean;
+    isCompleted: boolean;
   } | null>(null);
 
   const headerProps = {
@@ -84,14 +85,14 @@ export default function CourseView() {
         </Button>,
         <Button
           key="complete"
-          variant="default"
+          variant={navigationState.isCompleted ? "outline" : "default"}
           size="sm"
           onClick={navigationState.onMarkComplete}
-          disabled={navigationState.isMarkingComplete}
+          disabled={navigationState.isMarkingComplete || navigationState.isCompleted}
           data-testid="button-mark-complete"
         >
           <CheckCircle className="w-4 h-4 mr-1" />
-          {navigationState.isMarkingComplete ? 'Marcando...' : 'Marcar como Completa'}
+          {navigationState.isCompleted ? 'Completada' : (navigationState.isMarkingComplete ? 'Marcando...' : 'Marcar como Completa')}
         </Button>,
         <Button
           key="next"

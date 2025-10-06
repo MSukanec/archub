@@ -18,6 +18,7 @@ interface CourseViewerProps {
     onNext: () => void;
     onMarkComplete: () => void;
     isMarkingComplete: boolean;
+    isCompleted: boolean;
   } | null) => void;
 }
 
@@ -272,19 +273,23 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
   useEffect(() => {
     if (onNavigationStateChange) {
       if (currentLessonId && orderedLessons.length > 0) {
+        const currentProgress = progressMap.get(currentLessonId);
+        const isCompleted = currentProgress?.is_completed || false;
+        
         onNavigationStateChange({
           hasPrev: navigationInfo.hasPrev,
           hasNext: navigationInfo.hasNext,
           onPrevious: handlePrevious,
           onNext: handleNext,
           onMarkComplete: handleMarkComplete,
-          isMarkingComplete: markCompleteMutation.isPending
+          isMarkingComplete: markCompleteMutation.isPending,
+          isCompleted
         });
       } else {
         onNavigationStateChange(null);
       }
     }
-  }, [currentLessonId, navigationInfo.hasPrev, navigationInfo.hasNext, orderedLessons.length, markCompleteMutation.isPending, onNavigationStateChange, handlePrevious, handleNext, handleMarkComplete]);
+  }, [currentLessonId, navigationInfo.hasPrev, navigationInfo.hasNext, orderedLessons.length, markCompleteMutation.isPending, progressMap, onNavigationStateChange, handlePrevious, handleNext, handleMarkComplete]);
 
   // Group lessons by module
   const getLessonsForModule = (moduleId: string) => {
