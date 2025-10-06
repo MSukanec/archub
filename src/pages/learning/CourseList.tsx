@@ -214,13 +214,11 @@ export default function CourseList() {
         const progress = courseProgress.get(course.id) || { completed: 0, total: 0, percentage: 0 };
         
         return (
-          <div className="space-y-2 min-w-[200px]">
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-muted-foreground">
-                {progress.completed} de {progress.total} lecciones
-              </span>
-              <span className="text-xs font-medium">{progress.percentage}%</span>
+          <div className="space-y-1 min-w-[200px]">
+            <div className="text-xs text-muted-foreground">
+              {progress.completed} de {progress.total} lecciones
             </div>
+            <div className="text-xs font-medium">{progress.percentage}%</div>
             <Progress value={progress.percentage} className="h-2" />
           </div>
         );
