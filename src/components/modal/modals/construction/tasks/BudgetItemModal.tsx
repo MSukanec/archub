@@ -170,16 +170,18 @@ export function BudgetItemModal({
     enabled: !!userData?.user?.id && !!modalData.organizationId
   });
 
-  // Hook para cargar TODAS las tareas de la librería parametrica usando TASKS_VIEW
+  // Hook para cargar tareas del SISTEMA y de la ORGANIZACIÓN actual
   const { data: tasks = [], isLoading: tasksLoading } = useQuery({
-    queryKey: ['task-library'],
+    queryKey: ['task-library', modalData.organizationId],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
       // Usar TASKS_VIEW que incluye los campos division y unit ya resueltos
+      // Filtrar solo tareas del SISTEMA (organization_id IS NULL) y de LA ORGANIZACIÓN actual
       const { data: allTasks, error } = await supabase
         .from('tasks_view')
         .select('*')
+        .or(`organization_id.is.null,organization_id.eq.${modalData.organizationId}`)
         .order('custom_name', { ascending: true });
       
       if (error) {
@@ -187,10 +189,10 @@ export function BudgetItemModal({
         throw error;
       }
       
-      console.log('📋 Loaded tasks from TASKS_VIEW:', allTasks?.length, 'tasks');
+      console.log('📋 Loaded tasks from TASKS_VIEW:', allTasks?.length, 'tasks (Sistema + Organización)');
       return allTasks || [];
     },
-    enabled: !!supabase
+    enabled: !!supabase && !!modalData.organizationId
   });
 
 
