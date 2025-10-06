@@ -158,10 +158,10 @@ export default function LearningDashboard() {
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
         {/* Overall Progress Card */}
-        <Card className="border-2">
-          <CardHeader>
+        <Card>
+          <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-accent" />
+              <TrendingUp className="h-5 w-5" style={{ color: 'var(--accent)' }} />
               Progreso General de Aprendizaje
             </CardTitle>
             <CardDescription>
@@ -239,9 +239,9 @@ export default function LearningDashboard() {
         {/* Courses in Progress */}
         {coursesWithProgress.length > 0 && (
           <Card>
-            <CardHeader>
+            <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2">
-                <Award className="h-5 w-5" />
+                <Award className="h-5 w-5" style={{ color: 'var(--accent)' }} />
                 Cursos en Progreso
               </CardTitle>
               <CardDescription>
@@ -259,7 +259,7 @@ export default function LearningDashboard() {
                       </p>
                     </div>
                     <Button 
-                      variant="outline" 
+                      variant="default" 
                       size="sm"
                       onClick={() => navigate(`/learning/courses/${course.id}`)}
                       data-testid={`button-continue-course-${course.id}`}
@@ -282,9 +282,9 @@ export default function LearningDashboard() {
         {/* Recent Activity */}
         {recentCompletions.length > 0 && (
           <Card>
-            <CardHeader>
+            <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-accent" />
+                <CheckCircle2 className="h-5 w-5" style={{ color: 'var(--accent)' }} />
                 Actividad Reciente
               </CardTitle>
               <CardDescription>
