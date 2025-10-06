@@ -2115,6 +2115,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // GET /api/user/all-progress - Get all lesson progress for current user
+  app.get("/api/user/all-progress", async (req, res) => {
+    try {
+      // Get the authorization token from headers
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const token = authHeader.substring(7);
+      
+      // Create authenticated Supabase client
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+      
+      // Get current user
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      // Get all progress for this user
+      const { data: progress, error: progressError } = await authenticatedSupabase
+        .from('course_lesson_progress')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      if (progressError) {
+        console.error("Error fetching user progress:", progressError);
+        return res.status(500).json({ error: "Failed to fetch progress" });
+      }
+      
+      res.json(progress || []);
+    } catch (error) {
+      console.error("Error fetching user progress:", error);
+      res.status(500).json({ error: "Failed to fetch progress" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
