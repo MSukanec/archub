@@ -2191,15 +2191,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get current auth user
       const { data: { user: authUser }, error: authUserError } = await authenticatedSupabase.auth.getUser();
       
-      if (authUserError || !authUser) {
+      if (authUserError || !authUser || !authUser.email) {
         return res.status(401).json({ error: "Unauthorized" });
       }
       
-      // Get the user record from the users table
+      // Get the user record from the users table using ilike() for case-insensitive match
       const { data: userRecord, error: userRecordError } = await authenticatedSupabase
         .from('users')
-        .select('id')
-        .eq('email', authUser.email)
+        .select('id, email')
+        .ilike('email', authUser.email)
         .single();
       
       if (userRecordError || !userRecord) {
