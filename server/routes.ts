@@ -1947,52 +1947,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Unauthorized" });
       }
       
-      // Ensure user exists in the users table
-      const { data: existingUser } = await authenticatedSupabase
+      // CRITICAL: Get user from users table by EMAIL (not by id!)
+      // auth.users.id ≠ users.id, must use .ilike() for case-insensitive email matching
+      const { data: existingUser, error: userLookupError } = await authenticatedSupabase
         .from('users')
         .select('id')
-        .eq('id', user.id)
+        .ilike('email', user.email!)
         .single();
       
-      // If user doesn't exist in users table, create them
-      if (!existingUser) {
-        // First, get the default role_id (assuming there's a "user" or similar role)
-        const { data: defaultRole } = await authenticatedSupabase
-          .from('roles')
-          .select('id')
-          .or('name.eq.user,name.eq.User,name.eq.estudiante,name.eq.Estudiante')
-          .limit(1)
-          .single();
-        
-        // If no specific role found, try to get any role
-        const roleId = defaultRole?.id || (await authenticatedSupabase
-          .from('roles')
-          .select('id')
-          .limit(1)
-          .single()
-          .then(r => r.data?.id));
-        
-        if (!roleId) {
-          console.error("No role found in database - cannot create user");
-          return res.status(500).json({ error: "Database configuration error: no roles available" });
-        }
-        
-        const { error: createUserError } = await authenticatedSupabase
-          .from('users')
-          .insert({
-            id: user.id,
-            email: user.email,
-            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario',
-            role_id: roleId,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          });
-        
-        if (createUserError) {
-          console.error("Error creating user in users table:", createUserError);
-          // Continue anyway - the user might have been created by a concurrent request
-        }
+      if (userLookupError || !existingUser) {
+        console.error("User not found in users table:", user.email, userLookupError);
+        return res.status(404).json({ error: "User not found in database" });
       }
+      
+      // Use the CORRECT user_id from users table
+      const dbUserId = existingUser.id;
       
       // Upsert progress
       // Auto-complete when progress >= 95%
@@ -2004,7 +1973,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { data, error } = await authenticatedSupabase
         .from('course_lesson_progress')
         .upsert({
-          user_id: user.id,
+          user_id: dbUserId,
           lesson_id: lessonId,
           progress_pct: normalizedProgress,
           last_position_sec: last_position_sec || 0,
@@ -2062,6 +2031,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Unauthorized" });
       }
       
+      // CRITICAL: Get user from users table by EMAIL (not by id!)
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .ilike('email', user.email!)
+        .single();
+      
+      if (!dbUser) {
+        return res.json([]);
+      }
+      
       // Get all modules for the course
       const { data: modules, error: modulesError } = await authenticatedSupabase
         .from('course_modules')
@@ -2100,7 +2080,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { data: progress, error: progressError } = await authenticatedSupabase
         .from('course_lesson_progress')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', dbUser.id)
         .in('lesson_id', lessonIds);
       
       if (progressError) {
@@ -2146,11 +2126,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Unauthorized" });
       }
       
+      // CRITICAL: Get user from users table by EMAIL (not by id!)
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .ilike('email', user.email!)
+        .single();
+      
+      if (!dbUser) {
+        return res.json([]);
+      }
+      
       // Get all progress for this user
       const { data: progress, error: progressError } = await authenticatedSupabase
         .from('course_lesson_progress')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('user_id', dbUser.id);
       
       if (progressError) {
         console.error("Error fetching user progress:", progressError);
