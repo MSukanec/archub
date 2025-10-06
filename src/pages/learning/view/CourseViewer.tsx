@@ -134,7 +134,9 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
       });
       
       if (!response.ok) {
-        throw new Error('Failed to save progress');
+        const errorText = await response.text();
+        console.error('❌ Auto-save failed:', response.status, errorText);
+        throw new Error(`Failed to save progress (${response.status})`);
       }
       
       return response.json();
@@ -183,8 +185,10 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
       });
       
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to mark lesson as complete');
+        const errorText = await response.text();
+        console.error('❌ Mark complete failed:', response.status, errorText);
+        const errorData = errorText ? JSON.parse(errorText) : {};
+        throw new Error(errorData.error || `Failed to mark lesson as complete (${response.status})`);
       }
       
       return response.json();
