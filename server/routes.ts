@@ -2164,6 +2164,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // GET /api/user/enrollments - Get all course enrollments for current user
+  app.get("/api/user/enrollments", async (req, res) => {
+    try {
+      // Get the authorization token from headers
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const token = authHeader.substring(7);
+      
+      // Create authenticated Supabase client
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+      
+      // Get current user
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      // Get all enrollments for this user
+      const { data: enrollments, error: enrollmentsError } = await authenticatedSupabase
+        .from('course_enrollments')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      if (enrollmentsError) {
+        console.error("Error fetching user enrollments:", enrollmentsError);
+        return res.status(500).json({ error: "Failed to fetch enrollments" });
+      }
+      
+      res.json(enrollments || []);
+    } catch (error) {
+      console.error("Error fetching user enrollments:", error);
+      res.status(500).json({ error: "Failed to fetch enrollments" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

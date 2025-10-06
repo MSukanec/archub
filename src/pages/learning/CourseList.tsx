@@ -11,6 +11,8 @@ import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { useNavigationStore } from '@/stores/navigationStore'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 export default function CourseList() {
   const [activeTab, setActiveTab] = useState('courses')
@@ -36,6 +38,27 @@ export default function CourseList() {
       if (!session) return [];
 
       const response = await fetch('/api/user/all-progress', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+
+      if (!response.ok) return [];
+      return response.json();
+    },
+    enabled: !!supabase
+  });
+
+  // Get enrollments for the current user
+  const { data: enrollments = [] } = useQuery<any[]>({
+    queryKey: ['/api/user/enrollments'],
+    queryFn: async () => {
+      if (!supabase) return [];
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return [];
+
+      const response = await fetch('/api/user/enrollments', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }
@@ -151,6 +174,40 @@ export default function CourseList() {
       render: (course: any) => getStatusBadge(course.is_active)
     },
     {
+      key: 'access',
+      label: 'Acceso',
+      render: (course: any) => {
+        const enrollment = enrollments.find((e: any) => e.course_id === course.id);
+        
+        if (!enrollment) {
+          return (
+            <div className="text-xs text-muted-foreground">
+              Sin inscripción
+            </div>
+          );
+        }
+        
+        return (
+          <div className="space-y-1">
+            <div className="text-xs">
+              <span className="text-muted-foreground">Inicio: </span>
+              <span className="font-medium">
+                {format(new Date(enrollment.started_at), 'dd/MM/yyyy', { locale: es })}
+              </span>
+            </div>
+            {enrollment.expires_at && (
+              <div className="text-xs">
+                <span className="text-muted-foreground">Vence: </span>
+                <span className="font-medium">
+                  {format(new Date(enrollment.expires_at), 'dd/MM/yyyy', { locale: es })}
+                </span>
+              </div>
+            )}
+          </div>
+        );
+      }
+    },
+    {
       key: 'progress',
       label: 'Progreso',
       render: (course: any) => {
@@ -158,7 +215,7 @@ export default function CourseList() {
         
         return (
           <div className="space-y-2 min-w-[200px]">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-1">
               <span className="text-xs text-muted-foreground">
                 {progress.completed} de {progress.total} lecciones
               </span>
