@@ -74,6 +74,24 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
   // Fetch progress for all lessons in the course
   const { data: progressData } = useQuery<any[]>({
     queryKey: ['/api/courses', courseId, 'progress'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return [];
+      
+      const res = await fetch(`/api/courses/${courseId}/progress`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        credentials: 'include'
+      });
+      
+      if (!res.ok) {
+        console.error('Failed to fetch progress:', res.status);
+        return [];
+      }
+      
+      return res.json();
+    },
     enabled: !!courseId
   });
 
@@ -194,8 +212,12 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
       
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/courses', courseId, 'progress'] });
+    onSuccess: async () => {
+      // Force refetch of progress data
+      await queryClient.refetchQueries({ 
+        queryKey: ['/api/courses', courseId, 'progress'],
+        exact: true 
+      });
       toast({
         title: 'Lección completada',
         description: 'Has marcado esta lección como completa'
@@ -275,6 +297,13 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
       if (currentLessonId && orderedLessons.length > 0) {
         const currentProgress = progressMap.get(currentLessonId);
         const isCompleted = currentProgress?.is_completed || false;
+        
+        console.log('🔄 Navigation state update:', { 
+          lessonId: currentLessonId, 
+          isCompleted, 
+          progress: currentProgress,
+          isPending: markCompleteMutation.isPending 
+        });
         
         onNavigationStateChange({
           hasPrev: navigationInfo.hasPrev,

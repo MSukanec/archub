@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useCourseSidebarStore } from "@/stores/sidebarStore";
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 
 interface CourseSidebarProps {
   modules: any[];
@@ -31,7 +32,25 @@ export function CourseSidebar({ modules, lessons, currentLessonId }: CourseSideb
   // Fetch progress for all lessons in the course
   const { data: progressData } = useQuery<any[]>({
     queryKey: ['/api/courses', courseId, 'progress'],
-    enabled: !!courseId
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return [];
+      
+      const res = await fetch(`/api/courses/${courseId}/progress`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        credentials: 'include'
+      });
+      
+      if (!res.ok) {
+        console.error('Failed to fetch progress:', res.status);
+        return [];
+      }
+      
+      return res.json();
+    },
+    enabled: !!courseId && !!supabase
   });
 
   // Create a map of lesson progress for quick lookup
