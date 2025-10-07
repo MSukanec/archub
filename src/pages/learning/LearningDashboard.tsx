@@ -168,83 +168,83 @@ export default function LearningDashboard() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {/* Overall Progress Card */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" style={{ color: 'var(--accent)' }} />
-              Progreso General de Aprendizaje
-            </CardTitle>
-            <CardDescription>
-              {stats.overallProgress}% de todas las lecciones completadas
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">0%</span>
-                <span className="font-bold text-lg">{stats.overallProgress}%</span>
-                <span className="text-muted-foreground">100%</span>
-              </div>
-              <Progress value={stats.overallProgress} className="h-4" />
-              <div className="grid grid-cols-3 gap-4 pt-4">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-accent">{stats.completedLessons}</div>
-                  <div className="text-xs text-muted-foreground">Lecciones completadas</div>
+        {/* Main Dashboard Grid - 75% Progress / 25% Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* 75% - Progress Card */}
+          <div className="md:col-span-3">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" style={{ color: 'var(--accent)' }} />
+                  Progreso General de Aprendizaje
+                </CardTitle>
+                <CardDescription>
+                  {stats.overallProgress}% de todas las lecciones completadas
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">0%</span>
+                    <span className="font-bold text-lg">{stats.overallProgress}%</span>
+                    <span className="text-muted-foreground">100%</span>
+                  </div>
+                  <Progress value={stats.overallProgress} className="h-4" />
+                  <div className="grid grid-cols-3 gap-4 pt-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-accent">{stats.completedLessons}</div>
+                      <div className="text-xs text-muted-foreground">Lecciones completadas</div>
+                    </div>
+                    <div className="text-center border-x">
+                      <div className="text-3xl font-bold">{stats.totalLessons}</div>
+                      <div className="text-xs text-muted-foreground">Total de lecciones</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-accent">{stats.enrolledCourses}</div>
+                      <div className="text-xs text-muted-foreground">Cursos inscritos</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-center border-x">
-                  <div className="text-3xl font-bold">{stats.totalLessons}</div>
-                  <div className="text-xs text-muted-foreground">Total de lecciones</div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* 25% - Stacked Stats Cards */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <BookOpen className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                  Cursos Inscritos
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2">
+                  <div className="text-3xl font-bold">{stats.enrolledCourses}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Total de cursos disponibles
+                  </p>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-accent">{stats.enrolledCourses}</div>
-                  <div className="text-xs text-muted-foreground">Cursos inscritos</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Clock className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                  Cursos en Progreso
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2">
+                  <div className="text-3xl font-bold">{stats.coursesInProgress}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Cursos iniciados pero no completados
+                  </p>
                 </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Statistics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Cursos Inscritos</CardTitle>
-              <BookOpen className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.enrolledCourses}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Total de cursos disponibles
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Cursos en Progreso</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.coursesInProgress}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Cursos iniciados pero no completados
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Lecciones Completadas</CardTitle>
-              <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.completedLessons}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                De {stats.totalLessons} lecciones totales
-              </p>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Courses in Progress */}
