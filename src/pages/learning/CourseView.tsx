@@ -85,7 +85,7 @@ export default function CourseView() {
         </Button>,
         <Button
           key="complete"
-          variant={navigationState.isCompleted ? "outline" : "default"}
+          variant={navigationState.isCompleted ? "secondary" : "default"}
           size="sm"
           onClick={navigationState.onMarkComplete}
           disabled={navigationState.isMarkingComplete || navigationState.isCompleted}
