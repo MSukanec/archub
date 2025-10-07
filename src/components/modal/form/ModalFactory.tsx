@@ -70,6 +70,7 @@ import { CourseFormModal } from '../modals/admin/CourseFormModal';
 import { CourseModuleFormModal } from '../modals/admin/CourseModuleFormModal';
 import { LessonFormModal } from '../modals/admin/LessonFormModal';
 import { CourseEnrollmentModal } from '../modals/admin/CourseEnrollmentModal';
+import PaymentMethodModal from '../modals/PaymentMethodModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -238,6 +239,14 @@ export function ModalFactory() {
       return <LessonFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'course-enrollment':
       return <CourseEnrollmentModal modalData={data || undefined} onClose={closeModal} />;
+    case 'payment-method':
+      return <PaymentMethodModal 
+        courseSlug={data?.courseSlug || ''} 
+        userId={data?.userId || ''} 
+        price={data?.price || 0}
+        currency={data?.currency || 'ARS'}
+        months={data?.months}
+      />;
     default:
       return null;
   }
