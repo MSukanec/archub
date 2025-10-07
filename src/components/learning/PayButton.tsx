@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ShoppingCart } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 interface PayButtonProps {
   userId: string;
@@ -31,12 +32,26 @@ export default function PayButton({
     try {
       setLoading(true);
       
+      // Get auth token
+      if (!supabase) {
+        throw new Error('Supabase no está disponible');
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('Debes iniciar sesión para comprar un curso');
+      }
+      
       // Build return URL with course slug
       const returnUrl = `${window.location.origin}/learning/retorno?course=${courseSlug}`;
       
       const response = await fetch('https://wtatvsgeivymcppowrfy.functions.supabase.co/create_mp_preference', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
         body: JSON.stringify({
           user_id: userId,
           course_slug: courseSlug,
