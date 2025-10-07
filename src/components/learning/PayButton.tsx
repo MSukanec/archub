@@ -73,20 +73,26 @@ export default function PayButton({
 
       const data = await response.json();
 
+      console.log('Respuesta de la Edge Function:', { status: response.status, data });
+
       if (!response.ok) {
-        throw new Error(data?.error || 'No se pudo crear la preferencia de pago');
+        const errorMessage = data?.error || data?.message || `Error ${response.status}: No se pudo crear la preferencia`;
+        console.error('Error de la Edge Function:', errorMessage, data);
+        throw new Error(errorMessage);
       }
 
       const paymentUrl = data.sandbox_init_point || data.init_point;
       
       if (!paymentUrl) {
+        console.error('Respuesta sin URL de pago:', data);
         throw new Error('Preferencia sin URL de pago');
       }
 
+      console.log('Redirigiendo a Mercado Pago:', paymentUrl);
       // Redirect to Mercado Pago
       window.location.href = paymentUrl;
     } catch (error: any) {
-      console.error('Error al iniciar pago:', error);
+      console.error('Error completo al iniciar pago:', error);
       toast({
         title: 'Error al procesar el pago',
         description: error.message || 'No se pudo iniciar el proceso de pago',
