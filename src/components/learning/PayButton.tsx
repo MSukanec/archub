@@ -38,9 +38,17 @@ export default function PayButton({
       }
 
       const { data: { session } } = await supabase.auth.getSession();
+      const userToken = session?.access_token;
       
-      if (!session) {
+      if (!userToken) {
         throw new Error('Debes iniciar sesión para comprar un curso');
+      }
+      
+      // Get anon key from environment
+      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      
+      if (!anonKey) {
+        throw new Error('Configuración de Supabase incompleta');
       }
       
       // Build return URL with course slug
@@ -50,7 +58,8 @@ export default function PayButton({
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
+          'apikey': anonKey,
+          'Authorization': `Bearer ${userToken || anonKey}`
         },
         body: JSON.stringify({
           user_id: userId,
