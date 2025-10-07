@@ -2160,8 +2160,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { lessonId } = req.params;
       const { body, time_sec, is_pinned } = req.body;
       
-      if (!body || typeof body !== 'string') {
-        return res.status(400).json({ error: "Body is required and must be a string" });
+      if (body === undefined || typeof body !== 'string') {
+        return res.status(400).json({ error: "Body must be a string" });
       }
       
       const authHeader = req.headers.authorization;

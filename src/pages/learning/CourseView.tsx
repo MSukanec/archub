@@ -23,7 +23,7 @@ export default function CourseView() {
       const { data, error } = await supabase
         .from('courses')
         .select('*')
-        .eq('id', id)
+        .eq('slug', id)
         .single();
         
       if (error) {
@@ -150,9 +150,9 @@ export default function CourseView() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'Datos del Curso':
-        return <CourseDataTab courseId={id} />;
+        return <CourseDataTab courseId={course?.id} />;
       case 'Visor':
-        return <CourseViewer courseId={id} onNavigationStateChange={setNavigationState} />;
+        return <CourseViewer courseId={course?.id} onNavigationStateChange={setNavigationState} />;
       default:
         return null;
     }

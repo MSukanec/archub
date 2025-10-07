@@ -144,8 +144,8 @@ export default function CourseList() {
     setSearchValue('');
   };
 
-  const handleViewDetail = (courseId: string) => {
-    navigate(`/learning/courses/${courseId}`);
+  const handleViewDetail = (courseSlug: string) => {
+    navigate(`/learning/courses/${courseSlug}`);
   };
 
   const getStatusBadge = (isActive: boolean) => {
@@ -253,7 +253,7 @@ export default function CourseList() {
           <Button
             variant="default"
             size="sm"
-            onClick={() => handleViewDetail(course.id)}
+            onClick={() => handleViewDetail(course.slug)}
             className="h-8 gap-2"
             data-testid={`button-view-course-${course.id}`}
           >

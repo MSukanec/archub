@@ -57,11 +57,6 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
       clearTimeout(debounceTimerRef.current);
     }
 
-    if (noteText.trim() === '') {
-      setSaveStatus('idle');
-      return;
-    }
-
     setSaveStatus('saving');
 
     debounceTimerRef.current = setTimeout(async () => {

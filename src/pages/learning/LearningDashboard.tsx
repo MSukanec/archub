@@ -272,7 +272,7 @@ export default function LearningDashboard() {
                     <Button 
                       variant="default" 
                       size="sm"
-                      onClick={() => navigate(`/learning/courses/${course.id}`)}
+                      onClick={() => navigate(`/learning/courses/${course.slug}`)}
                       data-testid={`button-continue-course-${course.id}`}
                     >
                       Continuar
