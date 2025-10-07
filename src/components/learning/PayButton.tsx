@@ -51,9 +51,6 @@ export default function PayButton({
         throw new Error('Configuración de Supabase incompleta');
       }
       
-      // Build return URL with course slug
-      const returnUrl = `${window.location.origin}/learning/retorno?course=${courseSlug}`;
-      
       const response = await fetch('https://wtatvsgeivymcppowrfy.functions.supabase.co/create_mp_preference', {
         method: 'POST',
         headers: { 
@@ -66,8 +63,7 @@ export default function PayButton({
           course_slug: courseSlug,
           price,
           currency,
-          months,
-          return_url: returnUrl
+          months
         })
       });
 
