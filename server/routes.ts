@@ -2148,6 +2148,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: "Failed to fetch progress" });
       }
       
+      console.log('📊 /api/user/all-progress returning:', JSON.stringify(progress, null, 2));
+      
       res.json(progress || []);
     } catch (error) {
       console.error("Error fetching user progress:", error);
