@@ -242,7 +242,6 @@ export default function CourseList() {
       render: (course: any) => (
         <div className="flex items-center gap-2">
           <PayButton
-            userId={currentUser?.id || ''}
             courseSlug={course.slug}
             price={1000}
             currency="ARS"

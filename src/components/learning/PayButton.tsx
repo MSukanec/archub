@@ -3,7 +3,6 @@ import { ShoppingCart } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 interface PayButtonProps {
-  userId: string;
   courseSlug: string;
   price: number;
   currency?: 'ARS' | 'USD';
@@ -14,7 +13,6 @@ interface PayButtonProps {
 }
 
 export default function PayButton({
-  userId,
   courseSlug,
   price,
   currency = 'ARS',
@@ -27,7 +25,6 @@ export default function PayButton({
 
   const handlePay = () => {
     openModal('payment-method', {
-      userId,
       courseSlug,
       price,
       currency,

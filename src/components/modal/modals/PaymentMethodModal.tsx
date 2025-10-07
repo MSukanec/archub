@@ -17,7 +17,6 @@ import paypalLogo from '/Paypal_2014_logo.png';
 
 interface PaymentMethodModalProps {
   courseSlug: string;
-  userId: string;
   price: number;
   currency: 'ARS' | 'USD';
   months?: number | null;
@@ -27,7 +26,6 @@ type PaymentMethod = 'mercadopago' | 'paypal' | 'transfer';
 
 export default function PaymentMethodModal({
   courseSlug,
-  userId,
   price,
   currency,
   months = null
@@ -52,30 +50,21 @@ export default function PaymentMethodModal({
         throw new Error('Supabase no está disponible');
       }
 
-      const { data: { session } } = await supabase.auth.getSession();
-      const userToken = session?.access_token;
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
       
-      if (!userToken) {
+      if (userError || !user) {
         throw new Error('Debes iniciar sesión para comprar un curso');
-      }
-      
-      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-      
-      if (!anonKey) {
-        throw new Error('Configuración de Supabase incompleta');
       }
       
       const response = await fetch('https://wtatvsgeivymcppowrfy.functions.supabase.co/create_mp_preference', {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json',
-          'apikey': anonKey,
-          'Authorization': `Bearer ${userToken || anonKey}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          user_id: userId,
+          user_id: user.id,
           course_slug: courseSlug,
-          price,
+          price: Number(price),
           currency,
           months
         })
@@ -84,14 +73,16 @@ export default function PaymentMethodModal({
       const data = await response.json();
 
       if (!response.ok) {
+        console.error('create_mp_preference error:', data);
         const errorMessage = data?.error || data?.message || `Error ${response.status}: No se pudo crear la preferencia`;
         throw new Error(errorMessage);
       }
 
-      const paymentUrl = data.sandbox_init_point || data.init_point;
+      const paymentUrl = data.init_point || data.sandbox_init_point;
       
       if (!paymentUrl) {
-        throw new Error('Preferencia sin URL de pago');
+        console.error('Respuesta sin init_point:', data);
+        throw new Error('No pudimos obtener el link de pago');
       }
 
       window.location.href = paymentUrl;
