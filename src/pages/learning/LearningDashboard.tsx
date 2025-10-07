@@ -41,7 +41,9 @@ export default function LearningDashboard() {
       if (!response.ok) return [];
       return response.json();
     },
-    enabled: !!supabase
+    enabled: !!supabase,
+    staleTime: 0,  // Always refetch when component mounts
+    refetchOnMount: 'always'  // Force refetch every time
   });
 
   // Get enrollments
