@@ -88,6 +88,15 @@ export default function LearningDashboard() {
     const totalLessons = courseLessons.length;
     const completedLessons = allProgress.filter((p: any) => p.is_completed).length;
     const overallProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+    
+    console.log('📊 Dashboard Stats:', { 
+      enrolledCourses, 
+      totalLessons, 
+      completedLessons, 
+      overallProgress,
+      allProgressCount: allProgress.length,
+      completedItems: allProgress.filter((p: any) => p.is_completed)
+    });
 
     // Calculate courses with progress
     const coursesInProgress = courses.filter(course => {
