@@ -29,7 +29,7 @@ export function HeaderMobile({
 }: HeaderMobileProps = {}) {
   const { isOpen: isMobileMenuOpen, openMenu, closeMenu } = useMobileMenuStore();
 
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
 
   const getCurrentSectionLabel = () => {
     if (location === "/") return "Gestión de Organizaciones";
@@ -83,14 +83,17 @@ export function HeaderMobile({
       <div className="md:hidden sticky top-0 z-50 bg-[var(--card-bg)] border-b border-[var(--card-border)]">
         {/* Main Header Row */}
         <div className="flex items-center justify-between h-14 px-4">
-          {/* Left: Title */}
-          <div className="flex-1 flex items-center justify-start px-2">
+          {/* Left: Title - Clickable */}
+          <button 
+            onClick={() => navigate('/mode-selection')}
+            className="flex-1 flex items-center justify-start px-2 cursor-pointer hover:opacity-80 transition-opacity"
+          >
             <div className="flex items-center space-x-3">
               {/* Siempre mostrar icono - usar el prop o el automático */}
               <div className="flex-shrink-0">
                 {icon ? (
                   <div className="text-[var(--accent)]">
-                    {React.isValidElement(icon) ? icon : React.createElement(icon as React.ComponentType, { className: "w-5 h-5" })}
+                    {React.isValidElement(icon) ? icon : React.createElement(icon as React.ComponentType<{ className?: string }>, { className: "w-5 h-5" })}
                   </div>
                 ) : (
                   getBreadcrumbIcon()
@@ -100,7 +103,7 @@ export function HeaderMobile({
                 {title || getCurrentSectionLabel()}
               </h1>
             </div>
-          </div>
+          </button>
 
           {/* Right: ONLY Menu Icon */}
           <Menu 
