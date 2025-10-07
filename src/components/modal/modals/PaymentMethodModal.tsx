@@ -174,9 +174,14 @@ Enviá el comprobante a: pagos@archub.com.ar`;
       {!showBankInfo ? (
         <>
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Seleccioná tu método de pago preferido para continuar con la compra del curso
-            </p>
+            <div className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 p-4">
+              <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                💳 Suscripción Anual - Acceso por 365 días corridos
+              </p>
+              <p className="text-xs text-blue-700 dark:text-blue-200 mt-1">
+                Disfrutá del curso completo durante un año desde la fecha de compra
+              </p>
+            </div>
 
             <RadioGroup
               value={selectedMethod || ''}
@@ -207,7 +212,7 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                   <img 
                     src={mercadoPagoLogo} 
                     alt="Mercado Pago" 
-                    className="h-8 object-contain"
+                    className="h-14 object-contain"
                   />
                 </div>
               </div>
@@ -236,7 +241,7 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                   <img 
                     src={paypalLogo} 
                     alt="PayPal" 
-                    className="h-8 object-contain"
+                    className="h-14 object-contain"
                   />
                 </div>
               </div>
