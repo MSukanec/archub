@@ -213,11 +213,17 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
       return response.json();
     },
     onSuccess: async () => {
-      // Force refetch of progress data
-      await queryClient.refetchQueries({ 
-        queryKey: ['/api/courses', courseId, 'progress'],
-        exact: true 
-      });
+      // Force refetch of progress data for course and dashboard
+      await Promise.all([
+        queryClient.refetchQueries({ 
+          queryKey: ['/api/courses', courseId, 'progress'],
+          exact: true 
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: ['/api/user/all-progress'],
+          exact: true 
+        })
+      ]);
       toast({
         title: 'Lección completada',
         description: 'Has marcado esta lección como completa'
