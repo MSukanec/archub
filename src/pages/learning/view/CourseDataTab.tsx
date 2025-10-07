@@ -1,8 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Badge } from '@/components/ui/badge'
-import { BookOpen, FileText, Play, List } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { BookOpen, FileText, Play, List, TrendingUp } from 'lucide-react'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
 
 interface CourseDataTabProps {
@@ -80,6 +82,42 @@ export default function CourseDataTab({ courseId }: CourseDataTabProps) {
     enabled: !!courseId && !!supabase && modules.length > 0
   });
 
+  // Get all progress for the current course
+  const { data: courseProgress = [] } = useQuery<any[]>({
+    queryKey: ['/api/courses', courseId, 'progress'],
+    queryFn: async () => {
+      if (!courseId || !supabase) return [];
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return [];
+
+      const response = await fetch(`/api/courses/${courseId}/progress`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+
+      if (!response.ok) return [];
+      return response.json();
+    },
+    enabled: !!courseId && !!supabase,
+    staleTime: 0,
+    refetchOnMount: 'always'
+  });
+
+  // Calculate course statistics
+  const courseStats = useMemo(() => {
+    const totalLessons = lessons.length;
+    const completedLessons = courseProgress.filter((p: any) => p.is_completed).length;
+    const overallProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+    
+    return {
+      totalLessons,
+      completedLessons,
+      overallProgress
+    };
+  }, [lessons, courseProgress]);
+
   // Helper functions
   const getLessonsForModule = (moduleId: string) => {
     return lessons.filter(lesson => lesson.module_id === moduleId);
@@ -102,6 +140,39 @@ export default function CourseDataTab({ courseId }: CourseDataTabProps) {
 
   return (
     <div className="space-y-6">
+      {/* Progress Card */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" style={{ color: 'var(--accent)' }} />
+            Progreso del Curso
+          </CardTitle>
+          <CardDescription>
+            {courseStats.overallProgress}% del curso completado
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">0%</span>
+              <span className="font-bold text-lg">{courseStats.overallProgress}%</span>
+              <span className="text-muted-foreground">100%</span>
+            </div>
+            <Progress value={courseStats.overallProgress} className="h-4 bg-gray-200" />
+            <div className="grid grid-cols-2 gap-4 pt-4">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-accent">{courseStats.completedLessons}</div>
+                <div className="text-xs text-muted-foreground">Lecciones completadas</div>
+              </div>
+              <div className="text-center border-l">
+                <div className="text-3xl font-bold">{courseStats.totalLessons}</div>
+                <div className="text-xs text-muted-foreground">Total de lecciones</div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Two Column Layout - Section descriptions left, content right */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column - Información Básica */}
@@ -126,57 +197,9 @@ export default function CourseDataTab({ courseId }: CourseDataTabProps) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Slug (URL amigable)</label>
-              <div className="text-sm text-foreground px-3 py-2 bg-muted/30 rounded-md">
-                {courseData?.slug || '-'}
-              </div>
-            </div>
-
-            <div className="space-y-2">
               <label className="text-sm font-medium">Descripción Corta</label>
               <div className="text-sm text-foreground px-3 py-2 bg-muted/30 rounded-md min-h-[60px]">
                 {courseData?.short_description || '-'}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">URL de la Imagen de Portada</label>
-              <div className="text-sm text-foreground px-3 py-2 bg-muted/30 rounded-md">
-                {courseData?.cover_url || '-'}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Estado del Curso</label>
-              <div className="text-sm text-foreground px-3 py-2 bg-muted/30 rounded-md">
-                {courseData?.is_active ? 'Activo - Curso disponible' : 'Inactivo - Curso pausado'}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <hr className="border-t border-[var(--section-divider)] my-8" />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column - Descripción Detallada */}
-        <div>
-          <div className="flex items-center gap-2 mb-6">
-            <FileText className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="text-lg font-semibold">Descripción Detallada</h2>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Descripción completa del curso que incluye objetivos, contenido, requisitos previos y toda la información relevante.
-          </p>
-        </div>
-
-        {/* Right Column - Descripción Detallada Content */}
-        <div>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Descripción Completa</label>
-              <div className="text-sm text-foreground px-3 py-2 bg-muted/30 rounded-md min-h-[200px] whitespace-pre-wrap">
-                {courseData?.long_description || '-'}
               </div>
             </div>
           </div>
