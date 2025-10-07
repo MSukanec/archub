@@ -125,9 +125,18 @@ export default function CourseDataTab({ courseId }: CourseDataTabProps) {
 
   const formatDuration = (seconds: number | null) => {
     if (!seconds) return 'Sin duración';
-    const mins = Math.floor(seconds / 60);
+    const totalMins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    
+    // For module totals (large durations), show hours and minutes
+    if (totalMins >= 60) {
+      const hours = Math.floor(totalMins / 60);
+      const mins = totalMins % 60;
+      return `${hours} hs ${mins} min`;
+    }
+    
+    // For individual lessons, show MM:SS format
+    return `${totalMins}:${secs.toString().padStart(2, '0')}`;
   }
 
   if (!courseId) {
@@ -246,16 +255,16 @@ export default function CourseDataTab({ courseId }: CourseDataTabProps) {
                           {formatDuration(totalModuleDuration)}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 mt-2">
+                      <div className="mt-2">
                         <Badge variant="outline">
                           {moduleLessons.length} {moduleLessons.length === 1 ? 'lección' : 'lecciones'}
                         </Badge>
-                        {module.description && (
-                          <p className="text-sm text-muted-foreground">
-                            {module.description}
-                          </p>
-                        )}
                       </div>
+                      {module.description && (
+                        <p className="text-sm text-muted-foreground mt-2">
+                          {module.description}
+                        </p>
+                      )}
                     </div>
 
                     {/* Module Lessons */}
