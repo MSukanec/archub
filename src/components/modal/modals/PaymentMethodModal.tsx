@@ -12,6 +12,8 @@ import { supabase } from '@/lib/supabase';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import mercadoPagoLogo from '/MercadoPago_logo.png';
+import paypalLogo from '/Paypal_2014_logo.png';
 
 interface PaymentMethodModalProps {
   courseSlug: string;
@@ -162,6 +164,7 @@ Enviá el comprobante a: pagos@archub.com.ar`;
   const headerContent = (
     <FormModalHeader 
       title="Elegí cómo pagar"
+      description="Seleccioná tu método de pago preferido para continuar con la compra del curso"
       icon={ShoppingCart}
     />
   );
@@ -191,14 +194,21 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                 data-testid="payment-option-mercadopago"
               >
                 <RadioGroupItem value="mercadopago" id="mercadopago" className="mt-0.5" />
-                <div className="flex-1">
-                  <Label htmlFor="mercadopago" className="flex items-center gap-2 cursor-pointer">
-                    <CreditCard className="h-5 w-5 text-primary" />
-                    <span className="font-medium">Mercado Pago (ARS)</span>
-                  </Label>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Tarjeta de crédito/débito. Redirección segura.
-                  </p>
+                <div className="flex-1 flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <Label htmlFor="mercadopago" className="flex items-center gap-2 cursor-pointer">
+                      <CreditCard className="h-5 w-5 text-primary" />
+                      <span className="font-medium">Mercado Pago (ARS)</span>
+                    </Label>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Tarjeta de crédito/débito. Redirección segura.
+                    </p>
+                  </div>
+                  <img 
+                    src={mercadoPagoLogo} 
+                    alt="Mercado Pago" 
+                    className="h-8 object-contain"
+                  />
                 </div>
               </div>
 
@@ -213,14 +223,21 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                 data-testid="payment-option-paypal"
               >
                 <RadioGroupItem value="paypal" id="paypal" className="mt-0.5" />
-                <div className="flex-1">
-                  <Label htmlFor="paypal" className="flex items-center gap-2 cursor-pointer">
-                    <CreditCard className="h-5 w-5 text-primary" />
-                    <span className="font-medium">PayPal (USD)</span>
-                  </Label>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Pago internacional en dólares. (Próximamente)
-                  </p>
+                <div className="flex-1 flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <Label htmlFor="paypal" className="flex items-center gap-2 cursor-pointer">
+                      <CreditCard className="h-5 w-5 text-primary" />
+                      <span className="font-medium">PayPal (USD)</span>
+                    </Label>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Pago internacional en dólares. (Próximamente)
+                    </p>
+                  </div>
+                  <img 
+                    src={paypalLogo} 
+                    alt="PayPal" 
+                    className="h-8 object-contain"
+                  />
                 </div>
               </div>
 
