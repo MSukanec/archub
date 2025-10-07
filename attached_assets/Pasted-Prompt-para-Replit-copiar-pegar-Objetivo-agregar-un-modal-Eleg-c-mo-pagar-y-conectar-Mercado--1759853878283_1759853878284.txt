@@ -1,0 +1,206 @@
+Prompt para Replit (copiar/pegar)
+
+Objetivo: agregar un modal “Elegí cómo pagar” y conectar Mercado Pago ya mismo.
+Stack: React + Tailwind (o tu estilo actual).
+Rutas/archivos a crear o editar:
+
+src/components/payments/PaymentModal.tsx (nuevo)
+
+src/components/payments/usePayment.ts (nuevo, helper)
+
+src/pages/courses/CoursesList.tsx (o donde tengas el botón “Comprar”)
+
+Requisitos funcionales:
+
+Al hacer clic en Comprar sobre un curso, abrir PaymentModal con:
+
+Radio options:
+
+Mercado Pago (ARS)
+
+PayPal (USD) (estado “Próximamente”)
+
+Transferencia bancaria
+
+Botones: Cancelar y Continuar.
+
+Si el usuario elige Mercado Pago:
+
+Llamar con fetch a
+https://<PROJECT_REF>.functions.supabase.co/create_mp_preference
+
+Body JSON: { user_id: <uuid usuario>, course_slug: <slug curso> }
+(no mandes precio; el backend lo resolverá más adelante).
+
+Si responde { init_point }, redirigir: window.location.href = init_point.
+
+Mostrar loading y deshabilitar botones mientras llama.
+
+Si hay error, mostrar toast “No se pudo iniciar el pago”.
+
+Si el usuario elige PayPal (USD):
+
+Por ahora, mostrar toast “Próximamente” (dejar TODO: en el código).
+
+Si el usuario elige Transferencia bancaria:
+
+Mostrar dentro del modal un bloque con:
+
+Alias / CBU / Banco / Titular
+
+Botón Copiar datos
+
+Link Enviar comprobante (mailto:pagos@tudominio.com o https://wa.me/<tu-numero>?text=Comprobante curso <slug>).
+
+Cerrar modal al copiar o al hacer clic en “Enviar comprobante”.
+
+Diseño/UI:
+
+Modal centrado, ancho max-w-md, radios con cards.
+
+El radio seleccionado resalta con borde.
+
+Botón Continuar deshabilitado si no hay selección.
+
+Implementación (código):
+
+src/components/payments/usePayment.ts
+
+export type PaymentMethod = 'mercadopago' | 'paypal' | 'transfer';
+
+export async function payWithMercadoPago(opts: { userId: string; courseSlug: string; edgeUrl: string }) {
+  const res = await fetch(`${opts.edgeUrl}/create_mp_preference`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: opts.userId, course_slug: opts.courseSlug }),
+  });
+  const data = await res.json();
+  if (!res.ok || !data?.init_point) throw new Error(data?.error || 'No init_point');
+  window.location.href = data.init_point;
+}
+
+
+src/components/payments/PaymentModal.tsx
+
+import React, { useState } from 'react';
+import type { PaymentMethod } from './usePayment';
+
+type Props = {
+  isOpen: boolean;
+  onClose: () => void;
+  courseSlug: string;
+  userId: string;
+  edgeBaseUrl: string; // p.ej: https://<PROJECT_REF>.functions.supabase.co
+  bankInfo?: { alias: string; cbu: string; banco: string; titular: string; contacto: string }; // opcional
+  onStart?: (method: PaymentMethod) => void; // opcional para analytics
+};
+
+export default function PaymentModal({ isOpen, onClose, courseSlug, userId, edgeBaseUrl, bankInfo, onStart }: Props) {
+  const [method, setMethod] = useState<PaymentMethod | null>(null);
+  const [loading, setLoading] = useState(false);
+  if (!isOpen) return null;
+
+  async function handleContinue() {
+    if (!method) return;
+    onStart?.(method);
+    if (method === 'mercadopago') {
+      try {
+        setLoading(true);
+        const res = await fetch(`${edgeBaseUrl}/create_mp_preference`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, course_slug: courseSlug }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data?.init_point) throw new Error(data?.error || 'No init_point');
+        window.location.href = data.init_point;
+      } catch (e) {
+        alert('No se pudo iniciar el pago. Intentá nuevamente.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    if (method === 'paypal') {
+      alert('PayPal (USD) próximamente'); // TODO: conectar a create_paypal_order
+    }
+    if (method === 'transfer') {
+      // Mostrar instrucciones y acciones
+      const info = bankInfo ?? { alias: 'TU.ALIAS', cbu: '000...', banco: 'Tu Banco', titular: 'Tu Nombre', contacto: 'mailto:pagos@tudominio.com' };
+      const txt = `Alias: ${info.alias}\nCBU: ${info.cbu}\nBanco: ${info.banco}\nTitular: ${info.titular}\n\nEnviá el comprobante a: ${info.contacto}`;
+      navigator.clipboard.writeText(txt).then(() => alert('Datos copiados. Enviá el comprobante.')).catch(() => alert(txt));
+      onClose();
+    }
+  }
+
+  const Option = ({ id, title, desc, value }: { id: string; title: string; desc: string; value: PaymentMethod }) => (
+    <label htmlFor={id} className={`block border rounded-xl p-4 cursor-pointer mb-3 ${method === value ? 'border-black' : 'border-gray-300'}`}>
+      <div className="flex items-start gap-3">
+        <input id={id} type="radio" name="method" className="mt-1" checked={method === value} onChange={() => setMethod(value)} />
+        <div>
+          <div className="font-medium">{title}</div>
+          <div className="text-sm text-gray-600">{desc}</div>
+        </div>
+      </div>
+    </label>
+  );
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+        <div className="p-5 border-b">
+          <h3 className="text-lg font-semibold">Elegí cómo pagar</h3>
+        </div>
+        <div className="p-5">
+          <Option id="mp" title="Mercado Pago (ARS)" desc="Tarjeta/débito/MP. Redirección segura." value="mercadopago" />
+          <Option id="pp" title="PayPal (USD)" desc="Internacional en dólares. (Próximamente)" value="paypal" />
+          <Option id="tf" title="Transferencia bancaria" desc="Te mostramos alias/CBU y dónde enviar el comprobante." value="transfer" />
+        </div>
+        <div className="p-5 border-t flex justify-end gap-3">
+          <button className="px-4 py-2 rounded-lg border" onClick={onClose} disabled={loading}>Cancelar</button>
+          <button className="px-4 py-2 rounded-lg bg-black text-white disabled:opacity-60" onClick={handleContinue} disabled={!method || loading}>
+            {loading ? 'Redirigiendo…' : 'Continuar'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+En el archivo donde tenés el listado de cursos y el botón Comprar (ej. CoursesList.tsx):
+
+import React, { useState } from 'react';
+import PaymentModal from '../../components/payments/PaymentModal';
+
+export default function CoursesList() {
+  const [open, setOpen] = useState(false);
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+
+  const userId = '<UUID_USUARIO_LOGUEADO>'; // reemplazar con tu estado real
+  const edgeBaseUrl = 'https://<PROJECT_REF>.functions.supabase.co'; // poné el tuyo
+
+  function handleBuy(slug: string) {
+    setSelectedSlug(slug);
+    setOpen(true);
+  }
+
+  return (
+    <>
+      {/* ...tu tabla/lista de cursos... */}
+      {/* Ejemplo del botón: */}
+      {/* <button onClick={() => handleBuy(course.slug)}>Comprar</button> */}
+
+      <PaymentModal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        courseSlug={selectedSlug || ''}
+        userId={userId}
+        edgeBaseUrl={edgeBaseUrl}
+        bankInfo={{ alias: 'TU.ALIAS', cbu: '000...', banco: 'Banco X', titular: 'Tu Nombre', contacto: 'mailto:pagos@tudominio.com' }}
+      />
+    </>
+  );
+}
+
+
+Listo. Con esto, “Mercado Pago (ARS)” te redirige ya; PayPal queda marcado como “Próximamente”; y Transferencia muestra los datos y copia el CBU.
