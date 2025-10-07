@@ -70,6 +70,19 @@ export default function CourseView() {
     isViewMode: true,
     tabs: headerTabs,
     onTabChange: setActiveTab,
+    ...(activeTab === 'Datos del Curso' && {
+      actions: [
+        <Button
+          key="continue"
+          variant="default"
+          size="sm"
+          onClick={() => setActiveTab('Visor')}
+          data-testid="button-continue-course"
+        >
+          Continuar Curso
+        </Button>
+      ]
+    }),
     ...(activeTab === 'Visor' && navigationState && {
       actions: [
         <Button

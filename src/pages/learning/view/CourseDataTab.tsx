@@ -232,25 +232,29 @@ export default function CourseDataTab({ courseId }: CourseDataTabProps) {
             <div className="space-y-4">
               {modules.map((module, index) => {
                 const moduleLessons = getLessonsForModule(module.id);
+                const totalModuleDuration = moduleLessons.reduce((acc, lesson) => acc + (lesson.duration_sec || 0), 0);
                 
                 return (
                   <div key={module.id} className="border rounded-lg overflow-hidden">
                     {/* Module Header */}
                     <div className="bg-muted/30 px-4 py-3 border-b">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-semibold">
-                            Módulo {index + 1}: {module.title}
-                          </h3>
-                          {module.description && (
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {module.description}
-                            </p>
-                          )}
-                        </div>
+                        <h3 className="font-semibold">
+                          Módulo {index + 1}: {module.title}
+                        </h3>
+                        <span className="text-sm text-muted-foreground">
+                          {formatDuration(totalModuleDuration)}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
                         <Badge variant="outline">
                           {moduleLessons.length} {moduleLessons.length === 1 ? 'lección' : 'lecciones'}
                         </Badge>
+                        {module.description && (
+                          <p className="text-sm text-muted-foreground">
+                            {module.description}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -268,30 +272,20 @@ export default function CourseDataTab({ courseId }: CourseDataTabProps) {
                             onClick={() => setCurrentLesson(lesson.id)}
                             data-testid={`lesson-card-${lesson.id}`}
                           >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                                  <Play className="h-4 w-4 text-[var(--accent)]" />
-                                </div>
-                                <div>
-                                  <p className="text-sm font-medium">
-                                    {lessonIndex + 1}. {lesson.title}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {formatDuration(lesson.duration_sec)}
-                                    {lesson.free_preview && (
-                                      <Badge variant="outline" className="ml-2 text-xs">
-                                        Vista previa gratis
-                                      </Badge>
-                                    )}
-                                  </p>
-                                </div>
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+                                <Play className="h-4 w-4 text-[var(--accent)]" />
                               </div>
-                              {lesson.vimeo_video_id && (
-                                <Badge variant="secondary" className="text-xs">
-                                  ID: {lesson.vimeo_video_id}
-                                </Badge>
-                              )}
+                              <div className="flex-1">
+                                <p className="text-sm font-medium">
+                                  {lessonIndex + 1}. {lesson.title} · {formatDuration(lesson.duration_sec)}
+                                  {lesson.free_preview && (
+                                    <Badge variant="outline" className="ml-2 text-xs">
+                                      Vista previa gratis
+                                    </Badge>
+                                  )}
+                                </p>
+                              </div>
                             </div>
                           </div>
                         ))
