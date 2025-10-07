@@ -213,8 +213,10 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
       return response.json();
     },
     onSuccess: async () => {
+      console.log('✅ Lesson marked complete, refetching queries...');
+      
       // Force refetch of progress data for course and dashboard
-      await Promise.all([
+      const results = await Promise.all([
         queryClient.refetchQueries({ 
           queryKey: ['/api/courses', courseId, 'progress'],
           exact: true 
@@ -224,6 +226,9 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
           exact: true 
         })
       ]);
+      
+      console.log('🔄 Refetch results:', results);
+      
       toast({
         title: 'Lección completada',
         description: 'Has marcado esta lección como completa'
