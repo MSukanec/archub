@@ -8,6 +8,7 @@ import { useCourseSidebarStore } from '@/stores/sidebarStore'
 import VimeoPlayer from '@/components/video/VimeoPlayer'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
+import { LessonNotes } from '@/components/learning/LessonNotes'
 
 interface CourseViewerProps {
   courseId?: string;
@@ -398,6 +399,11 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
             </p>
           </div>
         </div>
+      )}
+
+      {/* Lesson Notes */}
+      {currentLessonId && (
+        <LessonNotes lessonId={currentLessonId} />
       )}
     </div>
   )

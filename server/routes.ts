@@ -2095,6 +2095,166 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // GET /api/lessons/:lessonId/notes - Get all notes for a lesson
+  app.get("/api/lessons/:lessonId/notes", async (req, res) => {
+    try {
+      const { lessonId } = req.params;
+      
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const token = authHeader.substring(7);
+      
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+      
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .ilike('email', user.email!)
+        .single();
+      
+      if (!dbUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      const { data: notes, error } = await authenticatedSupabase
+        .from('course_lesson_notes')
+        .select('*')
+        .eq('user_id', dbUser.id)
+        .eq('lesson_id', lessonId)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error("Error fetching notes:", error);
+        return res.status(500).json({ error: "Failed to fetch notes" });
+      }
+      
+      res.json(notes || []);
+    } catch (error) {
+      console.error("Error fetching lesson notes:", error);
+      res.status(500).json({ error: "Failed to fetch notes" });
+    }
+  });
+
+  // POST /api/lessons/:lessonId/notes - Create or update a lesson note
+  app.post("/api/lessons/:lessonId/notes", async (req, res) => {
+    try {
+      const { lessonId } = req.params;
+      const { body, time_sec, is_pinned } = req.body;
+      
+      if (!body || typeof body !== 'string') {
+        return res.status(400).json({ error: "Body is required and must be a string" });
+      }
+      
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const token = authHeader.substring(7);
+      
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+      
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .ilike('email', user.email!)
+        .single();
+      
+      if (!dbUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      const { data: existingNote } = await authenticatedSupabase
+        .from('course_lesson_notes')
+        .select('*')
+        .eq('user_id', dbUser.id)
+        .eq('lesson_id', lessonId)
+        .is('time_sec', null)
+        .single();
+      
+      let noteData;
+      
+      if (existingNote) {
+        const { data, error } = await authenticatedSupabase
+          .from('course_lesson_notes')
+          .update({
+            body,
+            is_pinned: is_pinned ?? false,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingNote.id)
+          .select()
+          .single();
+        
+        if (error) {
+          console.error("Error updating note:", error);
+          return res.status(500).json({ error: "Failed to update note" });
+        }
+        
+        noteData = data;
+      } else {
+        const { data, error } = await authenticatedSupabase
+          .from('course_lesson_notes')
+          .insert({
+            user_id: dbUser.id,
+            lesson_id: lessonId,
+            body,
+            time_sec: time_sec || null,
+            is_pinned: is_pinned ?? false
+          })
+          .select()
+          .single();
+        
+        if (error) {
+          console.error("Error creating note:", error);
+          return res.status(500).json({ error: "Failed to create note" });
+        }
+        
+        noteData = data;
+      }
+      
+      res.json(noteData);
+    } catch (error) {
+      console.error("Error saving lesson note:", error);
+      res.status(500).json({ error: "Failed to save note" });
+    }
+  });
+
   // GET /api/user/all-progress - Get all lesson progress for current user
   app.get("/api/user/all-progress", async (req, res) => {
     try {

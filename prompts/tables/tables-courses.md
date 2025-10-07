@@ -94,3 +94,21 @@ create table public.course_lesson_progress (
 ) TABLESPACE pg_default;
 
 create index IF not exists lesson_progress_user_id_lesson_id_idx on public.course_lesson_progress using btree (user_id, lesson_id) TABLESPACE pg_default;
+
+Tabla COURSE_LESSON_NOTES:
+
+create table public.course_lesson_notes (
+  id uuid not null default gen_random_uuid (),
+  user_id uuid not null,
+  lesson_id uuid not null,
+  body text not null,
+  time_sec integer null,
+  is_pinned boolean not null default false,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  constraint course_lesson_notes_pkey primary key (id),
+  constraint course_lesson_notes_lesson_id_fkey foreign KEY (lesson_id) references course_lessons (id) on delete CASCADE,
+  constraint course_lesson_notes_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create index IF not exists lesson_notes_by_user_lesson on public.course_lesson_notes using btree (user_id, lesson_id, created_at desc) TABLESPACE pg_default;

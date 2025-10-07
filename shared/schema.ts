@@ -657,6 +657,17 @@ export const course_lesson_progress = pgTable("course_lesson_progress", {
   lesson_progress_unique: unique().on(table.user_id, table.lesson_id),
 }));
 
+export const course_lesson_notes = pgTable("course_lesson_notes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  user_id: uuid("user_id").notNull(),
+  lesson_id: uuid("lesson_id").notNull(),
+  body: text("body").notNull(),
+  time_sec: integer("time_sec"),
+  is_pinned: boolean("is_pinned").notNull().default(false),
+  created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 // Schemas for courses
 export const insertCourseSchema = createInsertSchema(courses).omit({
   id: true,
@@ -683,6 +694,12 @@ export const insertCourseLessonProgressSchema = createInsertSchema(course_lesson
 
 export const selectCourseLessonProgressSchema = createInsertSchema(course_lesson_progress);
 
+export const insertCourseLessonNoteSchema = createInsertSchema(course_lesson_notes).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
 // Types for courses
 export type Course = typeof courses.$inferSelect;
 export type InsertCourse = z.infer<typeof insertCourseSchema>;
@@ -692,3 +709,5 @@ export type Lesson = typeof course_lessons.$inferSelect;
 export type InsertLesson = z.infer<typeof insertLessonSchema>;
 export type CourseLessonProgress = typeof course_lesson_progress.$inferSelect;
 export type InsertCourseLessonProgress = z.infer<typeof insertCourseLessonProgressSchema>;
+export type CourseLessonNote = typeof course_lesson_notes.$inferSelect;
+export type InsertCourseLessonNote = z.infer<typeof insertCourseLessonNoteSchema>;
