@@ -2200,10 +2200,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
       
-      // Get all enrollments for this user
+      // Get all enrollments for this user with course slug
       const { data: enrollments, error: enrollmentsError } = await authenticatedSupabase
         .from('course_enrollments')
-        .select('*')
+        .select('*, courses(slug)')
         .eq('user_id', userRecord.id);
       
       if (enrollmentsError) {
@@ -2211,7 +2211,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: "Failed to fetch enrollments" });
       }
       
-      res.json(enrollments || []);
+      // Flatten the course slug
+      const formattedEnrollments = (enrollments || []).map((e: any) => ({
+        ...e,
+        course_slug: e.courses?.slug
+      }));
+      
+      res.json(formattedEnrollments);
     } catch (error) {
       console.error("Error fetching user enrollments:", error);
       res.status(500).json({ error: "Failed to fetch enrollments" });

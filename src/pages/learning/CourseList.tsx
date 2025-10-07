@@ -13,6 +13,7 @@ import { Progress } from '@/components/ui/progress'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import PayButton from '@/components/learning/PayButton'
 
 export default function CourseList() {
   const [activeTab, setActiveTab] = useState('courses')
@@ -22,6 +23,17 @@ export default function CourseList() {
   const [, navigate] = useLocation()
 
   const [searchValue, setSearchValue] = useState('')
+
+  // Get current user
+  const { data: currentUser } = useQuery({
+    queryKey: ['current-user'],
+    queryFn: async () => {
+      if (!supabase) return null;
+      const { data: { session } } = await supabase.auth.getSession();
+      return session?.user || null;
+    },
+    enabled: !!supabase
+  });
 
   useEffect(() => {
     setSidebarContext('learning')
@@ -228,16 +240,27 @@ export default function CourseList() {
       key: 'actions',
       label: 'Acciones',
       render: (course: any) => (
-        <Button
-          variant="default"
-          size="sm"
-          onClick={() => handleViewDetail(course.id)}
-          className="h-8 gap-2"
-          data-testid={`button-view-course-${course.id}`}
-        >
-          <Eye className="h-4 w-4" />
-          <span>Ver curso</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          <PayButton
+            userId={currentUser?.id || ''}
+            courseSlug={course.slug}
+            price={1000}
+            currency="ARS"
+            months={null}
+            variant="secondary"
+            size="sm"
+          />
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => handleViewDetail(course.id)}
+            className="h-8 gap-2"
+            data-testid={`button-view-course-${course.id}`}
+          >
+            <Eye className="h-4 w-4" />
+            <span>Ver curso</span>
+          </Button>
+        </div>
       )
     }
   ];
