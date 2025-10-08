@@ -71,35 +71,36 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
 
   return (
     <div className="flex flex-col h-[400px]">
-      <div className="p-4 pb-2">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-sm">Notificaciones</h3>
-          <div className="flex items-center gap-2">
-            {unreadNotifications.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleMarkAllAsRead}
-                className="h-7 text-xs"
-                data-testid="button-mark-all-read"
-              >
-                <CheckCheck className="h-3 w-3 mr-1" />
-                Marcar todas
-              </Button>
-            )}
+      <div className="p-4 pb-3">
+        <h3 className="font-semibold text-sm mb-3">Notificaciones</h3>
+        <div className="flex gap-2">
+          {unreadNotifications.length > 0 && (
             <Button
-              variant="default"
+              variant="ghost"
               size="sm"
-              onClick={() => {
-                navigate('/notifications');
-                onClose();
-              }}
-              className="h-7 text-xs"
-              data-testid="button-view-all"
+              onClick={handleMarkAllAsRead}
+              className="h-8 text-xs flex-1"
+              data-testid="button-mark-all-read"
             >
-              Ver todas
+              <CheckCheck className="h-3 w-3 mr-1" />
+              Marcar todas
             </Button>
-          </div>
+          )}
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => {
+              navigate('/notifications');
+              onClose();
+            }}
+            className={cn(
+              "h-8 text-xs",
+              unreadNotifications.length > 0 ? "flex-1" : "w-full"
+            )}
+            data-testid="button-view-all"
+          >
+            Ver todas
+          </Button>
         </div>
       </div>
       
