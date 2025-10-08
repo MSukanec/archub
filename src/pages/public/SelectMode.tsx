@@ -193,15 +193,16 @@ export default function SelectMode() {
 
             {/* Title and Description at bottom */}
             <div className="w-full flex flex-col items-center gap-4">
-              {/* Title - always visible, white on hover */}
+              {/* Title - changes to white on hover */}
               <h2 className={`
                 text-2xl font-medium text-center
                 transition-all duration-500
+                text-foreground
                 ${isAvailable 
-                  ? 'text-foreground group-hover:text-white group-hover:scale-105' 
-                  : 'text-foreground'
+                  ? 'group-hover:!text-white group-hover:scale-105' 
+                  : ''
                 }
-                ${isSelected ? 'text-white scale-105' : ''}
+                ${isSelected ? '!text-white scale-105' : ''}
               `}>
                 {mode.title}
               </h2>
@@ -210,11 +211,12 @@ export default function SelectMode() {
               <p className={`
                 text-sm text-center leading-relaxed max-w-xs
                 transition-all duration-500
+                text-gray-400
                 ${isAvailable 
-                  ? 'opacity-0 group-hover:opacity-100 text-gray-400 transform translate-y-2 group-hover:translate-y-0' 
+                  ? 'opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0' 
                   : 'opacity-0'
                 }
-                ${isSelected ? 'opacity-100 text-gray-400 translate-y-0' : ''}
+                ${isSelected ? 'opacity-100 translate-y-0' : ''}
               `}>
                 {mode.description}
               </p>
