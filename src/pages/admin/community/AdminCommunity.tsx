@@ -5,6 +5,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import AdminCommunityDashboard from './AdminCommunityDashboard';
 import AdminCommunityOrganizations from './AdminCommunityOrganizations';
 import AdminCommunityUsers from './AdminCommunityUsers';
+import AdminCommunityNotifications from './AdminCommunityNotifications';
 import AdminCommunityChangelog from './AdminCommunityChangelog';
 
 const AdminCommunity = () => {
@@ -15,6 +16,7 @@ const AdminCommunity = () => {
     { id: 'resumen', label: 'Resumen', isActive: activeTab === 'resumen' },
     { id: 'organizaciones', label: 'Organizaciones', isActive: activeTab === 'organizaciones' },
     { id: 'usuarios', label: 'Usuarios', isActive: activeTab === 'usuarios' },
+    { id: 'notificaciones', label: 'Notificaciones', isActive: activeTab === 'notificaciones' },
     { id: 'cambios', label: 'Cambios', isActive: activeTab === 'cambios' }
   ];
 
@@ -31,6 +33,12 @@ const AdminCommunity = () => {
           label: "Nuevo Usuario",
           icon: Plus,
           onClick: () => openModal('admin-user', { isEditing: false })
+        };
+      case 'notificaciones':
+        return {
+          label: "Nueva Notificación",
+          icon: Plus,
+          onClick: () => openModal('notification', { isEditing: false })
         };
       case 'cambios':
         return {
@@ -61,6 +69,8 @@ const AdminCommunity = () => {
         return <AdminCommunityOrganizations />;
       case 'usuarios':
         return <AdminCommunityUsers />;
+      case 'notificaciones':
+        return <AdminCommunityNotifications />;
       case 'cambios':
         return <AdminCommunityChangelog />;
       default:

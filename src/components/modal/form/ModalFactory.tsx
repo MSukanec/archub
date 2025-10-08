@@ -71,6 +71,7 @@ import { CourseModuleFormModal } from '../modals/admin/CourseModuleFormModal';
 import { LessonFormModal } from '../modals/admin/LessonFormModal';
 import { CourseEnrollmentModal } from '../modals/admin/CourseEnrollmentModal';
 import PaymentMethodModal from '../modals/PaymentMethodModal';
+import { NotificationFormModal } from '../modals/admin/NotificationFormModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -244,6 +245,8 @@ export function ModalFactory() {
         courseSlug={data?.courseSlug || ''} 
         currency={data?.currency || 'ARS'}
       />;
+    case 'notification':
+      return <NotificationFormModal modalData={data || undefined} onClose={closeModal} />;
     default:
       return null;
   }
