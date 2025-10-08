@@ -163,57 +163,72 @@ export default function SelectMode() {
               relative overflow-hidden
               px-8 py-16
               ${isAvailable 
-                ? 'hover:bg-[#1a1a1a] hover:text-white' 
+                ? 'hover:bg-[#1a1a1a]' 
                 : 'hover:bg-muted/30'
               }
-              bg-background text-foreground
-              ${isSelected ? 'bg-[#1a1a1a] text-white' : ''}
+              bg-background
+              ${isSelected ? 'bg-[#1a1a1a]' : ''}
               ${!isAvailable ? 'opacity-60' : ''}
               group
             `}
             data-testid={`mode-select-${mode.type}`}
           >
-            {/* Number at top */}
+            {/* Number at top with accent color */}
             <div className="w-full flex justify-center">
-              <span className="text-sm font-light tracking-wider opacity-50 group-hover:opacity-100 transition-opacity duration-500">
+              <span className={`
+                text-sm font-light tracking-wider
+                transition-all duration-500
+                ${isAvailable 
+                  ? 'text-muted-foreground group-hover:text-[var(--accent)]' 
+                  : 'text-muted-foreground'
+                }
+                ${isSelected ? 'text-[var(--accent)]' : ''}
+              `}>
                 {mode.number}
               </span>
             </div>
 
-            {/* Center content - Description (only on hover) */}
-            <div className="flex-1 flex items-center justify-center px-4">
-              <p className={`
-                text-sm text-center leading-relaxed max-w-xs
-                transition-all duration-500
-                ${isAvailable 
-                  ? 'opacity-0 group-hover:opacity-100 transform scale-95 group-hover:scale-100' 
-                  : 'opacity-0 group-hover:opacity-60'
-                }
-              `}>
-                {mode.description}
-              </p>
-            </div>
+            {/* Center spacer */}
+            <div className="flex-1" />
 
-            {/* Title at bottom */}
+            {/* Title and Description at bottom */}
             <div className="w-full flex flex-col items-center gap-4">
+              {/* Title - always visible, white on hover */}
               <h2 className={`
                 text-2xl font-medium text-center
                 transition-all duration-500
-                ${isAvailable ? 'group-hover:transform group-hover:scale-105' : ''}
+                ${isAvailable 
+                  ? 'text-foreground group-hover:text-white group-hover:scale-105' 
+                  : 'text-foreground'
+                }
+                ${isSelected ? 'text-white scale-105' : ''}
               `}>
                 {mode.title}
               </h2>
 
+              {/* Description - only visible on hover, below title, light gray */}
+              <p className={`
+                text-sm text-center leading-relaxed max-w-xs
+                transition-all duration-500
+                ${isAvailable 
+                  ? 'opacity-0 group-hover:opacity-100 text-gray-400 transform translate-y-2 group-hover:translate-y-0' 
+                  : 'opacity-0'
+                }
+                ${isSelected ? 'opacity-100 text-gray-400 translate-y-0' : ''}
+              `}>
+                {mode.description}
+              </p>
+
               {/* Status indicators */}
               {!isAvailable && (
-                <div className="flex items-center gap-2 text-sm opacity-60">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
                   <Lock className="h-4 w-4" />
                   <span>Próximamente</span>
                 </div>
               )}
 
               {isLoading && (
-                <div className="flex items-center gap-2 text-sm">
+                <div className="flex items-center gap-2 text-sm text-white mt-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <span>Guardando...</span>
                 </div>
@@ -235,9 +250,10 @@ export default function SelectMode() {
               w-12 h-px
               transition-all duration-500
               ${isAvailable 
-                ? 'bg-border/30 group-hover:bg-white/50 group-hover:w-24' 
+                ? 'bg-border/30 group-hover:bg-[var(--accent)] group-hover:w-24' 
                 : 'bg-border/20'
               }
+              ${isSelected ? 'bg-[var(--accent)] w-24' : ''}
             `} />
           </div>
         );
