@@ -52,16 +52,26 @@ export default function PaymentMethodModal({
       }
 
       // DEBUG: Verificar estado del curso antes de intentar pago
-      const { data: courseCheck } = await supabase
+      const { data: courseCheck, error: courseError } = await supabase
         .from('courses')
         .select('id, slug, title, is_active, is_visible')
         .eq('slug', courseSlug)
         .single();
       
       console.log('📚 Estado del curso en BD:', courseCheck);
+      console.log('📚 Error al buscar curso:', courseError);
+      
+      // DEBUG: Listar todos los cursos para verificar slugs
+      const { data: allCourses } = await supabase
+        .from('courses')
+        .select('id, slug, title, is_active')
+        .order('created_at', { ascending: false })
+        .limit(10);
+      
+      console.log('📋 Cursos disponibles en BD:', allCourses);
       
       if (!courseCheck) {
-        throw new Error(`Curso con slug "${courseSlug}" no encontrado en la base de datos`);
+        throw new Error(`Curso con slug "${courseSlug}" no encontrado. Cursos disponibles: ${allCourses?.map(c => c.slug).join(', ') || 'ninguno'}`);
       }
       
       if (!courseCheck.is_active) {
