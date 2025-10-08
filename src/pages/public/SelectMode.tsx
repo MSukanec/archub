@@ -52,7 +52,7 @@ const modeOptions: ModeOption[] = [
 export default function SelectMode() {
   const [, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
-  const { setSidebarContext } = useNavigationStore();
+  const { setSidebarContext, setSidebarLevel } = useNavigationStore();
   const { setCompletingOnboarding } = useAuthStore();
   const { toast } = useToast();
   const [selectedMode, setSelectedMode] = useState<string | null>(null);
@@ -105,9 +105,11 @@ export default function SelectMode() {
       
       if (userType === 'learner') {
         setSidebarContext('learning');
+        setSidebarLevel('learning');
         navigate('/learning/dashboard');
       } else {
         setSidebarContext('organization');
+        setSidebarLevel('organization');
         navigate('/organization/dashboard');
       }
     },

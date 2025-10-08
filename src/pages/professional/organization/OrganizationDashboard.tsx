@@ -119,6 +119,11 @@ export default function OrganizationDashboard() {
     }
   }, [isMobile, setShowActionBar]);
 
+  // Establecer nivel del sidebar a organización
+  useEffect(() => {
+    setSidebarLevel('organization');
+  }, [setSidebarLevel]);
+
   if (isLoading) {
     return (
       <Layout wide={true}>

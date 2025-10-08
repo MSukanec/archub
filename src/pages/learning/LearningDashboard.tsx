@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useLocation } from 'wouter';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -165,6 +166,27 @@ export default function LearningDashboard() {
     );
   }
 
+  // Si no hay cursos inscritos, mostrar EmptyState
+  if (stats.enrolledCourses === 0) {
+    return (
+      <Layout headerProps={headerProps} wide>
+        <EmptyState
+          icon={<GraduationCap />}
+          title="Comienza tu Aprendizaje"
+          description="Aún no estás inscrito en ningún curso. Explora los cursos disponibles y comienza a desarrollar tus habilidades profesionales."
+          action={
+            <Button 
+              onClick={() => navigate('/learning/courses')}
+              data-testid="button-browse-courses"
+            >
+              Explorar Cursos Disponibles
+            </Button>
+          }
+        />
+      </Layout>
+    );
+  }
+
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
@@ -318,27 +340,6 @@ export default function LearningDashboard() {
                     </div>
                   </div>
                 ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Empty State */}
-        {stats.enrolledCourses === 0 && (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center py-12">
-                <GraduationCap className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Comienza tu Aprendizaje</h3>
-                <p className="text-muted-foreground mb-6">
-                  Aún no estás inscrito en ningún curso. Explora los cursos disponibles y comienza a aprender.
-                </p>
-                <Button 
-                  onClick={() => navigate('/learning/courses')}
-                  data-testid="button-browse-courses"
-                >
-                  Explorar Cursos
-                </Button>
               </div>
             </CardContent>
           </Card>
