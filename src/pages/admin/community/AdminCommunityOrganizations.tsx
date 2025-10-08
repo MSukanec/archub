@@ -1,456 +1,409 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Table } from '@/components/ui-custom/tables-and-trees/Table'
-import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { Edit, Trash2, Building, Crown } from 'lucide-react';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
+import { Card } from '@/components/ui/card'
+import { Users, Building, Activity, Clock, TrendingUp, Calendar, UserCheck } from 'lucide-react'
+import { format, subMonths, startOfMonth, endOfMonth, isAfter, isBefore, subDays } from 'date-fns'
+import { es } from 'date-fns/locale'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 
-import { useToast } from '@/hooks/use-toast';
-import AdminOrganizationRow from '@/components/ui/data-row/rows/AdminOrganizationRow';
-
-interface Organization {
-  id: string;
-  name: string;
-  created_at: string;
-  is_active: boolean;
-  is_system: boolean;
-  plan_id: string;
-  created_by: string;
-  plan: {
-    id: string;
-    name: string;
-  } | null;
-  creator: {
-    id: string;
-    full_name: string;
-    email: string;
-    avatar_url?: string;
-  } | null;
-  members_count: number;
-  projects_count: number;
-  last_seen_at: string | null;
+interface DashboardStats {
+  totalOrganizations: number
+  activeOrganizations: number
+  totalUsers: number
+  activeUsersNow: number
+  newUsersThisMonth: number
+  newUsersLastMonth: number
+  organizationsByPlan: {
+    free: number
+    pro: number
+    teams: number
+  }
+  avgMembersPerOrg: number
+  avgProjectsPerOrg: number
 }
 
-// Componente para mostrar la última actividad de la organización
-function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
-  const [tick, setTick] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => setTick(t => t + 1), 30_000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const { label, isOnline, tooltip } = useMemo(() => {
-    if (!lastSeen) return { label: '—', isOnline: false, tooltip: 'Sin actividad registrada' };
-    
-    const lastSeenTime = new Date(lastSeen).getTime();
-    const now = Date.now();
-    const diffMs = now - lastSeenTime;
-    
-    // Activo si está dentro de 90 segundos
-    if (diffMs <= 90_000) {
-      return { label: 'Activo ahora', isOnline: true, tooltip: format(new Date(lastSeen), 'dd/MM/yyyy HH:mm:ss', { locale: es }) };
-    }
-    
-    // Tiempo relativo
-    const diffSec = Math.floor(diffMs / 1000);
-    const diffMin = Math.floor(diffSec / 60);
-    const diffHr = Math.floor(diffMin / 60);
-    const diffDays = Math.floor(diffHr / 24);
-    
-    let relativeLabel = '';
-    if (diffDays >= 1) {
-      relativeLabel = `hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
-    } else if (diffHr >= 1) {
-      relativeLabel = `hace ${diffHr} h`;
-    } else if (diffMin >= 1) {
-      relativeLabel = `hace ${diffMin} min`;
-    } else {
-      relativeLabel = `hace ${diffSec} s`;
-    }
-    
-    return { 
-      label: relativeLabel, 
-      isOnline: false, 
-      tooltip: format(new Date(lastSeen), 'dd/MM/yyyy HH:mm:ss', { locale: es })
-    };
-  }, [lastSeen, tick]);
-
-  return (
-    <div className="flex items-center gap-2" title={tooltip}>
-      {isOnline ? (
-        <>
-          <span className="inline-block w-2 h-2 rounded-full bg-[var(--plan-free-bg)]" />
-          <Badge 
-            variant="default"
-            className="bg-[var(--plan-free-bg)] text-white hover:bg-[var(--plan-free-bg)]/90"
-          >
-            {label}
-          </Badge>
-        </>
-      ) : (
-        <span className="text-sm text-muted-foreground">{label}</span>
-      )}
-    </div>
-  );
-}
-
-// Hook para obtener todas las organizaciones (admin)
-function useAllOrganizations() {
-  return useQuery({
-    queryKey: ['admin-organizations'],
+export default function AdminCommunityOrganizations() {
+  // Fetch dashboard statistics
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ['admin-community-dashboard'],
     queryFn: async () => {
-      if (!supabase) throw new Error('Supabase not initialized');
+      if (!supabase) throw new Error('Supabase not available')
 
-      const { data, error } = await supabase
+      const now = new Date()
+      const thisMonthStart = startOfMonth(now)
+      const lastMonthStart = startOfMonth(subMonths(now, 1))
+      const lastMonthEnd = endOfMonth(subMonths(now, 1))
+      const ninetySecondsAgo = new Date(now.getTime() - 90000)
+
+      // Organizaciones
+      const { data: organizations } = await supabase
         .from('organizations')
-        .select(`
-          id,
-          name,
-          created_at,
-          is_active,
-          is_system,
-          plan_id,
-          created_by
-        `)
-        .order('created_at', { ascending: false });
+        .select('id, is_active, plan_id, created_at')
 
-      if (error) {
-        console.error('Error fetching organizations:', error);
-        throw error;
+      const totalOrganizations = organizations?.length || 0
+      const activeOrganizations = organizations?.filter(o => o.is_active).length || 0
+
+      // Planes
+      const { data: plans } = await supabase
+        .from('plans')
+        .select('id, name')
+
+      const plansMap = new Map(plans?.map(p => [p.id, p.name]) || [])
+
+      const organizationsByPlan = {
+        free: organizations?.filter(o => plansMap.get(o.plan_id) === 'Free').length || 0,
+        pro: organizations?.filter(o => plansMap.get(o.plan_id) === 'Pro').length || 0,
+        teams: organizations?.filter(o => plansMap.get(o.plan_id) === 'Teams').length || 0
       }
 
-      // Obtener los planes y usuarios creadores
-      const planIds = Array.from(new Set(data.map(org => org.plan_id).filter(Boolean)));
-      const creatorIds = Array.from(new Set(data.map(org => org.created_by).filter(Boolean)));
-      
-      const [plansResult, usersResult] = await Promise.all([
-        planIds.length > 0 ? supabase!
-          .from('plans')
-          .select('id, name')
-          .in('id', planIds) : { data: [], error: null },
-        creatorIds.length > 0 ? supabase!
-          .from('users')
-          .select('id, full_name, email, avatar_url')
-          .in('id', creatorIds) : { data: [], error: null }
-      ]);
+      // Usuarios
+      const { data: users } = await supabase
+        .from('users')
+        .select('id, created_at')
 
-      // Mapear organizaciones con sus relaciones
-      const organizationsWithPlans = data.map(org => ({
-        ...org,
-        plan: plansResult.data?.find(plan => plan.id === org.plan_id) || null,
-        creator: usersResult.data?.find(user => user.id === org.created_by) || null
-      }));
+      const totalUsers = users?.length || 0
 
-      console.log('Organizations with plans:', organizationsWithPlans);
+      const newUsersThisMonth = users?.filter(u => {
+        const date = new Date(u.created_at)
+        return isAfter(date, thisMonthStart)
+      }).length || 0
 
-      // Obtener conteos de miembros, proyectos y última actividad para cada organización
-      const organizationsWithCounts = await Promise.all(
-        organizationsWithPlans.map(async (org) => {
-          const [membersResult, projectsResult, activityResult] = await Promise.all([
-            supabase!
-              .from('organization_members')
-              .select('id', { count: 'exact' })
-              .eq('organization_id', org.id),
-            supabase!
-              .from('projects')
-              .select('id', { count: 'exact' })
-              .eq('organization_id', org.id),
-            supabase!
-              .from('organization_online_users')
-              .select('last_seen_at')
-              .eq('org_id', org.id)
-              .order('last_seen_at', { ascending: false })
-              .limit(1)
-              .single()
-          ]);
+      const newUsersLastMonth = users?.filter(u => {
+        const date = new Date(u.created_at)
+        return isAfter(date, lastMonthStart) && isBefore(date, lastMonthEnd)
+      }).length || 0
+
+      // Usuarios activos ahora (últimos 90 segundos)
+      const { data: activeUsers } = await supabase
+        .from('organization_online_users')
+        .select('user_id')
+        .gte('last_seen_at', ninetySecondsAgo.toISOString())
+
+      const uniqueActiveUsers = new Set(activeUsers?.map(u => u.user_id) || [])
+      const activeUsersNow = uniqueActiveUsers.size
+
+      // Promedios
+      const { data: members } = await supabase
+        .from('organization_members')
+        .select('organization_id', { count: 'exact' })
+
+      const { data: projects } = await supabase
+        .from('projects')
+        .select('organization_id', { count: 'exact' })
+
+      const avgMembersPerOrg = totalOrganizations > 0 ? (members?.length || 0) / totalOrganizations : 0
+      const avgProjectsPerOrg = totalOrganizations > 0 ? (projects?.length || 0) / totalOrganizations : 0
+
+      return {
+        totalOrganizations,
+        activeOrganizations,
+        totalUsers,
+        activeUsersNow,
+        newUsersThisMonth,
+        newUsersLastMonth,
+        organizationsByPlan,
+        avgMembersPerOrg,
+        avgProjectsPerOrg
+      } as DashboardStats
+    },
+    enabled: !!supabase
+  })
+
+  // Últimas conexiones de usuarios
+  const { data: recentActivity, isLoading: loadingActivity } = useQuery({
+    queryKey: ['recent-user-activity'],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not available')
+
+      const { data } = await supabase
+        .from('organization_online_users')
+        .select(`
+          user_id,
+          last_seen_at,
+          users!inner(full_name, email)
+        `)
+        .order('last_seen_at', { ascending: false })
+        .limit(10)
+
+      return data
+    },
+    enabled: !!supabase
+  })
+
+  // Organizaciones más activas (por última actividad)
+  const { data: activeOrganizations, isLoading: loadingOrgs } = useQuery({
+    queryKey: ['most-active-organizations'],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not available')
+
+      // Obtener todas las organizaciones
+      const { data: orgs } = await supabase
+        .from('organizations')
+        .select('id, name')
+        .eq('is_active', true)
+
+      if (!orgs) return []
+
+      // Para cada organización, obtener su última actividad
+      const orgsWithActivity = await Promise.all(
+        orgs.map(async (org) => {
+          const { data: activity } = await supabase
+            .from('organization_online_users')
+            .select('last_seen_at')
+            .eq('org_id', org.id)
+            .order('last_seen_at', { ascending: false })
+            .limit(1)
+            .single()
 
           return {
             ...org,
-            members_count: membersResult.count || 0,
-            projects_count: projectsResult.count || 0,
-            last_seen_at: activityResult.data?.last_seen_at || null
-          };
+            last_seen_at: activity?.last_seen_at || null
+          }
         })
-      );
+      )
 
-      // Ordenar por última actividad (más reciente primero)
-      const sortedOrganizations = organizationsWithCounts.sort((a, b) => {
-        if (!a.last_seen_at && !b.last_seen_at) return 0;
-        if (!a.last_seen_at) return 1; // Sin actividad al final
-        if (!b.last_seen_at) return -1; // Sin actividad al final
-        return new Date(b.last_seen_at).getTime() - new Date(a.last_seen_at).getTime();
-      });
-
-      return sortedOrganizations;
-    }
-  });
-}
-
-const AdminCommunityOrganizations = () => {
-  const [searchValue, setSearchValue] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
-
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const { openModal } = useGlobalModalStore();
-
-  const { data: organizations, isLoading } = useAllOrganizations();
-
-  // Calculate statistics
-  const stats = {
-    total: organizations?.length || 0,
-    free: organizations?.filter(org => org.plan?.name === 'Free').length || 0,
-    pro: organizations?.filter(org => org.plan?.name === 'Pro').length || 0,
-    teams: organizations?.filter(org => org.plan?.name === 'Teams').length || 0
-  };
-
-  const handleEdit = (organization: Organization) => {
-    openModal('admin-organization', { organization, isEditing: true });
-  };
-
-  const handleDelete = (organization: Organization) => {
-    openModal('delete-confirmation', {
-      title: 'Desactivar Organización',
-      description: `¿Estás seguro de que deseas desactivar la organización "${organization.name}"? Esta acción cambiará su estado a inactivo.`,
-      itemName: organization.name,
-      onConfirm: () => deleteOrganizationMutation.mutate(organization.id),
-      dangerous: true
-    });
-  };
-
-  const deleteOrganizationMutation = useMutation({
-    mutationFn: async (organizationId: string) => {
-      if (!supabase) throw new Error('Supabase not initialized');
-      
-      const { error } = await supabase
-        .from('organizations')
-        .update({ is_active: false })
-        .eq('id', organizationId);
-      
-      if (error) throw error;
+      // Ordenar por actividad más reciente y tomar las 5 primeras
+      return orgsWithActivity
+        .filter(o => o.last_seen_at)
+        .sort((a, b) => new Date(b.last_seen_at!).getTime() - new Date(a.last_seen_at!).getTime())
+        .slice(0, 5)
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
-      toast({
-        title: 'Organización desactivada',
-        description: 'La organización ha sido desactivada correctamente.'
-      });
-    },
-    onError: (error) => {
-      console.error('Error deactivating organization:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo desactivar la organización. Inténtalo de nuevo.',
-        variant: 'destructive'
-      });
-    }
-  });
+    enabled: !!supabase
+  })
 
-  // Filtrar organizaciones
-  const filteredOrganizations = organizations?.filter(org => {
-    const matchesSearch = org.name.toLowerCase().includes(searchValue.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || 
-      (statusFilter === 'active' && org.is_active) ||
-      (statusFilter === 'inactive' && !org.is_active);
-    const matchesType = typeFilter === 'all' ||
-      (typeFilter === 'system' && org.is_system) ||
-      (typeFilter === 'regular' && !org.is_system);
-    
-    return matchesSearch && matchesStatus && matchesType;
-  }) || [];
+  const userGrowth = stats?.newUsersLastMonth 
+    ? ((stats.newUsersThisMonth - stats.newUsersLastMonth) / stats.newUsersLastMonth) * 100
+    : 0
 
-  const handleClearFilters = () => {
-    setSearchValue('');
-    setStatusFilter('all');
-    setTypeFilter('all');
-  };
-
-  const customFilters = (
-    <div className="space-y-4 w-72">
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Ordenar por</Label>
-        <Select defaultValue="date-desc">
-          <SelectTrigger className="h-8">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="date-desc">Fecha (más reciente)</SelectItem>
-            <SelectItem value="date-asc">Fecha (más antigua)</SelectItem>
-            <SelectItem value="name-asc">Nombre (A-Z)</SelectItem>
-            <SelectItem value="name-desc">Nombre (Z-A)</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Estado</Label>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="h-8">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos los estados</SelectItem>
-            <SelectItem value="active">Activas</SelectItem>
-            <SelectItem value="inactive">Inactivas</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Tipo</Label>
-        <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="h-8">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos los tipos</SelectItem>
-            <SelectItem value="system">Sistema</SelectItem>
-            <SelectItem value="regular">Regular</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
-  );
-
-  const tableColumns = [
-    {
-      key: 'last_activity',
-      label: 'Última Actividad',
-      width: '18%',
-      render: (organization: Organization) => <LastActivityCell lastSeen={organization.last_seen_at} />
-    },
-    {
-      key: 'name',
-      label: 'Organización',
-      width: '28%',
-      render: (organization: Organization) => (
-        <div>
-          <div className="font-bold">{organization.name}</div>
-          <div className="text-xs text-muted-foreground">
-            {organization.creator?.full_name || 'Usuario desconocido'}
-          </div>
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(8)].map((_, i) => (
+            <Skeleton key={i} className="h-32" />
+          ))}
         </div>
-      ),
-    },
-    {
-      key: 'plan',
-      label: 'Plan',
-      width: '10%',
-      render: (organization: Organization) => {
-        const planName = organization.plan?.name || 'Sin plan';
-        let bgColor = '';
-        
-        if (planName === 'Free') {
-          bgColor = 'bg-[var(--plan-free-bg)]';
-        } else if (planName === 'Pro') {
-          bgColor = 'bg-[var(--plan-pro-bg)]';
-        } else if (planName === 'Teams') {
-          bgColor = 'bg-[var(--plan-teams-bg)]';
-        }
-        
-        return (
-          <Badge 
-            variant="default"
-            className={`${bgColor} text-white hover:${bgColor}/90`}
-          >
-            {planName}
-          </Badge>
-        );
-      },
-    },
-    {
-      key: 'members',
-      label: 'Miembros',
-      width: '8%',
-      render: (organization: Organization) => (
-        <span className="text-sm">{organization.members_count}</span>
-      ),
-    },
-    {
-      key: 'projects',
-      label: 'Proyectos',
-      width: '8%',
-      render: (organization: Organization) => (
-        <span className="text-sm">{organization.projects_count}</span>
-      ),
-    },
-    {
-      key: 'status',
-      label: 'Estado',
-      width: '10%',
-      render: (organization: Organization) => (
-        <div className="flex items-center gap-2">
-          <Badge 
-            variant="default"
-            className="bg-[var(--plan-free-bg)] text-white hover:bg-[var(--plan-free-bg)]/90"
-          >
-            {organization.is_active ? 'Activa' : 'Inactiva'}
-          </Badge>
-          {organization.is_system && (
-            <Badge variant="outline" className="text-xs">
-              <Crown className="w-3 h-3 mr-1" />
-              Sistema
-            </Badge>
-          )}
-        </div>
-      ),
-    },
-    {
-      key: 'created_at',
-      label: 'Fecha de creación',
-      width: '12%',
-      render: (organization: Organization) => (
-        <span className="text-sm">
-          {organization.created_at ? format(new Date(organization.created_at), 'dd/MM/yyyy', { locale: es }) : 'No disponible'}
-        </span>
-      ),
-    },
-    {
-      key: 'actions',
-      label: '',
-      width: '8%',
-      render: (organization: Organization) => (
-        <TableActionButtons
-          onEdit={() => handleEdit(organization)}
-          onDelete={() => handleDelete(organization)}
-        />
-      ),
-    },
-  ];
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
-      {/* Organizations Table */}
-      <Table
-        columns={tableColumns}
-        data={filteredOrganizations}
-        isLoading={isLoading}
-        renderCard={(organization) => (
-          <AdminOrganizationRow
-            organization={organization}
-            onClick={() => handleEdit(organization)}
-            density="normal"
-          />
-        )}
-        emptyState={
-          <div className="text-center py-8 text-muted-foreground">
-            <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
-            <p className="text-sm">No se encontraron organizaciones</p>
-            <p className="text-xs">No hay organizaciones que coincidan con los filtros aplicados.</p>
+      {/* Métricas principales */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="p-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Organizaciones</p>
+              <h3 className="text-2xl font-bold mt-1">{stats?.totalOrganizations || 0}</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                {stats?.activeOrganizations || 0} activas
+              </p>
+            </div>
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <Building className="h-5 w-5 text-primary" />
+            </div>
           </div>
-        }
-      />
-    </div>
-  );
-};
+        </Card>
 
-export default AdminCommunityOrganizations;
+        <Card className="p-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Usuarios Totales</p>
+              <h3 className="text-2xl font-bold mt-1">{stats?.totalUsers || 0}</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                en la plataforma
+              </p>
+            </div>
+            <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+              <Users className="h-5 w-5 text-blue-600" />
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Activos Ahora</p>
+              <h3 className="text-2xl font-bold mt-1">{stats?.activeUsersNow || 0}</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                usuarios online
+              </p>
+            </div>
+            <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center">
+              <Activity className="h-5 w-5 text-green-600" />
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Nuevos Este Mes</p>
+              <h3 className="text-2xl font-bold mt-1">{stats?.newUsersThisMonth || 0}</h3>
+              {userGrowth !== 0 && (
+                <p className={`text-xs mt-1 ${userGrowth > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {userGrowth > 0 ? '+' : ''}{userGrowth.toFixed(1)}% vs mes anterior
+                </p>
+              )}
+            </div>
+            <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+              <UserCheck className="h-5 w-5 text-emerald-600" />
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Plan Free</p>
+              <h3 className="text-2xl font-bold mt-1">{stats?.organizationsByPlan.free || 0}</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                organizaciones
+              </p>
+            </div>
+            <div className="h-10 w-10 rounded-full" style={{ backgroundColor: 'var(--plan-free-bg)', opacity: 0.1 }}>
+              <div className="h-full w-full flex items-center justify-center">
+                <Building className="h-5 w-5" style={{ color: 'var(--plan-free-bg)' }} />
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Plan Pro</p>
+              <h3 className="text-2xl font-bold mt-1">{stats?.organizationsByPlan.pro || 0}</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                organizaciones
+              </p>
+            </div>
+            <div className="h-10 w-10 rounded-full" style={{ backgroundColor: 'var(--plan-pro-bg)', opacity: 0.1 }}>
+              <div className="h-full w-full flex items-center justify-center">
+                <Building className="h-5 w-5" style={{ color: 'var(--plan-pro-bg)' }} />
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Plan Teams</p>
+              <h3 className="text-2xl font-bold mt-1">{stats?.organizationsByPlan.teams || 0}</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                organizaciones
+              </p>
+            </div>
+            <div className="h-10 w-10 rounded-full" style={{ backgroundColor: 'var(--plan-teams-bg)', opacity: 0.1 }}>
+              <div className="h-full w-full flex items-center justify-center">
+                <Building className="h-5 w-5" style={{ color: 'var(--plan-teams-bg)' }} />
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Promedio Proyectos</p>
+              <h3 className="text-2xl font-bold mt-1">{stats?.avgProjectsPerOrg.toFixed(1) || 0}</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                por organización
+              </p>
+            </div>
+            <div className="h-10 w-10 rounded-full bg-violet-500/10 flex items-center justify-center">
+              <TrendingUp className="h-5 w-5 text-violet-600" />
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Actividad Reciente */}
+        <Card className="p-6">
+          <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <Clock className="h-5 w-5 text-primary" />
+            Actividad Reciente de Usuarios
+          </h3>
+          {loadingActivity ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-16" />
+              ))}
+            </div>
+          ) : recentActivity && recentActivity.length > 0 ? (
+            <div className="space-y-3">
+              {recentActivity.map((activity: any) => {
+                const lastSeenTime = new Date(activity.last_seen_at).getTime()
+                const now = Date.now()
+                const diffMs = now - lastSeenTime
+                const isActive = diffMs <= 90000
+
+                return (
+                  <div key={activity.user_id} className="flex items-start justify-between p-3 rounded-lg border">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{activity.users?.full_name}</p>
+                      <p className="text-sm text-muted-foreground truncate">{activity.users?.email}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {format(new Date(activity.last_seen_at), "d 'de' MMMM, HH:mm:ss", { locale: es })}
+                      </p>
+                    </div>
+                    {isActive && (
+                      <Badge variant="default" className="bg-green-600 text-white">
+                        Activo
+                      </Badge>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              No hay actividad reciente
+            </p>
+          )}
+        </Card>
+
+        {/* Organizaciones Más Activas */}
+        <Card className="p-6">
+          <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-primary" />
+            Organizaciones Más Activas
+          </h3>
+          {loadingOrgs ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-16" />
+              ))}
+            </div>
+          ) : activeOrganizations && activeOrganizations.length > 0 ? (
+            <div className="space-y-3">
+              {activeOrganizations.map((org: any, index: number) => (
+                <div key={org.id} className="flex items-start justify-between p-3 rounded-lg border">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-sm font-bold text-primary">{index + 1}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{org.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Última actividad: {format(new Date(org.last_seen_at), "d 'de' MMMM, HH:mm", { locale: es })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              No hay datos de organizaciones activas
+            </p>
+          )}
+        </Card>
+      </div>
+    </div>
+  )
+}
