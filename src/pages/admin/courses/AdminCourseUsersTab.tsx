@@ -100,10 +100,7 @@ export default function AdminCourseUsersTab() {
       key: 'course',
       label: 'Curso',
       render: (enrollment: any) => (
-        <div>
-          <div className="font-medium text-sm">{enrollment.courses?.title || 'Sin título'}</div>
-          <div className="text-xs text-muted-foreground">{enrollment.courses?.slug || 'Sin slug'}</div>
-        </div>
+        <div className="font-medium text-sm">{enrollment.courses?.title || 'Sin título'}</div>
       )
     },
     {
@@ -132,23 +129,30 @@ export default function AdminCourseUsersTab() {
     {
       key: 'started_at',
       label: 'Inicio',
-      render: (enrollment: any) => (
-        <div className="text-sm text-muted-foreground">
-          {format(new Date(enrollment.started_at), 'dd/MM/yyyy', { locale: es })}
-        </div>
-      )
-    },
-    {
-      key: 'expires_at',
-      label: 'Expiración',
-      render: (enrollment: any) => (
-        <div className="text-sm text-muted-foreground">
-          {enrollment.expires_at 
-            ? format(new Date(enrollment.expires_at), 'dd/MM/yyyy', { locale: es })
-            : 'Sin expiración'
-          }
-        </div>
-      )
+      render: (enrollment: any) => {
+        const startDate = new Date(enrollment.started_at);
+        const endDate = enrollment.expires_at ? new Date(enrollment.expires_at) : null;
+        
+        return (
+          <div className="w-full max-w-xs">
+            <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+              <span>{format(startDate, 'MMM d', { locale: es })}</span>
+              {endDate && <span>{format(endDate, 'MMM d, yy', { locale: es })}</span>}
+            </div>
+            <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+              <div 
+                className="h-full rounded-full transition-all duration-300"
+                style={{ 
+                  backgroundColor: 'var(--accent)',
+                  width: endDate 
+                    ? `${Math.min(100, Math.max(0, ((new Date().getTime() - startDate.getTime()) / (endDate.getTime() - startDate.getTime())) * 100))}%`
+                    : '100%'
+                }}
+              />
+            </div>
+          </div>
+        );
+      }
     },
     {
       key: 'actions',
