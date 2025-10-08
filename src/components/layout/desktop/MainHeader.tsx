@@ -216,12 +216,19 @@ export function MainHeader() {
         </Link>
 
         {isLearningContext ? (
-          /* Learning breadcrumb */
+          /* Learning breadcrumb - identical style to professional */
           <>
-            <span className="text-sm font-medium text-[var(--main-sidebar-fg)]">
+            <button
+              onClick={() => navigate('/learning/dashboard')}
+              className="flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]"
+            >
               Capacitaciones
-            </span>
+            </button>
+            
+            {/* Separator */}
             <Slash className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-30" />
+            
+            {/* Nombre de la página actual */}
             <span className="text-sm font-medium text-[var(--main-sidebar-fg)] opacity-80">
               {currentPageName}
             </span>
