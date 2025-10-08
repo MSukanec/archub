@@ -101,6 +101,17 @@ export default function PaymentMethodModal({
         throw new Error('No se encontró el perfil para este usuario');
       }
 
+      // DEBUG: Verificar precio antes de enviar
+      const { data: priceCheck } = await supabase
+        .from('course_prices')
+        .select('amount, currency_code, provider, is_active')
+        .eq('course_id', courseCheck.id)
+        .eq('currency_code', currency)
+        .eq('is_active', true)
+        .limit(5);
+      
+      console.log('💰 Precios disponibles para el curso:', priceCheck);
+
       // 3) Invocar la Edge Function con user_id = profile.id (NO session.user.id)
       const response = await fetch('https://wtatvsgeivymcppowrfy.functions.supabase.co/create_mp_preference', {
         method: 'POST',
