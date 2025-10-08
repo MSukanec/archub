@@ -88,7 +88,7 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
               </Button>
             )}
             <Button
-              variant="ghost"
+              variant="default"
               size="sm"
               onClick={() => {
                 navigate('/notifications');

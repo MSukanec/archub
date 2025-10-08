@@ -233,12 +233,7 @@ export function Sidebar() {
             )}
 
             {/* Notificaciones */}
-            <div className={cn(
-              "flex items-center justify-center",
-              isExpanded ? "w-full" : "w-8"
-            )}>
-              <NotificationBell />
-            </div>
+            <NotificationBell isExpanded={isExpanded} />
 
             {/* Avatar del Usuario */}
             <button

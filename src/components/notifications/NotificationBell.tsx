@@ -1,6 +1,5 @@
 import { Bell } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { getUnreadCount, subscribeUserNotifications } from '@/lib/notifications';
 import { useAuthStore } from '@/stores/authStore';
@@ -10,8 +9,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { NotificationDropdown } from './NotificationDropdown';
+import ButtonSidebar from '@/components/layout/desktop/ButtonSidebar';
 
-export function NotificationBell() {
+interface NotificationBellProps {
+  isExpanded: boolean;
+}
+
+export function NotificationBell({ isExpanded }: NotificationBellProps) {
   const user = useAuthStore((state) => state.user);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -46,23 +50,27 @@ export function NotificationBell() {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
-          data-testid="button-notifications"
-        >
-          <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <Badge
-              variant="destructive"
-              className="absolute -top-1 -right-1 h-5 min-w-5 px-1 text-xs flex items-center justify-center"
-              data-testid="badge-unread-count"
-            >
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </Badge>
-          )}
-        </Button>
+        <div>
+          <ButtonSidebar
+            icon={<Bell className="w-[18px] h-[18px]" />}
+            label="Notificaciones"
+            isActive={false}
+            isExpanded={isExpanded}
+            onClick={() => setIsOpen(!isOpen)}
+            variant="secondary"
+            rightIcon={
+              unreadCount > 0 ? (
+                <Badge
+                  variant="destructive"
+                  className="h-5 min-w-5 px-1.5 text-xs flex items-center justify-center"
+                  data-testid="badge-unread-count"
+                >
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Badge>
+              ) : undefined
+            }
+          />
+        </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 p-0">
         <NotificationDropdown

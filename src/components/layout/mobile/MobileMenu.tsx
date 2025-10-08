@@ -392,9 +392,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
               </div>
 
               {/* Notificaciones */}
-              <div className="flex items-center">
-                <NotificationBell />
-              </div>
+              <NotificationBell isExpanded={true} />
 
               {/* Avatar del usuario - lado derecho */}
               <Avatar 
