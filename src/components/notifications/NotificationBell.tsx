@@ -51,7 +51,7 @@ export function NotificationBell({ isExpanded }: NotificationBellProps) {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <div>
+        <div className="relative">
           <ButtonSidebar
             icon={<Bell className="w-[18px] h-[18px]" />}
             label="Notificaciones"
@@ -60,7 +60,7 @@ export function NotificationBell({ isExpanded }: NotificationBellProps) {
             onClick={() => setIsOpen(!isOpen)}
             variant="secondary"
             rightIcon={
-              unreadCount > 0 ? (
+              unreadCount > 0 && isExpanded ? (
                 <Badge
                   className="h-5 min-w-5 px-1.5 text-xs flex items-center justify-center bg-[var(--accent)] text-white border-0 hover:bg-[var(--accent)]"
                   data-testid="badge-unread-count"
@@ -70,9 +70,21 @@ export function NotificationBell({ isExpanded }: NotificationBellProps) {
               ) : undefined
             }
           />
+          {/* Indicador de notificaciones cuando está colapsado */}
+          {unreadCount > 0 && !isExpanded && (
+            <span 
+              className="absolute top-0 right-0 h-2 w-2 rounded-full bg-[var(--accent)]"
+              data-testid="notification-indicator"
+            />
+          )}
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 p-0">
+      <DropdownMenuContent 
+        align="start" 
+        side="right"
+        sideOffset={8}
+        className="w-80 p-0"
+      >
         <NotificationDropdown
           userId={userId}
           onRefresh={fetchUnreadCount}
