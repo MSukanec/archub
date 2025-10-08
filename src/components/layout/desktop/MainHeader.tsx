@@ -61,6 +61,10 @@ const PAGE_NAMES: Record<string, string> = {
   '/profile': 'Perfil',
   '/profile/organizations': 'Gestión de Organizaciones',
   '/profile/preferences': 'Preferencias de Perfil',
+  
+  // Learning / Capacitaciones
+  '/learning/dashboard': 'Dashboard de Capacitaciones',
+  '/learning/courses': 'Mis Cursos',
 };
 
 interface MainHeaderProps {
@@ -71,8 +75,11 @@ export function MainHeader() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId, setCurrentOrganization, setSelectedProject } = useProjectContext();
-  const { setSidebarLevel, sidebarLevel } = useNavigationStore();
+  const { setSidebarLevel, sidebarLevel, currentSidebarContext } = useNavigationStore();
   const { toast } = useToast();
+  
+  // Detectar si estamos en el contexto de Learning
+  const isLearningContext = currentSidebarContext === 'learning';
   
   // ORGANIZATION CHANGE MUTATION - Exact copy from ProfileOrganizations.tsx that WORKS
   const switchOrganization = useMutation({
@@ -208,104 +215,120 @@ export function MainHeader() {
           </div>
         </Link>
 
-        {/* Organization selector */}
-        <div className="flex items-center gap-1">
-          <button
-            onClick={handleOrganizationClick}
-            className={`flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
-              sidebarLevel === 'organization' 
-                ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)]' 
-                : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]'
-            }`}
-          >
-            <Building2 className="h-4 w-4 mr-1" />
-            {currentOrganization}
-          </button>
-          
-          <Popover>
-            <PopoverTrigger asChild>
+        {isLearningContext ? (
+          /* Learning breadcrumb */
+          <>
+            <span className="text-sm font-medium text-[var(--main-sidebar-fg)]">
+              Capacitaciones
+            </span>
+            <Slash className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-30" />
+            <span className="text-sm font-medium text-[var(--main-sidebar-fg)] opacity-80">
+              {currentPageName}
+            </span>
+          </>
+        ) : (
+          /* Normal organization/project navigation */
+          <>
+            {/* Organization selector */}
+            <div className="flex items-center gap-1">
               <button
-                className="flex items-center h-8 px-1 transition-all duration-200 ease-out overflow-hidden rounded text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]"
+                onClick={handleOrganizationClick}
+                className={`flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
+                  sidebarLevel === 'organization' 
+                    ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)]' 
+                    : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]'
+                }`}
               >
-                <ChevronDown className="h-3 w-3" />
+                <Building2 className="h-4 w-4 mr-1" />
+                {currentOrganization}
               </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-2" align="start">
-              <div className="space-y-1">
-                <div className="px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
-                  Seleccionar Organización
-                </div>
-                {userData?.organizations?.map((org) => (
-                  <Button
-                    key={org.id}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleOrganizationChange(org.id)}
-                    className="w-full justify-start h-8 text-xs"
+              
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    className="flex items-center h-8 px-1 transition-all duration-200 ease-out overflow-hidden rounded text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]"
                   >
-                    <Building2 className="h-4 w-4 mr-2" />
-                    {org.name}
-                  </Button>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-        
-        {/* Separator */}
-        <Slash className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-30" />
+                    <ChevronDown className="h-3 w-3" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-2" align="start">
+                  <div className="space-y-1">
+                    <div className="px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
+                      Seleccionar Organización
+                    </div>
+                    {userData?.organizations?.map((org) => (
+                      <Button
+                        key={org.id}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleOrganizationChange(org.id)}
+                        className="w-full justify-start h-8 text-xs"
+                      >
+                        <Building2 className="h-4 w-4 mr-2" />
+                        {org.name}
+                      </Button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+            
+            {/* Separator */}
+            <Slash className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-30" />
 
-        {/* Project selector */}
-        <div className="flex items-center gap-1">
-          <button
-            onClick={handleProjectClick}
-            className={`flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
-              sidebarLevel === 'project' 
-                ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)]' 
-                : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]'
-            }`}
-          >
-            <FolderOpen className="h-4 w-4 mr-1" />
-            {currentProjectName}
-          </button>
-          
-          <Popover>
-            <PopoverTrigger asChild>
+            {/* Project selector */}
+            <div className="flex items-center gap-1">
               <button
-                className="flex items-center h-8 px-1 transition-all duration-200 ease-out overflow-hidden rounded text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]"
+                onClick={handleProjectClick}
+                className={`flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
+                  sidebarLevel === 'project' 
+                    ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)]' 
+                    : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]'
+                }`}
               >
-                <ChevronDown className="h-3 w-3" />
+                <FolderOpen className="h-4 w-4 mr-1" />
+                {currentProjectName}
               </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-2" align="start">
-              <div className="space-y-1">
-                <div className="px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
-                  Seleccionar Proyecto
-                </div>
-                {projectsLite.map((project) => (
-                  <Button
-                    key={project.id}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleProjectChange(project.id)}
-                    className="w-full justify-start h-8 text-xs"
+              
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    className="flex items-center h-8 px-1 transition-all duration-200 ease-out overflow-hidden rounded text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]"
                   >
-                    <FolderOpen className="h-4 w-4 mr-2" />
-                    {project.name}
-                  </Button>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-        
-        {/* Separator */}
-        <Slash className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-30" />
-        
-        {/* Nombre de la página actual */}
-        <span className="text-sm font-medium text-[var(--main-sidebar-fg)] opacity-80">
-          {currentPageName}
-        </span>
+                    <ChevronDown className="h-3 w-3" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-2" align="start">
+                  <div className="space-y-1">
+                    <div className="px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
+                      Seleccionar Proyecto
+                    </div>
+                    {projectsLite.map((project) => (
+                      <Button
+                        key={project.id}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleProjectChange(project.id)}
+                        className="w-full justify-start h-8 text-xs"
+                      >
+                        <FolderOpen className="h-4 w-4 mr-2" />
+                        {project.name}
+                      </Button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+            
+            {/* Separator */}
+            <Slash className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-30" />
+            
+            {/* Nombre de la página actual */}
+            <span className="text-sm font-medium text-[var(--main-sidebar-fg)] opacity-80">
+              {currentPageName}
+            </span>
+          </>
+        )}
       </div>
 
     </div>
