@@ -2,7 +2,7 @@ import { Bell } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useEffect, useState } from 'react';
 import { getUnreadCount, subscribeUserNotifications } from '@/lib/notifications';
-import { useAuthStore } from '@/stores/authStore';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,15 +16,16 @@ interface NotificationBellProps {
 }
 
 export function NotificationBell({ isExpanded }: NotificationBellProps) {
-  const user = useAuthStore((state) => state.user);
+  const { data: userData } = useCurrentUser();
+  const userId = userData?.user?.id;
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
 
   const fetchUnreadCount = async () => {
-    if (!user?.id) return;
+    if (!userId) return;
     
     try {
-      const count = await getUnreadCount(user.id);
+      const count = await getUnreadCount(userId);
       setUnreadCount(count);
     } catch (error) {
       console.error('Error fetching unread count:', error);
@@ -32,20 +33,20 @@ export function NotificationBell({ isExpanded }: NotificationBellProps) {
   };
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!userId) return;
 
     fetchUnreadCount();
 
-    const unsubscribe = subscribeUserNotifications(user.id, () => {
+    const unsubscribe = subscribeUserNotifications(userId, () => {
       fetchUnreadCount();
     });
 
     return () => {
       unsubscribe();
     };
-  }, [user?.id]);
+  }, [userId]);
 
-  if (!user?.id) return null;
+  if (!userId) return null;
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -61,8 +62,7 @@ export function NotificationBell({ isExpanded }: NotificationBellProps) {
             rightIcon={
               unreadCount > 0 ? (
                 <Badge
-                  variant="destructive"
-                  className="h-5 min-w-5 px-1.5 text-xs flex items-center justify-center"
+                  className="h-5 min-w-5 px-1.5 text-xs flex items-center justify-center bg-[var(--accent)] text-white border-0 hover:bg-[var(--accent)]"
                   data-testid="badge-unread-count"
                 >
                   {unreadCount > 99 ? '99+' : unreadCount}
@@ -74,7 +74,7 @@ export function NotificationBell({ isExpanded }: NotificationBellProps) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 p-0">
         <NotificationDropdown
-          userId={user.id}
+          userId={userId}
           onRefresh={fetchUnreadCount}
           onClose={() => setIsOpen(false)}
         />
