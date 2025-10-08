@@ -239,26 +239,33 @@ export default function CourseList() {
     {
       key: 'actions',
       label: 'Acciones',
-      render: (course: any) => (
-        <div className="flex items-center gap-2">
-          <PayButton
-            courseSlug={course.slug}
-            currency="ARS"
-            variant="secondary"
-            size="sm"
-          />
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => handleViewDetail(course.slug)}
-            className="h-8 gap-2"
-            data-testid={`button-view-course-${course.id}`}
-          >
-            <Eye className="h-4 w-4" />
-            <span>Ver curso</span>
-          </Button>
-        </div>
-      )
+      render: (course: any) => {
+        const enrollment = enrollments.find((e: any) => e.course_id === course.id);
+        const hasActiveEnrollment = enrollment && enrollment.is_active;
+        
+        return (
+          <div className="flex items-center gap-2">
+            {!hasActiveEnrollment && (
+              <PayButton
+                courseSlug={course.slug}
+                currency="ARS"
+                variant="secondary"
+                size="sm"
+              />
+            )}
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => handleViewDetail(course.slug)}
+              className="h-8 gap-2"
+              data-testid={`button-view-course-${course.id}`}
+            >
+              <Eye className="h-4 w-4" />
+              <span>Ver curso</span>
+            </Button>
+          </div>
+        );
+      }
     }
   ];
 
