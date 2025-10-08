@@ -146,8 +146,8 @@ export function Sidebar() {
                   } else if (sidebarLevel === 'learning') {
                     if (item.id === 'dashboard') return { show: true, text: 'Capacitaciones' };
                   } else if (sidebarLevel === 'admin') {
-                    if (item.id === 'community') return { show: true, text: 'Comunidad' };
-                    if (item.id === 'tasks') return { show: true, text: 'Administración' };
+                    if (item.id === 'dashboard') return { show: true, text: 'Comunidad' };
+                    if (item.id === 'courses') return { show: true, text: 'Administración' };
                   }
                   return { show: false, text: '' };
                 };
