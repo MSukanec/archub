@@ -134,3 +134,22 @@ create table public.course_prices (
     )
   )
 ) TABLESPACE pg_default;
+
+Tabla PAYMENTS_LOG:
+
+create table public.payments_log (
+  id uuid not null default gen_random_uuid (),
+  user_id uuid not null,
+  course_id uuid not null,
+  provider text not null,
+  provider_payment_id text not null,
+  status text not null,
+  amount numeric(12, 2) null,
+  currency text null,
+  external_reference text null,
+  raw_payload jsonb not null,
+  created_at timestamp with time zone not null default now(),
+  constraint payments_log_pkey primary key (id),
+  constraint payments_log_course_id_fkey foreign KEY (course_id) references courses (id) on delete CASCADE,
+  constraint payments_log_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+) TABLESPACE pg_default;

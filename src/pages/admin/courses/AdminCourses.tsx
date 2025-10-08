@@ -1,14 +1,15 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
-import { BookOpen, Plus, Users } from 'lucide-react'
+import { BookOpen, Plus, Users, BarChart3 } from 'lucide-react'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import AdminCourseDashboard from './AdminCourseDashboard'
 import AdminCourseUsersTab from './AdminCourseUsersTab'
 import AdminCourseListTab from './AdminCourseListTab'
 
 export default function AdminCourses() {
-  const [activeTab, setActiveTab] = useState('users')
+  const [activeTab, setActiveTab] = useState('dashboard')
   const { setSidebarLevel } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
 
@@ -28,6 +29,11 @@ export default function AdminCourses() {
     title: "Administración de Cursos",
     icon: BookOpen,
     tabs: [
+      {
+        id: 'dashboard',
+        label: 'Dashboard',
+        isActive: activeTab === 'dashboard'
+      },
       {
         id: 'users',
         label: 'Alumnos',
@@ -69,6 +75,7 @@ export default function AdminCourses() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
+        {activeTab === 'dashboard' && <AdminCourseDashboard />}
         {activeTab === 'users' && <AdminCourseUsersTab />}
         {activeTab === 'courses' && <AdminCourseListTab />}
       </div>
