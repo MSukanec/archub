@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Plus, Trash2 } from 'lucide-react';
 import { FormModalHeader } from '../../form/FormModalHeader';
 import { FormModalFooter } from '../../form/FormModalFooter';
 import { FormModalLayout } from '../../form/FormModalLayout';
@@ -11,11 +11,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useEffect, useState } from 'react';
+import { Separator } from '@/components/ui/separator';
 
 const courseSchema = z.object({
   slug: z.string().min(1, 'El slug es requerido').regex(/^[a-z0-9-]+$/, 'Solo minúsculas, números y guiones'),
@@ -44,6 +46,15 @@ interface Course {
   created_by?: string;
 }
 
+interface CoursePrice {
+  id: string;
+  course_id: string;
+  currency_code: string;
+  amount: number;
+  provider: string;
+  is_active: boolean;
+}
+
 interface CourseFormModalProps {
   modalData?: {
     course?: Course;
@@ -59,6 +70,27 @@ export function CourseFormModal({ modalData, onClose }: CourseFormModalProps) {
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const { data: userData } = useCurrentUser();
+  const [newPriceProvider, setNewPriceProvider] = useState('any');
+  const [newPriceCurrency, setNewPriceCurrency] = useState('ARS');
+  const [newPriceAmount, setNewPriceAmount] = useState('');
+
+  // Query para obtener los precios del curso
+  const { data: prices = [], refetch: refetchPrices } = useQuery({
+    queryKey: ['course-prices', course?.id],
+    queryFn: async () => {
+      if (!course?.id || !supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('course_prices')
+        .select('*')
+        .eq('course_id', course.id)
+        .order('currency_code', { ascending: true });
+      
+      if (error) throw error;
+      return data as CoursePrice[];
+    },
+    enabled: !!course?.id
+  });
 
   const form = useForm<CourseFormData>({
     resolver: zodResolver(courseSchema),
@@ -173,6 +205,73 @@ export function CourseFormModal({ modalData, onClose }: CourseFormModalProps) {
       toast({
         title: 'Error',
         description: error.message || 'No se pudo actualizar el curso. Inténtalo de nuevo.',
+        variant: 'destructive'
+      });
+    }
+  });
+
+  // Mutación para crear precio
+  const createPriceMutation = useMutation({
+    mutationFn: async () => {
+      if (!supabase || !course?.id) throw new Error('No course selected');
+      if (!newPriceAmount || parseFloat(newPriceAmount) <= 0) {
+        throw new Error('El monto debe ser mayor a 0');
+      }
+
+      const { error } = await supabase
+        .from('course_prices')
+        .insert({
+          course_id: course.id,
+          currency_code: newPriceCurrency,
+          amount: parseFloat(newPriceAmount),
+          provider: newPriceProvider,
+          is_active: true
+        });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      refetchPrices();
+      setNewPriceAmount('');
+      setNewPriceProvider('any');
+      setNewPriceCurrency('ARS');
+      toast({
+        title: 'Precio agregado',
+        description: 'El precio se agregó correctamente.'
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo agregar el precio.',
+        variant: 'destructive'
+      });
+    }
+  });
+
+  // Mutación para eliminar precio
+  const deletePriceMutation = useMutation({
+    mutationFn: async (priceId: string) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+
+      const { error } = await supabase
+        .from('course_prices')
+        .delete()
+        .eq('id', priceId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      refetchPrices();
+      toast({
+        title: 'Precio eliminado',
+        description: 'El precio se eliminó correctamente.'
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo eliminar el precio.',
         variant: 'destructive'
       });
     }
@@ -329,6 +428,105 @@ export function CourseFormModal({ modalData, onClose }: CourseFormModalProps) {
             )}
           />
         </div>
+
+        {/* Sección de Precios - solo en edición */}
+        {course && (
+          <>
+            <Separator className="my-6" />
+            
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Precios del Curso</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Configura los precios por moneda y proveedor de pago
+                </p>
+              </div>
+
+              {/* Lista de precios existentes */}
+              {prices.length > 0 && (
+                <div className="space-y-2">
+                  {prices.map((price) => (
+                    <div
+                      key={price.id}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="font-medium">
+                          {price.currency_code} ${Number(price.amount).toFixed(2)}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Provider: {price.provider}
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => deletePriceMutation.mutate(price.id)}
+                        disabled={deletePriceMutation.isPending}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Formulario para agregar nuevo precio */}
+              <div className="grid grid-cols-4 gap-3 items-end">
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Proveedor</label>
+                  <Select value={newPriceProvider} onValueChange={setNewPriceProvider}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="any">Cualquiera</SelectItem>
+                      <SelectItem value="mercadopago">MercadoPago</SelectItem>
+                      <SelectItem value="paypal">PayPal</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Moneda</label>
+                  <Select value={newPriceCurrency} onValueChange={setNewPriceCurrency}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ARS">ARS</SelectItem>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Monto</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={newPriceAmount}
+                    onChange={(e) => setNewPriceAmount(e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
+
+                <Button
+                  type="button"
+                  onClick={() => createPriceMutation.mutate()}
+                  disabled={createPriceMutation.isPending || !newPriceAmount}
+                  className="w-full"
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Agregar
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
       </form>
     </Form>
   );
