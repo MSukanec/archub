@@ -192,7 +192,12 @@ export default function SelectMode() {
             <div className="flex-1" />
 
             {/* Title and Description at bottom - all at same height */}
-            <div className="w-full flex flex-col items-center relative pb-20">
+            <div className={`
+              w-full flex flex-col items-center relative
+              transition-all duration-500
+              ${isAvailable ? 'group-hover:-translate-y-8' : ''}
+              ${isSelected ? '-translate-y-8' : ''}
+            `}>
               {/* Title - changes to white on hover */}
               <h2 className={`
                 text-2xl font-medium text-center
@@ -214,10 +219,10 @@ export default function SelectMode() {
                 transition-all duration-500
                 text-gray-400
                 ${isAvailable 
-                  ? 'opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0' 
+                  ? 'opacity-0 group-hover:opacity-100' 
                   : 'opacity-0'
                 }
-                ${isSelected ? 'opacity-100 translate-y-0' : ''}
+                ${isSelected ? 'opacity-100' : ''}
               `}>
                 {mode.description}
               </p>
@@ -228,7 +233,7 @@ export default function SelectMode() {
                   absolute top-full mt-3 left-1/2 transform -translate-x-1/2
                   flex items-center gap-2 text-sm text-muted-foreground
                   transition-all duration-500
-                  opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0
+                  opacity-0 group-hover:opacity-100
                 `}>
                   <Lock className="h-4 w-4" />
                   <span>Próximamente</span>
