@@ -226,10 +226,10 @@ export function MainHeader() {
             </button>
             
             {/* Separator */}
-            <Slash className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-30" />
+            <span className="text-xs font-medium text-[var(--main-sidebar-fg)] opacity-30 px-1">/</span>
             
             {/* Nombre de la página actual */}
-            <span className="text-sm font-medium text-[var(--main-sidebar-fg)] opacity-80">
+            <span className="text-xs font-medium text-[var(--main-sidebar-fg)] opacity-80">
               {currentPageName}
             </span>
           </>
@@ -281,7 +281,7 @@ export function MainHeader() {
             </div>
             
             {/* Separator */}
-            <Slash className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-30" />
+            <span className="text-xs font-medium text-[var(--main-sidebar-fg)] opacity-30 px-1">/</span>
 
             {/* Project selector */}
             <div className="flex items-center gap-1">
@@ -328,10 +328,10 @@ export function MainHeader() {
             </div>
             
             {/* Separator */}
-            <Slash className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-30" />
+            <span className="text-xs font-medium text-[var(--main-sidebar-fg)] opacity-30 px-1">/</span>
             
             {/* Nombre de la página actual */}
-            <span className="text-sm font-medium text-[var(--main-sidebar-fg)] opacity-80">
+            <span className="text-xs font-medium text-[var(--main-sidebar-fg)] opacity-80">
               {currentPageName}
             </span>
           </>
