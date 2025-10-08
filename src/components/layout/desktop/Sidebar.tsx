@@ -79,7 +79,6 @@ export function Sidebar() {
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
       return [
-        { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/admin/dashboard' },
         { id: 'community', label: 'Comunidad', icon: Users, href: '/admin/community' },
         { id: 'courses', label: 'Cursos', icon: BookOpen, href: '/admin/courses' },
         { id: 'tasks', label: 'Tareas', icon: ListTodo, href: '/admin/tasks' },
@@ -146,7 +145,6 @@ export function Sidebar() {
                   } else if (sidebarLevel === 'learning') {
                     if (item.id === 'dashboard') return { show: true, text: 'Capacitaciones' };
                   } else if (sidebarLevel === 'admin') {
-                    if (item.id === 'dashboard') return { show: true, text: 'Comunidad' };
                     if (item.id === 'courses') return { show: true, text: 'Administración' };
                   }
                   return { show: false, text: '' };
