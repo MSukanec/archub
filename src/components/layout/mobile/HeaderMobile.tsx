@@ -5,6 +5,7 @@ import { useLocation } from "wouter";
 import { MobileMenu } from "./MobileMenu";
 import { useMobileMenuStore } from "./useMobileMenuStore";
 import { SwipeContainer } from "./SwipeContainer";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 interface Tab {
   id: string;
@@ -105,11 +106,14 @@ export function HeaderMobile({
             </div>
           </button>
 
-          {/* Right: ONLY Menu Icon */}
-          <Menu 
-            className="w-6 h-6 text-[var(--layout-text)] cursor-pointer hover:text-[var(--accent)] transition-colors" 
-            onClick={openMenu}
-          />
+          {/* Right: Notifications and Menu */}
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <Menu 
+              className="w-6 h-6 text-[var(--layout-text)] cursor-pointer hover:text-[var(--accent)] transition-colors" 
+              onClick={openMenu}
+            />
+          </div>
         </div>
 
         {/* Tabs Row */}
