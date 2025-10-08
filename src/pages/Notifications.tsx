@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { Bell, CheckCircle, Circle } from 'lucide-react'
+import { Bell, CheckCircle, Circle, CheckCheck } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
 import { useLocation } from 'wouter'
 import { supabase } from '@/lib/supabase'
@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
-import { markAsRead, resolveNotificationHref, type UserNotificationRow } from '@/lib/notifications'
+import { markAsRead, markAllAsRead, resolveNotificationHref, type UserNotificationRow } from '@/lib/notifications'
 
 export default function Notifications() {
   const { data: userData, isLoading } = useCurrentUser()
@@ -68,6 +68,28 @@ export default function Notifications() {
       toast({
         title: "Error",
         description: "No se pudo marcar la notificación como leída",
+        variant: "destructive"
+      })
+    }
+  })
+
+  // Mutación para marcar todas como leídas
+  const markAllAsReadMutation = useMutation({
+    mutationFn: async () => {
+      if (!userData?.user?.id) throw new Error('No user available')
+      await markAllAsRead(userData.user.id)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] })
+      toast({
+        title: "Listo",
+        description: "Todas las notificaciones han sido marcadas como leídas"
+      })
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "No se pudieron marcar las notificaciones como leídas",
         variant: "destructive"
       })
     }
@@ -189,15 +211,29 @@ export default function Notifications() {
     )
   }
 
+  const unreadNotifications = notifications.filter(n => !n.read_at)
+
+  const headerProps = {
+    icon: Bell,
+    title: "Notificaciones",
+    pageTitle: "Notificaciones",
+    actions: unreadNotifications.length > 0 ? [
+      <Button
+        key="mark-all-read"
+        onClick={() => markAllAsReadMutation.mutate()}
+        disabled={markAllAsReadMutation.isPending}
+        className="h-8 px-3 text-xs"
+        data-testid="button-mark-all-read"
+      >
+        <CheckCheck className="w-4 h-4 mr-1" />
+        Marcar todas como leídas
+      </Button>
+    ] : []
+  }
+
   if (notifications.length === 0) {
     return (
-      <Layout
-        headerProps={{
-          icon: Bell,
-          title: "Notificaciones",
-          pageTitle: "Notificaciones"
-        }}
-      >
+      <Layout headerProps={headerProps}>
         <EmptyState
           icon={<Bell className="w-8 h-8 text-muted-foreground" />}
           title="No tienes notificaciones"
@@ -208,17 +244,7 @@ export default function Notifications() {
   }
 
   return (
-    <Layout
-      headerProps={{
-        icon: Bell,
-        title: "Notificaciones",
-        pageTitle: "Notificaciones",
-        breadcrumb: [
-          { name: "Organización", href: "/organization/dashboard" },
-          { name: "Notificaciones", href: "/notifications" }
-        ]
-      }}
-    >
+    <Layout headerProps={headerProps}>
       <Table
         data={notifications}
         columns={columns}
