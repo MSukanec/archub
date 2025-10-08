@@ -45,8 +45,27 @@ export default function PaymentMethodModal({
     try {
       setLoading(true);
       
+      console.log('🔍 Iniciando pago para curso:', courseSlug, 'Moneda:', currency);
+      
       if (!supabase) {
         throw new Error('Supabase no está disponible');
+      }
+
+      // DEBUG: Verificar estado del curso antes de intentar pago
+      const { data: courseCheck } = await supabase
+        .from('courses')
+        .select('id, slug, title, is_active, is_visible')
+        .eq('slug', courseSlug)
+        .single();
+      
+      console.log('📚 Estado del curso en BD:', courseCheck);
+      
+      if (!courseCheck) {
+        throw new Error(`Curso con slug "${courseSlug}" no encontrado en la base de datos`);
+      }
+      
+      if (!courseCheck.is_active) {
+        throw new Error(`El curso "${courseCheck.title}" no está activo (is_active = false)`);
       }
 
       // 1) Usuario autenticado (Auth)
@@ -88,9 +107,11 @@ export default function PaymentMethodModal({
       });
 
       const data = await response.json();
+      
+      console.log('📡 Respuesta de Edge Function:', { status: response.status, data });
 
       if (!response.ok) {
-        console.error('create_mp_preference error:', data);
+        console.error('❌ Error de Edge Function:', data);
         const errorMessage = data?.error || data?.message || `Error ${response.status}: No se pudo crear la preferencia`;
         throw new Error(errorMessage);
       }
