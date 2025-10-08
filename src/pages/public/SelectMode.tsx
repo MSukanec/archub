@@ -192,7 +192,7 @@ export default function SelectMode() {
             <div className="flex-1" />
 
             {/* Title and Description at bottom - all at same height */}
-            <div className="w-full flex flex-col items-center gap-4 min-h-[80px]">
+            <div className="w-full flex flex-col items-center relative">
               {/* Title - changes to white on hover */}
               <h2 className={`
                 text-2xl font-medium text-center
@@ -207,13 +207,14 @@ export default function SelectMode() {
                 {mode.title}
               </h2>
 
-              {/* Description - only visible on hover, below title, light gray */}
+              {/* Description - only visible on hover, below title, light gray - ABSOLUTE so it doesn't take space */}
               <p className={`
-                text-sm text-center leading-relaxed max-w-xs
+                absolute top-full mt-4 left-1/2 transform -translate-x-1/2
+                text-sm text-center leading-relaxed max-w-xs w-full px-4
                 transition-all duration-500
                 text-gray-400
                 ${isAvailable 
-                  ? 'opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0' 
+                  ? 'opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0' 
                   : 'opacity-0'
                 }
                 ${isSelected ? 'opacity-100 translate-y-0' : ''}
@@ -221,12 +222,13 @@ export default function SelectMode() {
                 {mode.description}
               </p>
 
-              {/* Status indicators */}
+              {/* Status indicators - ABSOLUTE so it doesn't take space */}
               {!isAvailable && (
                 <div className={`
-                  flex items-center gap-2 text-sm text-muted-foreground mt-2
+                  absolute top-full mt-4 left-1/2 transform -translate-x-1/2
+                  flex items-center gap-2 text-sm text-muted-foreground
                   transition-all duration-500
-                  opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0
+                  opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0
                 `}>
                   <Lock className="h-4 w-4" />
                   <span>Próximamente</span>
@@ -234,7 +236,7 @@ export default function SelectMode() {
               )}
 
               {isLoading && (
-                <div className="flex items-center gap-2 text-sm text-white mt-2">
+                <div className="absolute top-full mt-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 text-sm text-white">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <span>Guardando...</span>
                 </div>
