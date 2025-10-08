@@ -51,7 +51,11 @@ export function NotificationBell({ isExpanded }: NotificationBellProps) {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <div className="relative">
+        <div 
+          className="relative"
+          onMouseEnter={(e) => e.stopPropagation()}
+          onMouseLeave={(e) => e.stopPropagation()}
+        >
           <ButtonSidebar
             icon={<Bell className="w-[18px] h-[18px]" />}
             label="Notificaciones"
