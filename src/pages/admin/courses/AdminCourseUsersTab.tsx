@@ -7,9 +7,10 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { queryClient } from '@/lib/queryClient'
 
 export default function AdminCourseUsersTab() {
   const { toast } = useToast()
@@ -36,12 +37,52 @@ export default function AdminCourseUsersTab() {
     enabled: !!supabase
   });
 
+  // Delete enrollment mutation
+  const deleteEnrollmentMutation = useMutation({
+    mutationFn: async (enrollmentId: string) => {
+      if (!supabase) throw new Error('Supabase no disponible');
+      
+      const { error } = await supabase
+        .from('course_enrollments')
+        .delete()
+        .eq('id', enrollmentId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['course-enrollments'] });
+      toast({
+        title: 'Suscripción eliminada',
+        description: 'La suscripción se eliminó correctamente',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo eliminar la suscripción',
+        variant: 'destructive'
+      });
+    }
+  });
+
   const handleCreateEnrollment = () => {
     openModal('course-enrollment', {});
   };
 
   const handleEditEnrollment = (enrollment: any) => {
     openModal('course-enrollment', { enrollment, isEditing: true });
+  };
+
+  const handleDeleteEnrollment = (enrollment: any) => {
+    openModal('delete-confirmation', {
+      mode: 'simple',
+      title: 'Eliminar Suscripción',
+      description: '¿Estás seguro de que querés eliminar esta suscripción? El alumno perderá acceso al curso.',
+      itemName: `${enrollment.users?.full_name || 'Usuario'} - ${enrollment.courses?.title || 'Curso'}`,
+      destructiveActionText: 'Eliminar Suscripción',
+      onConfirm: () => deleteEnrollmentMutation.mutate(enrollment.id),
+      isLoading: deleteEnrollmentMutation.isPending
+    });
   };
 
   const columns = [
@@ -115,7 +156,7 @@ export default function AdminCourseUsersTab() {
       render: (enrollment: any) => (
         <TableActionButtons
           onEdit={() => handleEditEnrollment(enrollment)}
-          onDelete={() => toast({ title: "Eliminar inscripción", description: "Función en desarrollo" })}
+          onDelete={() => handleDeleteEnrollment(enrollment)}
         />
       )
     }
