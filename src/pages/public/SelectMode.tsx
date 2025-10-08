@@ -157,7 +157,7 @@ export default function SelectMode() {
             key={mode.type}
             onClick={() => handleModeSelect(mode.type, isAvailable)}
             className={`
-              flex-1 flex flex-col items-center justify-center
+              flex-1 flex flex-col items-center justify-between
               transition-all duration-500 ease-in-out
               cursor-pointer
               relative overflow-hidden
@@ -174,7 +174,7 @@ export default function SelectMode() {
             data-testid={`mode-select-${mode.type}`}
           >
             {/* Number at top with accent color */}
-            <div className="absolute top-16 left-0 right-0 flex justify-center">
+            <div className="w-full flex justify-center">
               <span className={`
                 text-sm font-light tracking-wider
                 transition-all duration-500
@@ -188,8 +188,11 @@ export default function SelectMode() {
               </span>
             </div>
 
-            {/* Title and Description - centered */}
-            <div className="w-full flex flex-col items-center gap-4">
+            {/* Center spacer */}
+            <div className="flex-1" />
+
+            {/* Title and Description at bottom - all at same height */}
+            <div className="w-full flex flex-col items-center gap-4 min-h-[80px]">
               {/* Title - changes to white on hover */}
               <h2 className={`
                 text-2xl font-medium text-center
