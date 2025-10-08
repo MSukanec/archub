@@ -5,7 +5,7 @@ import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import FormModalBody from "@/components/modal/form/FormModalBody";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
-import { ShoppingCart, Copy, CheckCircle, CreditCard, Building2 } from 'lucide-react';
+import { ShoppingCart, Copy, CheckCircle, CreditCard, Building2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
@@ -14,25 +14,24 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import mercadoPagoLogo from '/MercadoPago_logo.png';
 import paypalLogo from '/Paypal_2014_logo.png';
+import { useCoursePrice } from '@/hooks/useCoursePrice';
 
 interface PaymentMethodModalProps {
   courseSlug: string;
-  price: number;
   currency: 'ARS' | 'USD';
-  months?: number | null;
 }
 
 type PaymentMethod = 'mercadopago' | 'paypal' | 'transfer';
 
 export default function PaymentMethodModal({
   courseSlug,
-  price,
-  currency,
-  months = null
+  currency
 }: PaymentMethodModalProps) {
   const { closeModal } = useGlobalModalStore();
   const { setPanel } = useModalPanelStore();
   const { toast } = useToast();
+  
+  const { price: priceData, loading: priceLoading } = useCoursePrice(courseSlug, currency, 'mercadopago');
   
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [loading, setLoading] = useState(false);
@@ -64,9 +63,8 @@ export default function PaymentMethodModal({
         body: JSON.stringify({
           user_id: user.id,
           course_slug: courseSlug,
-          price: Number(price),
           currency,
-          months
+          provider: 'mercadopago'
         })
       });
 
@@ -264,14 +262,25 @@ Enviá el comprobante a: pagos@archub.com.ar`;
           <div className="rounded-lg border border-muted bg-muted/30 p-4">
             <div className="flex items-start gap-3">
               <ShoppingCart className="h-5 w-5 text-muted-foreground mt-0.5" />
-              <div>
+              <div className="flex-1">
                 <p className="text-sm font-medium">Total a pagar</p>
-                <p className="text-2xl font-bold mt-1">
-                  {currency === 'ARS' ? '$' : 'USD'} {price.toLocaleString()}
-                </p>
-                {months && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Acceso por {months} {months === 1 ? 'mes' : 'meses'}
+                {priceLoading ? (
+                  <div className="flex items-center gap-2 mt-1">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-sm text-muted-foreground">Cargando precio...</span>
+                  </div>
+                ) : priceData ? (
+                  <>
+                    <p className="text-2xl font-bold mt-1">
+                      {priceData.currency_code === 'ARS' ? '$' : 'USD'} {priceData.amount.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Suscripción Anual - Acceso por 365 días corridos
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Precio no disponible
                   </p>
                 )}
               </div>

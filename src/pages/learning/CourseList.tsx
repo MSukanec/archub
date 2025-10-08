@@ -243,9 +243,7 @@ export default function CourseList() {
         <div className="flex items-center gap-2">
           <PayButton
             courseSlug={course.slug}
-            price={1000}
             currency="ARS"
-            months={null}
             variant="secondary"
             size="sm"
           />

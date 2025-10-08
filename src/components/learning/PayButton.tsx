@@ -4,9 +4,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 
 interface PayButtonProps {
   courseSlug: string;
-  price: number;
   currency?: 'ARS' | 'USD';
-  months?: number | null;
   className?: string;
   variant?: 'default' | 'secondary' | 'outline';
   size?: 'default' | 'sm' | 'lg';
@@ -14,9 +12,7 @@ interface PayButtonProps {
 
 export default function PayButton({
   courseSlug,
-  price,
   currency = 'ARS',
-  months = null,
   className,
   variant = 'default',
   size = 'sm'
@@ -26,9 +22,7 @@ export default function PayButton({
   const handlePay = () => {
     openModal('payment-method', {
       courseSlug,
-      price,
-      currency,
-      months
+      currency
     });
   };
 

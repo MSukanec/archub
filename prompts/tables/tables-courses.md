@@ -112,3 +112,25 @@ create table public.course_lesson_notes (
 ) TABLESPACE pg_default;
 
 create index IF not exists lesson_notes_by_user_lesson on public.course_lesson_notes using btree (user_id, lesson_id, created_at desc) TABLESPACE pg_default;
+
+Tabla COURSE_PRICES:
+
+create table public.course_prices (
+  id uuid not null default gen_random_uuid (),
+  course_id uuid not null,
+  currency_code text not null,
+  amount numeric(14, 2) not null,
+  provider text not null default 'any'::text,
+  is_active boolean not null default true,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  constraint course_prices_pkey primary key (id),
+  constraint course_prices_unique_per_provider unique (course_id, currency_code, provider),
+  constraint course_prices_course_id_fkey foreign KEY (course_id) references courses (id) on delete CASCADE,
+  constraint course_prices_amount_check check ((amount >= (0)::numeric)),
+  constraint course_prices_currency_chk check (
+    (
+      currency_code = any (array['ARS'::text, 'USD'::text, 'EUR'::text])
+    )
+  )
+) TABLESPACE pg_default;

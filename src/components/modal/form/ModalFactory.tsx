@@ -242,9 +242,7 @@ export function ModalFactory() {
     case 'payment-method':
       return <PaymentMethodModal 
         courseSlug={data?.courseSlug || ''} 
-        price={data?.price || 0}
         currency={data?.currency || 'ARS'}
-        months={data?.months}
       />;
     default:
       return null;
