@@ -157,7 +157,7 @@ export default function SelectMode() {
             key={mode.type}
             onClick={() => handleModeSelect(mode.type, isAvailable)}
             className={`
-              flex-1 flex flex-col items-center justify-between
+              flex-1 flex flex-col items-center justify-center
               transition-all duration-500 ease-in-out
               cursor-pointer
               relative overflow-hidden
@@ -174,7 +174,7 @@ export default function SelectMode() {
             data-testid={`mode-select-${mode.type}`}
           >
             {/* Number at top with accent color */}
-            <div className="w-full flex justify-center">
+            <div className="absolute top-16 left-0 right-0 flex justify-center">
               <span className={`
                 text-sm font-light tracking-wider
                 transition-all duration-500
@@ -188,10 +188,7 @@ export default function SelectMode() {
               </span>
             </div>
 
-            {/* Center spacer */}
-            <div className="flex-1" />
-
-            {/* Title and Description at bottom */}
+            {/* Title and Description - centered */}
             <div className="w-full flex flex-col items-center gap-4">
               {/* Title - changes to white on hover */}
               <h2 className={`
@@ -223,7 +220,11 @@ export default function SelectMode() {
 
               {/* Status indicators */}
               {!isAvailable && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+                <div className={`
+                  flex items-center gap-2 text-sm text-muted-foreground mt-2
+                  transition-all duration-500
+                  opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0
+                `}>
                   <Lock className="h-4 w-4" />
                   <span>Próximamente</span>
                 </div>
