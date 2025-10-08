@@ -7,45 +7,45 @@ import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/hooks/use-toast";
-import { Building, Package, Hammer, Eye, Loader2, GraduationCap, Lock } from "lucide-react";
+import { Loader2, Lock } from "lucide-react";
 
 interface ModeOption {
   type: 'professional' | 'learner' | 'provider' | 'worker' | 'visitor';
   title: string;
   description: string;
-  icon: React.ComponentType<{ className?: string }>;
+  number: string;
 }
 
 const modeOptions: ModeOption[] = [
   {
     type: "professional",
     title: "Profesional",
-    description: "Gestiona proyectos completos con equipos, presupuestos y documentación",
-    icon: Building,
+    description: "Gestiona proyectos completos con equipos, presupuestos y documentación técnica profesional",
+    number: "01",
   },
   {
     type: "learner",
     title: "Capacitaciones",
-    description: "Accede a cursos y recursos de formación profesional",
-    icon: GraduationCap,
+    description: "Accede a cursos especializados y recursos de formación para el desarrollo profesional",
+    number: "02",
   },
   {
     type: "provider",
     title: "Proveedores",
-    description: "Administra catálogo de productos y cotizaciones",
-    icon: Package,
+    description: "Administra catálogo de productos, cotizaciones y seguimiento de entregas a obras",
+    number: "03",
   },
   {
     type: "worker",
     title: "Contratistas",
-    description: "Registra avances y coordina tareas del proyecto",
-    icon: Hammer,
+    description: "Registra avances, reporta incidencias y coordina tareas con el equipo del proyecto",
+    number: "04",
   },
   {
     type: "visitor",
     title: "Visitantes",
-    description: "Explora las funcionalidades sin compromiso",
-    icon: Eye,
+    description: "Explora las funcionalidades de la plataforma sin comprometerte con datos reales",
+    number: "05",
   }
 ];
 
@@ -147,8 +147,7 @@ export default function SelectMode() {
 
   return (
     <div className="flex min-h-screen w-full">
-      {modeOptions.map((mode) => {
-        const Icon = mode.icon;
+      {modeOptions.map((mode, index) => {
         const isSelected = selectedMode === mode.type;
         const isAvailable = mode.type === 'professional' || mode.type === 'learner';
         const isLoading = updateUserTypeMutation.isPending && isSelected;
@@ -158,94 +157,87 @@ export default function SelectMode() {
             key={mode.type}
             onClick={() => handleModeSelect(mode.type, isAvailable)}
             className={`
-              flex-1 flex flex-col items-center justify-center
+              flex-1 flex flex-col items-center justify-between
               transition-all duration-500 ease-in-out
               cursor-pointer
               relative overflow-hidden
+              px-8 py-16
               ${isAvailable 
-                ? 'hover:bg-[var(--accent)] hover:text-white' 
-                : 'hover:bg-muted/50'
+                ? 'hover:bg-[#1a1a1a] hover:text-white' 
+                : 'hover:bg-muted/30'
               }
               bg-background text-foreground
-              ${isSelected ? 'bg-[var(--accent)] text-white' : ''}
+              ${isSelected ? 'bg-[#1a1a1a] text-white' : ''}
               ${!isAvailable ? 'opacity-60' : ''}
               group
             `}
             data-testid={`mode-select-${mode.type}`}
           >
-            {/* Content Container */}
-            <div className="text-center px-8 py-12 space-y-6 relative z-10">
-              {/* Icon */}
-              <div className="flex justify-center mb-4">
-                <div className={`
-                  p-6 rounded-2xl 
-                  transition-all duration-500
-                  ${isAvailable 
-                    ? 'bg-[var(--accent)] text-white group-hover:bg-white group-hover:text-[var(--accent)]' 
-                    : 'bg-muted text-muted-foreground'
-                  }
-                  ${isSelected ? 'bg-white text-[var(--accent)]' : ''}
-                `}>
-                  {isLoading ? (
-                    <Loader2 className="h-10 w-10 animate-spin" />
-                  ) : !isAvailable ? (
-                    <Lock className="h-10 w-10" />
-                  ) : (
-                    <Icon className="h-10 w-10" />
-                  )}
-                </div>
-              </div>
+            {/* Number at top */}
+            <div className="w-full flex justify-center">
+              <span className="text-sm font-light tracking-wider opacity-50 group-hover:opacity-100 transition-opacity duration-500">
+                {mode.number}
+              </span>
+            </div>
 
-              {/* Title */}
-              <h2 className={`
-                text-3xl font-bold
-                transition-all duration-500
-                ${isAvailable 
-                  ? 'group-hover:scale-105' 
-                  : ''
-                }
-              `}>
-                {mode.title}
-              </h2>
-
-              {/* Description */}
+            {/* Center content - Description (only on hover) */}
+            <div className="flex-1 flex items-center justify-center px-4">
               <p className={`
-                text-base max-w-xs mx-auto
+                text-sm text-center leading-relaxed max-w-xs
                 transition-all duration-500
                 ${isAvailable 
-                  ? 'opacity-80 group-hover:opacity-100' 
-                  : 'opacity-60'
+                  ? 'opacity-0 group-hover:opacity-100 transform scale-95 group-hover:scale-100' 
+                  : 'opacity-0 group-hover:opacity-60'
                 }
               `}>
                 {mode.description}
               </p>
+            </div>
 
-              {/* Status Badge */}
+            {/* Title at bottom */}
+            <div className="w-full flex flex-col items-center gap-4">
+              <h2 className={`
+                text-2xl font-medium text-center
+                transition-all duration-500
+                ${isAvailable ? 'group-hover:transform group-hover:scale-105' : ''}
+              `}>
+                {mode.title}
+              </h2>
+
+              {/* Status indicators */}
               {!isAvailable && (
-                <div className="pt-4">
-                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-muted-foreground text-sm font-medium">
-                    <Lock className="h-4 w-4" />
-                    Próximamente
-                  </span>
+                <div className="flex items-center gap-2 text-sm opacity-60">
+                  <Lock className="h-4 w-4" />
+                  <span>Próximamente</span>
                 </div>
               )}
 
               {isLoading && (
-                <div className="pt-4">
-                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 text-white text-sm font-medium">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Guardando...
-                  </span>
+                <div className="flex items-center gap-2 text-sm">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Guardando...</span>
                 </div>
               )}
             </div>
 
-            {/* Hover Border Effect */}
+            {/* Vertical separator */}
+            {index < modeOptions.length - 1 && (
+              <div className={`
+                absolute right-0 top-0 bottom-0 w-px
+                transition-opacity duration-500
+                ${isAvailable ? 'bg-border/20 group-hover:bg-white/10' : 'bg-border/10'}
+              `} />
+            )}
+
+            {/* Top line decoration */}
             <div className={`
-              absolute inset-0 border-r border-border/20
-              transition-opacity duration-500
-              ${isAvailable ? 'group-hover:border-white/30' : ''}
-              ${mode.type === 'visitor' ? 'border-r-0' : ''}
+              absolute top-0 left-1/2 transform -translate-x-1/2
+              w-12 h-px
+              transition-all duration-500
+              ${isAvailable 
+                ? 'bg-border/30 group-hover:bg-white/50 group-hover:w-24' 
+                : 'bg-border/20'
+              }
             `} />
           </div>
         );
