@@ -49,12 +49,30 @@ export default function PaymentMethodModal({
         throw new Error('Supabase no está disponible');
       }
 
+      // 1) Usuario autenticado (Auth)
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError || !session?.access_token) {
         throw new Error('Debes iniciar sesión para comprar un curso');
       }
-      
+
+      // 2) Buscar perfil en public.users por auth_id
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .select('id, full_name, email')
+        .eq('auth_id', session.user.id)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Error obteniendo perfil:', profileError);
+        throw new Error('No se pudo obtener tu perfil de usuario');
+      }
+
+      if (!profile) {
+        throw new Error('No se encontró el perfil para este usuario');
+      }
+
+      // 3) Invocar la Edge Function con user_id = profile.id (NO session.user.id)
       const response = await fetch('https://wtatvsgeivymcppowrfy.functions.supabase.co/create_mp_preference', {
         method: 'POST',
         headers: { 
@@ -62,7 +80,7 @@ export default function PaymentMethodModal({
           'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({
-          user_id: session.user.id,
+          user_id: profile.id,  // CLAVE: enviar el ID de public.users, no auth.users
           course_slug: courseSlug,
           currency,
           provider: 'mercadopago'
@@ -84,6 +102,7 @@ export default function PaymentMethodModal({
         throw new Error('No pudimos obtener el link de pago');
       }
 
+      // 4) Redirigir a MP
       window.location.href = paymentUrl;
     } catch (error: any) {
       toast({
