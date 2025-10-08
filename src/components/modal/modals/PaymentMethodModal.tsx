@@ -49,19 +49,20 @@ export default function PaymentMethodModal({
         throw new Error('Supabase no está disponible');
       }
 
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      if (userError || !user) {
+      if (sessionError || !session?.access_token) {
         throw new Error('Debes iniciar sesión para comprar un curso');
       }
       
       const response = await fetch('https://wtatvsgeivymcppowrfy.functions.supabase.co/create_mp_preference', {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({
-          user_id: user.id,
+          user_id: session.user.id,
           course_slug: courseSlug,
           currency,
           provider: 'mercadopago'
