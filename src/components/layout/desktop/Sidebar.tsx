@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 interface SidebarItem {
   id: string;
@@ -230,6 +231,14 @@ export function Sidebar() {
                 variant="secondary"
               />
             )}
+
+            {/* Notificaciones */}
+            <div className={cn(
+              "flex items-center justify-center",
+              isExpanded ? "w-full" : "w-8"
+            )}>
+              <NotificationBell />
+            </div>
 
             {/* Avatar del Usuario */}
             <button

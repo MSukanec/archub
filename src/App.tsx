@@ -79,6 +79,9 @@ import CourseList from "@/pages/learning/CourseList";
 import CourseView from "@/pages/learning/CourseView";
 import PaymentReturn from "@/pages/learning/PaymentReturn";
 
+// Notifications
+import Notifications from "@/pages/Notifications";
+
 
 
 
@@ -114,6 +117,7 @@ function Router() {
         <Route path="/organization/preferences" component={Preferences} />
         <Route path="/organization/activity" component={Activity} />
         <Route path="/contacts" component={Contacts} />
+        <Route path="/notifications" component={Notifications} />
         <Route path="/organization/projects" component={Projects} />
         <Route path="/finances/general-costs" component={GeneralCosts} />
         

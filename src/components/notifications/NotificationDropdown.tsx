@@ -22,7 +22,7 @@ interface NotificationDropdownProps {
 }
 
 export function NotificationDropdown({ userId, onRefresh, onClose }: NotificationDropdownProps) {
-  const [, setLocation] = useLocation();
+  const [, navigate] = useLocation();
   const [notifications, setNotifications] = useState<UserNotificationRow[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,7 +50,7 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
       }
 
       const href = resolveNotificationHref(notification);
-      setLocation(href);
+      navigate(href);
       onClose();
     } catch (error) {
       console.error('Error handling notification click:', error);
@@ -74,18 +74,32 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
       <div className="p-4 pb-2">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-sm">Notificaciones</h3>
-          {unreadNotifications.length > 0 && (
+          <div className="flex items-center gap-2">
+            {unreadNotifications.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleMarkAllAsRead}
+                className="h-7 text-xs"
+                data-testid="button-mark-all-read"
+              >
+                <CheckCheck className="h-3 w-3 mr-1" />
+                Marcar todas
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleMarkAllAsRead}
+              onClick={() => {
+                navigate('/notifications');
+                onClose();
+              }}
               className="h-7 text-xs"
-              data-testid="button-mark-all-read"
+              data-testid="button-view-all"
             >
-              <CheckCheck className="h-3 w-3 mr-1" />
-              Marcar todas
+              Ver todas
             </Button>
-          )}
+          </div>
         </div>
       </div>
       

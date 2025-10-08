@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
@@ -388,6 +389,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     ))}
                   </div>
                 )}
+              </div>
+
+              {/* Notificaciones */}
+              <div className="flex items-center">
+                <NotificationBell />
               </div>
 
               {/* Avatar del usuario - lado derecho */}

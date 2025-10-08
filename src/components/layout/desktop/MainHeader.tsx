@@ -12,7 +12,6 @@ import { supabase } from '@/lib/supabase';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 // Mapeo de rutas a nombres de páginas
 const PAGE_NAMES: Record<string, string> = {
@@ -338,12 +337,6 @@ export function MainHeader() {
           </>
         )}
       </div>
-
-      {/* Right side: Notifications */}
-      <div className="flex items-center gap-2">
-        <NotificationBell />
-      </div>
-
     </div>
   );
 }
