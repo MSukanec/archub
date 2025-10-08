@@ -79,12 +79,13 @@ export function Sidebar() {
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
       return [
+        { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/admin/dashboard' },
         { id: 'community', label: 'Comunidad', icon: Users, href: '/admin/community' },
-        { id: 'costs', label: 'Costos', icon: DollarSign, href: '/admin/costs' },
-        { id: 'tasks', label: 'Tareas', icon: ListTodo, href: '/admin/tasks' },
-        { id: 'general', label: 'General', icon: Settings, href: '/admin/general' },
-        { id: 'products', label: 'Productos', icon: Package, href: '/providers/products' },
         { id: 'courses', label: 'Cursos', icon: BookOpen, href: '/admin/courses' },
+        { id: 'tasks', label: 'Tareas', icon: ListTodo, href: '/admin/tasks' },
+        { id: 'costs', label: 'Costos', icon: DollarSign, href: '/admin/costs' },
+        { id: 'products', label: 'Productos', icon: Package, href: '/providers/products' },
+        { id: 'general', label: 'General', icon: Settings, href: '/admin/general' },
       ];
     } else if (sidebarLevel === 'learning') {
       return [
@@ -144,6 +145,9 @@ export function Sidebar() {
                     if (item.id === 'logs') return { show: true, text: 'Comercialización' };
                   } else if (sidebarLevel === 'learning') {
                     if (item.id === 'dashboard') return { show: true, text: 'Capacitaciones' };
+                  } else if (sidebarLevel === 'admin') {
+                    if (item.id === 'community') return { show: true, text: 'Comunidad' };
+                    if (item.id === 'tasks') return { show: true, text: 'Administración' };
                   }
                   return { show: false, text: '' };
                 };
