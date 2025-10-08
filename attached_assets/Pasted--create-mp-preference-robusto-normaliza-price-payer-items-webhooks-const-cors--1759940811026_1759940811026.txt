@@ -1,0 +1,210 @@
+// === create_mp_preference — robusto (normaliza price) + payer/items + webhooks ===
+const cors = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS"
+};
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+const supabase = createClient(Deno.env.get("SUPABASE_URL"), Deno.env.get("SUPABASE_ANON_KEY"));
+// Normaliza strings tipo "1.234,56", "$100", "100,00" -> 1234.56
+function parsePrice(raw) {
+  if (typeof raw === "number" && isFinite(raw)) return raw;
+  if (typeof raw !== "string") return null;
+  const s = raw.trim().replace(/[^\d.,-]/g, "") // quita símbolos ($ ARS etc)
+  .replace(/\.(?=\d{3}\b)/g, "") // saca separadores de miles estilo 1.234
+  .replace(",", "."); // coma decimal -> punto
+  const n = Number(s);
+  return isFinite(n) ? n : null;
+}
+serve(async (req)=>{
+  if (req.method === "OPTIONS") {
+    return new Response("ok", {
+      headers: cors
+    });
+  }
+  try {
+    const payload = await req.json().catch(()=>({}));
+    const { user_id, course_slug, price, currency = "ARS", months = null } = payload ?? {};
+    // --- 0) Validaciones upfront
+    if (!user_id || !course_slug) {
+      return new Response(JSON.stringify({
+        error: "Faltan user_id o course_slug en el body"
+      }), {
+        status: 400,
+        headers: {
+          ...cors,
+          "Content-Type": "application/json"
+        }
+      });
+    }
+    // Precio robusto
+    const priceNum = parsePrice(price);
+    if (!priceNum || priceNum <= 0) {
+      return new Response(JSON.stringify({
+        error: "Precio inválido",
+        details: {
+          recibido: price,
+          normalizado: priceNum
+        }
+      }), {
+        status: 400,
+        headers: {
+          ...cors,
+          "Content-Type": "application/json"
+        }
+      });
+    }
+    // --- 1) Curso
+    const { data: course, error: eCourse } = await supabase.from("courses").select("id, title, slug, short_description").eq("slug", course_slug).maybeSingle();
+    if (eCourse || !course) {
+      return new Response(JSON.stringify({
+        error: "Curso no encontrado",
+        details: eCourse
+      }), {
+        status: 400,
+        headers: {
+          ...cors,
+          "Content-Type": "application/json"
+        }
+      });
+    }
+    // --- 2) Payer (opcional, si existe en users)
+    const { data: userRow } = await supabase.from("users").select("email, full_name").eq("id", user_id).maybeSingle();
+    const email = userRow?.email || undefined;
+    let first_name;
+    let last_name;
+    if (userRow?.full_name) {
+      const [f, ...rest] = userRow.full_name.trim().split(/\s+/);
+      first_name = f;
+      last_name = rest.join(" ") || undefined;
+    }
+    // --- 3) Credenciales / Secret
+    const MP_ACCESS_TOKEN = Deno.env.get("MP_ACCESS_TOKEN") || "";
+    if (!MP_ACCESS_TOKEN || MP_ACCESS_TOKEN.startsWith("TEST-")) {
+      return new Response(JSON.stringify({
+        error: "MP_ACCESS_TOKEN no productivo (APP_USR-...)"
+      }), {
+        status: 500,
+        headers: {
+          ...cors,
+          "Content-Type": "application/json"
+        }
+      });
+    }
+    const MP_WEBHOOK_SECRET = Deno.env.get("MP_WEBHOOK_SECRET") || "";
+    if (!MP_WEBHOOK_SECRET) {
+      return new Response(JSON.stringify({
+        error: "Falta MP_WEBHOOK_SECRET en Secrets"
+      }), {
+        status: 500,
+        headers: {
+          ...cors,
+          "Content-Type": "application/json"
+        }
+      });
+    }
+    const returnBase = Deno.env.get("CHECKOUT_RETURN_URL_BASE");
+    if (!returnBase) {
+      return new Response(JSON.stringify({
+        error: "Falta CHECKOUT_RETURN_URL_BASE en Secrets"
+      }), {
+        status: 500,
+        headers: {
+          ...cors,
+          "Content-Type": "application/json"
+        }
+      });
+    }
+    // --- 4) external_reference = user|slug|months
+    const external_reference = [
+      user_id,
+      course.slug,
+      months ?? "null"
+    ].join("|");
+    // --- 5) URL base de funciones
+    const functionsBase = new URL(req.url).origin;
+    // --- 6) Preferencia Mercado Pago
+    const prefBody = {
+      items: [
+        {
+          id: course.slug,
+          title: course.title,
+          description: course.short_description || "",
+          category_id: "services",
+          quantity: 1,
+          unit_price: priceNum,
+          currency_id: String(currency || "ARS").toUpperCase()
+        }
+      ],
+      external_reference,
+      payer: {
+        email,
+        first_name,
+        last_name
+      },
+      // Da prioridad a webhook vs IPN
+      notification_url: `${functionsBase}/mp_webhook?secret=${MP_WEBHOOK_SECRET}&source_news=webhooks`,
+      back_urls: {
+        success: `${returnBase}?course=${course.slug}`,
+        failure: `${returnBase}?course=${course.slug}`,
+        pending: `${returnBase}?course=${course.slug}`
+      },
+      auto_return: "approved",
+      binary_mode: true,
+      metadata: {
+        user_id,
+        course_slug: course.slug,
+        months
+      },
+      statement_descriptor: "ARCHUB"
+    };
+    const mpRes = await fetch("https://api.mercadopago.com/checkout/preferences", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(prefBody)
+    });
+    const mpText = await mpRes.text();
+    let pref = null;
+    try {
+      pref = JSON.parse(mpText);
+    } catch  {}
+    if (!mpRes.ok || !pref?.init_point) {
+      // Log útil para ver por qué MP rechazó
+      return new Response(JSON.stringify({
+        error: "mp_error",
+        status: mpRes.status,
+        sent: prefBody,
+        body: pref ?? mpText
+      }), {
+        status: 500,
+        headers: {
+          ...cors,
+          "Content-Type": "application/json"
+        }
+      });
+    }
+    // --- 7) Respuesta al front
+    return new Response(JSON.stringify({
+      init_point: pref.init_point
+    }), {
+      headers: {
+        ...cors,
+        "Content-Type": "application/json"
+      }
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({
+      error: String(e)
+    }), {
+      status: 500,
+      headers: {
+        ...cors,
+        "Content-Type": "application/json"
+      }
+    });
+  }
+});

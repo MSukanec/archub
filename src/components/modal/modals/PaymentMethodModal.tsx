@@ -45,37 +45,8 @@ export default function PaymentMethodModal({
     try {
       setLoading(true);
       
-      console.log('🔍 Iniciando pago para curso:', courseSlug, 'Moneda:', currency);
-      
       if (!supabase) {
         throw new Error('Supabase no está disponible');
-      }
-
-      // DEBUG: Verificar estado del curso antes de intentar pago
-      const { data: courseCheck, error: courseError } = await supabase
-        .from('courses')
-        .select('id, slug, title, is_active, visibility')
-        .eq('slug', courseSlug)
-        .single();
-      
-      console.log('📚 Estado del curso en BD:', courseCheck);
-      console.log('📚 Error al buscar curso:', courseError);
-      
-      // DEBUG: Listar todos los cursos para verificar slugs
-      const { data: allCourses } = await supabase
-        .from('courses')
-        .select('id, slug, title, is_active')
-        .order('created_at', { ascending: false })
-        .limit(10);
-      
-      console.log('📋 Cursos disponibles en BD:', allCourses);
-      
-      if (!courseCheck) {
-        throw new Error(`Curso con slug "${courseSlug}" no encontrado. Cursos disponibles: ${allCourses?.map(c => c.slug).join(', ') || 'ninguno'}`);
-      }
-      
-      if (!courseCheck.is_active) {
-        throw new Error(`El curso "${courseCheck.title}" no está activo (is_active = false)`);
       }
 
       // 1) Usuario autenticado (Auth)
@@ -101,17 +72,6 @@ export default function PaymentMethodModal({
         throw new Error('No se encontró el perfil para este usuario');
       }
 
-      // DEBUG: Verificar precio antes de enviar
-      const { data: priceCheck } = await supabase
-        .from('course_prices')
-        .select('amount, currency_code, provider, is_active')
-        .eq('course_id', courseCheck.id)
-        .eq('currency_code', currency)
-        .eq('is_active', true)
-        .limit(5);
-      
-      console.log('💰 Precios disponibles para el curso:', priceCheck);
-
       // 3) Invocar la Edge Function con user_id = profile.id (NO session.user.id)
       const response = await fetch('https://wtatvsgeivymcppowrfy.functions.supabase.co/create_mp_preference', {
         method: 'POST',
@@ -128,11 +88,9 @@ export default function PaymentMethodModal({
       });
 
       const data = await response.json();
-      
-      console.log('📡 Respuesta de Edge Function:', { status: response.status, data });
 
       if (!response.ok) {
-        console.error('❌ Error de Edge Function:', data);
+        console.error('Error al crear preferencia de pago:', data);
         const errorMessage = data?.error || data?.message || `Error ${response.status}: No se pudo crear la preferencia`;
         throw new Error(errorMessage);
       }
