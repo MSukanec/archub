@@ -143,17 +143,23 @@ const AdminCommunityUsers = () => {
       const { data, error } = await query
       if (error) throw error
       
-      // Get user presence data
-      // IMPORTANTE: user_presence.user_id guarda auth_id (de Supabase Auth), no users.id
+      // Get user presence data from organization_online_users
+      // IMPORTANTE: organization_online_users.user_id guarda auth_id (de Supabase Auth), no users.id
       const authIds = data.map(u => u.auth_id);
       
       const { data: presenceData } = await supabase
-        .from('user_presence')
+        .from('organization_online_users')
         .select('user_id, last_seen_at')
-        .in('user_id', authIds);
+        .in('user_id', authIds)
+        .order('last_seen_at', { ascending: false });
       
-      // Crear un map usando auth_id como clave
-      const presenceMap = new Map(presenceData?.map(p => [p.user_id, p.last_seen_at]) ?? []);
+      // Crear un map con la última actividad de cada usuario (la más reciente)
+      const presenceMap = new Map();
+      presenceData?.forEach(p => {
+        if (!presenceMap.has(p.user_id) || new Date(p.last_seen_at) > new Date(presenceMap.get(p.user_id))) {
+          presenceMap.set(p.user_id, p.last_seen_at);
+        }
+      });
       
       // Get organization counts for each user
       const usersWithCounts = await Promise.all(
