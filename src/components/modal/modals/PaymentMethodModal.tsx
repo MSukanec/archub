@@ -54,7 +54,7 @@ export default function PaymentMethodModal({
       // DEBUG: Verificar estado del curso antes de intentar pago
       const { data: courseCheck, error: courseError } = await supabase
         .from('courses')
-        .select('id, slug, title, is_active, is_visible')
+        .select('id, slug, title, is_active, visibility')
         .eq('slug', courseSlug)
         .single();
       
