@@ -245,24 +245,25 @@ export default function CourseList() {
         
         return (
           <div className="flex items-center gap-2">
-            {!hasActiveEnrollment && (
+            {!hasActiveEnrollment ? (
               <PayButton
                 courseSlug={course.slug}
                 currency="ARS"
                 variant="secondary"
                 size="sm"
               />
+            ) : (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => handleViewDetail(course.slug)}
+                className="h-8 gap-2"
+                data-testid={`button-view-course-${course.id}`}
+              >
+                <Eye className="h-4 w-4" />
+                <span>Ver curso</span>
+              </Button>
             )}
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => handleViewDetail(course.slug)}
-              className="h-8 gap-2"
-              data-testid={`button-view-course-${course.id}`}
-            >
-              <Eye className="h-4 w-4" />
-              <span>Ver curso</span>
-            </Button>
           </div>
         );
       }
