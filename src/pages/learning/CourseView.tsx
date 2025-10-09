@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { BookOpen, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -9,11 +9,35 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import CourseDataTab from './view/CourseDataTab';
 import CourseViewer from './view/CourseViewer';
 import CourseNotes from './view/CourseNotes';
+import CourseMarkersTab from './view/CourseMarkersTab';
 
 export default function CourseView() {
   const { id } = useParams<{ id: string }>();
-  const [, navigate] = useLocation();
-  const [activeTab, setActiveTab] = useState('Datos del Curso');
+  const [location, navigate] = useLocation();
+  
+  // Parse query params
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const tabParam = urlParams.get('tab');
+  const lessonParam = urlParams.get('lesson');
+  const seekParam = urlParams.get('seek');
+  
+  const [activeTab, setActiveTab] = useState(tabParam || 'Datos del Curso');
+  
+  // Sync activeTab when location changes (for navigation from markers)
+  // Only apply if tabParam exists in URL
+  useEffect(() => {
+    if (tabParam && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]); // Remove activeTab from deps to avoid loops
+  
+  // Update URL when tab changes manually (to persist state)
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab);
+    // Always clear query params when manually switching tabs
+    // This ensures the sync effect doesn't override manual changes
+    navigate(`/learning/courses/${id}`);
+  };
   
   // Get course data
   const { data: course, isLoading } = useQuery({
@@ -52,6 +76,11 @@ export default function CourseView() {
       id: 'Apuntes',
       label: 'Apuntes',
       isActive: activeTab === 'Apuntes'
+    },
+    {
+      id: 'Marcadores',
+      label: 'Marcadores',
+      isActive: activeTab === 'Marcadores'
     }
   ];
 
@@ -75,7 +104,7 @@ export default function CourseView() {
     },
     isViewMode: true,
     tabs: headerTabs,
-    onTabChange: setActiveTab,
+    onTabChange: handleTabChange,
     ...(activeTab === 'Datos del Curso' && {
       actions: [
         <Button
@@ -158,9 +187,18 @@ export default function CourseView() {
       case 'Datos del Curso':
         return <CourseDataTab courseId={course?.id} />;
       case 'Lecciones':
-        return <CourseViewer courseId={course?.id} onNavigationStateChange={setNavigationState} />;
+        return (
+          <CourseViewer 
+            courseId={course?.id} 
+            onNavigationStateChange={setNavigationState}
+            initialLessonId={lessonParam || undefined}
+            initialSeekTime={seekParam ? parseInt(seekParam) : undefined}
+          />
+        );
       case 'Apuntes':
         return <CourseNotes courseId={course?.id} />;
+      case 'Marcadores':
+        return <CourseMarkersTab courseId={course?.id} courseSlug={id} />;
       default:
         return null;
     }

@@ -23,12 +23,15 @@ interface CourseViewerProps {
     isMarkingComplete: boolean;
     isCompleted: boolean;
   } | null) => void;
+  initialLessonId?: string;
+  initialSeekTime?: number;
 }
 
-export default function CourseViewer({ courseId, onNavigationStateChange }: CourseViewerProps) {
+export default function CourseViewer({ courseId, onNavigationStateChange, initialLessonId, initialSeekTime }: CourseViewerProps) {
   const { setVisible, setData, setCurrentLesson, currentLessonId } = useCourseSidebarStore();
   const { toast } = useToast();
   const [vimeoPlayer, setVimeoPlayer] = useState<Player | null>(null);
+  const [targetSeekTime, setTargetSeekTime] = useState<number | undefined>(initialSeekTime);
   
   // Get course modules and lessons
   const { data: modules = [], isLoading: modulesLoading } = useQuery({
@@ -268,14 +271,17 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [moduleIdsString, lessonIdsString]);
 
-  // Seleccionar automáticamente la primera lección cuando se cargan las lecciones
+  // Seleccionar automáticamente la lección (inicial o primera) cuando se cargan las lecciones
   useEffect(() => {
     if (lessons.length > 0 && !currentLessonId) {
-      const firstLesson = lessons[0];
-      setCurrentLesson(firstLesson.id);
+      // Si hay initialLessonId, usar esa, si no, la primera
+      const targetLesson = initialLessonId 
+        ? lessons.find(l => l.id === initialLessonId) || lessons[0]
+        : lessons[0];
+      setCurrentLesson(targetLesson.id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lessonIdsString, currentLessonId]);
+  }, [lessonIdsString, currentLessonId, initialLessonId]);
 
   // Log de confirmación cuando cambia la lección activa (Paso 3 del prompt)
   useEffect(() => {
@@ -371,7 +377,23 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
   
   // Obtener progreso de la lección actual
   const currentProgress = currentLessonId ? progressMap.get(currentLessonId) : null;
-  const initialPosition = currentProgress?.last_position_sec || 0;
+  
+  // Determinar la posición inicial: si hay targetSeekTime (desde marcador), usar esa, si no, usar el progreso guardado
+  const initialPosition = targetSeekTime !== undefined ? targetSeekTime : (currentProgress?.last_position_sec || 0);
+  
+  // Actualizar targetSeekTime cuando cambia initialSeekTime (para navegación desde marcadores)
+  useEffect(() => {
+    if (initialSeekTime !== undefined) {
+      setTargetSeekTime(initialSeekTime);
+    }
+  }, [initialSeekTime]);
+  
+  // Limpiar targetSeekTime después de usarlo
+  useEffect(() => {
+    if (targetSeekTime !== undefined && currentLessonId === initialLessonId) {
+      setTargetSeekTime(undefined);
+    }
+  }, [currentLessonId, initialLessonId, targetSeekTime]);
 
   return (
     <div className="space-y-6">
