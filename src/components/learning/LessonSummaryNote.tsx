@@ -116,7 +116,7 @@ export function LessonSummaryNote({ lessonId }: LessonSummaryNoteProps) {
             time_sec: null,
             is_pinned: false
           }, {
-            onConflict: 'user_id,lesson_id',
+            onConflict: 'user_id,lesson_id,note_type',
             ignoreDuplicates: false
           });
 
