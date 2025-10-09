@@ -44,9 +44,9 @@ export default function CourseView() {
       isActive: activeTab === 'Datos del Curso'
     },
     {
-      id: 'Visor',
-      label: 'Visor',
-      isActive: activeTab === 'Visor'
+      id: 'Lecciones',
+      label: 'Lecciones',
+      isActive: activeTab === 'Lecciones'
     },
     {
       id: 'Apuntes',
@@ -82,14 +82,14 @@ export default function CourseView() {
           key="continue"
           variant="default"
           size="sm"
-          onClick={() => setActiveTab('Visor')}
+          onClick={() => setActiveTab('Lecciones')}
           data-testid="button-continue-course"
         >
           Continuar Curso
         </Button>
       ]
     }),
-    ...(activeTab === 'Visor' && navigationState && {
+    ...(activeTab === 'Lecciones' && navigationState && {
       actions: [
         <Button
           key="previous"
@@ -157,7 +157,7 @@ export default function CourseView() {
     switch (activeTab) {
       case 'Datos del Curso':
         return <CourseDataTab courseId={course?.id} />;
-      case 'Visor':
+      case 'Lecciones':
         return <CourseViewer courseId={course?.id} onNavigationStateChange={setNavigationState} />;
       case 'Apuntes':
         return <CourseNotes courseId={course?.id} />;
