@@ -106,12 +106,39 @@ create table public.course_lesson_notes (
   is_pinned boolean not null default false,
   created_at timestamp with time zone not null default now(),
   updated_at timestamp with time zone not null default now(),
+  note_type text not null default 'marker'::text,
   constraint course_lesson_notes_pkey primary key (id),
   constraint course_lesson_notes_lesson_id_fkey foreign KEY (lesson_id) references course_lessons (id) on delete CASCADE,
-  constraint course_lesson_notes_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+  constraint course_lesson_notes_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE,
+  constraint course_lesson_notes_time_nonneg_chk check (
+    (
+      (time_sec is null)
+      or (time_sec >= 0)
+    )
+  ),
+  constraint course_lesson_notes_type_chk check (
+    (
+      note_type = any (
+        array[
+          'summary'::text,
+          'marker'::text,
+          'todo'::text,
+          'question'::text
+        ]
+      )
+    )
+  )
 ) TABLESPACE pg_default;
 
+create unique INDEX IF not exists uniq_summary_per_user_lesson on public.course_lesson_notes using btree (user_id, lesson_id) TABLESPACE pg_default
+where
+  (note_type = 'summary'::text);
+
 create index IF not exists lesson_notes_by_user_lesson on public.course_lesson_notes using btree (user_id, lesson_id, created_at desc) TABLESPACE pg_default;
+
+create index IF not exists lesson_markers_idx on public.course_lesson_notes using btree (lesson_id, user_id, time_sec) TABLESPACE pg_default
+where
+  (note_type = 'marker'::text);
 
 Tabla COURSE_PRICES:
 

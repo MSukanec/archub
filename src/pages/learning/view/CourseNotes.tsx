@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { BookOpen, FileText, Calendar } from 'lucide-react';
+import { BookOpen, FileText, Calendar, Bookmark, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { CourseLessonNote } from '@shared/schema';
+import { Badge } from '@/components/ui/badge';
 
 interface CourseNotesProps {
   courseId: string;
@@ -100,8 +101,12 @@ export default function CourseNotes({ courseId }: CourseNotesProps) {
     enabled: !!courseId && !!supabase
   });
 
-  // Group notes by lesson
-  const notesByLesson = notes.reduce((acc, note) => {
+  // Separate notes by type
+  const summaryNotes = notes.filter(note => note.note_type === 'summary');
+  const markerNotes = notes.filter(note => note.note_type === 'marker');
+
+  // Group summary notes by lesson
+  const summariesByLesson = summaryNotes.reduce((acc, note) => {
     const lessonTitle = note.lesson?.title || 'Sin lección';
     if (!acc[lessonTitle]) {
       acc[lessonTitle] = {
@@ -112,6 +117,26 @@ export default function CourseNotes({ courseId }: CourseNotesProps) {
     acc[lessonTitle].notes.push(note);
     return acc;
   }, {} as Record<string, { moduleTitle: string; notes: NoteWithLesson[] }>);
+
+  // Group marker notes by lesson
+  const markersByLesson = markerNotes.reduce((acc, note) => {
+    const lessonTitle = note.lesson?.title || 'Sin lección';
+    if (!acc[lessonTitle]) {
+      acc[lessonTitle] = {
+        moduleTitle: note.module?.title || '',
+        markers: []
+      };
+    }
+    acc[lessonTitle].markers.push(note);
+    return acc;
+  }, {} as Record<string, { moduleTitle: string; markers: NoteWithLesson[] }>);
+
+  const formatTime = (seconds: number | null): string => {
+    if (seconds === null) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   if (isLoading) {
     return (
@@ -141,57 +166,131 @@ export default function CourseNotes({ courseId }: CourseNotesProps) {
   }
 
   return (
-    <div className="space-y-6" data-testid="course-notes-container">
-      <div className="flex items-center gap-3 mb-6">
+    <div className="space-y-8" data-testid="course-notes-container">
+      <div className="flex items-center gap-3">
         <BookOpen className="h-6 w-6 text-primary" />
         <div>
           <h2 className="text-2xl font-bold">Mis Apuntes del Curso</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            {notes.length} {notes.length === 1 ? 'nota encontrada' : 'notas encontradas'}
+            {summaryNotes.length} {summaryNotes.length === 1 ? 'resumen' : 'resúmenes'} y {markerNotes.length} {markerNotes.length === 1 ? 'marcador' : 'marcadores'}
           </p>
         </div>
       </div>
 
-      {Object.entries(notesByLesson).map(([lessonTitle, { moduleTitle, notes: lessonNotes }]) => (
-        <div key={lessonTitle} className="bg-card border border-border rounded-lg overflow-hidden">
-          <div className="bg-muted/30 px-6 py-4 border-b border-border">
-            <div className="flex items-start gap-3">
-              <BookOpen className="h-5 w-5 text-primary mt-0.5" />
-              <div>
-                <h3 className="font-semibold text-lg">{lessonTitle}</h3>
-                {moduleTitle && (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Módulo: {moduleTitle}
-                  </p>
-                )}
-              </div>
-            </div>
+      {/* Summary Notes Section */}
+      {summaryNotes.length > 0 && (
+        <div className="space-y-6">
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-primary" />
+            <h3 className="text-xl font-semibold">Resúmenes</h3>
           </div>
 
-          <div className="divide-y divide-border">
-            {lessonNotes.map((note) => (
-              <div key={note.id} className="px-6 py-4" data-testid={`note-${note.id}`}>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
-                  <Calendar className="h-3.5 w-3.5" />
-                  <span>
-                    {format(new Date(note.created_at), "d 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es })}
-                  </span>
-                  {note.updated_at !== note.created_at && (
-                    <span className="text-muted-foreground/70">
-                      (editado)
-                    </span>
-                  )}
-                </div>
-                <div className="prose prose-sm dark:prose-invert max-w-none">
-                  <p className="text-foreground whitespace-pre-wrap leading-relaxed">
-                    {note.body}
-                  </p>
+          {Object.entries(summariesByLesson).map(([lessonTitle, { moduleTitle, notes: lessonNotes }]) => (
+            <div key={lessonTitle} className="bg-card border border-border rounded-lg overflow-hidden">
+              <div className="bg-muted/30 px-6 py-4 border-b border-border">
+                <div className="flex items-start gap-3">
+                  <BookOpen className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-lg">{lessonTitle}</h4>
+                    {moduleTitle && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Módulo: {moduleTitle}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
+
+              <div className="divide-y divide-border">
+                {lessonNotes.map((note) => (
+                  <div key={note.id} className="px-6 py-4" data-testid={`summary-${note.id}`}>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+                      <Calendar className="h-3.5 w-3.5" />
+                      <span>
+                        {format(new Date(note.created_at), "d 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es })}
+                      </span>
+                      {note.updated_at !== note.created_at && (
+                        <span className="text-muted-foreground/70">
+                          (editado)
+                        </span>
+                      )}
+                    </div>
+                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                      <p className="text-foreground whitespace-pre-wrap leading-relaxed">
+                        {note.body}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
+      )}
+
+      {/* Markers Section */}
+      {markerNotes.length > 0 && (
+        <div className="space-y-6">
+          <div className="flex items-center gap-2">
+            <Bookmark className="h-5 w-5 text-primary" />
+            <h3 className="text-xl font-semibold">Marcadores</h3>
+          </div>
+
+          {Object.entries(markersByLesson).map(([lessonTitle, { moduleTitle, markers }]) => (
+            <div key={lessonTitle} className="bg-card border border-border rounded-lg overflow-hidden">
+              <div className="bg-muted/30 px-6 py-4 border-b border-border">
+                <div className="flex items-start gap-3">
+                  <BookOpen className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-lg">{lessonTitle}</h4>
+                    {moduleTitle && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Módulo: {moduleTitle}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="divide-y divide-border">
+                {markers.map((marker) => (
+                  <div key={marker.id} className="px-6 py-4 flex items-start gap-4" data-testid={`marker-${marker.id}`}>
+                    <div className="flex items-center gap-2 min-w-[80px] pt-0.5">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-mono font-medium">
+                        {formatTime(marker.time_sec)}
+                      </span>
+                    </div>
+                    
+                    <div className="flex-1">
+                      {marker.is_pinned && (
+                        <Badge variant="secondary" className="mb-2">
+                          Fijado
+                        </Badge>
+                      )}
+                      {marker.body ? (
+                        <p className="text-foreground leading-relaxed">
+                          {marker.body}
+                        </p>
+                      ) : (
+                        <p className="text-muted-foreground italic text-sm">
+                          Sin descripción
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
+                        <Calendar className="h-3.5 w-3.5" />
+                        <span>
+                          {format(new Date(marker.created_at), "d 'de' MMMM 'de' yyyy", { locale: es })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

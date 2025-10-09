@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useCallback, useRef } from 'react'
+import { useEffect, useMemo, useCallback, useRef, useState } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Play, BookOpen, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -8,7 +8,9 @@ import { useCourseSidebarStore } from '@/stores/sidebarStore'
 import VimeoPlayer from '@/components/video/VimeoPlayer'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
-import { LessonNotes } from '@/components/learning/LessonNotes'
+import { LessonSummaryNote } from '@/components/learning/LessonSummaryNote'
+import { LessonMarkers } from '@/components/learning/LessonMarkers'
+import Player from '@vimeo/player'
 
 interface CourseViewerProps {
   courseId?: string;
@@ -26,6 +28,7 @@ interface CourseViewerProps {
 export default function CourseViewer({ courseId, onNavigationStateChange }: CourseViewerProps) {
   const { setVisible, setData, setCurrentLesson, currentLessonId } = useCourseSidebarStore();
   const { toast } = useToast();
+  const [vimeoPlayer, setVimeoPlayer] = useState<Player | null>(null);
   
   // Get course modules and lessons
   const { data: modules = [], isLoading: modulesLoading } = useQuery({
@@ -380,6 +383,7 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
             vimeoId={currentLesson.vimeo_video_id}
             initialPosition={initialPosition}
             onProgress={handleVideoProgress}
+            onPlayerReady={setVimeoPlayer}
           />
           <div className="mt-4">
             <h2 className="text-xl font-semibold">{currentLesson.title}</h2>
@@ -401,9 +405,12 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
         </div>
       )}
 
-      {/* Lesson Notes */}
+      {/* Lesson Notes and Markers */}
       {currentLessonId && (
-        <LessonNotes lessonId={currentLessonId} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <LessonSummaryNote lessonId={currentLessonId} />
+          <LessonMarkers lessonId={currentLessonId} vimeoPlayer={vimeoPlayer} />
+        </div>
       )}
     </div>
   )

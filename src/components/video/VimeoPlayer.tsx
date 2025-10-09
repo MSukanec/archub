@@ -4,10 +4,11 @@ import Player from "@vimeo/player";
 type Props = { 
   vimeoId: string;
   initialPosition?: number;
-  onProgress?: (sec: number, pct: number) => void 
+  onProgress?: (sec: number, pct: number) => void;
+  onPlayerReady?: (player: Player) => void;
 };
 
-export default function VimeoPlayer({ vimeoId, initialPosition = 0, onProgress }: Props) {
+export default function VimeoPlayer({ vimeoId, initialPosition = 0, onProgress, onPlayerReady }: Props) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<Player | null>(null);
   const lastLoadedVideoRef = useRef<string | null>(null);
@@ -37,6 +38,9 @@ export default function VimeoPlayer({ vimeoId, initialPosition = 0, onProgress }
     });
     
     player.on("ended", () => onProgress?.(0, 100));
+
+    // Notificar al padre que el player está listo
+    onPlayerReady?.(player);
 
     return () => {
       player.destroy();

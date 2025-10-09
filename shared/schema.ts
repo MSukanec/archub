@@ -664,6 +664,7 @@ export const course_lesson_notes = pgTable("course_lesson_notes", {
   body: text("body").notNull(),
   time_sec: integer("time_sec"),
   is_pinned: boolean("is_pinned").notNull().default(false),
+  note_type: text("note_type").notNull().default("marker"),
   created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

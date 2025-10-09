@@ -1,0 +1,85 @@
+Cómo usarlo en el front (prompt para Replit)
+
+Objetivo: mantener el textarea de “Mis apuntes” (nota summary) y sumar una barra de marcadores que permita: “Agregar marcador en el segundo actual”, listar, editar, pinnear y saltar en el video.
+
+Componentes:
+
+LessonSummaryNote
+
+Carga (o crea si no existe) la nota note_type='summary' de user_id + lesson_id (tiene time_sec = null).
+
+Textarea con autosave con debounce (p.ej. 600–800 ms).
+
+Endpoint Supabase:
+
+select * from course_lesson_notes where user_id = :me and lesson_id = :lesson and note_type='summary' limit 1
+
+si no existe → insert { user_id, lesson_id, note_type:'summary', body:'' }
+
+update body al escribir.
+
+LessonMarkers
+
+Integra con tu reproductor (Vimeo Player/HTML5).
+
+Botón “+ Agregar marcador”: lee currentTime (redondea a Math.floor) y hace:
+
+insert {
+  user_id: me,
+  lesson_id,
+  body: '',            // empieza vacío
+  time_sec: currentSecond,
+  note_type: 'marker',
+  is_pinned: false
+}
+
+
+Lista de marcadores:
+
+query: select * from course_lesson_notes where user_id=:me and lesson_id=:lesson and note_type='marker' order by is_pinned desc, time_sec asc, created_at asc
+
+ítems con: mm:ss, input/textarea corto para body, botón “Ir” (seek al tiempo), “Pin”, “Borrar”.
+
+Edición in-place con autosave (debounce).
+
+Control de choques: si querés evitar duplicados en el mismo segundo, hacé un select previo en ese time_sec y si existe, enfocá ese item en vez de crear otro.
+
+Realtime (opcional)
+
+Suscribite al canal de course_lesson_notes filtrado por lesson_id y user_id para que refleje cambios desde otras pestañas.
+
+UX mínima:
+
+El “Mis Apuntes” (summary) queda igual donde lo tenés.
+
+Debajo (o a la derecha) aparece Marcadores con:
+
+Botón “+ en 0:42”
+
+Lista: [📌] 0:42 — “Muros: grosor” [Ir] [⋮]
+
+Pinned arriba.
+
+Consultas útiles (por si te sirven)
+
+Traer summary:
+
+select id, body, updated_at
+from public.course_lesson_notes
+where user_id = :uid and lesson_id = :lid and note_type = 'summary'
+limit 1;
+
+
+Traer marcadores:
+
+select id, time_sec, body, is_pinned
+from public.course_lesson_notes
+where user_id = :uid and lesson_id = :lid and note_type = 'marker'
+order by is_pinned desc, time_sec asc, created_at asc;
+
+
+Toggle pin:
+
+update public.course_lesson_notes
+set is_pinned = not is_pinned
+where id = :note_id and (user_id = auth.uid() or is_admin());
