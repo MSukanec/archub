@@ -268,12 +268,8 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
   }
 
   return (
-    <div className="bg-card border border-border rounded-lg p-6" data-testid="lesson-markers-container">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <Bookmark className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-semibold">Marcadores</h3>
-        </div>
+    <div className="space-y-4" data-testid="lesson-markers-container">
+      <div className="flex justify-end">
         <Button
           onClick={handleAddMarker}
           size="sm"
@@ -286,10 +282,6 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
           <span>en {formatTime(currentTime)}</span>
         </Button>
       </div>
-
-      <p className="text-sm text-muted-foreground mb-4">
-        Marca momentos importantes del video para volver más tarde
-      </p>
 
       {markers.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">

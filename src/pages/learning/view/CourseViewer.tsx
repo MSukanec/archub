@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useCallback, useRef, useState } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { Play, BookOpen, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Play, BookOpen, CheckCircle, ChevronLeft, ChevronRight, FileText, Bookmark } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
@@ -405,11 +405,48 @@ export default function CourseViewer({ courseId, onNavigationStateChange }: Cour
         </div>
       )}
 
-      {/* Lesson Notes and Markers */}
+      {/* Lesson Notes and Markers - Preferences Style Layout */}
       {currentLessonId && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <LessonSummaryNote lessonId={currentLessonId} />
-          <LessonMarkers lessonId={currentLessonId} vimeoPlayer={vimeoPlayer} />
+        <div className="space-y-8 mt-8">
+          {/* Summary Notes Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Column - Description */}
+            <div>
+              <div className="flex items-center gap-2 mb-6">
+                <FileText className="h-5 w-5 text-[var(--accent)]" />
+                <h2 className="text-lg font-semibold">Mis Apuntes</h2>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Resumen general de la lección - se guarda automáticamente mientras escribes.
+              </p>
+            </div>
+
+            {/* Right Column - Content */}
+            <div>
+              <LessonSummaryNote lessonId={currentLessonId} />
+            </div>
+          </div>
+
+          <hr className="border-t border-[var(--section-divider)] my-8" />
+
+          {/* Markers Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Column - Description */}
+            <div>
+              <div className="flex items-center gap-2 mb-6">
+                <Bookmark className="h-5 w-5 text-[var(--accent)]" />
+                <h2 className="text-lg font-semibold">Marcadores</h2>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Crea marcadores en momentos específicos del video para poder volver a ellos fácilmente.
+              </p>
+            </div>
+
+            {/* Right Column - Content */}
+            <div>
+              <LessonMarkers lessonId={currentLessonId} vimeoPlayer={vimeoPlayer} />
+            </div>
+          </div>
         </div>
       )}
     </div>

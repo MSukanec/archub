@@ -192,28 +192,17 @@ export function LessonSummaryNote({ lessonId }: LessonSummaryNoteProps) {
   }
 
   return (
-    <div className="bg-card border border-border rounded-lg p-6" data-testid="lesson-summary-note-container">
-      <div className="flex items-center gap-3 mb-3">
-        <FileText className="h-5 w-5 text-primary" />
-        <h3 className="text-lg font-semibold">Mis Apuntes</h3>
-      </div>
+    <div className="space-y-3" data-testid="lesson-summary-note-container">
+      <Textarea
+        data-testid="summary-note-textarea"
+        value={noteText}
+        onChange={(e) => setNoteText(e.target.value)}
+        placeholder="Escribe un resumen de esta lección..."
+        className="min-h-[150px] resize-none rounded-lg border-border focus:border-primary transition-colors"
+      />
       
-      <p className="text-sm text-muted-foreground mb-4">
-        Resumen general de la lección - se guarda automáticamente
-      </p>
-
-      <div className="space-y-3">
-        <Textarea
-          data-testid="summary-note-textarea"
-          value={noteText}
-          onChange={(e) => setNoteText(e.target.value)}
-          placeholder="Escribe un resumen de esta lección..."
-          className="min-h-[150px] resize-none rounded-lg border-border focus:border-primary transition-colors"
-        />
-        
-        <div className="flex justify-end">
-          {getSaveStatusIndicator()}
-        </div>
+      <div className="flex justify-end">
+        {getSaveStatusIndicator()}
       </div>
     </div>
   );
