@@ -16,11 +16,14 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
   const [isLoading, setIsLoading] = useState(true);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const savedTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitialLoadRef = useRef(true);
+  const initialNoteTextRef = useRef('');
 
   useEffect(() => {
     const loadNote = async () => {
       try {
         setIsLoading(true);
+        isInitialLoadRef.current = true;
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
 
@@ -41,11 +44,19 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
         
         if (mainNote) {
           setNoteText(mainNote.body);
+          initialNoteTextRef.current = mainNote.body;
+        } else {
+          setNoteText('');
+          initialNoteTextRef.current = '';
         }
       } catch (error) {
         console.error('Error loading notes:', error);
       } finally {
         setIsLoading(false);
+        // Marcar que la carga inicial terminó después de un pequeño delay
+        setTimeout(() => {
+          isInitialLoadRef.current = false;
+        }, 100);
       }
     };
 
@@ -53,6 +64,16 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
   }, [lessonId]);
 
   useEffect(() => {
+    // No guardar durante la carga inicial
+    if (isInitialLoadRef.current) {
+      return;
+    }
+
+    // No guardar si el texto está vacío y no había nada antes (evita crear notas vacías)
+    if (noteText.trim() === '' && initialNoteTextRef.current === '') {
+      return;
+    }
+
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
@@ -86,6 +107,8 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
           return;
         }
 
+        // Actualizar el texto inicial para futuras comparaciones
+        initialNoteTextRef.current = noteText;
         setSaveStatus('saved');
 
         if (savedTimerRef.current) {
