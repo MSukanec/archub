@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Layout } from '@/components/layout/desktop/Layout';
 import CourseDataTab from './view/CourseDataTab';
 import CourseViewer from './view/CourseViewer';
+import CourseNotes from './view/CourseNotes';
 
 export default function CourseView() {
   const { id } = useParams<{ id: string }>();
@@ -46,6 +47,11 @@ export default function CourseView() {
       id: 'Visor',
       label: 'Visor',
       isActive: activeTab === 'Visor'
+    },
+    {
+      id: 'Apuntes',
+      label: 'Apuntes',
+      isActive: activeTab === 'Apuntes'
     }
   ];
 
@@ -153,6 +159,8 @@ export default function CourseView() {
         return <CourseDataTab courseId={course?.id} />;
       case 'Visor':
         return <CourseViewer courseId={course?.id} onNavigationStateChange={setNavigationState} />;
+      case 'Apuntes':
+        return <CourseNotes courseId={course?.id} />;
       default:
         return null;
     }
