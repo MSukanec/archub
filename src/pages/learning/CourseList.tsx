@@ -241,7 +241,7 @@ export default function CourseList() {
       label: 'Acciones',
       render: (course: any) => {
         const enrollment = enrollments.find((e: any) => e.course_id === course.id);
-        const hasActiveEnrollment = enrollment && enrollment.is_active;
+        const hasActiveEnrollment = enrollment && enrollment.status === 'active';
         
         return (
           <div className="flex items-center gap-2">
