@@ -14,6 +14,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import PayButton from '@/components/learning/PayButton'
+import CourseCard from '@/components/ui/cards/CourseCard'
 
 export default function CourseList() {
   const [activeTab, setActiveTab] = useState('courses')
@@ -299,34 +300,65 @@ export default function CourseList() {
       <div className="space-y-6">
         {activeTab === 'courses' && (
           <>
-            {filteredCourses.length > 0 ? (
-              <Table
-                data={filteredCourses}
-                columns={columns}
-                isLoading={coursesLoading}
-                emptyState={
-                  <EmptyState
-                    icon={<BookOpen className="w-12 h-12" />}
-                    title="No hay cursos que coincidan"
-                    description="Ajusta los filtros de búsqueda para encontrar cursos"
-                  />
-                }
-                topBar={{
-                  showSearch: true,
-                  searchValue: searchValue,
-                  onSearchChange: setSearchValue,
-                  showClearFilters: searchValue !== '',
-                  onClearFilters: handleClearFilters,
-                  showFilter: false
-                }}
-              />
-            ) : (
-              <EmptyState
-                icon={<BookOpen className="w-12 h-12" />}
-                title="No hay cursos disponibles"
-                description="Actualmente no hay cursos activos para mostrar"
-              />
-            )}
+            {/* Desktop View */}
+            <div className="hidden lg:block">
+              {filteredCourses.length > 0 ? (
+                <Table
+                  data={filteredCourses}
+                  columns={columns}
+                  isLoading={coursesLoading}
+                  emptyState={
+                    <EmptyState
+                      icon={<BookOpen className="w-12 h-12" />}
+                      title="No hay cursos que coincidan"
+                      description="Ajusta los filtros de búsqueda para encontrar cursos"
+                    />
+                  }
+                  topBar={{
+                    showSearch: true,
+                    searchValue: searchValue,
+                    onSearchChange: setSearchValue,
+                    showClearFilters: searchValue !== '',
+                    onClearFilters: handleClearFilters,
+                    showFilter: false
+                  }}
+                />
+              ) : (
+                <EmptyState
+                  icon={<BookOpen className="w-12 h-12" />}
+                  title="No hay cursos disponibles"
+                  description="Actualmente no hay cursos activos para mostrar"
+                />
+              )}
+            </div>
+
+            {/* Mobile View */}
+            <div className="lg:hidden">
+              {filteredCourses.length > 0 ? (
+                <div className="space-y-3">
+                  {filteredCourses.map(course => {
+                    const progress = courseProgress.get(course.id);
+                    const enrollment = enrollments.find((e: any) => e.course_id === course.id && e.status === 'active');
+                    
+                    return (
+                      <CourseCard
+                        key={course.id}
+                        course={course}
+                        progress={progress}
+                        enrollment={enrollment}
+                        onViewDetail={handleViewDetail}
+                      />
+                    );
+                  })}
+                </div>
+              ) : (
+                <EmptyState
+                  icon={<BookOpen className="w-12 h-12" />}
+                  title="No hay cursos disponibles"
+                  description="Actualmente no hay cursos activos para mostrar"
+                />
+              )}
+            </div>
           </>
         )}
       </div>

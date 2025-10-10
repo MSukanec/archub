@@ -163,9 +163,14 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       : `/learning/courses/${courseSlug}?tab=Lecciones&lesson=${lessonId}`;
     
     console.log('🔗 URL construida:', url);
-    console.log('🔗 Navegando ahora...');
-    navigate(url);
-    console.log('🔗 Navigate ejecutado');
+    console.log('🔗 Navegando con window.history.pushState...');
+    
+    // Use window.history.pushState to properly update URL with query params
+    window.history.pushState({}, '', url);
+    // Trigger a popstate event to notify wouter of the change
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    
+    console.log('🔗 Navegación completada');
   };
 
   const columns = [
