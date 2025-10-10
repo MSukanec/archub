@@ -13,6 +13,7 @@ interface TransferForm {
   created_by: string
   description?: string
   type_id: string
+  project_id: string | null
   currency_id: string
   wallet_id_from: string
   wallet_id_to: string

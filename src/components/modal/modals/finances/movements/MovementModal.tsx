@@ -38,8 +38,8 @@ import { useMovementPartners, useCreateMovementPartners, useUpdateMovementPartne
 import { useMovementGeneralCosts, useCreateMovementGeneralCosts, useUpdateMovementGeneralCosts } from '@/hooks/use-movement-general-costs'
 import { useMovementPersonnel } from '@/hooks/use-movement-personnel'
 
-// Función para crear schema dinámico basado en contexto
-const createBasicMovementSchema = (isOrganizationalContext: boolean) => z.object({
+// Schema de movimiento básico - proyecto siempre requerido
+const basicMovementSchema = z.object({
   movement_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
   type_id: z.string().min(1, 'Tipo de movimiento es requerido'),
@@ -50,18 +50,16 @@ const createBasicMovementSchema = (isOrganizationalContext: boolean) => z.object
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
   exchange_rate: z.number().optional(),
-  project_id: isOrganizationalContext 
-    ? z.string().nullable().refine((val) => val !== '', { message: 'Proyecto es requerido' })
-    : z.string().optional().nullable()
+  project_id: z.string().nullable().refine((val) => val !== '', { message: 'Proyecto es requerido' })
 })
 
-// Schema para conversión (como en el modal original)
+// Schema para conversión - proyecto siempre requerido
 const conversionSchema = z.object({
   movement_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
   type_id: z.string().min(1, 'Tipo es requerido'),
-  project_id: z.string().optional().nullable(),
+  project_id: z.string().nullable().refine((val) => val !== '', { message: 'Proyecto es requerido' }),
   // Campos de origen (egreso)
   currency_id_from: z.string().min(1, 'Moneda origen es requerida'),
   wallet_id_from: z.string().min(1, 'Billetera origen es requerida'),
@@ -77,12 +75,13 @@ const conversionSchema = z.object({
   path: ["currency_id_to"]
 })
 
-// Schema para transferencia interna
+// Schema para transferencia interna - proyecto siempre requerido
 const transferSchema = z.object({
   movement_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
   type_id: z.string().min(1, 'Tipo es requerido'),
+  project_id: z.string().nullable().refine((val) => val !== '', { message: 'Proyecto es requerido' }),
   currency_id: z.string().min(1, 'Moneda es requerida'),
   wallet_id_from: z.string().min(1, 'Billetera origen es requerida'),
   wallet_id_to: z.string().min(1, 'Billetera destino es requerida'),
@@ -92,7 +91,7 @@ const transferSchema = z.object({
   path: ["wallet_id_to"]
 })
 
-type BasicMovementForm = z.infer<ReturnType<typeof createBasicMovementSchema>>
+type BasicMovementForm = z.infer<typeof basicMovementSchema>
 type ConversionForm = z.infer<typeof conversionSchema>
 type TransferForm = z.infer<typeof transferSchema>
 
@@ -168,8 +167,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   }, [movementConcepts, currencies, wallets])
   
   
-  // Detectar si estamos en contexto organizacional (mostrar selector de proyecto)
-  const isOrganizationalContext = location.includes('/organization/')
+  // Selector de proyecto siempre visible
+  const showProjectSelector = true
 
   // Mutaciones para subcontratos
   const createMovementSubcontractsMutation = useCreateMovementSubcontracts()
@@ -420,7 +419,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   // Synchronous form initialization - no waiting for async data
   const form = useForm<BasicMovementForm>({
-    resolver: zodResolver(createBasicMovementSchema(isOrganizationalContext)),
+    resolver: zodResolver(basicMovementSchema),
     defaultValues: {
       movement_date: editingMovement ? parseMovementDate(editingMovement.movement_date) : new Date(),
       created_by: editingMovement?.created_by || currentMember?.id || '',
@@ -432,7 +431,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       wallet_id: editingMovement?.wallet_id || defaultWallet,
       amount: editingMovement?.amount || 0,
       exchange_rate: editingMovement?.exchange_rate || undefined,
-      project_id: editingMovement?.project_id || (isOrganizationalContext ? null : (userData?.preferences?.last_project_id || null))
+      project_id: editingMovement?.project_id || (userData?.preferences?.last_project_id || null)
     }
   })
 
@@ -477,7 +476,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       created_by: editingMovement?.created_by || currentMember?.id || '',
       description: editingMovement?.description || '',
       type_id: editingMovement?.type_id || '',
-      project_id: editingMovement?.project_id || (isOrganizationalContext ? null : (userData?.preferences?.last_project_id || null)),
+      project_id: editingMovement?.project_id || (userData?.preferences?.last_project_id || null),
       currency_id_from: editingMovement?.currency_id_from || defaultCurrency,
       wallet_id_from: editingMovement?.wallet_id_from || defaultWallet,
       amount_from: editingMovement?.amount_from || 0,
@@ -512,6 +511,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       created_by: editingMovement?.created_by || currentMember?.id || '',
       description: editingMovement?.description || '',
       type_id: editingMovement?.type_id || '',
+      project_id: editingMovement?.project_id || (userData?.preferences?.last_project_id || null),
       currency_id: editingMovement?.currency_id || defaultCurrency,
       wallet_id_from: editingMovement?.wallet_id_from || defaultWallet,
       wallet_id_to: editingMovement?.wallet_id_to || '',
@@ -1424,7 +1424,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         // Crear movimiento de egreso
         const egressMovementData = {
           organization_id: userData.organization.id,
-          project_id: userData.preferences?.last_project_id || null,
+          project_id: data.project_id || null,
           movement_date: data.movement_date.getFullYear() + '-' + 
             String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
             String(data.movement_date.getDate()).padStart(2, '0'),
@@ -1443,7 +1443,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         // Crear movimiento de ingreso
         const ingressMovementData = {
           organization_id: userData.organization.id,
-          project_id: userData.preferences?.last_project_id || null,
+          project_id: data.project_id || null,
           movement_date: data.movement_date.getFullYear() + '-' + 
             String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
             String(data.movement_date.getDate()).padStart(2, '0'),
@@ -1528,7 +1528,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       // Crear movimiento de egreso (salida)
       const egressMovementData = {
         organization_id: userData.organization.id,
-        project_id: userData.preferences?.last_project_id || null,
+        project_id: data.project_id || null,
         movement_date: data.movement_date.getFullYear() + '-' + 
           String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
           String(data.movement_date.getDate()).padStart(2, '0'),
@@ -1546,7 +1546,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       // Crear movimiento de ingreso (entrada)
       const ingressMovementData = {
         organization_id: userData.organization.id,
-        project_id: userData.preferences?.last_project_id || null,
+        project_id: data.project_id || null,
         movement_date: data.movement_date.getFullYear() + '-' + 
           String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
           String(data.movement_date.getDate()).padStart(2, '0'),
@@ -1667,28 +1667,26 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     <Form {...conversionForm} key={`conversion-${movementType}`}>
       <form onSubmit={conversionForm.handleSubmit(onSubmitConversion)} className="space-y-4">
         {/* CAMPOS COMUNES PARA CONVERSIONES */}
-        {/* Selector de proyecto (solo en contexto organizacional) */}
-        {isOrganizationalContext && (
-          <FormField
-            control={conversionForm.control}
-            name="project_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Proyecto *</FormLabel>
-                <FormControl>
-                  <ProjectSelectorField
-                    projects={projects || []}
-                    organization={userData?.organization || undefined}
-                    value={field.value || null}
-                    onChange={field.onChange}
-                    placeholder="Seleccionar proyecto..."
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        {/* Selector de proyecto - siempre visible */}
+        <FormField
+          control={conversionForm.control}
+          name="project_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Proyecto *</FormLabel>
+              <FormControl>
+                <ProjectSelectorField
+                  projects={projects || []}
+                  organization={userData?.organization || undefined}
+                  value={field.value || null}
+                  onChange={field.onChange}
+                  placeholder="Seleccionar proyecto..."
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Fecha */}
         <FormField
@@ -1777,6 +1775,27 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const transferPanel = (
     <Form {...transferForm} key={`transfer-${movementType}`}>
       <form onSubmit={transferForm.handleSubmit(onSubmitTransfer)} className="space-y-4">
+        {/* SELECTOR DE PROYECTO - Siempre visible */}
+        <FormField
+          control={transferForm.control}
+          name="project_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Proyecto *</FormLabel>
+              <FormControl>
+                <ProjectSelectorField
+                  projects={projects || []}
+                  organization={userData?.organization || undefined}
+                  value={field.value || null}
+                  onChange={field.onChange}
+                  placeholder="Seleccionar proyecto..."
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         {/* 1. FECHA */}
         <FormField
           control={transferForm.control}
@@ -1935,28 +1954,26 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   // Campos comunes (siempre los mismos)
   const commonFields = (
     <div className="space-y-4">
-      {/* SELECTOR DE PROYECTO - Solo aparece en contexto organizacional */}
-      {isOrganizationalContext && (
-        <FormField
-          control={form.control}
-          name="project_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Proyecto *</FormLabel>
-              <FormControl>
-                <ProjectSelectorField
-                  projects={projects || []}
-                  organization={userData?.organization || undefined}
-                  value={field.value || null}
-                  onChange={field.onChange}
-                  placeholder="Seleccionar proyecto..."
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
+      {/* SELECTOR DE PROYECTO - Siempre visible */}
+      <FormField
+        control={form.control}
+        name="project_id"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Proyecto *</FormLabel>
+            <FormControl>
+              <ProjectSelectorField
+                projects={projects || []}
+                organization={userData?.organization || undefined}
+                value={field.value || null}
+                onChange={field.onChange}
+                placeholder="Seleccionar proyecto..."
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
       
       {/* LAYOUT: FECHA 1/3 Y TIPO DE MOVIMIENTO 2/3 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
