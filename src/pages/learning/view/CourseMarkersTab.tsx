@@ -152,15 +152,18 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
   };
 
   const handleGoToLesson = (lessonId: string, timeSec: number | null) => {
+    console.log('🔗 Navegando a lección:', { lessonId, timeSec, courseSlug });
+    
     // Set the current lesson in the sidebar
     setCurrentLesson(lessonId);
     
     // Navigate to the Lecciones tab with query params for time
-    if (timeSec !== null) {
-      navigate(`/learning/courses/${courseSlug}?tab=Lecciones&lesson=${lessonId}&seek=${timeSec}`);
-    } else {
-      navigate(`/learning/courses/${courseSlug}?tab=Lecciones&lesson=${lessonId}`);
-    }
+    const url = timeSec !== null 
+      ? `/learning/courses/${courseSlug}?tab=Lecciones&lesson=${lessonId}&seek=${timeSec}`
+      : `/learning/courses/${courseSlug}?tab=Lecciones&lesson=${lessonId}`;
+    
+    console.log('🔗 URL de navegación:', url);
+    navigate(url);
   };
 
   const columns = [
