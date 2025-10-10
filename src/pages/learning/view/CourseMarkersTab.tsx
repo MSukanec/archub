@@ -10,6 +10,7 @@ import { es } from 'date-fns/locale';
 import { useLocation } from 'wouter';
 import { useCourseSidebarStore } from '@/stores/sidebarStore';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import MarkerCard from '@/components/ui/cards/MarkerCard';
 
 interface CourseMarkersTabProps {
   courseId: string;
@@ -316,7 +317,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
     <div className="space-y-6" data-testid="course-markers-tab">
       {/* Filter */}
       {modules.length > 0 && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Button
             variant={selectedModule === 'all' ? "default" : "outline"}
             size="sm"
@@ -337,8 +338,8 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
         </div>
       )}
 
-      {/* Custom Table */}
-      <div className="border rounded-lg overflow-hidden">
+      {/* Desktop Table View */}
+      <div className="hidden lg:block border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-muted/50">
@@ -385,6 +386,19 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="lg:hidden">
+        <div className="space-y-3">
+          {filteredMarkers.map((marker) => (
+            <MarkerCard
+              key={marker.id}
+              marker={marker}
+              onGoToLesson={handleGoToLesson}
+            />
+          ))}
         </div>
       </div>
     </div>
