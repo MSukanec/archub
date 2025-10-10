@@ -667,7 +667,9 @@ export const course_lesson_notes = pgTable("course_lesson_notes", {
   note_type: text("note_type").notNull().default("marker"),
   created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => ({
+  user_lesson_note_type_unique: unique().on(table.user_id, table.lesson_id, table.note_type),
+}));
 
 // Schemas for courses
 export const insertCourseSchema = createInsertSchema(courses).omit({

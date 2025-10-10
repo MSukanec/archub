@@ -105,20 +105,41 @@ export function LessonSummaryNote({ lessonId }: LessonSummaryNoteProps) {
           return;
         }
 
-        // Upsert the summary note
-        const { error } = await supabase
+        // Check if a summary note already exists
+        const { data: existingNote } = await supabase
           .from('course_lesson_notes')
-          .upsert({
-            user_id: userRecord.id,
-            lesson_id: lessonId,
-            note_type: 'summary',
-            body: noteText,
-            time_sec: null,
-            is_pinned: false
-          }, {
-            onConflict: 'user_id,lesson_id,note_type',
-            ignoreDuplicates: false
-          });
+          .select('id')
+          .eq('user_id', userRecord.id)
+          .eq('lesson_id', lessonId)
+          .eq('note_type', 'summary')
+          .single();
+
+        let error;
+        
+        if (existingNote) {
+          // Update existing note
+          const result = await supabase
+            .from('course_lesson_notes')
+            .update({
+              body: noteText,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', existingNote.id);
+          error = result.error;
+        } else {
+          // Insert new note
+          const result = await supabase
+            .from('course_lesson_notes')
+            .insert({
+              user_id: userRecord.id,
+              lesson_id: lessonId,
+              note_type: 'summary',
+              body: noteText,
+              time_sec: null,
+              is_pinned: false
+            });
+          error = result.error;
+        }
 
         if (error) {
           console.error('Failed to save summary note:', error);
