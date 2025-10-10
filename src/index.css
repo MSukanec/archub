@@ -100,9 +100,11 @@
   --toast-description: hsl(0, 0%, 40%);
 
   /* Accent / State */
+  --accent-hsl: 76 100% 40%;
   --accent: hsl(76, 100%, 40%);
   --accent-2: hsl(150, 40%, 40%);
   --accent-rgb: 132, 204, 22;
+  --accent-foreground-hsl: 0 0% 100%;
   --accent-foreground: hsl(0, 0%, 100%);
   --destructive: hsl(0, 84%, 60%);
   --destructive-text: hsl(0, 0%, 100%);
@@ -309,8 +311,10 @@
   --toast-description: hsl(240, 5%, 65%);
 
   /* Accent / State */
+  --accent-hsl: 76 100% 40%;
   --accent: hsl(76, 100%, 40%);
   --accent-rgb: 132, 204, 22;
+  --accent-foreground-hsl: 0 0% 100%;
   --accent-text: hsl(0, 0%, 100%);
   --destructive: hsl(0, 84%, 65%);
   --destructive-text: hsl(0, 0%, 100%);

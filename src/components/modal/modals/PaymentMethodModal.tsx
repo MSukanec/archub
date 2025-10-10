@@ -183,11 +183,19 @@ Enviá el comprobante a: pagos@archub.com.ar`;
       {!showBankInfo ? (
         <>
           <div className="space-y-4">
-            <div className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 p-4">
-              <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+            <div 
+              className="rounded-lg p-4" 
+              style={{ 
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                borderColor: 'color-mix(in srgb, var(--accent) 30%, transparent)',
+                backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)'
+              }}
+            >
+              <p className="text-sm font-medium" style={{ color: 'var(--accent)' }}>
                 💳 Suscripción Anual - Acceso por 365 días corridos
               </p>
-              <p className="text-xs text-blue-700 dark:text-blue-200 mt-1">
+              <p className="text-xs mt-1" style={{ color: 'color-mix(in srgb, var(--accent) 80%, transparent)' }}>
                 Disfrutá del curso completo durante un año desde la fecha de compra
               </p>
             </div>
@@ -201,8 +209,8 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                 className={cn(
                   "relative flex items-start space-x-4 rounded-lg border-2 p-4 cursor-pointer transition-all",
                   selectedMethod === 'mercadopago' 
-                    ? "border-primary bg-primary/5" 
-                    : "border-border hover:border-primary/50"
+                    ? "border-accent bg-accent/5" 
+                    : "border-border hover:border-accent/50"
                 )}
                 onClick={() => setSelectedMethod('mercadopago')}
                 data-testid="payment-option-mercadopago"
@@ -211,7 +219,7 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                 <div className="flex-1 flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <Label htmlFor="mercadopago" className="flex items-center gap-2 cursor-pointer">
-                      <CreditCard className="h-5 w-5 text-primary" />
+                      <CreditCard className="h-5 w-5 text-accent" />
                       <span className="font-medium">Mercado Pago (ARS)</span>
                     </Label>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -230,8 +238,8 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                 className={cn(
                   "relative flex items-start space-x-4 rounded-lg border-2 p-4 cursor-pointer transition-all",
                   selectedMethod === 'paypal' 
-                    ? "border-primary bg-primary/5" 
-                    : "border-border hover:border-primary/50"
+                    ? "border-accent bg-accent/5" 
+                    : "border-border hover:border-accent/50"
                 )}
                 onClick={() => setSelectedMethod('paypal')}
                 data-testid="payment-option-paypal"
@@ -240,7 +248,7 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                 <div className="flex-1 flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <Label htmlFor="paypal" className="flex items-center gap-2 cursor-pointer">
-                      <CreditCard className="h-5 w-5 text-primary" />
+                      <CreditCard className="h-5 w-5 text-accent" />
                       <span className="font-medium">PayPal (USD)</span>
                     </Label>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -259,8 +267,8 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                 className={cn(
                   "relative flex items-start space-x-4 rounded-lg border-2 p-4 cursor-pointer transition-all",
                   selectedMethod === 'transfer' 
-                    ? "border-primary bg-primary/5" 
-                    : "border-border hover:border-primary/50"
+                    ? "border-accent bg-accent/5" 
+                    : "border-border hover:border-accent/50"
                 )}
                 onClick={() => setSelectedMethod('transfer')}
                 data-testid="payment-option-transfer"
@@ -268,7 +276,7 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                 <RadioGroupItem value="transfer" id="transfer" className="mt-0.5" />
                 <div className="flex-1">
                   <Label htmlFor="transfer" className="flex items-center gap-2 cursor-pointer">
-                    <Building2 className="h-5 w-5 text-primary" />
+                    <Building2 className="h-5 w-5 text-accent" />
                     <span className="font-medium">Transferencia bancaria</span>
                   </Label>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -360,8 +368,16 @@ Enviá el comprobante a: pagos@archub.com.ar`;
             </div>
           </div>
 
-          <div className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 p-4">
-            <p className="text-sm text-blue-900 dark:text-blue-100">
+          <div 
+            className="rounded-lg p-4" 
+            style={{ 
+              borderWidth: '1px',
+              borderStyle: 'solid',
+              borderColor: 'color-mix(in srgb, var(--accent) 30%, transparent)',
+              backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)'
+            }}
+          >
+            <p className="text-sm" style={{ color: 'var(--accent)' }}>
               Enviá el comprobante a:{' '}
               <a 
                 href="mailto:pagos@archub.com.ar" 

@@ -249,7 +249,7 @@ export default function CourseList() {
               <PayButton
                 courseSlug={course.slug}
                 currency="ARS"
-                variant="secondary"
+                variant="default"
                 size="sm"
               />
             ) : (
