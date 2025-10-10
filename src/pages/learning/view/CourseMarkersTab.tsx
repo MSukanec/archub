@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useLocation } from 'wouter';
 import { useCourseSidebarStore } from '@/stores/sidebarStore';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 
 interface CourseMarkersTabProps {
   courseId: string;
@@ -38,6 +39,7 @@ interface MarkerWithLesson {
 export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkersTabProps) {
   const [, navigate] = useLocation();
   const { setCurrentLesson } = useCourseSidebarStore();
+  const [selectedModule, setSelectedModule] = useState<string>('all');
 
   // Fetch all markers for the course with lesson and module information
   const { data: markers = [], isLoading } = useQuery({
@@ -59,17 +61,27 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
 
       if (!userRecord) return [];
 
-      // Get all lessons for this course
+      // First, get all modules for this course
+      const { data: courseModules } = await supabase
+        .from('course_modules')
+        .select('id')
+        .eq('course_id', courseId);
+
+      if (!courseModules || courseModules.length === 0) return [];
+
+      const moduleIds = courseModules.map(m => m.id);
+
+      // Then get all lessons for these modules
       const { data: courseLessons } = await supabase
         .from('course_lessons')
         .select('id, module_id')
-        .eq('course_id', courseId);
+        .in('module_id', moduleIds);
 
       if (!courseLessons || courseLessons.length === 0) return [];
 
       const lessonIds = courseLessons.map(l => l.id);
 
-      // Get all markers for these lessons
+      // Finally, get all markers for these lessons
       const { data: markersData, error } = await supabase
         .from('course_lesson_notes')
         .select(`
@@ -109,6 +121,28 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
     },
     enabled: !!courseId && !!supabase
   });
+
+  // Get unique modules from markers
+  const modules = useMemo(() => {
+    const uniqueModules = new Map<string, { title: string; sort_index: number }>();
+    
+    markers.forEach(marker => {
+      if (marker.module) {
+        const moduleKey = marker.module.title;
+        if (!uniqueModules.has(moduleKey)) {
+          uniqueModules.set(moduleKey, marker.module);
+        }
+      }
+    });
+
+    return Array.from(uniqueModules.values()).sort((a, b) => a.sort_index - b.sort_index);
+  }, [markers]);
+
+  // Filter markers by selected module
+  const filteredMarkers = useMemo(() => {
+    if (selectedModule === 'all') return markers;
+    return markers.filter(marker => marker.module?.title === selectedModule);
+  }, [markers, selectedModule]);
 
   const formatTime = (seconds: number | null): string => {
     if (seconds === null) return '0:00';
@@ -207,36 +241,68 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
     }
   ];
 
+  const renderFilterContent = () => {
+    return (
+      <>
+        <div className="text-xs font-medium mb-2 block">Filtrar por módulo</div>
+        <div className="space-y-1">
+          <Button
+            variant={selectedModule === 'all' ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setSelectedModule('all')}
+            className="w-full justify-start text-xs font-normal h-8"
+          >
+            Todos los módulos
+          </Button>
+          {modules.map((module) => (
+            <Button
+              key={module.title}
+              variant={selectedModule === module.title ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setSelectedModule(module.title)}
+              className="w-full justify-start text-xs font-normal h-8"
+            >
+              {module.title}
+            </Button>
+          ))}
+        </div>
+      </>
+    );
+  };
+
   return (
     <div className="space-y-6" data-testid="course-markers-tab">
-      <div className="flex items-center gap-3">
-        <Bookmark className="h-6 w-6 text-primary" />
-        <div>
-          <h2 className="text-2xl font-bold">Marcadores del Curso</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            {markers.length} {markers.length === 1 ? 'marcador encontrado' : 'marcadores encontrados'}
-          </p>
-        </div>
-      </div>
-
       <Table
         columns={columns}
-        data={markers}
+        data={filteredMarkers}
         isLoading={isLoading}
         emptyState={
-          <div className="text-center py-12">
-            <Bookmark className="h-16 w-16 mx-auto mb-4 text-muted-foreground/30" />
-            <h3 className="text-lg font-medium mb-2">No hay marcadores</h3>
-            <p className="text-sm text-muted-foreground">
-              Los marcadores que crees en las lecciones aparecerán aquí
-            </p>
-          </div>
+          <EmptyState
+            icon={<Bookmark />}
+            title="No hay marcadores"
+            description="Los marcadores que crees en las lecciones aparecerán aquí"
+            action={
+              <Button
+                onClick={() => navigate(`/learning/courses/${courseSlug}?tab=Lecciones`)}
+                data-testid="button-go-to-lessons"
+              >
+                Ir a Lecciones
+              </Button>
+            }
+          />
         }
         defaultSort={{
           key: 'created_at',
           direction: 'desc'
         }}
         getItemId={(marker) => marker.id}
+        topBar={modules.length > 0 ? {
+          showSearch: false,
+          showFilter: true,
+          renderFilterContent: renderFilterContent,
+          isFilterActive: selectedModule !== 'all',
+          onClearFilters: () => setSelectedModule('all')
+        } : undefined}
       />
     </div>
   );
