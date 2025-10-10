@@ -233,7 +233,11 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
         <Button
           size="sm"
           variant="default"
-          onClick={() => handleGoToLesson(marker.lesson_id, marker.time_sec)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleGoToLesson(marker.lesson_id, marker.time_sec);
+          }}
           className="gap-2"
           data-testid={`button-go-to-lesson-${marker.id}`}
         >
