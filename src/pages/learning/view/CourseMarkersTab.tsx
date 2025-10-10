@@ -317,7 +317,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
     <div className="space-y-6" data-testid="course-markers-tab">
       {/* Filter */}
       {modules.length > 0 && (
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
           <Button
             variant={selectedModule === 'all' ? "default" : "outline"}
             size="sm"
@@ -339,7 +339,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       )}
 
       {/* Desktop Table View */}
-      <div className="hidden lg:block border rounded-lg overflow-hidden">
+      <div className="border rounded-lg overflow-hidden hidden lg:block">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-muted/50">
