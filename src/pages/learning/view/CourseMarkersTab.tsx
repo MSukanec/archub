@@ -1,16 +1,19 @@
 import { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, Bookmark, ArrowRight } from 'lucide-react';
+import { Clock, Bookmark, ArrowRight, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useLocation } from 'wouter';
 import { useCourseSidebarStore } from '@/stores/sidebarStore';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import MarkerCard from '@/components/ui/cards/MarkerCard';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { queryClient } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 interface CourseMarkersTabProps {
   courseId: string;
@@ -41,6 +44,8 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
   const [, navigate] = useLocation();
   const { setCurrentLesson } = useCourseSidebarStore();
   const [selectedModule, setSelectedModule] = useState<string>('all');
+  const { openModal } = useGlobalModalStore();
+  const { toast } = useToast();
 
   // Fetch all markers for the course with lesson and module information
   const { data: markers = [], isLoading } = useQuery({
@@ -152,6 +157,45 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Delete marker mutation
+  const deleteMarkerMutation = useMutation({
+    mutationFn: async (markerId: string) => {
+      if (!supabase) throw new Error('Supabase no disponible');
+
+      const { error } = await supabase
+        .from('course_lesson_notes')
+        .delete()
+        .eq('id', markerId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['course-markers', courseId] });
+      toast({
+        title: "Marcador eliminado",
+        description: "El marcador se eliminó correctamente",
+      });
+    },
+    onError: (error) => {
+      console.error('Error deleting marker:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el marcador",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleDeleteMarker = (marker: MarkerWithLesson) => {
+    openModal('delete-confirmation', {
+      mode: 'simple',
+      title: 'Eliminar Marcador',
+      description: '¿Estás seguro de que querés eliminar este marcador?',
+      itemName: marker.body || 'Marcador sin descripción',
+      onConfirm: () => deleteMarkerMutation.mutate(marker.id)
+    });
+  };
+
   const handleGoToLesson = (lessonId: string, timeSec: number | null) => {
     console.log('🔗 handleGoToLesson EJECUTADO:', { lessonId, timeSec, courseSlug });
     
@@ -238,20 +282,35 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       sortable: false,
       width: '20%',
       render: (marker: MarkerWithLesson) => (
-        <Button
-          size="sm"
-          variant="default"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleGoToLesson(marker.lesson_id, marker.time_sec);
-          }}
-          className="gap-2"
-          data-testid={`button-go-to-lesson-${marker.id}`}
-        >
-          Ir a lección
-          <ArrowRight className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="default"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleGoToLesson(marker.lesson_id, marker.time_sec);
+            }}
+            className="gap-2"
+            data-testid={`button-go-to-lesson-${marker.id}`}
+          >
+            Ir a lección
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleDeleteMarker(marker);
+            }}
+            className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+            data-testid={`button-delete-marker-${marker.id}`}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       )
     }
   ];
@@ -376,6 +435,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
               key={marker.id}
               marker={marker}
               onGoToLesson={handleGoToLesson}
+              onDelete={handleDeleteMarker}
             />
           ))}
         </div>

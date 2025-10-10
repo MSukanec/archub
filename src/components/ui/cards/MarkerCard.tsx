@@ -1,4 +1,4 @@
-import { Clock, Bookmark, ArrowRight } from 'lucide-react';
+import { Clock, Bookmark, ArrowRight, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -17,9 +17,10 @@ type MarkerCardProps = {
     };
   };
   onGoToLesson: (lessonId: string, timeSec: number | null) => void;
+  onDelete?: (marker: any) => void;
 };
 
-const MarkerCard: React.FC<MarkerCardProps> = ({ marker, onGoToLesson }) => {
+const MarkerCard: React.FC<MarkerCardProps> = ({ marker, onGoToLesson, onDelete }) => {
   const formatTime = (seconds: number | null): string => {
     if (seconds === null) return '0:00';
     const mins = Math.floor(seconds / 60);
@@ -66,16 +67,29 @@ const MarkerCard: React.FC<MarkerCardProps> = ({ marker, onGoToLesson }) => {
         </p>
       </div>
 
-      {/* Action Button */}
-      <Button 
-        onClick={() => onGoToLesson(marker.lesson_id, marker.time_sec)}
-        className="w-full gap-2"
-        size="sm"
-        data-testid={`button-go-to-lesson-${marker.id}`}
-      >
-        Ir a lección
-        <ArrowRight className="w-4 h-4" />
-      </Button>
+      {/* Action Buttons */}
+      <div className="flex gap-2">
+        <Button 
+          onClick={() => onGoToLesson(marker.lesson_id, marker.time_sec)}
+          className="flex-1 gap-2"
+          size="sm"
+          data-testid={`button-go-to-lesson-${marker.id}`}
+        >
+          Ir a lección
+          <ArrowRight className="w-4 h-4" />
+        </Button>
+        {onDelete && (
+          <Button 
+            onClick={() => onDelete(marker)}
+            variant="ghost"
+            size="sm"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            data-testid={`button-delete-marker-${marker.id}`}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        )}
+      </div>
     </div>
   );
 };
