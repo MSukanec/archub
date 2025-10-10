@@ -152,7 +152,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
   };
 
   const handleGoToLesson = (lessonId: string, timeSec: number | null) => {
-    console.log('🔗 Navegando a lección:', { lessonId, timeSec, courseSlug });
+    console.log('🔗 handleGoToLesson EJECUTADO:', { lessonId, timeSec, courseSlug });
     
     // Set the current lesson in the sidebar
     setCurrentLesson(lessonId);
@@ -162,8 +162,10 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       ? `/learning/courses/${courseSlug}?tab=Lecciones&lesson=${lessonId}&seek=${timeSec}`
       : `/learning/courses/${courseSlug}?tab=Lecciones&lesson=${lessonId}`;
     
-    console.log('🔗 URL de navegación:', url);
+    console.log('🔗 URL construida:', url);
+    console.log('🔗 Navegando ahora...');
     navigate(url);
+    console.log('🔗 Navigate ejecutado');
   };
 
   const columns = [
