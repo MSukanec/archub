@@ -31,7 +31,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Key Architectural Decisions
 - **Shared Schema**: `shared/schema.ts` for frontend/backend consistency.
-- **Design System**: "new-york" style variant with a neutral color palette and dark mode support, emphasizing reusable UI components.
+- **Design System**: "new-york" style variant with a neutral color palette and dark mode support, emphasizing reusable UI components. **Accent Color System**: Dual CSS variable approach - `--accent-hsl` (76 100% 40%) for Tailwind with opacity support (e.g., bg-accent/5), and `--accent` (hsl(76, 100%, 40%)) for inline styles. Payment modals use color-mix() for soft accent backgrounds.
 - **Data Flow**: React Query for server state management, Express.js for REST APIs, Drizzle ORM for database operations with extensive cache invalidation.
 - **Database Views**: Always use database views for data fetching (e.g., `construction_tasks_view`).
 - **Project Management**: Includes a custom React-based Gantt chart, Kanban board, and parametric task generation.
