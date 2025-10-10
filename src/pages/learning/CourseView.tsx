@@ -15,21 +15,25 @@ export default function CourseView() {
   const { id } = useParams<{ id: string }>();
   const [location, navigate] = useLocation();
   
-  // Parse query params
-  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  // Parse query params from window.location.search (more reliable than wouter's location)
+  const urlParams = new URLSearchParams(window.location.search);
   const tabParam = urlParams.get('tab');
   const lessonParam = urlParams.get('lesson');
   const seekParam = urlParams.get('seek');
   
   const [activeTab, setActiveTab] = useState(tabParam || 'Datos del Curso');
   
-  // Sync activeTab when location changes (for navigation from markers)
-  // Only apply if tabParam exists in URL
+  // Sync activeTab when URL changes (for navigation from markers)
   useEffect(() => {
-    if (tabParam && tabParam !== activeTab) {
-      setActiveTab(tabParam);
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    console.log('🔄 CourseView useEffect - URL changed:', window.location.href);
+    console.log('🔄 tab from URL:', tab, 'activeTab:', activeTab);
+    if (tab && tab !== activeTab) {
+      console.log('🔄 Cambiando tab a:', tab);
+      setActiveTab(tab);
     }
-  }, [tabParam]); // Remove activeTab from deps to avoid loops
+  }, [location]); // Trigger when location changes
   
   // Update URL when tab changes manually (to persist state)
   const handleTabChange = (newTab: string) => {
