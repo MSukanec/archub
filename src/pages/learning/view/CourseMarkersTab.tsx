@@ -279,40 +279,109 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
     );
   };
 
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-20 bg-muted/20 rounded-lg animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  if (filteredMarkers.length === 0) {
+    return (
+      <EmptyState
+        icon={<Bookmark />}
+        title="No hay marcadores"
+        description="Los marcadores que crees en las lecciones aparecerán aquí"
+        action={
+          <Button
+            onClick={() => navigate(`/learning/courses/${courseSlug}?tab=Lecciones`)}
+            data-testid="button-go-to-lessons"
+          >
+            Ir a Lecciones
+          </Button>
+        }
+      />
+    );
+  }
+
   return (
     <div className="space-y-6" data-testid="course-markers-tab">
-      <Table
-        columns={columns}
-        data={filteredMarkers}
-        isLoading={isLoading}
-        emptyState={
-          <EmptyState
-            icon={<Bookmark />}
-            title="No hay marcadores"
-            description="Los marcadores que crees en las lecciones aparecerán aquí"
-            action={
-              <Button
-                onClick={() => navigate(`/learning/courses/${courseSlug}?tab=Lecciones`)}
-                data-testid="button-go-to-lessons"
-              >
-                Ir a Lecciones
-              </Button>
-            }
-          />
-        }
-        defaultSort={{
-          key: 'created_at',
-          direction: 'desc'
-        }}
-        getItemId={(marker) => marker.id}
-        topBar={modules.length > 0 ? {
-          showSearch: false,
-          showFilter: true,
-          renderFilterContent: renderFilterContent,
-          isFilterActive: selectedModule !== 'all',
-          onClearFilters: () => setSelectedModule('all')
-        } : undefined}
-      />
+      {/* Filter */}
+      {modules.length > 0 && (
+        <div className="flex items-center gap-2">
+          <Button
+            variant={selectedModule === 'all' ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSelectedModule('all')}
+          >
+            Todos
+          </Button>
+          {modules.map((module) => (
+            <Button
+              key={module.title}
+              variant={selectedModule === module.title ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedModule(module.title)}
+            >
+              {module.title}
+            </Button>
+          ))}
+        </div>
+      )}
+
+      {/* Custom Table */}
+      <div className="border rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-muted/50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium">Módulo</th>
+                <th className="px-4 py-3 text-left text-xs font-medium">Lección</th>
+                <th className="px-4 py-3 text-left text-xs font-medium">Tiempo</th>
+                <th className="px-4 py-3 text-left text-xs font-medium">Texto</th>
+                <th className="px-4 py-3 text-left text-xs font-medium">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {filteredMarkers.map((marker) => (
+                <tr key={marker.id} className="hover:bg-muted/20">
+                  <td className="px-4 py-3 text-sm">{marker.module?.title || 'Sin módulo'}</td>
+                  <td className="px-4 py-3 text-sm">{marker.lesson?.title || 'Sin lección'}</td>
+                  <td className="px-4 py-3 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-mono">{formatTime(marker.time_sec)}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    {marker.is_pinned && (
+                      <Badge variant="secondary" className="mr-2">Fijado</Badge>
+                    )}
+                    {marker.body || 'Sin descripción'}
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        console.log('🔥 CLICK DIRECTO EN BOTÓN!', marker.lesson_id, marker.time_sec);
+                        handleGoToLesson(marker.lesson_id, marker.time_sec);
+                      }}
+                      className="gap-2"
+                      data-testid={`button-go-to-lesson-${marker.id}`}
+                    >
+                      Ir a lección
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }
