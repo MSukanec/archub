@@ -10,7 +10,6 @@ import { es } from 'date-fns/locale';
 import { useLocation } from 'wouter';
 import { useCourseSidebarStore } from '@/stores/sidebarStore';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
-import MarkerCard from '@/components/ui/cards/MarkerCard';
 
 interface CourseMarkersTabProps {
   courseId: string;
@@ -338,8 +337,8 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
         </div>
       )}
 
-      {/* Desktop Table View */}
-      <div className="border rounded-lg overflow-hidden hidden lg:block">
+      {/* Custom Table */}
+      <div className="border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-muted/50">
@@ -386,19 +385,6 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* Mobile Card View */}
-      <div className="lg:hidden">
-        <div className="space-y-3">
-          {filteredMarkers.map((marker) => (
-            <MarkerCard
-              key={marker.id}
-              marker={marker}
-              onGoToLesson={handleGoToLesson}
-            />
-          ))}
         </div>
       </div>
     </div>
