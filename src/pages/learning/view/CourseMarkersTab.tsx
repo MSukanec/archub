@@ -181,7 +181,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       label: 'Lección',
       sortable: true,
       sortType: 'string' as const,
-      width: '25%',
+      width: '20%',
       render: (marker: MarkerWithLesson) => (
         <div className="font-medium">
           {marker.lesson?.title || 'Sin lección'}
@@ -193,7 +193,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       label: 'Tiempo',
       sortable: true,
       sortType: 'number' as const,
-      width: '10%',
+      width: '20%',
       render: (marker: MarkerWithLesson) => (
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4 text-muted-foreground" />
@@ -207,7 +207,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       key: 'body',
       label: 'Texto',
       sortable: false,
-      width: '35%',
+      width: '20%',
       render: (marker: MarkerWithLesson) => (
         <div className="flex items-start gap-2">
           {marker.is_pinned && (
@@ -225,11 +225,11 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       key: 'actions',
       label: 'Acciones',
       sortable: false,
-      width: '10%',
+      width: '20%',
       render: (marker: MarkerWithLesson) => (
         <Button
           size="sm"
-          variant="ghost"
+          variant="default"
           onClick={() => handleGoToLesson(marker.lesson_id, marker.time_sec)}
           className="gap-2"
           data-testid={`button-go-to-lesson-${marker.id}`}

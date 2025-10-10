@@ -157,9 +157,9 @@ export default function CourseNotes({ courseId }: CourseNotesProps) {
         <div className="h-20 w-20 rounded-full bg-muted/20 flex items-center justify-center mb-4">
           <FileText className="h-10 w-10 text-muted-foreground" />
         </div>
-        <h3 className="text-xl font-semibold mb-2">No hay apuntes aún</h3>
+        <h3 className="text-xl font-semibold mb-2">No hay resúmenes aún</h3>
         <p className="text-muted-foreground text-center max-w-md">
-          Comienza a tomar notas en las lecciones del curso y aparecerán aquí organizadas por lección
+          Comienza a crear resúmenes en las lecciones del curso y aparecerán aquí organizados por lección
         </p>
       </div>
     );
@@ -167,16 +167,6 @@ export default function CourseNotes({ courseId }: CourseNotesProps) {
 
   return (
     <div className="space-y-8" data-testid="course-notes-container">
-      <div className="flex items-center gap-3">
-        <BookOpen className="h-6 w-6 text-primary" />
-        <div>
-          <h2 className="text-2xl font-bold">Mis Apuntes del Curso</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            {summaryNotes.length} {summaryNotes.length === 1 ? 'resumen' : 'resúmenes'} y {markerNotes.length} {markerNotes.length === 1 ? 'marcador' : 'marcadores'}
-          </p>
-        </div>
-      </div>
-
       {/* Summary Notes Section */}
       {summaryNotes.length > 0 && (
         <div className="space-y-6">
@@ -219,70 +209,6 @@ export default function CourseNotes({ courseId }: CourseNotesProps) {
                       <p className="text-foreground whitespace-pre-wrap leading-relaxed">
                         {note.body}
                       </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Markers Section */}
-      {markerNotes.length > 0 && (
-        <div className="space-y-6">
-          <div className="flex items-center gap-2">
-            <Bookmark className="h-5 w-5 text-primary" />
-            <h3 className="text-xl font-semibold">Marcadores</h3>
-          </div>
-
-          {Object.entries(markersByLesson).map(([lessonTitle, { moduleTitle, markers }]) => (
-            <div key={lessonTitle} className="bg-card border border-border rounded-lg overflow-hidden">
-              <div className="bg-muted/30 px-6 py-4 border-b border-border">
-                <div className="flex items-start gap-3">
-                  <BookOpen className="h-5 w-5 text-primary mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold text-lg">{lessonTitle}</h4>
-                    {moduleTitle && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Módulo: {moduleTitle}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="divide-y divide-border">
-                {markers.map((marker) => (
-                  <div key={marker.id} className="px-6 py-4 flex items-start gap-4" data-testid={`marker-${marker.id}`}>
-                    <div className="flex items-center gap-2 min-w-[80px] pt-0.5">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-mono font-medium">
-                        {formatTime(marker.time_sec)}
-                      </span>
-                    </div>
-                    
-                    <div className="flex-1">
-                      {marker.is_pinned && (
-                        <Badge variant="secondary" className="mb-2">
-                          Fijado
-                        </Badge>
-                      )}
-                      {marker.body ? (
-                        <p className="text-foreground leading-relaxed">
-                          {marker.body}
-                        </p>
-                      ) : (
-                        <p className="text-muted-foreground italic text-sm">
-                          Sin descripción
-                        </p>
-                      )}
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
-                        <Calendar className="h-3.5 w-3.5" />
-                        <span>
-                          {format(new Date(marker.created_at), "d 'de' MMMM 'de' yyyy", { locale: es })}
-                        </span>
-                      </div>
                     </div>
                   </div>
                 ))}
