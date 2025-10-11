@@ -375,10 +375,12 @@ export function FormModalLayout({
         data-modal-content
         data-testid={`modal-content-${modalId}`}
         className={cn(
-          // Nuevo layout: panel del lado derecho ocupando todo el alto
-          "fixed inset-y-0 right-0 h-full w-1/2 min-w-[600px] max-w-[800px] flex flex-col bg-background border-l shadow-lg transition ease-in-out duration-250",
-          enableAnimations && !isClosing && "animate-in slide-in-from-right duration-250",
-          enableAnimations && isClosing && "animate-out slide-out-to-right duration-250",
+          // Base: fullscreen en mobile
+          "fixed inset-0 flex flex-col bg-background shadow-lg transition ease-in-out duration-250",
+          // Desktop: panel del lado derecho ocupando todo el alto
+          "md:inset-y-0 md:inset-x-auto md:right-0 md:h-full md:w-1/2 md:min-w-[600px] md:max-w-[800px] md:border-l",
+          enableAnimations && !isClosing && "animate-in slide-in-from-bottom md:slide-in-from-right duration-250",
+          enableAnimations && isClosing && "animate-out slide-out-to-bottom md:slide-out-to-right duration-250",
           className
         )}
         onClick={(e) => e.stopPropagation()}
