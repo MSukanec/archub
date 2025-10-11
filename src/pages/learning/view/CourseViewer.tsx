@@ -184,7 +184,7 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
       lastSaveTime.current = now;
       saveProgressMutation.mutate({ lessonId: currentLessonId, sec, pct });
     }
-  }, [currentLessonId, saveProgressMutation.mutate]);
+  }, [currentLessonId]);
 
   // Mark lesson as complete mutation
   const markCompleteMutation = useMutation({
@@ -310,7 +310,7 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
     if (currentLessonId) {
       markCompleteMutation.mutate(currentLessonId);
     }
-  }, [currentLessonId, markCompleteMutation.mutate]);
+  }, [currentLessonId]);
 
   // Update navigation state whenever it changes
   useEffect(() => {
