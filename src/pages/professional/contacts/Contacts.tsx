@@ -67,7 +67,7 @@ export default function Contacts() {
       setActions({
         search: {
           id: 'search',
-          icon: <Search className="h-5 w-5" />,
+          icon: Search,
           label: 'Buscar',
           onClick: () => {
             setShowSearch(true);
@@ -75,14 +75,14 @@ export default function Contacts() {
         },
         create: {
           id: 'create',
-          icon: <UserPlus className="h-6 w-6" />,
+          icon: UserPlus,
           label: 'Crear Contacto',
           onClick: () => openModal('contact', { isEditing: false }),
           variant: 'primary'
         },
         filter: {
           id: 'filter',
-          icon: <Filter className="h-5 w-5" />,
+          icon: Filter,
           label: 'Filtros',
           onClick: () => {
             // Popover is handled in MobileActionBar
@@ -90,7 +90,7 @@ export default function Contacts() {
         },
         notifications: {
           id: 'notifications',
-          icon: <Bell className="h-6 w-6 text-gray-600 dark:text-gray-400" />,
+          icon: Bell,
           label: 'Notificaciones',
           onClick: () => {
             // Popover is handled in MobileActionBar
