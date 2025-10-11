@@ -38,13 +38,12 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        // Mobile: fullscreen modal with safe padding
-        // Desktop: panel del lado derecho ocupando todo el alto
+        // Base styles
         "fixed z-50 flex flex-col gap-4 bg-background shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
-        // Mobile styles
-        "inset-0 p-4 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
-        // Desktop styles
-        "md:inset-y-0 md:left-auto md:right-0 md:h-full md:w-1/2 md:min-w-[600px] md:max-w-[800px] md:border-l md:p-6 md:data-[state=closed]:slide-out-to-right md:data-[state=open]:slide-in-from-right",
+        // Mobile: fullscreen modal with safe viewport fit
+        "inset-4 p-4 w-auto max-w-full overflow-x-hidden data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
+        // Desktop: panel del lado derecho ocupando todo el alto
+        "md:inset-y-0 md:inset-x-auto md:right-0 md:left-auto md:h-full md:w-1/2 md:min-w-[600px] md:max-w-[800px] md:border-l md:p-6 md:data-[state=closed]:slide-out-to-right md:data-[state=open]:slide-in-from-right",
         className
       )}
       onPointerDownOutside={(e) => e.preventDefault()}
