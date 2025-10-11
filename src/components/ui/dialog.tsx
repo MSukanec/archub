@@ -38,8 +38,13 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        // Nuevo layout: panel del lado derecho ocupando todo el alto
-        "fixed inset-y-0 right-0 z-50 h-full w-1/2 min-w-[600px] max-w-[800px] flex flex-col gap-4 border-l bg-background p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right",
+        // Mobile: fullscreen modal with safe padding
+        // Desktop: panel del lado derecho ocupando todo el alto
+        "fixed z-50 flex flex-col gap-4 bg-background shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
+        // Mobile styles
+        "inset-0 p-4 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
+        // Desktop styles
+        "md:inset-y-0 md:left-auto md:right-0 md:h-full md:w-1/2 md:min-w-[600px] md:max-w-[800px] md:border-l md:p-6 md:data-[state=closed]:slide-out-to-right md:data-[state=open]:slide-in-from-right",
         className
       )}
       onPointerDownOutside={(e) => e.preventDefault()}
