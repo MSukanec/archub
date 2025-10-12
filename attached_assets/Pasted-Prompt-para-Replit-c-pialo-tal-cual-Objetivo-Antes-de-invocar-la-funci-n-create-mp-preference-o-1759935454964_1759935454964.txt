@@ -1,0 +1,99 @@
+Prompt para Replit (cópialo tal cual)
+
+Objetivo: Antes de invocar la función create_mp_preference, obtener el perfil en public.users usando auth_id = auth.users.id y enviar user_id = perfil.id en el body.
+No enviar auth.users.id.
+Esto asegura que el webhook pueda insertar en payments_log y course_enrollments sin violar FKs.
+
+Tareas:
+
+Donde hoy llamamos a create_mp_preference, agregar:
+
+const { data: { user } } = await supabase.auth.getUser();
+
+select a public.users por auth_id = user.id para obtener perfil.id.
+
+En la invocación de la función, enviar user_id: perfil.id (no user.id).
+
+Mantener el resto de parámetros (course_slug, price, currency, months) como están.
+
+(Opcional, si existe full_name y email) preparar payer y item por si luego queremos enriquecer la preferencia de MP.
+
+Código a insertar/reemplazar (TypeScript/JS – Supabase JS v2):
+
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL!,
+  import.meta.env.VITE_SUPABASE_ANON_KEY!
+);
+
+// Lógica de compra (ajustar nombres si difieren)
+export async function startMercadoPagoCheckout(options: {
+  courseSlug: string;
+  price: number;
+  currency?: string;     // 'ARS' por defecto
+  months?: number | null;
+}) {
+  const { courseSlug, price, currency = 'ARS', months = null } = options;
+
+  // 1) Usuario autenticado (Auth)
+  const { data: authData, error: authErr } = await supabase.auth.getUser();
+  if (authErr) throw authErr;
+  const authUser = authData?.user;
+  if (!authUser) throw new Error('Debes iniciar sesión para comprar');
+
+  // 2) Buscar perfil en public.users por auth_id
+  const { data: profile, error: profileErr } = await supabase
+    .from('users')
+    .select('id, full_name, email')
+    .eq('auth_id', authUser.id)
+    .maybeSingle();
+
+  if (profileErr) throw profileErr;
+  if (!profile) throw new Error('No se encontró el perfil para este usuario');
+
+  // 3) Invocar la Edge Function con user_id = profile.id  (NO usar authUser.id)
+  const body = {
+    user_id: profile.id,             // <--- CLAVE: enviar el ID de tu tabla public.users
+    course_slug: courseSlug,
+    price,
+    currency,
+    months,
+    // Sugerido por MP (opcional, si luego ajustamos la función para pasarlo a la preferencia):
+    // payer: {
+    //   email: profile.email ?? undefined,
+    //   first_name: profile.full_name?.split(' ')?.[0] ?? undefined,
+    //   last_name: profile.full_name?.split(' ')?.slice(1).join(' ') || undefined,
+    // },
+    // item: {
+    //   id: courseSlug,
+    //   title: 'Nombre del curso',
+    //   description: 'Descripción corta del curso',
+    //   category_id: 'courses'
+    // }
+  };
+
+  const { data, error: fnErr } = await supabase.functions.invoke('create_mp_preference', { body });
+  if (fnErr) throw fnErr;
+
+  // 4) Redirigir a MP
+  const initPoint = data?.init_point;
+  if (!initPoint) throw new Error('No se recibió init_point');
+  window.location.href = initPoint;
+}
+
+
+Criterios de aceptación:
+
+En el body que llega a create_mp_preference debe verse user_id con un UUID de public.users.id (no el auth.users.id).
+
+Tras un pago aprobado, el webhook inserta en payments_log y upsertea en course_enrollments sin error 23503.
+
+No se hicieron cambios de esquema ni FKs.
+
+Por qué esto arregla el problema
+
+Tu tabla public.users guarda el vínculo con Auth en auth_id. Las otras tablas (payments_log, course_enrollments) referencian public.users.id.
+Estabas mandando el UID de Auth; ahora mandamos el ID de tu public.users, que es exactamente lo que piden las FKs. ✅
+
+Si luego querés sumar lo que Mercado Pago recomienda (payer + item), te doy la versión extendida de la función create_mp_preference para aceptar esos campos y trasladarlos a la preferencia. Pero con este cambio ya debería quedar resuelto el error de inserción.

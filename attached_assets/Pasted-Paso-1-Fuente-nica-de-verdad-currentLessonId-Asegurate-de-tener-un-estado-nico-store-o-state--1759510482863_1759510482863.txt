@@ -1,0 +1,124 @@
+Paso 1 — Fuente única de verdad: currentLessonId
+
+Asegurate de tener un estado único (store o state del visor) que diga cuál es la lección activa.
+
+// ej. en un store o en el componente padre del visor:
+const [currentLessonId, setCurrentLessonId] = useState<string | null>(null);
+
+// cuando montás el visor, seteá la primera lección visible
+useEffect(() => {
+  if (!currentLessonId && lessons?.length) setCurrentLessonId(lessons[0].id);
+}, [lessons, currentLessonId]);
+
+
+En el sidebar, al hacer clic:
+
+onClick={() => setCurrentLessonId(lesson.id)}
+
+
+Ya que el título y duración te cambian, seguramente esto ya lo estás haciendo. Bien.
+
+Paso 2 — Hacer que Vimeo cambie de video al cambiar la lección
+
+Depende de cómo integraste el player. Te dejo las 2 variantes. Elegí la que uses hoy:
+
+Variante A) Usás @vimeo/player con un iframe y una instancia Player
+
+Lo ideal es no recrear el iframe, sino cargar el nuevo video en la misma instancia:
+
+import Player from "@vimeo/player";
+const iframeRef = useRef<HTMLIFrameElement>(null);
+const playerRef = useRef<Player | null>(null);
+
+// 1) crear el player una sola vez
+useEffect(() => {
+  if (!iframeRef.current) return;
+  playerRef.current = new Player(iframeRef.current);
+  return () => { playerRef.current?.destroy(); };
+}, []);
+
+// 2) cuando cambia la lección, cargar el nuevo video
+useEffect(() => {
+  if (!playerRef.current || !currentLessonId) return;
+  const vimeoId = lessonMap[currentLessonId].vimeo_video_id; // obtén el id
+  playerRef.current.loadVideo(vimeoId).then(() => {
+    // si llevás progreso guardado:
+    const last = progressMap[currentLessonId]?.last_position_sec ?? 0;
+    if (last > 0) playerRef.current?.setCurrentTime(last);
+  }).catch(console.error);
+}, [currentLessonId]);
+
+
+Clave: usar player.loadVideo(newId) cuando cambia currentLessonId. Eso fuerza el cambio de lección en el iframe.
+
+Variante B) No usás @vimeo/player, solo cambias el src del <iframe>
+
+Forzá el re-render del iframe con una key dependiente del id:
+
+const vimeoId = lessonMap[currentLessonId].vimeo_video_id;
+return (
+  <iframe
+    key={vimeoId} // <- fuerza desmontaje/montaje
+    src={`https://player.vimeo.com/video/${vimeoId}?autopause=1`}
+    allow="autoplay; fullscreen; picture-in-picture"
+    allowFullScreen
+    className="w-full aspect-video rounded-xl"
+  />
+);
+
+
+Esta forma es más simple pero no te permite llamar setCurrentTime() fácilmente.
+
+Paso 3 — Confirmar visualmente que cambia
+
+Agregá un log del id activo al cambiar la lección:
+
+useEffect(() => {
+  if (!currentLessonId) return;
+  console.log('Lección activa ->', lessonMap[currentLessonId].title,
+              'Vimeo ID ->', lessonMap[currentLessonId].vimeo_video_id);
+}, [currentLessonId]);
+
+
+Si el log cambia y aún ves la pantalla “Lo sentimos”, el problema no es tu React sino Vimeo/privacidad (siguiente paso).
+
+Paso 4 — Resolver el error “Lo sentimos. Tenemos un pequeño problema.”
+
+Ese cartel casi siempre es privacidad de inserción:
+
+En Vimeo (video o carpeta) → Configuración → Privacidad → Inserción
+Seleccioná “Solo en estos dominios” y agrega tu dominio (dev y prod).
+
+Para dev: localhost, 127.0.0.1, y/o tu *.vercel.app si usás previews.
+
+Para prod: el dominio real de Archub.
+
+Probá abrir en una pestaña nueva la URL del iframe:
+https://player.vimeo.com/video/{VIMEO_ID}
+
+Si ahí también falla, es privacidad.
+
+Si ahí funciona y en tu app no, revisá ad-blockers o CSP.
+
+Asegurate de no estar usando un ID de video privado sin permiso de inserción.
+
+Paso 5 — (opcional ya) Auto-resume cuando cambia la lección
+
+Si guardás progreso, después del loadVideo(vimeoId) hacé:
+
+const last = progressMap[currentLessonId]?.last_position_sec ?? 0;
+if (last > 0) await playerRef.current?.setCurrentTime(last);
+
+Checklist mini (solo lo esencial de ahora)
+
+ Confirmar currentLessonId único y que el sidebar llama setCurrentLessonId.
+
+ Si usás @vimeo/player: implementar player.loadVideo(vimeoId) en useEffect([currentLessonId]).
+
+ Si usás <iframe> directo: poner key={vimeoId} para forzar cambio.
+
+ Corregir Privacidad → Inserción en Vimeo para tus dominios (dev/prod).
+
+ Probar el player.vimeo.com/video/{id} en una pestaña nueva.
+
+Cuando confirmes que el player ya cambia de lección, seguimos con el siguiente paso (throttle de timeupdate y upsert de progreso).

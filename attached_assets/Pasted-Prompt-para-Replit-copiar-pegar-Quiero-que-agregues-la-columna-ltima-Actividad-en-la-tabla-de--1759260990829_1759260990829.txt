@@ -1,0 +1,142 @@
+Prompt para Replit (copiar/pegar)
+
+Quiero que agregues la columna “Última Actividad” en la tabla de “Comunidad → Usuarios” usando la tabla public.user_presence que ya existe. Requisitos exactos:
+
+Consulta a Supabase
+
+Traé la lista de usuarios como siempre (id, nombre, email, etc.) y además un LEFT JOIN (o segunda consulta + merge en el front) contra user_presence por user_id.
+
+Necesito estos campos por usuario:
+
+last_seen_at (timestamp o null)
+
+is_online (booleano computado en el front como now - last_seen_at <= 90s si last_seen_at no es null).
+
+Si preferís hacerlo en una sola vista del lado de la BD, podés leer public.organization_online_users (o crear una vista similar) y left join con tus usuarios.
+
+Umbral de actividad
+
+Considerar “Activo ahora” si Date.now() - last_seen_at <= 90_000 ms.
+
+Si last_seen_at es null, mostrar “—”.
+
+Render de la columna
+
+Si is_online es true → mostrar badge “Activo ahora” (verde) y un puntito verde.
+
+Si es false → mostrar el tiempo relativo (ej.: “hace 5 min”, “ayer”, “28/09/25”), con color gris.
+
+Actualización en vivo
+
+Refrescá esta columna cada 30 s (intervalo) para que el estado pase de “Activo ahora” a tiempo relativo sin recargar la página.
+
+Accesibilidad y UI
+
+Badge: texto Activo ahora, fondo verde suave, texto verde oscuro, puntito verde a la izquierda.
+
+Tiempo relativo: texto gris; tooltip con la fecha/hora exacta ISO.
+
+Código ejemplo (TypeScript/React + Supabase)
+Usá esto como base e intégralo en la página de la grilla:
+
+// api/community.ts
+import { supabase } from "@/lib/supabase";
+
+export type CommunityUser = {
+  user_id: string;
+  name: string;
+  email: string;
+  // presencia
+  last_seen_at: string | null;
+};
+
+export async function fetchCommunityUsers(orgId: string): Promise<CommunityUser[]> {
+  // 1) Traer usuarios (ajusta a tu fuente real)
+  const { data: users, error: e1 } = await supabase
+    .from("organization_members_view") // o tu vista/lista actual
+    .select("user_id, name, email")
+    .eq("organization_id", orgId);
+
+  if (e1) throw e1;
+
+  // 2) Traer presencia y mergear por user_id
+  const { data: presences, error: e2 } = await supabase
+    .from("user_presence")
+    .select("user_id, last_seen_at")
+    .eq("org_id", orgId);
+
+  if (e2) throw e2;
+
+  const pMap = new Map(presences?.map(p => [p.user_id, p.last_seen_at]) ?? []);
+  return (users ?? []).map(u => ({
+    ...u,
+    last_seen_at: pMap.get(u.user_id) ?? null,
+  }));
+}
+
+// components/LastActivityCell.tsx
+import { useEffect, useMemo, useState } from "react";
+
+function diffLabel(ts: string | null): string {
+  if (!ts) return "—";
+  const d = new Date(ts).getTime();
+  const now = Date.now();
+  const ms = now - d;
+
+  // “Activo ahora” si <= 90s
+  if (ms <= 90_000) return "Activo ahora";
+
+  // tiempo relativo simple
+  const sec = Math.floor(ms / 1000);
+  const min = Math.floor(sec / 60);
+  const hr  = Math.floor(min / 60);
+  const day = Math.floor(hr / 24);
+
+  if (day >= 1) return `${day} día${day>1?"s":""} atrás`;
+  if (hr  >= 1) return `${hr} h atrás`;
+  if (min >= 1) return `${min} min atrás`;
+  return `${sec} s atrás`;
+}
+
+export function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    const i = setInterval(() => setTick(t => t + 1), 30_000); // refresco cada 30s
+    return () => clearInterval(i);
+  }, []);
+
+  const label = useMemo(() => diffLabel(lastSeen), [lastSeen, tick]);
+  const isOnline = label === "Activo ahora";
+
+  return (
+    <div className="flex items-center gap-2" title={lastSeen ?? ""}>
+      {isOnline ? (
+        <>
+          <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
+          <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md text-xs font-medium">
+            Activo ahora
+          </span>
+        </>
+      ) : (
+        <span className="text-slate-500 text-sm">{label}</span>
+      )}
+    </div>
+  );
+}
+
+// En tu tabla (columna “Última Actividad”)
+<LastActivityCell lastSeen={row.last_seen_at} />
+
+
+No cambies la BD. Ya existe user_presence y RLS. Sólo lee y pintá la UI según el umbral de 90 s. Si preferís obtener is_online directo desde SQL, podés leer la vista:
+
+select user_id, last_seen_at,
+       (now() - last_seen_at <= interval '90 seconds') as is_online
+from public.user_presence
+where org_id = :orgId;
+
+
+y en el front si is_online es true mostrás el badge.
+
+Con esto, en la columna Última Actividad se verá “Activo ahora” en verde si el usuario está dentro del umbral, y si no, un tiempo relativo (“hace 5 min”, “ayer”, etc.) con tooltip de fecha exacta.
