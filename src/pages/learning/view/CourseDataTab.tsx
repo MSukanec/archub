@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { BookOpen, FileText, Play, List, TrendingUp } from 'lucide-react'
+import { BookOpen, FileText, Play, List, TrendingUp, CheckCircle2 } from 'lucide-react'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
 
 interface CourseDataTabProps {
@@ -123,6 +123,10 @@ export default function CourseDataTab({ courseId }: CourseDataTabProps) {
     return lessons.filter(lesson => lesson.module_id === moduleId);
   }
 
+  const isLessonCompleted = (lessonId: string) => {
+    return courseProgress.some((p: any) => p.lesson_id === lessonId && p.is_completed);
+  }
+
   const formatDuration = (seconds: number | null) => {
     if (!seconds) return 'Sin duración';
     const totalMins = Math.floor(seconds / 60);
@@ -239,30 +243,43 @@ export default function CourseDataTab({ courseId }: CourseDataTabProps) {
                           No hay lecciones en este módulo
                         </div>
                       ) : (
-                        moduleLessons.map((lesson, lessonIndex) => (
-                          <div 
-                            key={lesson.id}
-                            className="px-4 py-3 hover:bg-muted/20 cursor-pointer transition-colors"
-                            onClick={() => setCurrentLesson(lesson.id)}
-                            data-testid={`lesson-card-${lesson.id}`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                                <Play className="h-4 w-4 text-[var(--accent)]" />
-                              </div>
-                              <div className="flex-1">
-                                <p className="text-sm font-medium">
-                                  {lessonIndex + 1}. {lesson.title} · {formatDuration(lesson.duration_sec)}
+                        moduleLessons.map((lesson, lessonIndex) => {
+                          const completed = isLessonCompleted(lesson.id);
+                          
+                          return (
+                            <div 
+                              key={lesson.id}
+                              className="px-4 py-3 hover:bg-muted/20 cursor-pointer transition-colors"
+                              onClick={() => setCurrentLesson(lesson.id)}
+                              data-testid={`lesson-card-${lesson.id}`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+                                  <Play className="h-4 w-4 text-[var(--accent)]" />
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-sm font-medium">
+                                      {lessonIndex + 1}. {lesson.title} · {formatDuration(lesson.duration_sec)}
+                                    </p>
+                                    {completed && (
+                                      <CheckCircle2 
+                                        className="h-4 w-4 flex-shrink-0" 
+                                        style={{ color: 'var(--accent)' }}
+                                        data-testid={`completed-badge-${lesson.id}`}
+                                      />
+                                    )}
+                                  </div>
                                   {lesson.free_preview && (
-                                    <Badge variant="outline" className="ml-2 text-xs">
+                                    <Badge variant="outline" className="mt-1 text-xs">
                                       Vista previa gratis
                                     </Badge>
                                   )}
-                                </p>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))
+                          );
+                        })
                       )}
                     </div>
                   </div>
