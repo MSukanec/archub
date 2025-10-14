@@ -18,7 +18,6 @@ import { supabase } from '@/lib/supabase';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useEffect, useState } from 'react';
 import { Separator } from '@/components/ui/separator';
-import { announceCourse } from '@/lib/discord';
 
 const courseSchema = z.object({
   slug: z.string().min(1, 'El slug es requerido').regex(/^[a-z0-9-]+$/, 'Solo minúsculas, números y guiones'),
@@ -30,7 +29,6 @@ const courseSchema = z.object({
     required_error: 'La visibilidad es requerida'
   }),
   is_active: z.boolean().default(true),
-  announce_discord: z.boolean().default(false),
 });
 
 type CourseFormData = z.infer<typeof courseSchema>;
@@ -104,7 +102,6 @@ export function CourseFormModal({ modalData, onClose }: CourseFormModalProps) {
       cover_url: course?.cover_url || '',
       visibility: (course?.visibility as any) || 'draft',
       is_active: course?.is_active ?? true,
-      announce_discord: false,
     }
   });
 
