@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, Bookmark, ArrowRight, Trash2 } from 'lucide-react';
+import { Clock, Bookmark, ArrowRight, Trash2, BookOpen } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useLocation } from 'wouter';
@@ -152,6 +152,25 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
     return markers.filter(marker => marker.module?.title === selectedModule);
   }, [markers, selectedModule]);
 
+  // Group markers by module for hierarchical display
+  const groupedMarkers = useMemo(() => {
+    const groups = new Map<string, { module: { title: string; sort_index: number }, markers: MarkerWithLesson[] }>();
+    
+    filteredMarkers.forEach(marker => {
+      const moduleTitle = marker.module?.title || 'Sin módulo';
+      if (!groups.has(moduleTitle)) {
+        groups.set(moduleTitle, {
+          module: marker.module || { title: 'Sin módulo', sort_index: 999 },
+          markers: []
+        });
+      }
+      groups.get(moduleTitle)!.markers.push(marker);
+    });
+
+    // Convert to array and sort by module sort_index
+    return Array.from(groups.values()).sort((a, b) => a.module.sort_index - b.module.sort_index);
+  }, [filteredMarkers]);
+
   const formatTime = (seconds: number | null): string => {
     if (seconds === null) return '0:00';
     const mins = Math.floor(seconds / 60);
@@ -223,23 +242,11 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
 
   const columns = [
     {
-      key: 'module',
-      label: 'Módulo',
-      sortable: true,
-      sortType: 'string' as const,
-      width: '20%',
-      render: (marker: MarkerWithLesson) => (
-        <div className="font-medium">
-          {marker.module?.title || 'Sin módulo'}
-        </div>
-      )
-    },
-    {
       key: 'lesson',
       label: 'Lección',
       sortable: true,
       sortType: 'string' as const,
-      width: '20%',
+      width: '25%',
       render: (marker: MarkerWithLesson) => (
         <div className="font-medium">
           {marker.lesson?.title || 'Sin lección'}
@@ -265,7 +272,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       key: 'body',
       label: 'Texto',
       sortable: false,
-      width: '20%',
+      width: '30%',
       render: (marker: MarkerWithLesson) => (
         <div className="flex items-start gap-2">
           {marker.is_pinned && (
@@ -283,7 +290,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       key: 'actions',
       label: 'Acciones',
       sortable: false,
-      width: '20%',
+      width: '25%',
       render: (marker: MarkerWithLesson) => (
         <div className="flex items-center gap-2">
           <Button
@@ -377,33 +384,119 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
 
   return (
     <div className="space-y-6" data-testid="course-markers-tab">
-      {/* Desktop View */}
+      {/* Desktop View - Hierarchical Table */}
       <div className="hidden lg:block">
-        <Table
-          data={filteredMarkers}
-          columns={columns}
-          topBar={{
-            showSearch: true,
-            showFilter: true,
-            renderFilterContent: renderFilterContent,
-            isFilterActive: selectedModule !== 'all'
-          }}
-          emptyState={
-            <EmptyState
-              icon={<Bookmark />}
-              title="No hay marcadores"
-              description="Los marcadores que crees en las lecciones aparecerán aquí"
-              action={
+        <div className="rounded-lg border bg-card">
+          {/* Top Bar */}
+          <div className="flex items-center justify-between border-b p-4">
+            <div className="flex items-center gap-2">
+              <Bookmark className="h-5 w-5 text-muted-foreground" />
+              <h3 className="font-semibold">Marcadores del Curso</h3>
+            </div>
+            <div className="flex items-center gap-2">
+              {modules.length > 1 && (
                 <Button
-                  onClick={() => navigate(`/learning/courses/${courseSlug}?tab=Lecciones`)}
-                  data-testid="button-go-to-lessons"
+                  variant={selectedModule === 'all' ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedModule('all')}
                 >
-                  Ir a Lecciones
+                  Todos los módulos
                 </Button>
-              }
-            />
-          }
-        />
+              )}
+            </div>
+          </div>
+
+          {/* Column Headers */}
+          <div className="grid grid-cols-[25%_20%_30%_25%] gap-4 px-4 py-3 border-b bg-muted/10">
+            <div className="text-xs font-semibold text-muted-foreground uppercase">Lección</div>
+            <div className="text-xs font-semibold text-muted-foreground uppercase">Tiempo</div>
+            <div className="text-xs font-semibold text-muted-foreground uppercase">Texto</div>
+            <div className="text-xs font-semibold text-muted-foreground uppercase">Acciones</div>
+          </div>
+
+          {/* Hierarchical Content */}
+          <div className="divide-y">
+            {groupedMarkers.map((group) => (
+              <div key={group.module.title}>
+                {/* Module Header Row */}
+                <div className="bg-muted/30 px-4 py-3 font-semibold text-sm flex items-center gap-2">
+                  <BookOpen className="h-4 w-4 text-[var(--accent)]" />
+                  {group.module.title}
+                  <Badge variant="outline" className="ml-auto">
+                    {group.markers.length} {group.markers.length === 1 ? 'marcador' : 'marcadores'}
+                  </Badge>
+                </div>
+
+                {/* Markers Table */}
+                <div className="divide-y">
+                  {group.markers.map((marker) => (
+                    <div 
+                      key={marker.id} 
+                      className="grid grid-cols-[25%_20%_30%_25%] gap-4 px-4 py-3 hover:bg-muted/20 transition-colors"
+                      data-testid={`marker-row-${marker.id}`}
+                    >
+                      {/* Lección */}
+                      <div className="font-medium text-sm">
+                        {marker.lesson?.title || 'Sin lección'}
+                      </div>
+                      
+                      {/* Tiempo */}
+                      <div className="flex items-center gap-2 text-sm">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-mono font-medium">
+                          {formatTime(marker.time_sec)}
+                        </span>
+                      </div>
+                      
+                      {/* Texto */}
+                      <div className="flex items-start gap-2 text-sm">
+                        {marker.is_pinned && (
+                          <Badge variant="secondary" className="shrink-0">
+                            Fijado
+                          </Badge>
+                        )}
+                        <span className={marker.body ? '' : 'text-muted-foreground italic'}>
+                          {marker.body || 'Sin descripción'}
+                        </span>
+                      </div>
+                      
+                      {/* Acciones */}
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="default"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleGoToLesson(marker.lesson_id, marker.time_sec);
+                          }}
+                          className="gap-2"
+                          data-testid={`button-go-to-lesson-${marker.id}`}
+                        >
+                          Ir a lección
+                          <ArrowRight className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleDeleteMarker(marker);
+                          }}
+                          className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          data-testid={`button-delete-marker-${marker.id}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Mobile View */}
@@ -431,15 +524,31 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
           </div>
         )}
 
-        {/* Mobile Cards */}
-        <div className="space-y-3">
-          {filteredMarkers.map((marker) => (
-            <MarkerCard
-              key={marker.id}
-              marker={marker}
-              onGoToLesson={handleGoToLesson}
-              onDelete={handleDeleteMarker}
-            />
+        {/* Mobile Cards - Grouped by Module */}
+        <div className="space-y-4">
+          {groupedMarkers.map((group) => (
+            <div key={group.module.title} className="space-y-2">
+              {/* Module Header for Mobile */}
+              <div className="flex items-center gap-2 px-2 py-1 bg-muted/30 rounded-md">
+                <BookOpen className="h-4 w-4 text-[var(--accent)]" />
+                <span className="font-semibold text-sm">{group.module.title}</span>
+                <Badge variant="outline" className="ml-auto text-xs">
+                  {group.markers.length}
+                </Badge>
+              </div>
+              
+              {/* Markers */}
+              <div className="space-y-3">
+                {group.markers.map((marker) => (
+                  <MarkerCard
+                    key={marker.id}
+                    marker={marker}
+                    onGoToLesson={handleGoToLesson}
+                    onDelete={handleDeleteMarker}
+                  />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </div>
