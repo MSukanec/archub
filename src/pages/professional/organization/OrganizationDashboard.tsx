@@ -33,7 +33,7 @@ export default function OrganizationDashboard() {
   const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId || undefined);
   const { data: userOrgPrefs } = useUserOrganizationPreferences(organizationId);
   const activeProjectId = userOrgPrefs?.last_project_id;
-  const { setSidebarLevel } = useNavigationStore();
+  const { setSidebarLevel, sidebarLevel } = useNavigationStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { setShowActionBar } = useActionBarMobile();
@@ -121,8 +121,11 @@ export default function OrganizationDashboard() {
 
   // Establecer nivel del sidebar a organización
   useEffect(() => {
-    setSidebarLevel('organization');
-  }, [setSidebarLevel]);
+    // Only set to 'organization' if not in 'general' mode (respects user's hub selection)
+    if (sidebarLevel !== 'general') {
+      setSidebarLevel('organization');
+    }
+  }, [setSidebarLevel, sidebarLevel]);
 
   if (isLoading) {
     return (

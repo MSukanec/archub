@@ -10,12 +10,15 @@ import AdminCourseListTab from './AdminCourseListTab'
 
 export default function AdminCourses() {
   const [activeTab, setActiveTab] = useState('dashboard')
-  const { setSidebarLevel } = useNavigationStore()
+  const { setSidebarLevel, sidebarLevel } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
 
   useEffect(() => {
-    setSidebarLevel('admin')
-  }, [setSidebarLevel])
+    // Only set to 'admin' if not in 'general' mode (respects user's hub selection)
+    if (sidebarLevel !== 'general') {
+      setSidebarLevel('admin')
+    }
+  }, [setSidebarLevel, sidebarLevel])
 
   const handleCreateEnrollment = () => {
     openModal('course-enrollment', {});

@@ -15,13 +15,16 @@ import { es } from 'date-fns/locale';
 import { DiscordWidget } from '@/components/learning/DiscordWidget';
 
 export default function LearningDashboard() {
-  const { setSidebarContext, setSidebarLevel } = useNavigationStore();
+  const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore();
   const [, navigate] = useLocation();
 
   useEffect(() => {
     setSidebarContext('learning');
-    setSidebarLevel('learning');
-  }, [setSidebarContext, setSidebarLevel]);
+    // Only set to 'learning' if not in 'general' mode (respects user's hub selection)
+    if (sidebarLevel !== 'general') {
+      setSidebarLevel('learning');
+    }
+  }, [setSidebarContext, setSidebarLevel, sidebarLevel]);
 
   const { data: courses = [], isLoading: coursesLoading } = useCourses();
 

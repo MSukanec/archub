@@ -18,7 +18,7 @@ import CourseCard from '@/components/ui/cards/CourseCard'
 
 export default function CourseList() {
   const [activeTab, setActiveTab] = useState('courses')
-  const { setSidebarContext, setSidebarLevel } = useNavigationStore()
+  const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore()
   
   const { data: courses = [], isLoading: coursesLoading } = useCourses()
   const [, navigate] = useLocation()
@@ -38,8 +38,11 @@ export default function CourseList() {
 
   useEffect(() => {
     setSidebarContext('learning')
-    setSidebarLevel('learning')
-  }, [setSidebarContext, setSidebarLevel])
+    // Only set to 'learning' if not in 'general' mode (respects user's hub selection)
+    if (sidebarLevel !== 'general') {
+      setSidebarLevel('learning')
+    }
+  }, [setSidebarContext, setSidebarLevel, sidebarLevel])
 
   // Get all progress for the current user across all courses
   const { data: allProgress = [] } = useQuery<any[]>({
