@@ -235,14 +235,14 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
     const markersCount = groupMarkers.length;
     return (
       <div 
-        className="grid gap-4 px-4 py-3 text-xs font-medium"
+        className="grid gap-4 px-4 py-2 text-xs font-medium"
         style={{ 
           gridTemplateColumns: "1fr 150px 1fr 200px",
           backgroundColor: "var(--table-group-header-bg)",
           color: "white"
         }}
       >
-        <div className="col-span-2 font-bold">
+        <div className="col-span-2 font-bold whitespace-nowrap overflow-hidden text-ellipsis">
           {moduleName} ({markersCount} {markersCount === 1 ? 'marcador' : 'marcadores'})
         </div>
         <div></div>
@@ -467,7 +467,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
           .map(([moduleTitle, moduleMarkers]) => (
             <div key={moduleTitle}>
               {/* Module Header for Mobile */}
-              <div className="px-4 py-2 mb-2 rounded-lg font-semibold text-sm" style={{ backgroundColor: "var(--table-group-header-bg)", color: "white" }}>
+              <div className="px-4 py-2 mb-2 rounded-lg font-semibold text-sm whitespace-nowrap overflow-hidden text-ellipsis" style={{ backgroundColor: "var(--table-group-header-bg)", color: "white" }}>
                 {moduleTitle} ({moduleMarkers.length})
               </div>
               {/* Module Cards */}
