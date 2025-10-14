@@ -35,7 +35,8 @@ import {
   User,
   GraduationCap,
   BookOpen,
-  ChevronDown
+  ChevronDown,
+  ArrowLeft
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
@@ -276,6 +277,28 @@ export function Sidebar() {
                 "flex flex-col gap-[2px]",
                 isExpanded ? "px-[9px]" : "items-center"
               )}>
+                {/* Botón Volver al hub general */}
+                <ButtonSidebar
+                  icon={<ArrowLeft className="w-[18px] h-[18px]" />}
+                  label="Volver"
+                  isActive={false}
+                  isExpanded={isExpanded}
+                  onClick={() => {
+                    setSidebarLevel('general');
+                    navigate('/mode-selection');
+                  }}
+                  variant="secondary"
+                />
+                
+                {/* Divisor después del botón Volver */}
+                <div className="my-3 h-[12px] flex items-center justify-center w-full">
+                  {isExpanded ? (
+                    <div className="w-full h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+                  ) : (
+                    <div className="w-8 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+                  )}
+                </div>
+                
                 {navigationItems.map((item, index) => {
                 if (item.adminOnly && !isAdmin) return null;
                 
