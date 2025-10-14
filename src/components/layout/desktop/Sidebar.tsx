@@ -113,7 +113,10 @@ export function Sidebar() {
 
   // Navegación según el nivel del sidebar
   const getNavigationItems = (): SidebarItem[] => {
-    if (sidebarLevel === 'organization') {
+    if (sidebarLevel === 'general') {
+      // Sidebar general - hub central
+      return [];
+    } else if (sidebarLevel === 'organization') {
       return [
         { id: 'dashboard', label: 'Resumen de Organización', icon: Home, href: '/organization/dashboard' },
         { id: 'projects', label: 'Gestión de Proyectos', icon: Building, href: '/organization/projects' },
@@ -182,11 +185,98 @@ export function Sidebar() {
         >
           {/* SECCIÓN SUPERIOR: Navegación principal con scroll */}
           <div className="pt-3 px-0 overflow-y-auto">
-            <div className={cn(
-              "flex flex-col gap-[2px]",
-              isExpanded ? "px-[9px]" : "items-center"
-            )}>
-              {navigationItems.map((item, index) => {
+            {sidebarLevel === 'general' ? (
+              /* SIDEBAR GENERAL - HUB CENTRAL */
+              <div className={cn(
+                "flex flex-col gap-3",
+                isExpanded ? "px-[9px]" : "px-[9px]"
+              )}>
+                {/* Título del hub */}
+                {isExpanded && (
+                  <div className="px-2 pt-2">
+                    <h2 className="text-lg font-semibold text-[var(--main-sidebar-fg)]">Archub</h2>
+                    <p className="text-xs text-[var(--main-sidebar-fg)] opacity-60 mt-1">Selecciona una sección</p>
+                  </div>
+                )}
+                
+                {/* Botón Organización */}
+                <button
+                  onClick={() => {
+                    setSidebarLevel('organization');
+                    navigate('/organization/dashboard');
+                  }}
+                  className="group relative overflow-hidden rounded-lg bg-[var(--main-sidebar-button-hover-bg)]/30 hover:bg-[var(--main-sidebar-button-hover-bg)]/50 transition-all duration-200 border border-[var(--main-sidebar-border)]"
+                >
+                  <div className="p-4 flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center flex-shrink-0">
+                      <Building className="h-5 w-5" style={{ color: 'var(--accent)' }} />
+                    </div>
+                    {isExpanded && (
+                      <div className="flex-1 text-left">
+                        <p className="text-sm font-medium text-[var(--main-sidebar-fg)]">Organización</p>
+                        <p className="text-xs text-[var(--main-sidebar-fg)] opacity-60">Gestión empresarial</p>
+                      </div>
+                    )}
+                  </div>
+                </button>
+
+                {/* Botón Proyecto */}
+                <button
+                  onClick={() => {
+                    if (!selectedProjectId) {
+                      toast({
+                        title: "No hay proyecto seleccionado",
+                        description: "Selecciona un proyecto primero",
+                        variant: "destructive"
+                      });
+                      return;
+                    }
+                    setSidebarLevel('project');
+                    navigate('/project/dashboard');
+                  }}
+                  className="group relative overflow-hidden rounded-lg bg-[var(--main-sidebar-button-hover-bg)]/30 hover:bg-[var(--main-sidebar-button-hover-bg)]/50 transition-all duration-200 border border-[var(--main-sidebar-border)]"
+                >
+                  <div className="p-4 flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center flex-shrink-0">
+                      <FolderOpen className="h-5 w-5" style={{ color: 'var(--accent)' }} />
+                    </div>
+                    {isExpanded && (
+                      <div className="flex-1 text-left">
+                        <p className="text-sm font-medium text-[var(--main-sidebar-fg)]">Proyecto</p>
+                        <p className="text-xs text-[var(--main-sidebar-fg)] opacity-60">Gestión de obras</p>
+                      </div>
+                    )}
+                  </div>
+                </button>
+
+                {/* Botón Capacitaciones */}
+                <button
+                  onClick={() => {
+                    setSidebarLevel('learning');
+                    navigate('/learning/dashboard');
+                  }}
+                  className="group relative overflow-hidden rounded-lg bg-[var(--main-sidebar-button-hover-bg)]/30 hover:bg-[var(--main-sidebar-button-hover-bg)]/50 transition-all duration-200 border border-[var(--main-sidebar-border)]"
+                >
+                  <div className="p-4 flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center flex-shrink-0">
+                      <GraduationCap className="h-5 w-5" style={{ color: 'var(--accent)' }} />
+                    </div>
+                    {isExpanded && (
+                      <div className="flex-1 text-left">
+                        <p className="text-sm font-medium text-[var(--main-sidebar-fg)]">Capacitaciones</p>
+                        <p className="text-xs text-[var(--main-sidebar-fg)] opacity-60">Cursos y formación</p>
+                      </div>
+                    )}
+                  </div>
+                </button>
+              </div>
+            ) : (
+              /* SIDEBARS ESPECÍFICOS */
+              <div className={cn(
+                "flex flex-col gap-[2px]",
+                isExpanded ? "px-[9px]" : "items-center"
+              )}>
+                {navigationItems.map((item, index) => {
                 if (item.adminOnly && !isAdmin) return null;
                 
                 const isActive = location === item.href;
@@ -254,6 +344,7 @@ export function Sidebar() {
                 );
               })}
             </div>
+            )}
           </div>
 
           {/* SECCIÓN INFERIOR: Controles y Avatar (siempre pegados al fondo) */}
