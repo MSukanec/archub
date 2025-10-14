@@ -194,6 +194,9 @@ export function MainHeader() {
     // NO navigate - solo cambiar proyecto activo
   };
 
+  return null; // HEADER COMENTADO TEMPORALMENTE PARA PRUEBAS
+  
+  /*
   return (
     <div 
       className="w-full h-12 border-b flex items-center justify-between pr-4 z-50"
@@ -202,9 +205,9 @@ export function MainHeader() {
         borderBottomColor: "var(--main-sidebar-border)"
       }}
     >
-      {/* Left side: Logo and navigation */}
+      {/* Left side: Logo and navigation *//*}
       <div className="flex items-center gap-2">
-        {/* Logo - Perfectly aligned with sidebar icons at 24px from left edge */}
+        {/* Logo - Perfectly aligned with sidebar icons at 24px from left edge *//*}
         <Link href="/select-mode">
           <div className="shrink-0 w-12 h-12 flex items-center justify-center cursor-pointer">
             <img 
@@ -216,7 +219,7 @@ export function MainHeader() {
         </Link>
 
         {isLearningContext ? (
-          /* Learning breadcrumb - identical style to professional */
+          /* Learning breadcrumb - identical style to professional *//*
           <>
             <button
               onClick={() => navigate('/learning/dashboard')}
@@ -225,18 +228,18 @@ export function MainHeader() {
               Capacitaciones
             </button>
             
-            {/* Separator */}
+            {/* Separator *//*}
             <span className="text-xs font-medium text-[var(--main-sidebar-fg)] opacity-30 px-1">/</span>
             
-            {/* Nombre de la página actual */}
+            {/* Nombre de la página actual *//*}
             <span className="text-xs font-medium text-[var(--main-sidebar-fg)] opacity-80">
               {currentPageName}
             </span>
           </>
         ) : (
-          /* Normal organization/project navigation */
+          /* Normal organization/project navigation *//*
           <>
-            {/* Organization selector */}
+            {/* Organization selector *//*}
             <div className="flex items-center gap-1">
               <button
                 onClick={handleOrganizationClick}
@@ -280,10 +283,10 @@ export function MainHeader() {
               </Popover>
             </div>
             
-            {/* Separator */}
+            {/* Separator *//*}
             <span className="text-xs font-medium text-[var(--main-sidebar-fg)] opacity-30 px-1">/</span>
 
-            {/* Project selector */}
+            {/* Project selector *//*}
             <div className="flex items-center gap-1">
               <button
                 onClick={handleProjectClick}
@@ -327,10 +330,10 @@ export function MainHeader() {
               </Popover>
             </div>
             
-            {/* Separator */}
+            {/* Separator *//*}
             <span className="text-xs font-medium text-[var(--main-sidebar-fg)] opacity-30 px-1">/</span>
             
-            {/* Nombre de la página actual */}
+            {/* Nombre de la página actual *//*}
             <span className="text-xs font-medium text-[var(--main-sidebar-fg)] opacity-80">
               {currentPageName}
             </span>
@@ -339,4 +342,5 @@ export function MainHeader() {
       </div>
     </div>
   );
+  */
 }

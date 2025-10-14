@@ -2,11 +2,18 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
+import { useProjectsLite } from "@/hooks/use-projects-lite";
+import { useProject } from "@/hooks/use-projects";
 import { cn } from "@/lib/utils";
 import { useProjectContext } from '@/stores/projectContext';
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
+import { supabase } from '@/lib/supabase';
+import { useMutation } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 import ButtonSidebar from "./ButtonSidebar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { 
   Settings, 
   Home,
@@ -27,7 +34,8 @@ import {
   ListTodo,
   User,
   GraduationCap,
-  BookOpen
+  BookOpen,
+  ChevronDown
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
@@ -46,12 +54,62 @@ export function Sidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const isAdmin = useIsAdmin();
-  const { selectedProjectId, currentOrganizationId } = useProjectContext();
-  const { sidebarLevel } = useNavigationStore();
+  const { selectedProjectId, currentOrganizationId, setSelectedProject } = useProjectContext();
+  const { sidebarLevel, setSidebarLevel } = useNavigationStore();
   const { isDocked, isHovered, setHovered, setDocked } = useSidebarStore();
+  const { toast } = useToast();
   
   // Estados simples
   const isExpanded = isDocked || isHovered;
+
+  // Get projects data
+  const { data: projectsLite = [] } = useProjectsLite(currentOrganizationId || undefined);
+  const { data: currentProject } = useProject(selectedProjectId || undefined);
+  const currentProjectName = currentProject?.name || "Seleccionar Proyecto";
+
+  // PROJECT CHANGE MUTATION
+  const selectProjectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      if (!supabase || !userData?.user?.id || !currentOrganizationId) {
+        throw new Error('Required data not available');
+      }
+      
+      const { error } = await supabase
+        .from('user_organization_preferences')
+        .upsert({
+          user_id: userData.user.id,
+          organization_id: currentOrganizationId,
+          last_project_id: projectId,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,organization_id'
+        })
+      
+      if (error) throw error
+      return projectId;
+    },
+    onSuccess: (projectId) => {
+      setSelectedProject(projectId, currentOrganizationId);
+      setSidebarLevel('project');
+      
+      queryClient.invalidateQueries({ 
+        queryKey: ['user-organization-preferences', userData?.user?.id, currentOrganizationId] 
+      });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+    },
+    onError: (error) => {
+      console.error('❌ Project selection error:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo seleccionar el proyecto",
+        variant: "destructive"
+      })
+    }
+  });
+
+  const handleProjectChange = (projectId: string) => {
+    selectProjectMutation.mutate(projectId);
+  };
 
   // Navegación según el nivel del sidebar
   const getNavigationItems = (): SidebarItem[] => {
@@ -104,10 +162,10 @@ export function Sidebar() {
   };
 
   return (
-    <div className="flex flex-row h-[calc(100vh-3rem)]">
+    <div className="flex flex-row h-screen">
       {/* SIDEBAR PRINCIPAL */}
       <div 
-        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-10 overflow-hidden relative h-[calc(100vh-3rem)]"
+        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-10 overflow-hidden relative h-screen"
         style={{
           width: isDocked 
             ? '240px' 
@@ -118,7 +176,7 @@ export function Sidebar() {
       >
         <aside 
           className={cn(
-            "grid h-[calc(100vh-3rem)] grid-rows-[1fr_auto]",
+            "grid h-screen grid-rows-[1fr_auto]",
             isExpanded ? "w-60" : "w-[50px]"
           )}
         >
@@ -234,6 +292,71 @@ export function Sidebar() {
 
             {/* Notificaciones */}
             <NotificationBell isExpanded={isExpanded} />
+
+            {/* Selector de Proyecto */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  className={cn(
+                    "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
+                    isExpanded ? "w-full" : "w-8"
+                  )}
+                >
+                  {/* Icono siempre centrado */}
+                  <div className="flex items-center justify-center w-8 flex-shrink-0">
+                    <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+                      <FolderOpen className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                    </div>
+                  </div>
+                  
+                  {/* Texto que aparece cuando se expande */}
+                  {isExpanded && (
+                    <div className="flex flex-1 items-center justify-between overflow-hidden min-w-0 ml-3">
+                      <div className="flex flex-col justify-center overflow-hidden min-w-0">
+                        <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
+                          {currentProjectName}
+                        </span>
+                        <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 truncate text-left">
+                          Cambiar proyecto
+                        </span>
+                      </div>
+                      <ChevronDown className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 flex-shrink-0 ml-2" />
+                    </div>
+                  )}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent 
+                side="right" 
+                align="end"
+                className="w-64 p-2"
+              >
+                <div className="space-y-1">
+                  <div className="px-2 py-1.5">
+                    <p className="text-xs font-semibold text-muted-foreground">Proyectos</p>
+                  </div>
+                  {projectsLite.length === 0 ? (
+                    <div className="px-2 py-4 text-center">
+                      <p className="text-sm text-muted-foreground">No hay proyectos disponibles</p>
+                    </div>
+                  ) : (
+                    projectsLite.map((project) => (
+                      <button
+                        key={project.id}
+                        onClick={() => handleProjectChange(project.id)}
+                        className={cn(
+                          "w-full px-2 py-2 text-left text-sm rounded-md transition-colors",
+                          project.id === selectedProjectId
+                            ? "bg-accent/10 text-accent font-medium"
+                            : "hover:bg-accent/5"
+                        )}
+                      >
+                        {project.name}
+                      </button>
+                    ))
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
 
             {/* Avatar del Usuario */}
             <button
