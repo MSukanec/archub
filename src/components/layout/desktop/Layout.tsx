@@ -166,14 +166,14 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                     wide={wide}
                   >
                     <div
-                      className={`${wide ? "" : "max-w-[1440px] mx-auto"} py-6 pb-32 min-h-0`}
+                      className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-6 pb-6 min-h-0`}
                     >
                       {children}
                     </div>
                   </PageLayout>
                 ) : (
                   <div
-                    className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-4 py-3 md:py-6 pb-32 min-h-0`}
+                    className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-4 pt-3 md:pt-6 pb-3 md:pb-6 min-h-0`}
                   >
                     {children}
                   </div>

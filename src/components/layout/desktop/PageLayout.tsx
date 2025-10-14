@@ -483,7 +483,7 @@ export function PageLayout({
         </div>
 
         {/* Page Content */}
-        <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} py-6 pb-32 min-h-0 ${
+        <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-6 pb-6 min-h-0 ${
           isDocked ? 'px-16' : 'px-16'
         }`}>
           {children}
