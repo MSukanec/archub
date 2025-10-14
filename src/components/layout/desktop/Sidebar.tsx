@@ -189,12 +189,12 @@ export function Sidebar() {
             {sidebarLevel === 'general' ? (
               /* SIDEBAR GENERAL - HUB CENTRAL */
               <div className={cn(
-                "flex flex-col gap-3",
-                isExpanded ? "px-[9px]" : "px-[9px]"
+                "flex flex-col gap-[2px]",
+                isExpanded ? "px-[9px]" : "items-center"
               )}>
                 {/* Título del hub */}
                 {isExpanded && (
-                  <div className="px-2 pt-2">
+                  <div className="px-2 pt-2 pb-3">
                     <h2 className="text-lg font-semibold text-[var(--main-sidebar-fg)]">Archub</h2>
                     <p className="text-xs text-[var(--main-sidebar-fg)] opacity-60 mt-1">Selecciona una sección</p>
                   </div>
@@ -206,19 +206,26 @@ export function Sidebar() {
                     setSidebarLevel('organization');
                     navigate('/organization/dashboard');
                   }}
-                  className="group relative overflow-hidden rounded-lg bg-[var(--main-sidebar-button-hover-bg)]/30 hover:bg-[var(--main-sidebar-button-hover-bg)]/50 transition-all duration-200 border border-[var(--main-sidebar-border)]"
+                  className={cn(
+                    "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
+                    isExpanded ? "w-full" : "w-8"
+                  )}
                 >
-                  <div className="p-4 flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center flex-shrink-0">
-                      <Building className="h-5 w-5" style={{ color: 'var(--accent)' }} />
+                  <div className="flex items-center justify-center w-8 flex-shrink-0">
+                    <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+                      <Building className="h-4 w-4" style={{ color: 'var(--accent)' }} />
                     </div>
-                    {isExpanded && (
-                      <div className="flex-1 text-left">
-                        <p className="text-sm font-medium text-[var(--main-sidebar-fg)]">Organización</p>
-                        <p className="text-xs text-[var(--main-sidebar-fg)] opacity-60">Gestión empresarial</p>
-                      </div>
-                    )}
                   </div>
+                  {isExpanded && (
+                    <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
+                      <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
+                        Organización
+                      </span>
+                      <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 truncate text-left">
+                        Gestión empresarial
+                      </span>
+                    </div>
+                  )}
                 </button>
 
                 {/* Botón Proyecto */}
@@ -235,19 +242,26 @@ export function Sidebar() {
                     setSidebarLevel('project');
                     navigate('/project/dashboard');
                   }}
-                  className="group relative overflow-hidden rounded-lg bg-[var(--main-sidebar-button-hover-bg)]/30 hover:bg-[var(--main-sidebar-button-hover-bg)]/50 transition-all duration-200 border border-[var(--main-sidebar-border)]"
+                  className={cn(
+                    "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
+                    isExpanded ? "w-full" : "w-8"
+                  )}
                 >
-                  <div className="p-4 flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center flex-shrink-0">
-                      <FolderOpen className="h-5 w-5" style={{ color: 'var(--accent)' }} />
+                  <div className="flex items-center justify-center w-8 flex-shrink-0">
+                    <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+                      <FolderOpen className="h-4 w-4" style={{ color: 'var(--accent)' }} />
                     </div>
-                    {isExpanded && (
-                      <div className="flex-1 text-left">
-                        <p className="text-sm font-medium text-[var(--main-sidebar-fg)]">Proyecto</p>
-                        <p className="text-xs text-[var(--main-sidebar-fg)] opacity-60">Gestión de obras</p>
-                      </div>
-                    )}
                   </div>
+                  {isExpanded && (
+                    <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
+                      <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
+                        Proyecto
+                      </span>
+                      <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 truncate text-left">
+                        Gestión de obras
+                      </span>
+                    </div>
+                  )}
                 </button>
 
                 {/* Botón Capacitaciones */}
@@ -256,19 +270,26 @@ export function Sidebar() {
                     setSidebarLevel('learning');
                     navigate('/learning/dashboard');
                   }}
-                  className="group relative overflow-hidden rounded-lg bg-[var(--main-sidebar-button-hover-bg)]/30 hover:bg-[var(--main-sidebar-button-hover-bg)]/50 transition-all duration-200 border border-[var(--main-sidebar-border)]"
+                  className={cn(
+                    "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
+                    isExpanded ? "w-full" : "w-8"
+                  )}
                 >
-                  <div className="p-4 flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center flex-shrink-0">
-                      <GraduationCap className="h-5 w-5" style={{ color: 'var(--accent)' }} />
+                  <div className="flex items-center justify-center w-8 flex-shrink-0">
+                    <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+                      <GraduationCap className="h-4 w-4" style={{ color: 'var(--accent)' }} />
                     </div>
-                    {isExpanded && (
-                      <div className="flex-1 text-left">
-                        <p className="text-sm font-medium text-[var(--main-sidebar-fg)]">Capacitaciones</p>
-                        <p className="text-xs text-[var(--main-sidebar-fg)] opacity-60">Cursos y formación</p>
-                      </div>
-                    )}
                   </div>
+                  {isExpanded && (
+                    <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
+                      <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
+                        Capacitaciones
+                      </span>
+                      <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 truncate text-left">
+                        Cursos y formación
+                      </span>
+                    </div>
+                  )}
                 </button>
               </div>
             ) : (
