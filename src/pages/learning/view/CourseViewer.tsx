@@ -330,6 +330,29 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
     }
   }, [activeLessonId, markCompleteMutation]);
 
+  // Actualizar targetSeekTime cuando cambia initialSeekTime (para navegación desde marcadores)
+  useEffect(() => {
+    if (initialSeekTime !== undefined) {
+      setTargetSeekTime(initialSeekTime);
+    }
+  }, [initialSeekTime]);
+  
+  // Escuchar pendingSeek del store (para navegación desde marcadores usando el store)
+  useEffect(() => {
+    if (pendingSeek !== null && pendingSeek !== undefined) {
+      console.log('🎯 pendingSeek detectado desde store:', pendingSeek);
+      setTargetSeekTime(pendingSeek);
+      // NO limpiar aquí - esperar confirmación del player vía onSeekApplied
+    }
+  }, [pendingSeek]);
+  
+  // Limpiar targetSeekTime después de usarlo
+  useEffect(() => {
+    if (targetSeekTime !== undefined && activeLessonId === initialLessonId) {
+      setTargetSeekTime(undefined);
+    }
+  }, [activeLessonId, initialLessonId, targetSeekTime]);
+
   // Update navigation state whenever it changes
   useEffect(() => {
     if (onNavigationStateChange) {
@@ -398,29 +421,6 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
   
   // Determinar la posición inicial: si hay targetSeekTime (desde marcador), usar esa, si no, usar el progreso guardado
   const initialPosition = targetSeekTime !== undefined ? targetSeekTime : (currentProgress?.last_position_sec || 0);
-  
-  // Actualizar targetSeekTime cuando cambia initialSeekTime (para navegación desde marcadores)
-  useEffect(() => {
-    if (initialSeekTime !== undefined) {
-      setTargetSeekTime(initialSeekTime);
-    }
-  }, [initialSeekTime]);
-  
-  // Escuchar pendingSeek del store (para navegación desde marcadores usando el store)
-  useEffect(() => {
-    if (pendingSeek !== null && pendingSeek !== undefined) {
-      console.log('🎯 pendingSeek detectado desde store:', pendingSeek);
-      setTargetSeekTime(pendingSeek);
-      // NO limpiar aquí - esperar confirmación del player vía onSeekApplied
-    }
-  }, [pendingSeek]);
-  
-  // Limpiar targetSeekTime después de usarlo
-  useEffect(() => {
-    if (targetSeekTime !== undefined && activeLessonId === initialLessonId) {
-      setTargetSeekTime(undefined);
-    }
-  }, [activeLessonId, initialLessonId, targetSeekTime]);
 
   return (
     <div className="space-y-6">
