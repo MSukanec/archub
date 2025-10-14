@@ -285,7 +285,6 @@ export function Sidebar() {
                   isExpanded={isExpanded}
                   onClick={() => {
                     setSidebarLevel('general');
-                    navigate('/mode-selection');
                   }}
                   variant="secondary"
                 />
