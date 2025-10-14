@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useLocation } from 'wouter';
 import { useCourseSidebarStore } from '@/stores/sidebarStore';
+import { useCoursePlayerStore } from '@/stores/coursePlayerStore';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import MarkerCard from '@/components/ui/cards/MarkerCard';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -43,6 +44,7 @@ interface MarkerWithLesson {
 export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkersTabProps) {
   const [, navigate] = useLocation();
   const { setCurrentLesson } = useCourseSidebarStore();
+  const goToLesson = useCoursePlayerStore(s => s.goToLesson);
   const [selectedModule, setSelectedModule] = useState<string>('all');
   const { openModal } = useGlobalModalStore();
   const { toast } = useToast();
@@ -202,20 +204,21 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
     // Set the current lesson in the sidebar
     setCurrentLesson(lessonId);
     
-    // Navigate to the Lecciones tab with query params for time
-    const url = timeSec !== null 
-      ? `/learning/courses/${courseSlug}?tab=Lecciones&lesson=${lessonId}&seek=${timeSec}`
-      : `/learning/courses/${courseSlug}?tab=Lecciones&lesson=${lessonId}`;
+    // Update URL with deep link params (for browser navigation and refresh support)
+    if (courseSlug) {
+      const params = new URLSearchParams();
+      params.set('tab', 'Lecciones');
+      params.set('lesson', lessonId);
+      if (timeSec !== null) {
+        params.set('seek', timeSec.toString());
+      }
+      navigate(`/learning/courses/${courseSlug}?${params.toString()}`);
+    }
     
-    console.log('🔗 URL construida:', url);
-    console.log('🔗 Navegando con window.history.pushState...');
+    // Use the store to navigate (this will switch to "Lecciones" tab and set pending seek)
+    goToLesson(lessonId, timeSec);
     
-    // Use window.history.pushState to properly update URL with query params
-    window.history.pushState({}, '', url);
-    // Trigger a popstate event to notify wouter of the change
-    window.dispatchEvent(new PopStateEvent('popstate'));
-    
-    console.log('🔗 Navegación completada');
+    console.log('🔗 Navegación completada vía store y URL');
   };
 
   const columns = [

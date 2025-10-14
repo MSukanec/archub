@@ -6,9 +6,10 @@ type Props = {
   initialPosition?: number;
   onProgress?: (sec: number, pct: number) => void;
   onPlayerReady?: (player: Player) => void;
+  onSeekApplied?: () => void;
 };
 
-export default function VimeoPlayer({ vimeoId, initialPosition = 0, onProgress, onPlayerReady }: Props) {
+export default function VimeoPlayer({ vimeoId, initialPosition = 0, onProgress, onPlayerReady, onSeekApplied }: Props) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<Player | null>(null);
   const lastLoadedVideoRef = useRef<string | null>(null);
@@ -66,6 +67,8 @@ export default function VimeoPlayer({ vimeoId, initialPosition = 0, onProgress, 
             await playerRef.current?.setCurrentTime(initialPosition);
             lastAppliedPositionRef.current = initialPosition;
             console.log('⏱️ Posición restaurada a:', initialPosition, 'segundos');
+            // Notify that seek has been applied
+            onSeekApplied?.();
           }
         })
         .catch((error) => {
@@ -79,6 +82,8 @@ export default function VimeoPlayer({ vimeoId, initialPosition = 0, onProgress, 
         .then(() => {
           lastAppliedPositionRef.current = initialPosition;
           console.log('⏱️ Posición actualizada a:', initialPosition, 'segundos');
+          // Notify that seek has been applied
+          onSeekApplied?.();
         })
         .catch((error) => {
           console.error('❌ Error al actualizar posición:', error);

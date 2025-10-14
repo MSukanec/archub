@@ -5,6 +5,7 @@ import { Play, BookOpen, CheckCircle, ChevronLeft, ChevronRight, FileText, Bookm
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
+import { useCoursePlayerStore } from '@/stores/coursePlayerStore'
 import VimeoPlayer from '@/components/video/VimeoPlayer'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
@@ -28,10 +29,25 @@ interface CourseViewerProps {
 }
 
 export default function CourseViewer({ courseId, onNavigationStateChange, initialLessonId, initialSeekTime }: CourseViewerProps) {
-  const { setVisible, setData, setCurrentLesson, currentLessonId } = useCourseSidebarStore();
+  const { setVisible, setData, setCurrentLesson, currentLessonId: sidebarLessonId } = useCourseSidebarStore();
+  const storeLessonId = useCoursePlayerStore(s => s.currentLessonId);
+  const goToLesson = useCoursePlayerStore(s => s.goToLesson);
+  const pendingSeek = useCoursePlayerStore(s => s.pendingSeek);
+  const clearPendingSeek = useCoursePlayerStore(s => s.clearPendingSeek);
   const { toast } = useToast();
   const [vimeoPlayer, setVimeoPlayer] = useState<Player | null>(null);
   const [targetSeekTime, setTargetSeekTime] = useState<number | undefined>(initialSeekTime);
+  
+  // SINGLE SOURCE OF TRUTH: coursePlayerStore.currentLessonId has priority
+  const activeLessonId = storeLessonId || sidebarLessonId || null;
+  
+  // Sync coursePlayerStore.currentLessonId with sidebar store (UNIDIRECTIONAL: store → sidebar)
+  useEffect(() => {
+    if (storeLessonId && storeLessonId !== sidebarLessonId) {
+      console.log('🔄 Sincronizando lección desde coursePlayerStore a sidebar:', storeLessonId);
+      setCurrentLesson(storeLessonId);
+    }
+  }, [storeLessonId, setCurrentLesson, sidebarLessonId])
   
   // Get course modules and lessons
   const { data: modules = [], isLoading: modulesLoading } = useQuery({
@@ -124,11 +140,11 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
 
   // Find current lesson index and navigation info
   const navigationInfo = useMemo(() => {
-    if (!currentLessonId || orderedLessons.length === 0) {
+    if (!activeLessonId || orderedLessons.length === 0) {
       return { currentIndex: -1, hasPrev: false, hasNext: false, prevLesson: null, nextLesson: null };
     }
     
-    const currentIndex = orderedLessons.findIndex(l => l.id === currentLessonId);
+    const currentIndex = orderedLessons.findIndex(l => l.id === activeLessonId);
     
     return {
       currentIndex,
@@ -137,7 +153,7 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
       prevLesson: currentIndex > 0 ? orderedLessons[currentIndex - 1] : null,
       nextLesson: currentIndex < orderedLessons.length - 1 ? orderedLessons[currentIndex + 1] : null,
     };
-  }, [currentLessonId, orderedLessons]);
+  }, [activeLessonId, orderedLessons]);
 
   // Save progress mutation (for auto-save while watching)
   const saveProgressMutation = useMutation({
@@ -177,14 +193,14 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
   const SAVE_THROTTLE_MS = 8000; // Save every 8 seconds max
 
   const handleVideoProgress = useCallback((sec: number, pct: number) => {
-    if (!currentLessonId) return;
+    if (!activeLessonId) return;
     
     const now = Date.now();
     if (now - lastSaveTime.current >= SAVE_THROTTLE_MS) {
       lastSaveTime.current = now;
-      saveProgressMutation.mutate({ lessonId: currentLessonId, sec, pct });
+      saveProgressMutation.mutate({ lessonId: activeLessonId, sec, pct });
     }
-  }, [currentLessonId]);
+  }, [activeLessonId, saveProgressMutation]);
 
   // Mark lesson as complete mutation
   const markCompleteMutation = useMutation({
@@ -272,55 +288,57 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
   }, [moduleIdsString, lessonIdsString]);
 
   // Seleccionar automáticamente la lección (inicial o primera) cuando se cargan las lecciones
+  // IMPORTANTE: Usa goToLesson del store para NO sobrescribir navegación desde marcadores
   useEffect(() => {
-    if (lessons.length > 0 && !currentLessonId) {
+    if (lessons.length > 0 && !activeLessonId) {
       // Si hay initialLessonId, usar esa, si no, la primera
       const targetLesson = initialLessonId 
         ? lessons.find(l => l.id === initialLessonId) || lessons[0]
         : lessons[0];
-      setCurrentLesson(targetLesson.id);
+      console.log('🎯 Auto-selección inicial de lección:', targetLesson.id);
+      goToLesson(targetLesson.id, null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lessonIdsString, currentLessonId, initialLessonId]);
+  }, [lessonIdsString, activeLessonId, initialLessonId, goToLesson]);
 
-  // Log de confirmación cuando cambia la lección activa (Paso 3 del prompt)
+  // Log de confirmación cuando cambia la lección activa
   useEffect(() => {
-    if (!currentLessonId) return;
-    const currentLesson = lessons.find(l => l.id === currentLessonId);
+    if (!activeLessonId) return;
+    const currentLesson = lessons.find(l => l.id === activeLessonId);
     if (currentLesson) {
       console.log('📚 Lección activa ->', currentLesson.title, 
                   'Vimeo ID ->', currentLesson.vimeo_video_id || 'sin video');
     }
-  }, [currentLessonId, lessons]);
+  }, [activeLessonId, lessons]);
 
-  // Navigation handlers with useCallback
+  // Navigation handlers with useCallback - use goToLesson from store
   const handlePrevious = useCallback(() => {
     if (navigationInfo.prevLesson) {
-      setCurrentLesson(navigationInfo.prevLesson.id);
+      goToLesson(navigationInfo.prevLesson.id, null);
     }
-  }, [navigationInfo.prevLesson, setCurrentLesson]);
+  }, [navigationInfo.prevLesson, goToLesson]);
 
   const handleNext = useCallback(() => {
     if (navigationInfo.nextLesson) {
-      setCurrentLesson(navigationInfo.nextLesson.id);
+      goToLesson(navigationInfo.nextLesson.id, null);
     }
-  }, [navigationInfo.nextLesson, setCurrentLesson]);
+  }, [navigationInfo.nextLesson, goToLesson]);
 
   const handleMarkComplete = useCallback(() => {
-    if (currentLessonId) {
-      markCompleteMutation.mutate(currentLessonId);
+    if (activeLessonId) {
+      markCompleteMutation.mutate(activeLessonId);
     }
-  }, [currentLessonId]);
+  }, [activeLessonId, markCompleteMutation]);
 
   // Update navigation state whenever it changes
   useEffect(() => {
     if (onNavigationStateChange) {
-      if (currentLessonId && orderedLessons.length > 0) {
-        const currentProgress = progressMap.get(currentLessonId);
+      if (activeLessonId && orderedLessons.length > 0) {
+        const currentProgress = progressMap.get(activeLessonId);
         const isCompleted = currentProgress?.is_completed || false;
         
         console.log('🔄 Navigation state update:', { 
-          lessonId: currentLessonId, 
+          lessonId: activeLessonId, 
           isCompleted, 
           progress: currentProgress,
           isPending: markCompleteMutation.isPending 
@@ -339,7 +357,7 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
         onNavigationStateChange(null);
       }
     }
-  }, [currentLessonId, navigationInfo.hasPrev, navigationInfo.hasNext, orderedLessons.length, markCompleteMutation.isPending, progressMap, onNavigationStateChange, handlePrevious, handleNext, handleMarkComplete]);
+  }, [activeLessonId, navigationInfo.hasPrev, navigationInfo.hasNext, orderedLessons.length, markCompleteMutation.isPending, progressMap, onNavigationStateChange, handlePrevious, handleNext, handleMarkComplete]);
 
   // Group lessons by module
   const getLessonsForModule = (moduleId: string) => {
@@ -373,10 +391,10 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
   }
 
   // Encontrar la lección actual
-  const currentLesson = lessons.find(l => l.id === currentLessonId);
+  const currentLesson = lessons.find(l => l.id === activeLessonId);
   
   // Obtener progreso de la lección actual
-  const currentProgress = currentLessonId ? progressMap.get(currentLessonId) : null;
+  const currentProgress = activeLessonId ? progressMap.get(activeLessonId) : null;
   
   // Determinar la posición inicial: si hay targetSeekTime (desde marcador), usar esa, si no, usar el progreso guardado
   const initialPosition = targetSeekTime !== undefined ? targetSeekTime : (currentProgress?.last_position_sec || 0);
@@ -388,12 +406,21 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
     }
   }, [initialSeekTime]);
   
+  // Escuchar pendingSeek del store (para navegación desde marcadores usando el store)
+  useEffect(() => {
+    if (pendingSeek !== null && pendingSeek !== undefined) {
+      console.log('🎯 pendingSeek detectado desde store:', pendingSeek);
+      setTargetSeekTime(pendingSeek);
+      // NO limpiar aquí - esperar confirmación del player vía onSeekApplied
+    }
+  }, [pendingSeek]);
+  
   // Limpiar targetSeekTime después de usarlo
   useEffect(() => {
-    if (targetSeekTime !== undefined && currentLessonId === initialLessonId) {
+    if (targetSeekTime !== undefined && activeLessonId === initialLessonId) {
       setTargetSeekTime(undefined);
     }
-  }, [currentLessonId, initialLessonId, targetSeekTime]);
+  }, [activeLessonId, initialLessonId, targetSeekTime]);
 
   return (
     <div className="space-y-6">
@@ -406,6 +433,10 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
             initialPosition={initialPosition}
             onProgress={handleVideoProgress}
             onPlayerReady={setVimeoPlayer}
+            onSeekApplied={() => {
+              console.log('✅ Seek confirmado por VimeoPlayer, limpiando pendingSeek');
+              clearPendingSeek();
+            }}
           />
           <div className="mt-4">
             <h2 className="text-xl font-semibold">{currentLesson.title}</h2>
@@ -421,14 +452,14 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
           <div className="text-center">
             <Play className="h-16 w-16 mx-auto mb-4 text-muted-foreground/40" />
             <p className="text-lg font-medium text-muted-foreground">
-              {currentLessonId ? 'Esta lección no tiene video disponible' : 'Selecciona una lección para comenzar'}
+              {activeLessonId ? 'Esta lección no tiene video disponible' : 'Selecciona una lección para comenzar'}
             </p>
           </div>
         </div>
       )}
 
       {/* Lesson Notes and Markers - Preferences Style Layout */}
-      {currentLessonId && (
+      {activeLessonId && (
         <div className="space-y-8 mt-8">
           {/* Summary Notes Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -445,7 +476,7 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
 
             {/* Right Column - Content */}
             <div>
-              <LessonSummaryNote lessonId={currentLessonId} />
+              <LessonSummaryNote lessonId={activeLessonId} />
             </div>
           </div>
 
@@ -466,7 +497,7 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
 
             {/* Right Column - Content */}
             <div>
-              <LessonMarkers lessonId={currentLessonId} vimeoPlayer={vimeoPlayer} />
+              <LessonMarkers lessonId={activeLessonId} vimeoPlayer={vimeoPlayer} />
             </div>
           </div>
         </div>

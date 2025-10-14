@@ -4,6 +4,7 @@ import { BookOpen, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
+import { useCoursePlayerStore } from '@/stores/coursePlayerStore';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import CourseDataTab from './view/CourseDataTab';
@@ -15,32 +16,60 @@ export default function CourseView() {
   const { id } = useParams<{ id: string }>();
   const [location, navigate] = useLocation();
   
+  // Get store state
+  const storeActiveTab = useCoursePlayerStore(s => s.activeTab);
+  const setStoreActiveTab = useCoursePlayerStore(s => s.setActiveTab);
+  const currentLessonId = useCoursePlayerStore(s => s.currentLessonId);
+  const pendingSeek = useCoursePlayerStore(s => s.pendingSeek);
+  const resetStore = useCoursePlayerStore(s => s.reset);
+  
   // Parse query params from window.location.search (more reliable than wouter's location)
   const urlParams = new URLSearchParams(window.location.search);
   const tabParam = urlParams.get('tab');
   const lessonParam = urlParams.get('lesson');
   const seekParam = urlParams.get('seek');
   
-  const [activeTab, setActiveTab] = useState(tabParam || 'Datos del Curso');
+  const [activeTab, setActiveTab] = useState(tabParam || storeActiveTab || 'Datos del Curso');
   
-  // Sync activeTab when URL changes (for navigation from markers)
+  // Initialize store with URL tab param if present (runs on mount AND when URL changes)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tab = params.get('tab');
-    console.log('🔄 CourseView useEffect - URL changed:', window.location.href);
-    console.log('🔄 tab from URL:', tab, 'activeTab:', activeTab);
-    if (tab && tab !== activeTab) {
-      console.log('🔄 Cambiando tab a:', tab);
-      setActiveTab(tab);
+    if (tabParam && tabParam !== storeActiveTab) {
+      console.log('🔗 Sincronizando store desde URL:', tabParam);
+      setStoreActiveTab(tabParam as any);
+      setActiveTab(tabParam);
+    } else if (!tabParam && activeTab !== storeActiveTab) {
+      // If no URL param, ensure local state matches store
+      setActiveTab(storeActiveTab);
     }
-  }, [location]); // Trigger when location changes
+  }, [tabParam]); // Re-run when URL changes (e.g., browser back/forward)
+  
+  // Sync activeTab with store ONLY when store changes from external actions (e.g., goToLesson)
+  useEffect(() => {
+    if (storeActiveTab !== activeTab) {
+      console.log('🔄 Sincronizando tab desde store:', storeActiveTab);
+      setActiveTab(storeActiveTab);
+    }
+  }, [storeActiveTab]); // Note: activeTab intentionally NOT in deps to avoid loops
+  
+  // Reset store when leaving course view
+  useEffect(() => {
+    return () => {
+      resetStore();
+    };
+  }, [resetStore]);
   
   // Update URL when tab changes manually (to persist state)
   const handleTabChange = (newTab: string) => {
     setActiveTab(newTab);
-    // Always clear query params when manually switching tabs
-    // This ensures the sync effect doesn't override manual changes
-    navigate(`/learning/courses/${id}`);
+    setStoreActiveTab(newTab as any);
+    // Update URL with tab parameter for deep linking support
+    if (newTab === 'Datos del Curso') {
+      // Clear params for default tab
+      navigate(`/learning/courses/${id}`);
+    } else {
+      // Include tab param for non-default tabs
+      navigate(`/learning/courses/${id}?tab=${encodeURIComponent(newTab)}`);
+    }
   };
   
   // Get course data
@@ -115,7 +144,7 @@ export default function CourseView() {
           key="continue"
           variant="default"
           size="sm"
-          onClick={() => setActiveTab('Lecciones')}
+          onClick={() => handleTabChange('Lecciones')}
           data-testid="button-continue-course"
         >
           Continuar Curso
@@ -195,8 +224,8 @@ export default function CourseView() {
           <CourseViewer 
             courseId={course?.id} 
             onNavigationStateChange={setNavigationState}
-            initialLessonId={lessonParam || undefined}
-            initialSeekTime={seekParam ? parseInt(seekParam) : undefined}
+            initialLessonId={currentLessonId || lessonParam || undefined}
+            initialSeekTime={pendingSeek ?? (seekParam ? parseInt(seekParam) : undefined)}
           />
         );
       case 'Apuntes':
