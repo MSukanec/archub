@@ -9,6 +9,7 @@ import {
   CheckCircle2
 } from "lucide-react";
 import { useCourseSidebarStore } from "@/stores/sidebarStore";
+import { useCoursePlayerStore } from "@/stores/coursePlayerStore";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 
@@ -20,6 +21,7 @@ interface CourseSidebarProps {
 
 export function CourseSidebar({ modules, lessons, currentLessonId }: CourseSidebarProps) {
   const { setCurrentLesson } = useCourseSidebarStore();
+  const goToLesson = useCoursePlayerStore(s => s.goToLesson);
   const [isDocked, setIsDocked] = useState(true);
   const [isHovered, setHovered] = useState(false);
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
@@ -183,7 +185,11 @@ export function CourseSidebar({ modules, lessons, currentLessonId }: CourseSideb
                         return (
                           <button
                             key={lesson.id}
-                            onClick={() => setCurrentLesson(lesson.id)}
+                            onClick={() => {
+                              // Update both sidebar (for UI) and coursePlayerStore (source of truth)
+                              setCurrentLesson(lesson.id);
+                              goToLesson(lesson.id);
+                            }}
                             className={cn(
                               "w-full h-9 rounded-md cursor-pointer transition-colors flex items-center group px-3 my-[2px]",
                               isActive 
