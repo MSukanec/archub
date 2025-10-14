@@ -12,6 +12,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useLocation } from 'wouter';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { DiscordWidget } from '@/components/learning/DiscordWidget';
 
 export default function LearningDashboard() {
   const { setSidebarContext, setSidebarLevel } = useNavigationStore();
@@ -344,6 +345,9 @@ export default function LearningDashboard() {
             </CardContent>
           </Card>
         )}
+
+        {/* Discord Community Widget */}
+        <DiscordWidget />
       </div>
     </Layout>
   );
