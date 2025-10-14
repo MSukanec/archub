@@ -3,7 +3,7 @@ import { create } from 'zustand'
 type SidebarContext = 'organization' | 'project' | 'design' | 'construction' | 'finances' | 'commercialization' | 'postsale' | 'organizations' | 'admin' | 'recursos' | 'perfil' | 'learning'
 
 // Nuevo tipo para los niveles del sidebar
-type SidebarLevel = 'main' | 'organization' | 'project' | 'construction' | 'finances' | 'library' | 'provider' | 'admin' | 'learning'
+type SidebarLevel = 'general' | 'organization' | 'project' | 'construction' | 'finances' | 'library' | 'provider' | 'admin' | 'learning'
 
 interface NavigationState {
   currentSidebarContext: SidebarContext
@@ -32,7 +32,7 @@ export const useNavigationStore = create<NavigationState>((set) => ({
     console.log('Setting current project:', project)
   },
   // Estados para los niveles del sidebar
-  sidebarLevel: 'organization',
+  sidebarLevel: 'general',
   setSidebarLevel: (level: SidebarLevel) => set({ sidebarLevel: level }),
-  goToMainLevel: () => set({ sidebarLevel: 'main' }),
+  goToMainLevel: () => set({ sidebarLevel: 'general' }),
 }))
