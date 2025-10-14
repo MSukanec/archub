@@ -387,6 +387,9 @@ export default function Projects() {
       },
     ],
     onTabChange: (tabId: string) => setActiveTab(tabId),
+    showBackButton: true,
+    onBackClick: () => navigate('/organization/dashboard'),
+    backButtonText: "Volver",
     actions: [
       <PlanRestricted 
         key="create-project"
