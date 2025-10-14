@@ -152,6 +152,15 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
     return markers.filter(marker => marker.module?.title === selectedModule);
   }, [markers, selectedModule]);
 
+  // Add moduleTitle property to markers for grouping
+  const markersWithModuleTitle = useMemo(() => {
+    return filteredMarkers.map(marker => ({
+      ...marker,
+      moduleTitle: marker.module?.title || 'Sin módulo',
+      moduleSortIndex: marker.module?.sort_index || 999
+    }));
+  }, [filteredMarkers]);
+
   const formatTime = (seconds: number | null): string => {
     if (seconds === null) return '0:00';
     const mins = Math.floor(seconds / 60);
@@ -221,25 +230,33 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
     console.log('🔗 Navegación completada vía store y URL');
   };
 
-  const columns = [
-    {
-      key: 'module',
-      label: 'Módulo',
-      sortable: true,
-      sortType: 'string' as const,
-      width: '20%',
-      render: (marker: MarkerWithLesson) => (
-        <div className="font-medium">
-          {marker.module?.title || 'Sin módulo'}
+  // Render module group header
+  const renderModuleGroupHeader = (moduleName: string, groupMarkers: any[]) => {
+    const markersCount = groupMarkers.length;
+    return (
+      <div 
+        className="grid gap-4 px-4 py-3 text-xs font-medium"
+        style={{ 
+          gridTemplateColumns: "1fr 150px 1fr 200px",
+          backgroundColor: "var(--table-group-header-bg)",
+          color: "white"
+        }}
+      >
+        <div className="col-span-2 font-bold">
+          {moduleName} ({markersCount} {markersCount === 1 ? 'marcador' : 'marcadores'})
         </div>
-      )
-    },
+        <div></div>
+        <div></div>
+      </div>
+    );
+  };
+
+  const columns = [
     {
       key: 'lesson',
       label: 'Lección',
       sortable: true,
       sortType: 'string' as const,
-      width: '20%',
       render: (marker: MarkerWithLesson) => (
         <div className="font-medium">
           {marker.lesson?.title || 'Sin lección'}
@@ -251,7 +268,6 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       label: 'Tiempo',
       sortable: true,
       sortType: 'number' as const,
-      width: '20%',
       render: (marker: MarkerWithLesson) => (
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4 text-muted-foreground" />
@@ -265,7 +281,6 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       key: 'body',
       label: 'Texto',
       sortable: false,
-      width: '20%',
       render: (marker: MarkerWithLesson) => (
         <div className="flex items-start gap-2">
           {marker.is_pinned && (
@@ -283,7 +298,6 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       key: 'actions',
       label: 'Acciones',
       sortable: false,
-      width: '20%',
       render: (marker: MarkerWithLesson) => (
         <div className="flex items-center gap-2">
           <Button
@@ -380,8 +394,10 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       {/* Desktop View */}
       <div className="hidden lg:block">
         <Table
-          data={filteredMarkers}
+          data={markersWithModuleTitle}
           columns={columns}
+          groupBy="moduleTitle"
+          renderGroupHeader={renderModuleGroupHeader}
           topBar={{
             showSearch: true,
             showFilter: true,
@@ -431,15 +447,41 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
           </div>
         )}
 
-        {/* Mobile Cards */}
-        <div className="space-y-3">
-          {filteredMarkers.map((marker) => (
-            <MarkerCard
-              key={marker.id}
-              marker={marker}
-              onGoToLesson={handleGoToLesson}
-              onDelete={handleDeleteMarker}
-            />
+        {/* Mobile Cards - Grouped by Module */}
+        <div className="space-y-4">
+          {Object.entries(
+            markersWithModuleTitle.reduce((acc, marker) => {
+              const moduleTitle = marker.moduleTitle;
+              if (!acc[moduleTitle]) {
+                acc[moduleTitle] = [];
+              }
+              acc[moduleTitle].push(marker);
+              return acc;
+            }, {} as Record<string, typeof markersWithModuleTitle>)
+          )
+          .sort((a, b) => {
+            const moduleA = a[1][0]?.moduleSortIndex || 999;
+            const moduleB = b[1][0]?.moduleSortIndex || 999;
+            return moduleA - moduleB;
+          })
+          .map(([moduleTitle, moduleMarkers]) => (
+            <div key={moduleTitle}>
+              {/* Module Header for Mobile */}
+              <div className="px-4 py-2 mb-2 rounded-lg font-semibold text-sm" style={{ backgroundColor: "var(--table-group-header-bg)", color: "white" }}>
+                {moduleTitle} ({moduleMarkers.length})
+              </div>
+              {/* Module Cards */}
+              <div className="space-y-3">
+                {moduleMarkers.map((marker) => (
+                  <MarkerCard
+                    key={marker.id}
+                    marker={marker}
+                    onGoToLesson={handleGoToLesson}
+                    onDelete={handleDeleteMarker}
+                  />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </div>
