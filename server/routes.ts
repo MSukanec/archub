@@ -2384,6 +2384,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Discord announcement endpoint
+  app.post("/api/discord/announce", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const token = authHeader.substring(7);
+      
+      // Create authenticated Supabase client
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+      
+      // Verify user is admin
+      const { data: { user: authUser }, error: authUserError } = await authenticatedSupabase.auth.getUser();
+      
+      if (authUserError || !authUser) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      // Get user record to check admin status
+      const { data: userRecord, error: userRecordError } = await authenticatedSupabase
+        .from('users')
+        .select('id, email, is_admin')
+        .ilike('email', authUser.email)
+        .single();
+      
+      if (userRecordError || !userRecord || !userRecord.is_admin) {
+        return res.status(403).json({ error: "Only admins can send announcements" });
+      }
+      
+      const { type, title, message, courseTitle, moduleTitle, courseDescription, courseUrl } = req.body;
+      
+      const { sendDiscordNotification, createCourseAnnouncementEmbed, createModuleAnnouncementEmbed, createCustomAnnouncement } = await import('./discord');
+      
+      let discordMessage;
+      
+      switch (type) {
+        case 'course':
+          discordMessage = createCourseAnnouncementEmbed(courseTitle, courseDescription, courseUrl);
+          break;
+        case 'module':
+          discordMessage = createModuleAnnouncementEmbed(courseTitle, moduleTitle);
+          break;
+        case 'custom':
+          discordMessage = createCustomAnnouncement(title, message);
+          break;
+        default:
+          return res.status(400).json({ error: "Invalid announcement type" });
+      }
+      
+      const success = await sendDiscordNotification(discordMessage);
+      
+      if (success) {
+        res.json({ ok: true, message: "Announcement sent to Discord" });
+      } else {
+        res.status(500).json({ error: "Failed to send announcement to Discord" });
+      }
+    } catch (error) {
+      console.error("Error sending Discord announcement:", error);
+      res.status(500).json({ error: "Failed to send announcement" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
