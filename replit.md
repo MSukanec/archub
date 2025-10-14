@@ -62,3 +62,7 @@ Preferred communication style: Simple, everyday language.
 - **date-fns**: Date manipulation utilities.
 - **React Flow**: For visual parameter dependency editor.
 - **Recharts**: Charting library.
+
+## Vercel Deployment
+
+**Serverless Functions**: Created Vercel-compatible serverless functions in `/api/` directory to replace Express routes for serverless deployment. Functions use Supabase service role key with user token to respect RLS policies. Implemented functions: budgets (CRUD), budget-items (CRUD + move). Configuration in `vercel.json` includes rewrites for all API routes. See `VERCEL_DEPLOY.md` for deployment guide and environment variables setup.

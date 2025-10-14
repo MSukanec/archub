@@ -1,5 +1,10 @@
 {
   "rewrites": [
-    { "source": "/current-user", "destination": "/api/current-user" }
+    { "source": "/current-user", "destination": "/api/current-user" },
+    { "source": "/api/budgets", "destination": "/api/budgets" },
+    { "source": "/api/budgets/:id", "destination": "/api/budgets/[id]" },
+    { "source": "/api/budget-items", "destination": "/api/budget-items" },
+    { "source": "/api/budget-items/move", "destination": "/api/budget-items/move" },
+    { "source": "/api/budget-items/:id", "destination": "/api/budget-items/[id]" }
   ]
 }
