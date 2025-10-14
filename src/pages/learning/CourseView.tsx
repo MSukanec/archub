@@ -8,6 +8,7 @@ import { useCoursePlayerStore } from '@/stores/coursePlayerStore';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import CourseDataTab from './view/CourseDataTab';
+import CourseContentTab from './view/CourseContentTab';
 import CourseViewer from './view/CourseViewer';
 import CourseNotes from './view/CourseNotes';
 import CourseMarkersTab from './view/CourseMarkersTab';
@@ -29,7 +30,7 @@ export default function CourseView() {
   const lessonParam = urlParams.get('lesson');
   const seekParam = urlParams.get('seek');
   
-  const [activeTab, setActiveTab] = useState(tabParam || storeActiveTab || 'Datos del Curso');
+  const [activeTab, setActiveTab] = useState(tabParam || storeActiveTab || 'Dashboard');
   
   // Initialize store with URL tab param if present (runs on mount AND when URL changes)
   useEffect(() => {
@@ -63,7 +64,7 @@ export default function CourseView() {
     setActiveTab(newTab);
     setStoreActiveTab(newTab as any);
     // Update URL with tab parameter for deep linking support
-    if (newTab === 'Datos del Curso') {
+    if (newTab === 'Dashboard') {
       // Clear params for default tab
       navigate(`/learning/courses/${id}`);
     } else {
@@ -96,9 +97,14 @@ export default function CourseView() {
 
   const headerTabs = [
     {
-      id: 'Datos del Curso',
-      label: 'Datos del Curso',
-      isActive: activeTab === 'Datos del Curso'
+      id: 'Dashboard',
+      label: 'Dashboard',
+      isActive: activeTab === 'Dashboard'
+    },
+    {
+      id: 'Contenido',
+      label: 'Contenido',
+      isActive: activeTab === 'Contenido'
     },
     {
       id: 'Lecciones',
@@ -138,7 +144,7 @@ export default function CourseView() {
     isViewMode: true,
     tabs: headerTabs,
     onTabChange: handleTabChange,
-    ...(activeTab === 'Datos del Curso' && {
+    ...(activeTab === 'Dashboard' && {
       actions: [
         <Button
           key="continue"
@@ -217,8 +223,10 @@ export default function CourseView() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'Datos del Curso':
+      case 'Dashboard':
         return <CourseDataTab courseId={course?.id} />;
+      case 'Contenido':
+        return <CourseContentTab courseId={course?.id} />;
       case 'Lecciones':
         return (
           <CourseViewer 
