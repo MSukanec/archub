@@ -195,13 +195,17 @@ export function Sidebar() {
                 "flex flex-col gap-[2px]",
                 isExpanded ? "px-[9px]" : "items-center"
               )}>
-                {/* Título del hub */}
-                {isExpanded && (
-                  <div className="px-2 pt-2 pb-3">
-                    <h2 className="text-lg font-semibold text-[var(--main-sidebar-fg)]">Archub</h2>
-                    <p className="text-xs text-[var(--main-sidebar-fg)] opacity-60 mt-1">Selecciona una sección</p>
-                  </div>
-                )}
+                {/* Logo */}
+                <div className="h-16 flex items-center justify-center mb-2">
+                  <img 
+                    src="/ArchubLogo.png" 
+                    alt="Archub Logo" 
+                    className={cn(
+                      "object-contain transition-all duration-150",
+                      isExpanded ? "h-12 w-auto" : "h-8 w-8"
+                    )}
+                  />
+                </div>
                 
                 {/* Botón Organización */}
                 <button
