@@ -5,6 +5,15 @@
     { "source": "/api/budgets/:id", "destination": "/api/budgets/[id]" },
     { "source": "/api/budget-items", "destination": "/api/budget-items" },
     { "source": "/api/budget-items/move", "destination": "/api/budget-items/move" },
-    { "source": "/api/budget-items/:id", "destination": "/api/budget-items/[id]" }
+    { "source": "/api/budget-items/:id", "destination": "/api/budget-items/[id]" },
+    { "source": "/api/admin/courses", "destination": "/api/admin/courses" },
+    { "source": "/api/admin/courses/:id", "destination": "/api/admin/courses/[id]" },
+    { "source": "/api/admin/modules", "destination": "/api/admin/modules" },
+    { "source": "/api/admin/modules/:id", "destination": "/api/admin/modules/[id]" },
+    { "source": "/api/admin/lessons", "destination": "/api/admin/lessons" },
+    { "source": "/api/admin/lessons/:id", "destination": "/api/admin/lessons/[id]" },
+    { "source": "/api/admin/enrollments", "destination": "/api/admin/enrollments" },
+    { "source": "/api/admin/enrollments/:id", "destination": "/api/admin/enrollments/[id]" },
+    { "source": "/api/admin/dashboard", "destination": "/api/admin/dashboard" }
   ]
 }
