@@ -1,9 +1,22 @@
 // api/admin/modules/[id].ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
+import { verifyAdminUser, AuthError } from "../auth-helper";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
+    const authHeader = req.headers.authorization || "";
+
+    try {
+      await verifyAdminUser(authHeader);
+    } catch (error) {
+      if (error instanceof AuthError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      console.error("Auth error:", error);
+      return res.status(500).json({ error: "Internal error" });
+    }
+
     const url = process.env.SUPABASE_URL;
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -13,12 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .json({ error: "Missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY" });
     }
 
-    const authHeader = req.headers.authorization || "";
     const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-
-    if (!token) {
-      return res.status(401).json({ error: "No authorization token provided" });
-    }
 
     const supabase = createClient(url, serviceKey, {
       auth: { persistSession: false },

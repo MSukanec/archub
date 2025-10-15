@@ -79,25 +79,38 @@ export default function AdminCourseContentTab({ courseId, modules = [], lessons 
         throw new Error('Supabase no está configurado');
       }
 
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session');
+
       // Actualizar el orden de todos los elementos reordenados
-      const updates: PromiseLike<any>[] = [];
+      const updates: Promise<any>[] = [];
 
       reorderedItems.forEach((item, index) => {
         if (item.type === 'module') {
           // Actualizar módulo
           updates.push(
-            supabase
-              .from('course_modules')
-              .update({ sort_index: index })
-              .eq('id', item.id)
+            fetch(`/api/admin/modules/${item.id}`, {
+              method: 'PATCH',
+              headers: {
+                'Authorization': `Bearer ${session.access_token}`,
+                'Content-Type': 'application/json'
+              },
+              credentials: 'include',
+              body: JSON.stringify({ sort_index: index })
+            })
           );
         } else if (item.type === 'lesson') {
           // Actualizar lección
           updates.push(
-            supabase
-              .from('course_lessons')
-              .update({ sort_index: index })
-              .eq('id', item.id)
+            fetch(`/api/admin/lessons/${item.id}`, {
+              method: 'PATCH',
+              headers: {
+                'Authorization': `Bearer ${session.access_token}`,
+                'Content-Type': 'application/json'
+              },
+              credentials: 'include',
+              body: JSON.stringify({ sort_index: index })
+            })
           );
         }
       });
@@ -105,8 +118,8 @@ export default function AdminCourseContentTab({ courseId, modules = [], lessons 
       await Promise.all(updates);
 
       // Invalidar cache para refrescar los datos
-      await queryClient.invalidateQueries({ queryKey: ['course-modules', courseId] });
-      await queryClient.invalidateQueries({ queryKey: ['course-lessons', courseId] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin/modules', courseId] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin/lessons', courseId] });
 
       toast({
         title: 'Orden actualizado',
@@ -141,16 +154,24 @@ export default function AdminCourseContentTab({ courseId, modules = [], lessons 
         return;
       }
 
-      // Actualizar el module_id de la lección
-      const { error } = await supabase
-        .from('course_lessons')
-        .update({ module_id: newParentId })
-        .eq('id', childId);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session');
 
-      if (error) throw error;
+      // Actualizar el module_id de la lección
+      const res = await fetch(`/api/admin/lessons/${childId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ module_id: newParentId })
+      });
+
+      if (!res.ok) throw new Error('Failed to update lesson');
 
       // Invalidar cache
-      await queryClient.invalidateQueries({ queryKey: ['course-lessons', courseId] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin/lessons', courseId] });
 
       toast({
         title: 'Lección movida',

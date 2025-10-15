@@ -18,58 +18,74 @@ export default function AdminCourseView() {
   
   // Get course data
   const { data: course, isLoading } = useQuery({
-    queryKey: ['course', id],
+    queryKey: ['/api/admin/courses', id],
     queryFn: async () => {
       if (!id || !supabase) return null;
       
-      const { data, error } = await supabase
-        .from('courses')
-        .select('*')
-        .eq('id', id)
-        .single();
-        
-      if (error) {
-        console.error('Error fetching course:', error);
-        throw error;
-      }
-      
-      return data;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session');
+
+      const res = await fetch(`/api/admin/courses/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        credentials: 'include'
+      });
+
+      if (!res.ok) throw new Error('Failed to fetch course');
+      return res.json();
     },
     enabled: !!id && !!supabase
   });
 
   const { data: modules = [] } = useQuery({
-    queryKey: ['course-modules', id],
+    queryKey: ['/api/admin/modules', id],
     queryFn: async () => {
       if (!id || !supabase) return [];
       
-      const { data, error } = await supabase
-        .from('course_modules')
-        .select('*')
-        .eq('course_id', id)
-        .order('sort_index', { ascending: true });
-        
-      if (error) throw error;
-      return data || [];
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return [];
+
+      const res = await fetch(`/api/admin/modules?course_id=${id}`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        credentials: 'include'
+      });
+
+      if (!res.ok) throw new Error('Failed to fetch modules');
+      return res.json();
     },
     enabled: !!id && !!supabase
   });
 
   const { data: lessons = [] } = useQuery({
-    queryKey: ['course-lessons', id],
+    queryKey: ['/api/admin/lessons', id],
     queryFn: async () => {
-      if (!id || !supabase) return [];
+      if (!id || !supabase || modules.length === 0) return [];
       
-      const { data, error } = await supabase
-        .from('course_lessons')
-        .select('*, course_modules!inner(course_id)')
-        .eq('course_modules.course_id', id)
-        .order('sort_index', { ascending: true });
-        
-      if (error) throw error;
-      return data || [];
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return [];
+
+      const allLessons: any[] = [];
+      
+      for (const module of modules) {
+        const res = await fetch(`/api/admin/lessons?module_id=${module.id}`, {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          credentials: 'include'
+        });
+
+        if (res.ok) {
+          const moduleLessons = await res.json();
+          allLessons.push(...moduleLessons);
+        }
+      }
+
+      return allLessons;
     },
-    enabled: !!id && !!supabase
+    enabled: !!id && !!supabase && modules.length > 0
   });
 
   const handleCreateModule = () => {

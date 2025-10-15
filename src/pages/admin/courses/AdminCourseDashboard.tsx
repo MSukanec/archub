@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Card } from '@/components/ui/card'
 import { Users, BookOpen, CreditCard, AlertCircle, TrendingUp, Calendar } from 'lucide-react'
-import { format, subMonths, startOfMonth, endOfMonth, isAfter, isBefore, addDays } from 'date-fns'
+import { format, subMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -20,147 +20,38 @@ interface DashboardStats {
   avgCompletionRate: number
 }
 
+interface DashboardData {
+  stats: DashboardStats
+  recentEnrollments: any[]
+  expiringSoon: any[]
+}
+
 export default function AdminCourseDashboard() {
-  // Fetch dashboard statistics
-  const { data: stats, isLoading } = useQuery({
-    queryKey: ['admin-course-dashboard'],
+  // Fetch dashboard data from API
+  const { data: dashboardData, isLoading } = useQuery<DashboardData>({
+    queryKey: ['/api/admin/dashboard'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not available')
 
-      const now = new Date()
-      const thisMonthStart = startOfMonth(now)
-      const thisMonthEnd = endOfMonth(now)
-      const nextMonthEnd = endOfMonth(addDays(thisMonthEnd, 1))
-      const lastMonthStart = startOfMonth(subMonths(now, 1))
-      const lastMonthEnd = endOfMonth(subMonths(now, 1))
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No session')
 
-      // Cursos
-      const { data: courses } = await supabase
-        .from('courses')
-        .select('id, is_active')
+      const res = await fetch('/api/admin/dashboard', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        credentials: 'include'
+      })
 
-      const totalCourses = courses?.length || 0
-      const activeCourses = courses?.filter(c => c.is_active).length || 0
-
-      // Inscripciones
-      const { data: enrollments } = await supabase
-        .from('course_enrollments')
-        .select('id, status, expires_at, started_at')
-
-      const totalEnrollments = enrollments?.length || 0
-      const activeEnrollments = enrollments?.filter(e => 
-        e.status === 'active' && 
-        (!e.expires_at || isAfter(new Date(e.expires_at), now))
-      ).length || 0
-
-      const expiringThisMonth = enrollments?.filter(e => {
-        if (!e.expires_at) return false
-        const expDate = new Date(e.expires_at)
-        return isAfter(expDate, now) && isBefore(expDate, thisMonthEnd)
-      }).length || 0
-
-      const expiringNextMonth = enrollments?.filter(e => {
-        if (!e.expires_at) return false
-        const expDate = new Date(e.expires_at)
-        return isAfter(expDate, thisMonthEnd) && isBefore(expDate, nextMonthEnd)
-      }).length || 0
-
-      // Pagos
-      const { data: payments } = await supabase
-        .from('payments_log')
-        .select('amount, currency, created_at, status')
-        .eq('status', 'approved')
-
-      const totalRevenue = payments?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 0
-
-      const revenueThisMonth = payments?.filter(p => {
-        const date = new Date(p.created_at)
-        return isAfter(date, thisMonthStart) && isBefore(date, thisMonthEnd)
-      }).reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 0
-
-      const revenueLastMonth = payments?.filter(p => {
-        const date = new Date(p.created_at)
-        return isAfter(date, lastMonthStart) && isBefore(date, lastMonthEnd)
-      }).reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 0
-
-      // Progreso promedio
-      const { data: progress } = await supabase
-        .from('course_lesson_progress')
-        .select('progress_pct')
-
-      const avgCompletionRate = progress?.length 
-        ? progress.reduce((sum, p) => sum + (Number(p.progress_pct) || 0), 0) / progress.length
-        : 0
-
-      return {
-        totalCourses,
-        activeCourses,
-        totalEnrollments,
-        activeEnrollments,
-        expiringThisMonth,
-        expiringNextMonth,
-        totalRevenue,
-        revenueThisMonth,
-        revenueLastMonth,
-        avgCompletionRate
-      } as DashboardStats
+      if (!res.ok) throw new Error('Failed to fetch dashboard data')
+      return res.json()
     },
     enabled: !!supabase
   })
 
-  // Últimas inscripciones
-  const { data: recentEnrollments, isLoading: loadingRecent } = useQuery({
-    queryKey: ['recent-enrollments'],
-    queryFn: async () => {
-      if (!supabase) throw new Error('Supabase not available')
-
-      const { data } = await supabase
-        .from('course_enrollments')
-        .select(`
-          id,
-          started_at,
-          expires_at,
-          status,
-          users!inner(full_name, email),
-          courses!inner(title)
-        `)
-        .order('started_at', { ascending: false })
-        .limit(5)
-
-      return data
-    },
-    enabled: !!supabase
-  })
-
-  // Próximos vencimientos
-  const { data: upcomingExpirations, isLoading: loadingExpirations } = useQuery({
-    queryKey: ['upcoming-expirations'],
-    queryFn: async () => {
-      if (!supabase) throw new Error('Supabase not available')
-
-      const now = new Date()
-      const thirtyDaysFromNow = addDays(now, 30)
-
-      const { data } = await supabase
-        .from('course_enrollments')
-        .select(`
-          id,
-          expires_at,
-          status,
-          users!inner(full_name, email),
-          courses!inner(title)
-        `)
-        .eq('status', 'active')
-        .not('expires_at', 'is', null)
-        .gte('expires_at', now.toISOString())
-        .lte('expires_at', thirtyDaysFromNow.toISOString())
-        .order('expires_at', { ascending: true })
-        .limit(5)
-
-      return data
-    },
-    enabled: !!supabase
-  })
+  const stats = dashboardData?.stats
+  const recentEnrollments = dashboardData?.recentEnrollments || []
+  const upcomingExpirations = dashboardData?.expiringSoon || []
 
   const revenueGrowth = stats?.revenueLastMonth 
     ? ((stats.revenueThisMonth - stats.revenueLastMonth) / stats.revenueLastMonth) * 100
@@ -320,13 +211,13 @@ export default function AdminCourseDashboard() {
             <Users className="h-5 w-5 text-primary" />
             Últimas Inscripciones
           </h3>
-          {loadingRecent ? (
+          {isLoading ? (
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
                 <Skeleton key={i} className="h-16" />
               ))}
             </div>
-          ) : recentEnrollments && recentEnrollments.length > 0 ? (
+          ) : recentEnrollments.length > 0 ? (
             <div className="space-y-3">
               {recentEnrollments.map((enrollment: any) => (
                 <div key={enrollment.id} className="flex items-start justify-between p-3 rounded-lg border">
@@ -356,13 +247,13 @@ export default function AdminCourseDashboard() {
             <AlertCircle className="h-5 w-5 text-orange-600" />
             Próximos Vencimientos (30 días)
           </h3>
-          {loadingExpirations ? (
+          {isLoading ? (
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
                 <Skeleton key={i} className="h-16" />
               ))}
             </div>
-          ) : upcomingExpirations && upcomingExpirations.length > 0 ? (
+          ) : upcomingExpirations.length > 0 ? (
             <div className="space-y-3">
               {upcomingExpirations.map((enrollment: any) => (
                 <div key={enrollment.id} className="flex items-start justify-between p-3 rounded-lg border border-orange-200 bg-orange-50/50 dark:bg-orange-950/20 dark:border-orange-800">

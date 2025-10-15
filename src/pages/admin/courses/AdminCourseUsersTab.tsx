@@ -18,21 +18,22 @@ export default function AdminCourseUsersTab() {
 
   // Fetch enrollments with user and course data
   const { data: enrollments = [], isLoading } = useQuery({
-    queryKey: ['course-enrollments'],
+    queryKey: ['/api/admin/enrollments'],
     queryFn: async () => {
       if (!supabase) return [];
       
-      const { data, error } = await supabase
-        .from('course_enrollments')
-        .select(`
-          *,
-          users(full_name, email),
-          courses(title, slug)
-        `)
-        .order('created_at', { ascending: false });
-        
-      if (error) throw error;
-      return data || [];
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return [];
+
+      const res = await fetch('/api/admin/enrollments', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        credentials: 'include'
+      });
+
+      if (!res.ok) throw new Error('Failed to fetch enrollments');
+      return res.json();
     },
     enabled: !!supabase
   });
@@ -42,15 +43,21 @@ export default function AdminCourseUsersTab() {
     mutationFn: async (enrollmentId: string) => {
       if (!supabase) throw new Error('Supabase no disponible');
       
-      const { error } = await supabase
-        .from('course_enrollments')
-        .delete()
-        .eq('id', enrollmentId);
-      
-      if (error) throw error;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session');
+
+      const res = await fetch(`/api/admin/enrollments/${enrollmentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        credentials: 'include'
+      });
+
+      if (!res.ok) throw new Error('Failed to delete enrollment');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['course-enrollments'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/enrollments'] });
       toast({
         title: 'Suscripción eliminada',
         description: 'La suscripción se eliminó correctamente',

@@ -30,68 +30,74 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
 
   // Get course data
   const { data: courseData } = useQuery({
-    queryKey: ['course', courseId],
+    queryKey: ['/api/admin/courses', courseId],
     queryFn: async () => {
       if (!courseId || !supabase) return null;
       
-      const { data, error } = await supabase
-        .from('courses')
-        .select('*')
-        .eq('id', courseId)
-        .single();
-        
-      if (error) {
-        console.error('Error fetching course:', error);
-        throw error;
-      }
-      
-      return data;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return null;
+
+      const res = await fetch(`/api/admin/courses/${courseId}`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        credentials: 'include'
+      });
+
+      if (!res.ok) throw new Error('Failed to fetch course');
+      return res.json();
     },
     enabled: !!courseId && !!supabase
   });
 
   // Get course modules
   const { data: modules = [] } = useQuery({
-    queryKey: ['course-modules', courseId],
+    queryKey: ['/api/admin/modules', courseId],
     queryFn: async () => {
       if (!courseId || !supabase) return [];
       
-      const { data, error } = await supabase
-        .from('course_modules')
-        .select('*')
-        .eq('course_id', courseId)
-        .order('sort_index', { ascending: true });
-        
-      if (error) {
-        console.error('Error fetching course modules:', error);
-        throw error;
-      }
-      
-      return data || [];
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return [];
+
+      const res = await fetch(`/api/admin/modules?course_id=${courseId}`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        credentials: 'include'
+      });
+
+      if (!res.ok) throw new Error('Failed to fetch modules');
+      return res.json();
     },
     enabled: !!courseId && !!supabase
   });
 
   // Get lessons
   const { data: lessons = [] } = useQuery({
-    queryKey: ['lessons', courseId],
+    queryKey: ['/api/admin/lessons', courseId],
     queryFn: async () => {
       if (!courseId || !supabase || modules.length === 0) return [];
       
-      const moduleIds = modules.map(m => m.id);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return [];
+
+      const allLessons: any[] = [];
       
-      const { data, error } = await supabase
-        .from('course_lessons')
-        .select('*')
-        .in('module_id', moduleIds)
-        .order('sort_index', { ascending: true});
-        
-      if (error) {
-        console.error('Error fetching lessons:', error);
-        throw error;
+      for (const module of modules) {
+        const res = await fetch(`/api/admin/lessons?module_id=${module.id}`, {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          credentials: 'include'
+        });
+
+        if (res.ok) {
+          const moduleLessons = await res.json();
+          allLessons.push(...moduleLessons);
+        }
       }
-      
-      return data || [];
+
+      return allLessons;
     },
     enabled: !!courseId && !!supabase && modules.length > 0
   });
@@ -101,22 +107,28 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
     mutationFn: async (dataToSave: any) => {
       if (!courseId || !supabase) return;
 
-      const { error } = await supabase
-        .from('courses')
-        .update({
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session');
+
+      const res = await fetch(`/api/admin/courses/${courseId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
           ...dataToSave,
           updated_at: new Date().toISOString()
         })
-        .eq('id', courseId);
+      });
 
-      if (error) {
-        console.error('Error saving course data:', error);
-        throw error;
-      }
+      if (!res.ok) throw new Error('Failed to update course');
+      return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['course', courseId] });
-      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/courses', courseId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/courses'] });
       toast({
         title: "Cambios guardados",
         description: "Los datos del curso se han guardado automáticamente"
@@ -345,7 +357,7 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
             </div>
           ) : (
             <div className="space-y-4">
-              {modules.map((module, index) => {
+              {modules.map((module: any, index: number) => {
                 const moduleLessons = getLessonsForModule(module.id);
                 
                 return (
