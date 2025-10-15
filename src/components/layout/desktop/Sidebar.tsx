@@ -36,8 +36,10 @@ import {
   GraduationCap,
   BookOpen,
   ChevronDown,
-  ArrowLeft
+  ArrowLeft,
+  MessageCircle
 } from "lucide-react";
+import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
@@ -153,6 +155,7 @@ export function Sidebar() {
       return [
         { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/learning/dashboard' },
         { id: 'courses', label: 'Cursos', icon: GraduationCap, href: '/learning/courses' },
+        { id: 'community', label: 'Comunidad', icon: MessageCircle, href: 'https://discord.com/channels/868615664070443008' },
       ];
     }
     
@@ -345,13 +348,20 @@ export function Sidebar() {
                 const dividerInfo = getDividerInfo();
                 
                 // Botón con o sin restricción
+                const isExternalLink = item.href.startsWith('http');
                 const button = (
                   <ButtonSidebar
                     icon={<item.icon className="w-[18px] h-[18px]" />}
                     label={item.label}
                     isActive={isActive}
                     isExpanded={isExpanded}
-                    onClick={() => navigate(item.href)}
+                    onClick={() => {
+                      if (isExternalLink) {
+                        window.open(item.href, '_blank', 'noopener,noreferrer');
+                      } else {
+                        navigate(item.href);
+                      }
+                    }}
                     href={item.href}
                     variant="secondary"
                   />

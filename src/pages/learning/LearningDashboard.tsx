@@ -12,7 +12,6 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useLocation } from 'wouter';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { DiscordWidget } from '@/components/learning/DiscordWidget';
 
 export default function LearningDashboard() {
   const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore();
@@ -147,13 +146,49 @@ export default function LearningDashboard() {
     }).filter(c => c.isEnrolled && c.percentage < 100).sort((a, b) => b.percentage - a.percentage);
   }, [courses, courseLessons, allProgress, enrollments]);
 
-  // Get recently completed lessons
-  const recentCompletions = useMemo(() => {
-    return allProgress
-      .filter((p: any) => p.is_completed && p.completed_at)
-      .sort((a: any, b: any) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime())
-      .slice(0, 5);
-  }, [allProgress]);
+  // Get recently completed lessons with course, module, and lesson details
+  const { data: recentCompletions = [] } = useQuery({
+    queryKey: ['recent-completions'],
+    queryFn: async () => {
+      if (!supabase) return [];
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return [];
+      
+      const { data, error } = await supabase
+        .from('course_lesson_progress')
+        .select(`
+          id,
+          completed_at,
+          progress_pct,
+          course_lessons!inner (
+            id,
+            title,
+            course_modules!inner (
+              id,
+              title,
+              courses!inner (
+                id,
+                title
+              )
+            )
+          )
+        `)
+        .eq('user_id', session.user.id)
+        .eq('is_completed', true)
+        .not('completed_at', 'is', null)
+        .order('completed_at', { ascending: false })
+        .limit(5);
+      
+      if (error) {
+        console.error('Error fetching recent completions:', error);
+        return [];
+      }
+      
+      return data || [];
+    },
+    enabled: !!supabase
+  });
 
   const headerProps = {
     title: "Dashboard de Capacitaciones",
@@ -330,27 +365,31 @@ export default function LearningDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {recentCompletions.map((completion: any, index: number) => (
-                  <div key={index} className="flex items-center gap-3 text-sm">
-                    <CheckCircle2 className="h-4 w-4 text-accent flex-shrink-0" />
-                    <div className="flex-1">
-                      <div className="font-medium">Lección completada</div>
-                      <div className="text-xs text-muted-foreground">
-                        {completion.completed_at && format(new Date(completion.completed_at), "d 'de' MMMM, HH:mm", { locale: es })}
+                {recentCompletions.map((completion: any, index: number) => {
+                  const lesson = completion.course_lessons;
+                  const module = lesson?.course_modules;
+                  const course = module?.courses;
+                  
+                  return (
+                    <div key={index} className="flex items-center gap-3 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-accent flex-shrink-0" />
+                      <div className="flex-1">
+                        <div className="font-medium">{lesson?.title || 'Lección completada'}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {course?.title} • {module?.title}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {completion.completed_at && format(new Date(completion.completed_at), "d 'de' MMMM, HH:mm", { locale: es })}
+                        </div>
                       </div>
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      {completion.progress_pct}%
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Discord Community Widget */}
-        <DiscordWidget />
       </div>
     </Layout>
   );
