@@ -298,6 +298,36 @@ export function Sidebar() {
                     </div>
                   )}
                 </button>
+
+                {/* Botón Administración - solo si es admin */}
+                {isAdmin && (
+                  <button
+                    onClick={() => {
+                      setSidebarLevel('admin');
+                      navigate('/admin/community');
+                    }}
+                    className={cn(
+                      "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
+                      isExpanded ? "w-full" : "w-8"
+                    )}
+                  >
+                    <div className="flex items-center justify-center w-8 flex-shrink-0">
+                      <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+                        <Crown className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                      </div>
+                    </div>
+                    {isExpanded && (
+                      <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
+                        <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
+                          Administración
+                        </span>
+                        <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 truncate text-left">
+                          Panel de control
+                        </span>
+                      </div>
+                    )}
+                  </button>
+                )}
               </div>
             ) : (
               /* SIDEBARS ESPECÍFICOS */
@@ -487,25 +517,6 @@ export function Sidebar() {
               onClick={handleDockToggle}
               variant="secondary"
             />
-            
-            {/* Botón de Administración - solo si es admin */}
-            {isAdmin && (
-              <ButtonSidebar
-                icon={<Crown className="w-[18px] h-[18px]" />}
-                label="Administración"
-                isActive={sidebarLevel === 'admin'}
-                isExpanded={isExpanded}
-                onClick={() => {
-                  const { setSidebarLevel } = useNavigationStore.getState();
-                  if (sidebarLevel === 'admin') {
-                    setSidebarLevel('organization');
-                  } else {
-                    setSidebarLevel('admin');
-                  }
-                }}
-                variant="secondary"
-              />
-            )}
 
             {/* Notificaciones */}
             <NotificationBell isExpanded={isExpanded} />
