@@ -9,9 +9,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useLocation } from 'wouter';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
+interface DashboardData {
+  enrollments: any[];
+  progress: any[];
+  courseLessons: any[];
+  recentCompletions: any[];
+}
 
 export default function LearningDashboard() {
   const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore();
@@ -27,66 +35,32 @@ export default function LearningDashboard() {
 
   const { data: courses = [], isLoading: coursesLoading } = useCourses();
 
-  // Get all progress for the current user
-  const { data: allProgress = [] } = useQuery<any[]>({
-    queryKey: ['/api/user/all-progress'],
+  // Get consolidated dashboard data
+  const { data: dashboardData, isLoading: dashboardLoading } = useQuery<DashboardData>({
+    queryKey: ['/api/learning/dashboard'],
     queryFn: async () => {
-      if (!supabase) return [];
+      if (!supabase) return { enrollments: [], progress: [], courseLessons: [], recentCompletions: [] };
       
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return [];
+      if (!session) return { enrollments: [], progress: [], courseLessons: [], recentCompletions: [] };
 
-      const response = await fetch('/api/user/all-progress', {
+      const response = await fetch('/api/learning/dashboard', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }
       });
 
-      if (!response.ok) return [];
+      if (!response.ok) return { enrollments: [], progress: [], courseLessons: [], recentCompletions: [] };
       return response.json();
     },
     enabled: !!supabase,
-    staleTime: 0,  // Always refetch when component mounts
-    refetchOnMount: 'always'  // Force refetch every time
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
-  // Get enrollments
-  const { data: enrollments = [] } = useQuery<any[]>({
-    queryKey: ['/api/user/enrollments'],
-    queryFn: async () => {
-      if (!supabase) return [];
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return [];
-
-      const response = await fetch('/api/user/enrollments', {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      });
-
-      if (!response.ok) return [];
-      return response.json();
-    },
-    enabled: !!supabase
-  });
-
-  // Get lessons count per course
-  const { data: courseLessons = [] } = useQuery({
-    queryKey: ['all-course-lessons'],
-    queryFn: async () => {
-      if (!supabase) return [];
-      
-      const { data, error } = await supabase
-        .from('course_lessons')
-        .select('id, module_id, course_modules!inner(course_id)')
-        .eq('is_active', true);
-      
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!supabase
-  });
+  const enrollments = dashboardData?.enrollments || [];
+  const allProgress = dashboardData?.progress || [];
+  const courseLessons = dashboardData?.courseLessons || [];
+  const recentCompletions = dashboardData?.recentCompletions || [];
 
   // Calculate overall statistics
   const stats = useMemo(() => {
@@ -146,60 +120,95 @@ export default function LearningDashboard() {
     }).filter(c => c.isEnrolled && c.percentage < 100).sort((a, b) => b.percentage - a.percentage);
   }, [courses, courseLessons, allProgress, enrollments]);
 
-  // Get recently completed lessons with course, module, and lesson details
-  const { data: recentCompletions = [] } = useQuery({
-    queryKey: ['recent-completions'],
-    queryFn: async () => {
-      if (!supabase) return [];
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return [];
-      
-      const { data, error } = await supabase
-        .from('course_lesson_progress')
-        .select(`
-          id,
-          completed_at,
-          progress_pct,
-          course_lessons!inner (
-            id,
-            title,
-            course_modules!inner (
-              id,
-              title,
-              courses!inner (
-                id,
-                title
-              )
-            )
-          )
-        `)
-        .eq('user_id', session.user.id)
-        .eq('is_completed', true)
-        .not('completed_at', 'is', null)
-        .order('completed_at', { ascending: false })
-        .limit(5);
-      
-      if (error) {
-        console.error('Error fetching recent completions:', error);
-        return [];
-      }
-      
-      return data || [];
-    },
-    enabled: !!supabase
-  });
-
   const headerProps = {
     title: "Dashboard de Capacitaciones",
     icon: GraduationCap,
   };
 
-  if (coursesLoading) {
+  // Show skeleton while loading
+  if (coursesLoading || dashboardLoading) {
     return (
       <Layout headerProps={headerProps} wide>
-        <div className="p-8 text-center text-muted-foreground">
-          Cargando dashboard...
+        <div className="space-y-6">
+          {/* Main Dashboard Grid Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* 75% - Progress Card Skeleton */}
+            <div className="md:col-span-3">
+              <Card>
+                <CardHeader className="pb-3">
+                  <Skeleton className="h-6 w-64" />
+                  <Skeleton className="h-4 w-48 mt-2" />
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <Skeleton className="h-4 w-full" />
+                    <div className="grid grid-cols-3 gap-4 pt-4">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="text-center">
+                          <Skeleton className="h-10 w-16 mx-auto" />
+                          <Skeleton className="h-3 w-24 mx-auto mt-2" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* 25% - Stacked Stats Cards Skeleton */}
+            <div className="space-y-6">
+              {[1, 2].map((i) => (
+                <Card key={i}>
+                  <CardHeader className="pb-3">
+                    <Skeleton className="h-5 w-32" />
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-10 w-16" />
+                    <Skeleton className="h-3 w-40 mt-2" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Courses in Progress Skeleton */}
+          <Card>
+            <CardHeader className="pb-3">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-4 w-64 mt-2" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="space-y-2 pb-4 border-b last:border-0">
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-2 w-full mt-2" />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Recent Activity Skeleton */}
+          <Card>
+            <CardHeader className="pb-3">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-4 w-64 mt-2" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <Skeleton className="h-4 w-4 flex-shrink-0" />
+                    <div className="flex-1">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2 mt-1" />
+                      <Skeleton className="h-3 w-32 mt-1" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </Layout>
     );
@@ -366,17 +375,13 @@ export default function LearningDashboard() {
             <CardContent>
               <div className="space-y-3">
                 {recentCompletions.map((completion: any, index: number) => {
-                  const lesson = completion.course_lessons;
-                  const module = lesson?.course_modules;
-                  const course = module?.courses;
-                  
                   return (
                     <div key={index} className="flex items-center gap-3 text-sm">
                       <CheckCircle2 className="h-4 w-4 text-accent flex-shrink-0" />
                       <div className="flex-1">
-                        <div className="font-medium">{lesson?.title || 'Lección completada'}</div>
+                        <div className="font-medium">{completion.lesson_title || 'Lección completada'}</div>
                         <div className="text-xs text-muted-foreground">
-                          {course?.title} • {module?.title}
+                          {completion.course_title} • {completion.module_title}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           {completion.completed_at && format(new Date(completion.completed_at), "d 'de' MMMM, HH:mm", { locale: es })}
