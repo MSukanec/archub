@@ -81,9 +81,9 @@ export default function CourseDataTab({ courseId }: CourseDataTabProps) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Progress Card */}
-      <Card>
+    <div className="grid grid-cols-4 gap-6">
+      {/* Progress Card - 3/4 width */}
+      <Card className="col-span-3">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" style={{ color: 'var(--accent)' }} />
@@ -115,8 +115,10 @@ export default function CourseDataTab({ courseId }: CourseDataTabProps) {
         </CardContent>
       </Card>
 
-      {/* Discord Community Widget */}
-      <DiscordWidget />
+      {/* Discord Community Widget - 1/4 width */}
+      <div className="col-span-1">
+        <DiscordWidget />
+      </div>
     </div>
   )
 }
