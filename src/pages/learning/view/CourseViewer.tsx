@@ -72,7 +72,7 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
   });
 
   const { data: lessons = [], isLoading: lessonsLoading } = useQuery({
-    queryKey: ['lessons', courseId],
+    queryKey: ['course-lessons-full', courseId],
     queryFn: async () => {
       if (!courseId || !supabase || modules.length === 0) return [];
       
@@ -80,7 +80,7 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
       
       const { data, error } = await supabase
         .from('course_lessons')
-        .select('*')
+        .select('id, module_id, title, vimeo_video_id, duration_sec, free_preview, sort_index, is_active')
         .in('module_id', moduleIds)
         .order('sort_index', { ascending: true });
         
@@ -88,6 +88,8 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
         console.error('Error fetching lessons:', error);
         throw error;
       }
+      
+      console.log('✅ Lecciones cargadas:', data?.length, 'primera:', data?.[0]);
       
       return data || [];
     },
@@ -304,10 +306,14 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
   // Log de confirmación cuando cambia la lección activa
   useEffect(() => {
     if (!activeLessonId) return;
+    console.log('🔍 Buscando lección:', activeLessonId, 'en array de', lessons.length, 'lecciones');
+    console.log('🔍 Primeras 3 lecciones IDs:', lessons.slice(0, 3).map(l => l.id));
     const currentLesson = lessons.find(l => l.id === activeLessonId);
     if (currentLesson) {
-      console.log('📚 Lección activa ->', currentLesson.title, 
+      console.log('📚 Lección encontrada ->', currentLesson.title, 
                   'Vimeo ID ->', currentLesson.vimeo_video_id || 'sin video');
+    } else {
+      console.error('❌ No se encontró la lección con ID:', activeLessonId);
     }
   }, [activeLessonId, lessons]);
 
