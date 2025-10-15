@@ -14,6 +14,10 @@
     { "source": "/api/admin/lessons/:id", "destination": "/api/admin/lessons/[id]" },
     { "source": "/api/admin/enrollments", "destination": "/api/admin/enrollments" },
     { "source": "/api/admin/enrollments/:id", "destination": "/api/admin/enrollments/[id]" },
-    { "source": "/api/admin/dashboard", "destination": "/api/admin/dashboard" }
+    { "source": "/api/admin/dashboard", "destination": "/api/admin/dashboard" },
+    { "source": "/api/learning/dashboard", "destination": "/api/learning/dashboard" },
+    { "source": "/api/courses/:id/progress", "destination": "/api/courses/[id]/progress" },
+    { "source": "/api/lessons/:id/progress", "destination": "/api/lessons/[id]/progress" },
+    { "source": "/api/lessons/:id/notes", "destination": "/api/lessons/[id]/notes" }
   ]
 }
