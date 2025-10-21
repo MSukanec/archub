@@ -18,6 +18,7 @@
     { "source": "/api/learning/dashboard", "destination": "/api/learning/dashboard" },
     { "source": "/api/courses/:id/progress", "destination": "/api/courses/[id]/progress" },
     { "source": "/api/lessons/:id/progress", "destination": "/api/lessons/[id]/progress" },
-    { "source": "/api/lessons/:id/notes", "destination": "/api/lessons/[id]/notes" }
+    { "source": "/api/lessons/:id/notes", "destination": "/api/lessons/[id]/notes" },
+    { "source": "/(.*)", "destination": "/" }
   ]
 }
