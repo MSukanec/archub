@@ -1,221 +1,158 @@
-import { useEffect, useMemo } from 'react';
-import { Layout } from '@/components/layout/desktop/Layout';
-import { useNavigationStore } from '@/stores/navigationStore';
-import { GraduationCap, BookOpen, CheckCircle2, Clock, TrendingUp, Award } from 'lucide-react';
-import { useCourses } from '@/hooks/use-courses';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useLocation } from 'wouter';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { useEffect, useMemo, useState } from 'react'
+import { Layout } from '@/components/layout/desktop/Layout'
+import { useNavigationStore } from '@/stores/navigationStore'
+import { GraduationCap, BookOpen, CheckCircle2, Clock, TrendingUp, Award, Flame } from 'lucide-react'
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/ui-custom/security/EmptyState'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useLocation } from 'wouter'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 
-interface DashboardData {
-  enrollments: any[];
-  progress: any[];
-  courseLessons: any[];
-  recentCompletions: any[];
-}
+import ProgressRing from '@/components/charts/courses/ProgressRing'
+import MiniBar from '@/components/charts/courses/MiniBar'
+import LineStreak from '@/components/charts/courses/LineStreak'
+import {
+  fetchGlobalProgress,
+  fetchStudyTime,
+  fetchActiveDays,
+  fetchCourseProgress,
+  fetchRecentActivity,
+  type GlobalProgress,
+  type StudyTime,
+  type ActiveDay,
+  type CourseProgressRow,
+  type RecentActivityItem
+} from '@/lib/supabase/training'
 
 export default function LearningDashboard() {
-  const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore();
-  const [, navigate] = useLocation();
+  const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore()
+  const { data: userData } = useCurrentUser()
+  const [, navigate] = useLocation()
+
+  const [global, setGlobal] = useState<GlobalProgress | null>(null)
+  const [study, setStudy] = useState<StudyTime | null>(null)
+  const [days, setDays] = useState<ActiveDay[]>([])
+  const [courses, setCourses] = useState<CourseProgressRow[]>([])
+  const [recent, setRecent] = useState<RecentActivityItem[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    setSidebarContext('learning');
-    // Only set to 'learning' if not in 'general' mode (respects user's hub selection)
+    setSidebarContext('learning')
     if (sidebarLevel !== 'general') {
-      setSidebarLevel('learning');
+      setSidebarLevel('learning')
     }
-  }, [setSidebarContext, setSidebarLevel, sidebarLevel]);
+  }, [setSidebarContext, setSidebarLevel, sidebarLevel])
 
-  const { data: courses = [], isLoading: coursesLoading } = useCourses();
+  useEffect(() => {
+    if (!userData?.user?.id) return
 
-  // Get consolidated dashboard data
-  const { data: dashboardData, isLoading: dashboardLoading } = useQuery<DashboardData>({
-    queryKey: ['/api/learning/dashboard'],
-    queryFn: async () => {
-      if (!supabase) return { enrollments: [], progress: [], courseLessons: [], recentCompletions: [] };
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return { enrollments: [], progress: [], courseLessons: [], recentCompletions: [] };
+    const userId = userData.user.id
 
-      const response = await fetch('/api/learning/dashboard', {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      });
+    ;(async () => {
+      setLoading(true)
+      try {
+        const [g, s, d, cp, ra] = await Promise.all([
+          fetchGlobalProgress(userId),
+          fetchStudyTime(userId),
+          fetchActiveDays(userId, 60),
+          fetchCourseProgress(userId),
+          fetchRecentActivity(userId, 8),
+        ])
+        setGlobal(g)
+        setStudy(s)
+        setDays(d)
+        setCourses(cp)
+        setRecent(ra)
+      } catch (error) {
+        console.error('Error loading dashboard data:', error)
+      } finally {
+        setLoading(false)
+      }
+    })()
+  }, [userData])
 
-      if (!response.ok) return { enrollments: [], progress: [], courseLessons: [], recentCompletions: [] };
-      return response.json();
-    },
-    enabled: !!supabase,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-  });
+  const hoursData = useMemo(() => ([
+    { name: 'Mes', value: Math.round((study?.seconds_this_month ?? 0) / 3600) },
+    { name: 'Total', value: Math.round((study?.seconds_lifetime ?? 0) / 3600) }
+  ]), [study])
 
-  const enrollments = dashboardData?.enrollments || [];
-  const allProgress = dashboardData?.progress || [];
-  const courseLessons = dashboardData?.courseLessons || [];
-  const recentCompletions = dashboardData?.recentCompletions || [];
+  const streakSeries = useMemo(() => {
+    const set = new Set(days.map(d => d.day))
+    const last30: { day: string; active: number }[] = []
+    const today = new Date()
+    for (let i = 29; i >= 0; i--) {
+      const dt = new Date(today.getTime() - i * 86400000)
+      const key = dt.toISOString().slice(0, 10)
+      last30.push({ day: key, active: set.has(key) ? 1 : 0 })
+    }
+    return last30
+  }, [days])
 
-  // Calculate overall statistics
-  const stats = useMemo(() => {
-    const enrolledCourses = enrollments.length;
-    const totalLessons = courseLessons.length;
-    const completedLessons = allProgress.filter((p: any) => p.is_completed).length;
-    const overallProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+  const coursesSorted = useMemo(() => {
+    return [...courses]
+      .filter(c => c.progress_pct > 0 && c.progress_pct < 100)
+      .sort((a, b) => b.progress_pct - a.progress_pct)
+      .slice(0, 3)
+  }, [courses])
+
+  const currentStreak = useMemo(() => {
+    const sorted = [...days].sort((a, b) => b.day.localeCompare(a.day))
+    let streak = 0
+    const today = new Date().toISOString().slice(0, 10)
     
-    console.log('📊 Dashboard Stats:', { 
-      enrolledCourses, 
-      totalLessons, 
-      completedLessons, 
-      overallProgress,
-      allProgressCount: allProgress.length,
-      completedItems: allProgress.filter((p: any) => p.is_completed)
-    });
-
-    // Calculate courses with progress
-    const coursesInProgress = courses.filter(course => {
-      const lessons = courseLessons.filter((l: any) => 
-        l.course_modules?.course_id === course.id
-      );
-      const completed = allProgress.filter((p: any) => 
-        p.is_completed && lessons.some((l: any) => l.id === p.lesson_id)
-      );
-      return completed.length > 0 && completed.length < lessons.length;
-    }).length;
-
-    return {
-      enrolledCourses,
-      totalLessons,
-      completedLessons,
-      overallProgress,
-      coursesInProgress
-    };
-  }, [enrollments, courseLessons, allProgress, courses]);
-
-  // Get courses with progress details
-  const coursesWithProgress = useMemo(() => {
-    return courses.map(course => {
-      const lessons = courseLessons.filter((l: any) => 
-        l.course_modules?.course_id === course.id
-      );
-      const completed = allProgress.filter((p: any) => 
-        p.is_completed && lessons.some((l: any) => l.id === p.lesson_id)
-      );
-      const percentage = lessons.length > 0 ? Math.round((completed.length / lessons.length) * 100) : 0;
-      const enrollment = enrollments.find((e: any) => e.course_id === course.id);
-
-      return {
-        ...course,
-        totalLessons: lessons.length,
-        completedLessons: completed.length,
-        percentage,
-        isEnrolled: !!enrollment
-      };
-    }).filter(c => c.isEnrolled && c.percentage < 100).sort((a, b) => b.percentage - a.percentage);
-  }, [courses, courseLessons, allProgress, enrollments]);
+    for (let i = 0; i < sorted.length; i++) {
+      const expectedDate = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10)
+      if (sorted[i]?.day === expectedDate) {
+        streak++
+      } else {
+        break
+      }
+    }
+    return streak
+  }, [days])
 
   const headerProps = {
     title: "Dashboard de Capacitaciones",
     icon: GraduationCap,
-  };
+  }
 
-  // Show skeleton while loading
-  if (coursesLoading || dashboardLoading) {
+  if (loading) {
     return (
       <Layout headerProps={headerProps} wide>
         <div className="space-y-6">
-          {/* Main Dashboard Grid Skeleton */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {/* 75% - Progress Card Skeleton */}
-            <div className="md:col-span-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2">
               <Card>
-                <CardHeader className="pb-3">
+                <CardHeader>
                   <Skeleton className="h-6 w-64" />
                   <Skeleton className="h-4 w-48 mt-2" />
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <Skeleton className="h-4 w-full" />
-                    <div className="grid grid-cols-3 gap-4 pt-4">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="text-center">
-                          <Skeleton className="h-10 w-16 mx-auto" />
-                          <Skeleton className="h-3 w-24 mx-auto mt-2" />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <Skeleton className="h-48 w-full" />
                 </CardContent>
               </Card>
             </div>
-
-            {/* 25% - Stacked Stats Cards Skeleton */}
             <div className="space-y-6">
-              {[1, 2].map((i) => (
-                <Card key={i}>
-                  <CardHeader className="pb-3">
-                    <Skeleton className="h-5 w-32" />
-                  </CardHeader>
-                  <CardContent>
-                    <Skeleton className="h-10 w-16" />
-                    <Skeleton className="h-3 w-40 mt-2" />
-                  </CardContent>
-                </Card>
-              ))}
+              <Card>
+                <CardHeader><Skeleton className="h-6 w-32" /></CardHeader>
+                <CardContent><Skeleton className="h-16 w-full" /></CardContent>
+              </Card>
+              <Card>
+                <CardHeader><Skeleton className="h-6 w-32" /></CardHeader>
+                <CardContent><Skeleton className="h-16 w-full" /></CardContent>
+              </Card>
             </div>
           </div>
-
-          {/* Courses in Progress Skeleton */}
-          <Card>
-            <CardHeader className="pb-3">
-              <Skeleton className="h-6 w-48" />
-              <Skeleton className="h-4 w-64 mt-2" />
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="space-y-2 pb-4 border-b last:border-0">
-                  <Skeleton className="h-5 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                  <Skeleton className="h-2 w-full mt-2" />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Recent Activity Skeleton */}
-          <Card>
-            <CardHeader className="pb-3">
-              <Skeleton className="h-6 w-48" />
-              <Skeleton className="h-4 w-64 mt-2" />
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <Skeleton className="h-4 w-4 flex-shrink-0" />
-                    <div className="flex-1">
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-3 w-1/2 mt-1" />
-                      <Skeleton className="h-3 w-32 mt-1" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </Layout>
-    );
+    )
   }
 
-  // Si no hay cursos inscritos, mostrar EmptyState
-  if (stats.enrolledCourses === 0) {
+  if (!global || global.total_lessons_total === 0) {
     return (
       <Layout headerProps={headerProps} wide>
         <EmptyState
@@ -232,46 +169,55 @@ export default function LearningDashboard() {
           }
         />
       </Layout>
-    );
+    )
   }
 
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {/* Main Dashboard Grid - 75% Progress / 25% Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* 75% - Progress Card */}
-          <div className="md:col-span-3">
+        {/* Main Dashboard Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* 66% - Main Progress Card */}
+          <div className="md:col-span-2">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" style={{ color: 'var(--accent)' }} />
                   Progreso General de Aprendizaje
                 </CardTitle>
-                <CardDescription>
-                  {stats.overallProgress}% de todas las lecciones completadas
+                <CardDescription data-testid="text-lessons-completed">
+                  {global.done_lessons_total}/{global.total_lessons_total} lecciones completadas
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">0%</span>
-                    <span className="font-bold text-lg">{stats.overallProgress}%</span>
-                    <span className="text-muted-foreground">100%</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Progress Ring */}
+                  <div className="flex items-center justify-center">
+                    <ProgressRing value={global.progress_pct} />
                   </div>
-                  <Progress value={stats.overallProgress} className="h-4" />
-                  <div className="grid grid-cols-3 gap-4 pt-4">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-accent">{stats.completedLessons}</div>
-                      <div className="text-xs text-muted-foreground">Lecciones completadas</div>
+
+                  {/* Charts Column */}
+                  <div className="space-y-6">
+                    {/* Study Time Chart */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium text-muted-foreground">
+                          Horas de Estudio
+                        </span>
+                      </div>
+                      <MiniBar data={hoursData} />
                     </div>
-                    <div className="text-center border-x">
-                      <div className="text-3xl font-bold">{stats.totalLessons}</div>
-                      <div className="text-xs text-muted-foreground">Total de lecciones</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-accent">{stats.enrolledCourses}</div>
-                      <div className="text-xs text-muted-foreground">Cursos inscritos</div>
+
+                    {/* Streak Chart */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Flame className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium text-muted-foreground">
+                          Racha (30 días)
+                        </span>
+                      </div>
+                      <LineStreak data={streakSeries} />
                     </div>
                   </div>
                 </div>
@@ -279,46 +225,46 @@ export default function LearningDashboard() {
             </Card>
           </div>
 
-          {/* 25% - Stacked Stats Cards */}
+          {/* 33% - Stats Column */}
           <div className="space-y-6">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <BookOpen className="h-4 w-4" style={{ color: 'var(--accent)' }} />
-                  Cursos Inscritos
+                  Cursos Activos
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-2">
-                  <div className="text-3xl font-bold">{stats.enrolledCourses}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Total de cursos disponibles
-                  </p>
+                <div className="text-4xl font-bold" style={{ color: 'var(--accent)' }} data-testid="text-active-courses-count">
+                  {courses.length}
                 </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Cursos en los que estás inscrito
+                </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <Clock className="h-4 w-4" style={{ color: 'var(--accent)' }} />
-                  Cursos en Progreso
+                  <Flame className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                  Racha Actual
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-2">
-                  <div className="text-3xl font-bold">{stats.coursesInProgress}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Cursos iniciados pero no completados
-                  </p>
+                <div className="text-4xl font-bold" style={{ color: 'var(--accent)' }} data-testid="text-current-streak">
+                  {currentStreak}
                 </div>
+                <p className="text-xs text-muted-foreground mt-1" data-testid="text-streak-label">
+                  {currentStreak === 1 ? 'día consecutivo' : 'días consecutivos'}
+                </p>
               </CardContent>
             </Card>
           </div>
         </div>
 
         {/* Courses in Progress */}
-        {coursesWithProgress.length > 0 && (
+        {coursesSorted.length > 0 && (
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2">
@@ -330,30 +276,22 @@ export default function LearningDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {coursesWithProgress.slice(0, 3).map((course) => (
-                <div key={course.id} className="space-y-2 pb-4 border-b last:border-0 last:pb-0">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-medium">{course.title}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {course.completedLessons} de {course.totalLessons} lecciones completadas
+              {coursesSorted.map((course) => (
+                <div key={course.course_id} className="space-y-2 pb-4 border-b last:border-0 last:pb-0" data-testid={`course-progress-${course.course_id}`}>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium truncate" data-testid="text-course-title">{course.course_title}</h4>
+                      <p className="text-sm text-muted-foreground" data-testid="text-course-lessons">
+                        {course.done_lessons} de {course.total_lessons} lecciones completadas
                       </p>
                     </div>
-                    <Button 
-                      variant="default" 
-                      size="sm"
-                      onClick={() => navigate(`/learning/courses/${course.slug}`)}
-                      data-testid={`button-continue-course-${course.id}`}
-                    >
-                      Continuar
-                    </Button>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <span className="text-sm font-medium min-w-[45px] text-right" data-testid="text-course-percentage">
+                        {course.progress_pct}%
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Progress value={course.percentage} className="h-2 flex-1" />
-                    <span className="text-sm font-medium min-w-[45px] text-right">
-                      {course.percentage}%
-                    </span>
-                  </div>
+                  <Progress value={course.progress_pct} className="h-2" data-testid="progress-bar-course" />
                 </div>
               ))}
             </CardContent>
@@ -361,7 +299,7 @@ export default function LearningDashboard() {
         )}
 
         {/* Recent Activity */}
-        {recentCompletions.length > 0 && (
+        {recent.length > 0 && (
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2">
@@ -369,33 +307,45 @@ export default function LearningDashboard() {
                 Actividad Reciente
               </CardTitle>
               <CardDescription>
-                Últimas lecciones completadas
+                Últimas lecciones en las que trabajaste
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {recentCompletions.map((completion: any, index: number) => {
-                  return (
-                    <div key={index} className="flex items-center gap-3 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-accent flex-shrink-0" />
-                      <div className="flex-1">
-                        <div className="font-medium">{completion.lesson_title || 'Lección completada'}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {completion.course_title} • {completion.module_title}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {completion.completed_at && format(new Date(completion.completed_at), "d 'de' MMMM, HH:mm", { locale: es })}
-                        </div>
+                {recent.map((item, index) => (
+                  <div key={index} className="flex items-start gap-3 text-sm pb-3 border-b last:border-0 last:pb-0" data-testid={`recent-activity-${index}`}>
+                    <CheckCircle2 
+                      className={`h-4 w-4 flex-shrink-0 mt-0.5 ${
+                        item.type === 'completed' ? 'text-accent' : 'text-muted-foreground'
+                      }`}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium truncate" data-testid="text-activity-lesson-title">{item.lesson_title}</div>
+                      <div className="text-xs text-muted-foreground truncate" data-testid="text-activity-course-module">
+                        {item.course_title} • {item.module_title}
+                      </div>
+                      <div className="text-xs text-muted-foreground" data-testid="text-activity-timestamp">
+                        {item.when && format(new Date(item.when), "d 'de' MMMM, HH:mm", { locale: es })}
                       </div>
                     </div>
-                  );
-                })}
+                    {item.type === 'completed' && (
+                      <span className="text-xs font-medium px-2 py-1 rounded-full flex-shrink-0" 
+                        style={{ 
+                          backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                          color: 'var(--accent)'
+                        }}
+                        data-testid="badge-completed"
+                      >
+                        Completada
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
         )}
-
       </div>
     </Layout>
-  );
+  )
 }
