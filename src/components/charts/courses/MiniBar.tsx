@@ -1,4 +1,4 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 
 interface MiniBarProps {
   data: { name: string; value: number }[]
@@ -11,7 +11,7 @@ export default function MiniBar({ data }: MiniBarProps) {
         <BarChart data={data}>
           <XAxis 
             dataKey="name" 
-            tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
+            tick={{ fontSize: 12, fill: 'var(--chart-grid-text)' }}
             stroke="var(--border)"
           />
           <YAxis hide />
@@ -22,12 +22,16 @@ export default function MiniBar({ data }: MiniBarProps) {
               borderRadius: '8px',
               color: 'var(--card-text)'
             }}
+            cursor={{ fill: 'hsl(0, 0%, 95%)' }}
           />
           <Bar 
             dataKey="value" 
-            fill="var(--accent)" 
-            radius={[6, 6, 0, 0]} 
-          />
+            radius={[6, 6, 0, 0]}
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill="var(--chart-1)" />
+            ))}
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
     </div>

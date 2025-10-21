@@ -1,4 +1,4 @@
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 
 interface LineStreakProps {
   data: { day: string; active: number }[]
@@ -9,8 +9,19 @@ export default function LineStreak({ data }: LineStreakProps) {
     <div className="w-full h-28" data-testid="chart-line-streak">
       <ResponsiveContainer>
         <LineChart data={data}>
-          <XAxis dataKey="day" hide />
-          <YAxis hide domain={[0, 1]} />
+          <CartesianGrid 
+            strokeDasharray="3 3" 
+            stroke="hsl(0, 0%, 85%)" 
+            vertical={false}
+          />
+          <XAxis 
+            dataKey="day" 
+            hide 
+          />
+          <YAxis 
+            hide 
+            domain={[0, 1]} 
+          />
           <Tooltip 
             contentStyle={{
               backgroundColor: 'var(--card-bg)',
@@ -27,9 +38,9 @@ export default function LineStreak({ data }: LineStreakProps) {
           <Line 
             type="monotone" 
             dataKey="active" 
-            stroke="var(--accent)" 
+            stroke="var(--chart-1)" 
             strokeWidth={2}
-            dot={false} 
+            dot={false}
           />
         </LineChart>
       </ResponsiveContainer>

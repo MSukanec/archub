@@ -121,6 +121,7 @@
   --chart-5: hsl(0, 87%, 67%);
   --chart-grid-text: hsl(0, 0%, 40%);
   --chart-positive: hsl(76, 100%, 40%);
+  --chart-ring-bg: hsl(0, 0%, 85%, 0.4);
 
   /* Tables */
   --table-header-bg: hsl(0, 0%, 97%);
@@ -333,6 +334,7 @@
   --chart-positive: #22c55e;
   --chart-negative: #ef4444;
   --chart-neutral: #84cc16;
+  --chart-ring-bg: hsl(0, 0%, 30%, 0.3);
 
   /* Checkbox dark mode */
   --checkbox-bg: hsl(0, 0%, 12%);

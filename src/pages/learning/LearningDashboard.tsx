@@ -124,28 +124,18 @@ export default function LearningDashboard() {
     return (
       <Layout headerProps={headerProps} wide>
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2">
-              <Card>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map(i => (
+              <Card key={i}>
                 <CardHeader>
-                  <Skeleton className="h-6 w-64" />
-                  <Skeleton className="h-4 w-48 mt-2" />
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-4 w-24 mt-2" />
                 </CardHeader>
                 <CardContent>
-                  <Skeleton className="h-48 w-full" />
+                  <Skeleton className="h-32 w-full" />
                 </CardContent>
               </Card>
-            </div>
-            <div className="space-y-6">
-              <Card>
-                <CardHeader><Skeleton className="h-6 w-32" /></CardHeader>
-                <CardContent><Skeleton className="h-16 w-full" /></CardContent>
-              </Card>
-              <Card>
-                <CardHeader><Skeleton className="h-6 w-32" /></CardHeader>
-                <CardContent><Skeleton className="h-16 w-full" /></CardContent>
-              </Card>
-            </div>
+            ))}
           </div>
         </div>
       </Layout>
@@ -175,92 +165,88 @@ export default function LearningDashboard() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {/* Main Dashboard Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* 66% - Main Progress Card */}
-          <div className="md:col-span-2">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" style={{ color: 'var(--accent)' }} />
-                  Progreso General de Aprendizaje
-                </CardTitle>
-                <CardDescription data-testid="text-lessons-completed">
-                  {global.done_lessons_total}/{global.total_lessons_total} lecciones completadas
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Progress Ring */}
-                  <div className="flex items-center justify-center">
-                    <ProgressRing value={global.progress_pct} />
-                  </div>
+        {/* Main Dashboard Grid - 4 equal cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Card 1: Progress Ring */}
+          <Card className="flex flex-col">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <TrendingUp className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                Progreso General
+              </CardTitle>
+              <CardDescription data-testid="text-lessons-completed">
+                {global.done_lessons_total}/{global.total_lessons_total} lecciones
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1 flex items-center justify-center">
+              <ProgressRing value={global.progress_pct} />
+            </CardContent>
+          </Card>
 
-                  {/* Charts Column */}
-                  <div className="space-y-6">
-                    {/* Study Time Chart */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium text-muted-foreground">
-                          Horas de Estudio
-                        </span>
-                      </div>
-                      <MiniBar data={hoursData} />
-                    </div>
+          {/* Card 2: Study Hours */}
+          <Card className="flex flex-col">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Clock className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                Horas de Estudio
+              </CardTitle>
+              <CardDescription>
+                Este mes y total
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1 flex items-center justify-center">
+              <MiniBar data={hoursData} />
+            </CardContent>
+          </Card>
 
-                    {/* Streak Chart */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <Flame className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium text-muted-foreground">
-                          Racha (30 días)
-                        </span>
-                      </div>
-                      <LineStreak data={streakSeries} />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Card 3: Activity Streak */}
+          <Card className="flex flex-col">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Flame className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                Racha de Actividad
+              </CardTitle>
+              <CardDescription>
+                Últimos 30 días
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1 flex items-center justify-center">
+              <LineStreak data={streakSeries} />
+            </CardContent>
+          </Card>
 
-          {/* 33% - Stats Column */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <BookOpen className="h-4 w-4" style={{ color: 'var(--accent)' }} />
-                  Cursos Activos
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+          {/* Card 4: Active Courses & Current Streak */}
+          <Card className="flex flex-col">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <BookOpen className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                Cursos Activos
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 space-y-6">
+              <div>
                 <div className="text-4xl font-bold" style={{ color: 'var(--accent)' }} data-testid="text-active-courses-count">
                   {courses.length}
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Cursos en los que estás inscrito
                 </p>
-              </CardContent>
-            </Card>
+              </div>
 
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
+              <div className="pt-4 border-t">
+                <div className="flex items-center gap-2 mb-2">
                   <Flame className="h-4 w-4" style={{ color: 'var(--accent)' }} />
-                  Racha Actual
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-4xl font-bold" style={{ color: 'var(--accent)' }} data-testid="text-current-streak">
+                  <span className="text-sm font-medium">Racha Actual</span>
+                </div>
+                <div className="text-2xl font-bold" style={{ color: 'var(--accent)' }} data-testid="text-current-streak">
                   {currentStreak}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1" data-testid="text-streak-label">
+                <p className="text-xs text-muted-foreground" data-testid="text-streak-label">
                   {currentStreak === 1 ? 'día consecutivo' : 'días consecutivos'}
                 </p>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Courses in Progress */}
@@ -289,6 +275,13 @@ export default function LearningDashboard() {
                       <span className="text-sm font-medium min-w-[45px] text-right" data-testid="text-course-percentage">
                         {course.progress_pct}%
                       </span>
+                      <Button 
+                        size="sm" 
+                        onClick={() => navigate(`/learning/courses/${course.course_slug}`)}
+                        data-testid={`button-go-to-course-${course.course_id}`}
+                      >
+                        Ir al Curso
+                      </Button>
                     </div>
                   </div>
                   <Progress value={course.progress_pct} className="h-2" data-testid="progress-bar-course" />

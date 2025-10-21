@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase'
 export type CourseProgressRow = {
   course_id: string
   course_title: string
+  course_slug: string
   user_id: string
   progress_pct: number
   done_lessons: number
@@ -94,7 +95,7 @@ export async function fetchCourseProgress(userId: string): Promise<CourseProgres
   try {
     const { data: enrollments, error: enrollError } = await supabase
       .from('course_enrollments')
-      .select('course_id, courses(id, title)')
+      .select('course_id, courses(id, title, slug)')
       .eq('user_id', userId)
 
     if (enrollError) throw enrollError
@@ -105,6 +106,7 @@ export async function fetchCourseProgress(userId: string): Promise<CourseProgres
     for (const enrollment of enrollments) {
       const courseId = enrollment.course_id
       const courseTitle = (enrollment.courses as any)?.title || 'Sin título'
+      const courseSlug = (enrollment.courses as any)?.slug || ''
 
       const { data: lessons, error: lessonsError } = await supabase
         .from('course_lessons')
@@ -133,6 +135,7 @@ export async function fetchCourseProgress(userId: string): Promise<CourseProgres
       courseProgress.push({
         course_id: courseId,
         course_title: courseTitle,
+        course_slug: courseSlug,
         user_id: userId,
         progress_pct,
         done_lessons,

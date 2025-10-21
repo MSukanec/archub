@@ -6,7 +6,7 @@ interface ProgressRingProps {
 
 export default function ProgressRing({ value = 0 }: ProgressRingProps) {
   const normalizedValue = Math.max(0, Math.min(100, value))
-  const data = [{ name: 'progress', value: normalizedValue, fill: 'var(--accent)' }]
+  const data = [{ name: 'progress', value: normalizedValue, fill: 'var(--chart-1)' }]
   
   return (
     <div className="relative w-full h-48" data-testid="chart-progress-ring">
@@ -22,7 +22,9 @@ export default function ProgressRing({ value = 0 }: ProgressRingProps) {
           <RadialBar 
             dataKey="value" 
             cornerRadius={10}
-            background={{ fill: 'var(--muted)' }}
+            background={{
+              fill: 'var(--chart-ring-bg)'
+            }}
           />
         </RadialBarChart>
       </ResponsiveContainer>
@@ -30,7 +32,7 @@ export default function ProgressRing({ value = 0 }: ProgressRingProps) {
         <span className="text-4xl font-bold" style={{ color: 'var(--accent)' }} data-testid="text-progress-percentage">
           {normalizedValue.toFixed(0)}%
         </span>
-        <span className="text-sm text-muted-foreground mt-1" data-testid="text-progress-label">Completado</span>
+        <span className="text-sm" style={{ color: 'var(--chart-grid-text)' }} data-testid="text-progress-label">Completado</span>
       </div>
     </div>
   )
