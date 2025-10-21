@@ -31,11 +31,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(401).json({ error: "Unauthorized" });
       }
       
-      // Get user from users table by EMAIL
+      // Get user from users table by auth_id
       const { data: dbUser } = await supabase
         .from('users')
         .select('id')
-        .ilike('email', user.email!)
+        .eq('auth_id', user.id)
         .single();
       
       if (!dbUser) {

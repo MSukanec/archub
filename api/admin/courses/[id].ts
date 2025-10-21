@@ -26,11 +26,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .json({ error: "Missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY" });
     }
 
-    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-
     const supabase = createClient(url, serviceKey, {
       auth: { persistSession: false },
-      global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
     const { id } = req.query;
