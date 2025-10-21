@@ -38,23 +38,31 @@ export function BudgetItems({
   }
 
   const handleDelete = (budget: any) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este presupuesto?')) {
-      deletebudget.mutate(budget.id, {
-        onSuccess: () => {
-          toast({
-            title: "Presupuesto eliminado",
-            description: "El presupuesto ha sido eliminado correctamente",
-          })
-        },
-        onError: (error) => {
-          toast({
-            title: "Error",
-            description: "No se pudo eliminar el presupuesto",
-            variant: "destructive",
-          })
-        }
-      })
-    }
+    openModal('delete-confirmation', {
+      mode: 'dangerous',
+      title: "Eliminar Presupuesto",
+      description: "Esta acción eliminará permanentemente este presupuesto y todos sus datos asociados. Esta acción no se puede deshacer.",
+      itemName: budget.name,
+      itemType: "presupuesto",
+      destructiveActionText: "Eliminar",
+      onConfirm: () => {
+        deletebudget.mutate(budget.id, {
+          onSuccess: () => {
+            toast({
+              title: "Presupuesto eliminado",
+              description: "El presupuesto ha sido eliminado correctamente",
+            })
+          },
+          onError: (error) => {
+            toast({
+              title: "Error",
+              description: "No se pudo eliminar el presupuesto",
+              variant: "destructive",
+            })
+          }
+        })
+      }
+    })
   }
 
   // Formatear moneda
