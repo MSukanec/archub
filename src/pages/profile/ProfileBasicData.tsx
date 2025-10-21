@@ -14,6 +14,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
 import { useAuthStore } from '@/stores/authStore'
+import { supabase } from '@/lib/supabase'
 
 interface Country {
   id: string;
@@ -68,6 +69,11 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
     mutationFn: async (data: typeof profileData) => {
       console.log('Saving profile data:', data)
       
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No active session');
+      
       // Use the server endpoint to update user data and avatar
       const profileUpdates: any = {
         user_id: userData?.user?.id,
@@ -96,12 +102,14 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
           },
           body: JSON.stringify(profileUpdates),
         })
         
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
         }
       }
       
@@ -139,7 +147,17 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
   const { data: countries = [] } = useQuery<Country[]>({
     queryKey: ['countries'],
     queryFn: async () => {
-      const response = await fetch('/api/countries')
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No active session');
+
+      const response = await fetch('/api/countries', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+      
       if (!response.ok) {
         throw new Error('Failed to fetch countries')
       }
