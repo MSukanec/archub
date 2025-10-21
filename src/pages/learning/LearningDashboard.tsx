@@ -124,7 +124,7 @@ export default function LearningDashboard() {
     return (
       <Layout headerProps={headerProps} wide>
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map(i => (
               <Card key={i}>
                 <CardHeader>
@@ -166,7 +166,7 @@ export default function LearningDashboard() {
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
         {/* Main Dashboard Grid - 4 equal cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {/* Card 1: Progress Ring */}
           <Card className="flex flex-col">
             <CardHeader className="pb-3">
