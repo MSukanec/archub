@@ -94,7 +94,7 @@ export default function LearningDashboard() {
 
   const coursesSorted = useMemo(() => {
     return [...courses]
-      .filter(c => c.progress_pct > 0 && c.progress_pct < 100)
+      .filter(c => c.progress_pct >= 0 && c.progress_pct < 100)
       .sort((a, b) => b.progress_pct - a.progress_pct)
       .slice(0, 3)
   }, [courses])
@@ -250,19 +250,19 @@ export default function LearningDashboard() {
         </div>
 
         {/* Courses in Progress */}
-        {coursesSorted.length > 0 && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2">
-                <Award className="h-5 w-5" style={{ color: 'var(--accent)' }} />
-                Cursos en Progreso
-              </CardTitle>
-              <CardDescription>
-                Continúa tu aprendizaje donde lo dejaste
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {coursesSorted.map((course) => (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2">
+              <Award className="h-5 w-5" style={{ color: 'var(--accent)' }} />
+              Cursos en Progreso
+            </CardTitle>
+            <CardDescription>
+              Continúa tu aprendizaje donde lo dejaste
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {coursesSorted.length > 0 ? (
+              coursesSorted.map((course) => (
                 <div key={course.course_id} className="space-y-2 pb-4 border-b last:border-0 last:pb-0" data-testid={`course-progress-${course.course_id}`}>
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex-1 min-w-0">
@@ -286,24 +286,29 @@ export default function LearningDashboard() {
                   </div>
                   <Progress value={course.progress_pct} className="h-2" data-testid="progress-bar-course" />
                 </div>
-              ))}
-            </CardContent>
-          </Card>
-        )}
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p className="text-sm">No tienes cursos en progreso</p>
+                <p className="text-xs mt-1">¡Comienza un curso para empezar tu aprendizaje!</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Recent Activity */}
-        {recent.length > 0 && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5" style={{ color: 'var(--accent)' }} />
-                Actividad Reciente
-              </CardTitle>
-              <CardDescription>
-                Últimas lecciones en las que trabajaste
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5" style={{ color: 'var(--accent)' }} />
+              Actividad Reciente
+            </CardTitle>
+            <CardDescription>
+              Últimas lecciones en las que trabajaste
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {recent.length > 0 ? (
               <div className="space-y-3">
                 {recent.map((item, index) => (
                   <div key={index} className="flex items-start gap-3 text-sm pb-3 border-b last:border-0 last:pb-0" data-testid={`recent-activity-${index}`}>
@@ -335,9 +340,14 @@ export default function LearningDashboard() {
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        )}
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p className="text-sm">No hay actividad reciente</p>
+                <p className="text-xs mt-1">Comienza a estudiar para ver tu actividad aquí</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </Layout>
   )

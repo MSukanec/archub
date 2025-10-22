@@ -46,7 +46,8 @@ export default function AdminCourseDashboard() {
       if (!res.ok) throw new Error('Failed to fetch dashboard data')
       return res.json()
     },
-    enabled: !!supabase
+    enabled: !!supabase,
+    staleTime: 0
   })
 
   const stats = dashboardData?.stats
@@ -122,7 +123,7 @@ export default function AdminCourseDashboard() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Progreso Promedio</p>
-              <h3 className="text-2xl font-bold mt-1">{stats?.avgCompletionRate.toFixed(1)}%</h3>
+              <h3 className="text-2xl font-bold mt-1">{stats?.avgCompletionRate ? stats.avgCompletionRate.toFixed(1) : '0.0'}%</h3>
               <p className="text-xs text-muted-foreground mt-1">
                 en todas las lecciones
               </p>

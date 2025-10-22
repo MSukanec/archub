@@ -83,7 +83,8 @@ export default function CourseList() {
       if (!response.ok) return [];
       return response.json();
     },
-    enabled: !!supabase
+    enabled: !!supabase,
+    staleTime: 0
   });
 
   // Get lessons count per course
