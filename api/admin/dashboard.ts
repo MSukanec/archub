@@ -42,17 +42,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
 
       // Fetch courses
-      const { data: courses } = await supabase
+      const { data: courses, error: coursesError } = await supabase
         .from('courses')
         .select('id, is_active');
+
+      console.log('📚 Courses query:', { courses, coursesError });
 
       const totalCourses = courses?.length || 0;
       const activeCourses = courses?.filter(c => c.is_active).length || 0;
 
       // Fetch enrollments
-      const { data: enrollments } = await supabase
+      const { data: enrollments, error: enrollmentsError } = await supabase
         .from('course_enrollments')
         .select('id, status, expires_at, started_at');
+
+      console.log('👥 Enrollments query:', { enrollments, enrollmentsError });
 
       const totalEnrollments = enrollments?.length || 0;
       const activeEnrollments = enrollments?.filter(e => 
@@ -73,10 +77,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }).length || 0;
 
       // Fetch payments
-      const { data: payments } = await supabase
+      const { data: payments, error: paymentsError } = await supabase
         .from('payments_log')
         .select('amount, currency, created_at, status')
         .eq('status', 'approved');
+
+      console.log('💰 Payments query:', { payments, paymentsError });
 
       const totalRevenue = payments?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 0;
 
@@ -128,7 +134,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .order('expires_at', { ascending: true })
         .limit(10);
 
-      return res.status(200).json({
+      const responseData = {
         stats: {
           totalCourses,
           activeCourses,
@@ -147,7 +153,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           const daysUntilExpiry = Math.floor((expDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
           return daysUntilExpiry > 0 && daysUntilExpiry <= 30;
         })
-      });
+      };
+
+      console.log('📊 Dashboard response:', JSON.stringify(responseData, null, 2));
+
+      // Prevent caching
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      
+      return res.status(200).json(responseData);
 
     } else {
       return res.status(405).json({ error: "Method not allowed" });
