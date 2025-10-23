@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Building, Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/hooks/use-toast";
 
@@ -107,6 +107,7 @@ export default function Register() {
               className="w-full h-10 rounded-xl"
               onClick={handleGoogleSignUp}
               disabled={loading}
+              data-testid="button-google-signup"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -133,108 +134,22 @@ export default function Register() {
               Continuar con Google
             </Button>
 
+            {/* Email Sign Up - Disabled */}
             <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="px-2 text-gray-500" style={{ backgroundColor: 'hsl(60, 9%, 95%)' }}>O continúa con</span>
+              <Button
+                variant="outline"
+                className="w-full h-10 rounded-xl bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed hover:bg-gray-100"
+                disabled
+                data-testid="button-email-signup-disabled"
+              >
+                <Mail className="w-4 h-4 mr-2" />
+                Continuar con Email
+                <Lock className="w-3 h-3 ml-2" />
+              </Button>
+              <div className="text-center mt-2">
+                <span className="text-xs text-gray-400">Próximamente disponible</span>
               </div>
             </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-gray-900">Nombre completo</Label>
-                <Input
-                  id="fullName"
-                  name="fullName"
-                  type="text"
-                  placeholder="Tu nombre completo"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-900">Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="tu@ejemplo.com"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-gray-900">Contraseña</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Mínimo 6 caracteres"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    required
-                  />
-                  <div
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 cursor-pointer text-gray-400 hover:text-gray-600"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-gray-900">Confirmar contraseña</Label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Confirma tu contraseña"
-                    value={formData.confirmPassword}
-                    onChange={handleInputChange}
-                    required
-                  />
-                  <div
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 cursor-pointer text-gray-400 hover:text-gray-600"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                variant="default"
-                className="w-full"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Creando cuenta...
-                  </>
-                ) : (
-                  "Crear Cuenta"
-                )}
-              </Button>
-            </form>
 
             <div className="text-center text-sm">
               <span className="text-gray-600">¿Ya tienes una cuenta? </span>
