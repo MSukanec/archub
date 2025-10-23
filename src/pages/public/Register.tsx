@@ -36,12 +36,12 @@ export default function Register() {
 
           {/* Text */}
           <div className="space-y-4">
-            <h1 className="text-4xl font-bold text-white">
+            <h1 className="text-4xl font-bold" style={{ color: 'white' }}>
               Comienza a
               <br />
               <span style={{ color: 'var(--accent)' }}>Construir el Futuro</span>
             </h1>
-            <p className="text-gray-500 text-base">
+            <p className="text-base" style={{ color: 'rgb(156, 163, 175)' }}>
               Únete a cientos de profesionales que ya optimizan sus proyectos con Archub.
               La herramienta completa para gestión de construcción.
             </p>
@@ -93,7 +93,7 @@ export default function Register() {
                   {/* Google Sign Up */}
                   <Button
                     variant="outline"
-                    className="w-full h-12 rounded-xl border-2 font-medium text-gray-900 hover:border-gray-400"
+                    className="w-full h-12 rounded-xl border-2 font-medium text-gray-900 hover:bg-background hover:text-gray-900 hover:border-gray-400 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5"
                     onClick={handleGoogleSignUp}
                     disabled={loading}
                     data-testid="button-google-signup"
