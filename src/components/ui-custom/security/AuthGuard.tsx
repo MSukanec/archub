@@ -164,6 +164,38 @@ export function AuthGuard({ children }: AuthGuardProps) {
     );
   }
 
+  // Show loading while userData is being fetched for authenticated users on protected routes
+  const isPublicRoute = PUBLIC_ROUTES.includes(location);
+  const isOnboardingRoute = ONBOARDING_ROUTES.includes(location);
+  
+  if (user && userDataLoading && !isPublicRoute && !isOnboardingRoute) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white"></div>
+      </div>
+    );
+  }
+
+  // Block rendering if user needs onboarding but is not on onboarding route
+  if (user && userData && !isOnboardingRoute) {
+    const onboardingCompleted = userData.preferences?.onboarding_completed;
+    const hasPersonalData = userData.user_data?.first_name && userData.user_data?.last_name;
+    const onboardingBypass = localStorage.getItem('onboarding_bypass') === 'true';
+    const bypassUserId = localStorage.getItem('onboarding_bypass_user_id');
+    const bypassValid = onboardingBypass && onboardingCompleted && bypassUserId === userData.user?.id;
+    
+    const needsOnboarding = (!onboardingCompleted || !hasPersonalData) && !bypassValid && !completingOnboarding;
+    
+    if (needsOnboarding) {
+      // Show loading instead of rendering the protected content
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white"></div>
+        </div>
+      );
+    }
+  }
+
   // Render children
   return <>{children}</>;
 }
