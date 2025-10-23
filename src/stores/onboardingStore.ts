@@ -6,6 +6,8 @@ interface OnboardingState {
   formData: {
     first_name: string;
     last_name: string;
+    country: string;
+    birthdate: string;
     organization_name: string;
     theme: 'light' | 'dark';
     default_currency_id: string;

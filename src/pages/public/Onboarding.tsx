@@ -74,6 +74,8 @@ export default function Onboarding() {
         .update({
           first_name: formData.first_name,
           last_name: formData.last_name,
+          country: formData.country || null,
+          birthdate: formData.birthdate || null,
           updated_at: new Date().toISOString(),
         })
         .eq('user_id', userId);
