@@ -36,12 +36,12 @@ export default function Login() {
 
           {/* Text */}
           <div className="space-y-4">
-            <h1 className="text-4xl font-bold" style={{ color: 'white' }}>
+            <h1 className="text-4xl font-bold !text-white">
               Una Plataforma para
               <br />
               <span style={{ color: 'var(--accent)' }}>Optimizar tu Construcción</span>
             </h1>
-            <p className="text-base" style={{ color: 'rgb(156, 163, 175)' }}>
+            <p className="text-base !text-gray-400">
               Gestiona proyectos, equipos y presupuestos en un solo lugar.
               Simplifica tu trabajo y aumenta la productividad.
             </p>
@@ -93,7 +93,7 @@ export default function Login() {
                   {/* Google Sign In */}
                   <Button
                     variant="outline"
-                    className="w-full h-12 rounded-xl border-2 font-medium text-gray-900 hover:bg-background hover:text-gray-900 hover:border-gray-400 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5"
+                    className="w-full h-12 rounded-xl border-2 font-medium text-gray-900 hover:bg-background hover:text-gray-900 hover:!border-border shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5"
                     onClick={handleGoogleSignIn}
                     disabled={loading}
                     data-testid="button-google-signin"
