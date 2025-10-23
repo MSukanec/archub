@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { CalendarDays, ChevronDown } from 'lucide-react'
+import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface DatePickerFieldProps {
   value?: Date
@@ -19,6 +20,11 @@ interface DatePickerFieldProps {
   maxDate?: Date
 }
 
+const MONTHS = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+]
+
 export default function DatePickerField({
   value,
   onChange,
@@ -31,6 +37,7 @@ export default function DatePickerField({
   maxDate
 }: DatePickerFieldProps) {
   const [open, setOpen] = useState(false)
+  const [month, setMonth] = useState<Date>(value || new Date())
 
   const handleDateSelect = (date: Date | undefined) => {
     onChange(date)
@@ -45,6 +52,34 @@ export default function DatePickerField({
     return false
   }
 
+  const handleMonthChange = (monthIndex: string) => {
+    const newDate = new Date(month)
+    newDate.setMonth(parseInt(monthIndex))
+    setMonth(newDate)
+  }
+
+  const handleYearChange = (year: string) => {
+    const newDate = new Date(month)
+    newDate.setFullYear(parseInt(year))
+    setMonth(newDate)
+  }
+
+  const handlePreviousMonth = () => {
+    const newDate = new Date(month)
+    newDate.setMonth(newDate.getMonth() - 1)
+    setMonth(newDate)
+  }
+
+  const handleNextMonth = () => {
+    const newDate = new Date(month)
+    newDate.setMonth(newDate.getMonth() + 1)
+    setMonth(newDate)
+  }
+
+  // Generate year range (current year - 100 to current year + 10)
+  const currentYear = new Date().getFullYear()
+  const years = Array.from({ length: 111 }, (_, i) => currentYear - 100 + i)
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -52,11 +87,8 @@ export default function DatePickerField({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            // Exact SelectTrigger styles matching SELECT and INPUT components
             "flex w-full items-center justify-between text-sm md:text-xs leading-tight py-2.5 md:py-2 px-3 md:px-2 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer",
-            // Validation error styling
             "aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-destructive aria-[invalid=true]:ring-1",
-            // Placeholder text styling
             !value && "text-[var(--input-placeholder)]",
             disabled && "cursor-not-allowed opacity-60",
             className
@@ -69,14 +101,73 @@ export default function DatePickerField({
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="single"
-          selected={value}
-          onSelect={handleDateSelect}
-          disabled={isDateDisabled}
-          initialFocus
-          locale={es}
-        />
+        <div className="p-3 space-y-2">
+          {/* Month and Year selectors */}
+          <div className="flex items-center justify-between gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7"
+              onClick={handlePreviousMonth}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            
+            <div className="flex gap-2 flex-1">
+              <Select
+                value={month.getMonth().toString()}
+                onValueChange={handleMonthChange}
+              >
+                <SelectTrigger className="h-8 text-xs flex-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {MONTHS.map((monthName, index) => (
+                    <SelectItem key={index} value={index.toString()}>
+                      {monthName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={month.getFullYear().toString()}
+                onValueChange={handleYearChange}
+              >
+                <SelectTrigger className="h-8 text-xs w-20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {years.map((year) => (
+                    <SelectItem key={year} value={year.toString()}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7"
+              onClick={handleNextMonth}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Calendar */}
+          <Calendar
+            mode="single"
+            selected={value}
+            onSelect={handleDateSelect}
+            disabled={isDateDisabled}
+            month={month}
+            onMonthChange={setMonth}
+            locale={es}
+          />
+        </div>
       </PopoverContent>
     </Popover>
   )

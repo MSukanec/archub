@@ -170,19 +170,62 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)] flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
-        {/* Header with step indicator */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-[var(--foreground)] mb-2">
-            ¡Bienvenido a Archub!
-          </h1>
-          
+    <div className="min-h-screen flex" style={{ backgroundColor: 'var(--main-sidebar-bg)' }}>
+      {/* Left Panel - Dark */}
+      <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12 relative">
+        <div className="max-w-md space-y-8 text-center">
+          {/* Logo */}
+          <div className="flex justify-center">
+            <img 
+              src="/ArchubLogo.png" 
+              alt="Archub Logo" 
+              className="w-32 h-32 object-contain"
+            />
+          </div>
 
+          {/* Text */}
+          <div className="space-y-4">
+            <h1 className="text-4xl font-bold !text-white">
+              ¡Estás a un paso de
+              <br />
+              <span style={{ color: 'var(--accent)' }}>Comenzar!</span>
+            </h1>
+            <p className="text-base !text-gray-400">
+              Completa tu perfil para personalizar tu experiencia en Archub.
+              Solo te tomará un momento.
+            </p>
+          </div>
+
+          {/* Dots indicator */}
+          <div className="flex justify-center gap-2 pt-8">
+            <div className="w-2 h-2 rounded-full bg-white"></div>
+            <div className="w-2 h-2 rounded-full bg-white/30"></div>
+            <div className="w-2 h-2 rounded-full bg-white/30"></div>
+          </div>
         </div>
+      </div>
 
-        {/* Current step content */}
-        {renderCurrentStep()}
+      {/* Right Panel - Light */}
+      <div className="w-full lg:w-1/2 flex flex-col">
+        <div className="w-full flex-1 flex items-stretch p-4 lg:p-6">
+          <div className="w-full h-full flex flex-col rounded-3xl px-6 lg:px-16 py-6" style={{ backgroundColor: 'var(--layout-bg)' }}>
+            {/* Logo mobile */}
+            <div className="flex items-center justify-between gap-4 mb-8">
+              <div className="flex items-center gap-3 lg:hidden">
+                <img 
+                  src="/ArchubLogo.png" 
+                  alt="Archub Logo" 
+                  className="w-10 h-10 object-contain"
+                />
+              </div>
+            </div>
+
+            {/* Form Content - Centered vertically */}
+            <div className="flex-1 flex items-center justify-center">
+              {renderCurrentStep()}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
