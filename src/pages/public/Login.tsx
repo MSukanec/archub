@@ -27,13 +27,11 @@ export default function Login() {
         <div className="max-w-md space-y-8 text-center">
           {/* Logo */}
           <div className="flex justify-center">
-            <div className="w-32 h-32 rounded-3xl bg-white/10 backdrop-blur-sm flex items-center justify-center p-6">
-              <img 
-                src="/ArchubLogo.png" 
-                alt="Archub Logo" 
-                className="w-full h-full object-contain"
-              />
-            </div>
+            <img 
+              src="/ArchubLogo.png" 
+              alt="Archub Logo" 
+              className="w-32 h-32 object-contain"
+            />
           </div>
 
           {/* Text */}
@@ -43,7 +41,7 @@ export default function Login() {
               <br />
               <span style={{ color: 'var(--accent)' }}>Optimizar tu Construcción</span>
             </h1>
-            <p className="text-gray-400 text-lg">
+            <p className="text-gray-500 text-base">
               Gestiona proyectos, equipos y presupuestos en un solo lugar.
               Simplifica tu trabajo y aumenta la productividad.
             </p>
@@ -59,32 +57,32 @@ export default function Login() {
       </div>
 
       {/* Right Panel - Light */}
-      <div className="w-full lg:w-1/2 flex items-stretch">
-        <div className="w-full flex items-center justify-center p-4 lg:p-6">
-          <div className="w-full h-full flex items-center justify-center rounded-3xl p-8 lg:p-12" style={{ backgroundColor: 'var(--layout-bg)' }}>
-            <div className="w-full max-w-md">
-              {/* Logo + Sign up link */}
-              <div className="flex items-center justify-between mb-12">
-                <div className="flex items-center gap-3">
-                  <img 
-                    src="/ArchubLogo.png" 
-                    alt="Archub Logo" 
-                    className="w-10 h-10 object-contain"
-                  />
-                </div>
-                <div className="text-sm">
-                  <span className="text-gray-600">¿No tienes cuenta? </span>
-                  <Link href="/register">
-                    <span className="font-semibold cursor-pointer hover:underline" style={{ color: 'var(--accent)' }}>
-                      Regístrate
-                    </span>
-                  </Link>
-                </div>
+      <div className="w-full lg:w-1/2 flex flex-col">
+        <div className="w-full flex-1 flex items-stretch p-4 lg:p-6">
+          <div className="w-full h-full flex flex-col rounded-3xl px-16 py-6" style={{ backgroundColor: 'var(--layout-bg)' }}>
+            {/* Logo + Sign up link - Fixed at top */}
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <img 
+                  src="/ArchubLogo.png" 
+                  alt="Archub Logo" 
+                  className="w-10 h-10 object-contain"
+                />
               </div>
+              <div className="text-sm">
+                <span className="text-gray-600">¿No tienes cuenta? </span>
+                <Link href="/register">
+                  <span className="font-semibold cursor-pointer hover:underline" style={{ color: 'var(--accent)' }}>
+                    Regístrate
+                  </span>
+                </Link>
+              </div>
+            </div>
 
-              {/* Card Content */}
-              <div className="space-y-8">
-                <div className="space-y-2">
+            {/* Card Content - Centered vertically */}
+            <div className="flex-1 flex items-center justify-center">
+              <div className="w-full max-w-md space-y-8">
+                <div className="space-y-2 text-center">
                   <h1 className="text-3xl font-bold text-gray-900">¡Bienvenido de nuevo!</h1>
                   <p className="text-gray-600">
                     Ingresa tus credenciales para acceder a tu cuenta
@@ -95,7 +93,7 @@ export default function Login() {
                   {/* Google Sign In */}
                   <Button
                     variant="outline"
-                    className="w-full h-12 rounded-xl border-2 hover:bg-gray-50 font-medium"
+                    className="w-full h-12 rounded-xl border-2 font-medium text-gray-900 hover:border-gray-400"
                     onClick={handleGoogleSignIn}
                     disabled={loading}
                     data-testid="button-google-signin"
