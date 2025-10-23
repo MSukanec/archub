@@ -59,9 +59,9 @@ export default function Register() {
       {/* Right Panel - Light */}
       <div className="w-full lg:w-1/2 flex flex-col">
         <div className="w-full flex-1 flex items-stretch p-4 lg:p-6">
-          <div className="w-full h-full flex flex-col rounded-3xl px-16 py-6" style={{ backgroundColor: 'var(--layout-bg)' }}>
+          <div className="w-full h-full flex flex-col rounded-3xl px-6 lg:px-16 py-6" style={{ backgroundColor: 'var(--layout-bg)' }}>
             {/* Logo + Sign in link - Fixed at top */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between gap-4 mb-8">
               <div className="flex items-center gap-3">
                 <img 
                   src="/ArchubLogo.png" 
