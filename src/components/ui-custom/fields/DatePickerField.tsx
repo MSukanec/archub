@@ -69,7 +69,7 @@ export default function DatePickerField({
           classNames={{
             day_selected:
               "bg-[var(--accent)] text-white hover:bg-[var(--accent)] hover:text-white focus:bg-[var(--accent)] focus:text-white",
-            day_today: "bg-accent/10 text-accent-foreground font-semibold",
+            day_today: "bg-[var(--accent)] !text-white dark:!text-white font-semibold hover:bg-[var(--accent)] hover:!text-white",
           }}
         />
       </PopoverContent>
