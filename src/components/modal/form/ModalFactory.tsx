@@ -70,6 +70,7 @@ import { CourseFormModal } from '../modals/admin/CourseFormModal';
 import { CourseModuleFormModal } from '../modals/admin/CourseModuleFormModal';
 import { LessonFormModal } from '../modals/admin/LessonFormModal';
 import { CourseEnrollmentModal } from '../modals/admin/CourseEnrollmentModal';
+import { CouponFormModal } from '../modals/admin/CouponFormModal';
 import PaymentMethodModal from '../modals/PaymentMethodModal';
 import { NotificationFormModal } from '../modals/admin/NotificationFormModal';
 
@@ -240,6 +241,8 @@ export function ModalFactory() {
       return <LessonFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'course-enrollment':
       return <CourseEnrollmentModal modalData={data || undefined} onClose={closeModal} />;
+    case 'coupon':
+      return <CouponFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'payment-method':
       return <PaymentMethodModal 
         courseSlug={data?.courseSlug || ''} 
