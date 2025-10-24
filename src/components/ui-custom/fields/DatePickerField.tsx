@@ -2,7 +2,6 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { CalendarIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
@@ -43,18 +42,18 @@ export default function DatePickerField({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button
-          variant={"outline"}
+        <button
+          type="button"
+          disabled={disabled}
           className={cn(
-            "w-full justify-start text-left font-normal",
-            !value && "text-muted-foreground",
+            "flex w-full items-center justify-start text-left text-sm md:text-xs leading-tight py-2.5 md:py-2 px-3 md:px-2 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed",
+            !value && "text-[var(--input-placeholder)]",
             className
           )}
-          disabled={disabled}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
+          <CalendarIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
           {value ? format(value, "PPP", { locale: es }) : <span>{placeholder}</span>}
-        </Button>
+        </button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
@@ -64,6 +63,9 @@ export default function DatePickerField({
           disabled={isDateDisabled}
           initialFocus
           locale={es}
+          captionLayout="dropdown-buttons"
+          fromYear={1920}
+          toYear={new Date().getFullYear()}
           classNames={{
             day_selected:
               "bg-[var(--accent)] text-white hover:bg-[var(--accent)] hover:text-white focus:bg-[var(--accent)] focus:text-white",

@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Upload, Link as LinkIcon, LogOut, Crown, MessageCircle, Camera, User, Settings, Building, Package, Hammer, Eye } from 'lucide-react'
+import DatePickerField from '@/components/ui-custom/fields/DatePickerField'
 
 import { useState, useEffect } from 'react'
 import { useLocation } from 'wouter'
@@ -51,7 +52,7 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [country, setCountry] = useState('')
-  const [birthdate, setBirthdate] = useState('')
+  const [birthdate, setBirthdate] = useState<Date | undefined>(undefined)
   const [avatarUrl, setAvatarUrl] = useState('')
   const [showAvatarUpload, setShowAvatarUpload] = useState(false)
 
@@ -80,15 +81,18 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
       }
       
       // Handle user_data updates
+      const birthdateString = data.birthdate?.toISOString().split('T')[0] || null
+      const currentBirthdateString = userData?.user_data?.birthdate || null
+      
       if (data.firstName !== userData?.user_data?.first_name ||
           data.lastName !== userData?.user_data?.last_name ||
           data.country !== userData?.user_data?.country ||
-          data.birthdate !== userData?.user_data?.birthdate) {
+          birthdateString !== currentBirthdateString) {
         
         profileUpdates.first_name = data.firstName
         profileUpdates.last_name = data.lastName
         profileUpdates.country = data.country || null
-        profileUpdates.birthdate = data.birthdate || null
+        profileUpdates.birthdate = birthdateString
       }
       
       // Handle avatar URL update if changed
@@ -141,7 +145,7 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
   const handleFirstNameChange = (value: string) => setFirstName(value)
   const handleLastNameChange = (value: string) => setLastName(value)
   const handleCountryChange = (value: string) => setCountry(value)
-  const handleBirthdateChange = (value: string) => setBirthdate(value)
+  const handleBirthdateChange = (value: Date | undefined) => setBirthdate(value)
 
   // Countries query
   const { data: countries = [] } = useQuery<Country[]>({
@@ -171,7 +175,7 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
       setFirstName(userData.user_data?.first_name || '')
       setLastName(userData.user_data?.last_name || '')
       setCountry(userData.user_data?.country || '')
-      setBirthdate(userData.user_data?.birthdate || '')
+      setBirthdate(userData.user_data?.birthdate ? new Date(userData.user_data.birthdate) : undefined)
       setAvatarUrl(userData.user?.avatar_url || '')
     }
   }, [userData])
@@ -338,10 +342,11 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Fecha de nacimiento</Label>
-                <Input
-                  type="date"
+                <DatePickerField
                   value={birthdate}
-                  onChange={(e) => handleBirthdateChange(e.target.value)}
+                  onChange={handleBirthdateChange}
+                  placeholder="Seleccionar fecha"
+                  disableFuture={true}
                 />
               </div>
             </div>
