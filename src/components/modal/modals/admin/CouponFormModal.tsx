@@ -32,10 +32,11 @@ const couponSchema = z.object({
   is_active: z.boolean().default(true),
   starts_at: z.string().optional(),
   expires_at: z.string().optional(),
-  max_uses: z.number().int().min(1).optional().nullable(),
-  max_uses_per_user: z.number().int().min(1).optional().nullable(),
-  minimum_purchase: z.number().min(0).optional().nullable(),
+  max_redemptions: z.number().int().min(1).optional().nullable(),
+  per_user_limit: z.number().int().min(1).optional().nullable(),
+  min_order_total: z.number().min(0).optional().nullable(),
   currency: z.enum(['ARS', 'USD', 'EUR']).optional().nullable(),
+  applies_to_all: z.boolean().default(true),
 });
 
 type CouponFormData = z.infer<typeof couponSchema>;
@@ -48,10 +49,11 @@ interface Coupon {
   is_active: boolean;
   starts_at?: string;
   expires_at?: string;
-  max_uses?: number;
-  max_uses_per_user?: number;
-  minimum_purchase?: number;
+  max_redemptions?: number;
+  per_user_limit?: number;
+  min_order_total?: number;
   currency?: string;
+  applies_to_all: boolean;
   created_at: string;
 }
 
@@ -125,10 +127,11 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
       is_active: coupon?.is_active ?? true,
       starts_at: coupon?.starts_at || undefined,
       expires_at: coupon?.expires_at || undefined,
-      max_uses: coupon?.max_uses || null,
-      max_uses_per_user: coupon?.max_uses_per_user || null,
-      minimum_purchase: coupon?.minimum_purchase || null,
+      max_redemptions: coupon?.max_redemptions || null,
+      per_user_limit: coupon?.per_user_limit || 1,
+      min_order_total: coupon?.min_order_total || null,
       currency: coupon?.currency as any || null,
+      applies_to_all: coupon?.applies_to_all ?? true,
     }
   });
 
@@ -141,10 +144,11 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
         is_active: coupon.is_active ?? true,
         starts_at: coupon.starts_at || undefined,
         expires_at: coupon.expires_at || undefined,
-        max_uses: coupon.max_uses || null,
-        max_uses_per_user: coupon.max_uses_per_user || null,
-        minimum_purchase: coupon.minimum_purchase || null,
+        max_redemptions: coupon.max_redemptions || null,
+        per_user_limit: coupon.per_user_limit || 1,
+        min_order_total: coupon.min_order_total || null,
         currency: coupon.currency as any || null,
+        applies_to_all: coupon.applies_to_all ?? true,
       });
     } else {
       form.reset({
@@ -154,10 +158,11 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
         is_active: true,
         starts_at: undefined,
         expires_at: undefined,
-        max_uses: null,
-        max_uses_per_user: null,
-        minimum_purchase: null,
+        max_redemptions: null,
+        per_user_limit: 1,
+        min_order_total: null,
         currency: null,
+        applies_to_all: true,
       });
     }
     setPanel('edit');
@@ -195,6 +200,8 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
     mutationFn: async (data: CouponFormData) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
+      const appliesToAll = selectedCourses.length === 0;
+      
       const { data: newCoupon, error } = await supabase
         .from('coupons')
         .insert({
@@ -204,10 +211,11 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
           is_active: data.is_active,
           starts_at: data.starts_at || null,
           expires_at: data.expires_at || null,
-          max_uses: data.max_uses || null,
-          max_uses_per_user: data.max_uses_per_user || null,
-          minimum_purchase: data.minimum_purchase || null,
+          max_redemptions: data.max_redemptions || null,
+          per_user_limit: data.per_user_limit || 1,
+          min_order_total: data.min_order_total || null,
           currency: data.currency || null,
+          applies_to_all: appliesToAll,
         })
         .select()
         .single();
@@ -243,6 +251,8 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
     mutationFn: async (data: CouponFormData) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
+      const appliesToAll = selectedCourses.length === 0;
+      
       const { error } = await supabase
         .from('coupons')
         .update({
@@ -252,10 +262,11 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
           is_active: data.is_active,
           starts_at: data.starts_at || null,
           expires_at: data.expires_at || null,
-          max_uses: data.max_uses || null,
-          max_uses_per_user: data.max_uses_per_user || null,
-          minimum_purchase: data.minimum_purchase || null,
+          max_redemptions: data.max_redemptions || null,
+          per_user_limit: data.per_user_limit || 1,
+          min_order_total: data.min_order_total || null,
           currency: data.currency || null,
+          applies_to_all: appliesToAll,
         })
         .eq('id', coupon!.id);
       
@@ -485,7 +496,7 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
           <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="max_uses"
+              name="max_redemptions"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Usos Máximos Totales</FormLabel>
@@ -497,7 +508,7 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
                       placeholder="Sin límite"
                       value={field.value || ''}
                       onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
-                      data-testid="input-coupon-max-uses" 
+                      data-testid="input-coupon-max-redemptions" 
                     />
                   </FormControl>
                   <FormDescription className="text-xs">
@@ -510,7 +521,7 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
 
             <FormField
               control={form.control}
-              name="max_uses_per_user"
+              name="per_user_limit"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Usos por Usuario</FormLabel>
@@ -519,10 +530,10 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
                       {...field} 
                       type="number"
                       min="1"
-                      placeholder="Sin límite"
+                      placeholder="1"
                       value={field.value || ''}
-                      onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
-                      data-testid="input-coupon-max-uses-per-user" 
+                      onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : 1)}
+                      data-testid="input-coupon-per-user-limit" 
                     />
                   </FormControl>
                   <FormDescription className="text-xs">
@@ -537,7 +548,7 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
 
         <FormField
           control={form.control}
-          name="minimum_purchase"
+          name="min_order_total"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Compra Mínima</FormLabel>
@@ -550,7 +561,7 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
                   placeholder="0.00"
                   value={field.value || ''}
                   onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
-                  data-testid="input-coupon-minimum" 
+                  data-testid="input-coupon-min-order-total" 
                 />
               </FormControl>
               <FormDescription className="text-xs">

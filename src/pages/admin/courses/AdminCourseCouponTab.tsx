@@ -19,10 +19,11 @@ interface Coupon {
   is_active: boolean;
   starts_at?: string;
   expires_at?: string;
-  max_uses?: number;
-  max_uses_per_user?: number;
-  minimum_purchase?: number;
+  max_redemptions?: number;
+  per_user_limit?: number;
+  min_order_total?: number;
   currency?: string;
+  applies_to_all: boolean;
   created_at: string;
   total_uses?: number;
 }
@@ -142,9 +143,9 @@ export default function AdminCourseCouponTab() {
       render: (coupon: Coupon) => (
         <div className="text-sm">
           <div className="font-medium">{coupon.total_uses || 0} usos</div>
-          {coupon.max_uses && (
+          {coupon.max_redemptions && (
             <div className="text-xs text-muted-foreground">
-              Límite: {coupon.max_uses}
+              Límite: {coupon.max_redemptions}
             </div>
           )}
         </div>
@@ -157,7 +158,7 @@ export default function AdminCourseCouponTab() {
         const now = new Date();
         const isExpired = coupon.expires_at && new Date(coupon.expires_at) < now;
         const notStarted = coupon.starts_at && new Date(coupon.starts_at) > now;
-        const limitReached = coupon.max_uses && (coupon.total_uses || 0) >= coupon.max_uses;
+        const limitReached = coupon.max_redemptions && (coupon.total_uses || 0) >= coupon.max_redemptions;
 
         let status = 'Activo';
         let color = 'var(--accent)';
