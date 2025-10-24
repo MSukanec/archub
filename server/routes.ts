@@ -2714,9 +2714,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           name: profile.full_name
         },
         back_urls: {
-          success: `${appUrl}/learning/payment-return?status=success`,
-          failure: `${appUrl}/learning/payment-return?status=failure`,
-          pending: `${appUrl}/learning/payment-return?status=pending`
+          success: `${appUrl}/learning/payment-return?status=success&course=${courseSlug}`,
+          failure: `${appUrl}/learning/payment-return?status=failure&course=${courseSlug}`,
+          pending: `${appUrl}/learning/payment-return?status=pending&course=${courseSlug}`
         },
         auto_return: 'approved',
         notification_url: `${appUrl}/api/webhooks/mp`,

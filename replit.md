@@ -2,7 +2,7 @@
 
 ## Overview
 
-Archub is a modern construction management platform designed to streamline operations in the construction industry. It provides comprehensive tools for project tracking, team management, and budget monitoring, aiming to enhance efficiency and collaboration in construction projects. The platform includes features like financial management with multi-currency support, robust document management, and a comprehensive project dashboard with KPIs and financial health indicators. Archub also incorporates a learning module for professional development.
+Archub is a comprehensive construction management platform designed to optimize operations, enhance collaboration, and improve efficiency in the construction industry. It provides tools for project tracking, team management, budget monitoring, and financial management with multi-currency support. Key features include robust document management, a detailed project dashboard with KPIs, and a learning module for professional development. Archub aims to streamline workflows and provide a unified platform for all construction project needs.
 
 ## User Preferences
 
@@ -10,42 +10,46 @@ Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
-### Frontend
-- **Framework**: React 18 with TypeScript
-- **Build Tool**: Vite
-- **UI Framework**: shadcn/ui (Radix UI primitives)
-- **Styling**: Tailwind CSS
-- **State Management**: Zustand
-- **Routing**: Wouter
-- **Data Fetching**: TanStack Query
+### UI/UX Decisions
+- **Design System**: "new-york" style with a neutral color palette and dark mode support, emphasizing reusable UI components.
+- **Accent Color System**: Dual CSS variable approach for flexible theming (`--accent-hsl` for Tailwind, `--accent` for inline styles).
+- **Modals**: Fully responsive Dialog component; right-side panel on desktop, fullscreen on mobile.
+- **Navigation**: Redesigned sidebar with a project selector, breadcrumb-style main header, and a centralized "general" hub for main navigation. Mobile menu mirrors desktop sidebar structure.
+- **Component Refactoring**: Generic container architecture for `DataRowCard` and a unified ghost button system.
+- **Context-Aware Headers**: MainHeader adapts content based on the current module (e.g., simplified breadcrumbs in Learning module).
 
-### Backend
-- **Runtime**: Node.js with Express.js
-- **Language**: TypeScript (ES modules)
-- **Database**: PostgreSQL (via Drizzle ORM)
-- **Session Management**: connect-pg-simple
-
-### Authentication
-- **Provider**: Supabase Auth (Email/password, Google OAuth)
-- **Session Handling**: Supabase sessions
-
-### Key Architectural Decisions
-- **Shared Schema**: `shared/schema.ts` for frontend/backend consistency.
-- **Design System**: "new-york" style variant with a neutral color palette and dark mode support, emphasizing reusable UI components. **Accent Color System**: Dual CSS variable approach - `--accent-hsl` (76 100% 40%) for Tailwind with opacity support (e.g., bg-accent/5), and `--accent` (hsl(76, 100%, 40%)) for inline styles. Payment modals use color-mix() for soft accent backgrounds.
+### Technical Implementations
+- **Frontend**: React 18, TypeScript, Vite, shadcn/ui (Radix UI primitives), Tailwind CSS, Zustand for state management, Wouter for routing, TanStack Query for data fetching.
+- **Backend**: Node.js, Express.js, TypeScript (ES modules).
+- **Database**: PostgreSQL with Drizzle ORM.
+- **Authentication**: Supabase Auth (Email/password, Google OAuth) with Supabase sessions.
+- **Shared Schema**: `shared/schema.ts` for consistency between frontend and backend.
 - **Data Flow**: React Query for server state management, Express.js for REST APIs, Drizzle ORM for database operations with extensive cache invalidation.
-- **Database Views**: Always use database views for data fetching (e.g., `construction_tasks_view`).
-- **Project Management**: Includes a custom React-based Gantt chart, Kanban board, and parametric task generation.
-- **Financial Management**: Comprehensive system for tracking movements, conversions, transfers, and budgets with multi-currency support. Features specialized subforms for Personnel, Subcontracts, and Project Clients.
-- **Document Management**: Hierarchical organization with versioning, file upload, a redesigned file explorer-style navigation, and a modal-based preview system.
-- **UI/UX Enhancements**: Redesigned projects page, improved header component, consistent UI architecture, and standardized mobile content padding. **Modal System**: Fully responsive Dialog component - desktop maintains right-side panel layout (w-1/2, min-w-600px), mobile uses fullscreen layout (inset-0) with proper viewport fit to prevent content overflow.
-- **Component Refactoring**: DataRowCard system refactored to a generic container architecture for maximum flexibility and consistent aesthetics. Unified ghost button system.
-- **Navigation**: Restructured navigation with project management moved to the profile section, organization activity as an independent page, and a redesigned sidebar with breadcrumb-style main header. **Project Selector in Sidebar**: Added project selector button in sidebar (above avatar) with FolderOpen icon, popover dropdown showing all projects, and seamless project switching functionality. **Header**: MainHeader temporarily commented for testing new layout without header (can be uncommented if needed). Mobile menu completely redesigned to match desktop Sidebar structure using sidebarLevel (organization, project, admin, learning) with bottom toggle buttons for Project, Admin, and Learning access. HeaderMobile logo navigates to /mode-selection. CourseSidebar integrated in mobile as 280px side panel. **MainHeader Context-Aware**: In Learning context, MainHeader displays simplified breadcrumb "Capacitaciones / <Page Name>" instead of organization/project selectors. **General Sidebar Hub**: Implemented central sidebar hub ('general' level) with 3 main navigation buttons (Organización, Proyecto, Capacitaciones). All specific sidebars (organization, project, learning, admin) include "Volver" button at top to return to general hub without page navigation.
-- **Access Control**: Implemented `PlanRestricted` component system with admin bypass for features like Subcontracts and Clients.
-- **Project Dashboard**: Comprehensive dashboard with KPIs, execution health, financial pulse, and documentation compliance.
-- **Learning Module**: New "Capacitaciones" module with course management, including courses, modules, and lessons, with Vimeo integration. Features CourseSidebar component on the right side of the layout (similar to main sidebar on left) for course navigation, controlled via useCourseSidebarStore, automatically activated in CourseViewer tab. Includes lesson progress tracking with course_lesson_progress table (progress_pct, last_position_sec, completed_at, is_completed). CourseViewer header has 3 action buttons: Marcar como Completa (secondary variant), Anterior (secondary variant), Siguiente (secondary variant). Sidebar displays progress circles (empty/filled with --accent color based on is_completed flag) next to each lesson. Navigation logic handles first/last lesson edge cases with disabled buttons. Auto-save progress every 8 seconds with throttle. Auto-complete lessons at 95% progress. VimeoPlayer restores last viewing position when switching lessons using loadVideo() pattern without iframe recreation. **Course Pricing System**: Frontend displays prices from `course_prices` table via Supabase using `useCoursePrice` hook and `getCoursePrice` utility. PayButton and PaymentMethodModal NO longer receive price from client - Edge Function `create_mp_preference` fetches secure server-side price by `course_slug + provider + currency`. Supports provider-specific pricing (e.g., 'mercadopago', 'paypal') or 'any' as fallback. Payment modal shows real-time price with loading state. Full-screen mode selection interface redesigned with hover animations. **Payment Flow**: CRITICAL - Payment flow queries `public.users` by `auth_id` to get `profile.id`, then sends `user_id: profile.id` (NOT `auth.users.id`) to Edge Function. This ensures webhook can insert into `payments_log` and `course_enrollments` without FK violations. PayButton only displays if user has NO active enrollment (`is_active = true`). **LearningDashboard**: Uses EmptyState component when user has no enrolled courses, with button navigating to CourseList. **Sidebar Level Management**: OrganizationDashboard and SelectMode properly set sidebarLevel to 'organization' when switching from learning mode to prevent sidebar state persistence issues. **Student Notes System**: Advanced note-taking system with summary notes and temporal markers stored in `course_lesson_notes` table (unique constraint: user_id,lesson_id,note_type). CourseView redesigned with five tabs in order: "Dashboard", "Contenido", "Lecciones", "Apuntes", "Marcadores". Dashboard tab shows progress and course structure with completion badges, Contenido tab displays basic course information and complete course structure with modules and lessons (including completion badges via CheckCircle2 icon in accent color). CourseViewer uses Preferences-style layout with icon+title+description sections separated by hr divider for both notes and markers. **coursePlayerStore Navigation**: Centralized Zustand store (`coursePlayerStore.ts`) serves as single source of truth for tab navigation (activeTab), lesson selection (currentLessonId), and video seeking (pendingSeek). Deep-link navigation via URL params (?tab=Lecciones&lesson=<id>&seek=<seconds>) with bidirectional sync between URL ↔ store ↔ local state. CourseView manages tab synchronization with two effects: URL changes update store (for browser back/forward), store changes update activeTab (for programmatic navigation). CourseViewer uses coursePlayerStore.currentLessonId as authoritative lesson state with unidirectional sync to sidebar for UI display. VimeoPlayer confirms seek application via `onSeekApplied` callback before clearing pendingSeek, preventing premature resets on slow loads. CourseMarkersTab "Go to Lesson" buttons atomically update URL + store + sidebar for consistent marker navigation. All navigation paths (auto-selection, Previous/Next buttons, marker jumps) funnel through coursePlayerStore.goToLesson() ensuring state consistency. **Discord Integration**: LearningDashboard includes DiscordWidget component (guild ID: 868615664070443008) displaying embedded Discord server widget with iframe for community engagement, showing online members and providing direct server access. **CourseMarkersTab**: Markers table uses grouped header rows by module (similar to budget items table with gray `--table-group-header-bg` headers). Table component's `groupBy` and `renderGroupHeader` props group markers by `moduleTitle`, removing redundant module column. Both desktop and mobile views display module headers with marker counts. **CourseDataTab**: Simplified Dashboard tab removes course content section, displaying only Progress Card and Discord Widget for cleaner interface. **CourseViewer Bug Fix**: Fixed critical React hooks error ("Rendered more hooks than during the previous render") by moving all useEffect hooks before early returns to comply with React's rules of hooks.
-- **Notification System**: Real-time notification system with bell icon and badge in header (both desktop MainHeader and mobile HeaderMobile). Uses Supabase tables `notifications` and `user_notifications` for delivery tracking. Features: getUnreadCount(), fetchNotifications(), markAsRead(), markAllAsRead(), subscribeUserNotifications() for real-time updates via Supabase realtime channels. NotificationDropdown displays notification list with read/unread states, time ago formatting, and click navigation using resolveNotificationHref() helper that supports routing via data.route, data.course_slug, data.payment_id, data.organization_id, data.project_id. Badge updates automatically when new notifications arrive or are marked as read.
-- **Admin Course Management**: AdminCourses page at /admin/courses with three-tab interface (Dashboard, Alumnos, Cursos) for administrative course management. **Dashboard tab (first position)**: Comprehensive analytics dashboard (AdminCourseDashboard.tsx) displaying 8 KPI cards (total/active courses, active subscriptions, expiring subscriptions this/next month, average completion rate, total revenue, monthly revenue with growth percentage, previous month revenue, average monthly revenue), recent enrollments list, and upcoming expirations (30-day window). Tables display courses with visibility/status, modules with course hierarchy, and lessons with Vimeo integration. "Cursos" button added to admin sidebar below "Productos". Full CRUD functionality implemented with modals: CourseFormModal (create/edit courses with slug, title, descriptions, cover, visibility, active status), CourseModuleFormModal (create/edit modules with course selection, title, description, sort order), and LessonFormModal (create/edit lessons with cascading course/module selection, Vimeo ID, duration, free preview, sort order, active status). All modals registered in ModalFactory and integrated with AdminCourses page. AdminCourseView (/admin/courses/:id) provides detailed course editing with HierarchicalTree component displaying modules (parent nodes) and lessons (child nodes) with drag & drop support for reordering. Header buttons allow adding modules/lessons with pre-selected course context. Cache invalidation ensures both global and course-specific queries stay synchronized. AdminCourseUsersTab provides enrollment management with delete functionality using DeleteConfirmationModal.
-- **Cost System**: Three-tier cost system for budget items (Archub Cost, Organization Cost, Independent Cost) with drag-and-drop reordering.
+- **Database Views**: Exclusive use of database views for data fetching (e.g., `construction_tasks_view`).
+
+### Feature Specifications
+- **Project Management**: Includes custom React-based Gantt chart, Kanban board, and parametric task generation.
+- **Financial Management**: Comprehensive tracking of movements, conversions, transfers, and budgets with multi-currency support, including specialized subforms for Personnel, Subcontracts, and Project Clients.
+- **Document Management**: Hierarchical organization, versioning, redesigned file explorer navigation, and modal-based preview system.
+- **Access Control**: `PlanRestricted` component system with admin bypass.
+- **Project Dashboard**: Displays KPIs, execution health, financial pulse, and documentation compliance.
+- **Learning Module ("Capacitaciones")**:
+    - Course management (courses, modules, lessons) with Vimeo integration.
+    - CourseSidebar for navigation and `useCourseSidebarStore` for state management.
+    - Lesson progress tracking (completion, last position, auto-save, auto-complete).
+    - Advanced student note-taking system with summary notes and temporal markers.
+    - Course pricing system with server-side validation and Mercado Pago integration.
+    - Discord Integration widget for community engagement.
+    - Deep-link navigation for lessons and tabs via URL parameters.
+- **Notification System**: Real-time notifications with bell icon badge, powered by Supabase `notifications` and `user_notifications` tables, supporting read/unread states and click navigation.
+- **Admin Course Management**: Dedicated `AdminCourses` page with a three-tab interface (Dashboard, Alumnos, Cursos) for full CRUD operations on courses, modules, and lessons. Includes analytics, hierarchical tree view with drag & drop reordering, and enrollment management.
+- **Coupon System**: Discount coupon system for courses with database-driven validation, redemption, and Mercado Pago integration.
+- **Cost System**: Three-tier cost system (Archub Cost, Organization Cost, Independent Cost) for budget items with drag-and-drop reordering.
+
+### System Design Choices
+- **Vercel Deployment**: Backend routes are implemented as Vercel-compatible serverless functions.
+- **Admin Authorization**: Admin endpoints use `AuthError` and verify user roles via `admin_users` view.
+- **SPA Fallback**: `vercel.json` configured for client-side routing and OAuth callbacks.
 
 ## External Dependencies
 
@@ -62,7 +66,3 @@ Preferred communication style: Simple, everyday language.
 - **date-fns**: Date manipulation utilities.
 - **React Flow**: For visual parameter dependency editor.
 - **Recharts**: Charting library.
-
-## Vercel Deployment
-
-**Serverless Functions**: Created Vercel-compatible serverless functions in `/api/` directory to replace Express routes for serverless deployment. Functions use Supabase service role key with user token to respect RLS policies. Implemented functions: budgets (CRUD), budget-items (CRUD + move), admin courses/modules/lessons/enrollments/dashboard (full CRUD + analytics), learning/dashboard (course progress), courses/[id]/progress (lesson progress tracking), lessons/[id]/progress (lesson progress CRUD), lessons/[id]/notes (student notes), countries (GET all countries), user/profile (PATCH user data and avatar). **Admin Authorization**: Admin endpoints use AuthError class with proper HTTP status codes (401 for missing/invalid tokens, 403 for non-admin users, 500 for config errors). All admin routes verify user role via `admin_users` view before any database operations. **SPA Fallback**: vercel.json includes `{ "source": "/(.*)", "destination": "/" }` fallback rule to serve index.html for all non-API routes, enabling client-side routing and OAuth callbacks. Configuration in `vercel.json` includes rewrites for all API routes. See `VERCEL_DEPLOY.md` for deployment guide and environment variables setup.
