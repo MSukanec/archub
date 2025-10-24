@@ -2950,13 +2950,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const authHeader = req.headers.authorization;
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        console.log('❌ No auth header');
         return res.status(401).json({ error: "No authorization token provided" });
       }
       
       const { isAdmin, error } = await verifyAdmin(authHeader);
       if (!isAdmin) {
+        console.log('❌ Not admin:', error);
         return res.status(403).json({ error });
       }
+      
+      console.log('✅ Admin verified, fetching enrollments...');
       
       const { course_id } = req.query;
       
@@ -2975,14 +2979,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const { data: enrollments, error: enrollmentsError } = await query;
       
+      console.log('📊 Enrollments query result:', {
+        count: enrollments?.length,
+        error: enrollmentsError,
+        sample: enrollments?.[0]
+      });
+      
       if (enrollmentsError) {
-        console.error("Error fetching enrollments:", enrollmentsError);
-        return res.status(500).json({ error: "Failed to fetch enrollments" });
+        console.error("❌ Error fetching enrollments:", enrollmentsError);
+        return res.status(500).json({ error: "Failed to fetch enrollments", details: enrollmentsError.message });
       }
       
+      console.log(`✅ Returning ${enrollments?.length || 0} enrollments`);
       return res.json(enrollments);
     } catch (error: any) {
-      console.error("Error in /api/admin/enrollments:", error);
+      console.error("❌ Error in /api/admin/enrollments:", error);
       return res.status(500).json({ error: "Internal error" });
     }
   });

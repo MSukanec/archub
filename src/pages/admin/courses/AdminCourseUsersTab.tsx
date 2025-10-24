@@ -20,11 +20,19 @@ export default function AdminCourseUsersTab() {
   const { data: enrollments = [], isLoading } = useQuery({
     queryKey: ['/api/admin/enrollments'],
     queryFn: async () => {
-      if (!supabase) return [];
+      console.log('🔍 Fetching enrollments...');
+      if (!supabase) {
+        console.log('❌ No supabase client');
+        return [];
+      }
       
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return [];
+      if (!session) {
+        console.log('❌ No session');
+        return [];
+      }
 
+      console.log('✅ Session found, making request...');
       const res = await fetch('/api/admin/enrollments', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
@@ -32,11 +40,19 @@ export default function AdminCourseUsersTab() {
         credentials: 'include'
       });
 
-      if (!res.ok) throw new Error('Failed to fetch enrollments');
-      return res.json();
+      if (!res.ok) {
+        console.log('❌ Response not OK:', res.status);
+        throw new Error('Failed to fetch enrollments');
+      }
+      
+      const data = await res.json();
+      console.log('📊 Enrollments received:', data.length, data);
+      return data;
     },
     enabled: !!supabase
   });
+  
+  console.log('🎯 Current enrollments in component:', enrollments, 'isLoading:', isLoading);
 
   // Delete enrollment mutation
   const deleteEnrollmentMutation = useMutation({
@@ -173,6 +189,14 @@ export default function AdminCourseUsersTab() {
     }
   ];
 
+  console.log('🎨 Rendering with enrollments.length:', enrollments.length);
+  
+  if (enrollments.length > 0) {
+    console.log('✅ Rendering TABLE with', enrollments.length, 'items');
+  } else {
+    console.log('❌ Rendering EMPTY STATE (enrollments.length === 0)');
+  }
+  
   return (
     <>
       {enrollments.length > 0 ? (
