@@ -19,6 +19,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ message: "API is working", timestamp: new Date().toISOString() });
   });
 
+  // Get all countries (public reference data, no auth required)
+  app.get("/api/countries", async (req, res) => {
+    try {
+      const { data: countries, error } = await supabase
+        .from("countries")
+        .select("id, name, country_code, alpha_3")
+        .order("name");
+
+      if (error) {
+        console.error("Error fetching countries:", error);
+        return res.status(500).json({ error: error.message });
+      }
+
+      return res.json(countries || []);
+    } catch (err: any) {
+      console.error("Countries API error:", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // Get current user data
   app.get("/api/current-user", async (req, res) => {
     try {
