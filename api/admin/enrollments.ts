@@ -54,7 +54,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(500).json({ error: "Failed to fetch enrollments" });
       }
 
-      return res.status(200).json(enrollments);
+      // Fetch progress for all enrollments in parallel
+      const enrollmentsWithProgress = await Promise.all(
+        (enrollments || []).map(async (enrollment) => {
+          const { data: progress } = await supabase
+            .rpc('get_course_progress', {
+              p_user_id: enrollment.user_id,
+              p_course_id: enrollment.course_id
+            });
+          
+          return {
+            ...enrollment,
+            progress: progress || { completed_lessons: 0, total_lessons: 0, progress_percentage: 0 }
+          };
+        })
+      );
+
+      return res.status(200).json(enrollmentsWithProgress);
 
     } else if (req.method === "POST") {
       // POST /api/admin/enrollments - Create new enrollment

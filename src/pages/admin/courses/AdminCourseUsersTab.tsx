@@ -20,19 +20,11 @@ export default function AdminCourseUsersTab() {
   const { data: enrollments = [], isLoading } = useQuery({
     queryKey: ['/api/admin/enrollments'],
     queryFn: async () => {
-      console.log('🔍 Fetching enrollments...');
-      if (!supabase) {
-        console.log('❌ No supabase client');
-        return [];
-      }
+      if (!supabase) return [];
       
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        console.log('❌ No session');
-        return [];
-      }
+      if (!session) return [];
 
-      console.log('✅ Session found, making request...');
       const res = await fetch('/api/admin/enrollments', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
@@ -40,19 +32,13 @@ export default function AdminCourseUsersTab() {
         credentials: 'include'
       });
 
-      if (!res.ok) {
-        console.log('❌ Response not OK:', res.status);
-        throw new Error('Failed to fetch enrollments');
-      }
-      
-      const data = await res.json();
-      console.log('📊 Enrollments received:', data.length, data);
-      return data;
+      if (!res.ok) throw new Error('Failed to fetch enrollments');
+      return res.json();
     },
-    enabled: !!supabase
+    enabled: !!supabase,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    refetchOnWindowFocus: false
   });
-  
-  console.log('🎯 Current enrollments in component:', enrollments, 'isLoading:', isLoading);
 
   // Delete enrollment mutation
   const deleteEnrollmentMutation = useMutation({
@@ -130,8 +116,9 @@ export default function AdminCourseUsersTab() {
       key: 'status',
       label: 'Estado',
       render: (enrollment: any) => {
+        const isActive = enrollment.status === 'active';
         const colors = {
-          active: '#22c55e',
+          active: 'var(--accent)',
           completed: '#3b82f6',
           expired: '#ef4444',
           cancelled: '#6b7280'
@@ -151,25 +138,61 @@ export default function AdminCourseUsersTab() {
     },
     {
       key: 'started_at',
-      label: 'Inicio',
+      label: 'Tiempo',
       render: (enrollment: any) => {
         const startDate = new Date(enrollment.started_at);
         const endDate = enrollment.expires_at ? new Date(enrollment.expires_at) : null;
+        
+        // Calcular porcentaje de tiempo transcurrido
+        let progressPercentage = 100;
+        if (endDate) {
+          const totalTime = endDate.getTime() - startDate.getTime();
+          const elapsedTime = new Date().getTime() - startDate.getTime();
+          progressPercentage = Math.min(100, Math.max(0, (elapsedTime / totalTime) * 100));
+        }
         
         return (
           <div className="w-full max-w-xs">
             <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
               <span>{format(startDate, 'MMM d', { locale: es })}</span>
-              {endDate && <span>{format(endDate, 'MMM d, yy', { locale: es })}</span>}
+              {endDate ? (
+                <span>{format(endDate, 'MMM d, yy', { locale: es })}</span>
+              ) : (
+                <span className="text-purple-500">Sin límite</span>
+              )}
             </div>
-            <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-border rounded-full overflow-hidden border border-border">
+              <div 
+                className="h-full rounded-full transition-all duration-300"
+                style={{ 
+                  backgroundColor: endDate ? 'var(--accent)' : '#a855f7',
+                  width: `${progressPercentage}%`
+                }}
+              />
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      key: 'progress',
+      label: 'Progreso',
+      render: (enrollment: any) => {
+        const progress = enrollment.progress || { completed_lessons: 0, total_lessons: 0, progress_percentage: 0 };
+        const percentage = progress.progress_percentage || 0;
+        
+        return (
+          <div className="w-full max-w-xs">
+            <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+              <span>{progress.completed_lessons || 0} / {progress.total_lessons || 0} lecciones</span>
+              <span className="font-medium">{percentage.toFixed(0)}%</span>
+            </div>
+            <div className="w-full h-2 bg-border rounded-full overflow-hidden border border-border">
               <div 
                 className="h-full rounded-full transition-all duration-300"
                 style={{ 
                   backgroundColor: 'var(--accent)',
-                  width: endDate 
-                    ? `${Math.min(100, Math.max(0, ((new Date().getTime() - startDate.getTime()) / (endDate.getTime() - startDate.getTime())) * 100))}%`
-                    : '100%'
+                  width: `${percentage}%`
                 }}
               />
             </div>
@@ -189,14 +212,6 @@ export default function AdminCourseUsersTab() {
     }
   ];
 
-  console.log('🎨 Rendering with enrollments.length:', enrollments.length);
-  
-  if (enrollments.length > 0) {
-    console.log('✅ Rendering TABLE with', enrollments.length, 'items');
-  } else {
-    console.log('❌ Rendering EMPTY STATE (enrollments.length === 0)');
-  }
-  
   return (
     <>
       {enrollments.length > 0 ? (

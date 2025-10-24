@@ -2945,25 +2945,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // GET /api/admin/enrollments - Get all enrollments
+  // GET /api/admin/enrollments - Get all enrollments with progress
   app.get("/api/admin/enrollments", async (req, res) => {
     try {
       const authHeader = req.headers.authorization;
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        console.log('❌ No auth header');
         return res.status(401).json({ error: "No authorization token provided" });
       }
       
       const { isAdmin, error } = await verifyAdmin(authHeader);
       if (!isAdmin) {
-        console.log('❌ Not admin:', error);
         return res.status(403).json({ error });
       }
       
-      console.log('✅ Admin verified, fetching enrollments...');
-      
       const { course_id } = req.query;
       
+      // Fetch enrollments with users and courses
       let query = supabase
         .from('course_enrollments')
         .select(`
@@ -2979,21 +2976,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const { data: enrollments, error: enrollmentsError } = await query;
       
-      console.log('📊 Enrollments query result:', {
-        count: enrollments?.length,
-        error: enrollmentsError,
-        sample: enrollments?.[0]
-      });
-      
       if (enrollmentsError) {
-        console.error("❌ Error fetching enrollments:", enrollmentsError);
-        return res.status(500).json({ error: "Failed to fetch enrollments", details: enrollmentsError.message });
+        console.error("Error fetching enrollments:", enrollmentsError);
+        return res.status(500).json({ error: "Failed to fetch enrollments" });
       }
       
-      console.log(`✅ Returning ${enrollments?.length || 0} enrollments`);
-      return res.json(enrollments);
+      // Fetch progress for all enrollments in parallel
+      const enrollmentsWithProgress = await Promise.all(
+        (enrollments || []).map(async (enrollment) => {
+          const { data: progress } = await supabase
+            .rpc('get_course_progress', {
+              p_user_id: enrollment.user_id,
+              p_course_id: enrollment.course_id
+            });
+          
+          return {
+            ...enrollment,
+            progress: progress || { completed_lessons: 0, total_lessons: 0, progress_percentage: 0 }
+          };
+        })
+      );
+      
+      return res.json(enrollmentsWithProgress);
     } catch (error: any) {
-      console.error("❌ Error in /api/admin/enrollments:", error);
+      console.error("Error in /api/admin/enrollments:", error);
       return res.status(500).json({ error: "Internal error" });
     }
   });
