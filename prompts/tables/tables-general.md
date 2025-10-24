@@ -279,3 +279,27 @@ TABLA USER_ORGANIZATION_PREFERENCES:
     "data_type": "timestamp with time zone"
   }
 ]
+
+TABLA COUNTRIES:
+
+create table public.countries (
+  id uuid not null default gen_random_uuid (),
+  alpha_3 text not null,
+  country_code text null,
+  name text not null,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  constraint countries_pkey primary key (id),
+  constraint countries_alpha3_format_chk check ((alpha_3 ~ '^[A-Z]{3}$'::text)),
+  constraint countries_country_code_chk check (
+    (
+      (country_code is null)
+      or (country_code ~ '^\+?[0-9]{1,4}$'::text)
+    )
+  ),
+  constraint countries_name_not_blank_chk check ((btrim(name) <> ''::text))
+) TABLESPACE pg_default;
+
+create unique INDEX IF not exists countries_name_lower_uniq on public.countries using btree (lower(name)) TABLESPACE pg_default;
+
+create unique INDEX IF not exists countries_alpha3_uniq on public.countries using btree (alpha_3) TABLESPACE pg_default;

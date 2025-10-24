@@ -27,7 +27,7 @@ export function Step1UserData({ onFinish }: Step1UserDataProps = {}) {
   });
 
   const handleFinish = () => {
-    if (formData.first_name && formData.last_name && formData.organization_name && onFinish) {
+    if (formData.first_name && formData.last_name && formData.country && formData.birthdate && formData.organization_name && onFinish) {
       onFinish();
     }
   };
@@ -60,7 +60,7 @@ export function Step1UserData({ onFinish }: Step1UserDataProps = {}) {
         {/* Nombre y Apellido */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="first_name" className="text-sm font-medium text-gray-900">
+            <Label htmlFor="first_name" className="text-xs font-medium leading-none">
               Nombre/s <span style={{ color: 'var(--accent)' }}>*</span>
             </Label>
             <Input
@@ -74,7 +74,7 @@ export function Step1UserData({ onFinish }: Step1UserDataProps = {}) {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="last_name" className="text-sm font-medium text-gray-900">
+            <Label htmlFor="last_name" className="text-xs font-medium leading-none">
               Apellido/s <span style={{ color: 'var(--accent)' }}>*</span>
             </Label>
             <Input
@@ -91,8 +91,8 @@ export function Step1UserData({ onFinish }: Step1UserDataProps = {}) {
         {/* País y Fecha de Nacimiento */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="country" className="text-sm font-medium text-gray-900">
-              País
+            <Label htmlFor="country" className="text-xs font-medium leading-none">
+              País <span style={{ color: 'var(--accent)' }}>*</span>
             </Label>
             <Select
               value={formData.country}
@@ -117,8 +117,8 @@ export function Step1UserData({ onFinish }: Step1UserDataProps = {}) {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="birthdate" className="text-sm font-medium text-gray-900">
-              Fecha de Nacimiento
+            <Label htmlFor="birthdate" className="text-xs font-medium leading-none">
+              Fecha de Nacimiento <span style={{ color: 'var(--accent)' }}>*</span>
             </Label>
             <DatePickerField
               value={getBirthdateValue()}
@@ -132,7 +132,7 @@ export function Step1UserData({ onFinish }: Step1UserDataProps = {}) {
 
         {/* Nombre de Organización */}
         <div className="space-y-2">
-          <Label htmlFor="organization_name" className="text-sm font-medium text-gray-900">
+          <Label htmlFor="organization_name" className="text-xs font-medium leading-none">
             Nombre de Organización / Empresa <span style={{ color: 'var(--accent)' }}>*</span>
           </Label>
           <Input
@@ -147,7 +147,7 @@ export function Step1UserData({ onFinish }: Step1UserDataProps = {}) {
 
         <Button 
           onClick={handleFinish}
-          disabled={!formData.first_name || !formData.last_name || !formData.organization_name}
+          disabled={!formData.first_name || !formData.last_name || !formData.country || !formData.birthdate || !formData.organization_name}
           className="w-full h-11"
           style={{ backgroundColor: 'var(--accent)', color: 'white' }}
           data-testid="button-finish-onboarding"

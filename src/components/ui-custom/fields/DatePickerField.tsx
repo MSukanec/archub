@@ -157,16 +157,18 @@ export default function DatePickerField({
             </Button>
           </div>
 
-          {/* Calendar */}
-          <Calendar
-            mode="single"
-            selected={value}
-            onSelect={handleDateSelect}
-            disabled={isDateDisabled}
-            month={month}
-            onMonthChange={setMonth}
-            locale={es}
-          />
+          {/* Calendar - hide native navigation */}
+          <div className="[&_.rdp-caption]:hidden [&_.rdp-nav]:hidden">
+            <Calendar
+              mode="single"
+              selected={value}
+              onSelect={handleDateSelect}
+              disabled={isDateDisabled}
+              month={month}
+              onMonthChange={setMonth}
+              locale={es}
+            />
+          </div>
         </div>
       </PopoverContent>
     </Popover>

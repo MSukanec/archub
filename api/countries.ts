@@ -16,26 +16,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ error: "Missing SUPABASE_URL / SUPABASE_ANON_KEY" });
     }
 
-    // Get user token from Authorization header - REQUIRED for RLS
-    const authHeader = req.headers.authorization || "";
-    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-
-    if (!token) {
-      return res.status(401).json({ error: "No authorization token provided" });
-    }
-
-    // Create Supabase client with anon key and user token (RLS applies)
+    // Create Supabase client with anon key only (no RLS required for public reference table)
     const supabase = createClient(url, anonKey, {
-      auth: { persistSession: false },
-      global: { headers: { Authorization: `Bearer ${token}` } },
+      auth: { persistSession: false }
     });
-
-    // Verify the token is valid
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
-    if (authError || !user) {
-      return res.status(401).json({ error: "Invalid or expired token" });
-    }
 
     // Fetch all countries ordered by name
     const { data: countries, error } = await supabase
@@ -45,10 +29,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (error) {
       console.error("Error fetching countries:", error);
-      // Check if it's an auth-related error
-      if (error.message?.includes("JWT") || error.message?.includes("token")) {
-        return res.status(401).json({ error: "Authentication failed" });
-      }
       return res.status(500).json({ error: error.message });
     }
 
