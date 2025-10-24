@@ -39,6 +39,17 @@ export default function DatePickerField({
     return false
   }
 
+  const handleDateChange = (date: Date | undefined) => {
+    if (date) {
+      // Normalizar la fecha al mediodía para evitar problemas de timezone
+      const normalizedDate = new Date(date)
+      normalizedDate.setHours(12, 0, 0, 0)
+      onChange(normalizedDate)
+    } else {
+      onChange(undefined)
+    }
+  }
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -59,7 +70,7 @@ export default function DatePickerField({
         <Calendar
           mode="single"
           selected={value}
-          onSelect={onChange}
+          onSelect={handleDateChange}
           disabled={isDateDisabled}
           initialFocus
           locale={es}
