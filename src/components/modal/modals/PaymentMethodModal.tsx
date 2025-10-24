@@ -5,8 +5,9 @@ import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import FormModalBody from "@/components/modal/form/FormModalBody";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
-import { ShoppingCart, Copy, CheckCircle, CreditCard, Building2, Loader2 } from 'lucide-react';
+import { ShoppingCart, Copy, CheckCircle, CreditCard, Building2, Loader2, Tag, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -23,6 +24,15 @@ interface PaymentMethodModalProps {
 
 type PaymentMethod = 'mercadopago' | 'paypal' | 'transfer';
 
+interface AppliedCoupon {
+  coupon_id: string;
+  code: string;
+  type: 'percent' | 'fixed';
+  amount: number;
+  discount: number;
+  final_price: number;
+}
+
 export default function PaymentMethodModal({
   courseSlug,
   currency
@@ -36,10 +46,120 @@ export default function PaymentMethodModal({
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [loading, setLoading] = useState(false);
   const [showBankInfo, setShowBankInfo] = useState(false);
+  
+  // Coupon states
+  const [couponCode, setCouponCode] = useState('');
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
 
   useEffect(() => {
     setPanel('edit');
   }, [setPanel]);
+
+  const handleValidateCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Ingresá un código de cupón',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (!priceData) {
+      toast({
+        title: 'Error',
+        description: 'Esperá a que se cargue el precio del curso',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    try {
+      setValidatingCoupon(true);
+
+      const { data: courseData, error: courseError } = await supabase
+        .from('courses')
+        .select('id')
+        .eq('slug', courseSlug)
+        .single();
+
+      if (courseError || !courseData) {
+        throw new Error('No se pudo obtener la información del curso');
+      }
+
+      const { data, error } = await supabase.rpc('validate_coupon', {
+        p_code: couponCode.trim(),
+        p_course_id: courseData.id,
+        p_price: priceData.amount,
+        p_currency: priceData.currency_code
+      });
+
+      if (error) {
+        console.error('Error validando cupón:', error);
+        throw new Error('Error al validar el cupón');
+      }
+
+      if (!data || !data.ok) {
+        // Map error reasons to user-friendly messages
+        const errorMessages: Record<string, string> = {
+          'NOT_FOUND_OR_INACTIVE': 'Cupón inválido o inactivo.',
+          'EXPIRED': 'El cupón está vencido.',
+          'NOT_STARTED': 'El cupón aún no está disponible.',
+          'USER_LIMIT_REACHED': 'Ya alcanzaste el límite de uso de este cupón.',
+          'GLOBAL_LIMIT_REACHED': 'Se alcanzó el límite de usos para este cupón.',
+          'NOT_APPLICABLE': 'Este cupón no aplica a este curso.',
+          'MINIMUM_NOT_MET': 'No alcanzás el mínimo de compra para usar este cupón.',
+          'CURRENCY_MISMATCH': 'El cupón no aplica a esta moneda.',
+          'UNAUTHENTICATED': 'Tenés que iniciar sesión para usar un cupón.'
+        };
+
+        const errorMessage = errorMessages[data.reason || ''] || 'No pudimos aplicar el cupón. Probá de nuevo.';
+        
+        toast({
+          title: 'Cupón no válido',
+          description: errorMessage,
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      // Coupon is valid
+      setAppliedCoupon({
+        coupon_id: data.coupon_id,
+        code: couponCode.trim().toUpperCase(),
+        type: data.type,
+        amount: data.amount,
+        discount: data.discount,
+        final_price: data.final_price
+      });
+
+      toast({
+        title: 'Cupón aplicado',
+        description: `¡Descuento de ${data.type === 'percent' ? data.amount + '%' : '$' + data.amount} aplicado!`,
+      });
+
+      setCouponCode('');
+    } catch (error: any) {
+      console.error('Error al validar cupón:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo validar el cupón',
+        variant: 'destructive'
+      });
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode('');
+    toast({
+      title: 'Cupón removido',
+      description: 'El descuento fue quitado'
+    });
+  };
 
   const handleMercadoPagoPayment = async () => {
     try {
@@ -49,41 +169,22 @@ export default function PaymentMethodModal({
         throw new Error('Supabase no está disponible');
       }
 
-      // 1) Usuario autenticado (Auth)
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError || !session?.access_token) {
         throw new Error('Debes iniciar sesión para comprar un curso');
       }
 
-      // 2) Buscar perfil en public.users por auth_id
-      const { data: profile, error: profileError } = await supabase
-        .from('users')
-        .select('id, full_name, email')
-        .eq('auth_id', session.user.id)
-        .maybeSingle();
-
-      if (profileError) {
-        console.error('Error obteniendo perfil:', profileError);
-        throw new Error('No se pudo obtener tu perfil de usuario');
-      }
-
-      if (!profile) {
-        throw new Error('No se encontró el perfil para este usuario');
-      }
-
-      // 3) Invocar la Edge Function con user_id = profile.id (NO session.user.id)
-      const response = await fetch('https://wtatvsgeivymcppowrfy.functions.supabase.co/create_mp_preference', {
+      // Call our new backend endpoint instead of Edge Function
+      const response = await fetch('/api/checkout/mp/create', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({
-          user_id: profile.id,  // CLAVE: enviar el ID de public.users, no auth.users
-          course_slug: courseSlug,
-          currency,
-          provider: 'mercadopago'
+          courseSlug,
+          code: appliedCoupon?.code || undefined
         })
       });
 
@@ -102,7 +203,7 @@ export default function PaymentMethodModal({
         throw new Error('No pudimos obtener el link de pago');
       }
 
-      // 4) Redirigir a MP
+      // Redirect to MP
       window.location.href = paymentUrl;
     } catch (error: any) {
       toast({
@@ -170,6 +271,9 @@ Enviá el comprobante a: pagos@archub.com.ar`;
     closeModal();
   };
 
+  const finalPrice = appliedCoupon ? appliedCoupon.final_price : priceData?.amount || 0;
+  const hasDiscount = appliedCoupon && appliedCoupon.discount > 0;
+
   const headerContent = (
     <FormModalHeader 
       title="Elegí cómo pagar"
@@ -199,6 +303,75 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                 Disfrutá del curso completo durante un año desde la fecha de compra
               </p>
             </div>
+
+            {/* Coupon Section */}
+            {!appliedCoupon ? (
+              <div className="space-y-3">
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <Tag className="h-4 w-4 text-accent" />
+                  Código de descuento
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Ingresá tu código"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !validatingCoupon) {
+                        handleValidateCoupon();
+                      }
+                    }}
+                    disabled={validatingCoupon}
+                    className="flex-1"
+                    data-testid="input-coupon-code"
+                  />
+                  <Button
+                    onClick={handleValidateCoupon}
+                    disabled={validatingCoupon || !couponCode.trim()}
+                    variant="secondary"
+                    data-testid="button-apply-coupon"
+                  >
+                    {validatingCoupon ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Validando
+                      </>
+                    ) : (
+                      'Aplicar'
+                    )}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div 
+                className="rounded-lg p-3 flex items-center justify-between"
+                style={{ 
+                  borderWidth: '1px',
+                  borderStyle: 'solid',
+                  borderColor: 'color-mix(in srgb, var(--accent) 30%, transparent)',
+                  backgroundColor: 'color-mix(in srgb, var(--accent) 5%, transparent)'
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <Tag className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                  <span className="text-sm font-medium" style={{ color: 'var(--accent)' }}>
+                    {appliedCoupon.code}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    ({appliedCoupon.type === 'percent' ? `${appliedCoupon.amount}% OFF` : `$${appliedCoupon.amount} OFF`})
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRemoveCoupon}
+                  className="h-7 px-2"
+                  data-testid="button-remove-coupon"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
 
             <RadioGroup
               value={selectedMethod || ''}
@@ -299,8 +472,25 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                   </div>
                 ) : priceData ? (
                   <>
+                    {hasDiscount && (
+                      <div className="space-y-1 mt-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Precio original</span>
+                          <span className="text-muted-foreground line-through">
+                            {priceData.currency_code === 'ARS' ? '$' : 'USD'} {priceData.amount.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span style={{ color: 'var(--accent)' }}>Cupón ({appliedCoupon.code})</span>
+                          <span style={{ color: 'var(--accent)' }}>
+                            −{priceData.currency_code === 'ARS' ? '$' : 'USD'} {appliedCoupon.discount.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="h-px bg-border my-2" />
+                      </div>
+                    )}
                     <p className="text-2xl font-bold mt-1">
-                      {priceData.currency_code === 'ARS' ? '$' : 'USD'} {priceData.amount.toLocaleString()}
+                      {priceData.currency_code === 'ARS' ? '$' : 'USD'} {finalPrice.toLocaleString()}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       Suscripción Anual - Acceso por 365 días corridos

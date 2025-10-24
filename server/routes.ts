@@ -2557,6 +2557,333 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== MERCADO PAGO CHECKOUT & WEBHOOKS ====================
+  
+  // Create Mercado Pago preference with coupon support
+  app.post("/api/checkout/mp/create", async (req, res) => {
+    try {
+      const { courseSlug, code } = req.body;
+
+      if (!courseSlug) {
+        return res.status(400).json({ error: "courseSlug is required" });
+      }
+
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      const token = authHeader.substring(7);
+
+      // Get authenticated user
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Invalid authentication" });
+      }
+
+      // Get user profile (public.users id)
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .select('id, full_name, email')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+
+      if (profileError || !profile) {
+        console.error('Error fetching profile:', profileError);
+        return res.status(404).json({ error: "User profile not found" });
+      }
+
+      // Get course data
+      const { data: course, error: courseError } = await supabase
+        .from('courses')
+        .select('id, slug, title')
+        .eq('slug', courseSlug)
+        .single();
+
+      if (courseError || !course) {
+        console.error('Error fetching course:', courseError);
+        return res.status(404).json({ error: "Course not found" });
+      }
+
+      // Get course price
+      const { data: priceData, error: priceError } = await supabase
+        .from('course_prices')
+        .select('*')
+        .eq('course_id', course.id)
+        .eq('currency_code', 'ARS')
+        .or(`provider.eq.mercadopago,provider.eq.any`)
+        .eq('is_active', true)
+        .order('provider', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (priceError || !priceData) {
+        console.error('Error fetching price:', priceError);
+        return res.status(404).json({ error: "Price not found for this course" });
+      }
+
+      let finalPrice = priceData.amount;
+      let couponData: any = null;
+
+      // Validate coupon if provided (server-side validation)
+      if (code && code.trim()) {
+        const { data: validationResult, error: couponError } = await supabase.rpc('validate_coupon', {
+          p_code: code.trim(),
+          p_course_id: course.id,
+          p_price: priceData.amount,
+          p_currency: priceData.currency_code
+        });
+
+        if (couponError) {
+          console.error('Error validating coupon:', couponError);
+          return res.status(400).json({ error: "Error validating coupon" });
+        }
+
+        if (!validationResult || !validationResult.ok) {
+          return res.status(400).json({ 
+            error: "Invalid coupon", 
+            reason: validationResult?.reason || 'UNKNOWN'
+          });
+        }
+
+        // Coupon is valid
+        couponData = validationResult;
+        finalPrice = validationResult.final_price;
+      }
+
+      // Initialize Mercado Pago SDK
+      const { MercadoPagoConfig, Preference } = require('mercadopago');
+      
+      const mpAccessToken = process.env.MP_ACCESS_TOKEN;
+      if (!mpAccessToken) {
+        console.error('MP_ACCESS_TOKEN not configured');
+        return res.status(500).json({ error: "Payment gateway not configured" });
+      }
+
+      const client = new MercadoPagoConfig({ 
+        accessToken: mpAccessToken
+      });
+      const preference = new Preference(client);
+
+      // Prepare metadata
+      const metadata: any = {
+        course_id: course.id,
+        course_slug: course.slug,
+        user_id: profile.id,
+        user_auth_id: user.id,
+        list_price: priceData.amount,
+        final_price: finalPrice
+      };
+
+      if (couponData) {
+        metadata.coupon_code = code.trim().toUpperCase();
+        metadata.coupon_id = couponData.coupon_id;
+        metadata.discount = couponData.discount;
+      }
+
+      // Create preference
+      const appUrl = process.env.APP_URL || process.env.REPL_SLUG 
+        ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`
+        : 'http://localhost:5000';
+
+      const preferenceData = {
+        items: [
+          {
+            id: course.id,
+            title: course.title,
+            quantity: 1,
+            currency_id: 'ARS',
+            unit_price: Number(finalPrice)
+          }
+        ],
+        payer: {
+          email: profile.email || user.email,
+          name: profile.full_name
+        },
+        back_urls: {
+          success: `${appUrl}/learning/payment-return?status=success`,
+          failure: `${appUrl}/learning/payment-return?status=failure`,
+          pending: `${appUrl}/learning/payment-return?status=pending`
+        },
+        auto_return: 'approved',
+        notification_url: `${appUrl}/api/webhooks/mp`,
+        metadata: metadata
+      };
+
+      console.log('Creating MP preference:', {
+        courseSlug,
+        finalPrice,
+        hasCoupon: !!couponData,
+        userId: profile.id
+      });
+
+      const result = await preference.create({ body: preferenceData });
+
+      res.json({
+        init_point: result.init_point,
+        sandbox_init_point: result.sandbox_init_point,
+        preference_id: result.id
+      });
+
+    } catch (error: any) {
+      console.error('Error creating MP preference:', error);
+      res.status(500).json({ 
+        error: "Failed to create payment preference",
+        message: error.message 
+      });
+    }
+  });
+
+  // Mercado Pago Webhook
+  app.post("/api/webhooks/mp", async (req, res) => {
+    try {
+      console.log('🔔 MP Webhook received:', req.body);
+
+      const { type, data } = req.body;
+
+      // Only process payment notifications
+      if (type !== 'payment') {
+        console.log('Ignoring non-payment notification:', type);
+        return res.status(200).json({ ok: true });
+      }
+
+      if (!data || !data.id) {
+        console.log('Invalid webhook data - missing payment ID');
+        return res.status(400).json({ error: "Invalid webhook data" });
+      }
+
+      // Initialize MP SDK
+      const { MercadoPagoConfig, Payment } = require('mercadopago');
+      
+      const mpAccessToken = process.env.MP_ACCESS_TOKEN;
+      if (!mpAccessToken) {
+        console.error('MP_ACCESS_TOKEN not configured');
+        return res.status(500).json({ error: "Payment gateway not configured" });
+      }
+
+      const client = new MercadoPagoConfig({ 
+        accessToken: mpAccessToken
+      });
+      const payment = new Payment(client);
+
+      // Get payment details from MP
+      const paymentData = await payment.get({ id: data.id });
+
+      console.log('💳 Payment data:', {
+        id: paymentData.id,
+        status: paymentData.status,
+        metadata: paymentData.metadata
+      });
+
+      // Only process approved payments
+      if (paymentData.status !== 'approved') {
+        console.log('Payment not approved, status:', paymentData.status);
+        return res.status(200).json({ ok: true, message: 'Payment not approved yet' });
+      }
+
+      const metadata = paymentData.metadata;
+      
+      if (!metadata || !metadata.course_id || !metadata.user_id) {
+        console.error('Missing required metadata:', metadata);
+        return res.status(400).json({ error: "Invalid payment metadata" });
+      }
+
+      // Check if enrollment already exists (idempotency)
+      const { data: existingEnrollment } = await supabase
+        .from('course_enrollments')
+        .select('id')
+        .eq('user_id', metadata.user_id)
+        .eq('course_id', metadata.course_id)
+        .maybeSingle();
+
+      if (existingEnrollment) {
+        console.log('Enrollment already exists, skipping');
+        return res.status(200).json({ ok: true, message: 'Enrollment already exists' });
+      }
+
+      // Create course enrollment
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 365); // 1 year subscription
+
+      const { error: enrollmentError } = await supabase
+        .from('course_enrollments')
+        .insert({
+          user_id: metadata.user_id,
+          course_id: metadata.course_id,
+          status: 'active',
+          expires_at: expiresAt.toISOString()
+        });
+
+      if (enrollmentError) {
+        console.error('Error creating enrollment:', enrollmentError);
+        // Don't return error to MP, we'll try again on next notification
+        return res.status(500).json({ error: "Failed to create enrollment" });
+      }
+
+      console.log('✅ Enrollment created successfully');
+
+      // Log payment
+      const { error: logError } = await supabase
+        .from('payments_log')
+        .insert({
+          user_id: metadata.user_id,
+          course_id: metadata.course_id,
+          provider: 'mercadopago',
+          provider_payment_id: String(paymentData.id),
+          status: paymentData.status,
+          amount: metadata.final_price,
+          currency: 'ARS',
+          external_reference: paymentData.external_reference,
+          raw_payload: paymentData
+        });
+
+      if (logError) {
+        console.error('Error logging payment (non-critical):', logError);
+      }
+
+      // Redeem coupon if present
+      if (metadata.coupon_code && metadata.coupon_id) {
+        console.log('💰 Redeeming coupon:', metadata.coupon_code);
+
+        const { error: redeemError } = await supabase.rpc('redeem_coupon', {
+          p_code: metadata.coupon_code,
+          p_course_id: metadata.course_id,
+          p_price: metadata.list_price,
+          p_currency: 'ARS',
+          p_order_id: paymentData.id
+        });
+
+        if (redeemError) {
+          console.error('Error redeeming coupon (non-critical):', redeemError);
+        } else {
+          console.log('✅ Coupon redeemed successfully');
+        }
+      }
+
+      res.status(200).json({ ok: true, message: 'Payment processed successfully' });
+
+    } catch (error: any) {
+      console.error('❌ Error processing MP webhook:', error);
+      res.status(500).json({ 
+        error: "Failed to process webhook",
+        message: error.message 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
