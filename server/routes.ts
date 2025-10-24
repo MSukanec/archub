@@ -2884,6 +2884,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // TEMPORARY DEBUG ENDPOINT
+  app.get("/api/debug/user-info", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const token = authHeader.substring(7);
+      
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+      
+      // Get auth user
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      // Search by email
+      const { data: userByEmail } = await authenticatedSupabase
+        .from('users')
+        .select('id, email, auth_id, full_name')
+        .ilike('email', user.email!)
+        .maybeSingle();
+      
+      // Search by auth_id
+      const { data: userByAuthId } = await authenticatedSupabase
+        .from('users')
+        .select('id, email, auth_id, full_name')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      // Get RPC result
+      const { data: rpcUser } = await authenticatedSupabase.rpc('archub_get_user');
+      
+      return res.json({
+        auth_user_id: user.id,
+        auth_user_email: user.email,
+        user_by_email: userByEmail,
+        user_by_auth_id: userByAuthId,
+        rpc_user_id: rpcUser?.user?.id || null,
+        rpc_user_auth_id: rpcUser?.user?.auth_id || null,
+      });
+    } catch (error: any) {
+      console.error('Debug endpoint error:', error);
+      return res.status(500).json({ error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
