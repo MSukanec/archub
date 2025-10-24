@@ -2884,6 +2884,172 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== ADMIN ENDPOINTS (for development) ====================
+  
+  // Helper function to verify admin access
+  async function verifyAdmin(authHeader: string) {
+    const token = authHeader.substring(7);
+    
+    const authSupabase = createClient(
+      process.env.VITE_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { persistSession: false } }
+    );
+    
+    const { data: { user }, error } = await authSupabase.auth.getUser(token);
+    
+    if (error || !user) {
+      return { isAdmin: false, error: "Invalid or expired token" };
+    }
+    
+    const { data: adminCheck } = await authSupabase
+      .from('admin_users')
+      .select('auth_id')
+      .eq('auth_id', user.id)
+      .maybeSingle();
+    
+    if (!adminCheck) {
+      return { isAdmin: false, error: "Admin access required" };
+    }
+    
+    return { isAdmin: true, user };
+  }
+  
+  // GET /api/admin/courses - Get all courses
+  app.get("/api/admin/courses", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const { isAdmin, error } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error });
+      }
+      
+      const { data: courses, error: coursesError } = await supabase
+        .from('courses')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (coursesError) {
+        console.error("Error fetching courses:", coursesError);
+        return res.status(500).json({ error: "Failed to fetch courses" });
+      }
+      
+      return res.json(courses);
+    } catch (error: any) {
+      console.error("Error in /api/admin/courses:", error);
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
+  
+  // GET /api/admin/enrollments - Get all enrollments
+  app.get("/api/admin/enrollments", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const { isAdmin, error } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error });
+      }
+      
+      const { course_id } = req.query;
+      
+      let query = supabase
+        .from('course_enrollments')
+        .select(`
+          *,
+          users!inner(id, full_name, email),
+          courses!inner(id, title)
+        `)
+        .order('started_at', { ascending: false });
+      
+      if (course_id) {
+        query = query.eq('course_id', course_id);
+      }
+      
+      const { data: enrollments, error: enrollmentsError } = await query;
+      
+      if (enrollmentsError) {
+        console.error("Error fetching enrollments:", enrollmentsError);
+        return res.status(500).json({ error: "Failed to fetch enrollments" });
+      }
+      
+      return res.json(enrollments);
+    } catch (error: any) {
+      console.error("Error in /api/admin/enrollments:", error);
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
+  
+  // DELETE /api/admin/enrollments/:id
+  app.delete("/api/admin/enrollments/:id", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const { isAdmin, error } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error });
+      }
+      
+      const { id } = req.params;
+      
+      const { error: deleteError } = await supabase
+        .from('course_enrollments')
+        .delete()
+        .eq('id', id);
+      
+      if (deleteError) {
+        console.error("Error deleting enrollment:", deleteError);
+        return res.status(500).json({ error: "Failed to delete enrollment" });
+      }
+      
+      return res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error in DELETE /api/admin/enrollments/:id:", error);
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
+  
+  // GET /api/admin/dashboard - Get admin dashboard data
+  app.get("/api/admin/dashboard", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const { isAdmin, error } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error });
+      }
+      
+      // Get basic counts
+      const [coursesResult, enrollmentsResult, usersResult] = await Promise.all([
+        supabase.from('courses').select('id', { count: 'exact', head: true }),
+        supabase.from('course_enrollments').select('id', { count: 'exact', head: true }),
+        supabase.from('users').select('id', { count: 'exact', head: true })
+      ]);
+      
+      return res.json({
+        total_courses: coursesResult.count || 0,
+        total_enrollments: enrollmentsResult.count || 0,
+        total_users: usersResult.count || 0
+      });
+    } catch (error: any) {
+      console.error("Error in /api/admin/dashboard:", error);
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
+
   // TEMPORARY DEBUG ENDPOINT
   app.get("/api/debug/user-info", async (req, res) => {
     try {
