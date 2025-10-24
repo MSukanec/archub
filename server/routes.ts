@@ -2051,12 +2051,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Unauthorized" });
       }
       
-      // CRITICAL: Get user from users table by EMAIL (not by id!)
+      // Get user from users table by auth_id
       const { data: dbUser } = await authenticatedSupabase
         .from('users')
         .select('id')
-        .ilike('email', user.email!)
-        .single();
+        .eq('auth_id', user.id)
+        .maybeSingle();
       
       if (!dbUser) {
         return res.json([]);
@@ -2306,12 +2306,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Unauthorized" });
       }
       
-      // CRITICAL: Get user from users table by EMAIL (not by id!)
+      // Get user from users table by auth_id
       const { data: dbUser } = await authenticatedSupabase
         .from('users')
         .select('id')
-        .ilike('email', user.email!)
-        .single();
+        .eq('auth_id', user.id)
+        .maybeSingle();
       
       if (!dbUser) {
         return res.json([]);
@@ -2368,12 +2368,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Unauthorized" });
       }
       
-      // Get the user record from the users table using ilike() for case-insensitive match
+      // Get the user record from the users table using auth_id
       const { data: userRecord, error: userRecordError } = await authenticatedSupabase
         .from('users')
         .select('id, email')
-        .ilike('email', authUser.email)
-        .single();
+        .eq('auth_id', authUser.id)
+        .maybeSingle();
       
       if (userRecordError || !userRecord) {
         console.error("Error fetching user record:", userRecordError);
@@ -2381,7 +2381,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Get all enrollments for this user with course slug
-      const { data: enrollments, error: enrollmentsError } = await authenticatedSupabase
+      const { data: enrollments, error: enrollmentsError} = await authenticatedSupabase
         .from('course_enrollments')
         .select('*, courses(slug)')
         .eq('user_id', userRecord.id);
