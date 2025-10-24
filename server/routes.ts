@@ -2984,15 +2984,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Fetch progress for all enrollments in parallel
       const enrollmentsWithProgress = await Promise.all(
         (enrollments || []).map(async (enrollment) => {
-          const { data: progress } = await supabase
-            .rpc('get_course_progress', {
-              p_user_id: enrollment.user_id,
-              p_course_id: enrollment.course_id
-            });
+          // Get all modules for the course
+          const { data: modules } = await supabase
+            .from('course_modules')
+            .select('id')
+            .eq('course_id', enrollment.course_id);
+          
+          if (!modules || modules.length === 0) {
+            return {
+              ...enrollment,
+              progress: { completed_lessons: 0, total_lessons: 0, progress_percentage: 0 }
+            };
+          }
+          
+          const moduleIds = modules.map(m => m.id);
+          
+          // Get all lessons for these modules
+          const { data: lessons } = await supabase
+            .from('course_lessons')
+            .select('id')
+            .in('module_id', moduleIds);
+          
+          if (!lessons || lessons.length === 0) {
+            return {
+              ...enrollment,
+              progress: { completed_lessons: 0, total_lessons: 0, progress_percentage: 0 }
+            };
+          }
+          
+          const lessonIds = lessons.map(l => l.id);
+          const total_lessons = lessons.length;
+          
+          // Get completed lessons for this user
+          const { data: progressData } = await supabase
+            .from('course_lesson_progress')
+            .select('id, is_completed')
+            .eq('user_id', enrollment.user_id)
+            .in('lesson_id', lessonIds)
+            .eq('is_completed', true);
+          
+          const completed_lessons = progressData?.length || 0;
+          const progress_percentage = total_lessons > 0 
+            ? Math.round((completed_lessons / total_lessons) * 100) 
+            : 0;
           
           return {
             ...enrollment,
-            progress: progress || { completed_lessons: 0, total_lessons: 0, progress_percentage: 0 }
+            progress: { 
+              completed_lessons, 
+              total_lessons, 
+              progress_percentage 
+            }
           };
         })
       );
