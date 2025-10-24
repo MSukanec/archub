@@ -180,3 +180,59 @@ create table public.payments_log (
   constraint payments_log_course_id_fkey foreign KEY (course_id) references courses (id) on delete CASCADE,
   constraint payments_log_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
 ) TABLESPACE pg_default;
+
+TABLA COUPON_COURSES:
+
+create table public.coupon_courses (
+  coupon_id uuid not null,
+  course_id uuid not null,
+  constraint coupon_courses_pkey primary key (coupon_id, course_id),
+  constraint coupon_courses_coupon_id_fkey foreign KEY (coupon_id) references coupons (id) on delete CASCADE,
+  constraint coupon_courses_course_id_fkey foreign KEY (course_id) references courses (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+TABLA COUPON_REDEMPTIONS:
+
+create table public.coupon_redemptions (
+  id uuid not null default gen_random_uuid (),
+  coupon_id uuid not null,
+  user_id uuid not null,
+  course_id uuid not null,
+  order_id uuid null,
+  amount_saved numeric(12, 2) not null,
+  currency text null,
+  created_at timestamp with time zone not null default now(),
+  constraint coupon_redemptions_pkey primary key (id),
+  constraint coupon_redemptions_coupon_id_fkey foreign KEY (coupon_id) references coupons (id) on delete CASCADE,
+  constraint coupon_redemptions_course_id_fkey foreign KEY (course_id) references courses (id) on delete CASCADE,
+  constraint coupon_redemptions_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+TABLA COUPONS:
+
+create table public.coupons (
+  id uuid not null default gen_random_uuid (),
+  code text not null,
+  type public.coupon_type_t not null,
+  amount numeric(12, 2) not null,
+  currency text null,
+  max_redemptions integer null,
+  per_user_limit integer null default 1,
+  starts_at timestamp with time zone null,
+  expires_at timestamp with time zone null,
+  min_order_total numeric(12, 2) null,
+  applies_to_all boolean not null default true,
+  is_active boolean not null default true,
+  created_by uuid null,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  constraint coupons_pkey primary key (id),
+  constraint coupons_created_by_fkey foreign KEY (created_by) references users (id) on delete set null
+) TABLESPACE pg_default;
+
+create unique INDEX IF not exists coupons_code_lower_uidx on public.coupons using btree (lower(code)) TABLESPACE pg_default;
+
+create trigger trg_coupons_set_updated BEFORE
+update on coupons for EACH row
+execute FUNCTION set_updated_at ();
+
