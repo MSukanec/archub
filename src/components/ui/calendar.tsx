@@ -81,7 +81,10 @@ function Calendar({
                 handleChange(value)
               }}
             >
-              <SelectTrigger className="pr-1.5 focus:ring-0 h-7 text-xs border-none">
+              <SelectTrigger className={cn(
+                buttonVariants({ variant: "outline" }),
+                "h-7 w-auto px-2 text-xs font-medium bg-transparent opacity-50 hover:opacity-100 focus:ring-0"
+              )}>
                 <SelectValue>{selected?.props?.children}</SelectValue>
               </SelectTrigger>
               <SelectContent position="popper">

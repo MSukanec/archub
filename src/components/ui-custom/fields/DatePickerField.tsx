@@ -68,8 +68,8 @@ export default function DatePickerField({
           toYear={new Date().getFullYear()}
           classNames={{
             day_selected:
-              "bg-[var(--accent)] text-white hover:bg-[var(--accent)] hover:text-white focus:bg-[var(--accent)] focus:text-white",
-            day_today: "bg-[var(--accent)] !text-white dark:!text-white font-semibold hover:bg-[var(--accent)] hover:!text-white",
+              "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+            day_today: "font-semibold [background:var(--accent)] [color:var(--accent-foreground)] hover:[background:var(--accent)] hover:[color:var(--accent-foreground)]",
           }}
         />
       </PopoverContent>
