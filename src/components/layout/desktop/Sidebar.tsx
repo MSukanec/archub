@@ -57,7 +57,7 @@ export function Sidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const isAdmin = useIsAdmin();
-  const { selectedProjectId, currentOrganizationId, setSelectedProject } = useProjectContext();
+  const { selectedProjectId, currentOrganizationId, setSelectedProject, setCurrentOrganization } = useProjectContext();
   const { sidebarLevel, setSidebarLevel } = useNavigationStore();
   const { isDocked, isHovered, setHovered, setDocked } = useSidebarStore();
   const { toast } = useToast();
@@ -230,10 +230,18 @@ export function Sidebar() {
                   </div>
                   {isExpanded && (
                     <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
-                      <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
+                      <span className={cn(
+                        "text-sm font-medium truncate text-left",
+                        location === '/home' ? "text-white" : "text-[var(--main-sidebar-fg)]",
+                        "group-hover:text-white"
+                      )}>
                         Inicio
                       </span>
-                      <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 truncate text-left">
+                      <span className={cn(
+                        "text-xs truncate text-left",
+                        location === '/home' ? "text-white opacity-100" : "text-[var(--main-sidebar-fg)] opacity-60",
+                        "group-hover:text-white group-hover:opacity-100"
+                      )}>
                         Página principal
                       </span>
                     </div>
@@ -278,10 +286,18 @@ export function Sidebar() {
                   </div>
                   {isExpanded && (
                     <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
-                      <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
+                      <span className={cn(
+                        "text-sm font-medium truncate text-left",
+                        (location.startsWith('/organization') || location.startsWith('/contacts') || location.startsWith('/movements') || location.startsWith('/finances') || location.startsWith('/analysis')) ? "text-white" : "text-[var(--main-sidebar-fg)]",
+                        "group-hover:text-white"
+                      )}>
                         Organización
                       </span>
-                      <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 truncate text-left">
+                      <span className={cn(
+                        "text-xs truncate text-left",
+                        (location.startsWith('/organization') || location.startsWith('/contacts') || location.startsWith('/movements') || location.startsWith('/finances') || location.startsWith('/analysis')) ? "text-white opacity-100" : "text-[var(--main-sidebar-fg)] opacity-60",
+                        "group-hover:text-white group-hover:opacity-100"
+                      )}>
                         Gestión empresarial
                       </span>
                     </div>
@@ -319,10 +335,18 @@ export function Sidebar() {
                   </div>
                   {isExpanded && (
                     <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
-                      <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
+                      <span className={cn(
+                        "text-sm font-medium truncate text-left",
+                        (location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients')) ? "text-white" : "text-[var(--main-sidebar-fg)]",
+                        "group-hover:text-white"
+                      )}>
                         Proyecto
                       </span>
-                      <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 truncate text-left">
+                      <span className={cn(
+                        "text-xs truncate text-left",
+                        (location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients')) ? "text-white opacity-100" : "text-[var(--main-sidebar-fg)] opacity-60",
+                        "group-hover:text-white group-hover:opacity-100"
+                      )}>
                         Gestión de obras
                       </span>
                     </div>
@@ -352,10 +376,18 @@ export function Sidebar() {
                   </div>
                   {isExpanded && (
                     <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
-                      <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
+                      <span className={cn(
+                        "text-sm font-medium truncate text-left",
+                        location.startsWith('/learning') ? "text-white" : "text-[var(--main-sidebar-fg)]",
+                        "group-hover:text-white"
+                      )}>
                         Capacitaciones
                       </span>
-                      <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 truncate text-left">
+                      <span className={cn(
+                        "text-xs truncate text-left",
+                        location.startsWith('/learning') ? "text-white opacity-100" : "text-[var(--main-sidebar-fg)] opacity-60",
+                        "group-hover:text-white group-hover:opacity-100"
+                      )}>
                         Cursos y formación
                       </span>
                     </div>
@@ -386,10 +418,18 @@ export function Sidebar() {
                     </div>
                     {isExpanded && (
                       <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
-                        <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
+                        <span className={cn(
+                          "text-sm font-medium truncate text-left",
+                          location.startsWith('/admin') ? "text-white" : "text-[var(--main-sidebar-fg)]",
+                          "group-hover:text-white"
+                        )}>
                           Administración
                         </span>
-                        <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 truncate text-left">
+                        <span className={cn(
+                          "text-xs truncate text-left",
+                          location.startsWith('/admin') ? "text-white opacity-100" : "text-[var(--main-sidebar-fg)] opacity-60",
+                          "group-hover:text-white group-hover:opacity-100"
+                        )}>
                           Panel de control
                         </span>
                       </div>
@@ -403,6 +443,79 @@ export function Sidebar() {
                 "flex flex-col gap-[2px]",
                 isExpanded ? "px-[9px]" : "items-center"
               )}>
+                {/* Selector de Organización - solo en sidebar de organización */}
+                {sidebarLevel === 'organization' && (
+                  <div className="h-16 flex items-center justify-center mb-2">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          className={cn(
+                            "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
+                            isExpanded ? "w-full" : "w-8"
+                          )}
+                        >
+                          {/* Icono siempre centrado */}
+                          <div className="flex items-center justify-center w-8 flex-shrink-0">
+                            <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+                              <Building className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                            </div>
+                          </div>
+                          
+                          {/* Texto que aparece cuando se expande */}
+                          {isExpanded && (
+                            <div className="flex flex-1 items-center justify-between overflow-hidden min-w-0 ml-3">
+                              <div className="flex flex-col justify-center overflow-hidden min-w-0">
+                                <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
+                                  {userData?.organization?.name || "Sin organización"}
+                                </span>
+                                <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 truncate text-left">
+                                  Cambiar organización
+                                </span>
+                              </div>
+                              <ChevronDown className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 flex-shrink-0 ml-2" />
+                            </div>
+                          )}
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent 
+                        side="right" 
+                        align="start"
+                        className="w-64 p-2"
+                      >
+                        <div className="space-y-1">
+                          <div className="px-2 py-1.5">
+                            <p className="text-xs font-semibold text-muted-foreground">Organizaciones</p>
+                          </div>
+                          {!userData?.organizations || userData.organizations.length === 0 ? (
+                            <div className="px-2 py-4 text-center">
+                              <p className="text-sm text-muted-foreground">No hay organizaciones disponibles</p>
+                            </div>
+                          ) : (
+                            userData.organizations.map((org: any) => (
+                              <button
+                                key={org.id}
+                                onClick={() => {
+                                  setCurrentOrganization(org.id);
+                                  queryClient.invalidateQueries({ queryKey: ['current-user'] });
+                                  queryClient.invalidateQueries({ queryKey: ['projects'] });
+                                }}
+                                className={cn(
+                                  "w-full px-2 py-2 text-left text-sm rounded-md transition-colors",
+                                  org.id === currentOrganizationId
+                                    ? "bg-accent/10 text-accent font-medium"
+                                    : "hover:bg-accent/5"
+                                )}
+                              >
+                                {org.name}
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                )}
+                
                 {/* Selector de Proyecto - solo en sidebar de proyecto */}
                 {sidebarLevel === 'project' && (
                   <div className="h-16 flex items-center justify-center mb-2">
