@@ -256,8 +256,8 @@ export default function Home() {
           </Card>
         )}
 
-        {/* Grid de 6 Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Grid de 4 Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* 1. Continuar donde lo dejaste */}
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
@@ -297,63 +297,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          {/* 2. Acciones rápidas */}
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-accent" />
-                Acciones rápidas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="outline"
-                  className="h-auto py-3 flex flex-col items-center gap-2"
-                  onClick={() => {
-                    setSidebarLevel('organization');
-                    navigate('/organization/projects');
-                  }}
-                >
-                  <Plus className="w-5 h-5" />
-                  <span className="text-xs">Crear proyecto</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-auto py-3 flex flex-col items-center gap-2"
-                  onClick={() => {
-                    toast({ title: "Crear tarea", description: "Funcionalidad próximamente" });
-                  }}
-                >
-                  <CheckSquare className="w-5 h-5" />
-                  <span className="text-xs">Crear tarea</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-auto py-3 flex flex-col items-center gap-2"
-                  onClick={() => {
-                    toast({ title: "Subir presupuesto", description: "Funcionalidad próximamente" });
-                  }}
-                >
-                  <FileUp className="w-5 h-5" />
-                  <span className="text-xs">Subir presup.</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-auto py-3 flex flex-col items-center gap-2"
-                  onClick={() => {
-                    setSidebarLevel('organization');
-                    navigate('/organization/contacts');
-                  }}
-                >
-                  <UserPlus className="w-5 h-5" />
-                  <span className="text-xs">Invitar miembro</span>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 3. Proyectos activos */}
+          {/* 2. Proyectos activos */}
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -385,9 +329,8 @@ export default function Home() {
                         key={project.id}
                         className={cn(
                           "p-3 rounded-lg hover:bg-accent/5 transition-colors cursor-pointer",
-                          isCurrentProject ? "border-2" : "border"
+                          isCurrentProject ? "border-2 border-[var(--accent)]" : "border border-border"
                         )}
-                        style={isCurrentProject ? { borderColor: 'hsl(var(--accent))' } : undefined}
                         onClick={() => {
                           selectProjectMutation.mutate(project.id);
                         }}
@@ -442,56 +385,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          {/* 4. Tareas próximas */}
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <CheckSquare className="w-5 h-5 text-accent" />
-                Tareas próximas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {upcomingTasks.length > 0 ? (
-                <div className="space-y-2">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-xs">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="text-left pb-2 font-medium">Tarea</th>
-                          <th className="text-left pb-2 font-medium">Proyecto</th>
-                          <th className="text-left pb-2 font-medium">Responsable</th>
-                          <th className="text-left pb-2 font-medium">Fecha</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {upcomingTasks.slice(0, 5).map((task) => (
-                          <tr key={task.id} className="border-b last:border-0">
-                            <td className="py-2">{task.title}</td>
-                            <td className="py-2 text-muted-foreground">{task.project_name}</td>
-                            <td className="py-2 text-muted-foreground">{task.assigned_to}</td>
-                            <td className="py-2 text-muted-foreground">
-                              {task.due_date ? format(new Date(task.due_date), 'dd/MM', { locale: es }) : '-'}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  <Button variant="link" className="w-full p-0 h-auto text-sm">
-                    Ver todas las tareas →
-                  </Button>
-                </div>
-              ) : (
-                <div className="text-center py-6">
-                  <p className="text-sm text-muted-foreground">
-                    No hay tareas próximas
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* 5. Academia */}
+          {/* 3. Academia */}
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
@@ -533,7 +427,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          {/* 6. Comunidad / Feedback */}
+          {/* 4. Comunidad / Feedback */}
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
