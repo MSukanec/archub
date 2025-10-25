@@ -232,6 +232,16 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
             // 3. Actualizar contexto de proyecto para que se actualice el sidebar
             setSelectedProject(newProject.id, organizationId);
           }
+
+          // Marcar checklist de "crear primer proyecto" como completado
+          const { error: checklistError } = await supabase.rpc('tick_home_checklist', {
+            p_key: 'create_project',
+            p_value: true
+          });
+          
+          if (checklistError) {
+            console.error('Error updating home checklist:', checklistError);
+          }
         } catch (error) {
           console.error('Error updating user organization preferences:', error);
         }
