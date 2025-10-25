@@ -312,7 +312,7 @@ export default function Home() {
                       className="flex-shrink-0"
                       onClick={() => {
                         setSidebarLevel('organization');
-                        navigate('/organization/contacts');
+                        navigate('/contacts');
                       }}
                     >
                       <ArrowRight className="w-4 h-4 mr-2" />
@@ -349,7 +349,7 @@ export default function Home() {
                       className="flex-shrink-0"
                       onClick={() => {
                         setSidebarLevel('organization');
-                        navigate('/organization/finances/movements');
+                        navigate('/movements');
                       }}
                     >
                       <ArrowRight className="w-4 h-4 mr-2" />
