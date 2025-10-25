@@ -10,6 +10,7 @@ import { useProjectContext } from "@/stores/projectContext";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useToast } from "@/hooks/use-toast";
 import { useProjects } from "@/hooks/use-projects";
+import { useCourses } from "@/hooks/use-courses";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { supabase } from "@/lib/supabase";
@@ -87,6 +88,10 @@ export default function Home() {
     if (b.id === selectedProjectId) return 1;
     return 0;
   });
+
+  // Query para cursos
+  const { data: courses = [] } = useCourses();
+  const latestCourse = courses.length > 0 ? courses[0] : null;
 
   // Mutación para cambiar el proyecto activo
   const selectProjectMutation = useMutation({
@@ -387,83 +392,86 @@ export default function Home() {
 
           {/* 3. Academia */}
           <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
                 <GraduationCap className="w-5 h-5 text-accent" />
                 Academia
               </CardTitle>
+              <Button
+                size="sm"
+                onClick={() => {
+                  setSidebarLevel('learning');
+                  navigate('/learning/dashboard');
+                }}
+              >
+                Ir a Academia
+              </Button>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                <div className="p-3 rounded-lg bg-purple-500/5 border border-purple-500/20">
-                  <h4 className="font-medium text-sm mb-1">Recomendado</h4>
-                  <p className="text-xs text-muted-foreground mb-3">
-                    Primer presupuesto en 30 min
-                  </p>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => {
-                      setSidebarLevel('learning');
-                      navigate('/learning/dashboard');
-                    }}
-                  >
-                    <Play className="w-4 h-4 mr-2" />
-                    Ver curso
-                  </Button>
+              {latestCourse ? (
+                <div className="space-y-3">
+                  <div className="p-3 rounded-lg bg-accent/5 border border-accent/20">
+                    <h4 className="font-medium text-sm mb-1">Recomendado</h4>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      {latestCourse.title}
+                    </p>
+                    <Button
+                      size="sm"
+                      className="w-full"
+                      onClick={() => {
+                        setSidebarLevel('learning');
+                        navigate(`/learning/courses/${latestCourse.id}`);
+                      }}
+                    >
+                      <Play className="w-4 h-4 mr-2" />
+                      Ver curso
+                    </Button>
+                  </div>
                 </div>
-                <Button
-                  variant="link"
-                  className="w-full p-0 h-auto text-sm"
-                  onClick={() => {
-                    setSidebarLevel('learning');
-                    navigate('/learning/dashboard');
-                  }}
-                >
-                  Ir a Academia →
-                </Button>
-              </div>
+              ) : (
+                <div className="text-center py-6">
+                  <p className="text-sm text-muted-foreground">
+                    No hay cursos disponibles
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
           {/* 4. Comunidad / Feedback */}
           <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-accent" />
                 Comunidad
               </CardTitle>
+              <Button
+                size="sm"
+                onClick={() => window.open('https://discord.com/channels/868615664070443008', '_blank')}
+              >
+                Ir a Discord
+              </Button>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Button
-                  className="w-full"
-                  onClick={() => window.open('https://discord.gg/your-discord', '_blank')}
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => toast({ title: "Sugerir idea", description: "Formulario próximamente" })}
                 >
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Entrar a Discord
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Sugerir una idea
                 </Button>
-                <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                    onClick={() => toast({ title: "Sugerir idea", description: "Formulario próximamente" })}
-                  >
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Sugerir una idea
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                    onClick={() => toast({ title: "Reportar bug", description: "Formulario próximamente" })}
-                  >
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    Reportar un bug
-                  </Button>
-                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => toast({ title: "Reportar bug", description: "Formulario próximamente" })}
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Reportar un bug
+                </Button>
               </div>
             </CardContent>
           </Card>
