@@ -10,7 +10,9 @@ import { useProjectContext } from "@/stores/projectContext";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useToast } from "@/hooks/use-toast";
 import { useProjects } from "@/hooks/use-projects";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
+import { supabase } from "@/lib/supabase";
 import { 
   Home as HomeIcon, 
   CheckCircle2,
@@ -44,7 +46,7 @@ export default function Home() {
   const [, navigate] = useLocation();
   const { data: userData, isLoading } = useCurrentUser();
   const { setSidebarLevel } = useNavigationStore();
-  const { selectedProjectId, currentOrganizationId } = useProjectContext();
+  const { selectedProjectId, currentOrganizationId, setSelectedProject } = useProjectContext();
   const isAdmin = useIsAdmin();
   const { toast } = useToast();
 
@@ -74,7 +76,58 @@ export default function Home() {
   }
 
   // Query para proyectos activos (datos reales)
-  const { data: activeProjects = [], isLoading: projectsLoading } = useProjects(currentOrganizationId || undefined);
+  const { data: allProjects = [], isLoading: projectsLoading } = useProjects(currentOrganizationId || undefined);
+  
+  // Filtrar SOLO proyectos con estado "Activo"
+  const activeProjects = allProjects.filter(project => project.status === 'Activo');
+
+  // Mutación para cambiar el proyecto activo
+  const selectProjectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      if (!supabase || !userData?.user?.id || !currentOrganizationId) {
+        throw new Error('Required data not available');
+      }
+      
+      const { error } = await supabase
+        .from('user_organization_preferences')
+        .upsert({
+          user_id: userData.user.id,
+          organization_id: currentOrganizationId,
+          last_project_id: projectId,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,organization_id'
+        });
+      
+      if (error) throw error;
+      return projectId;
+    },
+    onSuccess: (projectId) => {
+      setSelectedProject(projectId, currentOrganizationId);
+      
+      queryClient.invalidateQueries({ 
+        queryKey: ['user-organization-preferences', userData?.user?.id, currentOrganizationId] 
+      });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      
+      // Navegar al dashboard del proyecto
+      setSidebarLevel('project');
+      navigate('/project/dashboard');
+      
+      toast({
+        title: "Proyecto activado",
+        description: "El proyecto ha sido seleccionado correctamente",
+      });
+    },
+    onError: (error) => {
+      console.error('Error selecting project:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo seleccionar el proyecto",
+        variant: "destructive"
+      });
+    }
+  });
 
   // Query para tareas pendientes (mock por ahora)
   const { data: upcomingTasks = [] } = useQuery<Task[]>({
@@ -317,35 +370,39 @@ export default function Home() {
                 </div>
               ) : activeProjects.length > 0 ? (
                 <div className="space-y-3">
-                  {activeProjects.slice(0, 4).map((project) => (
-                    <div
-                      key={project.id}
-                      className="p-3 rounded-lg border hover:bg-accent/5 transition-colors cursor-pointer"
-                      onClick={() => {
-                        setSidebarLevel('project');
-                        navigate('/project/dashboard');
-                      }}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-sm truncate">{project.name}</h4>
-                        <Badge 
-                          variant="secondary" 
-                          className={cn(
-                            "text-xs",
-                            project.status === 'Activo' && "bg-green-500/10 text-green-600 dark:text-green-400",
-                            project.status === 'Completado' && "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                  {activeProjects.slice(0, 4).map((project) => {
+                    const isCurrentProject = project.id === selectedProjectId;
+                    
+                    return (
+                      <div
+                        key={project.id}
+                        className={cn(
+                          "p-3 rounded-lg border hover:bg-accent/5 transition-colors cursor-pointer",
+                          isCurrentProject && "border-[hsl(var(--accent))]"
+                        )}
+                        onClick={() => {
+                          selectProjectMutation.mutate(project.id);
+                        }}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-sm truncate">{project.name}</h4>
+                          {isCurrentProject && (
+                            <Badge 
+                              style={{ backgroundColor: 'hsl(var(--accent))', color: 'white' }}
+                              className="text-xs"
+                            >
+                              Activo
+                            </Badge>
                           )}
-                        >
-                          {project.status}
-                        </Badge>
+                        </div>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span>{project.project_data?.project_type?.name || 'Sin tipo'}</span>
+                          <span>·</span>
+                          <span>{project.project_data?.modality?.name || 'Sin modalidad'}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>{project.project_data?.project_type?.name || 'Sin tipo'}</span>
-                        <span>·</span>
-                        <span>{project.project_data?.modality?.name || 'Sin modalidad'}</span>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   {activeProjects.length > 4 && (
                     <Button 
                       variant="link" 
