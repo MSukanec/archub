@@ -51,6 +51,7 @@ export default function PaymentMethodModal({
   const [couponCode, setCouponCode] = useState('');
   const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
 
   useEffect(() => {
     setPanel('edit');
@@ -58,25 +59,18 @@ export default function PaymentMethodModal({
 
   const handleValidateCoupon = async () => {
     if (!couponCode.trim()) {
-      toast({
-        title: 'Error',
-        description: 'Ingresá un código de cupón',
-        variant: 'destructive'
-      });
+      setCouponError('Ingresá un código de cupón');
       return;
     }
 
     if (!priceData) {
-      toast({
-        title: 'Error',
-        description: 'Esperá a que se cargue el precio del curso',
-        variant: 'destructive'
-      });
+      setCouponError('Esperá a que se cargue el precio del curso');
       return;
     }
 
     try {
       setValidatingCoupon(true);
+      setCouponError(null);
 
       const { data: courseData, error: courseError } = await supabase
         .from('courses')
@@ -85,7 +79,8 @@ export default function PaymentMethodModal({
         .single();
 
       if (courseError || !courseData) {
-        throw new Error('No se pudo obtener la información del curso');
+        setCouponError('No se pudo obtener la información del curso');
+        return;
       }
 
       const { data, error } = await supabase.rpc('validate_coupon', {
@@ -97,34 +92,31 @@ export default function PaymentMethodModal({
 
       if (error) {
         console.error('Error validando cupón:', error);
-        throw new Error('Error al validar el cupón');
+        setCouponError('Error al validar el cupón');
+        return;
       }
 
       if (!data || !data.ok) {
         // Map error reasons to user-friendly messages
         const errorMessages: Record<string, string> = {
-          'NOT_FOUND_OR_INACTIVE': 'Cupón inválido o inactivo.',
-          'EXPIRED': 'El cupón está vencido.',
-          'NOT_STARTED': 'El cupón aún no está disponible.',
-          'USER_LIMIT_REACHED': 'Ya alcanzaste el límite de uso de este cupón.',
-          'GLOBAL_LIMIT_REACHED': 'Se alcanzó el límite de usos para este cupón.',
-          'NOT_APPLICABLE': 'Este cupón no aplica a este curso.',
-          'MINIMUM_NOT_MET': 'No alcanzás el mínimo de compra para usar este cupón.',
-          'CURRENCY_MISMATCH': 'El cupón no aplica a esta moneda.',
-          'UNAUTHENTICATED': 'Tenés que iniciar sesión para usar un cupón.'
+          'NOT_FOUND_OR_INACTIVE': 'Cupón inválido o inactivo',
+          'EXPIRED': 'El cupón está vencido',
+          'NOT_STARTED': 'El cupón aún no está disponible',
+          'USER_LIMIT_REACHED': 'Ya alcanzaste el límite de uso de este cupón',
+          'GLOBAL_LIMIT_REACHED': 'Se alcanzó el límite de usos para este cupón',
+          'NOT_APPLICABLE': 'Este cupón no aplica a este curso',
+          'MINIMUM_NOT_MET': 'No alcanzás el mínimo de compra para usar este cupón',
+          'CURRENCY_MISMATCH': 'El cupón no aplica a esta moneda',
+          'UNAUTHENTICATED': 'Tenés que iniciar sesión para usar un cupón'
         };
 
-        const errorMessage = errorMessages[data.reason || ''] || 'No pudimos aplicar el cupón. Probá de nuevo.';
-        
-        toast({
-          title: 'Cupón no válido',
-          description: errorMessage,
-          variant: 'destructive'
-        });
+        const errorMessage = errorMessages[data.reason || ''] || 'No pudimos aplicar el cupón. Probá de nuevo';
+        setCouponError(errorMessage);
         return;
       }
 
-      // Coupon is valid
+      // Coupon is valid - clear error and apply
+      setCouponError(null);
       setAppliedCoupon({
         coupon_id: data.coupon_id,
         code: couponCode.trim().toUpperCase(),
@@ -135,18 +127,14 @@ export default function PaymentMethodModal({
       });
 
       toast({
-        title: 'Cupón aplicado',
+        title: '✓ Cupón aplicado',
         description: `¡Descuento de ${data.type === 'percent' ? data.amount + '%' : '$' + data.amount} aplicado!`,
       });
 
       setCouponCode('');
     } catch (error: any) {
       console.error('Error al validar cupón:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo validar el cupón',
-        variant: 'destructive'
-      });
+      setCouponError(error.message || 'No se pudo validar el cupón');
     } finally {
       setValidatingCoupon(false);
     }
@@ -321,35 +309,50 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                   <Tag className="h-4 w-4 text-accent" />
                   Código de descuento
                 </Label>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Ingresá tu código"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !validatingCoupon) {
-                        handleValidateCoupon();
-                      }
-                    }}
-                    disabled={validatingCoupon}
-                    className="flex-1"
-                    data-testid="input-coupon-code"
-                  />
-                  <Button
-                    onClick={handleValidateCoupon}
-                    disabled={validatingCoupon || !couponCode.trim()}
-                    variant="secondary"
-                    data-testid="button-apply-coupon"
-                  >
-                    {validatingCoupon ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Validando
-                      </>
-                    ) : (
-                      'Aplicar'
-                    )}
-                  </Button>
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Ingresá tu código"
+                      value={couponCode}
+                      onChange={(e) => {
+                        setCouponCode(e.target.value.toUpperCase());
+                        // Clear error when user starts typing
+                        if (couponError) setCouponError(null);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !validatingCoupon) {
+                          handleValidateCoupon();
+                        }
+                      }}
+                      disabled={validatingCoupon}
+                      className={cn(
+                        "flex-1",
+                        couponError && "border-red-500 focus-visible:ring-red-500"
+                      )}
+                      data-testid="input-coupon-code"
+                    />
+                    <Button
+                      onClick={handleValidateCoupon}
+                      disabled={validatingCoupon || !couponCode.trim()}
+                      variant="secondary"
+                      data-testid="button-apply-coupon"
+                    >
+                      {validatingCoupon ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Validando
+                        </>
+                      ) : (
+                        'Aplicar'
+                      )}
+                    </Button>
+                  </div>
+                  {couponError && (
+                    <p className="text-sm text-red-500 flex items-center gap-1.5" data-testid="coupon-error-message">
+                      <X className="h-4 w-4 shrink-0" />
+                      {couponError}
+                    </p>
+                  )}
                 </div>
               </div>
             ) : (
