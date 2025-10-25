@@ -254,6 +254,16 @@ Enviá el comprobante a: pagos@archub.com.ar`;
   const handleContinue = () => {
     if (!selectedMethod) return;
 
+    // Validate if there's a coupon code entered but not applied
+    if (couponCode.trim() && !appliedCoupon) {
+      toast({
+        title: 'Cupón no aplicado',
+        description: 'Hacé clic en "Aplicar" para validar tu cupón o borrá el código para continuar sin descuento',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     switch (selectedMethod) {
       case 'mercadopago':
         handleMercadoPagoPayment();
