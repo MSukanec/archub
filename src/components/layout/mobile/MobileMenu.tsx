@@ -288,6 +288,52 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
           {/* Bottom Controls */}
           <div className="p-4 space-y-2 border-t border-[var(--main-sidebar-border)]">
+            {/* Inicio Button */}
+            <button
+              onClick={() => {
+                setSidebarLevel('general');
+                navigate('/home');
+                handleCloseMenu();
+              }}
+              className={cn(
+                "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
+                sidebarLevel === 'general'
+                  ? "bg-[hsl(76,100%,40%)] text-white" 
+                  : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
+              )}
+              data-testid="button-mobile-home"
+            >
+              <Home className="h-5 w-5" />
+              Inicio
+            </button>
+
+            {/* Divider "Secciones" */}
+            <div className="my-3 flex items-center gap-2 w-full">
+              <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+              <span className="text-[10px] font-medium text-[var(--main-sidebar-fg)] opacity-60 px-1">
+                Secciones
+              </span>
+              <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+            </div>
+
+            {/* Organization Button */}
+            <button
+              onClick={() => {
+                setSidebarLevel('organization');
+                navigate('/organization/dashboard');
+                handleCloseMenu();
+              }}
+              className={cn(
+                "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
+                sidebarLevel === 'organization'
+                  ? "bg-[hsl(76,100%,40%)] text-white" 
+                  : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
+              )}
+            >
+              <Building className="h-5 w-5" />
+              Organización
+            </button>
+
             {/* Project Button - solo si hay proyecto seleccionado */}
             {selectedProjectId && (
               <button

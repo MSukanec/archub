@@ -17,7 +17,7 @@ export default function Onboarding() {
   const [, navigate] = useLocation();
   const { user, loading: authLoading, initialized, setCompletingOnboarding } = useAuthStore();
   const { data: userData, isLoading: userLoading } = useCurrentUser();
-  const { setSidebarContext, setSidebarLevel } = useNavigationStore();
+  const { setSidebarLevel } = useNavigationStore();
 
   const { toast } = useToast();
   const { setTheme } = useThemeStore();
@@ -144,8 +144,7 @@ export default function Onboarding() {
       localStorage.setItem('onboarding_bypass', 'true');
       localStorage.setItem('onboarding_bypass_user_id', userData?.user?.id || '');
       
-      // Set sidebar to general context (hub mode)
-      setSidebarContext('general');
+      // Set sidebar to general level (hub mode)
       setSidebarLevel('general');
       
       // Navigate directly to Home page
