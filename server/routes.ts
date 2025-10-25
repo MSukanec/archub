@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { createClient } from '@supabase/supabase-js';
+import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
@@ -2665,8 +2666,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Initialize Mercado Pago SDK
-      const { MercadoPagoConfig, Preference } = require('mercadopago');
-      
       const mpAccessToken = process.env.MP_ACCESS_TOKEN;
       if (!mpAccessToken) {
         console.error('MP_ACCESS_TOKEN not configured');
@@ -2766,8 +2765,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Initialize MP SDK
-      const { MercadoPagoConfig, Payment } = require('mercadopago');
-      
       const mpAccessToken = process.env.MP_ACCESS_TOKEN;
       if (!mpAccessToken) {
         console.error('MP_ACCESS_TOKEN not configured');
