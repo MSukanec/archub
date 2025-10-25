@@ -78,8 +78,8 @@ export default function Home() {
   // Query para proyectos activos (datos reales)
   const { data: allProjects = [], isLoading: projectsLoading } = useProjects(currentOrganizationId || undefined);
   
-  // Filtrar SOLO proyectos con estado "Activo"
-  const activeProjects = allProjects.filter(project => project.status === 'Activo');
+  // Filtrar SOLO proyectos con estado "active"
+  const activeProjects = allProjects.filter(project => project.status === 'active');
 
   // Mutación para cambiar el proyecto activo
   const selectProjectMutation = useMutation({
