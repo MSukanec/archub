@@ -163,7 +163,44 @@ export default function PaymentMethodModal({
         throw new Error('Debes iniciar sesión para comprar un curso');
       }
 
-      // Call our new backend endpoint instead of Edge Function
+      // Check if final price is $0 (100% discount)
+      const currentFinalPrice = appliedCoupon ? appliedCoupon.final_price : priceData?.amount || 0;
+      
+      if (currentFinalPrice === 0) {
+        // Free enrollment with 100% coupon - no payment needed
+        const response = await fetch('/api/checkout/free-enroll', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({
+            courseSlug,
+            code: appliedCoupon?.code
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.error('Error al inscribir con cupón 100%:', data);
+          throw new Error(data?.error || 'No se pudo completar la inscripción');
+        }
+
+        toast({
+          title: '¡Inscripción exitosa!',
+          description: 'Te inscribiste correctamente al curso. Ya podés acceder al contenido.',
+        });
+
+        // Redirect to course
+        setTimeout(() => {
+          window.location.href = `/learning/courses/${courseSlug}`;
+        }, 1500);
+        
+        return;
+      }
+
+      // Normal payment flow with Mercado Pago
       const response = await fetch('/api/checkout/mp/create', {
         method: 'POST',
         headers: { 

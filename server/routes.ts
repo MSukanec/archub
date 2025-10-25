@@ -2747,6 +2747,166 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Free enrollment with 100% coupon
+  app.post("/api/checkout/free-enroll", async (req, res) => {
+    try {
+      const { courseSlug, code } = req.body;
+      const authHeader = req.headers.authorization || '';
+
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization header" });
+      }
+
+      const token = authHeader.substring(7);
+
+      // Get authenticated user
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Invalid authentication" });
+      }
+
+      // Get user profile
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .select('id, full_name, email')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+
+      if (profileError || !profile) {
+        console.error('Error fetching profile:', profileError);
+        return res.status(404).json({ error: "User profile not found" });
+      }
+
+      // Get course data
+      const { data: course, error: courseError } = await supabase
+        .from('courses')
+        .select('id, slug, title')
+        .eq('slug', courseSlug)
+        .single();
+
+      if (courseError || !course) {
+        console.error('Error fetching course:', courseError);
+        return res.status(404).json({ error: "Course not found" });
+      }
+
+      // Validate coupon (must be 100% discount)
+      if (!code || !code.trim()) {
+        return res.status(400).json({ error: "Coupon code required for free enrollment" });
+      }
+
+      const { data: priceData } = await supabase
+        .from('course_prices')
+        .select('amount, currency_code')
+        .eq('course_id', course.id)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const coursePrice = priceData?.amount || 0;
+
+      // Validate coupon using authenticated client
+      const { data: validationResult, error: couponError } = await authenticatedSupabase.rpc('validate_coupon', {
+        p_code: code.trim(),
+        p_course_id: course.id,
+        p_price: coursePrice,
+        p_currency: priceData?.currency_code || 'ARS'
+      });
+
+      if (couponError || !validationResult || !validationResult.ok) {
+        console.error('Coupon validation failed:', couponError || validationResult);
+        return res.status(400).json({ error: "Invalid coupon" });
+      }
+
+      // Verify it's actually 100% discount
+      if (validationResult.final_price !== 0) {
+        return res.status(400).json({ 
+          error: "This coupon does not provide 100% discount. Please use the normal payment flow." 
+        });
+      }
+
+      // Check if enrollment already exists
+      const { data: existingEnrollment } = await supabase
+        .from('course_enrollments')
+        .select('id')
+        .eq('user_id', profile.id)
+        .eq('course_id', course.id)
+        .maybeSingle();
+
+      if (existingEnrollment) {
+        return res.status(400).json({ error: "You are already enrolled in this course" });
+      }
+
+      // Create course enrollment
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 365); // 1 year subscription
+
+      const { error: enrollmentError } = await supabase
+        .from('course_enrollments')
+        .insert({
+          user_id: profile.id,
+          course_id: course.id,
+          status: 'active',
+          enrolled_at: new Date().toISOString(),
+          expires_at: expiresAt.toISOString(),
+          payment_method: 'coupon_100',
+          amount_paid: 0,
+          currency: priceData?.currency_code || 'ARS'
+        });
+
+      if (enrollmentError) {
+        console.error('Error creating enrollment:', enrollmentError);
+        return res.status(500).json({ error: "Failed to create enrollment" });
+      }
+
+      // Record coupon redemption
+      if (validationResult.coupon_id) {
+        await supabase
+          .from('coupon_redemptions')
+          .insert({
+            coupon_id: validationResult.coupon_id,
+            user_id: profile.id,
+            course_id: course.id,
+            original_price: coursePrice,
+            discount_amount: validationResult.discount,
+            final_price: 0
+          });
+      }
+
+      console.log('✅ Free enrollment created:', {
+        userId: profile.id,
+        courseId: course.id,
+        couponCode: code
+      });
+
+      res.json({ 
+        success: true,
+        message: 'Enrollment created successfully',
+        courseSlug: course.slug
+      });
+
+    } catch (error: any) {
+      console.error('Error creating free enrollment:', error);
+      res.status(500).json({ 
+        error: "Failed to create enrollment",
+        message: error.message 
+      });
+    }
+  });
+
   // Mercado Pago Webhook
   app.post("/api/webhooks/mp", async (req, res) => {
     try {
