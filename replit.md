@@ -14,9 +14,11 @@ Preferred communication style: Simple, everyday language.
 - **Design System**: "new-york" style with a neutral color palette and dark mode support, emphasizing reusable UI components.
 - **Accent Color System**: Dual CSS variable approach for flexible theming (`--accent-hsl` for Tailwind, `--accent` for inline styles).
 - **Modals**: Fully responsive Dialog component; right-side panel on desktop, fullscreen on mobile.
-- **Navigation**: Redesigned sidebar with a project selector, breadcrumb-style main header, and a centralized "general" hub for main navigation. Mobile menu mirrors desktop sidebar structure.
+- **Navigation**: Redesigned sidebar with a project selector, breadcrumb-style main header, and a centralized "general" hub for main navigation. Mobile menu mirrors desktop sidebar structure. "Inicio" (Home) button appears first in general sidebar with "Secciones" divider before other sections.
 - **Component Refactoring**: Generic container architecture for `DataRowCard` and a unified ghost button system.
 - **Context-Aware Headers**: MainHeader adapts content based on the current module (e.g., simplified breadcrumbs in Learning module).
+- **Button Design**: Default button variant uses gradient (yellow hsl(58,77%,51%) to green hsl(76,100%,40%)) matching logo colors.
+- **Onboarding Flow**: Streamlined onboarding automatically sets users to 'professional' mode and navigates directly to /home, skipping SelectMode page.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui (Radix UI primitives), Tailwind CSS, Zustand for state management, Wouter for routing, TanStack Query for data fetching.
@@ -28,6 +30,7 @@ Preferred communication style: Simple, everyday language.
 - **Database Views**: Exclusive use of database views for data fetching (e.g., `construction_tasks_view`).
 
 ### Feature Specifications
+- **Home Page**: Landing page (/home) after onboarding with personalized welcome message and quick-access cards to main sections (Organización, Proyecto, Capacitaciones, Administración). Maintains sidebar in 'general' level for hub navigation.
 - **Project Management**: Includes custom React-based Gantt chart, Kanban board, and parametric task generation.
 - **Financial Management**: Comprehensive tracking of movements, conversions, transfers, and budgets with multi-currency support, including specialized subforms for Personnel, Subcontracts, and Project Clients.
 - **Document Management**: Hierarchical organization, versioning, redesigned file explorer navigation, and modal-based preview system.
