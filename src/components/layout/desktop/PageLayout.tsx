@@ -17,6 +17,84 @@ import {
 } from "@/components/ui/popover";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 import { useSidebarStore } from "@/stores/sidebarStore";
+import { useNavigationStore } from "@/stores/navigationStore";
+import { useLocation } from "wouter";
+
+// Mapeo de rutas a nombres de páginas
+const PAGE_NAMES: Record<string, string> = {
+  // Home
+  '/home': 'Inicio',
+  
+  // Organization level
+  '/organization/dashboard': 'Resumen',
+  '/organization/projects': 'Proyectos',
+  '/organization/personnel': 'Personal',
+  '/organization/activity': 'Actividad',
+  '/organization/preferences': 'Preferencias',
+  
+  // Project level
+  '/project/dashboard': 'Resumen',
+  '/project/gantt': 'Gantt',
+  '/project/kanban': 'Kanban',
+  '/budgets': 'Cómputo y Presupuesto',
+  '/professional/budgets': 'Cómputo y Presupuesto',
+  
+  // Construction
+  '/construction/dashboard': 'Construcción',
+  '/construction/personnel': 'Mano de Obra',
+  '/construction/materials': 'Materiales',
+  '/construction/indirects': 'Indirectos',
+  '/construction/subcontracts': 'Subcontratos',
+  '/construction/logs': 'Bitácora',
+  
+  // General
+  '/contacts': 'Contactos',
+  '/analysis': 'Análisis de Costos',
+  '/movements': 'Movimientos',
+  '/clients': 'Clientes',
+  '/media': 'Galería',
+  '/calendar': 'Calendario',
+  
+  // Finances
+  '/finances/capital': 'Capital',
+  '/finances/general-costs': 'Gastos Generales',
+  '/finances/dashboard': 'Finanzas',
+  
+  // Admin
+  '/admin/community': 'Comunidad',
+  '/admin/costs': 'Costos',
+  '/admin/tasks': 'Tareas',
+  '/admin/general': 'General',
+  '/admin/courses': 'Cursos',
+  '/providers/products': 'Productos',
+  
+  // Profile
+  '/profile': 'Perfil',
+  '/profile/organizations': 'Organizaciones',
+  '/profile/preferences': 'Preferencias',
+  
+  // Learning / Capacitaciones
+  '/learning/dashboard': 'Mis Cursos',
+  '/learning/courses': 'Explorar',
+};
+
+// Mapeo de sidebar level a nombre de sección
+const SECTION_NAMES: Record<string, string> = {
+  'general': 'Inicio',
+  'organization': 'Organización',
+  'project': 'Proyecto',
+  'learning': 'Capacitaciones',
+  'admin': 'Administración',
+};
+
+// Mapeo de sidebar level a dashboard route
+const SECTION_DASHBOARDS: Record<string, string> = {
+  'general': '/home',
+  'organization': '/organization/dashboard',
+  'project': '/project/dashboard',
+  'learning': '/learning/dashboard',
+  'admin': '/admin/community',
+};
 
 interface Tab {
   id: string;
@@ -117,6 +195,8 @@ export function PageLayout({
   
   // Get sidebar state for padding compensation
   const { isDocked } = useSidebarStore();
+  const { sidebarLevel } = useNavigationStore();
+  const [location, navigate] = useLocation();
   
   // Estado y refs para animación de tabs
   const tabsContainerRef = useRef<HTMLDivElement>(null);
@@ -176,13 +256,13 @@ export function PageLayout({
       {/* Page Content - HEADER Y CONTENIDO juntos para que se muevan con scroll */}
       <div className="flex-1 overflow-y-auto">
         <div style={{ backgroundColor: "var(--layout-bg)" }}>
-          <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-6 ${
+          <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-3 ${
             isDocked ? 'px-16' : 'px-16'
           }`}>
-          {/* FILA SUPERIOR: Título de página a la izquierda + Botones de acción a la derecha */}
+          {/* FILA SUPERIOR: Breadcrumbs a la izquierda + Botones de acción a la derecha */}
           <div className={`h-[50px] flex items-center justify-between ${!hasTabs ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
-          {/* Left: Page Title */}
-          <div className="flex items-center gap-4">
+          {/* Left: Breadcrumbs */}
+          <div className="flex items-center gap-2">
             {showBackButton && (
               <Button
                 variant="ghost"
@@ -194,20 +274,44 @@ export function PageLayout({
                 {backButtonText}
               </Button>
             )}
-            {title && (
-              <div className="flex items-center gap-3">
-                {icon && (
-                  <span className="text-[var(--accent)] flex-shrink-0">
-                    {React.isValidElement(icon) ? icon : React.createElement(icon as React.ComponentType<{ className?: string }>, { 
-                      className: "w-5 h-5" 
-                    })}
+            
+            {/* Breadcrumbs Navigation */}
+            <div className="flex items-center gap-2">
+              {/* Inicio - siempre visible */}
+              <button
+                onClick={() => {
+                  navigate('/home');
+                }}
+                className="text-sm font-normal text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
+              >
+                Inicio
+              </button>
+              
+              {/* Sección - si no estamos en general */}
+              {sidebarLevel !== 'general' && (
+                <>
+                  <span className="text-sm font-normal text-[var(--muted-foreground)]">/</span>
+                  <button
+                    onClick={() => {
+                      navigate(SECTION_DASHBOARDS[sidebarLevel] || '/home');
+                    }}
+                    className="text-sm font-normal text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
+                  >
+                    {SECTION_NAMES[sidebarLevel] || 'Sección'}
+                  </button>
+                </>
+              )}
+              
+              {/* Página actual - si no es el dashboard de la sección ni home */}
+              {location !== '/home' && location !== SECTION_DASHBOARDS[sidebarLevel] && (
+                <>
+                  <span className="text-sm font-normal text-[var(--muted-foreground)]">/</span>
+                  <span className="text-sm font-normal text-[var(--muted-foreground)]">
+                    {PAGE_NAMES[location] || title || 'Página'}
                   </span>
-                )}
-                <h1 className="text-lg font-semibold text-[var(--foreground)]">
-                  {title}
-                </h1>
-              </div>
-            )}
+                </>
+              )}
+            </div>
           </div>
 
           {/* Right: Header Action Buttons + Main Action Buttons */}
