@@ -240,11 +240,30 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
         return newContact;
       }
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      // Si estamos creando un nuevo contacto (no editando), marcar checklist
+      if (!isEditing) {
+        try {
+          const { error: checklistError } = await supabase.rpc('tick_home_checklist', {
+            p_key: 'create_contact',
+            p_value: true
+          });
+          
+          if (checklistError) {
+            console.error('Error updating home checklist:', checklistError);
+          }
+        } catch (error) {
+          console.error('Error calling tick_home_checklist:', error);
+        }
+      }
+
       // Invalidate contacts query with correct organization ID
       queryClient.invalidateQueries({ queryKey: ['contacts', userData?.organization?.id] });
       // Also invalidate broader contacts queries that might exist
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
+      // Invalidate current-user to refresh checklist status
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      
       toast({
         title: isEditing ? "Contacto actualizado" : "Contacto creado",
         description: isEditing 
