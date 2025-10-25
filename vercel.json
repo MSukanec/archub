@@ -22,6 +22,8 @@
     { "source": "/api/lessons/:id/progress", "destination": "/api/lessons/[id]/progress" },
     { "source": "/api/lessons/:id/notes", "destination": "/api/lessons/[id]/notes" },
     { "source": "/api/checkout/mp/create", "destination": "/api/checkout/mp/create" },
+    { "source": "/api/checkout/free-enroll", "destination": "/api/checkout/free-enroll" },
+    { "source": "/api/webhooks/mp", "destination": "/api/webhooks/mp" },
     { "source": "/api/webhooks/mercadopago", "destination": "/api/webhooks/mercadopago" },
     { "source": "/api/user/enrollments", "destination": "/api/user/enrollments" },
     { "source": "/api/user/all-progress", "destination": "/api/user/all-progress" },
