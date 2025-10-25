@@ -149,7 +149,7 @@ export default function Landing() {
               {!loading && (
                 user ? (
                   <div className="flex items-center space-x-3">
-                    <Link href="/organization/dashboard">
+                    <Link href="/home">
                       <Button 
                         size="sm" 
                         className="h-8 px-3"
