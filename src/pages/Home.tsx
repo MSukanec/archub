@@ -210,160 +210,159 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Banner Principal - Primeros Pasos */}
-        {showBanner && (
-          <Card className="relative overflow-hidden">
-            {/* Patrón de fondo decorativo */}
-            <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" 
-                 style={{
-                   backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--accent)) 1px, transparent 0)',
-                   backgroundSize: '32px 32px'
-                 }} 
-            />
-            
-            <CardHeader className="relative">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center border border-accent/20">
-                    <Sparkles className="w-6 h-6 text-accent" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-2xl">¡Bienvenido a Archub!</CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Completa estos pasos para empezar a gestionar tus proyectos
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => dismissBannerMutation.mutate()}
-                  disabled={dismissBannerMutation.isPending}
-                  data-testid="button-dismiss-banner"
-                  className="flex-shrink-0"
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Ocultar este banner
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3 relative">
-              {/* Crear primer proyecto */}
-              <Card data-testid="checklist-create-project">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-3 flex-1">
-                      {homeChecklist.create_project ? (
-                        <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0" />
-                      ) : (
-                        <Circle className="w-6 h-6 text-muted-foreground flex-shrink-0" />
-                      )}
-                      <div className="flex-1">
-                        <h4 className={cn(
-                          "font-semibold text-base",
-                          homeChecklist.create_project ? "line-through text-muted-foreground" : "text-foreground"
-                        )}>
-                          Crear primer proyecto
-                        </h4>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Organiza tu trabajo creando un proyecto con tareas, presupuesto y equipo
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      className="flex-shrink-0"
-                      onClick={() => {
-                        setSidebarLevel('organization');
-                        navigate('/organization/projects');
-                      }}
-                    >
-                      <ArrowRight className="w-4 h-4 mr-2" />
-                      Ir a Proyectos
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Crear primer contacto */}
-              <Card data-testid="checklist-create-contact">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-3 flex-1">
-                      {homeChecklist.create_contact ? (
-                        <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0" />
-                      ) : (
-                        <Circle className="w-6 h-6 text-muted-foreground flex-shrink-0" />
-                      )}
-                      <div className="flex-1">
-                        <h4 className={cn(
-                          "font-semibold text-base",
-                          homeChecklist.create_contact ? "line-through text-muted-foreground" : "text-foreground"
-                        )}>
-                          Crear primer contacto
-                        </h4>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Gestiona clientes, proveedores y colaboradores en un solo lugar
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      className="flex-shrink-0"
-                      onClick={() => {
-                        setSidebarLevel('organization');
-                        navigate('/organization/contacts');
-                      }}
-                    >
-                      <ArrowRight className="w-4 h-4 mr-2" />
-                      Ir a Contactos
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Crear primer movimiento */}
-              <Card data-testid="checklist-create-movement">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-3 flex-1">
-                      {homeChecklist.create_movement ? (
-                        <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0" />
-                      ) : (
-                        <Circle className="w-6 h-6 text-muted-foreground flex-shrink-0" />
-                      )}
-                      <div className="flex-1">
-                        <h4 className={cn(
-                          "font-semibold text-base",
-                          homeChecklist.create_movement ? "line-through text-muted-foreground" : "text-foreground"
-                        )}>
-                          Crear primer movimiento
-                        </h4>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Registra ingresos y egresos para llevar control financiero de tus proyectos
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      className="flex-shrink-0"
-                      onClick={() => {
-                        setSidebarLevel('organization');
-                        navigate('/organization/finances/movements');
-                      }}
-                    >
-                      <ArrowRight className="w-4 h-4 mr-2" />
-                      Ir a Movimientos
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Grid de 4 Cards */}
+        {/* Fila superior: Banner (2 cols) + Continuar (1 col) + Proyectos activos (1 col) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Banner Principal - Primeros Pasos (2 columnas) */}
+          {showBanner && (
+            <Card className="relative overflow-hidden lg:col-span-2">
+              {/* Patrón de fondo decorativo */}
+              <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" 
+                   style={{
+                     backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--accent)) 1px, transparent 0)',
+                     backgroundSize: '32px 32px'
+                   }} 
+              />
+              
+              <CardHeader className="relative">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center border border-accent/20">
+                      <Sparkles className="w-6 h-6 text-accent" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-2xl">¡Bienvenido a Archub!</CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Completa estos pasos para empezar a gestionar tus proyectos
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => dismissBannerMutation.mutate()}
+                    disabled={dismissBannerMutation.isPending}
+                    data-testid="button-dismiss-banner"
+                    className="flex-shrink-0"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Ocultar este banner
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3 relative">
+                {/* Crear primer proyecto */}
+                <Card data-testid="checklist-create-project">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3 flex-1">
+                        {homeChecklist.create_project ? (
+                          <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0" />
+                        ) : (
+                          <Circle className="w-6 h-6 text-muted-foreground flex-shrink-0" />
+                        )}
+                        <div className="flex-1">
+                          <h4 className={cn(
+                            "font-semibold text-base",
+                            homeChecklist.create_project ? "line-through text-muted-foreground" : "text-foreground"
+                          )}>
+                            Crear primer proyecto
+                          </h4>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Organiza tu trabajo creando un proyecto con tareas, presupuesto y equipo
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="flex-shrink-0"
+                        onClick={() => {
+                          setSidebarLevel('organization');
+                          navigate('/organization/projects');
+                        }}
+                      >
+                        <ArrowRight className="w-4 h-4 mr-2" />
+                        Ir a Proyectos
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Crear primer contacto */}
+                <Card data-testid="checklist-create-contact">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3 flex-1">
+                        {homeChecklist.create_contact ? (
+                          <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0" />
+                        ) : (
+                          <Circle className="w-6 h-6 text-muted-foreground flex-shrink-0" />
+                        )}
+                        <div className="flex-1">
+                          <h4 className={cn(
+                            "font-semibold text-base",
+                            homeChecklist.create_contact ? "line-through text-muted-foreground" : "text-foreground"
+                          )}>
+                            Crear primer contacto
+                          </h4>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Gestiona clientes, proveedores y colaboradores en un solo lugar
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="flex-shrink-0"
+                        onClick={() => {
+                          setSidebarLevel('organization');
+                          navigate('/organization/contacts');
+                        }}
+                      >
+                        <ArrowRight className="w-4 h-4 mr-2" />
+                        Ir a Contactos
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Crear primer movimiento */}
+                <Card data-testid="checklist-create-movement">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3 flex-1">
+                        {homeChecklist.create_movement ? (
+                          <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0" />
+                        ) : (
+                          <Circle className="w-6 h-6 text-muted-foreground flex-shrink-0" />
+                        )}
+                        <div className="flex-1">
+                          <h4 className={cn(
+                            "font-semibold text-base",
+                            homeChecklist.create_movement ? "line-through text-muted-foreground" : "text-foreground"
+                          )}>
+                            Crear primer movimiento
+                          </h4>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Registra ingresos y egresos para llevar control financiero de tus proyectos
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="flex-shrink-0"
+                        onClick={() => {
+                          setSidebarLevel('organization');
+                          navigate('/organization/finances/movements');
+                        }}
+                      >
+                        <ArrowRight className="w-4 h-4 mr-2" />
+                        Ir a Movimientos
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </CardContent>
+            </Card>
+          )}
           {/* 1. Continuar donde lo dejaste */}
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
@@ -494,7 +493,11 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          {/* 3. Academia */}
+        </div>
+
+        {/* Fila inferior: Academia y Comunidad (2 columnas) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Academia */}
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -542,7 +545,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          {/* 4. Comunidad / Feedback */}
+          {/* Comunidad / Feedback */}
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
