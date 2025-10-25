@@ -148,8 +148,8 @@ export default function Onboarding() {
       setSidebarContext('general');
       setSidebarLevel('general');
       
-      // Navigate directly to organization dashboard
-      navigate('/organization/dashboard');
+      // Navigate directly to Home page
+      navigate('/home');
       resetOnboarding();
     },
     onError: (error) => {
