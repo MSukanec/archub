@@ -259,10 +259,10 @@ export function PageLayout({
           <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-3 ${
             isDocked ? 'px-16' : 'px-16'
           }`}>
-          {/* FILA SUPERIOR: Breadcrumbs a la izquierda + Botones de acción a la derecha */}
+          {/* FILA SUPERIOR: Breadcrumbs e icono/título a la izquierda + Botones de acción a la derecha */}
           <div className={`h-[50px] flex items-center justify-between ${!hasTabs ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
-          {/* Left: Breadcrumbs */}
-          <div className="flex items-center gap-2">
+          {/* Left: Breadcrumbs + Icon + Title */}
+          <div className="flex items-center gap-4">
             {showBackButton && (
               <Button
                 variant="ghost"
@@ -275,43 +275,56 @@ export function PageLayout({
               </Button>
             )}
             
-            {/* Breadcrumbs Navigation */}
-            <div className="flex items-center gap-2">
-              {/* Inicio - siempre visible */}
-              <button
-                onClick={() => {
-                  navigate('/home');
-                }}
-                className="text-sm font-normal text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
-              >
-                Inicio
-              </button>
-              
-              {/* Sección - si no estamos en general */}
-              {sidebarLevel !== 'general' && (
-                <>
-                  <span className="text-sm font-normal text-[var(--muted-foreground)]">/</span>
+            {/* Icon + Title */}
+            {(icon || title) && (
+              <div className="flex items-center gap-3">
+                {icon && (
+                  <span className="text-[var(--accent)] flex-shrink-0">
+                    {React.isValidElement(icon) ? icon : React.createElement(icon as React.ComponentType<{ className?: string }>, { 
+                      className: "w-5 h-5" 
+                    })}
+                  </span>
+                )}
+                
+                {/* Breadcrumbs Navigation */}
+                <div className="flex items-center gap-2">
+                  {/* Inicio - siempre visible */}
                   <button
                     onClick={() => {
-                      navigate(SECTION_DASHBOARDS[sidebarLevel] || '/home');
+                      navigate('/home');
                     }}
-                    className="text-sm font-normal text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
+                    className="text-sm font-semibold text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
                   >
-                    {SECTION_NAMES[sidebarLevel] || 'Sección'}
+                    Inicio
                   </button>
-                </>
-              )}
-              
-              {/* Página actual - si no es el dashboard de la sección ni home */}
-              {location !== '/home' && location !== SECTION_DASHBOARDS[sidebarLevel] && (
-                <>
-                  <span className="text-sm font-normal text-[var(--muted-foreground)]">/</span>
-                  <span className="text-sm font-normal text-[var(--muted-foreground)]">
-                    {PAGE_NAMES[location] || title || 'Página'}
-                  </span>
-                </>
-              )}
-            </div>
+                  
+                  {/* Sección - si no estamos en general */}
+                  {sidebarLevel !== 'general' && (
+                    <>
+                      <span className="text-sm font-semibold text-[var(--muted-foreground)]">/</span>
+                      <button
+                        onClick={() => {
+                          navigate(SECTION_DASHBOARDS[sidebarLevel] || '/home');
+                        }}
+                        className="text-sm font-semibold text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
+                      >
+                        {SECTION_NAMES[sidebarLevel] || 'Sección'}
+                      </button>
+                    </>
+                  )}
+                  
+                  {/* Página actual - si no es el dashboard de la sección ni home */}
+                  {location !== '/home' && location !== SECTION_DASHBOARDS[sidebarLevel] && (
+                    <>
+                      <span className="text-sm font-semibold text-[var(--muted-foreground)]">/</span>
+                      <span className="text-sm font-semibold text-[var(--muted-foreground)]">
+                        {PAGE_NAMES[location] || title || 'Página'}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right: Header Action Buttons + Main Action Buttons */}
