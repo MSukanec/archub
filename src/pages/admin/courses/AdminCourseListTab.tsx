@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Plus, BookOpen } from 'lucide-react'
-import { useCourses } from '@/hooks/use-courses'
+import { useAdminCourses } from '@/hooks/use-admin-courses'
 import { useToast } from '@/hooks/use-toast'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Badge } from '@/components/ui/badge'
@@ -16,7 +16,7 @@ export default function AdminCourseListTab() {
   const { openModal } = useGlobalModalStore()
   const [, navigate] = useLocation()
   
-  const { data: courses = [], isLoading: coursesLoading } = useCourses()
+  const { data: courses = [], isLoading: coursesLoading } = useAdminCourses()
 
   const handleCreateCourse = () => {
     openModal('course', {});
