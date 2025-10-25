@@ -104,7 +104,12 @@ export default function SidebarButton({
                   {userFullName.split(' ').map(name => name[0]).join('').substring(0, 2).toUpperCase()}
                 </div>
               ) : (
-                <span className="text-current">
+                <span 
+                  className="text-current group-hover:[&>svg]:text-[var(--accent)] group-data-[active=true]:[&>svg]:text-[var(--accent)]"
+                  style={{
+                    color: isActive ? 'var(--accent)' : undefined
+                  }}
+                >
                   {icon}
                 </span>
               )}
