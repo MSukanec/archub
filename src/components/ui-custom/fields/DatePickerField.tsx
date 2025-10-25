@@ -41,9 +41,12 @@ export default function DatePickerField({
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
-      // Normalizar la fecha al mediodía para evitar problemas de timezone
-      const normalizedDate = new Date(date)
-      normalizedDate.setHours(12, 0, 0, 0)
+      // Crear una nueva fecha con los valores de año, mes y día en la zona horaria local
+      // para evitar problemas de conversión UTC/local
+      const year = date.getFullYear()
+      const month = date.getMonth()
+      const day = date.getDate()
+      const normalizedDate = new Date(year, month, day, 12, 0, 0, 0)
       onChange(normalizedDate)
     } else {
       onChange(undefined)
