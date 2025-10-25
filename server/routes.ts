@@ -3202,6 +3202,152 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ error: "Internal error" });
     }
   });
+
+  // GET /api/admin/modules?course_id=X - Get modules for a course
+  app.get("/api/admin/modules", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const { isAdmin, error } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error });
+      }
+      
+      const { course_id } = req.query;
+      
+      let query = supabase
+        .from('course_modules')
+        .select('*')
+        .order('sort_index', { ascending: true });
+      
+      if (course_id) {
+        query = query.eq('course_id', course_id);
+      }
+      
+      const { data: modules, error: modulesError } = await query;
+      
+      if (modulesError) {
+        console.error("Error fetching modules:", modulesError);
+        return res.status(500).json({ error: "Failed to fetch modules" });
+      }
+      
+      return res.json(modules || []);
+    } catch (error: any) {
+      console.error("Error in /api/admin/modules:", error);
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
+
+  // PATCH /api/admin/modules/:id - Update module
+  app.patch("/api/admin/modules/:id", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const { isAdmin, error } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error });
+      }
+      
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const { data: module, error: moduleError } = await supabase
+        .from('course_modules')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (moduleError) {
+        console.error("Error updating module:", moduleError);
+        return res.status(500).json({ error: "Failed to update module" });
+      }
+      
+      return res.json(module);
+    } catch (error: any) {
+      console.error("Error in PATCH /api/admin/modules/:id:", error);
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
+
+  // GET /api/admin/lessons?module_id=X - Get lessons for a module
+  app.get("/api/admin/lessons", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const { isAdmin, error } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error });
+      }
+      
+      const { module_id } = req.query;
+      
+      let query = supabase
+        .from('course_lessons')
+        .select('*')
+        .order('sort_index', { ascending: true });
+      
+      if (module_id) {
+        query = query.eq('module_id', module_id);
+      }
+      
+      const { data: lessons, error: lessonsError } = await query;
+      
+      if (lessonsError) {
+        console.error("Error fetching lessons:", lessonsError);
+        return res.status(500).json({ error: "Failed to fetch lessons" });
+      }
+      
+      return res.json(lessons || []);
+    } catch (error: any) {
+      console.error("Error in /api/admin/lessons:", error);
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
+
+  // PATCH /api/admin/lessons/:id - Update lesson
+  app.patch("/api/admin/lessons/:id", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const { isAdmin, error } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error });
+      }
+      
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const { data: lesson, error: lessonError } = await supabase
+        .from('course_lessons')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (lessonError) {
+        console.error("Error updating lesson:", lessonError);
+        return res.status(500).json({ error: "Failed to update lesson" });
+      }
+      
+      return res.json(lesson);
+    } catch (error: any) {
+      console.error("Error in PATCH /api/admin/lessons/:id:", error);
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
   
   // GET /api/admin/enrollments - Get all enrollments with progress
   app.get("/api/admin/enrollments", async (req, res) => {
