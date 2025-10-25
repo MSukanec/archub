@@ -1276,16 +1276,26 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       // Si estamos creando un nuevo movimiento (no editando), marcar checklist
       if (!isEditing) {
         try {
-          const { error: checklistError } = await supabase.rpc('tick_home_checklist', {
-            p_key: 'create_movement',
-            p_value: true
+          console.log('🎯 Llamando a tick_home_checklist para create_movement');
+          const { data: session } = await supabase.auth.getSession();
+          const response = await fetch('/api/user/tick-checklist', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session.session?.access_token}`
+            },
+            body: JSON.stringify({ key: 'create_movement' })
           });
           
-          if (checklistError) {
-            console.error('Error updating home checklist:', checklistError);
+          const checklistData = await response.json();
+          
+          if (!response.ok) {
+            console.error('❌ Error updating home checklist:', checklistData);
+          } else {
+            console.log('✅ Home checklist updated successfully:', checklistData);
           }
         } catch (error) {
-          console.error('Error calling tick_home_checklist:', error);
+          console.error('❌ Error calling tick-checklist API:', error);
         }
       }
 

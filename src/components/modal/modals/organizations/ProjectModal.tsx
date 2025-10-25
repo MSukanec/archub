@@ -234,13 +234,27 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
           }
 
           // Marcar checklist de "crear primer proyecto" como completado
-          const { error: checklistError } = await supabase.rpc('tick_home_checklist', {
-            p_key: 'create_project',
-            p_value: true
-          });
-          
-          if (checklistError) {
-            console.error('Error updating home checklist:', checklistError);
+          console.log('🎯 Llamando a tick_home_checklist para create_project');
+          try {
+            const { data: session } = await supabase.auth.getSession();
+            const response = await fetch('/api/user/tick-checklist', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.session?.access_token}`
+              },
+              body: JSON.stringify({ key: 'create_project' })
+            });
+            
+            const checklistData = await response.json();
+            
+            if (!response.ok) {
+              console.error('❌ Error updating home checklist:', checklistData);
+            } else {
+              console.log('✅ Home checklist updated successfully:', checklistData);
+            }
+          } catch (error) {
+            console.error('❌ Error calling tick-checklist API:', error);
           }
         } catch (error) {
           console.error('Error updating user organization preferences:', error);
