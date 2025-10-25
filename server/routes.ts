@@ -2641,7 +2641,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Validate coupon if provided (server-side validation)
       if (code && code.trim()) {
-        const { data: validationResult, error: couponError } = await supabase.rpc('validate_coupon', {
+        // Use authenticatedSupabase instead of supabase to preserve user context
+        const { data: validationResult, error: couponError } = await authenticatedSupabase.rpc('validate_coupon', {
           p_code: code.trim(),
           p_course_id: course.id,
           p_price: priceData.amount,
