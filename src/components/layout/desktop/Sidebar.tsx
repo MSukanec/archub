@@ -207,6 +207,49 @@ export function Sidebar() {
                   />
                 </div>
                 
+                {/* Botón Inicio */}
+                <button
+                  onClick={() => {
+                    navigate('/home');
+                  }}
+                  className={cn(
+                    "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
+                    isExpanded ? "w-full" : "w-8"
+                  )}
+                  data-testid="button-sidebar-home"
+                >
+                  <div className="flex items-center justify-center w-8 flex-shrink-0">
+                    <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+                      <Home className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                    </div>
+                  </div>
+                  {isExpanded && (
+                    <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
+                      <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
+                        Inicio
+                      </span>
+                      <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 truncate text-left">
+                        Página principal
+                      </span>
+                    </div>
+                  )}
+                </button>
+
+                {/* Divisor "Secciones" */}
+                <div className="my-3 h-[12px] flex items-center justify-center w-full">
+                  {isExpanded ? (
+                    <div className="flex items-center gap-2 w-full">
+                      <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+                      <span className="text-[10px] font-medium text-[var(--main-sidebar-fg)] opacity-60 px-1 leading-none">
+                        Secciones
+                      </span>
+                      <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+                    </div>
+                  ) : (
+                    <div className="w-8 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+                  )}
+                </div>
+                
                 {/* Botón Organización */}
                 <button
                   onClick={() => {
