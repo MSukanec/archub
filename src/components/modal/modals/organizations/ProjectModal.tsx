@@ -249,6 +249,8 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
 
       // Only invalidate necessary queries to prevent unnecessary requests
       queryClient.invalidateQueries({ queryKey: ['projects'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['projects-lite'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['projects-map'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['user-data'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['current-user'], exact: false });
