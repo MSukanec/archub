@@ -41,13 +41,12 @@ export default function DatePickerField({
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
-      // Crear una nueva fecha con los valores de año, mes y día en la zona horaria local
-      // para evitar problemas de conversión UTC/local
-      const year = date.getFullYear()
-      const month = date.getMonth()
-      const day = date.getDate()
-      const normalizedDate = new Date(year, month, day, 12, 0, 0, 0)
-      onChange(normalizedDate)
+      // Forzar que la fecha se mantenga en la zona horaria local
+      // Usar toDateString y volver a parsear garantiza que se mantenga el día correcto
+      const dateStr = date.toDateString()
+      const localDate = new Date(dateStr)
+      localDate.setHours(12, 0, 0, 0)
+      onChange(localDate)
     } else {
       onChange(undefined)
     }
@@ -82,7 +81,7 @@ export default function DatePickerField({
           toYear={new Date().getFullYear()}
           classNames={{
             day_selected:
-              "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+              "border-2 [border-color:var(--accent)] bg-transparent text-foreground hover:bg-transparent hover:text-foreground focus:bg-transparent focus:text-foreground font-semibold",
             day_today: "font-semibold [background:var(--accent)] [color:var(--accent-foreground)] hover:[background:var(--accent)] hover:[color:var(--accent-foreground)]",
           }}
         />
