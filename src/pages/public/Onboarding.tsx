@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useThemeStore } from "@/stores/themeStore";
 import { useAuthStore } from "@/stores/authStore";
+import { useNavigationStore } from "@/stores/navigationStore";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { Step1UserData } from "@/components/onboarding/Step1UserData";
 
@@ -16,6 +17,7 @@ export default function Onboarding() {
   const [, navigate] = useLocation();
   const { user, loading: authLoading, initialized, setCompletingOnboarding } = useAuthStore();
   const { data: userData, isLoading: userLoading } = useCurrentUser();
+  const { setSidebarContext, setSidebarLevel } = useNavigationStore();
 
   const { toast } = useToast();
   const { setTheme } = useThemeStore();
@@ -82,12 +84,12 @@ export default function Onboarding() {
 
       if (userDataError) throw userDataError;
 
-      // Update user_preferences table
+      // Update user_preferences table - always set to professional mode
       const { error: preferencesError } = await supabase
         .from('user_preferences')
         .update({
           theme: formData.theme,
-          last_user_type: formData.last_user_type,
+          last_user_type: 'professional', // Always set to professional by default
           onboarding_completed: true,
           updated_at: new Date().toISOString(),
         })
@@ -138,10 +140,16 @@ export default function Onboarding() {
       });
     },
     onSuccess: () => {
-      // Toast removed per user request
+      // Set bypass flags for immediate access
+      localStorage.setItem('onboarding_bypass', 'true');
+      localStorage.setItem('onboarding_bypass_user_id', userData?.user?.id || '');
       
-      // Navigate immediately without delay
-      navigate('/select-mode');
+      // Set sidebar to general context (hub mode)
+      setSidebarContext('general');
+      setSidebarLevel('general');
+      
+      // Navigate directly to organization dashboard
+      navigate('/organization/dashboard');
       resetOnboarding();
     },
     onError: (error) => {
