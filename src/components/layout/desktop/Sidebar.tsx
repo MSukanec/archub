@@ -307,6 +307,14 @@ export function Sidebar() {
                 {/* Botón Proyecto */}
                 <button
                   onClick={() => {
+                    if (projectsLite.length === 0) {
+                      toast({
+                        title: "No hay proyectos creados",
+                        description: "Crea un proyecto primero desde Organización",
+                        variant: "destructive"
+                      });
+                      return;
+                    }
                     if (!selectedProjectId) {
                       toast({
                         title: "No hay proyecto seleccionado",
@@ -318,9 +326,13 @@ export function Sidebar() {
                     setSidebarLevel('project');
                     navigate('/project/dashboard');
                   }}
+                  disabled={projectsLite.length === 0}
                   className={cn(
-                    "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
+                    "h-10 rounded-md transition-colors flex items-center group overflow-hidden",
                     isExpanded ? "w-full" : "w-8",
+                    projectsLite.length === 0 
+                      ? "opacity-50 cursor-not-allowed" 
+                      : "cursor-pointer hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white",
                     (location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients')) && "bg-[var(--main-sidebar-button-active-bg)]"
                   )}
                 >
@@ -328,8 +340,12 @@ export function Sidebar() {
                     <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
                       <FolderOpen className={cn(
                         "h-4 w-4 transition-colors",
-                        (location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients')) ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
-                        "group-hover:text-[var(--accent)]"
+                        projectsLite.length === 0 
+                          ? "text-[var(--main-sidebar-fg)] opacity-50"
+                          : (location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients')) 
+                            ? "text-[var(--accent)]" 
+                            : "text-[var(--main-sidebar-fg)]",
+                        projectsLite.length > 0 && "group-hover:text-[var(--accent)]"
                       )} />
                     </div>
                   </div>
@@ -337,17 +353,25 @@ export function Sidebar() {
                     <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
                       <span className={cn(
                         "text-sm font-medium truncate text-left",
-                        (location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients')) ? "text-white" : "text-[var(--main-sidebar-fg)]",
-                        "group-hover:text-white"
+                        projectsLite.length === 0
+                          ? "text-[var(--main-sidebar-fg)] opacity-50"
+                          : (location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients')) 
+                            ? "text-white" 
+                            : "text-[var(--main-sidebar-fg)]",
+                        projectsLite.length > 0 && "group-hover:text-white"
                       )}>
                         Proyecto
                       </span>
                       <span className={cn(
                         "text-xs truncate text-left",
-                        (location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients')) ? "text-white opacity-100" : "text-[var(--main-sidebar-fg)] opacity-60",
-                        "group-hover:text-white group-hover:opacity-100"
+                        projectsLite.length === 0
+                          ? "text-[var(--main-sidebar-fg)] opacity-30"
+                          : (location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients')) 
+                            ? "text-white opacity-100" 
+                            : "text-[var(--main-sidebar-fg)] opacity-60",
+                        projectsLite.length > 0 && "group-hover:text-white group-hover:opacity-100"
                       )}>
-                        Gestión de obras
+                        {projectsLite.length === 0 ? "Crea un proyecto primero" : "Gestión de obras"}
                       </span>
                     </div>
                   )}

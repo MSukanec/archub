@@ -36,6 +36,7 @@ import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 import { useProjectContext } from "@/stores/projectContext";
 import { useCourseSidebarStore } from "@/stores/sidebarStore";
 import { CourseSidebar } from "@/components/layout/CourseSidebar";
+import { useToast } from "@/hooks/use-toast";
 
 interface MobileMenuProps {
   onClose: () => void;
@@ -76,6 +77,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const currentProject = projectsData?.find((p: any) => p.id === selectedProjectId);
   const currentProjectName = currentProject?.name || "Seleccionar proyecto";
   const isAdmin = useIsAdmin();
+  const { toast } = useToast();
 
   // CourseSidebar state
   const { isVisible: isCourseSidebarVisible, modules, lessons, currentLessonId } = useCourseSidebarStore();
@@ -334,27 +336,44 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
               Organización
             </button>
 
-            {/* Project Button - solo si hay proyecto seleccionado */}
-            {selectedProjectId && (
-              <button
-                onClick={() => {
-                  if (sidebarLevel === 'project') {
-                    setSidebarLevel('organization');
-                  } else {
-                    setSidebarLevel('project');
-                  }
-                }}
-                className={cn(
-                  "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-                  sidebarLevel === 'project'
-                    ? "bg-[hsl(76,100%,40%)] text-white" 
-                    : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
-                )}
-              >
-                <FolderOpen className="h-5 w-5" />
-                Proyecto
-              </button>
-            )}
+            {/* Project Button */}
+            <button
+              onClick={() => {
+                if (!projectsData || projectsData.length === 0) {
+                  toast({
+                    title: "No hay proyectos creados",
+                    description: "Crea un proyecto primero desde Organización",
+                    variant: "destructive"
+                  });
+                  return;
+                }
+                if (!selectedProjectId) {
+                  toast({
+                    title: "No hay proyecto seleccionado",
+                    description: "Selecciona un proyecto primero",
+                    variant: "destructive"
+                  });
+                  return;
+                }
+                if (sidebarLevel === 'project') {
+                  setSidebarLevel('organization');
+                } else {
+                  setSidebarLevel('project');
+                }
+              }}
+              disabled={!projectsData || projectsData.length === 0}
+              className={cn(
+                "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150",
+                (!projectsData || projectsData.length === 0)
+                  ? "opacity-50 cursor-not-allowed bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)]"
+                  : sidebarLevel === 'project'
+                    ? "bg-[hsl(76,100%,40%)] text-white shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5" 
+                    : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)] shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5"
+              )}
+            >
+              <FolderOpen className="h-5 w-5" />
+              Proyecto
+            </button>
 
             {/* Admin Button - solo si es admin */}
             {isAdmin && (
