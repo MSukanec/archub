@@ -82,7 +82,8 @@ import PaymentReturn from "@/pages/learning/PaymentReturn";
 // Notifications
 import Notifications from "@/pages/Notifications";
 
-
+// Home
+import Home from "@/pages/Home";
 
 
 
@@ -108,6 +109,9 @@ function Router() {
         {/* Onboarding and Mode Selection Routes */}
         <Route path="/onboarding" component={Onboarding} />
         <Route path="/select-mode" component={SelectMode} />
+
+        {/* Home - Main landing page after onboarding */}
+        <Route path="/home" component={Home} />
 
         {/* Main Dashboard - Independent dashboard */}
         <Route path="/dashboard" component={OrganizationDashboard} />
