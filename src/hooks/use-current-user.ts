@@ -27,6 +27,13 @@ export interface UserData {
     last_project_id: string
     last_budget_id: string
     onboarding_completed: boolean
+    home_checklist: {
+      create_project: boolean
+      create_contact: boolean
+      create_movement: boolean
+    }
+    home_banner_dismissed: boolean
+    last_home_seen_at: string
     [key: string]: any
   } | null
   organization: {

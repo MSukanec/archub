@@ -55,20 +55,50 @@ export default function Home() {
   const currentDate = format(new Date(), "EEEE, d 'de' MMMM", { locale: es });
   const greeting = getGreeting();
 
-  // Estado para onboarding checklist (mock por ahora)
-  const [onboardingSteps, setOnboardingSteps] = useState([
-    { id: 1, label: "Crear primer proyecto", completed: false },
-    { id: 2, label: "Crear primer contacto", completed: false },
-    { id: 3, label: "Crear primer movimiento", completed: false },
-  ]);
-
-  // Determinar si es nuevo usuario (mock - luego usaremos datos reales)
-  const isNewUser = true; // Cambiar según lógica real
-
   // Mantener el sidebar en modo general
   useEffect(() => {
     setSidebarLevel('general');
   }, [setSidebarLevel]);
+
+  // Lógica de banner de bienvenida (Primeros Pasos)
+  const homeChecklist = userData?.preferences?.home_checklist || {
+    create_project: false,
+    create_contact: false,
+    create_movement: false,
+  };
+  
+  const onboardingCompleted = userData?.preferences?.onboarding_completed || false;
+  const bannerDismissed = userData?.preferences?.home_banner_dismissed || false;
+  
+  // Mostrar banner solo si onboarding completado, no dismisseado, y hay al menos un paso pendiente
+  const showBanner = onboardingCompleted && 
+                     !bannerDismissed && 
+                     Object.values(homeChecklist).some(v => !v);
+
+  // Mutación para ocultar el banner
+  const dismissBannerMutation = useMutation({
+    mutationFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      const { error } = await supabase.rpc('dismiss_home_banner');
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      toast({
+        title: "Banner ocultado",
+        description: "El banner de bienvenida ha sido ocultado",
+      });
+    },
+    onError: (error) => {
+      console.error('Error dismissing banner:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo ocultar el banner",
+        variant: "destructive"
+      });
+    }
+  });
 
   function getGreeting() {
     const hour = new Date().getHours();
@@ -179,16 +209,26 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Banner Principal */}
-        {isNewUser ? (
-          /* Banner de Onboarding */
+        {/* Banner Principal - Primeros Pasos */}
+        {showBanner && (
           <Card className="border-2 border-accent/20 bg-gradient-to-br from-accent/5 to-accent/10">
             <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-accent" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-accent" />
+                  </div>
+                  <CardTitle className="text-2xl">¡Bienvenido a Archub!</CardTitle>
                 </div>
-                <CardTitle className="text-2xl">¡Bienvenido a Archub!</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => dismissBannerMutation.mutate()}
+                  disabled={dismissBannerMutation.isPending}
+                  data-testid="button-dismiss-banner"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -197,67 +237,96 @@ export default function Home() {
               </p>
               
               <div className="space-y-3">
-                {onboardingSteps.map((step) => (
-                  <div
-                    key={step.id}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-background/60 hover:bg-background/80 transition-colors cursor-pointer"
-                    onClick={() => {
-                      // Toggle completed state (mock)
-                      setOnboardingSteps(steps => 
-                        steps.map(s => s.id === step.id ? {...s, completed: !s.completed} : s)
-                      );
-                    }}
-                  >
-                    {step.completed ? (
-                      <CheckCircle2 className="w-5 h-5 text-accent flex-shrink-0" />
-                    ) : (
-                      <Circle className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                    )}
-                    <span className={cn(
-                      "font-medium",
-                      step.completed ? "line-through text-muted-foreground" : "text-foreground"
-                    )}>
-                      {step.label}
-                    </span>
-                  </div>
-                ))}
+                {/* Crear primer proyecto */}
+                <div
+                  className="flex items-center gap-3 p-3 rounded-lg bg-background/60 hover:bg-background/80 transition-colors cursor-pointer"
+                  onClick={() => {
+                    setSidebarLevel('organization');
+                    navigate('/organization/projects');
+                  }}
+                  data-testid="checklist-create-project"
+                >
+                  {homeChecklist.create_project ? (
+                    <CheckCircle2 className="w-5 h-5 text-accent flex-shrink-0" />
+                  ) : (
+                    <Circle className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                  )}
+                  <span className={cn(
+                    "font-medium",
+                    homeChecklist.create_project ? "line-through text-muted-foreground" : "text-foreground"
+                  )}>
+                    Crear primer proyecto
+                  </span>
+                </div>
+
+                {/* Crear primer contacto */}
+                <div
+                  className="flex items-center gap-3 p-3 rounded-lg bg-background/60 hover:bg-background/80 transition-colors cursor-pointer"
+                  onClick={() => {
+                    setSidebarLevel('organization');
+                    navigate('/organization/contacts');
+                  }}
+                  data-testid="checklist-create-contact"
+                >
+                  {homeChecklist.create_contact ? (
+                    <CheckCircle2 className="w-5 h-5 text-accent flex-shrink-0" />
+                  ) : (
+                    <Circle className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                  )}
+                  <span className={cn(
+                    "font-medium",
+                    homeChecklist.create_contact ? "line-through text-muted-foreground" : "text-foreground"
+                  )}>
+                    Crear primer contacto
+                  </span>
+                </div>
+
+                {/* Crear primer movimiento */}
+                <div
+                  className="flex items-center gap-3 p-3 rounded-lg bg-background/60 hover:bg-background/80 transition-colors cursor-pointer"
+                  onClick={() => {
+                    setSidebarLevel('organization');
+                    navigate('/organization/finances/movements');
+                  }}
+                  data-testid="checklist-create-movement"
+                >
+                  {homeChecklist.create_movement ? (
+                    <CheckCircle2 className="w-5 h-5 text-accent flex-shrink-0" />
+                  ) : (
+                    <Circle className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                  )}
+                  <span className={cn(
+                    "font-medium",
+                    homeChecklist.create_movement ? "line-through text-muted-foreground" : "text-foreground"
+                  )}>
+                    Crear primer movimiento
+                  </span>
+                </div>
               </div>
 
-              <Button
-                variant="outline"
-                className="w-full sm:w-auto"
-                onClick={() => {
-                  setSidebarLevel('learning');
-                  navigate('/learning/dashboard');
-                }}
-              >
-                <Play className="w-4 h-4 mr-2" />
-                Ver lección de 5 min
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          /* Banner de Novedades */
-          <Card className="border-2 border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-blue-500/10">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-blue-500" />
-                </div>
-                <CardTitle className="text-xl">Novedades de Archub</CardTitle>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto"
+                  onClick={() => {
+                    setSidebarLevel('learning');
+                    navigate('/learning/courses');
+                  }}
+                  data-testid="button-view-courses"
+                >
+                  <Play className="w-4 h-4 mr-2" />
+                  Ver lección de 5 min
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full sm:w-auto"
+                  onClick={() => dismissBannerMutation.mutate()}
+                  disabled={dismissBannerMutation.isPending}
+                  data-testid="button-hide-banner"
+                >
+                  Ocultar este banner
+                </Button>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <h4 className="font-semibold">Nueva funcionalidad: Gestión de Tareas Mejorada</h4>
-                <p className="text-sm text-muted-foreground">
-                  Ahora puedes asignar múltiples responsables, establecer dependencias entre tareas y recibir notificaciones automáticas.
-                </p>
-              </div>
-              
-              <Button variant="outline" className="w-full sm:w-auto">
-                Ver más novedades
-              </Button>
             </CardContent>
           </Card>
         )}
