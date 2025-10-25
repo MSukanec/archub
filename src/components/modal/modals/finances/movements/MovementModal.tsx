@@ -1273,6 +1273,22 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       return result
     },
     onSuccess: async (result) => {
+      // Si estamos creando un nuevo movimiento (no editando), marcar checklist
+      if (!isEditing) {
+        try {
+          const { error: checklistError } = await supabase.rpc('tick_home_checklist', {
+            p_key: 'create_movement',
+            p_value: true
+          });
+          
+          if (checklistError) {
+            console.error('Error updating home checklist:', checklistError);
+          }
+        } catch (error) {
+          console.error('Error calling tick_home_checklist:', error);
+        }
+      }
+
       // Invalidar todas las queries relacionadas
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       queryClient.invalidateQueries({ queryKey: ['movements-view'] })
@@ -1304,6 +1320,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           queryKey: ['movement-general-costs', result.id] 
         })
       }
+      
+      // Invalidar current-user para refrescar el checklist
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
       
       // Esperar un momento para que se actualicen los datos
       await new Promise(resolve => setTimeout(resolve, 300))
