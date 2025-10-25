@@ -9,6 +9,7 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import { useProjectContext } from "@/stores/projectContext";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useToast } from "@/hooks/use-toast";
+import { useProjects } from "@/hooks/use-projects";
 import { useQuery } from "@tanstack/react-query";
 import { 
   Home as HomeIcon, 
@@ -30,13 +31,6 @@ import {
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-
-interface Project {
-  id: string;
-  name: string;
-  status: string;
-  created_at: string;
-}
 
 interface Task {
   id: string;
@@ -79,15 +73,8 @@ export default function Home() {
     return "Buenas noches";
   }
 
-  // Query para proyectos activos (mock por ahora)
-  const { data: activeProjects = [] } = useQuery<Project[]>({
-    queryKey: ['active-projects', currentOrganizationId],
-    queryFn: async () => {
-      // Mock data - reemplazar con API real
-      return [];
-    },
-    enabled: !!currentOrganizationId
-  });
+  // Query para proyectos activos (datos reales)
+  const { data: activeProjects = [], isLoading: projectsLoading } = useProjects(currentOrganizationId || undefined);
 
   // Query para tareas pendientes (mock por ahora)
   const { data: upcomingTasks = [] } = useQuery<Task[]>({
@@ -308,14 +295,27 @@ export default function Home() {
 
           {/* 3. Proyectos activos */}
           <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
                 <FolderOpen className="w-5 h-5 text-accent" />
                 Proyectos activos
               </CardTitle>
+              <Button
+                size="sm"
+                onClick={() => {
+                  setSidebarLevel('organization');
+                  navigate('/organization/projects');
+                }}
+              >
+                Proyectos
+              </Button>
             </CardHeader>
             <CardContent>
-              {activeProjects.length > 0 ? (
+              {projectsLoading ? (
+                <div className="text-center py-6">
+                  <p className="text-sm text-muted-foreground">Cargando proyectos...</p>
+                </div>
+              ) : activeProjects.length > 0 ? (
                 <div className="space-y-3">
                   {activeProjects.slice(0, 4).map((project) => (
                     <div
@@ -328,18 +328,36 @@ export default function Home() {
                     >
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="font-medium text-sm truncate">{project.name}</h4>
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge 
+                          variant="secondary" 
+                          className={cn(
+                            "text-xs",
+                            project.status === 'Activo' && "bg-green-500/10 text-green-600 dark:text-green-400",
+                            project.status === 'Completado' && "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                          )}
+                        >
                           {project.status}
                         </Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        85% tareas completadas
-                      </p>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span>{project.project_data?.project_type?.name || 'Sin tipo'}</span>
+                        <span>·</span>
+                        <span>{project.project_data?.modality?.name || 'Sin modalidad'}</span>
+                      </div>
                     </div>
                   ))}
-                  <Button variant="link" className="w-full p-0 h-auto text-sm">
-                    Ver todos los proyectos →
-                  </Button>
+                  {activeProjects.length > 4 && (
+                    <Button 
+                      variant="link" 
+                      className="w-full p-0 h-auto text-sm"
+                      onClick={() => {
+                        setSidebarLevel('organization');
+                        navigate('/organization/projects');
+                      }}
+                    >
+                      Ver todos los proyectos ({activeProjects.length}) →
+                    </Button>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-6">
