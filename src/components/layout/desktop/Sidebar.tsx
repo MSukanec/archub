@@ -214,13 +214,18 @@ export function Sidebar() {
                   }}
                   className={cn(
                     "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
-                    isExpanded ? "w-full" : "w-8"
+                    isExpanded ? "w-full" : "w-8",
+                    location === '/home' && "bg-[var(--main-sidebar-button-active-bg)]"
                   )}
                   data-testid="button-sidebar-home"
                 >
                   <div className="flex items-center justify-center w-8 flex-shrink-0">
                     <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                      <Home className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                      <Home className={cn(
+                        "h-4 w-4 transition-colors",
+                        location === '/home' ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
+                        "group-hover:text-[var(--accent)]"
+                      )} />
                     </div>
                   </div>
                   {isExpanded && (
@@ -258,12 +263,17 @@ export function Sidebar() {
                   }}
                   className={cn(
                     "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
-                    isExpanded ? "w-full" : "w-8"
+                    isExpanded ? "w-full" : "w-8",
+                    (location.startsWith('/organization') || location.startsWith('/contacts') || location.startsWith('/movements') || location.startsWith('/finances') || location.startsWith('/analysis')) && "bg-[var(--main-sidebar-button-active-bg)]"
                   )}
                 >
                   <div className="flex items-center justify-center w-8 flex-shrink-0">
                     <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                      <Building className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                      <Building className={cn(
+                        "h-4 w-4 transition-colors",
+                        (location.startsWith('/organization') || location.startsWith('/contacts') || location.startsWith('/movements') || location.startsWith('/finances') || location.startsWith('/analysis')) ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
+                        "group-hover:text-[var(--accent)]"
+                      )} />
                     </div>
                   </div>
                   {isExpanded && (
@@ -294,12 +304,17 @@ export function Sidebar() {
                   }}
                   className={cn(
                     "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
-                    isExpanded ? "w-full" : "w-8"
+                    isExpanded ? "w-full" : "w-8",
+                    (location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients')) && "bg-[var(--main-sidebar-button-active-bg)]"
                   )}
                 >
                   <div className="flex items-center justify-center w-8 flex-shrink-0">
                     <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                      <FolderOpen className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                      <FolderOpen className={cn(
+                        "h-4 w-4 transition-colors",
+                        (location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients')) ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
+                        "group-hover:text-[var(--accent)]"
+                      )} />
                     </div>
                   </div>
                   {isExpanded && (
@@ -322,12 +337,17 @@ export function Sidebar() {
                   }}
                   className={cn(
                     "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
-                    isExpanded ? "w-full" : "w-8"
+                    isExpanded ? "w-full" : "w-8",
+                    location.startsWith('/learning') && "bg-[var(--main-sidebar-button-active-bg)]"
                   )}
                 >
                   <div className="flex items-center justify-center w-8 flex-shrink-0">
                     <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                      <GraduationCap className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                      <GraduationCap className={cn(
+                        "h-4 w-4 transition-colors",
+                        location.startsWith('/learning') ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
+                        "group-hover:text-[var(--accent)]"
+                      )} />
                     </div>
                   </div>
                   {isExpanded && (
@@ -351,12 +371,17 @@ export function Sidebar() {
                     }}
                     className={cn(
                       "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
-                      isExpanded ? "w-full" : "w-8"
+                      isExpanded ? "w-full" : "w-8",
+                      location.startsWith('/admin') && "bg-[var(--main-sidebar-button-active-bg)]"
                     )}
                   >
                     <div className="flex items-center justify-center w-8 flex-shrink-0">
                       <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                        <Crown className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                        <Crown className={cn(
+                          "h-4 w-4 transition-colors",
+                          location.startsWith('/admin') ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
+                          "group-hover:text-[var(--accent)]"
+                        )} />
                       </div>
                     </div>
                     {isExpanded && (
@@ -455,6 +480,7 @@ export function Sidebar() {
                   isExpanded={isExpanded}
                   onClick={() => {
                     setSidebarLevel('general');
+                    navigate('/home');
                   }}
                   variant="secondary"
                 />

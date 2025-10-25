@@ -105,10 +105,11 @@ export default function SidebarButton({
                 </div>
               ) : (
                 <span 
-                  className="text-current group-hover:[&>svg]:text-[var(--accent)] group-data-[active=true]:[&>svg]:text-[var(--accent)]"
-                  style={{
-                    color: isActive ? 'var(--accent)' : undefined
-                  }}
+                  className={cn(
+                    "transition-colors duration-200",
+                    isActive ? "text-[var(--accent)]" : "text-[var(--main-sidebar-button-fg)]",
+                    "group-hover:text-[var(--accent)]"
+                  )}
                 >
                   {icon}
                 </span>
