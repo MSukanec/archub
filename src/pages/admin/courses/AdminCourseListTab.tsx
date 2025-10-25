@@ -10,6 +10,7 @@ import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/Tabl
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useLocation } from 'wouter'
+import { supabase } from '@/lib/supabase'
 
 export default function AdminCourseListTab() {
   const { toast } = useToast()
@@ -24,6 +25,44 @@ export default function AdminCourseListTab() {
 
   const handleEditCourse = (course: any) => {
     openModal('course', { course, isEditing: true });
+  };
+
+  const handleDeleteCourse = (course: any) => {
+    openModal('delete-confirmation', {
+      mode: 'dangerous',
+      title: 'Eliminar curso',
+      description: `Estás por eliminar el curso "${course.title}". Esta acción no se puede deshacer y se eliminarán todos los módulos, lecciones, inscripciones y progreso asociados.`,
+      itemName: course.title,
+      destructiveActionText: 'Eliminar curso',
+      onDelete: async () => {
+        try {
+          const response = await fetch(`/api/admin/courses/${course.id}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${(await supabase?.auth.getSession())?.data.session?.access_token}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to delete course');
+          }
+
+          toast({
+            title: 'Curso eliminado',
+            description: 'El curso fue eliminado correctamente'
+          });
+
+          // Invalidate cache to refresh the list
+          window.location.reload();
+        } catch (error) {
+          toast({
+            title: 'Error al eliminar',
+            description: 'No se pudo eliminar el curso',
+            variant: 'destructive'
+          });
+        }
+      }
+    });
   };
 
   const handleViewCourse = (courseId: string) => {
@@ -96,7 +135,7 @@ export default function AdminCourseListTab() {
           </Button>
           <TableActionButtons
             onEdit={() => handleEditCourse(course)}
-            onDelete={() => toast({ title: "Eliminar curso", description: "Función en desarrollo" })}
+            onDelete={() => handleDeleteCourse(course)}
           />
         </div>
       )
