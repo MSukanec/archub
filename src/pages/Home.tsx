@@ -4,6 +4,7 @@ import { Layout } from "@/components/layout/desktop/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { CustomButton } from "@/components/ui-custom/fields/CustomButton";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useProjectContext } from "@/stores/projectContext";
@@ -420,7 +421,7 @@ export default function Home() {
                       className="w-full"
                       onClick={() => {
                         setSidebarLevel('learning');
-                        navigate(`/learning/courses/${latestCourse.id}`);
+                        navigate('/learning/courses');
                       }}
                     >
                       <Play className="w-4 h-4 mr-2" />
@@ -454,24 +455,21 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start"
-                  onClick={() => toast({ title: "Sugerir idea", description: "Formulario próximamente" })}
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Sugerir una idea
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start"
-                  onClick={() => toast({ title: "Reportar bug", description: "Formulario próximamente" })}
-                >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Reportar un bug
-                </Button>
+                <CustomButton
+                  icon={MessageSquare}
+                  title="Reportar un bug"
+                  onClick={() => window.open('https://discord.com/channels/868615664070443008/1426005460598657056', '_blank')}
+                />
+                <CustomButton
+                  icon={Sparkles}
+                  title="Sugerir una idea"
+                  onClick={() => window.open('https://discord.com/channels/868615664070443008/1426008844353667233', '_blank')}
+                />
+                <CustomButton
+                  icon={MessageSquare}
+                  title="Foro general"
+                  onClick={() => window.open('https://discord.com/channels/868615664070443008/1137167434860732588', '_blank')}
+                />
               </div>
             </CardContent>
           </Card>
