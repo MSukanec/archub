@@ -40,6 +40,7 @@ export default function DatePickerField({
   }
 
   const handleDateChange = (date: Date | undefined) => {
+    // Solo permitir seleccionar, nunca deseleccionar
     if (date) {
       // Forzar que la fecha se mantenga en la zona horaria local
       // Usar toDateString y volver a parsear garantiza que se mantenga el día correcto
@@ -47,9 +48,8 @@ export default function DatePickerField({
       const localDate = new Date(dateStr)
       localDate.setHours(12, 0, 0, 0)
       onChange(localDate)
-    } else {
-      onChange(undefined)
     }
+    // Si date es undefined, no hacer nada (evita deselección)
   }
 
   return (
