@@ -99,55 +99,35 @@ export default function AdminCourseCouponTab() {
       key: 'code',
       label: 'Código',
       render: (coupon: Coupon) => (
-        <div>
-          <div className="font-medium text-sm font-mono">{coupon.code}</div>
-          <div className="text-xs text-muted-foreground">
-            {coupon.type === 'percent' ? `${coupon.amount}% OFF` : `$${coupon.amount} OFF`}
-          </div>
-        </div>
+        <div className="font-bold text-sm font-mono">{coupon.code}</div>
       )
     },
     {
       key: 'type',
       label: 'Tipo',
       render: (coupon: Coupon) => (
-        <Badge style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
+        <div className="text-sm">
           {coupon.type === 'percent' ? 'Porcentaje' : 'Monto Fijo'}
-        </Badge>
+        </div>
       )
     },
     {
-      key: 'validity',
-      label: 'Validez',
+      key: 'amount',
+      label: 'Importe del cupón',
       render: (coupon: Coupon) => (
-        <div className="text-sm">
-          {coupon.starts_at && (
-            <div className="text-muted-foreground">
-              Desde: {format(new Date(coupon.starts_at), 'dd/MM/yyyy', { locale: es })}
-            </div>
-          )}
-          {coupon.expires_at && (
-            <div className="text-muted-foreground">
-              Hasta: {format(new Date(coupon.expires_at), 'dd/MM/yyyy', { locale: es })}
-            </div>
-          )}
-          {!coupon.starts_at && !coupon.expires_at && (
-            <div className="text-muted-foreground">Sin límite de fecha</div>
-          )}
+        <div className="text-sm font-medium">
+          {coupon.type === 'percent' ? `${coupon.amount}%` : `$${coupon.amount}`}
         </div>
       )
     },
     {
       key: 'usage',
-      label: 'Usos',
+      label: 'Usos / Límite',
       render: (coupon: Coupon) => (
         <div className="text-sm">
-          <div className="font-medium">{coupon.total_uses || 0} usos</div>
-          {coupon.max_redemptions && (
-            <div className="text-xs text-muted-foreground">
-              Límite: {coupon.max_redemptions}
-            </div>
-          )}
+          {coupon.max_redemptions 
+            ? `${coupon.total_uses || 0} / ${coupon.max_redemptions}` 
+            : `${coupon.total_uses || 0} / ∞`}
         </div>
       )
     },
@@ -183,6 +163,17 @@ export default function AdminCourseCouponTab() {
           </Badge>
         );
       }
+    },
+    {
+      key: 'validity',
+      label: 'Fecha de caducidad',
+      render: (coupon: Coupon) => (
+        <div className="text-sm text-muted-foreground">
+          {coupon.expires_at 
+            ? format(new Date(coupon.expires_at), 'dd/MM/yyyy', { locale: es })
+            : 'Sin vencimiento'}
+        </div>
+      )
     },
     {
       key: 'actions',
