@@ -287,14 +287,17 @@ export default function Home() {
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  <p className="text-sm text-muted-foreground">
+                <div className="text-center py-6">
+                  <p className="text-sm text-muted-foreground mb-3">
                     No hay proyectos recientes
                   </p>
-                  <Button className="w-full" onClick={() => {
-                    setSidebarLevel('organization');
-                    navigate('/organization/projects');
-                  }}>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setSidebarLevel('organization');
+                      navigate('/organization/projects');
+                    }}
+                  >
                     <Plus className="w-4 h-4 mr-2" />
                     Crear proyecto
                   </Button>
