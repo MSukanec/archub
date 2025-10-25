@@ -1,5 +1,27 @@
 import React, { useState, useRef, useEffect } from "react";
-import { ChevronDown, Search, Filter, X, ArrowLeft, DollarSign } from "lucide-react";
+import { 
+  ChevronDown, 
+  Search, 
+  Filter, 
+  X, 
+  ArrowLeft, 
+  DollarSign,
+  Home,
+  Building,
+  Users,
+  FileText,
+  Calculator,
+  FolderOpen,
+  Activity,
+  Settings,
+  Package,
+  Layers,
+  History,
+  BookOpen,
+  ListTodo,
+  GraduationCap,
+  MessageCircle
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,62 +42,44 @@ import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
 
-// Mapeo de rutas a nombres de páginas
-const PAGE_NAMES: Record<string, string> = {
+// Mapeo de rutas a nombres e iconos de páginas (exactamente como en el sidebar)
+const PAGE_CONFIG: Record<string, { name: string; icon: any }> = {
   // Home
-  '/home': 'Inicio',
+  '/home': { name: 'Inicio', icon: Home },
   
   // Organization level
-  '/organization/dashboard': 'Resumen',
-  '/organization/projects': 'Proyectos',
-  '/organization/personnel': 'Personal',
-  '/organization/activity': 'Actividad',
-  '/organization/preferences': 'Preferencias',
+  '/organization/dashboard': { name: 'Resumen de Organización', icon: Home },
+  '/organization/projects': { name: 'Gestión de Proyectos', icon: Building },
+  '/contacts': { name: 'Contactos', icon: Users },
+  '/analysis': { name: 'Análisis de Costos', icon: FileText },
+  '/movements': { name: 'Movimientos', icon: DollarSign },
+  '/finances/capital': { name: 'Capital', icon: Calculator },
+  '/finances/general-costs': { name: 'Gastos Generales', icon: FolderOpen },
+  '/organization/activity': { name: 'Actividad', icon: Activity },
+  '/organization/preferences': { name: 'Preferencias', icon: Settings },
   
   // Project level
-  '/project/dashboard': 'Resumen',
-  '/project/gantt': 'Gantt',
-  '/project/kanban': 'Kanban',
-  '/budgets': 'Cómputo y Presupuesto',
-  '/professional/budgets': 'Cómputo y Presupuesto',
-  
-  // Construction
-  '/construction/dashboard': 'Construcción',
-  '/construction/personnel': 'Mano de Obra',
-  '/construction/materials': 'Materiales',
-  '/construction/indirects': 'Indirectos',
-  '/construction/subcontracts': 'Subcontratos',
-  '/construction/logs': 'Bitácora',
-  
-  // General
-  '/contacts': 'Contactos',
-  '/analysis': 'Análisis de Costos',
-  '/movements': 'Movimientos',
-  '/clients': 'Clientes',
-  '/media': 'Galería',
-  '/calendar': 'Calendario',
-  
-  // Finances
-  '/finances/capital': 'Capital',
-  '/finances/general-costs': 'Gastos Generales',
-  '/finances/dashboard': 'Finanzas',
+  '/project/dashboard': { name: 'Resumen de Proyecto', icon: Home },
+  '/budgets': { name: 'Cómputo y Presupuesto', icon: Calculator },
+  '/professional/budgets': { name: 'Cómputo y Presupuesto', icon: Calculator },
+  '/construction/personnel': { name: 'Mano de Obra', icon: Users },
+  '/construction/materials': { name: 'Materiales', icon: Package },
+  '/construction/indirects': { name: 'Indirectos', icon: Layers },
+  '/construction/subcontracts': { name: 'Subcontratos', icon: FileText },
+  '/construction/logs': { name: 'Bitácora', icon: History },
+  '/clients': { name: 'Clientes', icon: Users },
   
   // Admin
-  '/admin/community': 'Comunidad',
-  '/admin/costs': 'Costos',
-  '/admin/tasks': 'Tareas',
-  '/admin/general': 'General',
-  '/admin/courses': 'Cursos',
-  '/providers/products': 'Productos',
-  
-  // Profile
-  '/profile': 'Perfil',
-  '/profile/organizations': 'Organizaciones',
-  '/profile/preferences': 'Preferencias',
+  '/admin/community': { name: 'Comunidad', icon: Users },
+  '/admin/courses': { name: 'Cursos', icon: BookOpen },
+  '/admin/tasks': { name: 'Tareas', icon: ListTodo },
+  '/admin/costs': { name: 'Costos', icon: DollarSign },
+  '/providers/products': { name: 'Productos', icon: Package },
+  '/admin/general': { name: 'General', icon: Settings },
   
   // Learning / Capacitaciones
-  '/learning/dashboard': 'Mis Cursos',
-  '/learning/courses': 'Explorar',
+  '/learning/dashboard': { name: 'Dashboard', icon: Home },
+  '/learning/courses': { name: 'Cursos', icon: GraduationCap },
 };
 
 // Mapeo de sidebar level a nombre de sección
@@ -275,56 +279,53 @@ export function PageLayout({
               </Button>
             )}
             
-            {/* Icon + Title */}
-            {(icon || title) && (
-              <div className="flex items-center gap-3">
-                {icon && (
-                  <span className="text-[var(--accent)] flex-shrink-0">
-                    {React.isValidElement(icon) ? icon : React.createElement(icon as React.ComponentType<{ className?: string }>, { 
-                      className: "w-5 h-5" 
-                    })}
-                  </span>
+            {/* Icon from sidebar + Breadcrumbs */}
+            <div className="flex items-center gap-3">
+              {/* Icono de la página actual (del sidebar) */}
+              {PAGE_CONFIG[location]?.icon && (
+                <span className="text-[var(--accent)] flex-shrink-0">
+                  {React.createElement(PAGE_CONFIG[location].icon, { className: "w-5 h-5" })}
+                </span>
+              )}
+              
+              {/* Breadcrumbs Navigation */}
+              <div className="flex items-center gap-2">
+                {/* Inicio - siempre visible */}
+                <button
+                  onClick={() => {
+                    navigate('/home');
+                  }}
+                  className="text-sm font-semibold text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
+                >
+                  Inicio
+                </button>
+                
+                {/* Sección - si no estamos en general */}
+                {sidebarLevel !== 'general' && (
+                  <>
+                    <span className="text-sm font-semibold text-[var(--muted-foreground)]">/</span>
+                    <button
+                      onClick={() => {
+                        navigate(SECTION_DASHBOARDS[sidebarLevel] || '/home');
+                      }}
+                      className="text-sm font-semibold text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
+                    >
+                      {SECTION_NAMES[sidebarLevel] || 'Sección'}
+                    </button>
+                  </>
                 )}
                 
-                {/* Breadcrumbs Navigation */}
-                <div className="flex items-center gap-2">
-                  {/* Inicio - siempre visible */}
-                  <button
-                    onClick={() => {
-                      navigate('/home');
-                    }}
-                    className="text-sm font-semibold text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
-                  >
-                    Inicio
-                  </button>
-                  
-                  {/* Sección - si no estamos en general */}
-                  {sidebarLevel !== 'general' && (
-                    <>
-                      <span className="text-sm font-semibold text-[var(--muted-foreground)]">/</span>
-                      <button
-                        onClick={() => {
-                          navigate(SECTION_DASHBOARDS[sidebarLevel] || '/home');
-                        }}
-                        className="text-sm font-semibold text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
-                      >
-                        {SECTION_NAMES[sidebarLevel] || 'Sección'}
-                      </button>
-                    </>
-                  )}
-                  
-                  {/* Página actual - si no es el dashboard de la sección ni home */}
-                  {location !== '/home' && location !== SECTION_DASHBOARDS[sidebarLevel] && (
-                    <>
-                      <span className="text-sm font-semibold text-[var(--muted-foreground)]">/</span>
-                      <span className="text-sm font-semibold text-[var(--muted-foreground)]">
-                        {PAGE_NAMES[location] || title || 'Página'}
-                      </span>
-                    </>
-                  )}
-                </div>
+                {/* Página actual - si no es el dashboard de la sección ni home */}
+                {location !== '/home' && location !== SECTION_DASHBOARDS[sidebarLevel] && (
+                  <>
+                    <span className="text-sm font-semibold text-[var(--muted-foreground)]">/</span>
+                    <span className="text-sm font-semibold text-[var(--muted-foreground)]">
+                      {PAGE_CONFIG[location]?.name || title || 'Página'}
+                    </span>
+                  </>
+                )}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Right: Header Action Buttons + Main Action Buttons */}
