@@ -79,7 +79,14 @@ export default function Home() {
   const { data: allProjects = [], isLoading: projectsLoading } = useProjects(currentOrganizationId || undefined);
   
   // Filtrar SOLO proyectos con estado "active"
-  const activeProjects = allProjects.filter(project => project.status === 'active');
+  const filteredActiveProjects = allProjects.filter(project => project.status === 'active');
+  
+  // Ordenar: proyecto activo primero, luego los demás
+  const activeProjects = filteredActiveProjects.sort((a, b) => {
+    if (a.id === selectedProjectId) return -1;
+    if (b.id === selectedProjectId) return 1;
+    return 0;
+  });
 
   // Mutación para cambiar el proyecto activo
   const selectProjectMutation = useMutation({
@@ -360,7 +367,7 @@ export default function Home() {
                   navigate('/organization/projects');
                 }}
               >
-                Proyectos
+                Ir a Proyectos
               </Button>
             </CardHeader>
             <CardContent>
@@ -377,9 +384,10 @@ export default function Home() {
                       <div
                         key={project.id}
                         className={cn(
-                          "p-3 rounded-lg border hover:bg-accent/5 transition-colors cursor-pointer",
-                          isCurrentProject && "border-[hsl(var(--accent))]"
+                          "p-3 rounded-lg hover:bg-accent/5 transition-colors cursor-pointer",
+                          isCurrentProject ? "border-2" : "border"
                         )}
+                        style={isCurrentProject ? { borderColor: 'hsl(var(--accent))' } : undefined}
                         onClick={() => {
                           selectProjectMutation.mutate(project.id);
                         }}
@@ -395,10 +403,8 @@ export default function Home() {
                             </Badge>
                           )}
                         </div>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span>{project.project_data?.project_type?.name || 'Sin tipo'}</span>
-                          <span>·</span>
-                          <span>{project.project_data?.modality?.name || 'Sin modalidad'}</span>
+                        <div className="text-xs text-muted-foreground">
+                          {project.project_data?.project_type?.name || 'Sin tipo'} - {project.project_data?.modality?.name || 'Sin modalidad'}
                         </div>
                       </div>
                     );
