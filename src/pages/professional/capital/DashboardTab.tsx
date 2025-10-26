@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { DollarSign, ArrowUpDown } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useFinancialSummary, useMonthlyFlowData, useRecentMovements } from '@/hooks/use-finance-dashboard-simple'
 import { useWalletCurrencyBalances } from '@/hooks/use-wallet-currency-balances'
@@ -10,7 +11,6 @@ import { WalletCurrencyBalanceTable } from '@/components/charts/WalletCurrencyBa
 import { formatDateShort } from '@/lib/date-utils'
 import { Link } from 'wouter'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
-import { motion } from 'framer-motion'
 import { CapitalChart } from '@/components/charts/organization/dashboard/CapitalChart'
 import { useMovements } from '@/hooks/use-movements'
 import { useMovementKPIs } from '@/hooks/use-movement-kpis'
@@ -183,8 +183,8 @@ export default function FinancesDashboard() {
           />
         </div>
 
-        {/* FILA 1: 3 columnas - Balances por Billetera y Moneda / Este Mes / Movimientos Recientes */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+        {/* 2 columnas - Balances por Billetera y Moneda / Movimientos Recientes */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
           {/* Balances por Billetera y Moneda */}
           <Card>
             <CardHeader className="pb-2">
@@ -194,34 +194,6 @@ export default function FinancesDashboard() {
             </CardHeader>
             <CardContent className="pt-4">
               <WalletCurrencyBalanceTable data={walletCurrencyBalances} isLoading={walletCurrencyLoading} />
-            </CardContent>
-          </Card>
-
-          {/* Este Mes */}
-          <Card>
-            <CardHeader className="pb-2">
-              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-                Este Mes
-              </p>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="text-5xl font-bold text-foreground tracking-tight mb-4">
-                {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthBalance || 0).replace('ARS', '').replace('$', '$').trim()}
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">I:</span>
-                  <span className="text-green-600 font-medium">
-                    {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthIncome || 0).replace('ARS', '').trim()}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">E:</span>
-                  <span className="text-red-600 font-medium">
-                    {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthExpenses || 0).replace('ARS', '').trim()}
-                  </span>
-                </div>
-              </div>
             </CardContent>
           </Card>
 
@@ -272,87 +244,22 @@ export default function FinancesDashboard() {
           </Card>
         </div>
 
-        {/* FILA 2: 4 columnas - 3 KPIs apilados + Gráfico de Flujo Financiero */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6 mt-6">
-          {/* Columna 1: 3 KPIs apilados */}
-          <div className="space-y-4">
-            {/* Income Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Card className="h-full relative overflow-hidden">
-                <CardHeader className="pb-2">
-                  <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-                    Ingresos Totales
-                  </p>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="text-5xl font-bold text-foreground tracking-tight">
-                    {summaryLoading ? '...' : formatCurrency(financialSummary?.totalIncome || 0).replace('ARS', '').replace('$', '$').trim()}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Expenses Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              <Card className="h-full relative overflow-hidden">
-                <CardHeader className="pb-2">
-                  <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-                    Egresos Totales
-                  </p>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="text-5xl font-bold text-foreground tracking-tight">
-                    {summaryLoading ? '...' : formatCurrency(financialSummary?.totalExpenses || 0).replace('ARS', '').replace('$', '$').trim()}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Balance Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <Card className="h-full relative overflow-hidden">
-                <CardHeader className="pb-2">
-                  <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-                    Balance Neto
-                  </p>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="text-5xl font-bold text-foreground tracking-tight">
-                    {summaryLoading ? '...' : formatCurrency(financialSummary?.balance || 0).replace('ARS', '').replace('$', '$').trim()}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+        {/* Flujo Financiero Mensual - 100% ancho */}
+        <div className="relative group mt-6">
+          {/* Header - igual que el de Capital */}
+          <div className="flex flex-row items-start justify-between mb-4">
+            <div className="flex flex-col gap-2">
+              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
+                Flujo Financiero Mensual
+              </p>
+            </div>
           </div>
-
-          {/* Columnas 2-4: Gráfico de Flujo Financiero Mensual */}
-          <div className="lg:col-span-3">
-            <Card className="h-full">
-              <CardHeader className="pb-2">
-                <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-                  Flujo Financiero Mensual
-                </p>
-              </CardHeader>
-              <CardContent className="pt-4 pb-2">
-                <MonthlyFlowChart 
-                  data={monthlyFlow || []} 
-                  isLoading={flowLoading} 
-                />
-              </CardContent>
-            </Card>
-          </div>
+          
+          {/* Gráfico */}
+          <MonthlyFlowChart 
+            data={monthlyFlow || []} 
+            isLoading={flowLoading} 
+          />
         </div>
 
         </>
