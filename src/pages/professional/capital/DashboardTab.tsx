@@ -1,25 +1,19 @@
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, ArrowUpDown, Wallet, Building } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { useState } from 'react'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { DollarSign, ArrowUpDown } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useFinancialSummary, useMonthlyFlowData, useRecentMovements } from '@/hooks/use-finance-dashboard-simple'
 import { useWalletCurrencyBalances } from '@/hooks/use-wallet-currency-balances'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { MonthlyFlowChart } from '@/components/charts/MonthlyFlowChart'
 import { WalletCurrencyBalanceTable } from '@/components/charts/WalletCurrencyBalanceTable'
-import { MiniTrendChart } from '@/components/charts/MiniTrendChart'
-import { ActionBar } from '@/components/layout/desktop/ActionBar'
 import { formatDateShort } from '@/lib/date-utils'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
 import { Link } from 'wouter'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { motion } from 'framer-motion'
-import { useNavigationStore } from '@/stores/navigationStore'
 import { CapitalChart } from '@/components/charts/organization/dashboard/CapitalChart'
 import { useMovements } from '@/hooks/use-movements'
+import { useMovementKPIs } from '@/hooks/use-movement-kpis'
 
 type Period = 'Semana' | 'Mes' | 'Trimestre' | 'Año';
 
@@ -32,6 +26,12 @@ export default function FinancesDashboard() {
   // Estado para el gráfico de capital
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('Trimestre');
   const { data: movements = [] } = useMovements(organizationId, null);
+  const { organizationBalances, isLoading: kpisLoading } = useMovementKPIs(organizationId);
+  
+  // Obtener el balance principal (primera moneda con más movimientos)
+  const primaryBalance = organizationBalances && organizationBalances.length > 0 
+    ? organizationBalances[0] 
+    : null;
   
   // Always use organization view mode
   const viewMode = 'all'
@@ -118,8 +118,45 @@ export default function FinancesDashboard() {
           <>
         {/* Gráfico de Capital - 100% ancho - IDÉNTICO al del dashboard */}
         <div className="relative group mb-6">
-          {/* Header con botones de período */}
-          <div className="flex flex-row items-start justify-end mb-4">
+          {/* Header - idéntico al dashboard */}
+          <div className="flex flex-row items-start justify-between mb-4">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
+                  Capital
+                </p>
+              </div>
+              
+              {/* Total histórico - debajo del título */}
+              <div className="text-5xl font-bold text-foreground tracking-tight leading-none">
+                ${primaryBalance?.balance.toLocaleString('es-AR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                }) || '0.00'}
+              </div>
+              
+              {/* Ingresos y Egresos - debajo del monto total */}
+              <div className="flex items-center gap-4 text-sm">
+                <span className="text-muted-foreground">
+                  I: <span className="text-green-600 font-medium">
+                    ${primaryBalance?.positiveTotal.toLocaleString('es-AR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    }) || '0.00'}
+                  </span>
+                </span>
+                <span className="text-muted-foreground">
+                  E: <span className="text-red-600 font-medium">
+                    ${primaryBalance?.negativeTotal.toLocaleString('es-AR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    }) || '0.00'}
+                  </span>
+                </span>
+              </div>
+            </div>
+            
+            {/* Period selector buttons */}
             <div className="flex items-center gap-2">
               {(['Semana', 'Mes', 'Trimestre', 'Año'] as Period[]).map((period) => (
                 <button
@@ -141,7 +178,7 @@ export default function FinancesDashboard() {
           {/* Gráfico */}
           <CapitalChart 
             movements={movements} 
-            primaryCurrencyCode={defaultCurrency?.code || '$'}
+            primaryCurrencyCode={primaryBalance?.currencyCode || defaultCurrency?.code || '$'}
             selectedPeriod={selectedPeriod}
           />
         </div>
@@ -150,64 +187,39 @@ export default function FinancesDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
           {/* Balances por Billetera y Moneda */}
           <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <DollarSign className="h-5 w-5" />
-                    Balances por Billetera y Moneda
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Resumen detallado de saldos
-                  </p>
-                </div>
-                <Badge variant="outline" className="text-xs">
-                  MULTI
-                </Badge>
-              </div>
+            <CardHeader className="pb-2">
+              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
+                Balances por Billetera
+              </p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-4">
               <WalletCurrencyBalanceTable data={walletCurrencyBalances} isLoading={walletCurrencyLoading} />
             </CardContent>
           </Card>
 
           {/* Este Mes */}
           <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    Este Mes
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {format(new Date(), 'MMMM yyyy', { locale: es })}
-                  </p>
-                </div>
-                {getCurrencyBadge()}
-              </div>
+            <CardHeader className="pb-2">
+              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
+                Este Mes
+              </p>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="pt-0">
+              <div className="text-5xl font-bold text-foreground tracking-tight mb-4">
+                {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthBalance || 0).replace('ARS', '').replace('$', '$').trim()}
+              </div>
+              <div className="space-y-2 text-sm">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Ingresos</span>
-                  <span className="font-medium" style={{ color: 'var(--chart-positive)' }}>
-                    {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthIncome || 0)}
+                  <span className="text-muted-foreground">I:</span>
+                  <span className="text-green-600 font-medium">
+                    {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthIncome || 0).replace('ARS', '').trim()}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Egresos</span>
-                  <span className="font-medium" style={{ color: 'var(--chart-negative)' }}>
-                    {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthExpenses || 0)}
+                  <span className="text-muted-foreground">E:</span>
+                  <span className="text-red-600 font-medium">
+                    {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthExpenses || 0).replace('ARS', '').trim()}
                   </span>
-                </div>
-                <div className="border-t pt-2">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">Balance Mensual</span>
-                    <span className="font-bold" style={getBalanceColor(financialSummary?.thisMonthBalance || 0)}>
-                      {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthBalance || 0)}
-                    </span>
-                  </div>
                 </div>
               </div>
             </CardContent>
@@ -215,16 +227,12 @@ export default function FinancesDashboard() {
 
           {/* Movimientos Recientes */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <FileText className="h-5 w-5" />
+            <CardHeader className="pb-2">
+              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
                 Movimientos Recientes
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Últimos 5 movimientos registrados
               </p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-4">
               {recentMovements && recentMovements.length > 0 ? (
                 <div className="space-y-3">
                   {recentMovements.slice(0, 5).map((movement, index) => (
@@ -275,33 +283,14 @@ export default function FinancesDashboard() {
               transition={{ duration: 0.5 }}
             >
               <Card className="h-full relative overflow-hidden">
-                <CardContent className="p-4 h-full flex flex-col">
-                  {/* Mini Chart */}
-                  <div className="mb-4">
-                    <MiniTrendChart 
-                      data={monthlyFlow?.map(month => ({ value: month.income || 0 })) || []} 
-                      color="var(--chart-positive)" 
-                      isLoading={flowLoading} 
-                    />
-                  </div>
-                  
-                  {/* Spacer to push content down */}
-                  <div className="flex-1"></div>
-                  
-                  {/* Icon and Title Section - positioned lower */}
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4" style={{ color: 'var(--chart-positive)' }} />
-                      <span className="text-sm text-muted-foreground">
-                        Ingresos Totales
-                      </span>
-                    </div>
-                    {getCurrencyBadge()}
-                  </div>
-                  
-                  {/* Amount - smaller size like reference */}
-                  <div className="text-lg font-bold" style={{ color: 'var(--chart-positive)' }}>
-                    {summaryLoading ? '...' : formatCurrency(financialSummary?.totalIncome || 0)}
+                <CardHeader className="pb-2">
+                  <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
+                    Ingresos Totales
+                  </p>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="text-5xl font-bold text-foreground tracking-tight">
+                    {summaryLoading ? '...' : formatCurrency(financialSummary?.totalIncome || 0).replace('ARS', '').replace('$', '$').trim()}
                   </div>
                 </CardContent>
               </Card>
@@ -314,33 +303,14 @@ export default function FinancesDashboard() {
               transition={{ duration: 0.5, delay: 0.1 }}
             >
               <Card className="h-full relative overflow-hidden">
-                <CardContent className="p-4 h-full flex flex-col">
-                  {/* Mini Chart */}
-                  <div className="mb-4">
-                    <MiniTrendChart 
-                      data={monthlyFlow?.map(month => ({ value: Math.abs(month.expenses || 0) })) || []} 
-                      color="var(--chart-negative)" 
-                      isLoading={flowLoading} 
-                    />
-                  </div>
-                  
-                  {/* Spacer to push content down */}
-                  <div className="flex-1"></div>
-                  
-                  {/* Icon and Title Section - positioned lower */}
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <TrendingDown className="h-4 w-4" style={{ color: 'var(--chart-negative)' }} />
-                      <span className="text-sm text-muted-foreground">
-                        Egresos Totales
-                      </span>
-                    </div>
-                    {getCurrencyBadge()}
-                  </div>
-                  
-                  {/* Amount - smaller size like reference */}
-                  <div className="text-lg font-bold" style={{ color: 'var(--chart-negative)' }}>
-                    {summaryLoading ? '...' : formatCurrency(financialSummary?.totalExpenses || 0)}
+                <CardHeader className="pb-2">
+                  <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
+                    Egresos Totales
+                  </p>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="text-5xl font-bold text-foreground tracking-tight">
+                    {summaryLoading ? '...' : formatCurrency(financialSummary?.totalExpenses || 0).replace('ARS', '').replace('$', '$').trim()}
                   </div>
                 </CardContent>
               </Card>
@@ -353,33 +323,14 @@ export default function FinancesDashboard() {
               transition={{ duration: 0.5, delay: 0.2 }}
             >
               <Card className="h-full relative overflow-hidden">
-                <CardContent className="p-4 h-full flex flex-col">
-                  {/* Mini Chart */}
-                  <div className="mb-4">
-                    <MiniTrendChart 
-                      data={monthlyFlow?.map(month => ({ value: month.net || 0 })) || []} 
-                      color="var(--chart-neutral)" 
-                      isLoading={flowLoading} 
-                    />
-                  </div>
-                  
-                  {/* Spacer to push content down */}
-                  <div className="flex-1"></div>
-                  
-                  {/* Icon and Title Section - positioned lower */}
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="h-4 w-4" style={getBalanceColor(financialSummary?.balance || 0)} />
-                      <span className="text-sm text-muted-foreground">
-                        Balance Neto
-                      </span>
-                    </div>
-                    {getCurrencyBadge()}
-                  </div>
-                  
-                  {/* Amount - smaller size like reference */}
-                  <div className="text-lg font-bold" style={getBalanceColor(financialSummary?.balance || 0)}>
-                    {summaryLoading ? '...' : formatCurrency(financialSummary?.balance || 0)}
+                <CardHeader className="pb-2">
+                  <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
+                    Balance Neto
+                  </p>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="text-5xl font-bold text-foreground tracking-tight">
+                    {summaryLoading ? '...' : formatCurrency(financialSummary?.balance || 0).replace('ARS', '').replace('$', '$').trim()}
                   </div>
                 </CardContent>
               </Card>
@@ -389,21 +340,12 @@ export default function FinancesDashboard() {
           {/* Columnas 2-4: Gráfico de Flujo Financiero Mensual */}
           <div className="lg:col-span-3">
             <Card className="h-full">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5" />
-                      Flujo Financiero Mensual
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Ingresos, egresos y flujo neto del período seleccionado
-                    </p>
-                  </div>
-                  {getCurrencyBadge()}
-                </div>
+              <CardHeader className="pb-2">
+                <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
+                  Flujo Financiero Mensual
+                </p>
               </CardHeader>
-              <CardContent className="pb-2">
+              <CardContent className="pt-4 pb-2">
                 <MonthlyFlowChart 
                   data={monthlyFlow || []} 
                   isLoading={flowLoading} 
