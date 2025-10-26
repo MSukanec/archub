@@ -467,6 +467,26 @@ export function Sidebar() {
                 "flex flex-col gap-[2px]",
                 isExpanded ? "px-[9px]" : "items-center"
               )}>
+                {/* Logo - presente en TODOS los sidebars */}
+                <div className="h-16 flex items-center justify-center mb-2">
+                  <button
+                    onClick={() => {
+                      setSidebarLevel('general');
+                      navigate('/home');
+                    }}
+                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                  >
+                    <img 
+                      src="/ArchubLogo.png" 
+                      alt="Archub Logo" 
+                      className={cn(
+                        "object-contain transition-all duration-150",
+                        isExpanded ? "h-12 w-auto" : "h-8 w-8"
+                      )}
+                    />
+                  </button>
+                </div>
+
                 {/* Selector de Organización - solo en sidebar de organización */}
                 {sidebarLevel === 'organization' && (
                   <div className="h-16 flex items-center justify-center mb-2">
@@ -608,28 +628,6 @@ export function Sidebar() {
                     </Popover>
                   </div>
                 )}
-                
-                {/* Botón Volver al hub general */}
-                <ButtonSidebar
-                  icon={<ArrowLeft className="w-[18px] h-[18px]" />}
-                  label="Volver"
-                  isActive={false}
-                  isExpanded={isExpanded}
-                  onClick={() => {
-                    setSidebarLevel('general');
-                    navigate('/home');
-                  }}
-                  variant="secondary"
-                />
-                
-                {/* Divisor después del botón Volver */}
-                <div className="my-3 h-[12px] flex items-center justify-center w-full">
-                  {isExpanded ? (
-                    <div className="w-full h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                  ) : (
-                    <div className="w-8 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                  )}
-                </div>
                 
                 {navigationItems.map((item, index) => {
                 if (item.adminOnly && !isAdmin) return null;
