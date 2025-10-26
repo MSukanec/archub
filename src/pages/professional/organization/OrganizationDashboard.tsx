@@ -213,151 +213,102 @@ export default function OrganizationDashboard() {
           </div>
         </div>
 
-        {/* Grid de 4 Cards KPI */}
+        {/* Grid de 4 Cards KPI - Minimalistas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* 1. Proyectos */}
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Folder className="w-5 h-5 text-accent" />
-                Proyectos
-              </CardTitle>
+          <Card className="relative group cursor-pointer hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Proyectos</p>
+              <button
+                onClick={() => {
+                  setSidebarLevel('organization');
+                  setLocation('/organization/projects');
+                }}
+                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-accent/10 rounded"
+                data-testid="button-expand-proyectos"
+              >
+                <ArrowRight className="w-4 h-4 text-muted-foreground" />
+              </button>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div>
-                  <div className="text-3xl font-bold text-foreground">
-                    {projectsLoading ? '...' : projects.length}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {projects.length === 1 ? 'Proyecto activo' : 'Proyectos en total'}
-                  </p>
-                </div>
-                <Button 
-                  className="w-full"
-                  onClick={() => {
-                    setSidebarLevel('organization');
-                    setLocation('/organization/projects');
-                  }}
-                  data-testid="button-ir-proyectos"
-                >
-                  <ArrowRight className="w-4 h-4 mr-2" />
-                  Ver proyectos
-                </Button>
+            <CardContent className="pt-0">
+              <div className="text-4xl font-extralight text-foreground tracking-tight">
+                {projectsLoading ? '...' : projects.length}
               </div>
             </CardContent>
           </Card>
 
           {/* 2. Contactos */}
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Users className="w-5 h-5 text-accent" />
-                Contactos
-              </CardTitle>
+          <Card className="relative group cursor-pointer hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Contactos</p>
+              <button
+                onClick={() => {
+                  setSidebarLevel('organization');
+                  setLocation('/contacts');
+                }}
+                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-accent/10 rounded"
+                data-testid="button-expand-contactos"
+              >
+                <ArrowRight className="w-4 h-4 text-muted-foreground" />
+              </button>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div>
-                  <div className="text-3xl font-bold text-foreground">
-                    {contactsLoading ? '...' : contacts.length}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {contacts.length === 1 ? 'Contacto registrado' : 'Contactos registrados'}
-                  </p>
-                </div>
-                <Button 
-                  className="w-full"
-                  onClick={() => {
-                    setSidebarLevel('organization');
-                    setLocation('/contacts');
-                  }}
-                  data-testid="button-ir-contactos"
-                >
-                  <ArrowRight className="w-4 h-4 mr-2" />
-                  Ver contactos
-                </Button>
+            <CardContent className="pt-0">
+              <div className="text-4xl font-extralight text-foreground tracking-tight">
+                {contactsLoading ? '...' : contacts.length}
               </div>
             </CardContent>
           </Card>
 
           {/* 3. Movimientos */}
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-accent" />
-                Movimientos
-              </CardTitle>
+          <Card className="relative group cursor-pointer hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Movimientos</p>
+              <button
+                onClick={() => {
+                  setSidebarLevel('organization');
+                  setLocation('/movements');
+                }}
+                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-accent/10 rounded"
+                data-testid="button-expand-movimientos"
+              >
+                <ArrowRight className="w-4 h-4 text-muted-foreground" />
+              </button>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div>
-                  <div className="text-3xl font-bold text-foreground">
-                    {movementsLoading ? '...' : movements.length}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {movements.length === 1 ? 'Movimiento registrado' : 'Movimientos registrados'}
-                  </p>
-                </div>
-                <Button 
-                  className="w-full"
-                  onClick={() => {
-                    setSidebarLevel('organization');
-                    setLocation('/movements');
-                  }}
-                  data-testid="button-ir-movimientos"
-                >
-                  <ArrowRight className="w-4 h-4 mr-2" />
-                  Ver movimientos
-                </Button>
+            <CardContent className="pt-0">
+              <div className="text-4xl font-extralight text-foreground tracking-tight">
+                {movementsLoading ? '...' : movements.length}
               </div>
             </CardContent>
           </Card>
 
           {/* 4. Capital */}
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Calculator className="w-5 h-5 text-accent" />
-                Capital
-              </CardTitle>
+          <Card className="relative group cursor-pointer hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Capital</p>
+              <button
+                onClick={() => {
+                  setSidebarLevel('organization');
+                  setLocation('/finances/capital');
+                }}
+                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-accent/10 rounded"
+                data-testid="button-expand-capital"
+              >
+                <ArrowRight className="w-4 h-4 text-muted-foreground" />
+              </button>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div>
-                  {kpisLoading ? (
-                    <div className="text-xl font-bold text-foreground">Cargando...</div>
-                  ) : primaryBalance ? (
-                    <>
-                      <div className="text-3xl font-bold text-foreground">
-                        {primaryBalance.currencyCode} {primaryBalance.balance.toLocaleString('es-AR', {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2
-                        })}
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Balance en {primaryBalance.currencyName}
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <div className="text-3xl font-bold text-foreground">$ 0</div>
-                      <p className="text-sm text-muted-foreground">Sin movimientos</p>
-                    </>
-                  )}
+            <CardContent className="pt-0">
+              {kpisLoading ? (
+                <div className="text-4xl font-extralight text-foreground tracking-tight">...</div>
+              ) : primaryBalance ? (
+                <div className="text-4xl font-extralight text-foreground tracking-tight">
+                  {primaryBalance.currencyCode} {primaryBalance.balance.toLocaleString('es-AR', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                  })}
                 </div>
-                <Button 
-                  className="w-full"
-                  onClick={() => {
-                    setSidebarLevel('organization');
-                    setLocation('/finances/capital');
-                  }}
-                  data-testid="button-ir-capital"
-                >
-                  <ArrowRight className="w-4 h-4 mr-2" />
-                  Ver capital
-                </Button>
-              </div>
+              ) : (
+                <div className="text-4xl font-extralight text-foreground tracking-tight">$ 0</div>
+              )}
             </CardContent>
           </Card>
         </div>
