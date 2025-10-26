@@ -40,9 +40,9 @@ interface CapitalChartPropsExtended extends CapitalChartProps {
 
 export function CapitalChart({ movements, primaryCurrencyCode, selectedPeriod }: CapitalChartPropsExtended) {
 
-  const { chartData, totalBalance, maxValue, minValue } = useMemo(() => {
+  const { chartData, totalBalance, maxValue, minValue, isYearView } = useMemo(() => {
     if (!movements || movements.length === 0) {
-      return { chartData: [], totalBalance: 0, maxValue: 0, minValue: 0 };
+      return { chartData: [], totalBalance: 0, maxValue: 0, minValue: 0, isYearView: false };
     }
 
     // Filter movements by selected period
@@ -113,19 +113,9 @@ export function CapitalChart({ movements, primaryCurrencyCode, selectedPeriod }:
       cumulativeIncome += dayData.income;
       cumulativeExpense += dayData.expense;
       
-      // Para vista de Año, solo mostrar etiqueta en el día 1 de cada mes
-      let displayDate = format(parseISO(date), dateFormat, { locale: es });
-      if (selectedPeriod === 'Año') {
-        const currentDay = parseISO(date).getDate();
-        // Solo mostrar la etiqueta si es día 1 del mes
-        if (currentDay !== 1) {
-          displayDate = '';
-        }
-      }
-      
       return {
         date,
-        displayDate,
+        displayDate: format(parseISO(date), dateFormat, { locale: es }),
         dailyBalance,
         cumulativeBalance,
         income: dayData.income,
@@ -143,7 +133,7 @@ export function CapitalChart({ movements, primaryCurrencyCode, selectedPeriod }:
     const maxValue = Math.max(...allBalances, 0);
     const minValue = Math.min(...allBalances, 0);
 
-    return { chartData: data, totalBalance, maxValue, minValue };
+    return { chartData: data, totalBalance, maxValue, minValue, isYearView: selectedPeriod === 'Año' };
   }, [movements, selectedPeriod, primaryCurrencyCode]);
 
   const CustomTooltip = ({ active, payload }: any) => {
@@ -195,6 +185,7 @@ export function CapitalChart({ movements, primaryCurrencyCode, selectedPeriod }:
             tick={{ fontSize: 11, fill: 'hsl(0, 0%, 60%)' }}
             tickLine={false}
             axisLine={{ stroke: 'hsl(0, 0%, 85%)' }}
+            interval={isYearView ? Math.floor(chartData.length / 12) : 'preserveStartEnd'}
           />
           <YAxis
             tick={{ fontSize: 11, fill: 'hsl(0, 0%, 60%)' }}

@@ -184,7 +184,7 @@ export default function OrganizationDashboard() {
     <Layout headerProps={headerProps} wide={true}>
       <div className="space-y-6">
         {/* Welcome Section - Sin Card, directo en el fondo como Home */}
-        <div className="space-y-2">
+        <div className="space-y-2 pb-6 border-b border-border">
           <div className="flex items-center gap-4">
             {/* Organization Avatar */}
             <div className="flex-shrink-0">
@@ -192,10 +192,10 @@ export default function OrganizationDashboard() {
                 <img 
                   src={organization.logo_url} 
                   alt={organization.name}
-                  className="w-16 h-16 rounded-full object-cover border-2 border-black"
+                  className="w-16 h-16 rounded-full object-cover border-2 border-accent"
                 />
               ) : (
-                <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center border-2 border-black">
+                <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center border-2 border-accent">
                   <Building className="w-8 h-8 text-accent" />
                 </div>
               )}
