@@ -30,6 +30,8 @@ interface ChartDataPoint {
   cumulativeBalance: number;
   income: number;
   expense: number;
+  cumulativeIncome: number;
+  cumulativeExpense: number;
 }
 
 interface CapitalChartPropsExtended extends CapitalChartProps {
@@ -99,13 +101,17 @@ export function CapitalChart({ movements, primaryCurrencyCode, selectedPeriod }:
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    // Build chart data with cumulative balance
+    // Build chart data with cumulative balance, income, and expense
     let cumulativeBalance = 0;
+    let cumulativeIncome = 0;
+    let cumulativeExpense = 0;
     const dateFormat = selectedPeriod === 'Año' ? 'MMM' : 'dd MMM';
     const data: ChartDataPoint[] = dates.map((date, index) => {
       const dayData = dailyData.get(date) || { income: 0, expense: 0 };
       const dailyBalance = dayData.income - dayData.expense;
       cumulativeBalance += dailyBalance;
+      cumulativeIncome += dayData.income;
+      cumulativeExpense += dayData.expense;
       
       // Para vista de Año, solo mostrar etiqueta en el día 1 de cada mes
       let displayDate = format(parseISO(date), dateFormat, { locale: es });
@@ -124,6 +130,8 @@ export function CapitalChart({ movements, primaryCurrencyCode, selectedPeriod }:
         cumulativeBalance,
         income: dayData.income,
         expense: dayData.expense,
+        cumulativeIncome,
+        cumulativeExpense,
       };
     });
 
@@ -145,27 +153,23 @@ export function CapitalChart({ movements, primaryCurrencyCode, selectedPeriod }:
       
       return (
         <div className="bg-background border border-border rounded-lg shadow-lg p-3">
-          <p className="text-sm font-medium text-foreground mb-2">{data.displayDate}</p>
+          <p className="text-sm font-medium text-foreground mb-2">{format(parseISO(data.date), 'dd MMM yyyy', { locale: es })}</p>
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">
-              Balance acumulado: <span className={isPositive ? 'text-green-600' : 'text-red-600'}>
+              Balance: <span className={isPositive ? 'text-green-600' : 'text-red-600'}>
                 $ {data.cumulativeBalance.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
               </span>
             </p>
-            {data.income > 0 && (
-              <p className="text-xs text-muted-foreground">
-                Ingresos del día: <span className="text-green-600">
-                  $ {data.income.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                </span>
-              </p>
-            )}
-            {data.expense > 0 && (
-              <p className="text-xs text-muted-foreground">
-                Egresos del día: <span className="text-red-600">
-                  $ {data.expense.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                </span>
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground">
+              Ingresos acum.: <span className="text-green-600">
+                $ {data.cumulativeIncome.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+              </span>
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Egresos acum.: <span className="text-red-600">
+                $ {data.cumulativeExpense.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+              </span>
+            </p>
           </div>
         </div>
       );
@@ -226,6 +230,26 @@ export function CapitalChart({ movements, primaryCurrencyCode, selectedPeriod }:
             type="monotone"
             dataKey="cumulativeBalance"
             stroke="hsl(0, 0%, 40%)"
+            strokeWidth={2}
+            dot={false}
+            activeDot={{ r: 4 }}
+          />
+          
+          {/* Line for cumulative income */}
+          <Line
+            type="monotone"
+            dataKey="cumulativeIncome"
+            stroke="hsl(var(--accent-hsl))"
+            strokeWidth={2}
+            dot={false}
+            activeDot={{ r: 4 }}
+          />
+          
+          {/* Line for cumulative expense */}
+          <Line
+            type="monotone"
+            dataKey="cumulativeExpense"
+            stroke="hsl(var(--chart-negative))"
             strokeWidth={2}
             dot={false}
             activeDot={{ r: 4 }}
