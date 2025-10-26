@@ -219,40 +219,38 @@ export default function OrganizationDashboard() {
         </div>
 
         {/* Card grande de Capital con gráfico */}
-        <Card className="relative cursor-pointer hover:shadow-md transition-shadow mb-4">
+        <Card className="relative group cursor-pointer hover:shadow-md transition-shadow mb-4">
           <CardHeader className="flex flex-row items-center justify-between pb-6">
-            <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Capital</p>
-            
-            <div className="flex items-center gap-4">
-              {/* Period selector buttons */}
-              <div className="flex items-center gap-2">
-                {(['Semana', 'Mes', 'Trimestre', 'Año'] as Period[]).map((period) => (
-                  <button
-                    key={period}
-                    onClick={() => setSelectedPeriod(period)}
-                    className={`px-3 py-1 text-sm rounded transition-colors ${
-                      selectedPeriod === period
-                        ? 'bg-foreground text-background font-medium'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                    data-testid={`button-period-${period.toLowerCase()}`}
-                  >
-                    {period}
-                  </button>
-                ))}
-              </div>
-              
-              {/* Arrow button */}
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Capital</p>
               <button
                 onClick={() => {
                   setSidebarLevel('organization');
                   setLocation('/finances/capital');
                 }}
-                className="p-1 hover:bg-accent/10 rounded transition-colors"
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
                 data-testid="button-expand-capital-chart"
               >
                 <ArrowRight className="w-4 h-4 text-muted-foreground" />
               </button>
+            </div>
+            
+            {/* Period selector buttons */}
+            <div className="flex items-center gap-2">
+              {(['Semana', 'Mes', 'Trimestre', 'Año'] as Period[]).map((period) => (
+                <button
+                  key={period}
+                  onClick={() => setSelectedPeriod(period)}
+                  className={`px-3 py-1 text-sm rounded transition-colors ${
+                    selectedPeriod === period
+                      ? 'bg-foreground text-background font-medium'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                  data-testid={`button-period-${period.toLowerCase()}`}
+                >
+                  {period}
+                </button>
+              ))}
             </div>
           </CardHeader>
           <CardContent className="pt-0">
@@ -268,18 +266,20 @@ export default function OrganizationDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* 1. Proyectos */}
           <Card className="relative group cursor-pointer hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Proyectos</p>
-              <button
-                onClick={() => {
-                  setSidebarLevel('organization');
-                  setLocation('/organization/projects');
-                }}
-                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-accent/10 rounded"
-                data-testid="button-expand-proyectos"
-              >
-                <ArrowRight className="w-4 h-4 text-muted-foreground" />
-              </button>
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Proyectos</p>
+                <button
+                  onClick={() => {
+                    setSidebarLevel('organization');
+                    setLocation('/organization/projects');
+                  }}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  data-testid="button-expand-proyectos"
+                >
+                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </div>
             </CardHeader>
             <CardContent className="pt-0">
               <div className="text-4xl font-extralight text-foreground tracking-tight">
@@ -290,18 +290,20 @@ export default function OrganizationDashboard() {
 
           {/* 2. Contactos */}
           <Card className="relative group cursor-pointer hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Contactos</p>
-              <button
-                onClick={() => {
-                  setSidebarLevel('organization');
-                  setLocation('/contacts');
-                }}
-                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-accent/10 rounded"
-                data-testid="button-expand-contactos"
-              >
-                <ArrowRight className="w-4 h-4 text-muted-foreground" />
-              </button>
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Contactos</p>
+                <button
+                  onClick={() => {
+                    setSidebarLevel('organization');
+                    setLocation('/contacts');
+                  }}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  data-testid="button-expand-contactos"
+                >
+                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </div>
             </CardHeader>
             <CardContent className="pt-0">
               <div className="text-4xl font-extralight text-foreground tracking-tight">
@@ -312,18 +314,20 @@ export default function OrganizationDashboard() {
 
           {/* 3. Movimientos */}
           <Card className="relative group cursor-pointer hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Movimientos</p>
-              <button
-                onClick={() => {
-                  setSidebarLevel('organization');
-                  setLocation('/movements');
-                }}
-                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-accent/10 rounded"
-                data-testid="button-expand-movimientos"
-              >
-                <ArrowRight className="w-4 h-4 text-muted-foreground" />
-              </button>
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Movimientos</p>
+                <button
+                  onClick={() => {
+                    setSidebarLevel('organization');
+                    setLocation('/movements');
+                  }}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  data-testid="button-expand-movimientos"
+                >
+                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </div>
             </CardHeader>
             <CardContent className="pt-0">
               <div className="text-4xl font-extralight text-foreground tracking-tight">
@@ -334,18 +338,20 @@ export default function OrganizationDashboard() {
 
           {/* 4. Capital */}
           <Card className="relative group cursor-pointer hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Capital</p>
-              <button
-                onClick={() => {
-                  setSidebarLevel('organization');
-                  setLocation('/finances/capital');
-                }}
-                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-accent/10 rounded"
-                data-testid="button-expand-capital"
-              >
-                <ArrowRight className="w-4 h-4 text-muted-foreground" />
-              </button>
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Capital</p>
+                <button
+                  onClick={() => {
+                    setSidebarLevel('organization');
+                    setLocation('/finances/capital');
+                  }}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  data-testid="button-expand-capital"
+                >
+                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </div>
             </CardHeader>
             <CardContent className="pt-0">
               {kpisLoading ? (

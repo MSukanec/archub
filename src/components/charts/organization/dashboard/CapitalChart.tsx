@@ -131,28 +131,28 @@ export function CapitalChart({ movements, primaryCurrencyCode, selectedPeriod }:
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
-      const isPositive = data.dailyBalance >= 0;
+      const isPositive = data.cumulativeBalance >= 0;
       
       return (
         <div className="bg-background border border-border rounded-lg shadow-lg p-3">
           <p className="text-sm font-medium text-foreground mb-2">{data.displayDate}</p>
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">
-              Balance: <span className={isPositive ? 'text-green-600' : 'text-red-600'}>
-                {primaryCurrencyCode} {data.dailyBalance.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+              Balance acumulado: <span className={isPositive ? 'text-green-600' : 'text-red-600'}>
+                $ {data.cumulativeBalance.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
               </span>
             </p>
             {data.income > 0 && (
               <p className="text-xs text-muted-foreground">
-                Ingresos: <span className="text-green-600">
-                  {primaryCurrencyCode} {data.income.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                Ingresos del día: <span className="text-green-600">
+                  $ {data.income.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                 </span>
               </p>
             )}
             {data.expense > 0 && (
               <p className="text-xs text-muted-foreground">
-                Egresos: <span className="text-red-600">
-                  {primaryCurrencyCode} {data.expense.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                Egresos del día: <span className="text-red-600">
+                  $ {data.expense.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                 </span>
               </p>
             )}
