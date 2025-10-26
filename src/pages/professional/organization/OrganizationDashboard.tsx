@@ -218,204 +218,151 @@ export default function OrganizationDashboard() {
           </div>
         </div>
 
-        {/* Sección de Capital - sin Card */}
-        <div className="relative group mb-6">
-          {/* Header */}
-          <div className="flex flex-row items-start justify-between mb-4">
-            <div className="flex flex-col gap-2">
+        {/* Layout: Capital (3/4) + Cards KPI (1/4) */}
+        <div className="grid grid-cols-4 gap-4 mb-6">
+          {/* Sección de Capital - 3/4 del ancho */}
+          <div className="col-span-3 relative group">
+            {/* Header */}
+            <div className="flex flex-row items-start justify-between mb-4">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <p 
+                    className="text-xs font-normal text-muted-foreground uppercase tracking-wide cursor-pointer hover:text-foreground transition-colors"
+                    onClick={() => {
+                      setSidebarLevel('organization');
+                      setLocation('/finances/capital');
+                    }}
+                  >
+                    Capital
+                  </p>
+                  <button
+                    onClick={() => {
+                      setSidebarLevel('organization');
+                      setLocation('/finances/capital');
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                </div>
+                
+                {/* Total histórico - debajo del título */}
+                <div className="text-5xl font-bold text-foreground tracking-tight leading-none">
+                  ${primaryBalance?.balance.toLocaleString('es-AR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  }) || '0.00'}
+                </div>
+                
+                {/* Ingresos y Egresos - debajo del monto total */}
+                <div className="flex items-center gap-4 text-sm">
+                  <span className="text-muted-foreground">
+                    I: <span className="text-green-600 font-medium">
+                      ${primaryBalance?.positiveTotal.toLocaleString('es-AR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      }) || '0.00'}
+                    </span>
+                  </span>
+                  <span className="text-muted-foreground">
+                    E: <span className="text-red-600 font-medium">
+                      ${primaryBalance?.negativeTotal.toLocaleString('es-AR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      }) || '0.00'}
+                    </span>
+                  </span>
+                </div>
+              </div>
+              
+              {/* Period selector buttons */}
               <div className="flex items-center gap-2">
-                <p 
-                  className="text-xs font-normal text-muted-foreground uppercase tracking-wide cursor-pointer hover:text-foreground transition-colors"
-                  onClick={() => {
-                    setSidebarLevel('organization');
-                    setLocation('/finances/capital');
-                  }}
-                >
-                  Capital
-                </p>
-                <button
-                  onClick={() => {
-                    setSidebarLevel('organization');
-                    setLocation('/finances/capital');
-                  }}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                </button>
-              </div>
-              
-              {/* Total histórico - debajo del título */}
-              <div className="text-5xl font-bold text-foreground tracking-tight leading-none">
-                ${primaryBalance?.balance.toLocaleString('es-AR', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                }) || '0.00'}
-              </div>
-              
-              {/* Ingresos y Egresos - debajo del monto total */}
-              <div className="flex items-center gap-4 text-sm">
-                <span className="text-muted-foreground">
-                  I: <span className="text-green-600 font-medium">
-                    ${primaryBalance?.positiveTotal.toLocaleString('es-AR', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2
-                    }) || '0.00'}
-                  </span>
-                </span>
-                <span className="text-muted-foreground">
-                  E: <span className="text-red-600 font-medium">
-                    ${primaryBalance?.negativeTotal.toLocaleString('es-AR', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2
-                    }) || '0.00'}
-                  </span>
-                </span>
+                {(['Semana', 'Mes', 'Trimestre', 'Año'] as Period[]).map((period) => (
+                  <button
+                    key={period}
+                    onClick={() => setSelectedPeriod(period)}
+                    className={`px-3 py-1 text-sm rounded transition-colors ${
+                      selectedPeriod === period
+                        ? 'bg-foreground text-background font-medium'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                    data-testid={`button-period-${period.toLowerCase()}`}
+                  >
+                    {period}
+                  </button>
+                ))}
               </div>
             </div>
             
-            {/* Period selector buttons */}
-            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-              {(['Semana', 'Mes', 'Trimestre', 'Año'] as Period[]).map((period) => (
-                <button
-                  key={period}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedPeriod(period);
-                  }}
-                  className={`px-3 py-1 text-sm rounded transition-colors ${
-                    selectedPeriod === period
-                      ? 'bg-foreground text-background font-medium'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                  data-testid={`button-period-${period.toLowerCase()}`}
-                >
-                  {period}
-                </button>
-              ))}
-            </div>
+            {/* Gráfico */}
+            <CapitalChart 
+              movements={movements} 
+              primaryCurrencyCode={primaryBalance?.currencyCode || '$'}
+              selectedPeriod={selectedPeriod}
+            />
           </div>
-          
-          {/* Gráfico */}
-          <CapitalChart 
-            movements={movements} 
-            primaryCurrencyCode={primaryBalance?.currencyCode || '$'}
-            selectedPeriod={selectedPeriod}
-          />
+
+          {/* Cards KPI - 1/4 del ancho */}
+          <div className="col-span-1 flex flex-col gap-4">
+            {/* 1. Proyectos */}
+            <Card 
+              className="relative group cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => {
+                setSidebarLevel('organization');
+                setLocation('/organization/projects');
+              }}
+            >
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Proyectos</p>
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="text-5xl font-bold text-foreground tracking-tight">
+                  {projectsLoading ? '...' : projects.length}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 2. Contactos */}
+            <Card 
+              className="relative group cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => {
+                setSidebarLevel('organization');
+                setLocation('/contacts');
+              }}
+            >
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Contactos</p>
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="text-5xl font-bold text-foreground tracking-tight">
+                  {contactsLoading ? '...' : contacts.length}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
-        {/* Grid de 4 Cards KPI - Minimalistas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* 1. Proyectos */}
-          <Card 
-            className="relative group cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => {
-              setSidebarLevel('organization');
-              setLocation('/organization/projects');
-            }}
-          >
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-2">
-                <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Proyectos</p>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                </div>
+        {/* Projects Section - Estilo minimalista */}
+        <Card className="relative group">
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Tus Proyectos</p>
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <ArrowRight className="w-4 h-4 text-muted-foreground" />
               </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="text-4xl font-extralight text-foreground tracking-tight">
-                {projectsLoading ? '...' : projects.length}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 2. Contactos */}
-          <Card 
-            className="relative group cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => {
-              setSidebarLevel('organization');
-              setLocation('/contacts');
-            }}
-          >
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-2">
-                <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Contactos</p>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="text-4xl font-extralight text-foreground tracking-tight">
-                {contactsLoading ? '...' : contacts.length}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 3. Movimientos */}
-          <Card 
-            className="relative group cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => {
-              setSidebarLevel('organization');
-              setLocation('/movements');
-            }}
-          >
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-2">
-                <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Movimientos</p>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="text-4xl font-extralight text-foreground tracking-tight">
-                {movementsLoading ? '...' : movements.length}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 4. Capital */}
-          <Card 
-            className="relative group cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => {
-              setSidebarLevel('organization');
-              setLocation('/finances/capital');
-            }}
-          >
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-2">
-                <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Capital</p>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              {kpisLoading ? (
-                <div className="text-4xl font-extralight text-foreground tracking-tight">...</div>
-              ) : primaryBalance ? (
-                <div className="text-4xl font-extralight text-foreground tracking-tight">
-                  {primaryBalance.currencyCode} {primaryBalance.balance.toLocaleString('es-AR', {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0
-                  })}
-                </div>
-              ) : (
-                <div className="text-4xl font-extralight text-foreground tracking-tight">$ 0</div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Projects Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl flex items-center gap-2">
-              <Folder className="w-5 h-5 text-accent" />
-              Tus Proyectos
-            </CardTitle>
+            </div>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent className="pt-0">
             {isLoading || projectsLoading ? (
               <div className="flex items-center justify-center h-64">
                 <div className="text-muted-foreground">Cargando proyectos...</div>
