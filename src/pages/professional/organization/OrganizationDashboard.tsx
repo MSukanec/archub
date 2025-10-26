@@ -218,16 +218,17 @@ export default function OrganizationDashboard() {
           </div>
         </div>
 
-        {/* Card grande de Capital con gráfico */}
-        <Card 
-          className="relative group cursor-pointer hover:shadow-md transition-shadow mb-4"
+        {/* Sección de Capital - sin Card */}
+        <div 
+          className="relative group cursor-pointer mb-6"
           onClick={() => {
             setSidebarLevel('organization');
             setLocation('/finances/capital');
           }}
         >
-          <CardHeader className="flex flex-row items-start justify-between pb-4">
-            <div className="flex items-start gap-4">
+          {/* Header */}
+          <div className="flex flex-row items-start justify-between mb-4">
+            <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Capital</p>
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -235,7 +236,7 @@ export default function OrganizationDashboard() {
                 </div>
               </div>
               
-              {/* Total histórico - inline con título */}
+              {/* Total histórico - debajo del título */}
               <div className="text-5xl font-bold text-foreground tracking-tight leading-none">
                 ${primaryBalance?.balance.toLocaleString('es-AR', {
                   minimumFractionDigits: 2,
@@ -264,15 +265,15 @@ export default function OrganizationDashboard() {
                 </button>
               ))}
             </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <CapitalChart 
-              movements={movements} 
-              primaryCurrencyCode={primaryBalance?.currencyCode || '$'}
-              selectedPeriod={selectedPeriod}
-            />
-          </CardContent>
-        </Card>
+          </div>
+          
+          {/* Gráfico */}
+          <CapitalChart 
+            movements={movements} 
+            primaryCurrencyCode={primaryBalance?.currencyCode || '$'}
+            selectedPeriod={selectedPeriod}
+          />
+        </div>
 
         {/* Grid de 4 Cards KPI - Minimalistas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
