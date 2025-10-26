@@ -160,16 +160,20 @@ export function CapitalChart({ movements, primaryCurrencyCode, selectedPeriod }:
                 $ {data.cumulativeBalance.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
               </span>
             </p>
-            <p className="text-xs text-muted-foreground">
-              Ingresos acum.: <span className="text-green-600">
-                $ {data.cumulativeIncome.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-              </span>
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Egresos acum.: <span className="text-red-600">
-                $ {data.cumulativeExpense.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-              </span>
-            </p>
+            {data.income > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Ingresos del día: <span className="text-green-600">
+                  $ {data.income.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                </span>
+              </p>
+            )}
+            {data.expense > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Egresos del día: <span className="text-red-600">
+                  $ {data.expense.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                </span>
+              </p>
+            )}
           </div>
         </div>
       );
@@ -235,20 +239,20 @@ export function CapitalChart({ movements, primaryCurrencyCode, selectedPeriod }:
             activeDot={{ r: 4 }}
           />
           
-          {/* Line for cumulative income */}
+          {/* Line for daily income */}
           <Line
             type="monotone"
-            dataKey="cumulativeIncome"
+            dataKey="income"
             stroke="hsl(var(--accent-hsl))"
             strokeWidth={2}
             dot={false}
             activeDot={{ r: 4 }}
           />
           
-          {/* Line for cumulative expense */}
+          {/* Line for daily expense */}
           <Line
             type="monotone"
-            dataKey="cumulativeExpense"
+            dataKey="expense"
             stroke="hsl(var(--chart-negative))"
             strokeWidth={2}
             dot={false}
