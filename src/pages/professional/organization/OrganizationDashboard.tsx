@@ -37,6 +37,7 @@ import { useMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/lib/supabase';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { CapitalChart } from '@/components/charts/organization/dashboard/CapitalChart';
 
 export default function OrganizationDashboard() {
   const [, setLocation] = useLocation();
@@ -212,6 +213,29 @@ export default function OrganizationDashboard() {
             </div>
           </div>
         </div>
+
+        {/* Card grande de Capital con gráfico */}
+        <Card className="relative group cursor-pointer hover:shadow-md transition-shadow mb-4">
+          <CardHeader className="flex flex-row items-center justify-between pb-6">
+            <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Capital</p>
+            <button
+              onClick={() => {
+                setSidebarLevel('organization');
+                setLocation('/finances/capital');
+              }}
+              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-accent/10 rounded"
+              data-testid="button-expand-capital-chart"
+            >
+              <ArrowRight className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <CapitalChart 
+              movements={movements} 
+              primaryCurrencyCode={primaryBalance?.currencyCode || '$'} 
+            />
+          </CardContent>
+        </Card>
 
         {/* Grid de 4 Cards KPI - Minimalistas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
