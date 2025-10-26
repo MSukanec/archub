@@ -233,27 +233,7 @@ export function CapitalChart({ movements, primaryCurrencyCode, selectedPeriod }:
           <Line
             type="monotone"
             dataKey="cumulativeBalance"
-            stroke="hsl(0, 0%, 40%)"
-            strokeWidth={2}
-            dot={false}
-            activeDot={{ r: 4 }}
-          />
-          
-          {/* Line for daily income */}
-          <Line
-            type="monotone"
-            dataKey="income"
             stroke="hsl(var(--accent-hsl))"
-            strokeWidth={2}
-            dot={false}
-            activeDot={{ r: 4 }}
-          />
-          
-          {/* Line for daily expense */}
-          <Line
-            type="monotone"
-            dataKey="expense"
-            stroke="hsl(var(--chart-negative))"
             strokeWidth={2}
             dot={false}
             activeDot={{ r: 4 }}
