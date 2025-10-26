@@ -215,7 +215,7 @@ export default function OrganizationDashboard() {
         </div>
 
         {/* Card grande de Capital con gráfico */}
-        <Card className="relative group cursor-pointer hover:shadow-md transition-shadow mb-4">
+        <Card className="relative cursor-pointer hover:shadow-md transition-shadow mb-4">
           <CardHeader className="flex flex-row items-center justify-between pb-6">
             <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Capital</p>
             <button
@@ -223,7 +223,7 @@ export default function OrganizationDashboard() {
                 setSidebarLevel('organization');
                 setLocation('/finances/capital');
               }}
-              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-accent/10 rounded"
+              className="p-1 hover:bg-accent/10 rounded transition-colors"
               data-testid="button-expand-capital-chart"
             >
               <ArrowRight className="w-4 h-4 text-muted-foreground" />

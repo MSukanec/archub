@@ -21,7 +21,7 @@ interface CapitalChartProps {
   primaryCurrencyCode: string;
 }
 
-type Period = 'Week' | 'Month' | 'Quarter' | 'Year';
+type Period = 'Semana' | 'Mes' | 'Trimestre' | 'Año';
 
 interface ChartDataPoint {
   date: string;
@@ -33,7 +33,7 @@ interface ChartDataPoint {
 }
 
 export function CapitalChart({ movements, primaryCurrencyCode }: CapitalChartProps) {
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Month');
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Mes');
 
   const { chartData, totalBalance, maxValue, minValue } = useMemo(() => {
     if (!movements || movements.length === 0) {
@@ -45,16 +45,16 @@ export function CapitalChart({ movements, primaryCurrencyCode }: CapitalChartPro
     let startDate: Date;
     
     switch (selectedPeriod) {
-      case 'Week':
+      case 'Semana':
         startDate = subDays(now, 7);
         break;
-      case 'Month':
+      case 'Mes':
         startDate = subDays(now, 30);
         break;
-      case 'Quarter':
+      case 'Trimestre':
         startDate = subMonths(now, 3);
         break;
-      case 'Year':
+      case 'Año':
         startDate = subMonths(now, 12);
         break;
     }
@@ -98,6 +98,7 @@ export function CapitalChart({ movements, primaryCurrencyCode }: CapitalChartPro
 
     // Build chart data with cumulative balance
     let cumulativeBalance = 0;
+    const dateFormat = selectedPeriod === 'Año' ? 'MMM' : 'dd MMM';
     const data: ChartDataPoint[] = dates.map(date => {
       const dayData = dailyData.get(date) || { income: 0, expense: 0 };
       const dailyBalance = dayData.income - dayData.expense;
@@ -105,7 +106,7 @@ export function CapitalChart({ movements, primaryCurrencyCode }: CapitalChartPro
       
       return {
         date,
-        displayDate: format(parseISO(date), 'dd MMM', { locale: es }),
+        displayDate: format(parseISO(date), dateFormat, { locale: es }),
         dailyBalance,
         cumulativeBalance,
         income: dayData.income,
@@ -161,33 +162,31 @@ export function CapitalChart({ movements, primaryCurrencyCode }: CapitalChartPro
 
   return (
     <div className="w-full">
-      {/* Header with total and period selector */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <div className="text-5xl font-extralight text-foreground tracking-tight">
-            {primaryCurrencyCode}{totalBalance.toLocaleString('es-AR', {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
-            })}
-          </div>
-          <p className="text-sm text-muted-foreground mt-1">Capital</p>
-        </div>
-        
-        <div className="flex gap-2">
-          {(['Week', 'Month', 'Quarter', 'Year'] as Period[]).map((period) => (
-            <button
-              key={period}
-              onClick={() => setSelectedPeriod(period)}
-              className={`px-3 py-1 text-sm rounded transition-colors ${
-                selectedPeriod === period
-                  ? 'bg-foreground text-background font-medium'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-              data-testid={`button-period-${period.toLowerCase()}`}
-            >
-              {period}
-            </button>
-          ))}
+      {/* Period selector buttons */}
+      <div className="flex items-center justify-center gap-2 mb-6">
+        {(['Semana', 'Mes', 'Trimestre', 'Año'] as Period[]).map((period) => (
+          <button
+            key={period}
+            onClick={() => setSelectedPeriod(period)}
+            className={`px-3 py-1 text-sm rounded transition-colors ${
+              selectedPeriod === period
+                ? 'bg-foreground text-background font-medium'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+            data-testid={`button-period-${period.toLowerCase()}`}
+          >
+            {period}
+          </button>
+        ))}
+      </div>
+
+      {/* Total amount - centered and bold */}
+      <div className="text-center mb-6">
+        <div className="text-5xl font-bold text-foreground tracking-tight">
+          ${totalBalance.toLocaleString('es-AR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })}
         </div>
       </div>
 
