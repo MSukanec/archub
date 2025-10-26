@@ -44,7 +44,7 @@ type Period = 'Semana' | 'Mes' | 'Trimestre' | 'Año';
 
 export default function OrganizationDashboard() {
   const [, setLocation] = useLocation();
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Mes');
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Trimestre');
   const { openModal } = useGlobalModalStore();
   
   const { data: userData, isLoading } = useCurrentUser();
@@ -226,11 +226,21 @@ export default function OrganizationDashboard() {
             setLocation('/finances/capital');
           }}
         >
-          <CardHeader className="flex flex-row items-center justify-between pb-6">
-            <div className="flex items-center gap-2">
-              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Capital</p>
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                <ArrowRight className="w-4 h-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-start justify-between pb-4">
+            <div className="flex items-start gap-4">
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Capital</p>
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                </div>
+              </div>
+              
+              {/* Total histórico - inline con título */}
+              <div className="text-5xl font-bold text-foreground tracking-tight leading-none">
+                ${primaryBalance?.balance.toLocaleString('es-AR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                }) || '0.00'}
               </div>
             </div>
             

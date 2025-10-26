@@ -183,18 +183,8 @@ export function CapitalChart({ movements, primaryCurrencyCode, selectedPeriod }:
 
   return (
     <div className="w-full">
-      {/* Total amount - centered and bold */}
-      <div className="text-center mb-6">
-        <div className="text-5xl font-bold text-foreground tracking-tight">
-          ${totalBalance.toLocaleString('es-AR', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          })}
-        </div>
-      </div>
-
-      {/* Chart */}
-      <ResponsiveContainer width="100%" height={200}>
+      {/* Chart - más alto */}
+      <ResponsiveContainer width="100%" height={280}>
         <ComposedChart
           data={chartData}
           margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
