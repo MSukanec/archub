@@ -18,6 +18,10 @@ import { Link } from 'wouter'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { motion } from 'framer-motion'
 import { useNavigationStore } from '@/stores/navigationStore'
+import { CapitalChart } from '@/components/charts/organization/dashboard/CapitalChart'
+import { useMovements } from '@/hooks/use-movements'
+
+type Period = 'Semana' | 'Mes' | 'Trimestre' | 'Año';
 
 
 export default function FinancesDashboard() {
@@ -25,6 +29,9 @@ export default function FinancesDashboard() {
   const organizationId = userData?.preferences?.last_organization_id
   const projectId = userData?.preferences?.last_project_id
 
+  // Estado para el gráfico de capital
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Trimestre');
+  const { data: movements = [] } = useMovements(organizationId, null);
   
   // Always use organization view mode
   const viewMode = 'all'
@@ -109,6 +116,36 @@ export default function FinancesDashboard() {
           />
         ) : (
           <>
+        {/* Gráfico de Capital - 100% ancho - IDÉNTICO al del dashboard */}
+        <div className="relative group mb-6">
+          {/* Header con botones de período */}
+          <div className="flex flex-row items-start justify-end mb-4">
+            <div className="flex items-center gap-2">
+              {(['Semana', 'Mes', 'Trimestre', 'Año'] as Period[]).map((period) => (
+                <button
+                  key={period}
+                  onClick={() => setSelectedPeriod(period)}
+                  className={`px-3 py-1 text-sm rounded transition-colors ${
+                    selectedPeriod === period
+                      ? 'bg-foreground text-background font-medium'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                  data-testid={`button-period-${period.toLowerCase()}`}
+                >
+                  {period}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Gráfico */}
+          <CapitalChart 
+            movements={movements} 
+            primaryCurrencyCode={defaultCurrency?.code || '$'}
+            selectedPeriod={selectedPeriod}
+          />
+        </div>
+
         {/* FILA 1: 3 columnas - Balances por Billetera y Moneda / Este Mes / Movimientos Recientes */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
           {/* Balances por Billetera y Moneda */}

@@ -1,11 +1,6 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { CapitalChart } from '@/components/charts/organization/dashboard/CapitalChart'
-import { useMovements } from '@/hooks/use-movements'
-import { useProjectContext } from '@/stores/projectContext'
-
-type Period = 'Semana' | 'Mes' | 'Trimestre' | 'Año';
 
 interface MemberSummary {
   member_id: string
@@ -30,12 +25,6 @@ interface CapitalDashboardProps {
 }
 
 export function CapitalDashboard({ memberSummary }: CapitalDashboardProps) {
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Trimestre');
-  const { currentOrganizationId } = useProjectContext();
-  const { data: movements = [] } = useMovements(currentOrganizationId, null);
-  
-  // Calcular el balance principal (primera moneda)
-  const primaryCurrencyCode = '$';
   // Member summary table columns
   const memberSummaryColumns = [
     {
@@ -120,44 +109,11 @@ export function CapitalDashboard({ memberSummary }: CapitalDashboardProps) {
   ]
 
   return (
-    <div className="space-y-6">
-      {/* Gráfico de Capital - Idéntico al del dashboard */}
-      <div className="relative group">
-        {/* Header con botones de período */}
-        <div className="flex flex-row items-start justify-end mb-4">
-          <div className="flex items-center gap-2">
-            {(['Semana', 'Mes', 'Trimestre', 'Año'] as Period[]).map((period) => (
-              <button
-                key={period}
-                onClick={() => setSelectedPeriod(period)}
-                className={`px-3 py-1 text-sm rounded transition-colors ${
-                  selectedPeriod === period
-                    ? 'bg-foreground text-background font-medium'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                data-testid={`button-period-${period.toLowerCase()}`}
-              >
-                {period}
-              </button>
-            ))}
-          </div>
-        </div>
-        
-        {/* Gráfico */}
-        <CapitalChart 
-          movements={movements} 
-          primaryCurrencyCode={primaryCurrencyCode}
-          selectedPeriod={selectedPeriod}
-        />
-      </div>
-
-      {/* Tabla de resumen por socio */}
-      <Table
-        data={memberSummary}
-        columns={memberSummaryColumns}
-        defaultSort={{ key: 'member', direction: 'asc' }}
-        getItemId={(item) => item.member_id || 'unknown'}
-      />
-    </div>
+    <Table
+      data={memberSummary}
+      columns={memberSummaryColumns}
+      defaultSort={{ key: 'member', direction: 'asc' }}
+      getItemId={(item) => item.member_id || 'unknown'}
+    />
   )
 }
