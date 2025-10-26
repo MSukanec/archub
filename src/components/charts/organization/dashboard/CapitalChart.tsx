@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { format, subDays, subMonths, startOfDay, isWithinInterval, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -32,8 +32,11 @@ interface ChartDataPoint {
   expense: number;
 }
 
-export function CapitalChart({ movements, primaryCurrencyCode }: CapitalChartProps) {
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Mes');
+interface CapitalChartPropsExtended extends CapitalChartProps {
+  selectedPeriod: Period;
+}
+
+export function CapitalChart({ movements, primaryCurrencyCode, selectedPeriod }: CapitalChartPropsExtended) {
 
   const { chartData, totalBalance, maxValue, minValue } = useMemo(() => {
     if (!movements || movements.length === 0) {
@@ -162,24 +165,6 @@ export function CapitalChart({ movements, primaryCurrencyCode }: CapitalChartPro
 
   return (
     <div className="w-full">
-      {/* Period selector buttons */}
-      <div className="flex items-center justify-center gap-2 mb-6">
-        {(['Semana', 'Mes', 'Trimestre', 'Año'] as Period[]).map((period) => (
-          <button
-            key={period}
-            onClick={() => setSelectedPeriod(period)}
-            className={`px-3 py-1 text-sm rounded transition-colors ${
-              selectedPeriod === period
-                ? 'bg-foreground text-background font-medium'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-            data-testid={`button-period-${period.toLowerCase()}`}
-          >
-            {period}
-          </button>
-        ))}
-      </div>
-
       {/* Total amount - centered and bold */}
       <div className="text-center mb-6">
         <div className="text-5xl font-bold text-foreground tracking-tight">

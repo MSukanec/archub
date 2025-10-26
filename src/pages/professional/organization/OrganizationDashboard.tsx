@@ -38,9 +38,13 @@ import { supabase } from '@/lib/supabase';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { CapitalChart } from '@/components/charts/organization/dashboard/CapitalChart';
+import { useState } from 'react';
+
+type Period = 'Semana' | 'Mes' | 'Trimestre' | 'Año';
 
 export default function OrganizationDashboard() {
   const [, setLocation] = useLocation();
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Mes');
   const { openModal } = useGlobalModalStore();
   
   const { data: userData, isLoading } = useCurrentUser();
@@ -218,21 +222,44 @@ export default function OrganizationDashboard() {
         <Card className="relative cursor-pointer hover:shadow-md transition-shadow mb-4">
           <CardHeader className="flex flex-row items-center justify-between pb-6">
             <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Capital</p>
-            <button
-              onClick={() => {
-                setSidebarLevel('organization');
-                setLocation('/finances/capital');
-              }}
-              className="p-1 hover:bg-accent/10 rounded transition-colors"
-              data-testid="button-expand-capital-chart"
-            >
-              <ArrowRight className="w-4 h-4 text-muted-foreground" />
-            </button>
+            
+            <div className="flex items-center gap-4">
+              {/* Period selector buttons */}
+              <div className="flex items-center gap-2">
+                {(['Semana', 'Mes', 'Trimestre', 'Año'] as Period[]).map((period) => (
+                  <button
+                    key={period}
+                    onClick={() => setSelectedPeriod(period)}
+                    className={`px-3 py-1 text-sm rounded transition-colors ${
+                      selectedPeriod === period
+                        ? 'bg-foreground text-background font-medium'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                    data-testid={`button-period-${period.toLowerCase()}`}
+                  >
+                    {period}
+                  </button>
+                ))}
+              </div>
+              
+              {/* Arrow button */}
+              <button
+                onClick={() => {
+                  setSidebarLevel('organization');
+                  setLocation('/finances/capital');
+                }}
+                className="p-1 hover:bg-accent/10 rounded transition-colors"
+                data-testid="button-expand-capital-chart"
+              >
+                <ArrowRight className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </div>
           </CardHeader>
           <CardContent className="pt-0">
             <CapitalChart 
               movements={movements} 
-              primaryCurrencyCode={primaryBalance?.currencyCode || '$'} 
+              primaryCurrencyCode={primaryBalance?.currencyCode || '$'}
+              selectedPeriod={selectedPeriod}
             />
           </CardContent>
         </Card>
