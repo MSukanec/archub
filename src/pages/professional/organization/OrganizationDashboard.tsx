@@ -1,5 +1,17 @@
 import { useEffect } from "react";
-import { Building, Clock, Calendar, Home, Folder, Plus } from "lucide-react";
+import { 
+  Building, 
+  Clock, 
+  Calendar, 
+  Home, 
+  Folder, 
+  Plus, 
+  Users, 
+  DollarSign, 
+  Calculator,
+  TrendingUp,
+  ArrowRight 
+} from "lucide-react";
 import { useLocation } from 'wouter';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -12,6 +24,9 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects } from '@/hooks/use-projects';
+import { useContacts } from '@/hooks/use-contacts';
+import { useMovements } from '@/hooks/use-movements';
+import { useMovementKPIs } from '@/hooks/use-movement-kpis';
 import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences';
 import { useProjectContext } from '@/stores/projectContext';
 import { useNavigationStore } from '@/stores/navigationStore';
@@ -31,6 +46,9 @@ export default function OrganizationDashboard() {
   const { currentOrganizationId, setSelectedProject } = useProjectContext();
   const organizationId = currentOrganizationId || userData?.organization?.id;
   const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId || undefined);
+  const { data: contacts = [], isLoading: contactsLoading } = useContacts();
+  const { data: movements = [], isLoading: movementsLoading } = useMovements(organizationId, null);
+  const { organizationBalances, isLoading: kpisLoading } = useMovementKPIs(organizationId);
   const { data: userOrgPrefs } = useUserOrganizationPreferences(organizationId);
   const activeProjectId = userOrgPrefs?.last_project_id;
   const { setSidebarLevel, sidebarLevel } = useNavigationStore();
@@ -43,6 +61,11 @@ export default function OrganizationDashboard() {
   const organization = userData?.organizations?.find(org => org.id === currentOrganizationId) || 
                       ((userData as UserData | undefined)?.organization ?? null);
   const currentTime = new Date();
+  
+  // Obtener el balance principal (primera moneda con más movimientos)
+  const primaryBalance = organizationBalances && organizationBalances.length > 0 
+    ? organizationBalances[0] 
+    : null;
   
   // Prepare projects with active flag
   const projectsWithActive = projects.map(project => ({
@@ -155,53 +178,198 @@ export default function OrganizationDashboard() {
   return (
     <Layout headerProps={headerProps} wide={true}>
       <div className="space-y-6">
-        {/* Welcome Card - Full Width */}
-        <Card className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-accent/5 to-transparent"></div>
-          <CardContent className="relative p-4 md:p-6">
-            <div className="flex flex-col md:flex-row items-center md:items-center gap-4 md:gap-6">
-              {/* Organization Avatar */}
-              <div className="flex-shrink-0">
-                {organization?.logo_url ? (
-                  <img 
-                    src={organization.logo_url} 
-                    alt={organization.name}
-                    className="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover border-2 border-accent/20"
-                  />
-                ) : (
-                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-accent/10 flex items-center justify-center border-2 border-accent/20">
-                    <Building className="w-6 h-6 md:w-8 md:h-8 text-accent" />
-                  </div>
-                )}
-              </div>
-
-              {/* Welcome Content */}
-              <div className="flex-1 text-center md:text-left">
-                <div className="mb-2">
-                  <h1 className="text-xl md:text-2xl font-bold text-foreground">
-                    ¡Bienvenido a {organization?.name || 'tu organización'}!
-                  </h1>
+        {/* Welcome Section - Sin Card, directo en el fondo como Home */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-4">
+            {/* Organization Avatar */}
+            <div className="flex-shrink-0">
+              {organization?.logo_url ? (
+                <img 
+                  src={organization.logo_url} 
+                  alt={organization.name}
+                  className="w-16 h-16 rounded-full object-cover border-2 border-black"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center border-2 border-black">
+                  <Building className="w-8 h-8 text-accent" />
                 </div>
-                <p className="text-muted-foreground text-sm md:text-base mb-3">
-                  Estás gestionando las operaciones de construcción. Desde aquí puedes acceder rápidamente a todas las funciones principales.
-                </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-2 sm:gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    <span>{format(currentTime, "HH:mm", { locale: es })}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    <span className="text-center sm:text-left">{format(currentTime, "EEEE, d 'de' MMMM", { locale: es })}</span>
-                  </div>
+              )}
+            </div>
+            <div>
+              <h2 className="text-3xl font-semibold text-foreground">
+                ¡Bienvenido a {organization?.name || 'tu organización'}!
+              </h2>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                <div className="flex items-center gap-1">
+                  <Clock className="w-4 h-4" />
+                  <span>{format(currentTime, "HH:mm", { locale: es })}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-4 h-4" />
+                  <span className="capitalize">{format(currentTime, "EEEE, d 'de' MMMM", { locale: es })}</span>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+
+        {/* Grid de 4 Cards KPI */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* 1. Proyectos */}
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Folder className="w-5 h-5 text-accent" />
+                Proyectos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div>
+                  <div className="text-3xl font-bold text-foreground">
+                    {projectsLoading ? '...' : projects.length}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {projects.length === 1 ? 'Proyecto activo' : 'Proyectos en total'}
+                  </p>
+                </div>
+                <Button 
+                  className="w-full"
+                  onClick={() => {
+                    setSidebarLevel('organization');
+                    setLocation('/organization/projects');
+                  }}
+                  data-testid="button-ir-proyectos"
+                >
+                  <ArrowRight className="w-4 h-4 mr-2" />
+                  Ver proyectos
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 2. Contactos */}
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Users className="w-5 h-5 text-accent" />
+                Contactos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div>
+                  <div className="text-3xl font-bold text-foreground">
+                    {contactsLoading ? '...' : contacts.length}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {contacts.length === 1 ? 'Contacto registrado' : 'Contactos registrados'}
+                  </p>
+                </div>
+                <Button 
+                  className="w-full"
+                  onClick={() => {
+                    setSidebarLevel('organization');
+                    setLocation('/contacts');
+                  }}
+                  data-testid="button-ir-contactos"
+                >
+                  <ArrowRight className="w-4 h-4 mr-2" />
+                  Ver contactos
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 3. Movimientos */}
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-accent" />
+                Movimientos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div>
+                  <div className="text-3xl font-bold text-foreground">
+                    {movementsLoading ? '...' : movements.length}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {movements.length === 1 ? 'Movimiento registrado' : 'Movimientos registrados'}
+                  </p>
+                </div>
+                <Button 
+                  className="w-full"
+                  onClick={() => {
+                    setSidebarLevel('organization');
+                    setLocation('/movements');
+                  }}
+                  data-testid="button-ir-movimientos"
+                >
+                  <ArrowRight className="w-4 h-4 mr-2" />
+                  Ver movimientos
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 4. Capital */}
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Calculator className="w-5 h-5 text-accent" />
+                Capital
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div>
+                  {kpisLoading ? (
+                    <div className="text-xl font-bold text-foreground">Cargando...</div>
+                  ) : primaryBalance ? (
+                    <>
+                      <div className="text-3xl font-bold text-foreground">
+                        {primaryBalance.currencyCode} {primaryBalance.balance.toLocaleString('es-AR', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2
+                        })}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Balance en {primaryBalance.currencyName}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-3xl font-bold text-foreground">$ 0</div>
+                      <p className="text-sm text-muted-foreground">Sin movimientos</p>
+                    </>
+                  )}
+                </div>
+                <Button 
+                  className="w-full"
+                  onClick={() => {
+                    setSidebarLevel('organization');
+                    setLocation('/finances/capital');
+                  }}
+                  data-testid="button-ir-capital"
+                >
+                  <ArrowRight className="w-4 h-4 mr-2" />
+                  Ver capital
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Projects Section */}
         <Card>
+          <CardHeader>
+            <CardTitle className="text-xl flex items-center gap-2">
+              <Folder className="w-5 h-5 text-accent" />
+              Tus Proyectos
+            </CardTitle>
+          </CardHeader>
           <CardContent className="p-6">
             {isLoading || projectsLoading ? (
               <div className="flex items-center justify-center h-64">
