@@ -102,14 +102,24 @@ export function CapitalChart({ movements, primaryCurrencyCode, selectedPeriod }:
     // Build chart data with cumulative balance
     let cumulativeBalance = 0;
     const dateFormat = selectedPeriod === 'Año' ? 'MMM' : 'dd MMM';
-    const data: ChartDataPoint[] = dates.map(date => {
+    const data: ChartDataPoint[] = dates.map((date, index) => {
       const dayData = dailyData.get(date) || { income: 0, expense: 0 };
       const dailyBalance = dayData.income - dayData.expense;
       cumulativeBalance += dailyBalance;
       
+      // Para vista de Año, solo mostrar etiqueta en el día 1 de cada mes
+      let displayDate = format(parseISO(date), dateFormat, { locale: es });
+      if (selectedPeriod === 'Año') {
+        const currentDay = parseISO(date).getDate();
+        // Solo mostrar la etiqueta si es día 1 del mes
+        if (currentDay !== 1) {
+          displayDate = '';
+        }
+      }
+      
       return {
         date,
-        displayDate: format(parseISO(date), dateFormat, { locale: es }),
+        displayDate,
         dailyBalance,
         cumulativeBalance,
         income: dayData.income,

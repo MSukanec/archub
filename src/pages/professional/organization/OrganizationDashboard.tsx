@@ -219,28 +219,30 @@ export default function OrganizationDashboard() {
         </div>
 
         {/* Card grande de Capital con gráfico */}
-        <Card className="relative group cursor-pointer hover:shadow-md transition-shadow mb-4">
+        <Card 
+          className="relative group cursor-pointer hover:shadow-md transition-shadow mb-4"
+          onClick={() => {
+            setSidebarLevel('organization');
+            setLocation('/finances/capital');
+          }}
+        >
           <CardHeader className="flex flex-row items-center justify-between pb-6">
             <div className="flex items-center gap-2">
               <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Capital</p>
-              <button
-                onClick={() => {
-                  setSidebarLevel('organization');
-                  setLocation('/finances/capital');
-                }}
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
-                data-testid="button-expand-capital-chart"
-              >
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                 <ArrowRight className="w-4 h-4 text-muted-foreground" />
-              </button>
+              </div>
             </div>
             
             {/* Period selector buttons */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
               {(['Semana', 'Mes', 'Trimestre', 'Año'] as Period[]).map((period) => (
                 <button
                   key={period}
-                  onClick={() => setSelectedPeriod(period)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedPeriod(period);
+                  }}
                   className={`px-3 py-1 text-sm rounded transition-colors ${
                     selectedPeriod === period
                       ? 'bg-foreground text-background font-medium'
@@ -265,20 +267,19 @@ export default function OrganizationDashboard() {
         {/* Grid de 4 Cards KPI - Minimalistas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* 1. Proyectos */}
-          <Card className="relative group cursor-pointer hover:shadow-md transition-shadow">
+          <Card 
+            className="relative group cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => {
+              setSidebarLevel('organization');
+              setLocation('/organization/projects');
+            }}
+          >
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
                 <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Proyectos</p>
-                <button
-                  onClick={() => {
-                    setSidebarLevel('organization');
-                    setLocation('/organization/projects');
-                  }}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  data-testid="button-expand-proyectos"
-                >
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                   <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                </button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
@@ -289,20 +290,19 @@ export default function OrganizationDashboard() {
           </Card>
 
           {/* 2. Contactos */}
-          <Card className="relative group cursor-pointer hover:shadow-md transition-shadow">
+          <Card 
+            className="relative group cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => {
+              setSidebarLevel('organization');
+              setLocation('/contacts');
+            }}
+          >
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
                 <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Contactos</p>
-                <button
-                  onClick={() => {
-                    setSidebarLevel('organization');
-                    setLocation('/contacts');
-                  }}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  data-testid="button-expand-contactos"
-                >
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                   <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                </button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
@@ -313,20 +313,19 @@ export default function OrganizationDashboard() {
           </Card>
 
           {/* 3. Movimientos */}
-          <Card className="relative group cursor-pointer hover:shadow-md transition-shadow">
+          <Card 
+            className="relative group cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => {
+              setSidebarLevel('organization');
+              setLocation('/movements');
+            }}
+          >
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
                 <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Movimientos</p>
-                <button
-                  onClick={() => {
-                    setSidebarLevel('organization');
-                    setLocation('/movements');
-                  }}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  data-testid="button-expand-movimientos"
-                >
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                   <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                </button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
@@ -337,20 +336,19 @@ export default function OrganizationDashboard() {
           </Card>
 
           {/* 4. Capital */}
-          <Card className="relative group cursor-pointer hover:shadow-md transition-shadow">
+          <Card 
+            className="relative group cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => {
+              setSidebarLevel('organization');
+              setLocation('/finances/capital');
+            }}
+          >
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
                 <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Capital</p>
-                <button
-                  onClick={() => {
-                    setSidebarLevel('organization');
-                    setLocation('/finances/capital');
-                  }}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  data-testid="button-expand-capital"
-                >
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                   <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                </button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
