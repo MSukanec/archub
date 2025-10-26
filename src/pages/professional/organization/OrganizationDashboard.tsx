@@ -228,20 +228,50 @@ export default function OrganizationDashboard() {
         >
           {/* Header */}
           <div className="flex flex-row items-start justify-between mb-4">
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Capital</p>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+            <div className="flex items-start gap-6">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Capital</p>
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                </div>
+                
+                {/* Total histórico - debajo del título */}
+                <div className="text-5xl font-bold text-foreground tracking-tight leading-none">
+                  ${primaryBalance?.balance.toLocaleString('es-AR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  }) || '0.00'}
                 </div>
               </div>
               
-              {/* Total histórico - debajo del título */}
-              <div className="text-5xl font-bold text-foreground tracking-tight leading-none">
-                ${primaryBalance?.balance.toLocaleString('es-AR', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                }) || '0.00'}
+              {/* KPIs secundarios - a la derecha del valor */}
+              <div className="flex flex-col gap-2 mt-8">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-xs text-muted-foreground">Ingresos:</span>
+                  <span className="text-lg font-medium text-green-600">
+                    ${primaryBalance?.positiveTotal.toLocaleString('es-AR', {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0
+                    }) || '0'}
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-xs text-muted-foreground">Egresos:</span>
+                  <span className="text-lg font-medium text-red-600">
+                    ${primaryBalance?.negativeTotal.toLocaleString('es-AR', {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0
+                    }) || '0'}
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-xs text-muted-foreground">Movimientos:</span>
+                  <span className="text-lg font-medium text-foreground">
+                    {movements.length}
+                  </span>
+                </div>
               </div>
             </div>
             
