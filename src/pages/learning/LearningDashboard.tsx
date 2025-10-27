@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { GraduationCap, BookOpen, Clock, TrendingUp, Award, Flame } from 'lucide-react'
+import { GraduationCap, BookOpen, Clock, TrendingUp, Award, Flame, CheckCircle2 } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -381,7 +381,7 @@ export default function LearningDashboard() {
           <CardContent>
             {recent.length > 0 ? (
               <div className="space-y-3">
-                {recent.map((item, index) => (
+                {recent.map((item: any, index: number) => (
                   <div key={index} className="flex items-start gap-3 text-sm pb-3 border-b last:border-0 last:pb-0" data-testid={`recent-activity-${index}`}>
                     <CheckCircle2 
                       className={`h-4 w-4 flex-shrink-0 mt-0.5 ${

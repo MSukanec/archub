@@ -1968,16 +1968,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Unauthorized" });
       }
       
-      // CRITICAL: Get user from users table by EMAIL (not by id!)
-      // auth.users.id ≠ users.id, must use .ilike() for case-insensitive email matching
+      // Get user from users table by auth_id
       const { data: existingUser, error: userLookupError } = await authenticatedSupabase
         .from('users')
         .select('id')
-        .ilike('email', user.email!)
-        .single();
+        .eq('auth_id', user.id)
+        .maybeSingle();
       
       if (userLookupError || !existingUser) {
-        console.error("User not found in users table:", user.email, userLookupError);
+        console.error("User not found in users table:", user.id, userLookupError);
         return res.status(404).json({ error: "User not found in database" });
       }
       
@@ -2149,8 +2148,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { data: dbUser } = await authenticatedSupabase
         .from('users')
         .select('id')
-        .ilike('email', user.email!)
-        .single();
+        .eq('auth_id', user.id)
+        .maybeSingle();
       
       if (!dbUser) {
         return res.status(404).json({ error: "User not found" });
@@ -2213,8 +2212,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { data: dbUser } = await authenticatedSupabase
         .from('users')
         .select('id')
-        .ilike('email', user.email!)
-        .single();
+        .eq('auth_id', user.id)
+        .maybeSingle();
       
       if (!dbUser) {
         return res.status(404).json({ error: "User not found" });
