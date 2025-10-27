@@ -10,7 +10,7 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import CourseDataTab from './view/CourseDataTab';
 import CourseContentTab from './view/CourseContentTab';
 import CourseViewer from './view/CourseViewer';
-import CourseNotes from './view/CourseNotes';
+import CourseNotesTab from './view/CourseNotesTab';
 import CourseMarkersTab from './view/CourseMarkersTab';
 
 export default function CourseView() {
@@ -237,7 +237,7 @@ export default function CourseView() {
           />
         );
       case 'Apuntes':
-        return <CourseNotes courseId={course?.id} />;
+        return <CourseNotesTab courseId={course?.id} courseSlug={id} />;
       case 'Marcadores':
         return <CourseMarkersTab courseId={course?.id} courseSlug={id} />;
       default:
