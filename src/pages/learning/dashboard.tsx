@@ -1,9 +1,10 @@
 import { useEffect, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { GraduationCap, BookOpen, Clock, TrendingUp, Award, Flame, CheckCircle2 } from 'lucide-react'
+import { GraduationCap, BookOpen, Award, CheckCircle2 } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { StatCard, StatCardTitle } from '@/components/ui/stat-card'
 import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
@@ -195,17 +196,9 @@ export default function LearningDashboard() {
     return (
       <Layout headerProps={headerProps} wide>
         <div className="space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map(i => (
-              <Card key={i}>
-                <CardHeader>
-                  <Skeleton className="h-6 w-32" />
-                  <Skeleton className="h-4 w-24 mt-2" />
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-32 w-full" />
-                </CardContent>
-              </Card>
+              <Skeleton key={i} className="h-48" />
             ))}
           </div>
         </div>
@@ -237,64 +230,44 @@ export default function LearningDashboard() {
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
         {/* Main Dashboard Grid - 4 equal cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Card 1: Progress Ring */}
-          <Card className="flex flex-col">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <TrendingUp className="h-4 w-4" style={{ color: 'var(--accent)' }} />
-                Progreso General
-              </CardTitle>
-              <CardDescription data-testid="text-lessons-completed">
-                {global.done_lessons_total}/{global.total_lessons_total} lecciones
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 flex items-center justify-center">
+          <StatCard>
+            <StatCardTitle>Progreso General</StatCardTitle>
+            <p className="text-sm text-muted-foreground mt-2" data-testid="text-lessons-completed">
+              {global.done_lessons_total}/{global.total_lessons_total} lecciones
+            </p>
+            <div className="flex items-center justify-center mt-4">
               <ProgressRing value={global.progress_pct} />
-            </CardContent>
-          </Card>
+            </div>
+          </StatCard>
 
           {/* Card 2: Study Hours */}
-          <Card className="flex flex-col">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Clock className="h-4 w-4" style={{ color: 'var(--accent)' }} />
-                Horas de Estudio
-              </CardTitle>
-              <CardDescription>
-                Este mes y total
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 flex items-center justify-center">
+          <StatCard>
+            <StatCardTitle>Horas de Estudio</StatCardTitle>
+            <p className="text-sm text-muted-foreground mt-2">
+              Este mes y total
+            </p>
+            <div className="flex items-center justify-center mt-4">
               <MiniBar data={hoursData} />
-            </CardContent>
-          </Card>
+            </div>
+          </StatCard>
 
           {/* Card 3: Activity Streak */}
-          <Card className="flex flex-col">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Flame className="h-4 w-4" style={{ color: 'var(--accent)' }} />
-                Racha de Actividad
-              </CardTitle>
-              <CardDescription>
-                Últimos 30 días
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 flex items-center justify-center">
+          <StatCard>
+            <StatCardTitle>Racha de Actividad</StatCardTitle>
+            <p className="text-sm text-muted-foreground mt-2">
+              Últimos 30 días
+            </p>
+            <div className="flex items-center justify-center mt-4">
               <LineStreak data={streakSeries} />
-            </CardContent>
-          </Card>
+            </div>
+          </StatCard>
 
           {/* Card 4: Active Courses & Current Streak */}
-          <Card className="flex flex-col">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <BookOpen className="h-4 w-4" style={{ color: 'var(--accent)' }} />
-                Cursos Activos
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 space-y-6">
+          <StatCard>
+            <StatCardTitle>Cursos Activos</StatCardTitle>
+            <div className="mt-4 space-y-6">
               <div>
                 <div className="text-4xl font-bold" style={{ color: 'var(--accent)' }} data-testid="text-active-courses-count">
                   {courses.length}
@@ -305,10 +278,9 @@ export default function LearningDashboard() {
               </div>
 
               <div className="pt-4 border-t">
-                <div className="flex items-center gap-2 mb-2">
-                  <Flame className="h-4 w-4" style={{ color: 'var(--accent)' }} />
-                  <span className="text-sm font-medium">Racha Actual</span>
-                </div>
+                <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide mb-2">
+                  Racha Actual
+                </p>
                 <div className="text-2xl font-bold" style={{ color: 'var(--accent)' }} data-testid="text-current-streak">
                   {currentStreak}
                 </div>
@@ -316,24 +288,19 @@ export default function LearningDashboard() {
                   {currentStreak === 1 ? 'día consecutivo' : 'días consecutivos'}
                 </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </StatCard>
         </div>
 
         {/* Courses in Progress */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2">
-              <Award className="h-5 w-5" style={{ color: 'var(--accent)' }} />
-              Cursos en Progreso
-            </CardTitle>
-            <CardDescription>
-              Continúa tu aprendizaje donde lo dejaste
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {coursesSorted.length > 0 ? (
-              coursesSorted.map((course) => (
+        <StatCard>
+          <StatCardTitle className="mb-4">Cursos en Progreso</StatCardTitle>
+          <p className="text-sm text-muted-foreground mb-4">
+            Continúa tu aprendizaje donde lo dejaste
+          </p>
+          {coursesSorted.length > 0 ? (
+            <div className="space-y-4">
+              {coursesSorted.map((course) => (
                 <div key={course.course_id} className="space-y-2 pb-4 border-b last:border-0 last:pb-0" data-testid={`course-progress-${course.course_id}`}>
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex-1 min-w-0">
@@ -357,68 +324,61 @@ export default function LearningDashboard() {
                   </div>
                   <Progress value={course.progress_pct} className="h-2" data-testid="progress-bar-course" />
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <p className="text-sm">No tienes cursos en progreso</p>
-                <p className="text-xs mt-1">¡Comienza un curso para empezar tu aprendizaje!</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <p className="text-sm">No tienes cursos en progreso</p>
+              <p className="text-xs mt-1">¡Comienza un curso para empezar tu aprendizaje!</p>
+            </div>
+          )}
+        </StatCard>
 
         {/* Recent Activity */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5" style={{ color: 'var(--accent)' }} />
-              Actividad Reciente
-            </CardTitle>
-            <CardDescription>
-              Últimas lecciones en las que trabajaste
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {recent.length > 0 ? (
-              <div className="space-y-3">
-                {recent.map((item: any, index: number) => (
-                  <div key={index} className="flex items-start gap-3 text-sm pb-3 border-b last:border-0 last:pb-0" data-testid={`recent-activity-${index}`}>
-                    <CheckCircle2 
-                      className={`h-4 w-4 flex-shrink-0 mt-0.5 ${
-                        item.type === 'completed' ? 'text-accent' : 'text-muted-foreground'
-                      }`}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate" data-testid="text-activity-lesson-title">{item.lesson_title}</div>
-                      <div className="text-xs text-muted-foreground truncate" data-testid="text-activity-course-module">
-                        {item.course_title} • {item.module_title}
-                      </div>
-                      <div className="text-xs text-muted-foreground" data-testid="text-activity-timestamp">
-                        {item.when && format(new Date(item.when), "d 'de' MMMM, HH:mm", { locale: es })}
-                      </div>
+        <StatCard>
+          <StatCardTitle className="mb-4">Actividad Reciente</StatCardTitle>
+          <p className="text-sm text-muted-foreground mb-4">
+            Últimas lecciones en las que trabajaste
+          </p>
+          {recent.length > 0 ? (
+            <div className="space-y-3">
+              {recent.map((item: any, index: number) => (
+                <div key={index} className="flex items-start gap-3 text-sm pb-3 border-b last:border-0 last:pb-0" data-testid={`recent-activity-${index}`}>
+                  <CheckCircle2 
+                    className={`h-4 w-4 flex-shrink-0 mt-0.5 ${
+                      item.type === 'completed' ? 'text-accent' : 'text-muted-foreground'
+                    }`}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium truncate" data-testid="text-activity-lesson-title">{item.lesson_title}</div>
+                    <div className="text-xs text-muted-foreground truncate" data-testid="text-activity-course-module">
+                      {item.course_title} • {item.module_title}
                     </div>
-                    {item.type === 'completed' && (
-                      <span className="text-xs font-medium px-2 py-1 rounded-full flex-shrink-0" 
-                        style={{ 
-                          backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
-                          color: 'var(--accent)'
-                        }}
-                        data-testid="badge-completed"
-                      >
-                        Completada
-                      </span>
-                    )}
+                    <div className="text-xs text-muted-foreground" data-testid="text-activity-timestamp">
+                      {item.when && format(new Date(item.when), "d 'de' MMMM, HH:mm", { locale: es })}
+                    </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <p className="text-sm">No hay actividad reciente</p>
-                <p className="text-xs mt-1">Comienza a estudiar para ver tu actividad aquí</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  {item.type === 'completed' && (
+                    <span className="text-xs font-medium px-2 py-1 rounded-full flex-shrink-0" 
+                      style={{ 
+                        backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                        color: 'var(--accent)'
+                      }}
+                      data-testid="badge-completed"
+                    >
+                      Completada
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <p className="text-sm">No hay actividad reciente</p>
+              <p className="text-xs mt-1">Comienza a estudiar para ver tu actividad aquí</p>
+            </div>
+          )}
+        </StatCard>
       </div>
     </Layout>
   )

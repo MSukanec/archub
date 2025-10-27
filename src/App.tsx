@@ -74,7 +74,7 @@ import MaterialsView from "@/pages/professional/analysis/material-costs/Material
 import GeneralCosts from "@/pages/professional/finances/general-costs/GeneralCosts";
 
 // Learning Pages
-import LearningDashboard from "@/pages/learning/LearningDashboard";
+import LearningDashboard from "@/pages/learning/dashboard";
 import CourseList from "@/pages/learning/CourseList";
 import CourseView from "@/pages/learning/CourseView";
 import PaymentReturn from "@/pages/learning/PaymentReturn";
