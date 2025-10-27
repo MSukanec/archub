@@ -1,10 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { Card } from '@/components/ui/card'
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui/stat-card'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card'
 import { format, subMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 
 interface DashboardStats {
@@ -26,7 +24,7 @@ interface DashboardData {
   expiringSoon: any[]
 }
 
-export default function AdminCourseDashboard() {
+export default function AdminCourseDashboardTab() {
   // Fetch dashboard data from API
   const { data: dashboardData, isLoading } = useQuery<DashboardData>({
     queryKey: ['/api/admin/dashboard'],
@@ -57,7 +55,7 @@ export default function AdminCourseDashboard() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(8)].map((_, i) => (
             <Skeleton key={i} className="h-32" />
           ))}
@@ -68,8 +66,8 @@ export default function AdminCourseDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Métricas principales - Usando StatCard */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Métricas principales - 2 columnas en mobile */}
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard>
           <StatCardTitle>Cursos Totales</StatCardTitle>
           <StatCardValue>{stats?.totalCourses || 0}</StatCardValue>
@@ -140,9 +138,6 @@ export default function AdminCourseDashboard() {
                       {format(new Date(enrollment.started_at), "d 'de' MMMM, yyyy", { locale: es })}
                     </p>
                   </div>
-                  <Badge variant={enrollment.status === 'active' ? 'default' : 'secondary'}>
-                    {enrollment.status}
-                  </Badge>
                 </div>
               ))}
             </div>

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { BookOpen, Plus, Users, BarChart3, Tag } from 'lucide-react'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import AdminCourseDashboard from './AdminCourseDashboard'
+import AdminCourseDashboardTab from './AdminCourseDashboardTab'
 import AdminCourseUsersTab from './AdminCourseUsersTab'
 import AdminCourseListTab from './AdminCourseListTab'
 import AdminCourseCouponTab from './AdminCourseCouponTab'
@@ -99,7 +99,7 @@ export default function AdminCourses() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {activeTab === 'dashboard' && <AdminCourseDashboard />}
+        {activeTab === 'dashboard' && <AdminCourseDashboardTab />}
         {activeTab === 'users' && <AdminCourseUsersTab />}
         {activeTab === 'courses' && <AdminCourseListTab />}
         {activeTab === 'coupons' && <AdminCourseCouponTab />}
