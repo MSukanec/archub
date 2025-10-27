@@ -236,3 +236,108 @@ create trigger trg_coupons_set_updated BEFORE
 update on coupons for EACH row
 execute FUNCTION set_updated_at ();
 
+VISTA v_course_lessons_total
+
+[
+  {
+    "column_name": "course_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "total_lessons",
+    "data_type": "integer"
+  }
+]
+
+VISTA v_course_progress
+
+[
+  {
+    "column_name": "course_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "user_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "progress_pct",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "done_lessons",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "total_lessons",
+    "data_type": "integer"
+  }
+]
+
+VISTA v_user_active_days:
+
+[
+  {
+    "column_name": "user_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "day",
+    "data_type": "date"
+  }
+]
+
+VISTA v_user_course_done:
+
+[
+  {
+    "column_name": "course_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "user_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "done_lessons",
+    "data_type": "integer"
+  }
+]
+
+VISTA v_user_global_progress
+
+[
+  {
+    "column_name": "user_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "done_lessons_total",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "total_lessons_total",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "progress_pct",
+    "data_type": "numeric"
+  }
+]
+
+VISTA v_user_study_time:
+
+[
+  {
+    "column_name": "user_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "seconds_lifetime",
+    "data_type": "bigint"
+  },
+  {
+    "column_name": "seconds_this_month",
+    "data_type": "bigint"
+  }
+]

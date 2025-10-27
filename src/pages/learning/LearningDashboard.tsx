@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { GraduationCap, BookOpen, CheckCircle2, Clock, TrendingUp, Award, Flame } from 'lucide-react'
+import { GraduationCap, BookOpen, Clock, TrendingUp, Award, Flame } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -11,34 +11,17 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useLocation } from 'wouter'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
 
 import ProgressRing from '@/components/charts/courses/ProgressRing'
 import MiniBar from '@/components/charts/courses/MiniBar'
 import LineStreak from '@/components/charts/courses/LineStreak'
-import {
-  fetchGlobalProgress,
-  fetchStudyTime,
-  fetchActiveDays,
-  fetchCourseProgress,
-  fetchRecentActivity,
-  type GlobalProgress,
-  type StudyTime,
-  type ActiveDay,
-  type CourseProgressRow,
-  type RecentActivityItem
-} from '@/lib/supabase/training'
 
 export default function LearningDashboard() {
   const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore()
   const { data: userData } = useCurrentUser()
   const [, navigate] = useLocation()
-
-  const [global, setGlobal] = useState<GlobalProgress | null>(null)
-  const [study, setStudy] = useState<StudyTime | null>(null)
-  const [days, setDays] = useState<ActiveDay[]>([])
-  const [courses, setCourses] = useState<CourseProgressRow[]>([])
-  const [recent, setRecent] = useState<RecentActivityItem[]>([])
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     setSidebarContext('learning')
@@ -47,33 +30,121 @@ export default function LearningDashboard() {
     }
   }, [setSidebarContext, setSidebarLevel, sidebarLevel])
 
-  useEffect(() => {
-    if (!userData?.user?.id) return
+  // Fetch all dashboard data from the server
+  const { data: dashboardData, isLoading } = useQuery<any>({
+    queryKey: ['/api/learning/dashboard'],
+    queryFn: async () => {
+      if (!supabase) return null;
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return null;
 
-    const userId = userData.user.id
+      const response = await fetch('/api/learning/dashboard', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
 
-    ;(async () => {
-      setLoading(true)
-      try {
-        const [g, s, d, cp, ra] = await Promise.all([
-          fetchGlobalProgress(userId),
-          fetchStudyTime(userId),
-          fetchActiveDays(userId, 60),
-          fetchCourseProgress(userId),
-          fetchRecentActivity(userId, 8),
-        ])
-        setGlobal(g)
-        setStudy(s)
-        setDays(d)
-        setCourses(cp)
-        setRecent(ra)
-      } catch (error) {
-        console.error('Error loading dashboard data:', error)
-      } finally {
-        setLoading(false)
+      if (!response.ok) {
+        console.error('Failed to fetch dashboard data:', await response.text());
+        return null;
       }
-    })()
-  }, [userData])
+      
+      const data = await response.json();
+      console.log('📊 Dashboard data received:', data);
+      return data;
+    },
+    enabled: !!supabase && !!userData
+  });
+
+  // Calculate derived data
+  const { enrollments = [], progress = [], courseLessons = [], recentCompletions = [] } = dashboardData || {}
+
+  // Calculate global progress from enrollments and progress
+  const global = useMemo(() => {
+    if (!enrollments.length) return null;
+    
+    const courseIds = enrollments.map((e: any) => e.course_id);
+    const relevantLessons = courseLessons.filter((l: any) => 
+      courseIds.includes(l.course_modules?.course_id)
+    );
+    const total_lessons_total = relevantLessons.length;
+    const done_lessons_total = progress.filter((p: any) => 
+      p.is_completed && relevantLessons.some((l: any) => l.id === p.lesson_id)
+    ).length;
+    const progress_pct = total_lessons_total > 0 
+      ? Math.round((done_lessons_total / total_lessons_total) * 100) 
+      : 0;
+    
+    return { done_lessons_total, total_lessons_total, progress_pct };
+  }, [enrollments, courseLessons, progress]);
+
+  // Calculate course progress
+  const courses = useMemo(() => {
+    return enrollments.map((enrollment: any) => {
+      const courseId = enrollment.course_id;
+      const lessons = courseLessons.filter((l: any) => 
+        l.course_modules?.course_id === courseId
+      );
+      const total_lessons = lessons.length;
+      const done_lessons = progress.filter((p: any) => 
+        p.is_completed && lessons.some((l: any) => l.id === p.lesson_id)
+      ).length;
+      const progress_pct = total_lessons > 0 
+        ? Math.round((done_lessons / total_lessons) * 100) 
+        : 0;
+      
+      return {
+        course_id: courseId,
+        course_title: enrollment.courses?.title || 'Sin título',
+        course_slug: enrollment.course_slug || '',
+        progress_pct,
+        done_lessons,
+        total_lessons
+      };
+    });
+  }, [enrollments, courseLessons, progress]);
+
+  // Calculate study time from progress data
+  const study = useMemo(() => {
+    if (!progress.length) return { seconds_lifetime: 0, seconds_this_month: 0 };
+    
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    let seconds_lifetime = 0;
+    let seconds_this_month = 0;
+    
+    progress.forEach((p: any) => {
+      const lastPos = p.last_position_sec || 0;
+      seconds_lifetime += lastPos;
+      
+      const updateDate = new Date(p.updated_at);
+      if (updateDate >= startOfMonth) {
+        seconds_this_month += lastPos;
+      }
+    });
+    
+    return { seconds_lifetime, seconds_this_month };
+  }, [progress]);
+
+  // Calculate active days from progress data
+  const days = useMemo(() => {
+    const cutoffDate = new Date(Date.now() - 60 * 86400000);
+    const daysSet = new Set<string>();
+    
+    progress.forEach((p: any) => {
+      const updateDate = new Date(p.updated_at);
+      if (updateDate >= cutoffDate) {
+        const day = updateDate.toISOString().slice(0, 10);
+        daysSet.add(day);
+      }
+    });
+    
+    return Array.from(daysSet).map(day => ({ day }));
+  }, [progress]);
+
+  const recent = recentCompletions || [];
 
   const hoursData = useMemo(() => ([
     { name: 'Mes', value: Math.round((study?.seconds_this_month ?? 0) / 3600) },
@@ -120,7 +191,7 @@ export default function LearningDashboard() {
     icon: GraduationCap,
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Layout headerProps={headerProps} wide>
         <div className="space-y-6">

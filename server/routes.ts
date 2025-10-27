@@ -2436,12 +2436,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Unauthorized" });
       }
       
-      // Get user from users table by EMAIL
+      // Get user from users table by auth_id
       const { data: dbUser } = await authenticatedSupabase
         .from('users')
         .select('id')
-        .ilike('email', user.email!)
-        .single();
+        .eq('auth_id', user.id)
+        .maybeSingle();
       
       if (!dbUser) {
         return res.json({
