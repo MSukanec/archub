@@ -2404,28 +2404,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // GET /api/learning/dashboard - Optimized dashboard using database views
+  // GET /api/learning/dashboard - Consolidated endpoint for dashboard data
   app.get("/api/learning/dashboard", async (req, res) => {
     try {
+      // Get the authorization token from headers
       const authHeader = req.headers.authorization;
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ error: "No authorization token provided" });
       }
       
       const token = authHeader.substring(7);
+      
+      // Create authenticated Supabase client
       const authenticatedSupabase = createClient(
         process.env.VITE_SUPABASE_URL!,
         process.env.VITE_SUPABASE_ANON_KEY!,
         {
-          global: { headers: { Authorization: `Bearer ${token}` } }
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
         }
       );
       
+      // Get current user
       const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
       if (userError || !user) {
         return res.status(401).json({ error: "Unauthorized" });
       }
       
+      // Get user from users table by auth_id
       const { data: dbUser } = await authenticatedSupabase
         .from('users')
         .select('id')
@@ -2434,50 +2444,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!dbUser) {
         return res.json({
-          global: null,
-          study: { seconds_lifetime: 0, seconds_this_month: 0 },
-          activeDays: [],
-          courses: [],
-          recentActivity: []
+          enrollments: [],
+          progress: [],
+          courseLessons: [],
+          recentCompletions: []
         });
       }
       
-      // Use optimized database views - execute in parallel
-      const [globalResult, studyResult, daysResult, coursesResult, recentResult] = await Promise.all([
-        // Global progress from view
+      // Execute all queries in parallel for maximum speed
+      const [enrollmentsResult, progressResult, courseLessonsResult, recentCompletionsResult] = await Promise.all([
+        // Get enrollments with course slug
         authenticatedSupabase
-          .from('v_user_global_progress')
-          .select('*')
-          .eq('user_id', dbUser.id)
-          .maybeSingle(),
-        
-        // Study time from view
-        authenticatedSupabase
-          .from('v_user_study_time')
-          .select('*')
-          .eq('user_id', dbUser.id)
-          .maybeSingle(),
-        
-        // Active days from view (last 60 days for streak calculation)
-        authenticatedSupabase
-          .from('v_user_active_days')
-          .select('day')
-          .eq('user_id', dbUser.id)
-          .gte('day', new Date(Date.now() - 60 * 86400000).toISOString().slice(0, 10))
-          .order('day', { ascending: false }),
-        
-        // Course progress from view with course details
-        authenticatedSupabase
-          .from('v_course_progress')
-          .select('*, courses!inner(id, title, slug)')
+          .from('course_enrollments')
+          .select('*, courses(slug)')
           .eq('user_id', dbUser.id),
         
-        // Recent completions
+        // Get all progress
+        authenticatedSupabase
+          .from('course_lesson_progress')
+          .select('*')
+          .eq('user_id', dbUser.id),
+        
+        // Get all active course lessons with course info
+        authenticatedSupabase
+          .from('course_lessons')
+          .select('id, module_id, course_modules!inner(course_id)')
+          .eq('is_active', true),
+        
+        // Get recent completions (last 10) with lesson and course details
         authenticatedSupabase
           .from('course_lesson_progress')
           .select(`
-            completed_at,
-            course_lessons!inner(title, course_modules!inner(title, courses!inner(title, slug)))
+            *,
+            course_lessons!inner(
+              id,
+              title,
+              course_modules!inner(
+                id,
+                title,
+                course_id,
+                courses!inner(
+                  id,
+                  title,
+                  slug
+                )
+              )
+            )
           `)
           .eq('user_id', dbUser.id)
           .eq('is_completed', true)
@@ -2486,32 +2498,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .limit(10)
       ]);
       
-      // Format courses with progress
-      const courses = (coursesResult.data || []).map((cp: any) => ({
-        course_id: cp.course_id,
-        course_title: cp.courses?.title || 'Sin título',
-        course_slug: cp.courses?.slug || '',
-        progress_pct: Number(cp.progress_pct) || 0,
-        done_lessons: cp.done_lessons || 0,
-        total_lessons: cp.total_lessons || 0
+      // Check for errors
+      if (enrollmentsResult.error) {
+        console.error("Error fetching enrollments:", enrollmentsResult.error);
+        throw enrollmentsResult.error;
+      }
+      
+      if (progressResult.error) {
+        console.error("Error fetching progress:", progressResult.error);
+        throw progressResult.error;
+      }
+      
+      if (courseLessonsResult.error) {
+        console.error("Error fetching course lessons:", courseLessonsResult.error);
+        throw courseLessonsResult.error;
+      }
+      
+      if (recentCompletionsResult.error) {
+        console.error("Error fetching recent completions:", recentCompletionsResult.error);
+        throw recentCompletionsResult.error;
+      }
+      
+      // Format enrollments to flatten course slug
+      const formattedEnrollments = (enrollmentsResult.data || []).map((e: any) => ({
+        ...e,
+        course_slug: e.courses?.slug
       }));
       
-      // Format recent activity
-      const recentActivity = (recentResult.data || []).map((item: any) => ({
-        type: 'completed',
-        when: item.completed_at,
-        lesson_title: item.course_lessons?.title || 'Sin título',
-        module_title: item.course_lessons?.course_modules?.title || 'Sin módulo',
-        course_title: item.course_lessons?.course_modules?.courses?.title || 'Sin curso',
-        course_slug: item.course_lessons?.course_modules?.courses?.slug || ''
-      }));
+      // Format recent completions to extract nested data
+      const formattedCompletions = (recentCompletionsResult.data || []).map((completion: any) => {
+        const lesson = completion.course_lessons;
+        const module = lesson?.course_modules;
+        const course = module?.courses;
+        
+        return {
+          id: completion.id,
+          completed_at: completion.completed_at,
+          lesson_title: lesson?.title || 'Sin título',
+          module_title: module?.title || 'Sin módulo',
+          course_title: course?.title || 'Sin curso',
+          course_slug: course?.slug || '',
+          lesson_id: lesson?.id,
+          module_id: module?.id,
+          course_id: course?.id
+        };
+      });
       
+      // Return consolidated data
       res.json({
-        global: globalResult.data || null,
-        study: studyResult.data || { seconds_lifetime: 0, seconds_this_month: 0 },
-        activeDays: (daysResult.data || []).map((d: any) => d.day),
-        courses,
-        recentActivity
+        enrollments: formattedEnrollments,
+        progress: progressResult.data || [],
+        courseLessons: courseLessonsResult.data || [],
+        recentCompletions: formattedCompletions
       });
     } catch (error) {
       console.error("Error fetching dashboard data:", error);

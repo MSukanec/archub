@@ -45,8 +45,6 @@ Preferred communication style: Simple, everyday language.
     - Course pricing system with server-side validation and Mercado Pago integration.
     - Discord Integration widget for community engagement.
     - Deep-link navigation for lessons and tabs via URL parameters.
-    - Dashboard optimized with database views (v_user_global_progress, v_user_study_time, v_user_active_days, v_course_progress) for fast performance.
-    - Dashboard UI uses StatCard component for consistent KPI display.
 - **Notification System**: Real-time notifications with bell icon badge, powered by Supabase `notifications` and `user_notifications` tables, supporting read/unread states and click navigation.
 - **Admin Course Management**: Dedicated `AdminCourses` page with a three-tab interface (Dashboard, Alumnos, Cursos) for full CRUD operations on courses, modules, and lessons. Includes analytics, hierarchical tree view with drag & drop reordering, and enrollment management.
 - **Coupon System**: Discount coupon system for courses with database-driven validation, redemption, and Mercado Pago integration.
