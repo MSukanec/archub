@@ -3558,6 +3558,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get RPC result
       const { data: rpcUser } = await authenticatedSupabase.rpc('archub_get_user');
       
+      // Get enrollments with the correct user_id
+      const correctUserId = userByAuthId?.id || userByEmail?.id;
+      const { data: enrollments } = correctUserId 
+        ? await authenticatedSupabase
+            .from('course_enrollments')
+            .select('*')
+            .eq('user_id', correctUserId)
+        : { data: null };
+      
+      // Get ALL enrollments to see what user_ids exist
+      const { data: allEnrollments } = await authenticatedSupabase
+        .from('course_enrollments')
+        .select('user_id, course_id, status, created_at')
+        .limit(20);
+      
       return res.json({
         auth_user_id: user.id,
         auth_user_email: user.email,
@@ -3565,6 +3580,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user_by_auth_id: userByAuthId,
         rpc_user_id: rpcUser?.user?.id || null,
         rpc_user_auth_id: rpcUser?.user?.auth_id || null,
+        correct_user_id: correctUserId,
+        enrollments_for_correct_user: enrollments,
+        all_enrollments_sample: allEnrollments,
       });
     } catch (error: any) {
       console.error('Debug endpoint error:', error);
