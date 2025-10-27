@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Card } from '@/components/ui/card'
-import { Users, BookOpen, CreditCard, AlertCircle, TrendingUp, Calendar } from 'lucide-react'
+import { Users, AlertCircle } from 'lucide-react'
 import { format, subMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
@@ -54,10 +54,6 @@ export default function AdminCourseDashboard() {
   const recentEnrollments = dashboardData?.recentEnrollments || []
   const upcomingExpirations = dashboardData?.expiringSoon || []
 
-  const revenueGrowth = stats?.revenueLastMonth 
-    ? ((stats.revenueThisMonth - stats.revenueLastMonth) / stats.revenueLastMonth) * 100
-    : 0
-
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -72,136 +68,102 @@ export default function AdminCourseDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Métricas principales */}
+      {/* Métricas principales - Estilo minimalista */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Cursos Totales</p>
-              <h3 className="text-2xl font-bold mt-1">{stats?.totalCourses || 0}</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                {stats?.activeCourses || 0} activos
-              </p>
-            </div>
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <BookOpen className="h-5 w-5 text-primary" />
-            </div>
+          <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
+            Cursos Totales
+          </p>
+          <div className="text-5xl font-bold text-foreground tracking-tight leading-none mt-2">
+            {stats?.totalCourses || 0}
           </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            {stats?.activeCourses || 0} activos
+          </p>
         </Card>
 
         <Card className="p-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Suscripciones</p>
-              <h3 className="text-2xl font-bold mt-1">{stats?.activeEnrollments || 0}</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                de {stats?.totalEnrollments || 0} totales
-              </p>
-            </div>
-            <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center">
-              <Users className="h-5 w-5 text-green-600" />
-            </div>
+          <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
+            Suscripciones
+          </p>
+          <div className="text-5xl font-bold text-foreground tracking-tight leading-none mt-2">
+            {stats?.activeEnrollments || 0}
           </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            de {stats?.totalEnrollments || 0} totales
+          </p>
         </Card>
 
         <Card className="p-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Vencen Este Mes</p>
-              <h3 className="text-2xl font-bold mt-1">{stats?.expiringThisMonth || 0}</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                {stats?.expiringNextMonth || 0} próximo mes
-              </p>
-            </div>
-            <div className="h-10 w-10 rounded-full bg-orange-500/10 flex items-center justify-center">
-              <AlertCircle className="h-5 w-5 text-orange-600" />
-            </div>
+          <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
+            Vencen Este Mes
+          </p>
+          <div className="text-5xl font-bold text-foreground tracking-tight leading-none mt-2">
+            {stats?.expiringThisMonth || 0}
           </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            {stats?.expiringNextMonth || 0} próximo mes
+          </p>
         </Card>
 
         <Card className="p-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Progreso Promedio</p>
-              <h3 className="text-2xl font-bold mt-1">{stats?.avgCompletionRate ? stats.avgCompletionRate.toFixed(1) : '0.0'}%</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                en todas las lecciones
-              </p>
-            </div>
-            <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-              <TrendingUp className="h-5 w-5 text-blue-600" />
-            </div>
+          <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
+            Progreso Promedio
+          </p>
+          <div className="text-5xl font-bold text-foreground tracking-tight leading-none mt-2">
+            {stats?.avgCompletionRate ? stats.avgCompletionRate.toFixed(1) : '0.0'}%
           </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            en todas las lecciones
+          </p>
         </Card>
 
         <Card className="p-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Ingresos Totales</p>
-              <h3 className="text-2xl font-bold mt-1">
-                ${(stats?.totalRevenue || 0).toLocaleString('es-AR')}
-              </h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                en todos los cursos
-              </p>
-            </div>
-            <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
-              <CreditCard className="h-5 w-5 text-emerald-600" />
-            </div>
+          <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
+            Ingresos Totales
+          </p>
+          <div className="text-5xl font-bold text-foreground tracking-tight leading-none mt-2">
+            ${(stats?.totalRevenue || 0).toLocaleString('es-AR')}
           </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            en todos los cursos
+          </p>
         </Card>
 
         <Card className="p-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Este Mes</p>
-              <h3 className="text-2xl font-bold mt-1">
-                ${(stats?.revenueThisMonth || 0).toLocaleString('es-AR')}
-              </h3>
-              {revenueGrowth !== 0 && (
-                <p className={`text-xs mt-1 ${revenueGrowth > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {revenueGrowth > 0 ? '+' : ''}{revenueGrowth.toFixed(1)}% vs mes anterior
-                </p>
-              )}
-            </div>
-            <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
-              <Calendar className="h-5 w-5 text-emerald-600" />
-            </div>
+          <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
+            Este Mes
+          </p>
+          <div className="text-5xl font-bold text-foreground tracking-tight leading-none mt-2">
+            ${(stats?.revenueThisMonth || 0).toLocaleString('es-AR')}
           </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            {format(new Date(), "MMMM yyyy", { locale: es })}
+          </p>
         </Card>
 
         <Card className="p-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Mes Anterior</p>
-              <h3 className="text-2xl font-bold mt-1">
-                ${(stats?.revenueLastMonth || 0).toLocaleString('es-AR')}
-              </h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                {format(subMonths(new Date(), 1), 'MMMM yyyy', { locale: es })}
-              </p>
-            </div>
-            <div className="h-10 w-10 rounded-full bg-gray-500/10 flex items-center justify-center">
-              <Calendar className="h-5 w-5 text-gray-600" />
-            </div>
+          <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
+            Mes Anterior
+          </p>
+          <div className="text-5xl font-bold text-foreground tracking-tight leading-none mt-2">
+            ${(stats?.revenueLastMonth || 0).toLocaleString('es-AR')}
           </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            {format(subMonths(new Date(), 1), "MMMM yyyy", { locale: es })}
+          </p>
         </Card>
 
         <Card className="p-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Promedio Mensual</p>
-              <h3 className="text-2xl font-bold mt-1">
-                ${((stats?.totalRevenue || 0) / 12).toLocaleString('es-AR', { maximumFractionDigits: 0 })}
-              </h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                últimos 12 meses
-              </p>
-            </div>
-            <div className="h-10 w-10 rounded-full bg-violet-500/10 flex items-center justify-center">
-              <TrendingUp className="h-5 w-5 text-violet-600" />
-            </div>
+          <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
+            Promedio Mensual
+          </p>
+          <div className="text-5xl font-bold text-foreground tracking-tight leading-none mt-2">
+            ${((stats?.totalRevenue || 0) / 12).toLocaleString('es-AR', { maximumFractionDigits: 0 })}
           </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            últimos 12 meses
+          </p>
         </Card>
       </div>
 

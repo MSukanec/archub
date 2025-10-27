@@ -3494,17 +3494,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error });
       }
       
-      // Get basic counts
-      const [coursesResult, enrollmentsResult, usersResult] = await Promise.all([
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+      const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      const endOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 2, 0, 23, 59, 59);
+      const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+      const next30Days = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      
+      // Execute all queries in parallel
+      const [
+        allCoursesResult,
+        activeCoursesResult,
+        allEnrollmentsResult,
+        activeEnrollmentsResult,
+        expiringThisMonthResult,
+        expiringNextMonthResult,
+        recentEnrollmentsResult,
+        expiringSoonResult,
+        allProgressResult
+      ] = await Promise.all([
+        // Total courses
         supabase.from('courses').select('id', { count: 'exact', head: true }),
+        
+        // Active courses
+        supabase.from('courses').select('id', { count: 'exact', head: true }).eq('is_active', true),
+        
+        // Total enrollments
         supabase.from('course_enrollments').select('id', { count: 'exact', head: true }),
-        supabase.from('users').select('id', { count: 'exact', head: true })
+        
+        // Active enrollments
+        supabase.from('course_enrollments').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+        
+        // Expiring this month
+        supabase.from('course_enrollments')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'active')
+          .not('expires_at', 'is', null)
+          .gte('expires_at', startOfMonth.toISOString())
+          .lte('expires_at', endOfMonth.toISOString()),
+        
+        // Expiring next month
+        supabase.from('course_enrollments')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'active')
+          .not('expires_at', 'is', null)
+          .gte('expires_at', startOfNextMonth.toISOString())
+          .lte('expires_at', endOfNextMonth.toISOString()),
+        
+        // Recent enrollments (last 10)
+        supabase.from('course_enrollments')
+          .select('*, users(full_name, email), courses(title, slug)')
+          .order('started_at', { ascending: false })
+          .limit(10),
+        
+        // Expiring in next 30 days
+        supabase.from('course_enrollments')
+          .select('*, users(full_name, email), courses(title, slug)')
+          .eq('status', 'active')
+          .not('expires_at', 'is', null)
+          .gte('expires_at', now.toISOString())
+          .lte('expires_at', next30Days.toISOString())
+          .order('expires_at', { ascending: true })
+          .limit(10),
+        
+        // All lesson progress for avg completion rate
+        supabase.from('course_lesson_progress')
+          .select('progress_pct')
       ]);
       
+      // Calculate average completion rate
+      const progressData = allProgressResult.data || [];
+      const avgCompletionRate = progressData.length > 0
+        ? progressData.reduce((sum, p) => sum + (p.progress_pct || 0), 0) / progressData.length
+        : 0;
+      
+      // Note: Revenue data would require a payments table - setting to 0 for now
+      const stats = {
+        totalCourses: allCoursesResult.count || 0,
+        activeCourses: activeCoursesResult.count || 0,
+        totalEnrollments: allEnrollmentsResult.count || 0,
+        activeEnrollments: activeEnrollmentsResult.count || 0,
+        expiringThisMonth: expiringThisMonthResult.count || 0,
+        expiringNextMonth: expiringNextMonthResult.count || 0,
+        totalRevenue: 0, // TODO: Implement when payments table is available
+        revenueThisMonth: 0, // TODO: Implement when payments table is available
+        revenueLastMonth: 0, // TODO: Implement when payments table is available
+        avgCompletionRate: avgCompletionRate
+      };
+      
       return res.json({
-        total_courses: coursesResult.count || 0,
-        total_enrollments: enrollmentsResult.count || 0,
-        total_users: usersResult.count || 0
+        stats,
+        recentEnrollments: recentEnrollmentsResult.data || [],
+        expiringSoon: expiringSoonResult.data || []
       });
     } catch (error: any) {
       console.error("Error in /api/admin/dashboard:", error);
