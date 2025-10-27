@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Card } from '@/components/ui/card'
-import { Users, AlertCircle } from 'lucide-react'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui/stat-card'
 import { format, subMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
@@ -68,112 +68,61 @@ export default function AdminCourseDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Métricas principales - Estilo minimalista */}
+      {/* Métricas principales - Usando StatCard */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4">
-          <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-            Cursos Totales
-          </p>
-          <div className="text-5xl font-bold text-foreground tracking-tight leading-none mt-2">
-            {stats?.totalCourses || 0}
-          </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            {stats?.activeCourses || 0} activos
-          </p>
-        </Card>
+        <StatCard>
+          <StatCardTitle>Cursos Totales</StatCardTitle>
+          <StatCardValue>{stats?.totalCourses || 0}</StatCardValue>
+          <StatCardMeta>{stats?.activeCourses || 0} activos</StatCardMeta>
+        </StatCard>
 
-        <Card className="p-4">
-          <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-            Suscripciones
-          </p>
-          <div className="text-5xl font-bold text-foreground tracking-tight leading-none mt-2">
-            {stats?.activeEnrollments || 0}
-          </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            de {stats?.totalEnrollments || 0} totales
-          </p>
-        </Card>
+        <StatCard>
+          <StatCardTitle>Suscripciones</StatCardTitle>
+          <StatCardValue>{stats?.activeEnrollments || 0}</StatCardValue>
+          <StatCardMeta>de {stats?.totalEnrollments || 0} totales</StatCardMeta>
+        </StatCard>
 
-        <Card className="p-4">
-          <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-            Vencen Este Mes
-          </p>
-          <div className="text-5xl font-bold text-foreground tracking-tight leading-none mt-2">
-            {stats?.expiringThisMonth || 0}
-          </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            {stats?.expiringNextMonth || 0} próximo mes
-          </p>
-        </Card>
+        <StatCard>
+          <StatCardTitle>Vencen Este Mes</StatCardTitle>
+          <StatCardValue>{stats?.expiringThisMonth || 0}</StatCardValue>
+          <StatCardMeta>{stats?.expiringNextMonth || 0} próximo mes</StatCardMeta>
+        </StatCard>
 
-        <Card className="p-4">
-          <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-            Progreso Promedio
-          </p>
-          <div className="text-5xl font-bold text-foreground tracking-tight leading-none mt-2">
-            {stats?.avgCompletionRate ? stats.avgCompletionRate.toFixed(1) : '0.0'}%
-          </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            en todas las lecciones
-          </p>
-        </Card>
+        <StatCard>
+          <StatCardTitle>Progreso Promedio</StatCardTitle>
+          <StatCardValue>{stats?.avgCompletionRate ? stats.avgCompletionRate.toFixed(1) : '0.0'}%</StatCardValue>
+          <StatCardMeta>en todas las lecciones</StatCardMeta>
+        </StatCard>
 
-        <Card className="p-4">
-          <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-            Ingresos Totales
-          </p>
-          <div className="text-5xl font-bold text-foreground tracking-tight leading-none mt-2">
-            ${(stats?.totalRevenue || 0).toLocaleString('es-AR')}
-          </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            en todos los cursos
-          </p>
-        </Card>
+        <StatCard>
+          <StatCardTitle>Ingresos Totales</StatCardTitle>
+          <StatCardValue>${(stats?.totalRevenue || 0).toLocaleString('es-AR')}</StatCardValue>
+          <StatCardMeta>en todos los cursos</StatCardMeta>
+        </StatCard>
 
-        <Card className="p-4">
-          <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-            Este Mes
-          </p>
-          <div className="text-5xl font-bold text-foreground tracking-tight leading-none mt-2">
-            ${(stats?.revenueThisMonth || 0).toLocaleString('es-AR')}
-          </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            {format(new Date(), "MMMM yyyy", { locale: es })}
-          </p>
-        </Card>
+        <StatCard>
+          <StatCardTitle>Este Mes</StatCardTitle>
+          <StatCardValue>${(stats?.revenueThisMonth || 0).toLocaleString('es-AR')}</StatCardValue>
+          <StatCardMeta>{format(new Date(), "MMMM yyyy", { locale: es })}</StatCardMeta>
+        </StatCard>
 
-        <Card className="p-4">
-          <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-            Mes Anterior
-          </p>
-          <div className="text-5xl font-bold text-foreground tracking-tight leading-none mt-2">
-            ${(stats?.revenueLastMonth || 0).toLocaleString('es-AR')}
-          </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            {format(subMonths(new Date(), 1), "MMMM yyyy", { locale: es })}
-          </p>
-        </Card>
+        <StatCard>
+          <StatCardTitle>Mes Anterior</StatCardTitle>
+          <StatCardValue>${(stats?.revenueLastMonth || 0).toLocaleString('es-AR')}</StatCardValue>
+          <StatCardMeta>{format(subMonths(new Date(), 1), "MMMM yyyy", { locale: es })}</StatCardMeta>
+        </StatCard>
 
-        <Card className="p-4">
-          <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-            Promedio Mensual
-          </p>
-          <div className="text-5xl font-bold text-foreground tracking-tight leading-none mt-2">
-            ${((stats?.totalRevenue || 0) / 12).toLocaleString('es-AR', { maximumFractionDigits: 0 })}
-          </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            últimos 12 meses
-          </p>
-        </Card>
+        <StatCard>
+          <StatCardTitle>Promedio Mensual</StatCardTitle>
+          <StatCardValue>${((stats?.totalRevenue || 0) / 12).toLocaleString('es-AR', { maximumFractionDigits: 0 })}</StatCardValue>
+          <StatCardMeta>últimos 12 meses</StatCardMeta>
+        </StatCard>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Últimas inscripciones */}
-        <Card className="p-6">
-          <h3 className="font-semibold mb-4 flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
-            Últimas Inscripciones
-          </h3>
+        <StatCard>
+          <StatCardTitle className="mb-4">Últimas Inscripciones</StatCardTitle>
           {isLoading ? (
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
@@ -202,14 +151,11 @@ export default function AdminCourseDashboard() {
               No hay inscripciones recientes
             </p>
           )}
-        </Card>
+        </StatCard>
 
         {/* Próximos vencimientos */}
-        <Card className="p-6">
-          <h3 className="font-semibold mb-4 flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-orange-600" />
-            Próximos Vencimientos (30 días)
-          </h3>
+        <StatCard>
+          <StatCardTitle className="mb-4">Próximos Vencimientos (30 días)</StatCardTitle>
           {isLoading ? (
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
@@ -235,7 +181,7 @@ export default function AdminCourseDashboard() {
               No hay vencimientos próximos
             </p>
           )}
-        </Card>
+        </StatCard>
       </div>
     </div>
   )

@@ -19,6 +19,7 @@ Preferred communication style: Simple, everyday language.
 - **Context-Aware Headers**: MainHeader adapts content based on the current module (e.g., simplified breadcrumbs in Learning module).
 - **Button Design**: Default button variant uses gradient (yellow hsl(58,77%,51%) to green hsl(76,100%,40%)) matching logo colors.
 - **Onboarding Flow**: Streamlined onboarding automatically sets users to 'professional' mode and navigates directly to /home, skipping SelectMode page.
+- **StatCard Component**: Standardized minimal card design for statistics and KPIs. Features composable subcomponents (`StatCardTitle`, `StatCardValue`, `StatCardMeta`, `StatCardContent`) with preset styling (text-xs uppercase titles, text-5xl values, text-sm metadata). Used in admin and capital dashboards for visual consistency.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui (Radix UI primitives), Tailwind CSS, Zustand for state management, Wouter for routing, TanStack Query for data fetching.
