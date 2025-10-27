@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { Layout } from "@/components/layout/desktop/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatCard, StatCardTitle } from "@/components/ui/stat-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CustomButton } from "@/components/ui-custom/fields/CustomButton";
@@ -243,7 +244,7 @@ export default function Home() {
                   className="flex-shrink-0"
                 >
                   <X className="w-4 h-4 mr-2" />
-                  Ocultar este banner
+                  Ocultar el tutorial
                 </Button>
               </div>
             </CardHeader>
@@ -365,14 +366,9 @@ export default function Home() {
         {/* Grid de 4 Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* 1. Continuar donde lo dejaste */}
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Clock className="w-5 h-5 text-accent" />
-                Continuar donde lo dejaste
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+          <StatCard className="hover:shadow-lg transition-shadow">
+            <StatCardTitle className="mb-4">Continuar donde lo dejaste</StatCardTitle>
+            <div>
               {selectedProjectId ? (
                 <div className="space-y-3">
                   <p className="text-sm text-muted-foreground">
@@ -403,17 +399,15 @@ export default function Home() {
                   </Button>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </StatCard>
 
           {/* 2. Proyectos activos */}
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <FolderOpen className="w-5 h-5 text-accent" />
-                Proyectos activos
-              </CardTitle>
+          <StatCard className="hover:shadow-lg transition-shadow">
+            <div className="flex flex-row items-center justify-between mb-4">
+              <StatCardTitle>Proyectos activos</StatCardTitle>
               <Button
+                variant="ghost"
                 size="sm"
                 onClick={() => {
                   setSidebarLevel('organization');
@@ -422,8 +416,8 @@ export default function Home() {
               >
                 Ir a Proyectos
               </Button>
-            </CardHeader>
-            <CardContent>
+            </div>
+            <div>
               {projectsLoading ? (
                 <div className="text-center py-6">
                   <p className="text-sm text-muted-foreground">Cargando proyectos...</p>
@@ -491,17 +485,15 @@ export default function Home() {
                   </Button>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </StatCard>
 
           {/* 3. Academia */}
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <GraduationCap className="w-5 h-5 text-accent" />
-                Academia
-              </CardTitle>
+          <StatCard className="hover:shadow-lg transition-shadow">
+            <div className="flex flex-row items-center justify-between mb-4">
+              <StatCardTitle>Academia</StatCardTitle>
               <Button
+                variant="ghost"
                 size="sm"
                 onClick={() => {
                   setSidebarLevel('learning');
@@ -510,8 +502,8 @@ export default function Home() {
               >
                 Ir a Academia
               </Button>
-            </CardHeader>
-            <CardContent>
+            </div>
+            <div>
               {latestCourse ? (
                 <div className="space-y-3">
                   <div className="p-3 rounded-lg bg-accent/5 border border-accent/20">
@@ -539,24 +531,22 @@ export default function Home() {
                   </p>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </StatCard>
 
           {/* 4. Comunidad / Feedback */}
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-accent" />
-                Comunidad
-              </CardTitle>
+          <StatCard className="hover:shadow-lg transition-shadow">
+            <div className="flex flex-row items-center justify-between mb-4">
+              <StatCardTitle>Comunidad</StatCardTitle>
               <Button
+                variant="ghost"
                 size="sm"
                 onClick={() => window.open('https://discord.com/channels/868615664070443008', '_blank')}
               >
                 Ir a Discord
               </Button>
-            </CardHeader>
-            <CardContent>
+            </div>
+            <div>
               <div className="space-y-2">
                 <CustomButton
                   icon={MessageSquare}
@@ -574,8 +564,8 @@ export default function Home() {
                   onClick={() => window.open('https://discord.com/channels/868615664070443008/1137167434860732588', '_blank')}
                 />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </StatCard>
         </div>
       </div>
     </Layout>
