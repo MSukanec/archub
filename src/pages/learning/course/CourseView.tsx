@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useCoursePlayerStore } from '@/stores/coursePlayerStore';
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import CourseDataTab from './view/CourseDataTab';
+import CourseDashboardTab from './view/CourseDashboardTab';
 import CourseContentTab from './view/CourseContentTab';
 import CourseViewer from './view/CourseViewer';
 import CourseNotesTab from './view/CourseNotesTab';
@@ -224,7 +224,7 @@ export default function CourseView() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'Dashboard':
-        return <CourseDataTab courseId={course?.id} />;
+        return <CourseDashboardTab courseId={course?.id} />;
       case 'Contenido':
         return <CourseContentTab courseId={course?.id} />;
       case 'Lecciones':

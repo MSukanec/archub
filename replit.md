@@ -41,10 +41,12 @@ Preferred communication style: Simple, everyday language.
     - Course management (courses, modules, lessons) with Vimeo integration.
     - CourseSidebar for navigation and `useCourseSidebarStore` for state management.
     - Lesson progress tracking (completion, last position, auto-save, auto-complete).
-    - Advanced student note-taking system with summary notes and temporal markers.
+    - Advanced student note-taking system with summary notes and temporal markers (table-based interface).
+    - Course dashboard (CourseDashboardTab) with StatCard components showing progress, study time, notes/markers count.
     - Course pricing system with server-side validation and Mercado Pago integration.
     - Discord Integration widget for community engagement.
     - Deep-link navigation for lessons and tabs via URL parameters.
+    - Table-based tabs for Apuntes (summary notes) and Marcadores (temporal markers) with module grouping, filtering, and navigation.
 - **Notification System**: Real-time notifications with bell icon badge, powered by Supabase `notifications` and `user_notifications` tables, supporting read/unread states and click navigation.
 - **Admin Course Management**: Dedicated `AdminCourses` page with a three-tab interface (Dashboard, Alumnos, Cursos) for full CRUD operations on courses, modules, and lessons. Includes analytics, hierarchical tree view with drag & drop reordering, and enrollment management.
 - **Coupon System**: Discount coupon system for courses with database-driven validation, redemption, and Mercado Pago integration.
