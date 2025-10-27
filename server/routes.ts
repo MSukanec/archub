@@ -2453,10 +2453,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Execute all queries in parallel for maximum speed
       const [enrollmentsResult, progressResult, courseLessonsResult, recentCompletionsResult] = await Promise.all([
-        // Get enrollments with course slug
+        // Get enrollments with course slug and title
         authenticatedSupabase
           .from('course_enrollments')
-          .select('*, courses(slug)')
+          .select('*, courses(slug, title)')
           .eq('user_id', dbUser.id),
         
         // Get all progress
