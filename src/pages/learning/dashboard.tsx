@@ -1,9 +1,10 @@
 import { useEffect, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { GraduationCap, BookOpen, Clock, TrendingUp, Award, Flame, CheckCircle2 } from 'lucide-react'
+import { GraduationCap, BookOpen, Clock, Award, Flame, CheckCircle2 } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card'
 import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
@@ -18,6 +19,35 @@ import ProgressRing from '@/components/charts/courses/ProgressRing'
 import MiniBar from '@/components/charts/courses/MiniBar'
 import LineStreak from '@/components/charts/courses/LineStreak'
 
+interface DashboardData {
+  global: {
+    done_lessons_total: number
+    total_lessons_total: number
+    progress_pct: number
+  } | null
+  study: {
+    seconds_lifetime: number
+    seconds_this_month: number
+  }
+  activeDays: string[]
+  courses: Array<{
+    course_id: string
+    course_title: string
+    course_slug: string
+    progress_pct: number
+    done_lessons: number
+    total_lessons: number
+  }>
+  recentActivity: Array<{
+    type: string
+    when: string
+    lesson_title: string
+    module_title: string
+    course_title: string
+    course_slug: string
+  }>
+}
+
 export default function LearningDashboard() {
   const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore()
   const { data: userData } = useCurrentUser()
@@ -30,129 +60,42 @@ export default function LearningDashboard() {
     }
   }, [setSidebarContext, setSidebarLevel, sidebarLevel])
 
-  // Fetch all dashboard data from the server
-  const { data: dashboardData, isLoading } = useQuery<any>({
+  // Fetch optimized dashboard data
+  const { data: dashboardData, isLoading } = useQuery<DashboardData>({
     queryKey: ['/api/learning/dashboard'],
     queryFn: async () => {
-      if (!supabase) return null;
+      if (!supabase) return null
       
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return null;
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return null
 
       const response = await fetch('/api/learning/dashboard', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }
-      });
+      })
 
       if (!response.ok) {
-        console.error('Failed to fetch dashboard data:', await response.text());
-        return null;
+        console.error('Failed to fetch dashboard data:', await response.text())
+        return null
       }
       
-      const data = await response.json();
-      console.log('📊 Dashboard data received:', data);
-      return data;
+      return response.json()
     },
     enabled: !!supabase && !!userData
-  });
+  })
 
-  // Calculate derived data
-  const { enrollments = [], progress = [], courseLessons = [], recentCompletions = [] } = dashboardData || {}
+  const { global, study, activeDays = [], courses = [], recentActivity = [] } = dashboardData || {}
 
-  // Calculate global progress from enrollments and progress
-  const global = useMemo(() => {
-    if (!enrollments.length) return null;
-    
-    const courseIds = enrollments.map((e: any) => e.course_id);
-    const relevantLessons = courseLessons.filter((l: any) => 
-      courseIds.includes(l.course_modules?.course_id)
-    );
-    const total_lessons_total = relevantLessons.length;
-    const done_lessons_total = progress.filter((p: any) => 
-      p.is_completed && relevantLessons.some((l: any) => l.id === p.lesson_id)
-    ).length;
-    const progress_pct = total_lessons_total > 0 
-      ? Math.round((done_lessons_total / total_lessons_total) * 100) 
-      : 0;
-    
-    return { done_lessons_total, total_lessons_total, progress_pct };
-  }, [enrollments, courseLessons, progress]);
-
-  // Calculate course progress
-  const courses = useMemo(() => {
-    return enrollments.map((enrollment: any) => {
-      const courseId = enrollment.course_id;
-      const lessons = courseLessons.filter((l: any) => 
-        l.course_modules?.course_id === courseId
-      );
-      const total_lessons = lessons.length;
-      const done_lessons = progress.filter((p: any) => 
-        p.is_completed && lessons.some((l: any) => l.id === p.lesson_id)
-      ).length;
-      const progress_pct = total_lessons > 0 
-        ? Math.round((done_lessons / total_lessons) * 100) 
-        : 0;
-      
-      return {
-        course_id: courseId,
-        course_title: enrollment.courses?.title || 'Sin título',
-        course_slug: enrollment.course_slug || '',
-        progress_pct,
-        done_lessons,
-        total_lessons
-      };
-    });
-  }, [enrollments, courseLessons, progress]);
-
-  // Calculate study time from progress data
-  const study = useMemo(() => {
-    if (!progress.length) return { seconds_lifetime: 0, seconds_this_month: 0 };
-    
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    
-    let seconds_lifetime = 0;
-    let seconds_this_month = 0;
-    
-    progress.forEach((p: any) => {
-      const lastPos = p.last_position_sec || 0;
-      seconds_lifetime += lastPos;
-      
-      const updateDate = new Date(p.updated_at);
-      if (updateDate >= startOfMonth) {
-        seconds_this_month += lastPos;
-      }
-    });
-    
-    return { seconds_lifetime, seconds_this_month };
-  }, [progress]);
-
-  // Calculate active days from progress data
-  const days = useMemo(() => {
-    const cutoffDate = new Date(Date.now() - 60 * 86400000);
-    const daysSet = new Set<string>();
-    
-    progress.forEach((p: any) => {
-      const updateDate = new Date(p.updated_at);
-      if (updateDate >= cutoffDate) {
-        const day = updateDate.toISOString().slice(0, 10);
-        daysSet.add(day);
-      }
-    });
-    
-    return Array.from(daysSet).map(day => ({ day }));
-  }, [progress]);
-
-  const recent = recentCompletions || [];
-
+  // Calculate study hours
   const hoursData = useMemo(() => ([
     { name: 'Mes', value: Math.round((study?.seconds_this_month ?? 0) / 3600) },
     { name: 'Total', value: Math.round((study?.seconds_lifetime ?? 0) / 3600) }
   ]), [study])
 
+  // Calculate streak series for chart
   const streakSeries = useMemo(() => {
-    const set = new Set(days.map(d => d.day))
+    const set = new Set(activeDays)
     const last30: { day: string; active: number }[] = []
     const today = new Date()
     for (let i = 29; i >= 0; i--) {
@@ -161,8 +104,9 @@ export default function LearningDashboard() {
       last30.push({ day: key, active: set.has(key) ? 1 : 0 })
     }
     return last30
-  }, [days])
+  }, [activeDays])
 
+  // Get top 3 courses in progress
   const coursesSorted = useMemo(() => {
     return [...courses]
       .filter(c => c.progress_pct >= 0 && c.progress_pct < 100)
@@ -170,21 +114,21 @@ export default function LearningDashboard() {
       .slice(0, 3)
   }, [courses])
 
+  // Calculate current streak
   const currentStreak = useMemo(() => {
-    const sorted = [...days].sort((a, b) => b.day.localeCompare(a.day))
+    const sorted = [...activeDays].sort((a, b) => b.localeCompare(a))
     let streak = 0
-    const today = new Date().toISOString().slice(0, 10)
     
     for (let i = 0; i < sorted.length; i++) {
       const expectedDate = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10)
-      if (sorted[i]?.day === expectedDate) {
+      if (sorted[i] === expectedDate) {
         streak++
       } else {
         break
       }
     }
     return streak
-  }, [days])
+  }, [activeDays])
 
   const headerProps = {
     title: "Dashboard de Capacitaciones",
@@ -195,17 +139,9 @@ export default function LearningDashboard() {
     return (
       <Layout headerProps={headerProps} wide>
         <div className="space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map(i => (
-              <Card key={i}>
-                <CardHeader>
-                  <Skeleton className="h-6 w-32" />
-                  <Skeleton className="h-4 w-24 mt-2" />
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-32 w-full" />
-                </CardContent>
-              </Card>
+              <Skeleton key={i} className="h-48" />
             ))}
           </div>
         </div>
@@ -236,72 +172,54 @@ export default function LearningDashboard() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {/* Main Dashboard Grid - 4 equal cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        {/* Main Dashboard Grid - 4 cards using StatCard */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Card 1: Progress Ring */}
-          <Card className="flex flex-col">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <TrendingUp className="h-4 w-4" style={{ color: 'var(--accent)' }} />
-                Progreso General
-              </CardTitle>
-              <CardDescription data-testid="text-lessons-completed">
+          <StatCard className="flex flex-col">
+            <div className="pb-3">
+              <StatCardTitle>Progreso General</StatCardTitle>
+              <StatCardMeta data-testid="text-lessons-completed">
                 {global.done_lessons_total}/{global.total_lessons_total} lecciones
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 flex items-center justify-center">
+              </StatCardMeta>
+            </div>
+            <div className="flex-1 flex items-center justify-center">
               <ProgressRing value={global.progress_pct} />
-            </CardContent>
-          </Card>
+            </div>
+          </StatCard>
 
           {/* Card 2: Study Hours */}
-          <Card className="flex flex-col">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Clock className="h-4 w-4" style={{ color: 'var(--accent)' }} />
-                Horas de Estudio
-              </CardTitle>
-              <CardDescription>
-                Este mes y total
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 flex items-center justify-center">
+          <StatCard className="flex flex-col">
+            <div className="pb-3">
+              <StatCardTitle>Horas de Estudio</StatCardTitle>
+              <StatCardMeta>Este mes y total</StatCardMeta>
+            </div>
+            <div className="flex-1 flex items-center justify-center">
               <MiniBar data={hoursData} />
-            </CardContent>
-          </Card>
+            </div>
+          </StatCard>
 
           {/* Card 3: Activity Streak */}
-          <Card className="flex flex-col">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Flame className="h-4 w-4" style={{ color: 'var(--accent)' }} />
-                Racha de Actividad
-              </CardTitle>
-              <CardDescription>
-                Últimos 30 días
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 flex items-center justify-center">
+          <StatCard className="flex flex-col">
+            <div className="pb-3">
+              <StatCardTitle>Racha de Actividad</StatCardTitle>
+              <StatCardMeta>Últimos 30 días</StatCardMeta>
+            </div>
+            <div className="flex-1 flex items-center justify-center">
               <LineStreak data={streakSeries} />
-            </CardContent>
-          </Card>
+            </div>
+          </StatCard>
 
           {/* Card 4: Active Courses & Current Streak */}
-          <Card className="flex flex-col">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <BookOpen className="h-4 w-4" style={{ color: 'var(--accent)' }} />
-                Cursos Activos
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 space-y-6">
+          <StatCard className="flex flex-col">
+            <div className="pb-3">
+              <StatCardTitle>Cursos Activos</StatCardTitle>
+            </div>
+            <div className="flex-1 space-y-6">
               <div>
-                <div className="text-4xl font-bold" style={{ color: 'var(--accent)' }} data-testid="text-active-courses-count">
+                <StatCardValue data-testid="text-active-courses-count">
                   {courses.length}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Cursos en los que estás inscrito
-                </p>
+                </StatCardValue>
+                <StatCardMeta>Cursos en los que estás inscrito</StatCardMeta>
               </div>
 
               <div className="pt-4 border-t">
@@ -316,8 +234,8 @@ export default function LearningDashboard() {
                   {currentStreak === 1 ? 'día consecutivo' : 'días consecutivos'}
                 </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </StatCard>
         </div>
 
         {/* Courses in Progress */}
@@ -379,9 +297,9 @@ export default function LearningDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {recent.length > 0 ? (
+            {recentActivity.length > 0 ? (
               <div className="space-y-3">
-                {recent.map((item: any, index: number) => (
+                {recentActivity.map((item, index) => (
                   <div key={index} className="flex items-start gap-3 text-sm pb-3 border-b last:border-0 last:pb-0" data-testid={`recent-activity-${index}`}>
                     <CheckCircle2 
                       className={`h-4 w-4 flex-shrink-0 mt-0.5 ${
