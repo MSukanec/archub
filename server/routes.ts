@@ -5,13 +5,29 @@ import { createClient } from '@supabase/supabase-js';
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error("Supabase credentials are not set");
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error("Supabase URL and ANON KEY are required");
 }
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+// Public client for general queries (with RLS)
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Admin client for admin operations (bypasses RLS)
+// This will be undefined if SUPABASE_SERVICE_ROLE_KEY is not set
+const adminSupabase = supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : undefined;
+
+// Helper to get admin client or throw error
+function getAdminClient() {
+  if (!adminSupabase) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY is not configured. Admin operations require service role key.');
+  }
+  return adminSupabase;
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -3085,7 +3101,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error });
       }
       
-      const { data: courses, error: coursesError } = await supabase
+      const adminClient = getAdminClient();
+      const { data: courses, error: coursesError } = await adminClient
         .from('courses')
         .select('*')
         .order('created_at', { ascending: false });
@@ -3115,9 +3132,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error });
       }
       
+      const adminClient = getAdminClient();
       const { id } = req.params;
       
-      const { data: course, error: courseError } = await supabase
+      const { data: course, error: courseError } = await adminClient
         .from('courses')
         .select('*')
         .eq('id', id)
@@ -3148,10 +3166,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error });
       }
       
+      const adminClient = getAdminClient();
       const { id } = req.params;
       const updates = req.body;
       
-      const { data: course, error: courseError } = await supabase
+      const { data: course, error: courseError } = await adminClient
         .from('courses')
         .update(updates)
         .eq('id', id)
@@ -3183,9 +3202,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error });
       }
       
+      const adminClient = getAdminClient();
       const { id } = req.params;
       
-      const { error: courseError } = await supabase
+      const { error: courseError } = await adminClient
         .from('courses')
         .delete()
         .eq('id', id);
@@ -3215,9 +3235,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error });
       }
       
+      const adminClient = getAdminClient();
       const { course_id } = req.query;
       
-      let query = supabase
+      let query = adminClient
         .from('course_modules')
         .select('*')
         .order('sort_index', { ascending: true });
@@ -3253,10 +3274,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error });
       }
       
+      const adminClient = getAdminClient();
       const { id } = req.params;
       const updates = req.body;
       
-      const { data: module, error: moduleError } = await supabase
+      const { data: module, error: moduleError } = await adminClient
         .from('course_modules')
         .update(updates)
         .eq('id', id)
@@ -3288,9 +3310,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error });
       }
       
+      const adminClient = getAdminClient();
       const { module_id } = req.query;
       
-      let query = supabase
+      let query = adminClient
         .from('course_lessons')
         .select('*')
         .order('sort_index', { ascending: true });
@@ -3326,10 +3349,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error });
       }
       
+      const adminClient = getAdminClient();
       const { id } = req.params;
       const updates = req.body;
       
-      const { data: lesson, error: lessonError } = await supabase
+      const { data: lesson, error: lessonError } = await adminClient
         .from('course_lessons')
         .update(updates)
         .eq('id', id)
@@ -3361,10 +3385,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error });
       }
       
+      const adminClient = getAdminClient();
       const { course_id } = req.query;
       
       // Fetch enrollments with users and courses
-      let query = supabase
+      let query = adminClient
         .from('course_enrollments')
         .select(`
           *,
@@ -3388,7 +3413,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const enrollmentsWithProgress = await Promise.all(
         (enrollments || []).map(async (enrollment) => {
           // Get all modules for the course
-          const { data: modules } = await supabase
+          const { data: modules } = await adminClient
             .from('course_modules')
             .select('id')
             .eq('course_id', enrollment.course_id);
@@ -3403,7 +3428,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const moduleIds = modules.map(m => m.id);
           
           // Get all lessons for these modules
-          const { data: lessons } = await supabase
+          const { data: lessons } = await adminClient
             .from('course_lessons')
             .select('id')
             .in('module_id', moduleIds);
@@ -3419,7 +3444,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const total_lessons = lessons.length;
           
           // Get completed lessons for this user
-          const { data: progressData } = await supabase
+          const { data: progressData } = await adminClient
             .from('course_lesson_progress')
             .select('id, is_completed')
             .eq('user_id', enrollment.user_id)
@@ -3462,9 +3487,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error });
       }
       
+      const adminClient = getAdminClient();
       const { id } = req.params;
       
-      const { error: deleteError } = await supabase
+      const { error: deleteError } = await adminClient
         .from('course_enrollments')
         .delete()
         .eq('id', id);
@@ -3494,6 +3520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error });
       }
       
+      const adminClient = getAdminClient();
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
@@ -3516,19 +3543,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         allProgressResult
       ] = await Promise.all([
         // Total courses
-        supabase.from('courses').select('id', { count: 'exact', head: true }),
+        adminClient.from('courses').select('id', { count: 'exact', head: true }),
         
         // Active courses
-        supabase.from('courses').select('id', { count: 'exact', head: true }).eq('is_active', true),
+        adminClient.from('courses').select('id', { count: 'exact', head: true }).eq('is_active', true),
         
         // Total enrollments
-        supabase.from('course_enrollments').select('id', { count: 'exact', head: true }),
+        adminClient.from('course_enrollments').select('id', { count: 'exact', head: true }),
         
         // Active enrollments
-        supabase.from('course_enrollments').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+        adminClient.from('course_enrollments').select('id', { count: 'exact', head: true }).eq('status', 'active'),
         
         // Expiring this month
-        supabase.from('course_enrollments')
+        adminClient.from('course_enrollments')
           .select('id', { count: 'exact', head: true })
           .eq('status', 'active')
           .not('expires_at', 'is', null)
@@ -3536,7 +3563,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .lte('expires_at', endOfMonth.toISOString()),
         
         // Expiring next month
-        supabase.from('course_enrollments')
+        adminClient.from('course_enrollments')
           .select('id', { count: 'exact', head: true })
           .eq('status', 'active')
           .not('expires_at', 'is', null)
@@ -3544,13 +3571,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .lte('expires_at', endOfNextMonth.toISOString()),
         
         // Recent enrollments (last 10)
-        supabase.from('course_enrollments')
+        adminClient.from('course_enrollments')
           .select('*, users(full_name, email), courses(title, slug)')
           .order('started_at', { ascending: false })
           .limit(10),
         
         // Expiring in next 30 days
-        supabase.from('course_enrollments')
+        adminClient.from('course_enrollments')
           .select('*, users(full_name, email), courses(title, slug)')
           .eq('status', 'active')
           .not('expires_at', 'is', null)
@@ -3560,7 +3587,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .limit(10),
         
         // All lesson progress for avg completion rate
-        supabase.from('course_lesson_progress')
+        adminClient.from('course_lesson_progress')
           .select('progress_pct')
       ]);
       
