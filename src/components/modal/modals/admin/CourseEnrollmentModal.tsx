@@ -156,7 +156,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['course-enrollments'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/enrollments'] });
       toast({
         title: "Inscripción creada",
         description: "El alumno ha sido inscrito exitosamente"
@@ -190,7 +190,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['course-enrollments'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/enrollments'] });
       toast({
         title: "Inscripción actualizada",
         description: "La inscripción ha sido actualizada exitosamente"
