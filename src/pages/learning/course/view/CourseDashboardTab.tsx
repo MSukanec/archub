@@ -2,9 +2,11 @@ import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card'
-import { BookOpen, CheckCircle, Clock, FileText, Bookmark } from 'lucide-react'
+import { BookOpen, CheckCircle, Clock, FileText, Bookmark, Megaphone, Info } from 'lucide-react'
 import { DiscordWidget } from '@/components/learning/DiscordWidget'
 import { useLocation, useParams } from 'wouter'
+import { Card, CardContent } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 interface CourseDashboardTabProps {
   courseId?: string;
@@ -271,8 +273,25 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
 
   return (
     <div className="space-y-6">
+      {/* Instructor Announcement Card */}
+      <Card className="border-accent/20 bg-accent/5">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 mt-1">
+              <Megaphone className="h-5 w-5 text-accent" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-sm mb-1">Anuncios del Instructor</h3>
+              <p className="text-sm text-muted-foreground">
+                No hay anuncios en este momento
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Top Row - Main Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Progress Card - No clickeable */}
         <StatCard>
           <StatCardTitle showArrow={false}>Progreso Total</StatCardTitle>
@@ -314,7 +333,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       </div>
 
       {/* Second Row - Additional Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Markers Card - Navega a Marcadores */}
         <StatCard onCardClick={() => navigateToTab('Marcadores')}>
           <StatCardTitle>Marcadores</StatCardTitle>
