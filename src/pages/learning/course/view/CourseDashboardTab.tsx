@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { queryClient } from '@/lib/queryClient'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui/stat-card'
-import { BookOpen, CheckCircle, Clock, FileText, Bookmark, Megaphone, Info } from 'lucide-react'
+import { BookOpen, CheckCircle, Clock, FileText, Bookmark, Megaphone, Info, PlayCircle } from 'lucide-react'
 import { DiscordWidget } from '@/components/learning/DiscordWidget'
 import { useLocation, useParams } from 'wouter'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,6 +13,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { ProgressChart } from '@/components/charts/courses/ProgressChart'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 
 interface CourseDashboardTabProps {
   courseId?: string;
@@ -35,6 +37,20 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       navigate(`/learning/courses/${courseSlug}?tab=${encodeURIComponent(tab)}`);
     }
   };
+
+  // Invalidate queries when dashboard mounts to ensure fresh data
+  useEffect(() => {
+    if (courseId) {
+      queryClient.invalidateQueries({ queryKey: ['course-progress', courseId] });
+      queryClient.invalidateQueries({ queryKey: ['study-time', courseId] });
+      queryClient.invalidateQueries({ queryKey: ['recent-notes', courseId] });
+      queryClient.invalidateQueries({ queryKey: ['recent-markers', courseId] });
+      queryClient.invalidateQueries({ queryKey: ['course-duration', courseId] });
+      queryClient.invalidateQueries({ queryKey: ['course-enrollment', courseId] });
+      queryClient.invalidateQueries({ queryKey: ['progress-history', courseId] });
+      queryClient.invalidateQueries({ queryKey: ['monthly-study-time'] });
+    }
+  }, [courseId]);
 
   // Get course progress using the v_course_progress view
   const { data: courseProgress } = useQuery({
@@ -644,9 +660,27 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
           <StatCardTitle>Apuntes Creados</StatCardTitle>
           <StatCardContent>
             {recentNotes.length === 0 ? (
-              <div className="text-center py-8">
-                <FileText className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">No hay apuntes aún</p>
+              <div className="py-4">
+                <EmptyState
+                  icon={<FileText />}
+                  title="No hay apuntes aún"
+                  description="Comienza a tomar apuntes durante tus lecciones"
+                  action={
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigateToTab('Lecciones');
+                      }}
+                      data-testid="button-go-to-lessons-notes"
+                    >
+                      <PlayCircle className="mr-2 h-4 w-4" />
+                      Ir a Lecciones
+                    </Button>
+                  }
+                  className="min-h-0 md:min-h-0"
+                />
               </div>
             ) : (
               <>
@@ -706,9 +740,27 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
           <StatCardTitle>Marcadores Creados</StatCardTitle>
           <StatCardContent>
             {recentMarkers.length === 0 ? (
-              <div className="text-center py-8">
-                <Bookmark className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">No hay marcadores aún</p>
+              <div className="py-4">
+                <EmptyState
+                  icon={<Bookmark />}
+                  title="No hay marcadores aún"
+                  description="Crea marcadores en momentos clave de tus lecciones"
+                  action={
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigateToTab('Lecciones');
+                      }}
+                      data-testid="button-go-to-lessons-markers"
+                    >
+                      <PlayCircle className="mr-2 h-4 w-4" />
+                      Ir a Lecciones
+                    </Button>
+                  }
+                  className="min-h-0 md:min-h-0"
+                />
               </div>
             ) : (
               <>
