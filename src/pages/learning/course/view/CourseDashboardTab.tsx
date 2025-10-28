@@ -235,22 +235,74 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     enabled: !!courseId && !!supabase
   });
 
+  // Get total course duration (sum of all lesson durations)
+  const { data: courseDuration } = useQuery({
+    queryKey: ['course-duration', courseId],
+    queryFn: async () => {
+      if (!courseId || !supabase) return { total_seconds: 0 };
+      
+      // Get all modules for this course
+      const { data: courseModules } = await supabase
+        .from('course_modules')
+        .select('id')
+        .eq('course_id', courseId);
+
+      if (!courseModules || courseModules.length === 0) return { total_seconds: 0 };
+
+      const moduleIds = courseModules.map(m => m.id);
+
+      // Get all lessons for these modules with their durations
+      const { data: courseLessons, error } = await supabase
+        .from('course_lessons')
+        .select('duration_sec')
+        .in('module_id', moduleIds);
+
+      if (error) {
+        console.error('Error fetching course duration:', error);
+        return { total_seconds: 0 };
+      }
+
+      if (!courseLessons || courseLessons.length === 0) return { total_seconds: 0 };
+
+      const totalSeconds = courseLessons.reduce((sum, lesson) => sum + (lesson.duration_sec || 0), 0);
+      
+      return { total_seconds: totalSeconds };
+    },
+    enabled: !!courseId && !!supabase
+  });
+
   // Calculate stats
   const stats = useMemo(() => {
     const progressPct = courseProgress?.progress_pct || 0;
     const doneLessons = courseProgress?.done_lessons || 0;
     const totalLessons = courseProgress?.total_lessons || 0;
     const totalSeconds = studyTime?.total_seconds || 0;
+    const courseTotalSeconds = courseDuration?.total_seconds || 0;
     
-    // Format study time
+    // Format study time (user's time spent)
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     
     let studyTimeFormatted = '';
     if (hours > 0) {
-      studyTimeFormatted = `${hours}h ${minutes}m`;
+      studyTimeFormatted = `${hours} HS ${minutes} MIN`;
+    } else if (minutes > 0) {
+      studyTimeFormatted = `${minutes} MIN`;
     } else {
-      studyTimeFormatted = `${minutes}m`;
+      studyTimeFormatted = `0 MIN`;
+    }
+
+    // Format course total duration
+    const courseHours = Math.floor(courseTotalSeconds / 3600);
+    const courseMinutes = Math.floor((courseTotalSeconds % 3600) / 60);
+    
+    let courseDurationFormatted = '';
+    if (courseHours > 0) {
+      courseDurationFormatted = `${courseHours} hs ${courseMinutes} min de contenido`;
+    } else if (courseMinutes > 0) {
+      courseDurationFormatted = `${courseMinutes} min de contenido`;
+    } else {
+      courseDurationFormatted = `sin contenido`;
     }
 
     return {
@@ -258,10 +310,11 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       doneLessons,
       totalLessons,
       studyTimeFormatted,
+      courseDurationFormatted,
       notesCount: notesCount || 0,
       markersCount: markersCount || 0
     };
-  }, [courseProgress, studyTime, notesCount, markersCount]);
+  }, [courseProgress, studyTime, courseDuration, notesCount, markersCount]);
 
   if (!courseId) {
     return (
@@ -301,6 +354,13 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
           </StatCardMeta>
         </StatCard>
 
+        {/* Study Time Card - No clickeable */}
+        <StatCard>
+          <StatCardTitle showArrow={false}>Tiempo de Estudio</StatCardTitle>
+          <StatCardValue>{stats.studyTimeFormatted}</StatCardValue>
+          <StatCardMeta>{stats.courseDurationFormatted}</StatCardMeta>
+        </StatCard>
+
         {/* Completed Lessons Card - Navega a Lecciones */}
         <StatCard onCardClick={() => navigateToTab('Lecciones')}>
           <StatCardTitle>Lecciones Completadas</StatCardTitle>
@@ -309,16 +369,6 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
             <CheckCircle className="h-8 w-8 text-green-500" />
           </StatCardValue>
           <StatCardMeta>de {stats.totalLessons} totales</StatCardMeta>
-        </StatCard>
-
-        {/* Study Time Card - No clickeable */}
-        <StatCard>
-          <StatCardTitle showArrow={false}>Tiempo de Estudio</StatCardTitle>
-          <StatCardValue className="flex items-center gap-3">
-            <Clock className="h-8 w-8 text-blue-500" />
-            <span className="text-3xl">{stats.studyTimeFormatted}</span>
-          </StatCardValue>
-          <StatCardMeta>en este curso</StatCardMeta>
         </StatCard>
 
         {/* Notes Card - Navega a Apuntes */}
