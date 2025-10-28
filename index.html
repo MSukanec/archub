@@ -7,22 +7,23 @@
     <title>Archub - Gestión de Construcción</title>
     <meta name="description" content="Plataforma moderna de gestión de construcción para arquitectos y constructores">
     <style>
-      /* Loader inicial que aparece antes de que React cargue (solo en rutas de checkout) */
+      /* Loader inicial que aparece INSTANTÁNEAMENTE antes de que React cargue */
       #initial-loader {
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
-        display: none; /* Oculto por defecto */
+        display: flex;
         align-items: center;
         justify-content: center;
         background: linear-gradient(to bottom, #ffffff, #f9fafb);
         z-index: 9999;
       }
       
-      #initial-loader.show {
-        display: flex;
+      /* Ocultar por defecto si no es ruta de checkout */
+      #initial-loader.hide {
+        display: none;
       }
       
       @media (prefers-color-scheme: dark) {
@@ -63,22 +64,23 @@
         }
       }
     </style>
+  </head>
+  <body>
+    <!-- Loader inicial - Visible INSTANTÁNEAMENTE en rutas de checkout -->
+    <div id="initial-loader">
+      <div class="spinner"></div>
+    </div>
+    
     <script>
-      // Mostrar loader solo en rutas de checkout/pago
+      // Ocultar loader si NO estamos en ruta de checkout/pago
       (function() {
         var path = window.location.pathname;
-        if (path.includes('/checkout/') || path.includes('/payment')) {
-          var loader = document.createElement('div');
-          loader.id = 'initial-loader';
-          loader.className = 'show';
-          loader.innerHTML = '<div class="spinner"></div>';
-          document.body.appendChild(loader);
+        var loader = document.getElementById('initial-loader');
+        if (!path.includes('/checkout/') && !path.includes('/payment')) {
+          loader.className = 'hide';
         }
       })();
     </script>
-  </head>
-  <body>
-    <!-- Loader se crea dinámicamente solo para rutas de checkout -->
     
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
