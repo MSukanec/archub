@@ -1,5 +1,5 @@
 import { Switch, Route } from "wouter";
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -8,190 +8,193 @@ import { useAuthStore } from "@/stores/authStore";
 import { ActionBarMobileProvider } from "@/components/layout/mobile/ActionBarMobileContext";
 import { AuthGuard } from "@/components/ui-custom/security/AuthGuard";
 import { AuthAdmin } from "@/components/ui-custom/security/AuthAdmin";
-import { ModalFactory } from "@/components/modal/form/ModalFactory";
-import { ProjectContextInitializer } from "@/components/navigation/ProjectContextInitializer";
-import { Loader2 } from "lucide-react";
 
-// Critical Pages - Loaded immediately (public + checkout)
+// Public Pages
 import Landing from "@/pages/public/Landing";
 import Login from "@/pages/public/Login";
 import Register from "@/pages/public/Register";
 import ForgotPassword from "@/pages/public/ForgotPassword";
+
+// Protected Pages
+
+
+import Projects from "@/pages/professional/projects/Projects";
+import ProjectView from "@/pages/professional/projects/ProjectView";
+
+
+
+
+
+
+import FinancesCapitalMovements from "@/pages/professional/capital/Capital";
+import OrganizationMovements from "@/pages/professional/movements/Movements";
+import { Clients } from "@/pages/professional/clients/Clients";
+import Project from "@/pages/professional/project/dashboard/Project";
+
+
+import Preferences from "@/pages/professional/preferences/Preferences";
+import ConstructionDashboard from "@/pages/professional/project/construction/ConstructionDashboard";
+import Logs from "@/pages/professional/project/construction/logs/Logs";
+import ConstructionPersonnel from "@/pages/professional/project/construction/ConstructionPersonnel";
+import Materials from "@/pages/professional/materials/Materials";
+import Budgets from "@/pages/professional/budgets/Budgets";
+import BudgetView from "@/pages/professional/budgets/BudgetView";
+
+
+import ConstructionSubcontracts from "@/pages/professional/project/construction/subcontracts/Subcontracts";
+import SubcontractView from "@/pages/professional/project/construction/subcontracts/SubcontractView";
+import ConstructionIndirects from "@/pages/professional/project/construction/indirects/Indirects";
+import Media from "@/pages/professional/media/Media";
+import Contacts from "@/pages/professional/contacts/Contacts";
+import Calendar from "@/pages/professional/calendar/Calendar";
+
+import OrganizationDashboard from "@/pages/professional/organization/OrganizationDashboard";
+
+import Profile from "@/pages/profile/Profile";
+
+import Onboarding from "@/pages/public/Onboarding";
+import SelectMode from "@/pages/public/SelectMode";
+import Activity from "@/pages/professional/organization/Activity";
+
+// Admin Pages
+import AdminCommunity from "@/pages/admin/community/AdminCommunity";
+import AdminCosts from "@/pages/admin/costs/AdminCosts";
+import AdminTasks from "@/pages/admin/tasks/AdminTasks";
+import AdminGeneral from "@/pages/admin/general/AdminGeneral";
+import AdminCourses from "@/pages/admin/courses/AdminCourses";
+import AdminCourseView from "@/pages/admin/courses/AdminCourseView";
+
+// Provider Pages  
+import Products from "@/pages/providers/products/Products";
+
+// Analysis Pages
+import Analysis from "@/pages/professional/analysis/Analysis";
+import TaskView from "@/pages/professional/analysis/TaskView";
+import MaterialsView from "@/pages/professional/analysis/material-costs/MaterialsView";
+import GeneralCosts from "@/pages/professional/finances/general-costs/GeneralCosts";
+
+// Learning Pages
+import LearningDashboard from "@/pages/learning/dashboard/LearningDashboard";
+import CourseList from "@/pages/learning/courses/CourseList";
+import CourseView from "@/pages/learning/courses/CourseView";
 import PaymentReturn from "@/pages/learning/PaymentReturn";
 import PayPalReturn from "@/pages/checkout/paypal/PayPalReturn";
 import PayPalCancel from "@/pages/checkout/paypal/PayPalCancel";
-import NotFound from "@/pages/public/NotFound";
-
-// Lazy-loaded Pages - Load on demand (reduces initial bundle)
-const Onboarding = lazy(() => import("@/pages/public/Onboarding"));
-const SelectMode = lazy(() => import("@/pages/public/SelectMode"));
-const Home = lazy(() => import("@/pages/Home"));
-
-// Professional Pages
-const Projects = lazy(() => import("@/pages/professional/projects/Projects"));
-const ProjectView = lazy(() => import("@/pages/professional/projects/ProjectView"));
-const FinancesCapitalMovements = lazy(() => import("@/pages/professional/capital/Capital"));
-const OrganizationMovements = lazy(() => import("@/pages/professional/movements/Movements"));
-const Clients = lazy(() => import("@/pages/professional/clients/Clients").then(m => ({ default: m.Clients })));
-const Project = lazy(() => import("@/pages/professional/project/dashboard/Project"));
-const Preferences = lazy(() => import("@/pages/professional/preferences/Preferences"));
-const ConstructionDashboard = lazy(() => import("@/pages/professional/project/construction/ConstructionDashboard"));
-const Logs = lazy(() => import("@/pages/professional/project/construction/logs/Logs"));
-const ConstructionPersonnel = lazy(() => import("@/pages/professional/project/construction/ConstructionPersonnel"));
-const Materials = lazy(() => import("@/pages/professional/materials/Materials"));
-const Budgets = lazy(() => import("@/pages/professional/budgets/Budgets"));
-const BudgetView = lazy(() => import("@/pages/professional/budgets/BudgetView"));
-const ConstructionSubcontracts = lazy(() => import("@/pages/professional/project/construction/subcontracts/Subcontracts"));
-const SubcontractView = lazy(() => import("@/pages/professional/project/construction/subcontracts/SubcontractView"));
-const ConstructionIndirects = lazy(() => import("@/pages/professional/project/construction/indirects/Indirects"));
-const Media = lazy(() => import("@/pages/professional/media/Media"));
-const Contacts = lazy(() => import("@/pages/professional/contacts/Contacts"));
-const Calendar = lazy(() => import("@/pages/professional/calendar/Calendar"));
-const OrganizationDashboard = lazy(() => import("@/pages/professional/organization/OrganizationDashboard"));
-const Profile = lazy(() => import("@/pages/profile/Profile"));
-const Activity = lazy(() => import("@/pages/professional/organization/Activity"));
-
-// Admin Pages
-const AdminCommunity = lazy(() => import("@/pages/admin/community/AdminCommunity"));
-const AdminCosts = lazy(() => import("@/pages/admin/costs/AdminCosts"));
-const AdminTasks = lazy(() => import("@/pages/admin/tasks/AdminTasks"));
-const AdminGeneral = lazy(() => import("@/pages/admin/general/AdminGeneral"));
-const AdminCourses = lazy(() => import("@/pages/admin/courses/AdminCourses"));
-const AdminCourseView = lazy(() => import("@/pages/admin/courses/AdminCourseView"));
-
-// Provider Pages
-const Products = lazy(() => import("@/pages/providers/products/Products"));
-
-// Analysis Pages
-const Analysis = lazy(() => import("@/pages/professional/analysis/Analysis"));
-const TaskView = lazy(() => import("@/pages/professional/analysis/TaskView"));
-const MaterialsView = lazy(() => import("@/pages/professional/analysis/material-costs/MaterialsView"));
-const GeneralCosts = lazy(() => import("@/pages/professional/finances/general-costs/GeneralCosts"));
-
-// Learning Pages
-const LearningDashboard = lazy(() => import("@/pages/learning/dashboard/LearningDashboard"));
-const CourseList = lazy(() => import("@/pages/learning/courses/CourseList"));
-const CourseView = lazy(() => import("@/pages/learning/courses/CourseView"));
 
 // Notifications
-const Notifications = lazy(() => import("@/pages/Notifications"));
+import Notifications from "@/pages/Notifications";
 
-// Loading fallback component
-function LoadingPage() {
-  return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="flex flex-col items-center gap-3">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">Cargando...</p>
-      </div>
-    </div>
-  );
-}
+// Home
+import Home from "@/pages/Home";
 
-// Wrapper for lazy components to handle Suspense per route
-function LazyRoute({ component: Component }: { component: React.ComponentType<any> }) {
-  return (
-    <Suspense fallback={<LoadingPage />}>
-      <Component />
-    </Suspense>
-  );
-}
+
+
+
+
+
+
+
+import NotFound from "@/pages/public/NotFound";
+import { ModalFactory } from "@/components/modal/form/ModalFactory";
+import { ProjectContextInitializer } from "@/components/navigation/ProjectContextInitializer";
 
 function Router() {
   return (
     <AuthGuard>
       <Switch>
-        {/* Public Routes - No lazy loading */}
+        {/* Public Routes */}
         <Route path="/" component={Landing} />
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
         <Route path="/forgot-password" component={ForgotPassword} />
 
-        {/* Checkout Routes - No lazy loading (critical) */}
+        {/* Onboarding and Mode Selection Routes */}
+        <Route path="/onboarding" component={Onboarding} />
+        <Route path="/select-mode" component={SelectMode} />
+
+        {/* Home - Main landing page after onboarding */}
+        <Route path="/home" component={Home} />
+
+        {/* Main Dashboard - Independent dashboard */}
+        <Route path="/dashboard" component={OrganizationDashboard} />
+
+        {/* Organization Routes - ORDEN IMPORTANTE: rutas específicas primero */}
+        <Route path="/organization/dashboard" component={OrganizationDashboard} />
+        <Route path="/organization/preferences" component={Preferences} />
+        <Route path="/organization/activity" component={Activity} />
+        <Route path="/contacts" component={Contacts} />
+        <Route path="/notifications" component={Notifications} />
+        <Route path="/organization/projects" component={Projects} />
+        <Route path="/finances/general-costs" component={GeneralCosts} />
+        
+        <Route path="/organization" component={OrganizationDashboard} />
+
+        <Route path="/calendar" component={Calendar} />
+
+
+        {/* Projects Routes */}
+        <Route path="/projects" component={Projects} />
+        <Route path="/projects/:id" component={ProjectView} />
+
+        {/* General Routes */}
+        <Route path="/project/dashboard" component={Project} />
+        <Route path="/clients" component={Clients} />
+        <Route path="/media" component={Media} />
+        <Route path="/budgets" component={Budgets} />
+        <Route path="/professional/budgets" component={Budgets} />
+        <Route path="/professional/budgets/view/:id" component={BudgetView} />
+        
+
+
+
+
+
+
+
+        {/* Construction Routes */}
+        <Route path="/construction/dashboard" component={ConstructionDashboard} />
+
+
+        <Route path="/construction/subcontracts" component={ConstructionSubcontracts} />
+        <Route path="/construction/subcontracts/:id" component={SubcontractView} />
+        <Route path="/construction/indirects" component={ConstructionIndirects} />
+        <Route path="/construction/logs" component={Logs} />
+        <Route path="/construction/personnel" component={ConstructionPersonnel} />
+        <Route path="/construction/materials" component={Materials} />
+        <Route path="/analysis" component={Analysis} />
+        <Route path="/analysis/:id" component={TaskView} />
+        <Route path="/analysis/materials/:id" component={MaterialsView} />
+        
+        {/* Learning Routes */}
+        <Route path="/learning/dashboard" component={LearningDashboard} />
+        <Route path="/learning/courses" component={CourseList} />
+        <Route path="/learning/courses/:id" component={CourseView} />
         <Route path="/learning/retorno" component={PaymentReturn} />
         <Route path="/checkout/paypal/return" component={PayPalReturn} />
         <Route path="/checkout/paypal/cancel" component={PayPalCancel} />
 
-        {/* Onboarding and Mode Selection Routes - Lazy loaded */}
-        <Route path="/onboarding">{() => <LazyRoute component={Onboarding} />}</Route>
-        <Route path="/select-mode">{() => <LazyRoute component={SelectMode} />}</Route>
+        {/* Finances Routes */}
+        <Route path="/finances/dashboard" component={FinancesCapitalMovements} />
 
-        {/* Home - Main landing page after onboarding - Lazy loaded */}
-        <Route path="/home">{() => <LazyRoute component={Home} />}</Route>
-
-        {/* Main Dashboard - Independent dashboard - Lazy loaded */}
-        <Route path="/dashboard">{() => <LazyRoute component={OrganizationDashboard} />}</Route>
-
-        {/* Organization Routes - ORDEN IMPORTANTE: rutas específicas primero - Lazy loaded */}
-        <Route path="/organization/dashboard">{() => <LazyRoute component={OrganizationDashboard} />}</Route>
-        <Route path="/organization/preferences">{() => <LazyRoute component={Preferences} />}</Route>
-        <Route path="/organization/activity">{() => <LazyRoute component={Activity} />}</Route>
-        <Route path="/contacts">{() => <LazyRoute component={Contacts} />}</Route>
-        <Route path="/notifications">{() => <LazyRoute component={Notifications} />}</Route>
-        <Route path="/organization/projects">{() => <LazyRoute component={Projects} />}</Route>
-        <Route path="/finances/general-costs">{() => <LazyRoute component={GeneralCosts} />}</Route>
+        <Route path="/finances/capital" component={FinancesCapitalMovements} />
+        <Route path="/movements" component={OrganizationMovements} />
         
-        <Route path="/organization">{() => <LazyRoute component={OrganizationDashboard} />}</Route>
-
-        <Route path="/calendar">{() => <LazyRoute component={Calendar} />}</Route>
-
-
-        {/* Projects Routes - Lazy loaded */}
-        <Route path="/projects">{() => <LazyRoute component={Projects} />}</Route>
-        <Route path="/projects/:id">{() => <LazyRoute component={ProjectView} />}</Route>
-
-        {/* General Routes - Lazy loaded */}
-        <Route path="/project/dashboard">{() => <LazyRoute component={Project} />}</Route>
-        <Route path="/clients">{() => <LazyRoute component={Clients} />}</Route>
-        <Route path="/media">{() => <LazyRoute component={Media} />}</Route>
-        <Route path="/budgets">{() => <LazyRoute component={Budgets} />}</Route>
-        <Route path="/professional/budgets">{() => <LazyRoute component={Budgets} />}</Route>
-        <Route path="/professional/budgets/view/:id">{() => <LazyRoute component={BudgetView} />}</Route>
-        
+        {/* Duplicate General Routes for compatibility */}
+        <Route path="/project/dashboard" component={Project} />
+        <Route path="/clients" component={Clients} />
 
 
-
-
-
-
-
-        {/* Construction Routes - Lazy loaded */}
-        <Route path="/construction/dashboard">{() => <LazyRoute component={ConstructionDashboard} />}</Route>
-        <Route path="/construction/subcontracts">{() => <LazyRoute component={ConstructionSubcontracts} />}</Route>
-        <Route path="/construction/subcontracts/:id">{() => <LazyRoute component={SubcontractView} />}</Route>
-        <Route path="/construction/indirects">{() => <LazyRoute component={ConstructionIndirects} />}</Route>
-        <Route path="/construction/logs">{() => <LazyRoute component={Logs} />}</Route>
-        <Route path="/construction/personnel">{() => <LazyRoute component={ConstructionPersonnel} />}</Route>
-        <Route path="/construction/materials">{() => <LazyRoute component={Materials} />}</Route>
-        <Route path="/analysis">{() => <LazyRoute component={Analysis} />}</Route>
-        <Route path="/analysis/:id">{() => <LazyRoute component={TaskView} />}</Route>
-        <Route path="/analysis/materials/:id">{() => <LazyRoute component={MaterialsView} />}</Route>
-        
-        {/* Learning Routes - Lazy loaded */}
-        <Route path="/learning/dashboard">{() => <LazyRoute component={LearningDashboard} />}</Route>
-        <Route path="/learning/courses">{() => <LazyRoute component={CourseList} />}</Route>
-        <Route path="/learning/courses/:id">{() => <LazyRoute component={CourseView} />}</Route>
-
-        {/* Finances Routes - Lazy loaded */}
-        <Route path="/finances/dashboard">{() => <LazyRoute component={FinancesCapitalMovements} />}</Route>
-        <Route path="/finances/capital">{() => <LazyRoute component={FinancesCapitalMovements} />}</Route>
-        <Route path="/movements">{() => <LazyRoute component={OrganizationMovements} />}</Route>
-        
-        {/* Duplicate General Routes for compatibility - Lazy loaded */}
-        <Route path="/project/dashboard">{() => <LazyRoute component={Project} />}</Route>
-        <Route path="/clients">{() => <LazyRoute component={Clients} />}</Route>
-
-        {/* Profile Routes - ORDEN IMPORTANTE: rutas específicas primero - Lazy loaded */}
-        <Route path="/profile/organizations">{() => <LazyRoute component={Profile} />}</Route>
-        <Route path="/profile/preferences">{() => <LazyRoute component={Profile} />}</Route>
-        <Route path="/profile">{() => <LazyRoute component={Profile} />}</Route>
+        {/* Profile Routes - ORDEN IMPORTANTE: rutas específicas primero */}
+        <Route path="/profile/organizations" component={Profile} />
+        <Route path="/profile/preferences" component={Profile} />
+        <Route path="/profile" component={Profile} />
 
 
 
         {/* Admin Routes */}
         <Route path="/admin/community">
           <AuthAdmin>
-            <LazyRoute component={AdminCommunity} />
+            <AdminCommunity />
           </AuthAdmin>
         </Route>
 
@@ -206,44 +209,44 @@ function Router() {
 
         <Route path="/admin/costs">
           <AuthAdmin>
-            <LazyRoute component={AdminCosts} />
+            <AdminCosts />
           </AuthAdmin>
         </Route>
 
         <Route path="/admin/tasks">
           <AuthAdmin>
-            <LazyRoute component={AdminTasks} />
+            <AdminTasks />
           </AuthAdmin>
         </Route>
 
         <Route path="/admin/general">
           <AuthAdmin>
-            <LazyRoute component={AdminGeneral} />
+            <AdminGeneral />
           </AuthAdmin>
         </Route>
 
         <Route path="/admin/courses/:id">
           <AuthAdmin>
-            <LazyRoute component={AdminCourseView} />
+            <AdminCourseView />
           </AuthAdmin>
         </Route>
 
         <Route path="/admin/courses">
           <AuthAdmin>
-            <LazyRoute component={AdminCourses} />
+            <AdminCourses />
           </AuthAdmin>
         </Route>
 
         {/* Provider Routes */}
         <Route path="/proveedor/productos">
           <AuthAdmin>
-            <LazyRoute component={Products} />
+            <Products />
           </AuthAdmin>
         </Route>
         
         <Route path="/providers/products">
           <AuthAdmin>
-            <LazyRoute component={Products} />
+            <Products />
           </AuthAdmin>
         </Route>
 
@@ -251,7 +254,7 @@ function Router() {
 
 
 
-        {/* 404 Route - Must be last - No lazy loading */}
+        {/* 404 Route - Must be last */}
         <Route path="*" component={NotFound} />
       </Switch>
     </AuthGuard>
