@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { GraduationCap, BookOpen, Award, CheckCircle2 } from 'lucide-react'
+import { GraduationCap, BookOpen, Award, CheckCircle2, Sparkles, ArrowRight } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatCard, StatCardTitle } from '@/components/ui/stat-card'
@@ -229,6 +229,65 @@ export default function LearningDashboard() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
+        {/* Hero Section */}
+        <div 
+          className="relative h-[300px] md:h-[400px] rounded-xl overflow-hidden group"
+          data-testid="hero-archicad-course"
+        >
+          {/* Background Image */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+            style={{
+              backgroundImage: `url(/ArchiCADCourse.jpg)`
+            }}
+          />
+          
+          {/* Gradient Overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
+          
+          {/* Content */}
+          <div className="relative h-full flex flex-col justify-end p-6 md:p-10">
+            {/* Badge */}
+            <div className="mb-4">
+              <span 
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs md:text-sm font-medium backdrop-blur-sm border transition-all duration-300 hover:scale-105"
+                style={{
+                  backgroundColor: 'rgba(var(--accent-rgb), 0.15)',
+                  borderColor: 'rgba(var(--accent-rgb), 0.3)',
+                  color: 'var(--accent)'
+                }}
+                data-testid="badge-latest-course"
+              >
+                <Sparkles className="w-4 h-4" />
+                Último Curso Disponible
+              </span>
+            </div>
+            
+            {/* Title */}
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-3 md:mb-4 tracking-tight" data-testid="text-hero-title">
+              Master ArchiCAD Online
+            </h1>
+            
+            {/* Description */}
+            <p className="text-base md:text-lg text-white/90 max-w-2xl mb-6">
+              Domina las herramientas más avanzadas de diseño arquitectónico y modelado BIM
+            </p>
+            
+            {/* CTA Button */}
+            <div>
+              <Button
+                size="lg"
+                onClick={() => navigate('/learning/courses/master-archicad')}
+                className="group/btn"
+                data-testid="button-go-to-archicad"
+              >
+                <span>Ver Curso</span>
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
         {/* Main Dashboard Grid - 4 equal cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Card 1: Progress Ring */}
