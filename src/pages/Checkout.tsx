@@ -832,7 +832,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 }
