@@ -75,8 +75,8 @@ import GeneralCosts from "@/pages/professional/finances/general-costs/GeneralCos
 
 // Learning Pages
 import LearningDashboard from "@/pages/learning/dashboard/LearningDashboard";
-import CourseList from "@/pages/learning/course/CourseList";
-import CourseView from "@/pages/learning/course/CourseView";
+import CourseList from "@/pages/learning/courses/CourseList";
+import CourseView from "@/pages/learning/courses/CourseView";
 import PaymentReturn from "@/pages/learning/PaymentReturn";
 import PayPalReturn from "@/pages/checkout/paypal/PayPalReturn";
 import PayPalCancel from "@/pages/checkout/paypal/PayPalCancel";
