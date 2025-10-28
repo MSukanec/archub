@@ -119,17 +119,17 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     enabled: !!courseId && !!supabase
   });
 
-  // Get total notes count
-  const { data: notesCount } = useQuery({
-    queryKey: ['notes-count', courseId],
+  // Get latest 3 notes
+  const { data: recentNotes = [] } = useQuery({
+    queryKey: ['recent-notes', courseId],
     queryFn: async () => {
-      if (!courseId || !supabase) return 0;
+      if (!courseId || !supabase) return [];
       
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return 0;
+      if (!session) return [];
 
       const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!authUser?.email) return 0;
+      if (!authUser?.email) return [];
 
       const { data: userRecord } = await supabase
         .from('users')
@@ -137,7 +137,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         .eq('auth_id', authUser.id)
         .single();
 
-      if (!userRecord) return 0;
+      if (!userRecord) return [];
 
       // Get all modules for this course
       const { data: courseModules } = await supabase
@@ -145,7 +145,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         .select('id')
         .eq('course_id', courseId);
 
-      if (!courseModules || courseModules.length === 0) return 0;
+      if (!courseModules || courseModules.length === 0) return [];
 
       const moduleIds = courseModules.map(m => m.id);
 
@@ -155,39 +155,48 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         .select('id')
         .in('module_id', moduleIds);
 
-      if (!courseLessons || courseLessons.length === 0) return 0;
+      if (!courseLessons || courseLessons.length === 0) return [];
 
       const lessonIds = courseLessons.map(l => l.id);
 
-      // Count all notes for these lessons
-      const { count, error } = await supabase
+      // Get latest 3 notes with lesson info
+      const { data, error } = await supabase
         .from('course_lesson_notes')
-        .select('*', { count: 'exact', head: true })
+        .select(`
+          id,
+          body,
+          created_at,
+          course_lessons (
+            title
+          )
+        `)
         .eq('user_id', userRecord.id)
         .eq('note_type', 'summary')
-        .in('lesson_id', lessonIds);
+        .in('lesson_id', lessonIds)
+        .order('created_at', { ascending: false })
+        .limit(3);
 
       if (error) {
-        console.error('Error fetching notes count:', error);
-        return 0;
+        console.error('Error fetching recent notes:', error);
+        return [];
       }
 
-      return count || 0;
+      return data || [];
     },
     enabled: !!courseId && !!supabase
   });
 
-  // Get total markers count
-  const { data: markersCount } = useQuery({
-    queryKey: ['markers-count', courseId],
+  // Get latest 3 markers
+  const { data: recentMarkers = [] } = useQuery({
+    queryKey: ['recent-markers', courseId],
     queryFn: async () => {
-      if (!courseId || !supabase) return 0;
+      if (!courseId || !supabase) return [];
       
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return 0;
+      if (!session) return [];
 
       const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!authUser?.email) return 0;
+      if (!authUser?.email) return [];
 
       const { data: userRecord } = await supabase
         .from('users')
@@ -195,7 +204,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         .eq('auth_id', authUser.id)
         .single();
 
-      if (!userRecord) return 0;
+      if (!userRecord) return [];
 
       // Get all modules for this course
       const { data: courseModules } = await supabase
@@ -203,7 +212,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         .select('id')
         .eq('course_id', courseId);
 
-      if (!courseModules || courseModules.length === 0) return 0;
+      if (!courseModules || courseModules.length === 0) return [];
 
       const moduleIds = courseModules.map(m => m.id);
 
@@ -213,24 +222,34 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         .select('id')
         .in('module_id', moduleIds);
 
-      if (!courseLessons || courseLessons.length === 0) return 0;
+      if (!courseLessons || courseLessons.length === 0) return [];
 
       const lessonIds = courseLessons.map(l => l.id);
 
-      // Count all markers for these lessons
-      const { count, error } = await supabase
+      // Get latest 3 markers with lesson info
+      const { data, error } = await supabase
         .from('course_lesson_notes')
-        .select('*', { count: 'exact', head: true })
+        .select(`
+          id,
+          body,
+          time_sec,
+          created_at,
+          course_lessons (
+            title
+          )
+        `)
         .eq('user_id', userRecord.id)
         .eq('note_type', 'marker')
-        .in('lesson_id', lessonIds);
+        .in('lesson_id', lessonIds)
+        .order('created_at', { ascending: false })
+        .limit(3);
 
       if (error) {
-        console.error('Error fetching markers count:', error);
-        return 0;
+        console.error('Error fetching recent markers:', error);
+        return [];
       }
 
-      return count || 0;
+      return data || [];
     },
     enabled: !!courseId && !!supabase
   });
@@ -440,11 +459,9 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       courseDurationFormatted,
       monthTimeFormatted,
       subscriptionFormatted,
-      subscriptionMetaFormatted,
-      notesCount: notesCount || 0,
-      markersCount: markersCount || 0
+      subscriptionMetaFormatted
     };
-  }, [courseProgress, studyTime, courseDuration, enrollment, monthlyStudyTime, notesCount, markersCount]);
+  }, [courseProgress, studyTime, courseDuration, enrollment, monthlyStudyTime]);
 
   if (!courseId) {
     return (
@@ -507,26 +524,74 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       </div>
 
       {/* Second Row - Additional Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Notes Card - Navega a Apuntes */}
-        <StatCard onCardClick={() => navigateToTab('Apuntes')}>
-          <StatCardTitle>Apuntes Creados</StatCardTitle>
-          <StatCardValue className="flex items-center gap-3">
-            <FileText className="h-8 w-8 text-purple-500" />
-            <span className="text-3xl">{stats.notesCount}</span>
-          </StatCardValue>
-          <StatCardMeta>resúmenes de lecciones</StatCardMeta>
-        </StatCard>
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow border-border"
+          onClick={() => navigateToTab('Apuntes')}
+        >
+          <CardContent className="p-4">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
+              Apuntes Creados
+            </h3>
+            {recentNotes.length === 0 ? (
+              <div className="text-center py-8">
+                <FileText className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">No hay apuntes aún</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {recentNotes.map((note: any) => (
+                  <div 
+                    key={note.id} 
+                    className="p-2 rounded bg-muted/30 hover:bg-muted/50 transition-colors"
+                  >
+                    <p className="text-xs font-medium text-foreground truncate">
+                      {note.course_lessons?.title || 'Sin título'}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate mt-1">
+                      {note.body?.substring(0, 60)}...
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Markers Card - Navega a Marcadores */}
-        <StatCard onCardClick={() => navigateToTab('Marcadores')}>
-          <StatCardTitle>Marcadores</StatCardTitle>
-          <StatCardValue className="flex items-center gap-3">
-            <Bookmark className="h-8 w-8 text-orange-500" />
-            <span className="text-3xl">{stats.markersCount}</span>
-          </StatCardValue>
-          <StatCardMeta>momentos guardados</StatCardMeta>
-        </StatCard>
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow border-border"
+          onClick={() => navigateToTab('Marcadores')}
+        >
+          <CardContent className="p-4">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
+              Marcadores Creados
+            </h3>
+            {recentMarkers.length === 0 ? (
+              <div className="text-center py-8">
+                <Bookmark className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">No hay marcadores aún</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {recentMarkers.map((marker: any) => (
+                  <div 
+                    key={marker.id} 
+                    className="p-2 rounded bg-muted/30 hover:bg-muted/50 transition-colors"
+                  >
+                    <p className="text-xs font-medium text-foreground truncate">
+                      {marker.course_lessons?.title || 'Sin título'}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate mt-1">
+                      {marker.body?.substring(0, 60) || 'Sin descripción'}...
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Discord Widget */}
         <div>
