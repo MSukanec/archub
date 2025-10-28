@@ -3724,16 +3724,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Headers", "authorization, x-client-info, apikey, content-type");
     res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Max-Age", "86400");
 
     if (req.method === "OPTIONS") {
       return res.status(200).send("ok");
     }
 
     try {
-      const { order_id, amountUsd, description } = req.body || {};
+      const { user_id, course_slug, amount_usd, description = "Archub purchase" } = req.body || {};
       
-      if (!order_id) {
-        return res.status(400).json({ ok: false, error: "Falta 'order_id'" });
+      if (!user_id || !course_slug || !amount_usd) {
+        return res.status(400).json({ ok: false, error: "Missing user_id, course_slug or amount_usd" });
       }
 
       const cid = process.env.PAYPAL_CLIENT_ID;
@@ -3773,14 +3774,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ ok: false, error: "No se obtuvo 'access_token' de PayPal" });
       }
 
-      // 2) Create Order
-      const value = typeof amountUsd === "number" ? amountUsd.toFixed(2) : "169.00";
-      const desc = description || `Order ${order_id}`;
-
-      // Determine base URL dynamically from request headers
+      // 2) Create Order with custom_id in Base64
+      const metaB64 = Buffer.from(JSON.stringify({ type: "course", user_id, course_slug })).toString("base64");
+      
+      // Determine return URL base
       const protocol = req.headers['x-forwarded-proto'] || (req.secure ? 'https' : 'http');
       const host = req.headers['x-forwarded-host'] || req.headers['host'];
-      const baseUrl = `${protocol}://${host}`;
+      const returnBase = process.env.CHECKOUT_RETURN_URL_BASE || `${protocol}://${host}`;
 
       const createResp = await fetch(`${base}/v2/checkout/orders`, {
         method: "POST",
@@ -3792,15 +3792,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           intent: "CAPTURE",
           purchase_units: [
             {
-              amount: { currency_code: "USD", value },
-              description: desc,
+              amount: { currency_code: "USD", value: String(amount_usd) },
+              description,
+              custom_id: metaB64,
             },
           ],
           application_context: {
             brand_name: "Archub",
             user_action: "PAY_NOW",
-            return_url: `${baseUrl}/checkout/paypal/return`,
-            cancel_url: `${baseUrl}/checkout/paypal/cancel`,
+            return_url: `${returnBase}/checkout/paypal/return`,
+            cancel_url: `${returnBase}/checkout/paypal/cancel`,
           },
         }),
       });
@@ -3822,7 +3823,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      return res.status(200).json({ ok: true, paypal_order: createJson });
+      return res.status(200).json({ ok: true, order: createJson });
     } catch (e: any) {
       console.error("create-order ERROR:", e);
       return res.status(500).json({ ok: false, error: e?.message ?? "Unknown error" });
@@ -3835,6 +3836,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Headers", "authorization, x-client-info, apikey, content-type");
     res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Max-Age", "86400");
 
     if (req.method === "OPTIONS") {
       return res.status(200).send("ok");
@@ -3844,7 +3846,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { orderId } = req.body ?? {};
       
       if (!orderId) {
-        return res.status(400).json({ ok: false, error: "Falta 'orderId'" });
+        return res.status(400).json({ ok: false, error: "Missing orderId" });
       }
 
       const cid = process.env.PAYPAL_CLIENT_ID;
@@ -3885,7 +3887,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ ok: false, error: "No se obtuvo 'access_token' de PayPal" });
       }
 
-      // 2) Capture Order
+      // 2) Capture Order (NO escribe en DB, el webhook de Supabase lo hace)
       const capResp = await fetch(`${base}/v2/checkout/orders/${orderId}/capture`, {
         method: "POST",
         headers: {
@@ -3966,74 +3968,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // POST /api/paypal/webhook
+  // POST /api/paypal/webhook - DEPRECATED
+  // El webhook real está en Supabase Edge Function `paypal_webhook`
   app.post("/api/paypal/webhook", async (req, res) => {
-    try {
-      const webhookId = process.env.PAYPAL_WEBHOOK_ID;
-      
-      if (!webhookId) {
-        console.warn('PAYPAL_WEBHOOK_ID not configured, skipping signature verification');
-      } else {
-        const token = await getPayPalAccessToken();
-        const verifyRes = await fetch(`${getPayPalBaseUrl()}/v1/notifications/verify-webhook-signature`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            transmission_id: req.headers['paypal-transmission-id'],
-            transmission_time: req.headers['paypal-transmission-time'],
-            cert_url: req.headers['paypal-cert-url'],
-            auth_algo: req.headers['paypal-auth-algo'],
-            transmission_sig: req.headers['paypal-transmission-sig'],
-            webhook_id: webhookId,
-            webhook_event: req.body,
-          }),
-        });
-
-        const verifyJson = await verifyRes.json();
-        if (verifyJson.verification_status !== 'SUCCESS') {
-          console.error('PayPal webhook verification failed:', verifyJson);
-          return res.status(400).send('Verification failed');
-        }
-      }
-
-      const event = req.body;
-      console.log('PayPal webhook event:', event.event_type);
-
-      if (event.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
-        const capture = event.resource;
-        const captureId = capture.id;
-        const amount = capture.amount?.value;
-        const currency = capture.amount?.currency_code;
-        const customRaw = capture.custom_id;
-
-        let custom: { user_id?: string; course_slug?: string } = {};
-        if (customRaw) {
-          try { custom = JSON.parse(customRaw); } catch { }
-        }
-
-        await logPayPalPayment({
-          payment_id: captureId,
-          status: 'COMPLETED',
-          amount: String(amount || '0'),
-          currency: currency || 'USD',
-          user_id: custom.user_id,
-          course_slug: custom.course_slug,
-          raw: capture,
-        });
-
-        if (custom.user_id && custom.course_slug) {
-          await enrollUserInCourse(custom.user_id, custom.course_slug);
-        }
-      }
-
-      return res.status(200).send('OK');
-    } catch (error: any) {
-      console.error('PayPal webhook error:', error);
-      return res.status(500).send('Internal error');
-    }
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    return res.status(410).json({
+      ok: false,
+      message: "Este endpoint no se usa. El webhook válido es la Edge Function `paypal_webhook` en Supabase."
+    });
   });
 
   // ============================================

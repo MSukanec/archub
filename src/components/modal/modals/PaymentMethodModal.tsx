@@ -274,19 +274,26 @@ export default function PaymentMethodModal({
         throw new Error('No se pudo obtener el ID del usuario');
       }
 
-      // Generate unique order ID
-      const order_id = `${userRecord.id}_${courseSlug}_${Date.now()}`;
+      // Get final amount (with coupon if applied)
+      const finalAmount = appliedCoupon ? appliedCoupon.final_price : (priceData?.amount ? Number(priceData.amount) : undefined);
       
-      // Get amount from priceData if available
-      const amountUsd = priceData?.amount ? Number(priceData.amount) : undefined;
+      if (!finalAmount || finalAmount <= 0) {
+        throw new Error('Precio inválido');
+      }
+
       const courseTitle = (priceData as any)?.courses?.title || courseSlug;
       const description = `${courseTitle} - Suscripción Anual`;
 
-      // Create PayPal order using robust pattern
+      // Create PayPal order with new parameters
       const res = await fetch('/api/paypal/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order_id, amountUsd, description }),
+        body: JSON.stringify({ 
+          user_id: userRecord.id,
+          course_slug: courseSlug,
+          amount_usd: finalAmount,
+          description
+        }),
       });
 
       const text = await res.text();
@@ -302,7 +309,7 @@ export default function PaymentMethodModal({
         throw new Error(payload?.error || `HTTP ${res.status}`);
       }
 
-      const paypal_order = payload.paypal_order;
+      const paypal_order = payload.order;
       
       // Extract approval URL from PayPal order
       const approvalLink = paypal_order?.links?.find((link: any) => link.rel === 'approve');
