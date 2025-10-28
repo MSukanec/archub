@@ -3777,6 +3777,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const value = typeof amountUsd === "number" ? amountUsd.toFixed(2) : "169.00";
       const desc = description || `Order ${order_id}`;
 
+      // Determine base URL dynamically from request headers
+      const protocol = req.headers['x-forwarded-proto'] || (req.secure ? 'https' : 'http');
+      const host = req.headers['x-forwarded-host'] || req.headers['host'];
+      const baseUrl = `${protocol}://${host}`;
+
       const createResp = await fetch(`${base}/v2/checkout/orders`, {
         method: "POST",
         headers: {
@@ -3794,6 +3799,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           application_context: {
             brand_name: "Archub",
             user_action: "PAY_NOW",
+            return_url: `${baseUrl}/checkout/paypal/return`,
+            cancel_url: `${baseUrl}/checkout/paypal/cancel`,
           },
         }),
       });
@@ -3824,22 +3831,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // POST /api/paypal/capture-order
   app.post("/api/paypal/capture-order", async (req, res) => {
+    // CORS headers
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "authorization, x-client-info, apikey, content-type");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+
+    if (req.method === "OPTIONS") {
+      return res.status(200).send("ok");
+    }
+
     try {
-      const { orderID } = req.body || {};
+      const { orderId } = req.body ?? {};
       
-      if (!orderID) {
-        return res.status(400).json({ error: 'Falta orderID' });
+      if (!orderId) {
+        return res.status(400).json({ ok: false, error: "Falta 'orderId'" });
       }
 
-      const capture = await paypalFetch(`/v2/checkout/orders/${orderID}/capture`, {
-        method: 'POST',
-        body: '',
+      const cid = process.env.PAYPAL_CLIENT_ID;
+      const csec = process.env.PAYPAL_CLIENT_SECRET;
+      const env = (process.env.PAYPAL_ENV || "sandbox").toLowerCase();
+      const base =
+        process.env.PAYPAL_BASE_URL ||
+        (env === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com");
+
+      if (!cid || !csec) {
+        return res.status(500).json({ ok: false, error: "Faltan PAYPAL_CLIENT_ID o PAYPAL_CLIENT_SECRET" });
+      }
+
+      // 1) OAuth
+      const auth = Buffer.from(`${cid}:${csec}`).toString("base64");
+      const tokenResp = await fetch(`${base}/v1/oauth2/token`, {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${auth}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: "grant_type=client_credentials",
       });
 
-      return res.json(capture);
-    } catch (error: any) {
-      console.error('Error capturing PayPal order:', error);
-      return res.status(500).json({ error: error.message || 'Error capturando orden' });
+      const tokenText = await tokenResp.text();
+      if (!tokenResp.ok) {
+        console.error("PayPal OAuth error:", tokenResp.status, tokenText);
+        return res.status(500).json({
+          ok: false,
+          error: `OAuth fallo ${tokenResp.status}`,
+          details: tokenText,
+        });
+      }
+
+      const tokenJson = JSON.parse(tokenText);
+      const access_token = tokenJson.access_token;
+      if (!access_token) {
+        return res.status(500).json({ ok: false, error: "No se obtuvo 'access_token' de PayPal" });
+      }
+
+      // 2) Capture Order
+      const capResp = await fetch(`${base}/v2/checkout/orders/${orderId}/capture`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const capText = await capResp.text();
+      let capJson: any;
+      try {
+        capJson = JSON.parse(capText);
+      } catch {
+        capJson = { raw: capText };
+      }
+
+      if (!capResp.ok) {
+        console.error("PayPal Capture error:", capResp.status, capJson);
+        return res.status(500).json({
+          ok: false,
+          error: `Capture fallo ${capResp.status}`,
+          details: capJson,
+        });
+      }
+
+      return res.status(200).json({ ok: true, capture: capJson });
+    } catch (e: any) {
+      console.error("capture-order ERROR:", e);
+      return res.status(500).json({ ok: false, error: e?.message ?? "Unknown error" });
     }
   });
 
