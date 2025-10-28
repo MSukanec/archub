@@ -568,29 +568,37 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       </div>
 
       {/* Progress Chart */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold">Progreso</CardTitle>
-            <div className="flex gap-2">
-              {(['Semana', 'Mes', 'Trimestre', 'Año'] as Period[]).map((period) => (
-                <Button
-                  key={period}
-                  variant={selectedPeriod === period ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setSelectedPeriod(period)}
-                  className={selectedPeriod === period ? '' : 'text-muted-foreground'}
-                >
-                  {period}
-                </Button>
-              ))}
-            </div>
+      <div className="relative group">
+        {/* Header */}
+        <div className="flex flex-row items-start justify-between mb-4">
+          <div className="flex flex-col gap-2">
+            <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
+              Progreso
+            </p>
           </div>
-        </CardHeader>
-        <CardContent>
-          <ProgressChart progressData={progressHistory} selectedPeriod={selectedPeriod} />
-        </CardContent>
-      </Card>
+          
+          {/* Period selector buttons */}
+          <div className="flex items-center gap-2">
+            {(['Semana', 'Mes', 'Trimestre', 'Año'] as Period[]).map((period) => (
+              <button
+                key={period}
+                onClick={() => setSelectedPeriod(period)}
+                className={`px-3 py-1 text-sm rounded transition-colors ${
+                  selectedPeriod === period
+                    ? 'bg-[hsl(var(--accent-hsl))] text-background font-medium'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                data-testid={`button-period-${period.toLowerCase()}`}
+              >
+                {period}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        {/* Gráfico */}
+        <ProgressChart progressData={progressHistory} selectedPeriod={selectedPeriod} />
+      </div>
 
       {/* Top Row - Main Stats */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">

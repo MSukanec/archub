@@ -11,7 +11,7 @@ export function DiscordWidget() {
       data-testid="button-discord"
     >
       <SiDiscord className="h-5 w-5 mr-2" style={{ color: 'currentColor' }} />
-      Unirse a Discord
+      Ir a Discord
     </Button>
   );
 }

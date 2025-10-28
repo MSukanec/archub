@@ -283,7 +283,7 @@ export default function OrganizationDashboard() {
                     onClick={() => setSelectedPeriod(period)}
                     className={`px-3 py-1 text-sm rounded transition-colors ${
                       selectedPeriod === period
-                        ? 'bg-foreground text-background font-medium'
+                        ? 'bg-[hsl(var(--accent-hsl))] text-background font-medium'
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                     data-testid={`button-period-${period.toLowerCase()}`}
