@@ -12,7 +12,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.setHeader("Access-Control-Allow-Origin", "*").status(400).json({ ok:false, error:"Missing user_id, course_slug or amount_usd" });
     }
 
-    const metaB64 = Buffer.from(JSON.stringify({ type:"course", user_id, course_slug })).toString("base64");
     const base = paypalBase();
     const token = await getAccessToken();
 
@@ -22,7 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       purchase_units: [{
         amount: { currency_code: "USD", value: String(amount_usd) },
         description,
-        custom_id: metaB64,
+        custom_id: `user:${user_id};course:${course_slug}`,
       }],
       application_context: {
         brand_name: "Archub",

@@ -1,7 +1,7 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useState, useEffect, useMemo } from 'react'
 import { useCourses } from '@/hooks/use-courses'
-import { BookOpen } from 'lucide-react'
+import { BookOpen, Clock } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useQuery } from '@tanstack/react-query'
 import { useLocation } from 'wouter'
@@ -273,7 +273,8 @@ export default function CourseList() {
                         <span>{progress.total} {progress.total === 1 ? 'lección' : 'lecciones'}</span>
                       </div>
                       {progress.totalDurationSec > 0 && (
-                        <div className="flex items-center gap-2 pl-5">
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-3.5 w-3.5" />
                           <span>{durationText} de contenido</span>
                         </div>
                       )}

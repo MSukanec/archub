@@ -29,7 +29,7 @@ Preferred communication style: Simple, everyday language.
 - **Shared Schema**: `shared/schema.ts` for consistency between frontend and backend.
 - **Data Flow**: React Query for server state management, Express.js for REST APIs, Drizzle ORM for database operations with extensive cache invalidation.
 - **Database Views**: Exclusive use of database views for data fetching (e.g., `construction_tasks_view`).
-- **PayPal Integration**: Custom implementation with Vercel serverless endpoints (`/api/paypal/*`) and Supabase Edge Function webhook. Order creation includes Base64-encoded metadata in `custom_id` field. Payment capture handled by frontend, enrollment/logging handled by Supabase webhook.
+- **PayPal Integration**: Custom implementation with Vercel serverless endpoints (`/api/paypal/*`) and Supabase Edge Function webhook. Order creation includes simple text metadata in `custom_id` field with format `user:{user_id};course:{course_slug}`. Payment capture handled by frontend, enrollment/logging handled by Supabase webhook.
 
 ### Feature Specifications
 - **Home Page**: Landing page (/home) after onboarding with personalized welcome message and quick-access cards to main sections (Organización, Proyecto, Capacitaciones, Administración). Maintains sidebar in 'general' level for hub navigation.
