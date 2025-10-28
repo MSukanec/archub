@@ -3982,29 +3982,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // End PayPal Integration Routes
   // ============================================
 
-  // ============================================
-  // Mercado Pago Integration Routes
-  // ============================================
-
-  // Import Vercel Edge Function handlers
-  const { vercelToExpress } = await import('./vercelAdapter');
-  const mpCreatePreference = await import('../api/mp/create-preference');
-
-  // POST /api/mp/create-preference
-  app.post("/api/mp/create-preference", vercelToExpress(mpCreatePreference.default));
-
-  // POST /api/mp/webhook
-  // Note: webhook is handled by Vercel serverless function in production
-  // In development, you can test locally but won't receive real MP notifications
-  app.post("/api/mp/webhook", async (req, res) => {
-    console.log("MP Webhook called (dev mode):", req.body);
-    res.status(200).json({ ok: true, message: "Webhook received in dev mode" });
-  });
-
-  // ============================================
-  // End Mercado Pago Integration Routes
-  // ============================================
-
   // TEMPORARY DEBUG ENDPOINT
   app.get("/api/debug/user-info", async (req, res) => {
     try {
