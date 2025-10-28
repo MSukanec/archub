@@ -20,7 +20,7 @@ export function err(res: VercelResponse, message: string, status = 400, extra?: 
 }
 
 export function supabaseAdmin() {
-  const url = process.env.SUPABASE_URL!;
+  const url = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL!;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   return createClient(url, key, { auth: { persistSession: false } });
 }
@@ -30,8 +30,18 @@ function baseUrl() {
 }
 
 export async function getPayPalAccessToken() {
-  const id = process.env.PAYPAL_CLIENT_ID!;
-  const secret = process.env.PAYPAL_CLIENT_SECRET!;
+  const id = process.env.PAYPAL_CLIENT_ID;
+  const secret = process.env.PAYPAL_CLIENT_SECRET;
+  
+  if (!id || !secret) {
+    console.error('❌ PayPal credentials missing:', {
+      hasClientId: !!id,
+      hasClientSecret: !!secret,
+      env: process.env.NODE_ENV
+    });
+    throw new Error('PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET environment variables are required. Please configure them in your Vercel project settings.');
+  }
+  
   const tokenRes = await fetch(`${baseUrl()}/v1/oauth2/token`, {
     method: 'POST',
     headers: {
