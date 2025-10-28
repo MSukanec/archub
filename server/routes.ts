@@ -3720,49 +3720,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // POST /api/paypal/create-order
   app.post("/api/paypal/create-order", async (req, res) => {
+    // CORS headers
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "authorization, x-client-info, apikey, content-type");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+
+    if (req.method === "OPTIONS") {
+      return res.status(200).send("ok");
+    }
+
     try {
-      const { user_id, course_slug } = req.body || {};
+      const { order_id, amountUsd, description } = req.body || {};
       
-      if (!user_id || !course_slug) {
-        return res.status(400).json({ error: 'Faltan user_id o course_slug' });
+      if (!order_id) {
+        return res.status(400).json({ ok: false, error: "Falta 'order_id'" });
       }
 
-      const { currency, amount } = await getCoursePriceUSD(course_slug);
+      const cid = process.env.PAYPAL_CLIENT_ID;
+      const csec = process.env.PAYPAL_CLIENT_SECRET;
+      const env = (process.env.PAYPAL_ENV || "sandbox").toLowerCase();
+      const base =
+        process.env.PAYPAL_BASE_URL ||
+        (env === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com");
 
-      const custom = JSON.stringify({ user_id, course_slug });
+      if (!cid || !csec) {
+        return res.status(500).json({ ok: false, error: "Faltan PAYPAL_CLIENT_ID o PAYPAL_CLIENT_SECRET" });
+      }
 
-      const protocol = req.headers['x-forwarded-proto'] || (req.secure ? 'https' : 'http');
-      const host = req.headers['x-forwarded-host'] || req.headers['host'];
-      const baseUrl = `${protocol}://${host}`;
+      // 1) OAuth
+      const auth = Buffer.from(`${cid}:${csec}`).toString("base64");
+      const tokenResp = await fetch(`${base}/v1/oauth2/token`, {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${auth}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: "grant_type=client_credentials",
+      });
 
-      const order = await paypalFetch('/v2/checkout/orders', {
-        method: 'POST',
+      const tokenText = await tokenResp.text();
+      if (!tokenResp.ok) {
+        console.error("PayPal OAuth error:", tokenResp.status, tokenText);
+        return res.status(500).json({
+          ok: false,
+          error: `OAuth PayPal falló: ${tokenResp.status}`,
+          details: tokenText,
+        });
+      }
+      const tokenJson = JSON.parse(tokenText);
+      const access_token = tokenJson.access_token;
+      if (!access_token) {
+        return res.status(500).json({ ok: false, error: "No se obtuvo 'access_token' de PayPal" });
+      }
+
+      // 2) Create Order
+      const value = typeof amountUsd === "number" ? amountUsd.toFixed(2) : "169.00";
+      const desc = description || `Order ${order_id}`;
+
+      const createResp = await fetch(`${base}/v2/checkout/orders`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          intent: 'CAPTURE',
+          intent: "CAPTURE",
           purchase_units: [
             {
-              amount: { currency_code: currency, value: amount },
-              custom_id: custom,
+              amount: { currency_code: "USD", value },
+              description: desc,
             },
           ],
           application_context: {
-            shipping_preference: 'NO_SHIPPING',
-            user_action: 'PAY_NOW',
-            return_url: `${baseUrl}/api/paypal/capture-and-redirect?course_slug=${encodeURIComponent(course_slug)}`,
-            cancel_url: `${baseUrl}/learning/courses/${encodeURIComponent(course_slug)}`
+            brand_name: "Archub",
+            user_action: "PAY_NOW",
           },
         }),
       });
 
-      const approvalLink = order.links?.find((link: any) => link.rel === 'approve')?.href;
+      const createText = await createResp.text();
+      let createJson: any;
+      try {
+        createJson = JSON.parse(createText);
+      } catch {
+        createJson = { raw: createText };
+      }
 
-      return res.json({ 
-        orderID: order.id,
-        approvalUrl: approvalLink 
-      });
-    } catch (error: any) {
-      console.error('Error creating PayPal order:', error);
-      return res.status(500).json({ error: error.message || 'Error creando orden' });
+      if (!createResp.ok) {
+        console.error("PayPal Create Order error:", createResp.status, createJson);
+        return res.status(500).json({ 
+          ok: false, 
+          error: `CreateOrder falló: ${createResp.status}`, 
+          details: createJson 
+        });
+      }
+
+      return res.status(200).json({ ok: true, paypal_order: createJson });
+    } catch (e: any) {
+      console.error("create-order ERROR:", e);
+      return res.status(500).json({ ok: false, error: e?.message ?? "Unknown error" });
     }
   });
 
