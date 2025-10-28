@@ -4,11 +4,6 @@ import {
   Clock, 
   Calendar, 
   Users,
-  Hammer,
-  Package,
-  TrendingUp,
-  FileText,
-  ClipboardList,
   Calculator,
   BookOpen
 } from "lucide-react";
@@ -84,9 +79,9 @@ export default function ProjectDashboard() {
         <div className="flex items-center gap-4">
           {/* Project Avatar */}
           <div className="flex-shrink-0">
-            {currentProject.image_url ? (
+            {currentProject.project_data?.project_image_url ? (
               <img 
-                src={currentProject.image_url} 
+                src={currentProject.project_data.project_image_url} 
                 alt={currentProject.name}
                 className="w-16 h-16 rounded-full object-cover border-2"
                 style={{ borderColor: projectColor }}
@@ -126,12 +121,6 @@ export default function ProjectDashboard() {
                 <Calendar className="w-4 h-4" />
                 <span className="capitalize">{format(currentTime, "EEEE, d 'de' MMMM", { locale: es })}</span>
               </div>
-              {currentProject.location && (
-                <div className="flex items-center gap-1">
-                  <Building2 className="w-4 h-4" />
-                  <span>{currentProject.location}</span>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -215,16 +204,18 @@ export default function ProjectDashboard() {
       {/* Bitácora y Clientes Grid - 2 columnas */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Bitácora Card */}
-        <Card className="relative group cursor-pointer hover:shadow-md transition-shadow">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
+        <StatCard 
+          href="/construction/logs"
+          onClick={() => setSidebarLevel('project')}
+          data-testid="stat-card-bitacora"
+        >
+          <StatCardContent>
+            <div className="flex items-center gap-2 mb-3">
               <BookOpen className="w-5 h-5 text-accent" />
               <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
                 Bitácora de Obra
               </p>
             </div>
-          </CardHeader>
-          <CardContent>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Entradas totales</span>
@@ -242,20 +233,22 @@ export default function ProjectDashboard() {
             <p className="text-xs text-muted-foreground mt-4">
               Registra y consulta todas las actividades diarias del proyecto.
             </p>
-          </CardContent>
-        </Card>
+          </StatCardContent>
+        </StatCard>
 
         {/* Clientes Card */}
-        <Card className="relative group cursor-pointer hover:shadow-md transition-shadow">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
+        <StatCard 
+          href="/clients"
+          onClick={() => setSidebarLevel('general')}
+          data-testid="stat-card-clientes"
+        >
+          <StatCardContent>
+            <div className="flex items-center gap-2 mb-3">
               <Users className="w-5 h-5 text-accent" />
               <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
                 Clientes del Proyecto
               </p>
             </div>
-          </CardHeader>
-          <CardContent>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Clientes activos</span>
@@ -273,28 +266,10 @@ export default function ProjectDashboard() {
             <p className="text-xs text-muted-foreground mt-4">
               Gestiona la información y pagos de tus clientes.
             </p>
-          </CardContent>
-        </Card>
+          </StatCardContent>
+        </StatCard>
       </div>
 
-      {/* Description if available */}
-      {currentProject.description && (
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-accent" />
-              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-                Descripción del Proyecto
-              </p>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-              {currentProject.description}
-            </p>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
