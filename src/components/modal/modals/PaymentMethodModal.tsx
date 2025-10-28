@@ -219,7 +219,7 @@ export default function PaymentMethodModal({
         });
 
         setTimeout(() => {
-          window.location.href = `/learning/courses/${courseSlug}`;
+          window.location.assign(`/learning/courses/${courseSlug}`);
         }, 1500);
         return;
       }
@@ -241,17 +241,21 @@ export default function PaymentMethodModal({
         throw new Error("No se pudo obtener el ID interno del usuario");
       }
 
+      const requestBody = {
+        user_id: userRecord.id,
+        course_slug: courseSlug,
+        currency: "ARS",
+        months: priceData?.months || 12,
+      };
+
+      console.log("[MP] Creando preferencia…", requestBody);
+
       // Llamada al nuevo endpoint en Vercel
       const API_BASE = getApiBase();
       const res = await fetch(`${API_BASE}/api/mp/create-preference`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: userRecord.id,
-          course_slug: courseSlug,
-          currency: "ARS",
-          months: priceData?.months || 12, // Usa los meses del precio o 12 por defecto
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const text = await res.text();
@@ -262,20 +266,32 @@ export default function PaymentMethodModal({
         payload = { error: text };
       }
 
+      console.log("[MP] Respuesta create-preference:", { 
+        status: res.status, 
+        ok: res.ok,
+        data: payload 
+      });
+
       if (!res.ok || !payload?.init_point) {
-        console.error("Error MP create-preference:", payload);
-        throw new Error(payload?.error || `HTTP ${res.status}`);
+        console.error("[MP] Error al crear preferencia:", payload);
+        throw new Error(
+          payload?.error 
+            ? `No se pudo crear la preferencia: ${String(payload.error)}`
+            : `create-preference falló: status=${res.status}`
+        );
       }
 
       // Redirige al checkout de Mercado Pago
-      window.location.href = payload.init_point;
+      console.log("[MP] Redirigiendo a:", payload.init_point);
+      window.location.assign(payload.init_point);
     } catch (error: any) {
-      console.error(error);
+      console.error("[MP] Error fatal:", error);
       toast({
         title: "Error al procesar el pago",
         description: error.message || "No se pudo iniciar el pago",
         variant: "destructive",
       });
+    } finally {
       setLoading(false);
     }
   };
@@ -321,16 +337,20 @@ export default function PaymentMethodModal({
       const courseTitle = (priceData as any)?.courses?.title || courseSlug;
       const description = `${courseTitle} - Suscripción Anual`;
 
+      const requestBody = {
+        user_id: userRecord.id,
+        course_slug: courseSlug,
+        amount_usd: finalAmount,
+        description,
+      };
+
+      console.log("[PayPal] Creando orden…", requestBody);
+
       const API_BASE = getApiBase();
       const res = await fetch(`${API_BASE}/api/paypal/create-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: userRecord.id,
-          course_slug: courseSlug,
-          amount_usd: finalAmount,
-          description,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const text = await res.text();
@@ -341,8 +361,14 @@ export default function PaymentMethodModal({
         payload = { ok: false, error: text };
       }
 
+      console.log("[PayPal] Respuesta create-order:", {
+        status: res.status,
+        ok: res.ok,
+        data: payload
+      });
+
       if (!res.ok || !payload?.ok) {
-        console.error("Error al crear orden de PayPal:", payload);
+        console.error("[PayPal] Error al crear orden:", payload);
         throw new Error(payload?.error || `HTTP ${res.status}`);
       }
 
@@ -351,11 +377,12 @@ export default function PaymentMethodModal({
         (link: any) => link.rel === "approve",
       );
       if (!approvalLink?.href) {
-        console.error("PayPal order sin approval link:", paypal_order);
+        console.error("[PayPal] Order sin approval link:", paypal_order);
         throw new Error("No se recibió la URL de aprobación de PayPal");
       }
 
-      window.location.href = approvalLink.href;
+      console.log("[PayPal] Redirigiendo a:", approvalLink.href);
+      window.location.assign(approvalLink.href);
     } catch (error: any) {
       toast({
         title: "Error al procesar el pago con PayPal",
