@@ -41,9 +41,14 @@ export default function PaymentMethodModal({
   const { setPanel } = useModalPanelStore();
   const { toast } = useToast();
   
-  const { price: priceData, loading: priceLoading } = useCoursePrice(courseSlug, currency, 'mercadopago');
-  
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
+  
+  // Determine provider and currency based on selected method
+  const currentProvider = selectedMethod === 'paypal' ? 'paypal' : 'mercadopago';
+  const currentCurrency = selectedMethod === 'paypal' ? 'USD' : 'ARS';
+  
+  const { price: priceData, loading: priceLoading } = useCoursePrice(courseSlug, currentCurrency, currentProvider);
+  
   const [loading, setLoading] = useState(false);
   const [showBankInfo, setShowBankInfo] = useState(false);
   
@@ -240,11 +245,72 @@ export default function PaymentMethodModal({
     }
   };
 
-  const handlePayPalPayment = () => {
-    toast({
-      title: 'Próximamente disponible',
-      description: 'El pago con PayPal estará disponible pronto',
-    });
+  const handlePayPalPayment = async () => {
+    try {
+      setLoading(true);
+      
+      if (!supabase) {
+        throw new Error('Supabase no está disponible');
+      }
+
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session?.access_token) {
+        throw new Error('Debes iniciar sesión para comprar un curso');
+      }
+
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) {
+        throw new Error('No se pudo obtener el usuario');
+      }
+
+      const { data: userRecord } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', authUser.id)
+        .single();
+
+      if (!userRecord) {
+        throw new Error('No se pudo obtener el ID del usuario');
+      }
+
+      // Create PayPal order
+      const createOrderResponse = await fetch('/api/paypal/create-order', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          user_id: userRecord.id,
+          course_slug: courseSlug
+        })
+      });
+
+      const orderData = await createOrderResponse.json();
+
+      if (!createOrderResponse.ok) {
+        console.error('Error al crear orden de PayPal:', orderData);
+        throw new Error(orderData?.error || 'No se pudo crear la orden de PayPal');
+      }
+
+      const approvalUrl = orderData.approvalUrl;
+      
+      if (!approvalUrl) {
+        throw new Error('No se recibió la URL de aprobación de PayPal');
+      }
+
+      // Redirect to PayPal approval URL (sandbox or production based on backend config)
+      window.location.href = approvalUrl;
+      
+    } catch (error: any) {
+      toast({
+        title: 'Error al procesar el pago con PayPal',
+        description: error.message || 'No se pudo iniciar el pago',
+        variant: 'destructive'
+      });
+      setLoading(false);
+    }
   };
 
   const handleTransferPayment = () => {
@@ -475,7 +541,7 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                       <span className="font-medium">PayPal (USD)</span>
                     </Label>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Pago internacional en dólares. (Próximamente)
+                      Pago internacional en dólares.
                     </p>
                   </div>
                   <img 
