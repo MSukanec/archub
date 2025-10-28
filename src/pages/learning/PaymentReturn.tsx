@@ -12,6 +12,17 @@ export default function PaymentReturn() {
   const [error, setError] = useState<string | null>(null);
   const [courseSlug, setCourseSlug] = useState<string>('');
 
+  // Remove initial loader cuando el componente se monta
+  useEffect(() => {
+    const initialLoader = document.getElementById('initial-loader');
+    if (initialLoader) {
+      initialLoader.classList.add('fade-out');
+      setTimeout(() => {
+        initialLoader.remove();
+      }, 300);
+    }
+  }, []);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const course = params.get('course') || '';

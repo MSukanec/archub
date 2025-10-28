@@ -10,6 +10,17 @@ export default function PayPalReturn() {
   const [errorMessage, setErrorMessage] = useState('');
   const [courseSlug, setCourseSlug] = useState('');
 
+  // Remove initial loader cuando el componente se monta
+  useEffect(() => {
+    const initialLoader = document.getElementById('initial-loader');
+    if (initialLoader) {
+      initialLoader.classList.add('fade-out');
+      setTimeout(() => {
+        initialLoader.remove();
+      }, 300);
+    }
+  }, []);
+
   useEffect(() => {
     const capturePayment = async () => {
       try {
