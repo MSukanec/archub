@@ -37,7 +37,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       purchase_units: [{
         amount: { currency_code: "USD", value: String(amount_usd) },
         description,
-        custom_id: `user:${user_id};course:${course.id}`,
+        custom_id: btoa(`user:${user_id};course:${course.id}`),
       }],
       application_context: {
         brand_name: "Archub",
