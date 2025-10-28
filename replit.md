@@ -29,6 +29,7 @@ Preferred communication style: Simple, everyday language.
 - **Shared Schema**: `shared/schema.ts` for consistency between frontend and backend.
 - **Data Flow**: React Query for server state management, Express.js for REST APIs, Drizzle ORM for database operations with extensive cache invalidation.
 - **Database Views**: Exclusive use of database views for data fetching (e.g., `construction_tasks_view`).
+- **PayPal Integration**: Custom implementation with Vercel serverless endpoints (`/api/paypal/*`) and Supabase Edge Function webhook. Order creation includes Base64-encoded metadata in `custom_id` field. Payment capture handled by frontend, enrollment/logging handled by Supabase webhook.
 
 ### Feature Specifications
 - **Home Page**: Landing page (/home) after onboarding with personalized welcome message and quick-access cards to main sections (Organización, Proyecto, Capacitaciones, Administración). Maintains sidebar in 'general' level for hub navigation.
@@ -49,7 +50,8 @@ Preferred communication style: Simple, everyday language.
     - Table-based tabs for Apuntes (summary notes) and Marcadores (temporal markers) with module grouping, filtering, and navigation.
 - **Notification System**: Real-time notifications with bell icon badge, powered by Supabase `notifications` and `user_notifications` tables, supporting read/unread states and click navigation.
 - **Admin Course Management**: Dedicated `AdminCourses` page with a three-tab interface (Dashboard, Alumnos, Cursos) for full CRUD operations on courses, modules, and lessons. Includes analytics, hierarchical tree view with drag & drop reordering, and enrollment management.
-- **Coupon System**: Discount coupon system for courses with database-driven validation, redemption, and Mercado Pago integration.
+- **Coupon System**: Discount coupon system for courses with database-driven validation, redemption, and Mercado Pago/PayPal integration.
+- **Payment Processing**: Dual payment provider support (Mercado Pago for ARS, PayPal for USD) with webhook-based enrollment. PayPal flow: create-order → user approval → capture-order → webhook enrollment. Mercado Pago flow: create preference → redirect → webhook enrollment.
 - **Cost System**: Three-tier cost system (Archub Cost, Organization Cost, Independent Cost) for budget items with drag-and-drop reordering.
 
 ### System Design Choices
