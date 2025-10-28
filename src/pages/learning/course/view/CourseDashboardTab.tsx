@@ -534,8 +534,8 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       {/* Second Row - Notes and Markers */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Notes Card - Navega a Apuntes */}
-        <StatCard onCardClick={() => navigateToTab('Apuntes')}>
-          <StatCardTitle>Apuntes Creados</StatCardTitle>
+        <StatCard>
+          <StatCardTitle showArrow={false}>Apuntes Creados</StatCardTitle>
           <StatCardContent>
             {recentNotes.length === 0 ? (
               <div className="text-center py-8">
@@ -543,33 +543,45 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                 <p className="text-sm text-muted-foreground">No hay apuntes aún</p>
               </div>
             ) : (
-              <div className="space-y-2">
-                {recentNotes.map((note: any) => (
-                  <div 
-                    key={note.id} 
-                    className="group/item flex items-start gap-3 p-3 rounded-lg border border-input bg-transparent hover:bg-accent/5 hover:border-accent transition-all duration-200"
-                  >
-                    <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-accent/10">
-                      <FileText className="w-4 h-4 text-accent" />
+              <>
+                <div className="space-y-2">
+                  {recentNotes.map((note: any) => (
+                    <div 
+                      key={note.id} 
+                      className="group/item flex items-start gap-3 p-3 rounded-lg border border-border/40 bg-transparent hover:bg-accent/5 hover:border-accent/50 transition-all duration-200"
+                    >
+                      <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-accent/10">
+                        <FileText className="w-4 h-4 text-accent" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground group-hover/item:text-accent transition-colors truncate">
+                          {note.course_lessons?.title || 'Sin título'}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                          {note.body?.substring(0, 60)}...
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground group-hover/item:text-accent transition-colors truncate">
-                        {note.course_lessons?.title || 'Sin título'}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                        {note.body?.substring(0, 60)}...
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigateToTab('Apuntes');
+                  }}
+                  className="text-xs text-accent hover:underline mt-3 block"
+                  data-testid="link-view-all-notes"
+                >
+                  Ver todos
+                </button>
+              </>
             )}
           </StatCardContent>
         </StatCard>
 
         {/* Markers Card - Navega a Marcadores */}
-        <StatCard onCardClick={() => navigateToTab('Marcadores')}>
-          <StatCardTitle>Marcadores Creados</StatCardTitle>
+        <StatCard>
+          <StatCardTitle showArrow={false}>Marcadores Creados</StatCardTitle>
           <StatCardContent>
             {recentMarkers.length === 0 ? (
               <div className="text-center py-8">
@@ -577,26 +589,38 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                 <p className="text-sm text-muted-foreground">No hay marcadores aún</p>
               </div>
             ) : (
-              <div className="space-y-2">
-                {recentMarkers.map((marker: any) => (
-                  <div 
-                    key={marker.id} 
-                    className="group/item flex items-start gap-3 p-3 rounded-lg border border-input bg-transparent hover:bg-accent/5 hover:border-accent transition-all duration-200"
-                  >
-                    <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-accent/10">
-                      <Bookmark className="w-4 h-4 text-accent" />
+              <>
+                <div className="space-y-2">
+                  {recentMarkers.map((marker: any) => (
+                    <div 
+                      key={marker.id} 
+                      className="group/item flex items-start gap-3 p-3 rounded-lg border border-border/40 bg-transparent hover:bg-accent/5 hover:border-accent/50 transition-all duration-200"
+                    >
+                      <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-accent/10">
+                        <Bookmark className="w-4 h-4 text-accent" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground group-hover/item:text-accent transition-colors truncate">
+                          {marker.course_lessons?.title || 'Sin título'}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                          {marker.body?.substring(0, 60) || 'Sin descripción'}...
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground group-hover/item:text-accent transition-colors truncate">
-                        {marker.course_lessons?.title || 'Sin título'}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                        {marker.body?.substring(0, 60) || 'Sin descripción'}...
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigateToTab('Marcadores');
+                  }}
+                  className="text-xs text-accent hover:underline mt-3 block"
+                  data-testid="link-view-all-markers"
+                >
+                  Ver todos
+                </button>
+              </>
             )}
           </StatCardContent>
         </StatCard>

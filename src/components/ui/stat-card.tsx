@@ -65,17 +65,15 @@ interface StatCardTitleProps {
 }
 
 const StatCardTitle = ({ children, className, showArrow = true }: StatCardTitleProps) => {
-  // Determinar si el padre es clickeable mirando si tiene la clase 'group'
-  const parentIsClickable = showArrow;
-
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center justify-between gap-2">
       <p className={cn("text-xs font-normal text-muted-foreground uppercase tracking-wide", className)}>
         {children}
       </p>
-      {parentIsClickable && (
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-          <ArrowRight className="w-4 h-4 text-muted-foreground" />
+      {showArrow && (
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-xs text-muted-foreground">
+          <span>Ver más</span>
+          <ArrowRight className="w-3 h-3" />
         </div>
       )}
     </div>
