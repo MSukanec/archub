@@ -8,6 +8,8 @@ import { useLocation, useParams } from 'wouter'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useCoursePlayerStore } from '@/stores/coursePlayerStore'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 interface CourseDashboardTabProps {
   courseId?: string;
@@ -554,6 +556,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                       key={note.id}
                       onClick={(e) => {
                         e.stopPropagation();
+                        e.preventDefault();
                         if (note.lesson_id) {
                           goToLesson(note.lesson_id, null);
                         }
@@ -564,9 +567,14 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                         <FileText className="w-4 h-4 text-accent" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground group-hover/item:text-accent transition-colors truncate">
-                          {note.course_lessons?.title || 'Sin título'}
-                        </p>
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-sm font-medium text-foreground group-hover/item:text-accent transition-colors truncate">
+                            {note.course_lessons?.title || 'Sin título'}
+                          </p>
+                          <span className="text-xs text-muted-foreground flex-shrink-0">
+                            {format(new Date(note.created_at), 'dd/MM/yy', { locale: es })}
+                          </span>
+                        </div>
                         <p className="text-xs text-muted-foreground mt-0.5 truncate">
                           {note.body?.substring(0, 60)}...
                         </p>
@@ -574,16 +582,20 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                     </div>
                   ))}
                 </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigateToTab('Apuntes');
-                  }}
-                  className="text-xs text-accent hover:underline mt-3 block text-center w-full"
-                  data-testid="link-view-all-notes"
-                >
-                  Ver todos los apuntes
-                </button>
+                <div className="mt-3 text-center">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      navigateToTab('Apuntes');
+                    }}
+                    className="text-xs text-accent hover:underline"
+                    data-testid="link-view-all-notes"
+                  >
+                    Ver todos los apuntes
+                  </button>
+                </div>
               </>
             )}
           </StatCardContent>
@@ -606,6 +618,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                       key={marker.id}
                       onClick={(e) => {
                         e.stopPropagation();
+                        e.preventDefault();
                         if (marker.lesson_id) {
                           goToLesson(marker.lesson_id, marker.time_sec || null);
                         }
@@ -616,9 +629,14 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                         <Bookmark className="w-4 h-4 text-accent" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground group-hover/item:text-accent transition-colors truncate">
-                          {marker.course_lessons?.title || 'Sin título'}
-                        </p>
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-sm font-medium text-foreground group-hover/item:text-accent transition-colors truncate">
+                            {marker.course_lessons?.title || 'Sin título'}
+                          </p>
+                          <span className="text-xs text-muted-foreground flex-shrink-0">
+                            {format(new Date(marker.created_at), 'dd/MM/yy', { locale: es })}
+                          </span>
+                        </div>
                         <p className="text-xs text-muted-foreground mt-0.5 truncate">
                           {marker.body?.substring(0, 60) || 'Sin descripción'}...
                         </p>
@@ -626,16 +644,20 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                     </div>
                   ))}
                 </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigateToTab('Marcadores');
-                  }}
-                  className="text-xs text-accent hover:underline mt-3 block text-center w-full"
-                  data-testid="link-view-all-markers"
-                >
-                  Ver todos los marcadores
-                </button>
+                <div className="mt-3 text-center">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      navigateToTab('Marcadores');
+                    }}
+                    className="text-xs text-accent hover:underline"
+                    data-testid="link-view-all-markers"
+                  >
+                    Ver todos los marcadores
+                  </button>
+                </div>
               </>
             )}
           </StatCardContent>
