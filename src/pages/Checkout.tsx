@@ -238,7 +238,11 @@ export default function Checkout() {
 
       if (!userRecord) throw new Error('No se pudo obtener el ID del usuario');
 
-      const finalPrice = appliedCoupon ? appliedCoupon.final_price : priceData!.amount;
+      if (!priceData) {
+        throw new Error('El precio del curso no está disponible');
+      }
+
+      const finalPrice = appliedCoupon ? appliedCoupon.final_price : priceData.amount;
 
       const createResponse = await fetch('/api/checkout/mp/create', {
         method: 'POST',
@@ -358,6 +362,15 @@ Enviá el comprobante a: pagos@archub.com.ar`;
       toast({
         title: 'Seleccioná un método de pago',
         description: 'Elegí cómo querés pagar antes de continuar',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (!priceData && selectedMethod !== 'transfer') {
+      toast({
+        title: 'Precio no disponible',
+        description: 'No se pudo cargar el precio del curso. Por favor recargá la página.',
         variant: 'destructive'
       });
       return;
@@ -798,7 +811,7 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                     {/* Pay Button */}
                     <Button
                       onClick={handlePayNow}
-                      disabled={processingPayment || priceLoading || !selectedMethod || !acceptedTerms}
+                      disabled={processingPayment || priceLoading || !selectedMethod || !acceptedTerms || (!priceData && selectedMethod !== 'transfer')}
                       className="w-full"
                       size="lg"
                     >
