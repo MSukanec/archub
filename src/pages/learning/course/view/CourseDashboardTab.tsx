@@ -308,6 +308,42 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     enabled: !!courseId && !!supabase
   });
 
+  // Get user's study time this month from v_user_study_time
+  const { data: monthlyStudyTime } = useQuery({
+    queryKey: ['monthly-study-time'],
+    queryFn: async () => {
+      if (!supabase) return { seconds_this_month: 0 };
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return { seconds_this_month: 0 };
+
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser?.email) return { seconds_this_month: 0 };
+
+      const { data: userRecord } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', authUser.id)
+        .single();
+
+      if (!userRecord) return { seconds_this_month: 0 };
+
+      const { data, error } = await supabase
+        .from('v_user_study_time')
+        .select('seconds_this_month')
+        .eq('user_id', userRecord.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching monthly study time:', error);
+        return { seconds_this_month: 0 };
+      }
+
+      return { seconds_this_month: data?.seconds_this_month || 0 };
+    },
+    enabled: !!supabase
+  });
+
   // Calculate stats
   const stats = useMemo(() => {
     const progressPct = courseProgress?.progress_pct || 0;
@@ -315,6 +351,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     const totalLessons = courseProgress?.total_lessons || 0;
     const totalSeconds = studyTime?.total_seconds || 0;
     const courseTotalSeconds = courseDuration?.total_seconds || 0;
+    const monthSeconds = monthlyStudyTime?.seconds_this_month || 0;
     
     // Format study time (user's time spent)
     const hours = Math.floor(totalSeconds / 3600);
@@ -340,6 +377,19 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       courseDurationFormatted = `${courseMinutes} min de contenido`;
     } else {
       courseDurationFormatted = `sin contenido`;
+    }
+
+    // Format this month study time
+    const monthHours = Math.floor(monthSeconds / 3600);
+    const monthMinutes = Math.floor((monthSeconds % 3600) / 60);
+    
+    let monthTimeFormatted = '';
+    if (monthHours > 0) {
+      monthTimeFormatted = `${monthHours} HS`;
+    } else if (monthMinutes > 0) {
+      monthTimeFormatted = `${monthMinutes} MIN`;
+    } else {
+      monthTimeFormatted = `0 HS`;
     }
 
     // Calculate subscription days remaining
@@ -388,12 +438,13 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       totalLessons,
       studyTimeFormatted,
       courseDurationFormatted,
+      monthTimeFormatted,
       subscriptionFormatted,
       subscriptionMetaFormatted,
       notesCount: notesCount || 0,
       markersCount: markersCount || 0
     };
-  }, [courseProgress, studyTime, courseDuration, enrollment, notesCount, markersCount]);
+  }, [courseProgress, studyTime, courseDuration, enrollment, monthlyStudyTime, notesCount, markersCount]);
 
   if (!courseId) {
     return (
@@ -424,6 +475,13 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
 
       {/* Top Row - Main Stats */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Subscription Days Card - No clickeable */}
+        <StatCard>
+          <StatCardTitle showArrow={false}>Tiempo Restante</StatCardTitle>
+          <StatCardValue>{stats.subscriptionFormatted}</StatCardValue>
+          <StatCardMeta>{stats.subscriptionMetaFormatted}</StatCardMeta>
+        </StatCard>
+
         {/* Progress Card - Navega a Lecciones */}
         <StatCard onCardClick={() => navigateToTab('Lecciones')}>
           <StatCardTitle>Progreso Total</StatCardTitle>
@@ -440,16 +498,16 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
           <StatCardMeta>{stats.courseDurationFormatted}</StatCardMeta>
         </StatCard>
 
-        {/* Completed Lessons Card - Navega a Lecciones */}
-        <StatCard onCardClick={() => navigateToTab('Lecciones')}>
-          <StatCardTitle>Lecciones Completadas</StatCardTitle>
-          <StatCardValue className="flex items-center gap-3">
-            {stats.doneLessons}
-            <CheckCircle className="h-8 w-8 text-green-500" />
-          </StatCardValue>
-          <StatCardMeta>de {stats.totalLessons} totales</StatCardMeta>
+        {/* This Month Study Time Card - No clickeable */}
+        <StatCard>
+          <StatCardTitle showArrow={false}>Este Mes</StatCardTitle>
+          <StatCardValue>{stats.monthTimeFormatted}</StatCardValue>
+          <StatCardMeta>dedicadas en total</StatCardMeta>
         </StatCard>
+      </div>
 
+      {/* Second Row - Additional Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Notes Card - Navega a Apuntes */}
         <StatCard onCardClick={() => navigateToTab('Apuntes')}>
           <StatCardTitle>Apuntes Creados</StatCardTitle>
@@ -458,16 +516,6 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
             <span className="text-3xl">{stats.notesCount}</span>
           </StatCardValue>
           <StatCardMeta>resúmenes de lecciones</StatCardMeta>
-        </StatCard>
-      </div>
-
-      {/* Second Row - Additional Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Subscription Days Card - No clickeable */}
-        <StatCard>
-          <StatCardTitle showArrow={false}>Tiempo Restante</StatCardTitle>
-          <StatCardValue>{stats.subscriptionFormatted}</StatCardValue>
-          <StatCardMeta>{stats.subscriptionMetaFormatted}</StatCardMeta>
         </StatCard>
 
         {/* Markers Card - Navega a Marcadores */}
@@ -480,17 +528,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
           <StatCardMeta>momentos guardados</StatCardMeta>
         </StatCard>
 
-        {/* Pending Lessons Card - Navega a Lecciones */}
-        <StatCard onCardClick={() => navigateToTab('Lecciones')}>
-          <StatCardTitle>Lecciones Pendientes</StatCardTitle>
-          <StatCardValue className="flex items-center gap-3">
-            <BookOpen className="h-8 w-8 text-amber-500" />
-            <span className="text-3xl">{stats.totalLessons - stats.doneLessons}</span>
-          </StatCardValue>
-          <StatCardMeta>por completar</StatCardMeta>
-        </StatCard>
-
-        {/* Discord Widget - Spans 1 column */}
+        {/* Discord Widget */}
         <div>
           <DiscordWidget />
         </div>
