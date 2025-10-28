@@ -1,9 +1,22 @@
 // /api/mp/create-preference.ts
 export const config = { runtime: "nodejs", regions: ["gru1"] };
 
-import { env } from "../_lib/env";
 import { json, handlePreflight } from "../_lib/cors";
 import { supabaseAdmin } from "../_lib/supabase-admin";
+
+function must(name: string) {
+  const v = process.env[name];
+  if (!v) throw new Error(`Missing env: ${name}`);
+  return v;
+}
+
+const ENV = {
+  SUPABASE_URL: must("SUPABASE_URL"),
+  SUPABASE_SERVICE_ROLE_KEY: must("SUPABASE_SERVICE_ROLE_KEY"),
+  MP_ACCESS_TOKEN: must("MP_ACCESS_TOKEN"), // Debe empezar con APP_USR-
+  MP_WEBHOOK_SECRET: must("MP_WEBHOOK_SECRET"),
+  CHECKOUT_RETURN_URL_BASE: must("CHECKOUT_RETURN_URL_BASE"),
+};
 
 export default async function handler(req: Request) {
   const pre = handlePreflight(req);
@@ -13,19 +26,20 @@ export default async function handler(req: Request) {
     if (req.method !== "POST")
       return json({ error: "Method not allowed" }, 405);
 
-    const payload = await req.json().catch(() => ({}));
+    const body = await req.json().catch(() => ({}) as any);
     const {
       user_id,
       course_slug,
       currency = "ARS",
-      months: monthsFromPayload = null,
-    } = payload ?? {};
+      months: monthsRaw = null, // opcional desde el front
+    } = body ?? {};
 
+    // 🔒 Validaciones básicas
     if (!user_id || !course_slug) {
       return json({ error: "Faltan user_id o course_slug" }, 400);
     }
 
-    // Curso activo
+    // 📚 Curso activo
     const { data: course, error: eCourse } = await supabaseAdmin
       .from("courses")
       .select("id, title, slug, short_description, is_active")
@@ -39,10 +53,16 @@ export default async function handler(req: Request) {
       );
     }
 
-    // Precio (ahora también trae months)
+    // 🗓️ Duración (meses). Si no viene, por ahora tomamos 12 como default.
+    const months =
+      Number.isFinite(Number(monthsRaw)) && Number(monthsRaw) > 0
+        ? Number(monthsRaw)
+        : 12;
+
+    // 💵 Precio en course_prices (provider 'mercadopago' o 'any')
     const { data: priceRows, error: ePrice } = await supabaseAdmin
       .from("course_prices")
-      .select("amount, currency_code, provider, is_active, months")
+      .select("amount, currency_code, provider, is_active")
       .eq("course_id", course.id)
       .eq("currency_code", String(currency).toUpperCase())
       .in("provider", ["mercadopago", "any"])
@@ -77,7 +97,7 @@ export default async function handler(req: Request) {
       );
     }
 
-    // Datos del payer (opcionales)
+    // 👤 Payer (opcional)
     const { data: userRow } = await supabaseAdmin
       .from("users")
       .select("email, full_name")
@@ -93,33 +113,18 @@ export default async function handler(req: Request) {
       last_name = rest.join(" ") || undefined;
     }
 
-    // ENV requeridos
-    if (!env.MP_ACCESS_TOKEN || env.MP_ACCESS_TOKEN.startsWith("TEST-")) {
+    // 🔑 Chequeos MP
+    if (!ENV.MP_ACCESS_TOKEN || ENV.MP_ACCESS_TOKEN.startsWith("TEST-")) {
       return json(
-        { error: "MP_ACCESS_TOKEN no productivo (APP_USR-...)" },
+        { error: "MP_ACCESS_TOKEN no productivo (debe ser APP_USR-...)" },
         500,
       );
     }
-    if (!env.MP_WEBHOOK_SECRET) {
-      return json({ error: "Falta MP_WEBHOOK_SECRET en env" }, 500);
-    }
-    if (!env.CHECKOUT_RETURN_URL_BASE) {
-      return json({ error: "Falta CHECKOUT_RETURN_URL_BASE en env" }, 500);
-    }
 
-    // Duración efectiva
-    const effectiveMonths =
-      monthsFromPayload !== null && monthsFromPayload !== undefined
-        ? monthsFromPayload
-        : (chosen.months ?? null);
-
-    // external_reference = user|slug|months   (months puede ser "null")
-    const external_reference = [
-      user_id,
-      course.slug,
-      effectiveMonths ?? "null",
-    ].join("|");
-
+    // 📦 external_reference y metadata
+    const external_reference = [user_id, course.slug, months ?? "null"].join(
+      "|",
+    );
     const origin = new URL(req.url).origin;
 
     const prefBody = {
@@ -136,18 +141,18 @@ export default async function handler(req: Request) {
       ],
       external_reference,
       payer: { email, first_name, last_name },
-      notification_url: `${origin}/api/mp/webhook?secret=${env.MP_WEBHOOK_SECRET}&source_news=webhooks`,
+      notification_url: `${origin}/api/mp/webhook?secret=${ENV.MP_WEBHOOK_SECRET}&source_news=webhooks`,
       back_urls: {
-        success: `${env.CHECKOUT_RETURN_URL_BASE}?course=${course.slug}`,
-        failure: `${env.CHECKOUT_RETURN_URL_BASE}?course=${course.slug}`,
-        pending: `${env.CHECKOUT_RETURN_URL_BASE}?course=${course.slug}`,
+        success: `${ENV.CHECKOUT_RETURN_URL_BASE}?course=${course.slug}`,
+        failure: `${ENV.CHECKOUT_RETURN_URL_BASE}?course=${course.slug}`,
+        pending: `${ENV.CHECKOUT_RETURN_URL_BASE}?course=${course.slug}`,
       },
       auto_return: "approved",
       binary_mode: true,
       metadata: {
         user_id,
         course_slug: course.slug,
-        months: effectiveMonths,
+        months,
         provider: chosen.provider,
       },
       statement_descriptor: "ARCHUB",
@@ -156,16 +161,16 @@ export default async function handler(req: Request) {
     const r = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${env.MP_ACCESS_TOKEN}`,
+        Authorization: `Bearer ${ENV.MP_ACCESS_TOKEN}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(prefBody),
     });
 
-    const mpText = await r.text();
+    const raw = await r.text();
     let pref: any = null;
     try {
-      pref = JSON.parse(mpText);
+      pref = JSON.parse(raw);
     } catch {}
 
     if (!r.ok || !pref?.init_point) {
@@ -174,7 +179,7 @@ export default async function handler(req: Request) {
           error: "mp_error",
           status: r.status,
           sent: prefBody,
-          body: pref ?? mpText,
+          body: pref ?? raw,
         },
         500,
       );
