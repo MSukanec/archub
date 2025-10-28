@@ -79,7 +79,7 @@ export default function CourseList() {
       
       const { data, error } = await supabase
         .from('course_lessons')
-        .select('id, module_id, course_modules!inner(course_id)')
+        .select('id, module_id, duration_sec, course_modules!inner(course_id)')
         .eq('is_active', true);
       
       if (error) throw error;
@@ -89,7 +89,7 @@ export default function CourseList() {
   });
 
   const courseProgress = useMemo(() => {
-    const progressMap = new Map<string, { completed: number; total: number; percentage: number; lastActivity?: Date }>();
+    const progressMap = new Map<string, { completed: number; total: number; percentage: number; lastActivity?: Date; totalDurationSec: number }>();
     
     courses.forEach(course => {
       const lessons = courseLessons.filter((l: any) => 
@@ -97,6 +97,10 @@ export default function CourseList() {
       );
       
       const totalLessons = lessons.length;
+      
+      const totalDurationSec = lessons.reduce((sum: number, lesson: any) => {
+        return sum + (lesson.duration_sec || 0);
+      }, 0);
       
       const completedLessons = allProgress.filter((p: any) => 
         p.is_completed && lessons.some((l: any) => l.id === p.lesson_id)
@@ -118,7 +122,8 @@ export default function CourseList() {
         completed: completedCount,
         total: totalLessons,
         percentage,
-        lastActivity
+        lastActivity,
+        totalDurationSec
       });
     });
     
@@ -126,7 +131,7 @@ export default function CourseList() {
   }, [courses, courseLessons, allProgress]);
 
   const filteredCourses = useMemo(() => {
-    const activeCourses = courses.filter(c => c.is_active);
+    const activeCourses = courses.filter(c => c.is_active && c.visibility !== 'draft');
     
     if (activeTab === 'enrolled') {
       return activeCourses.filter(course => {
@@ -222,9 +227,15 @@ export default function CourseList() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredCourses.map(course => {
-              const progress = courseProgress.get(course.id) || { completed: 0, total: 0, percentage: 0 };
+              const progress = courseProgress.get(course.id) || { completed: 0, total: 0, percentage: 0, totalDurationSec: 0 };
               const enrollment = enrollments.find((e: any) => e.course_id === course.id && e.status === 'active');
               const hasEnrollment = !!enrollment;
+              
+              const hours = Math.floor(progress.totalDurationSec / 3600);
+              const minutes = Math.floor((progress.totalDurationSec % 3600) / 60);
+              const durationText = hours > 0 
+                ? `${hours}h ${minutes}m` 
+                : `${minutes}m`;
 
               return (
                 <Card 
@@ -256,46 +267,55 @@ export default function CourseList() {
                       {course.title}
                     </h3>
 
-                    <div className="space-y-2 mb-4 text-xs text-muted-foreground">
+                    <div className="space-y-1 mb-4 text-xs text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <BookOpen className="h-3.5 w-3.5" />
                         <span>{progress.total} {progress.total === 1 ? 'lección' : 'lecciones'}</span>
                       </div>
+                      {progress.totalDurationSec > 0 && (
+                        <div className="flex items-center gap-2 pl-5">
+                          <span>{durationText} de contenido</span>
+                        </div>
+                      )}
                     </div>
 
-                    <div className="space-y-2 mb-4 mt-auto">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground">Progreso</span>
-                        <span className="font-semibold">{progress.percentage}%</span>
+                    {hasEnrollment && (
+                      <div className="space-y-2 mb-4 mt-auto">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">Progreso</span>
+                          <span className="font-semibold">{progress.percentage}%</span>
+                        </div>
+                        <Progress value={progress.percentage} className="h-2" />
                       </div>
-                      <Progress value={progress.percentage} className="h-2" />
-                    </div>
+                    )}
 
-                    {progress.lastActivity && (
+                    {hasEnrollment && progress.lastActivity && (
                       <div className="text-xs text-muted-foreground mb-3">
                         Última actividad: {format(progress.lastActivity, "dd 'de' MMMM 'a las' HH:mm", { locale: es })}
                       </div>
                     )}
 
-                    {hasEnrollment ? (
-                      <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => handleViewCourse(course.slug)}
-                        className="w-full"
-                        data-testid={`button-view-course-${course.id}`}
-                      >
-                        Ver curso
-                      </Button>
-                    ) : (
-                      <PayButton
-                        courseSlug={course.slug}
-                        currency="ARS"
-                        variant="default"
-                        size="sm"
-                        className="w-full"
-                      />
-                    )}
+                    <div className={hasEnrollment ? '' : 'mt-auto'}>
+                      {hasEnrollment ? (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => handleViewCourse(course.slug)}
+                          className="w-full"
+                          data-testid={`button-view-course-${course.id}`}
+                        >
+                          Ver curso
+                        </Button>
+                      ) : (
+                        <PayButton
+                          courseSlug={course.slug}
+                          currency="ARS"
+                          variant="default"
+                          size="sm"
+                          className="w-full"
+                        />
+                      )}
+                    </div>
                   </div>
                 </Card>
               );
