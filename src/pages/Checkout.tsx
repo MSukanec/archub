@@ -98,12 +98,16 @@ export default function Checkout() {
       try {
         setLoading(true);
         
+        console.log('🛒 Checkout: courseSlug from params:', courseSlug);
+        
         // Load course
         const { data: courseData, error: courseError } = await supabase
           .from('courses')
           .select('id, title, slug, thumbnail_url, subtitle')
           .eq('slug', courseSlug)
           .single();
+        
+        console.log('🛒 Checkout: Course query result:', { courseData, courseError });
         
         if (courseError || !courseData) {
           toast({
