@@ -62,6 +62,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const value = typeof amountUsd === "number" ? amountUsd.toFixed(2) : "169.00"; // default temporal
     const desc = description || `Order ${order_id}`;
 
+    // Determine base URL dynamically from request headers
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    const baseUrl = `${protocol}://${host}`;
+
     const createResp = await fetch(`${base}/v2/checkout/orders`, {
       method: "POST",
       headers: {
@@ -79,6 +84,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         application_context: {
           brand_name: "Archub",
           user_action: "PAY_NOW",
+          return_url: `${baseUrl}/checkout/paypal/return`,
+          cancel_url: `${baseUrl}/checkout/paypal/cancel`,
         },
       }),
     });
