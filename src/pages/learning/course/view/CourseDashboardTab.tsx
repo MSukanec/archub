@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui/stat-card'
 import { BookOpen, CheckCircle, Clock, FileText, Bookmark, Megaphone, Info } from 'lucide-react'
 import { DiscordWidget } from '@/components/learning/DiscordWidget'
 import { useLocation, useParams } from 'wouter'
@@ -473,22 +473,30 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
 
   return (
     <div className="space-y-6">
-      {/* Instructor Announcement Card */}
-      <Card className="border-accent/20 bg-accent/5">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 mt-1">
-              <Megaphone className="h-5 w-5 text-accent" />
+      {/* Announcements and Discord Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        {/* Instructor Announcement Card - 3 columns */}
+        <Card className="border-accent/20 bg-accent/5 lg:col-span-3">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 mt-1">
+                <Megaphone className="h-5 w-5 text-accent" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-sm mb-1">Anuncios del Instructor</h3>
+                <p className="text-sm text-muted-foreground">
+                  No hay anuncios en este momento
+                </p>
+              </div>
             </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-sm mb-1">Anuncios del Instructor</h3>
-              <p className="text-sm text-muted-foreground">
-                No hay anuncios en este momento
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        {/* Discord Widget - 1 column */}
+        <div className="lg:col-span-1">
+          <DiscordWidget />
+        </div>
+      </div>
 
       {/* Top Row - Main Stats */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -523,17 +531,12 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         </StatCard>
       </div>
 
-      {/* Second Row - Additional Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Second Row - Notes and Markers */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Notes Card - Navega a Apuntes */}
-        <Card 
-          className="cursor-pointer hover:shadow-md transition-shadow border-border"
-          onClick={() => navigateToTab('Apuntes')}
-        >
-          <CardContent className="p-4">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
-              Apuntes Creados
-            </h3>
+        <StatCard onCardClick={() => navigateToTab('Apuntes')}>
+          <StatCardTitle>Apuntes Creados</StatCardTitle>
+          <StatCardContent>
             {recentNotes.length === 0 ? (
               <div className="text-center py-8">
                 <FileText className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
@@ -544,30 +547,30 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                 {recentNotes.map((note: any) => (
                   <div 
                     key={note.id} 
-                    className="p-2 rounded bg-muted/30 hover:bg-muted/50 transition-colors"
+                    className="group/item flex items-start gap-3 p-3 rounded-lg border border-input bg-transparent hover:bg-accent/5 hover:border-accent transition-all duration-200"
                   >
-                    <p className="text-xs font-medium text-foreground truncate">
-                      {note.course_lessons?.title || 'Sin título'}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate mt-1">
-                      {note.body?.substring(0, 60)}...
-                    </p>
+                    <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-accent/10">
+                      <FileText className="w-4 h-4 text-accent" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground group-hover/item:text-accent transition-colors truncate">
+                        {note.course_lessons?.title || 'Sin título'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                        {note.body?.substring(0, 60)}...
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </StatCardContent>
+        </StatCard>
 
         {/* Markers Card - Navega a Marcadores */}
-        <Card 
-          className="cursor-pointer hover:shadow-md transition-shadow border-border"
-          onClick={() => navigateToTab('Marcadores')}
-        >
-          <CardContent className="p-4">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
-              Marcadores Creados
-            </h3>
+        <StatCard onCardClick={() => navigateToTab('Marcadores')}>
+          <StatCardTitle>Marcadores Creados</StatCardTitle>
+          <StatCardContent>
             {recentMarkers.length === 0 ? (
               <div className="text-center py-8">
                 <Bookmark className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
@@ -578,25 +581,25 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                 {recentMarkers.map((marker: any) => (
                   <div 
                     key={marker.id} 
-                    className="p-2 rounded bg-muted/30 hover:bg-muted/50 transition-colors"
+                    className="group/item flex items-start gap-3 p-3 rounded-lg border border-input bg-transparent hover:bg-accent/5 hover:border-accent transition-all duration-200"
                   >
-                    <p className="text-xs font-medium text-foreground truncate">
-                      {marker.course_lessons?.title || 'Sin título'}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate mt-1">
-                      {marker.body?.substring(0, 60) || 'Sin descripción'}...
-                    </p>
+                    <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-accent/10">
+                      <Bookmark className="w-4 h-4 text-accent" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground group-hover/item:text-accent transition-colors truncate">
+                        {marker.course_lessons?.title || 'Sin título'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                        {marker.body?.substring(0, 60) || 'Sin descripción'}...
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Discord Widget */}
-        <div>
-          <DiscordWidget />
-        </div>
+          </StatCardContent>
+        </StatCard>
       </div>
     </div>
   )
