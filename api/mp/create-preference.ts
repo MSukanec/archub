@@ -1,5 +1,5 @@
 // /api/mp/create-preference.ts
-export const config = { runtime: "nodejs", regions: ["gru1"] }; // usa la región de tu Supabase
+export const config = { runtime: "nodejs", regions: ["gru1"] };
 
 import { env } from "../_lib/env";
 import { json, handlePreflight } from "../_lib/cors";
@@ -18,15 +18,14 @@ export default async function handler(req: Request) {
       user_id,
       course_slug,
       currency = "ARS",
-      months = null,
+      months: monthsFromPayload = null,
     } = payload ?? {};
 
-    // --- Validaciones básicas
     if (!user_id || !course_slug) {
       return json({ error: "Faltan user_id o course_slug" }, 400);
     }
 
-    // --- Curso (activo)
+    // Curso activo
     const { data: course, error: eCourse } = await supabaseAdmin
       .from("courses")
       .select("id, title, slug, short_description, is_active")
@@ -40,11 +39,10 @@ export default async function handler(req: Request) {
       );
     }
 
-    // --- Precio desde course_prices
-    // Prioridad: provider = 'mercadopago' -> 'any', ambos activos y con la currency pedida
+    // Precio (ahora también trae months)
     const { data: priceRows, error: ePrice } = await supabaseAdmin
       .from("course_prices")
-      .select("amount, currency_code, provider, is_active")
+      .select("amount, currency_code, provider, is_active, months")
       .eq("course_id", course.id)
       .eq("currency_code", String(currency).toUpperCase())
       .in("provider", ["mercadopago", "any"])
@@ -79,7 +77,7 @@ export default async function handler(req: Request) {
       );
     }
 
-    // --- Payer (opcional)
+    // Datos del payer (opcionales)
     const { data: userRow } = await supabaseAdmin
       .from("users")
       .select("email, full_name")
@@ -95,7 +93,7 @@ export default async function handler(req: Request) {
       last_name = rest.join(" ") || undefined;
     }
 
-    // --- Credenciales MP + Secret
+    // ENV requeridos
     if (!env.MP_ACCESS_TOKEN || env.MP_ACCESS_TOKEN.startsWith("TEST-")) {
       return json(
         { error: "MP_ACCESS_TOKEN no productivo (APP_USR-...)" },
@@ -109,15 +107,21 @@ export default async function handler(req: Request) {
       return json({ error: "Falta CHECKOUT_RETURN_URL_BASE en env" }, 500);
     }
 
-    // --- external_reference = user|slug|months
-    const external_reference = [user_id, course.slug, months ?? "null"].join(
-      "|",
-    );
+    // Duración efectiva
+    const effectiveMonths =
+      monthsFromPayload !== null && monthsFromPayload !== undefined
+        ? monthsFromPayload
+        : (chosen.months ?? null);
 
-    // --- URL base del sitio (para back_urls) y de la API (para webhook)
+    // external_reference = user|slug|months   (months puede ser "null")
+    const external_reference = [
+      user_id,
+      course.slug,
+      effectiveMonths ?? "null",
+    ].join("|");
+
     const origin = new URL(req.url).origin;
 
-    // --- Construcción de preferencia
     const prefBody = {
       items: [
         {
@@ -143,13 +147,12 @@ export default async function handler(req: Request) {
       metadata: {
         user_id,
         course_slug: course.slug,
-        months,
+        months: effectiveMonths,
         provider: chosen.provider,
       },
       statement_descriptor: "ARCHUB",
     };
 
-    // --- Llamada a Mercado Pago
     const r = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",
       headers: {
