@@ -23,11 +23,15 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
   const [, navigate] = useLocation();
   const { id: courseSlug } = useParams<{ id: string }>();
   const goToLesson = useCoursePlayerStore(s => s.goToLesson);
+  const setActiveTab = useCoursePlayerStore(s => s.setActiveTab);
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('Mes');
 
   // Handler to navigate to a specific tab
   const navigateToTab = (tab: string) => {
     if (courseSlug) {
+      // Update store first to trigger tab change
+      setActiveTab(tab as any);
+      // Then update URL for deep linking
       navigate(`/learning/courses/${courseSlug}?tab=${encodeURIComponent(tab)}`);
     }
   };
