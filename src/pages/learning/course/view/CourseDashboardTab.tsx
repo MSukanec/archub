@@ -4,12 +4,23 @@ import { supabase } from '@/lib/supabase'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card'
 import { BookOpen, CheckCircle, Clock, FileText, Bookmark } from 'lucide-react'
 import { DiscordWidget } from '@/components/learning/DiscordWidget'
+import { useLocation, useParams } from 'wouter'
 
 interface CourseDashboardTabProps {
   courseId?: string;
 }
 
 export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps) {
+  const [, navigate] = useLocation();
+  const { id: courseSlug } = useParams<{ id: string }>();
+
+  // Handler to navigate to a specific tab
+  const navigateToTab = (tab: string) => {
+    if (courseSlug) {
+      navigate(`/learning/courses/${courseSlug}?tab=${encodeURIComponent(tab)}`);
+    }
+  };
+
   // Get course progress using the v_course_progress view
   const { data: courseProgress } = useQuery({
     queryKey: ['course-progress', courseId],
@@ -262,17 +273,17 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     <div className="space-y-6">
       {/* Top Row - Main Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Progress Card */}
+        {/* Progress Card - No clickeable */}
         <StatCard>
-          <StatCardTitle>Progreso Total</StatCardTitle>
+          <StatCardTitle showArrow={false}>Progreso Total</StatCardTitle>
           <StatCardValue>{stats.progressPct}%</StatCardValue>
           <StatCardMeta>
             {stats.doneLessons} de {stats.totalLessons} lecciones
           </StatCardMeta>
         </StatCard>
 
-        {/* Completed Lessons Card */}
-        <StatCard>
+        {/* Completed Lessons Card - Navega a Lecciones */}
+        <StatCard onCardClick={() => navigateToTab('Lecciones')}>
           <StatCardTitle>Lecciones Completadas</StatCardTitle>
           <StatCardValue className="flex items-center gap-3">
             {stats.doneLessons}
@@ -281,9 +292,9 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
           <StatCardMeta>de {stats.totalLessons} totales</StatCardMeta>
         </StatCard>
 
-        {/* Study Time Card */}
+        {/* Study Time Card - No clickeable */}
         <StatCard>
-          <StatCardTitle>Tiempo de Estudio</StatCardTitle>
+          <StatCardTitle showArrow={false}>Tiempo de Estudio</StatCardTitle>
           <StatCardValue className="flex items-center gap-3">
             <Clock className="h-8 w-8 text-blue-500" />
             <span className="text-3xl">{stats.studyTimeFormatted}</span>
@@ -291,8 +302,8 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
           <StatCardMeta>en este curso</StatCardMeta>
         </StatCard>
 
-        {/* Notes Card */}
-        <StatCard>
+        {/* Notes Card - Navega a Apuntes */}
+        <StatCard onCardClick={() => navigateToTab('Apuntes')}>
           <StatCardTitle>Apuntes Creados</StatCardTitle>
           <StatCardValue className="flex items-center gap-3">
             <FileText className="h-8 w-8 text-purple-500" />
@@ -304,8 +315,8 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
 
       {/* Second Row - Additional Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Markers Card */}
-        <StatCard>
+        {/* Markers Card - Navega a Marcadores */}
+        <StatCard onCardClick={() => navigateToTab('Marcadores')}>
           <StatCardTitle>Marcadores</StatCardTitle>
           <StatCardValue className="flex items-center gap-3">
             <Bookmark className="h-8 w-8 text-orange-500" />
@@ -314,8 +325,8 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
           <StatCardMeta>momentos guardados</StatCardMeta>
         </StatCard>
 
-        {/* Pending Lessons Card */}
-        <StatCard>
+        {/* Pending Lessons Card - Navega a Lecciones */}
+        <StatCard onCardClick={() => navigateToTab('Lecciones')}>
           <StatCardTitle>Lecciones Pendientes</StatCardTitle>
           <StatCardValue className="flex items-center gap-3">
             <BookOpen className="h-8 w-8 text-amber-500" />
