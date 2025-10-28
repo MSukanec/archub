@@ -53,8 +53,12 @@ export default function CourseHeroImageUpload({
   const removeMutation = useMutation({
     mutationFn: async () => {
       if (currentImageUrl) {
-        const urlParts = currentImageUrl.split('/');
-        const filePath = `${courseId}/hero.${urlParts[urlParts.length - 1].split('.').pop()}`;
+        // Remove query string (cache-busting) from URL before extracting extension
+        const cleanUrl = currentImageUrl.split('?')[0];
+        const urlParts = cleanUrl.split('/');
+        const fileName = urlParts[urlParts.length - 1];
+        const extension = fileName.split('.').pop();
+        const filePath = `${courseId}/hero.${extension}`;
         
         await deleteCourseImage(filePath);
         await updateCourseImageUrl(courseId, null);

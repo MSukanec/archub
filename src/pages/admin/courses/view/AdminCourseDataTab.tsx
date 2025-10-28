@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { BookOpen, FileText, Eye, Play, List } from 'lucide-react'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
+import CourseHeroImageUpload from '@/components/learning/CourseHeroImageUpload'
 
 interface AdminCourseDataTabProps {
   courseId?: string;
@@ -194,6 +195,15 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
 
   return (
     <div className="space-y-6">
+      {/* Hero Image Section */}
+      <CourseHeroImageUpload
+        courseId={courseId}
+        currentImageUrl={coverUrl}
+        onImageUpdate={(url) => setCoverUrl(url || '')}
+      />
+
+      <hr className="border-t border-[var(--section-divider)] my-8" />
+
       {/* Two Column Layout - Section descriptions left, content right */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column - Información Básica */}
