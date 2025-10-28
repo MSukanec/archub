@@ -7,11 +7,22 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { BookOpen, Eye } from 'lucide-react'
+import { BookOpen, Eye, DollarSign, Plus, Trash2 } from 'lucide-react'
 import CourseHeroImageUpload from '@/components/learning/CourseHeroImageUpload'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
 
 interface AdminCourseDataTabProps {
   courseId?: string;
+}
+
+interface CoursePrice {
+  id: string;
+  course_id: string;
+  currency_code: string;
+  amount: number;
+  provider: string;
+  is_active: boolean;
 }
 
 export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps) {
@@ -25,6 +36,11 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
   const [coverUrl, setCoverUrl] = useState('')
   const [visibility, setVisibility] = useState('public')
   const [isActive, setIsActive] = useState(true)
+
+  // Pricing states
+  const [newPriceProvider, setNewPriceProvider] = useState('any')
+  const [newPriceCurrency, setNewPriceCurrency] = useState('ARS')
+  const [newPriceAmount, setNewPriceAmount] = useState('')
 
   // Get course data
   const { data: courseData } = useQuery({
@@ -48,6 +64,23 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
     enabled: !!courseId && !!supabase
   });
 
+  // Query para obtener los precios del curso
+  const { data: prices = [], refetch: refetchPrices } = useQuery({
+    queryKey: ['course-prices', courseId],
+    queryFn: async () => {
+      if (!courseId || !supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('course_prices')
+        .select('*')
+        .eq('course_id', courseId)
+        .order('currency_code', { ascending: true });
+      
+      if (error) throw error;
+      return data as CoursePrice[];
+    },
+    enabled: !!courseId
+  });
 
   // Auto-save mutation for course data
   const saveCourseDataMutation = useMutation({
@@ -88,6 +121,73 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
         title: "Error al guardar",
         description: "No se pudieron guardar los cambios del curso",
         variant: "destructive"
+      });
+    }
+  });
+
+  // Mutación para crear precio
+  const createPriceMutation = useMutation({
+    mutationFn: async () => {
+      if (!supabase || !courseId) throw new Error('No course selected');
+      if (!newPriceAmount || parseFloat(newPriceAmount) <= 0) {
+        throw new Error('El monto debe ser mayor a 0');
+      }
+
+      const { error } = await supabase
+        .from('course_prices')
+        .insert({
+          course_id: courseId,
+          currency_code: newPriceCurrency,
+          amount: parseFloat(newPriceAmount),
+          provider: newPriceProvider,
+          is_active: true
+        });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      refetchPrices();
+      setNewPriceAmount('');
+      setNewPriceProvider('any');
+      setNewPriceCurrency('ARS');
+      toast({
+        title: 'Precio agregado',
+        description: 'El precio se agregó correctamente.'
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo agregar el precio.',
+        variant: 'destructive'
+      });
+    }
+  });
+
+  // Mutación para eliminar precio
+  const deletePriceMutation = useMutation({
+    mutationFn: async (priceId: string) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+
+      const { error } = await supabase
+        .from('course_prices')
+        .delete()
+        .eq('id', priceId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      refetchPrices();
+      toast({
+        title: 'Precio eliminado',
+        description: 'El precio se eliminó correctamente.'
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo eliminar el precio.',
+        variant: 'destructive'
       });
     }
   });
@@ -183,6 +283,120 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
                 onChange={(e) => setShortDescription(e.target.value)}
                 rows={2}
               />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr className="border-t border-[var(--section-divider)] my-8" />
+
+      {/* Sección de Precios */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column - Precios */}
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <DollarSign className="h-5 w-5 text-[var(--accent)]" />
+            <h2 className="text-lg font-semibold">Precios del Curso</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Configura los precios según la moneda y el proveedor de pago. Puedes asignar diferentes precios para cada combinación de moneda y proveedor (MercadoPago, PayPal, o cualquiera).
+          </p>
+        </div>
+
+        {/* Right Column - Precios Content */}
+        <div>
+          <div className="space-y-4">
+            {/* Lista de precios existentes */}
+            {prices.length > 0 && (
+              <div className="space-y-2">
+                {prices.map((price) => (
+                  <div
+                    key={price.id}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="font-medium">
+                        {price.currency_code} ${Number(price.amount).toFixed(2)}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {price.provider === 'any' ? 'Cualquier proveedor' : 
+                         price.provider === 'mercadopago' ? 'MercadoPago' : 'PayPal'}
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deletePriceMutation.mutate(price.id)}
+                      disabled={deletePriceMutation.isPending}
+                      data-testid={`button-delete-price-${price.id}`}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {prices.length === 0 && (
+              <div className="text-sm text-muted-foreground p-4 border rounded-lg bg-muted/20">
+                No hay precios configurados para este curso
+              </div>
+            )}
+
+            {/* Formulario para agregar nuevo precio */}
+            <div className="grid grid-cols-4 gap-3 items-end">
+              <div>
+                <label className="text-sm font-medium mb-1 block">Proveedor</label>
+                <Select value={newPriceProvider} onValueChange={setNewPriceProvider}>
+                  <SelectTrigger data-testid="select-new-price-provider">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Cualquiera</SelectItem>
+                    <SelectItem value="mercadopago">MercadoPago</SelectItem>
+                    <SelectItem value="paypal">PayPal</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1 block">Moneda</label>
+                <Select value={newPriceCurrency} onValueChange={setNewPriceCurrency}>
+                  <SelectTrigger data-testid="select-new-price-currency">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ARS">ARS</SelectItem>
+                    <SelectItem value="USD">USD</SelectItem>
+                    <SelectItem value="EUR">EUR</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1 block">Monto</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={newPriceAmount}
+                  onChange={(e) => setNewPriceAmount(e.target.value)}
+                  placeholder="0.00"
+                  data-testid="input-new-price-amount"
+                />
+              </div>
+
+              <Button
+                type="button"
+                onClick={() => createPriceMutation.mutate()}
+                disabled={createPriceMutation.isPending || !newPriceAmount}
+                className="w-full"
+                data-testid="button-add-price"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Agregar
+              </Button>
             </div>
           </div>
         </div>
