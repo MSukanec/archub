@@ -23,6 +23,7 @@ interface CoursePrice {
   amount: number;
   provider: string;
   is_active: boolean;
+  months: number | null;
 }
 
 export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps) {
@@ -41,6 +42,7 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
   const [newPriceProvider, setNewPriceProvider] = useState('any')
   const [newPriceCurrency, setNewPriceCurrency] = useState('ARS')
   const [newPriceAmount, setNewPriceAmount] = useState('')
+  const [newPriceMonths, setNewPriceMonths] = useState('')
 
   // Get course data
   const { data: courseData } = useQuery({
@@ -133,6 +135,15 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
         throw new Error('El monto debe ser mayor a 0');
       }
 
+      let monthsValue = null;
+      if (newPriceMonths) {
+        const parsed = parseInt(newPriceMonths);
+        if (Number.isNaN(parsed)) {
+          throw new Error('La cantidad de meses debe ser un número válido');
+        }
+        monthsValue = parsed;
+      }
+
       const { error } = await supabase
         .from('course_prices')
         .insert({
@@ -140,7 +151,8 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
           currency_code: newPriceCurrency,
           amount: parseFloat(newPriceAmount),
           provider: newPriceProvider,
-          is_active: true
+          is_active: true,
+          months: monthsValue
         });
 
       if (error) throw error;
@@ -148,6 +160,7 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
     onSuccess: () => {
       refetchPrices();
       setNewPriceAmount('');
+      setNewPriceMonths('');
       setNewPriceProvider('any');
       setNewPriceCurrency('ARS');
       toast({
@@ -299,7 +312,7 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
             <h2 className="text-lg font-semibold">Precios del Curso</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Configura los precios según la moneda y el proveedor de pago. Puedes asignar diferentes precios para cada combinación de moneda y proveedor (MercadoPago, PayPal, o cualquiera).
+            Configura los precios según la moneda y el proveedor de pago. Puedes asignar diferentes precios para cada combinación de moneda y proveedor (MercadoPago, PayPal, o cualquiera). También puedes especificar la duración de la suscripción en meses.
           </p>
         </div>
 
@@ -314,7 +327,7 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
                     key={price.id}
                     className="flex items-center justify-between p-3 border rounded-lg"
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 flex-wrap">
                       <div className="font-medium">
                         {price.currency_code} ${Number(price.amount).toFixed(2)}
                       </div>
@@ -322,6 +335,11 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
                         {price.provider === 'any' ? 'Cualquier proveedor' : 
                          price.provider === 'mercadopago' ? 'MercadoPago' : 'PayPal'}
                       </div>
+                      {price.months !== null && (
+                        <Badge variant="secondary" className="text-xs">
+                          {price.months} {price.months === 1 ? 'mes' : 'meses'}
+                        </Badge>
+                      )}
                     </div>
                     <Button
                       type="button"
@@ -345,46 +363,63 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
             )}
 
             {/* Formulario para agregar nuevo precio */}
-            <div className="grid grid-cols-4 gap-3 items-end">
-              <div>
-                <label className="text-sm font-medium mb-1 block">Proveedor</label>
-                <Select value={newPriceProvider} onValueChange={setNewPriceProvider}>
-                  <SelectTrigger data-testid="select-new-price-provider">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="any">Cualquiera</SelectItem>
-                    <SelectItem value="mercadopago">MercadoPago</SelectItem>
-                    <SelectItem value="paypal">PayPal</SelectItem>
-                  </SelectContent>
-                </Select>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Proveedor</label>
+                  <Select value={newPriceProvider} onValueChange={setNewPriceProvider}>
+                    <SelectTrigger data-testid="select-new-price-provider">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="any">Cualquiera</SelectItem>
+                      <SelectItem value="mercadopago">MercadoPago</SelectItem>
+                      <SelectItem value="paypal">PayPal</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Moneda</label>
+                  <Select value={newPriceCurrency} onValueChange={setNewPriceCurrency}>
+                    <SelectTrigger data-testid="select-new-price-currency">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ARS">ARS</SelectItem>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              <div>
-                <label className="text-sm font-medium mb-1 block">Moneda</label>
-                <Select value={newPriceCurrency} onValueChange={setNewPriceCurrency}>
-                  <SelectTrigger data-testid="select-new-price-currency">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ARS">ARS</SelectItem>
-                    <SelectItem value="USD">USD</SelectItem>
-                    <SelectItem value="EUR">EUR</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Monto</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={newPriceAmount}
+                    onChange={(e) => setNewPriceAmount(e.target.value)}
+                    placeholder="0.00"
+                    data-testid="input-new-price-amount"
+                  />
+                </div>
 
-              <div>
-                <label className="text-sm font-medium mb-1 block">Monto</label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={newPriceAmount}
-                  onChange={(e) => setNewPriceAmount(e.target.value)}
-                  placeholder="0.00"
-                  data-testid="input-new-price-amount"
-                />
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Meses (opcional)</label>
+                  <Input
+                    type="number"
+                    step="1"
+                    min="0"
+                    value={newPriceMonths}
+                    onChange={(e) => setNewPriceMonths(e.target.value)}
+                    placeholder="Ej: 1, 3, 6, 12"
+                    data-testid="input-new-price-months"
+                  />
+                </div>
               </div>
 
               <Button
@@ -395,7 +430,7 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
                 data-testid="button-add-price"
               >
                 <Plus className="h-4 w-4 mr-1" />
-                Agregar
+                Agregar Precio
               </Button>
             </div>
           </div>

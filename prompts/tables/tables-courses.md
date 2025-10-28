@@ -21,22 +21,19 @@ create table public.courses (
 
 Tabla COURSE_MODULES:
 
-create table public.courses (
+create table public.course_modules (
   id uuid not null default gen_random_uuid (),
-  slug text not null,
+  course_id uuid not null,
   title text not null,
-  short_description text null,
-  long_description text null,
-  cover_url text null,
-  is_active boolean not null default true,
-  visibility text not null default 'public'::text,
-  created_by uuid null,
+  sort_index integer not null default 0,
   created_at timestamp with time zone not null default now(),
   updated_at timestamp with time zone not null default now(),
-  constraint courses_pkey primary key (id),
-  constraint courses_slug_key unique (slug),
-  constraint courses_created_by_fkey foreign KEY (created_by) references users (id) on delete set null
+  description text null,
+  constraint course_modules_pkey primary key (id),
+  constraint course_modules_course_id_fkey foreign KEY (course_id) references courses (id) on delete CASCADE
 ) TABLESPACE pg_default;
+
+create index IF not exists course_modules_course_id_sort_index_idx on public.course_modules using btree (course_id, sort_index) TABLESPACE pg_default;
 
 Tabla COURSE_LESSONS:
 
@@ -151,6 +148,7 @@ create table public.course_prices (
   is_active boolean not null default true,
   created_at timestamp with time zone not null default now(),
   updated_at timestamp with time zone not null default now(),
+  months integer null,
   constraint course_prices_pkey primary key (id),
   constraint course_prices_unique_per_provider unique (course_id, currency_code, provider),
   constraint course_prices_course_id_fkey foreign KEY (course_id) references courses (id) on delete CASCADE,
@@ -158,6 +156,12 @@ create table public.course_prices (
   constraint course_prices_currency_chk check (
     (
       currency_code = any (array['ARS'::text, 'USD'::text, 'EUR'::text])
+    )
+  ),
+  constraint course_prices_months_check check (
+    (
+      (months is null)
+      or (months >= 0)
     )
   )
 ) TABLESPACE pg_default;
