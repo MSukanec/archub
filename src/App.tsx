@@ -78,6 +78,8 @@ import LearningDashboard from "@/pages/learning/dashboard/LearningDashboard";
 import CourseList from "@/pages/learning/course/CourseList";
 import CourseView from "@/pages/learning/course/CourseView";
 import PaymentReturn from "@/pages/learning/PaymentReturn";
+import PayPalReturn from "@/pages/checkout/paypal/PayPalReturn";
+import PayPalCancel from "@/pages/checkout/paypal/PayPalCancel";
 
 // Notifications
 import Notifications from "@/pages/Notifications";
@@ -168,6 +170,8 @@ function Router() {
         <Route path="/learning/courses" component={CourseList} />
         <Route path="/learning/courses/:id" component={CourseView} />
         <Route path="/learning/retorno" component={PaymentReturn} />
+        <Route path="/checkout/paypal/return" component={PayPalReturn} />
+        <Route path="/checkout/paypal/cancel" component={PayPalCancel} />
 
         {/* Finances Routes */}
         <Route path="/finances/dashboard" component={FinancesCapitalMovements} />
