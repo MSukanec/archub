@@ -4,6 +4,7 @@ export type PriceRow = {
   amount: number;
   currency_code: string;
   provider: string | null;
+  months: number | null;
 };
 
 /**
@@ -22,7 +23,7 @@ export async function getCoursePriceBySlug(
   // A) provider específico + currency
   const qA = await supabase
     .from("course_prices")
-    .select("amount, currency_code, provider, courses!inner(slug)")
+    .select("amount, currency_code, provider, months, courses!inner(slug)")
     .eq("courses.slug", courseSlug)
     .eq("is_active", true)
     .eq("currency_code", currency)
@@ -34,14 +35,15 @@ export async function getCoursePriceBySlug(
     return {
       amount: Number(qA.data.amount),
       currency_code: qA.data.currency_code,
-      provider: qA.data.provider
+      provider: qA.data.provider,
+      months: qA.data.months
     };
   }
 
   // B) provider "any" + currency
   const qB = await supabase
     .from("course_prices")
-    .select("amount, currency_code, provider, courses!inner(slug)")
+    .select("amount, currency_code, provider, months, courses!inner(slug)")
     .eq("courses.slug", courseSlug)
     .eq("is_active", true)
     .eq("currency_code", currency)
@@ -53,7 +55,8 @@ export async function getCoursePriceBySlug(
     return {
       amount: Number(qB.data.amount),
       currency_code: qB.data.currency_code,
-      provider: qB.data.provider
+      provider: qB.data.provider,
+      months: qB.data.months
     };
   }
 

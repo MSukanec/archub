@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import mercadoPagoLogo from "/MercadoPago_logo.png";
 import paypalLogo from "/Paypal_2014_logo.png";
 import { useCoursePrice } from "@/hooks/useCoursePrice";
+import { getApiBase } from "@/utils/apiBase";
 
 interface PaymentMethodModalProps {
   courseSlug: string;
@@ -192,7 +193,8 @@ export default function PaymentMethodModal({
         ? appliedCoupon.final_price
         : priceData?.amount || 0;
       if (currentFinalPrice === 0) {
-        const response = await fetch("/api/checkout/free-enroll", {
+        const API_BASE = getApiBase();
+        const response = await fetch(`${API_BASE}/api/checkout/free-enroll`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -240,14 +242,15 @@ export default function PaymentMethodModal({
       }
 
       // Llamada al nuevo endpoint en Vercel
-      const res = await fetch("/api/mp/create-preference", {
+      const API_BASE = getApiBase();
+      const res = await fetch(`${API_BASE}/api/mp/create-preference`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: userRecord.id,
           course_slug: courseSlug,
           currency: "ARS",
-          months: 12, // Suscripción anual (365 días). Podés parametrizarlo si querés.
+          months: priceData?.months || 12, // Usa los meses del precio o 12 por defecto
         }),
       });
 
@@ -318,7 +321,8 @@ export default function PaymentMethodModal({
       const courseTitle = (priceData as any)?.courses?.title || courseSlug;
       const description = `${courseTitle} - Suscripción Anual`;
 
-      const res = await fetch("/api/paypal/create-order", {
+      const API_BASE = getApiBase();
+      const res = await fetch(`${API_BASE}/api/paypal/create-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
