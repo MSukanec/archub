@@ -3622,6 +3622,293 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============================================
+  // PayPal Integration Routes
+  // ============================================
+  
+  // Helper functions for PayPal (adapted from api/paypal/_utils.ts)
+  function getPayPalBaseUrl() {
+    return process.env.PAYPAL_BASE_URL || 'https://api-m.paypal.com';
+  }
+
+  async function getPayPalAccessToken() {
+    const id = process.env.PAYPAL_CLIENT_ID;
+    const secret = process.env.PAYPAL_CLIENT_SECRET;
+    
+    if (!id || !secret) {
+      throw new Error('PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET are required. Please set them in your environment variables.');
+    }
+    
+    const tokenRes = await fetch(`${getPayPalBaseUrl()}/v1/oauth2/token`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Basic ' + Buffer.from(`${id}:${secret}`).toString('base64'),
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: 'grant_type=client_credentials',
+    });
+    
+    if (!tokenRes.ok) {
+      const text = await tokenRes.text();
+      throw new Error(`PayPal token error: ${tokenRes.status} ${text}`);
+    }
+    
+    const json = await tokenRes.json();
+    return json.access_token as string;
+  }
+
+  async function paypalFetch(path: string, opts: RequestInit & { accessToken?: string } = {}) {
+    const token = opts.accessToken ?? (await getPayPalAccessToken());
+    const res = await fetch(`${getPayPalBaseUrl()}${path}`, {
+      ...opts,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        ...(opts.headers || {}),
+      },
+    });
+    const body = await res.text();
+    let json: any;
+    try { json = body ? JSON.parse(body) : null; } catch { json = body; }
+    if (!res.ok) throw new Error(`PayPal ${path} ${res.status}: ${body}`);
+    return json;
+  }
+
+  async function getCoursePriceUSD(course_slug: string) {
+    const { data, error } = await getAdminClient()
+      .from('course_prices')
+      .select('currency_code, amount, courses!inner(slug)')
+      .eq('courses.slug', course_slug)
+      .eq('provider', 'paypal')
+      .eq('is_active', true)
+      .single();
+    
+    if (error || !data) {
+      throw new Error(`Precio no encontrado para ${course_slug} (paypal)`);
+    }
+    
+    return { currency: data.currency_code || 'USD', amount: String(data.amount) };
+  }
+
+  async function logPayPalPayment(payload: {
+    payment_id: string;
+    status: string;
+    amount: string;
+    currency: string;
+    user_id?: string | null;
+    course_slug?: string | null;
+    raw?: any;
+  }) {
+    await getAdminClient().from('payments_log').insert({
+      provider: 'paypal',
+      payment_id: payload.payment_id,
+      status: payload.status,
+      amount: payload.amount,
+      currency: payload.currency,
+      user_id: payload.user_id ?? null,
+      course_slug: payload.course_slug ?? null,
+      raw: payload.raw ?? null,
+    });
+  }
+
+  async function enrollUserInCourse(user_id: string, course_slug: string) {
+    await getAdminClient().from('course_enrollments').upsert(
+      { user_id, course_slug, started_at: new Date().toISOString() },
+      { onConflict: 'user_id,course_slug' }
+    );
+  }
+
+  // POST /api/paypal/create-order
+  app.post("/api/paypal/create-order", async (req, res) => {
+    try {
+      const { user_id, course_slug } = req.body || {};
+      
+      if (!user_id || !course_slug) {
+        return res.status(400).json({ error: 'Faltan user_id o course_slug' });
+      }
+
+      const { currency, amount } = await getCoursePriceUSD(course_slug);
+
+      const custom = JSON.stringify({ user_id, course_slug });
+
+      const protocol = req.headers['x-forwarded-proto'] || (req.secure ? 'https' : 'http');
+      const host = req.headers['x-forwarded-host'] || req.headers['host'];
+      const baseUrl = `${protocol}://${host}`;
+
+      const order = await paypalFetch('/v2/checkout/orders', {
+        method: 'POST',
+        body: JSON.stringify({
+          intent: 'CAPTURE',
+          purchase_units: [
+            {
+              amount: { currency_code: currency, value: amount },
+              custom_id: custom,
+            },
+          ],
+          application_context: {
+            shipping_preference: 'NO_SHIPPING',
+            user_action: 'PAY_NOW',
+            return_url: `${baseUrl}/api/paypal/capture-and-redirect?course_slug=${encodeURIComponent(course_slug)}`,
+            cancel_url: `${baseUrl}/learning/courses/${encodeURIComponent(course_slug)}`
+          },
+        }),
+      });
+
+      const approvalLink = order.links?.find((link: any) => link.rel === 'approve')?.href;
+
+      return res.json({ 
+        orderID: order.id,
+        approvalUrl: approvalLink 
+      });
+    } catch (error: any) {
+      console.error('Error creating PayPal order:', error);
+      return res.status(500).json({ error: error.message || 'Error creando orden' });
+    }
+  });
+
+  // POST /api/paypal/capture-order
+  app.post("/api/paypal/capture-order", async (req, res) => {
+    try {
+      const { orderID } = req.body || {};
+      
+      if (!orderID) {
+        return res.status(400).json({ error: 'Falta orderID' });
+      }
+
+      const capture = await paypalFetch(`/v2/checkout/orders/${orderID}/capture`, {
+        method: 'POST',
+        body: '',
+      });
+
+      return res.json(capture);
+    } catch (error: any) {
+      console.error('Error capturing PayPal order:', error);
+      return res.status(500).json({ error: error.message || 'Error capturando orden' });
+    }
+  });
+
+  // GET /api/paypal/capture-and-redirect
+  app.get("/api/paypal/capture-and-redirect", async (req, res) => {
+    try {
+      const token = req.query.token as string;
+      const course_slug = req.query.course_slug as string;
+
+      if (!token) {
+        return res.status(400).send('Missing token parameter');
+      }
+
+      const capture = await paypalFetch(`/v2/checkout/orders/${token}/capture`, {
+        method: 'POST',
+        body: '',
+      });
+
+      const captureId = capture.purchase_units?.[0]?.payments?.captures?.[0]?.id;
+      const status = capture.status;
+      const amount = capture.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value;
+      const currency = capture.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.currency_code;
+      const customRaw = capture.purchase_units?.[0]?.payments?.captures?.[0]?.custom_id;
+
+      let custom: { user_id?: string; course_slug?: string } = {};
+      if (customRaw) {
+        try { custom = JSON.parse(customRaw); } catch { }
+      }
+
+      await logPayPalPayment({
+        payment_id: captureId || token,
+        status,
+        amount: String(amount || '0'),
+        currency: currency || 'USD',
+        user_id: custom.user_id,
+        course_slug: custom.course_slug || course_slug,
+        raw: capture,
+      });
+
+      if (status === 'COMPLETED' && custom.user_id && (custom.course_slug || course_slug)) {
+        await enrollUserInCourse(custom.user_id, custom.course_slug || course_slug);
+      }
+
+      const finalSlug = custom.course_slug || course_slug || 'unknown';
+      return res.redirect(307, `/learning/payment-return?status=success&provider=paypal&course=${encodeURIComponent(finalSlug)}`);
+    } catch (error: any) {
+      console.error('Error in capture-and-redirect:', error);
+      return res.redirect(307, `/learning/payment-return?status=error&provider=paypal&message=${encodeURIComponent(error.message)}`);
+    }
+  });
+
+  // POST /api/paypal/webhook
+  app.post("/api/paypal/webhook", async (req, res) => {
+    try {
+      const webhookId = process.env.PAYPAL_WEBHOOK_ID;
+      
+      if (!webhookId) {
+        console.warn('PAYPAL_WEBHOOK_ID not configured, skipping signature verification');
+      } else {
+        const token = await getPayPalAccessToken();
+        const verifyRes = await fetch(`${getPayPalBaseUrl()}/v1/notifications/verify-webhook-signature`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            transmission_id: req.headers['paypal-transmission-id'],
+            transmission_time: req.headers['paypal-transmission-time'],
+            cert_url: req.headers['paypal-cert-url'],
+            auth_algo: req.headers['paypal-auth-algo'],
+            transmission_sig: req.headers['paypal-transmission-sig'],
+            webhook_id: webhookId,
+            webhook_event: req.body,
+          }),
+        });
+
+        const verifyJson = await verifyRes.json();
+        if (verifyJson.verification_status !== 'SUCCESS') {
+          console.error('PayPal webhook verification failed:', verifyJson);
+          return res.status(400).send('Verification failed');
+        }
+      }
+
+      const event = req.body;
+      console.log('PayPal webhook event:', event.event_type);
+
+      if (event.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
+        const capture = event.resource;
+        const captureId = capture.id;
+        const amount = capture.amount?.value;
+        const currency = capture.amount?.currency_code;
+        const customRaw = capture.custom_id;
+
+        let custom: { user_id?: string; course_slug?: string } = {};
+        if (customRaw) {
+          try { custom = JSON.parse(customRaw); } catch { }
+        }
+
+        await logPayPalPayment({
+          payment_id: captureId,
+          status: 'COMPLETED',
+          amount: String(amount || '0'),
+          currency: currency || 'USD',
+          user_id: custom.user_id,
+          course_slug: custom.course_slug,
+          raw: capture,
+        });
+
+        if (custom.user_id && custom.course_slug) {
+          await enrollUserInCourse(custom.user_id, custom.course_slug);
+        }
+      }
+
+      return res.status(200).send('OK');
+    } catch (error: any) {
+      console.error('PayPal webhook error:', error);
+      return res.status(500).send('Internal error');
+    }
+  });
+
+  // ============================================
+  // End PayPal Integration Routes
+  // ============================================
+
   // TEMPORARY DEBUG ENDPOINT
   app.get("/api/debug/user-info", async (req, res) => {
     try {
