@@ -76,6 +76,7 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/courses', courseId] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/courses'] });
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
       toast({
         title: "Cambios guardados",
         description: "Los datos del curso se han guardado automáticamente"
