@@ -39,12 +39,16 @@ function must(name: string) {
   return v;
 }
 
+function optional(name: string, defaultValue: string = "") {
+  return process.env[name] || defaultValue;
+}
+
 const ENV = {
   SUPABASE_URL: must("SUPABASE_URL"),
   SUPABASE_SERVICE_ROLE_KEY: must("SUPABASE_SERVICE_ROLE_KEY"),
   MP_ACCESS_TOKEN: must("MP_ACCESS_TOKEN"),
-  MP_WEBHOOK_SECRET: must("MP_WEBHOOK_SECRET"),
-  CHECKOUT_RETURN_URL_BASE: must("CHECKOUT_RETURN_URL_BASE"),
+  MP_WEBHOOK_SECRET: optional("MP_WEBHOOK_SECRET", "dev-secret"),
+  CHECKOUT_RETURN_URL_BASE: optional("CHECKOUT_RETURN_URL_BASE", "/learning/payment-return"),
 };
 
 const supabaseAdmin = createClient(
