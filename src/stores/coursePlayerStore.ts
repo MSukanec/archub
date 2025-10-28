@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-type TabName = "Dashboard" | "Contenido" | "Lecciones" | "Apuntes" | "Marcadores";
+type TabName = "Visión General" | "Contenido" | "Lecciones" | "Apuntes" | "Marcadores";
 
 type State = {
   activeTab: TabName;
@@ -13,7 +13,7 @@ type State = {
 };
 
 const initialState = {
-  activeTab: "Dashboard" as TabName,
+  activeTab: "Visión General" as TabName,
   currentLessonId: null,
   pendingSeek: null,
 };

@@ -30,7 +30,7 @@ export default function CourseView() {
   const lessonParam = urlParams.get('lesson');
   const seekParam = urlParams.get('seek');
   
-  const [activeTab, setActiveTab] = useState(tabParam || storeActiveTab || 'Dashboard');
+  const [activeTab, setActiveTab] = useState(tabParam || storeActiveTab || 'Visión General');
   
   // Initialize store with URL tab param if present (runs on mount AND when URL changes)
   useEffect(() => {
@@ -64,7 +64,7 @@ export default function CourseView() {
     setActiveTab(newTab);
     setStoreActiveTab(newTab as any);
     // Update URL with tab parameter for deep linking support
-    if (newTab === 'Dashboard') {
+    if (newTab === 'Visión General') {
       // Clear params for default tab
       navigate(`/learning/courses/${id}`);
     } else {
@@ -97,9 +97,9 @@ export default function CourseView() {
 
   const headerTabs = [
     {
-      id: 'Dashboard',
-      label: 'Dashboard',
-      isActive: activeTab === 'Dashboard'
+      id: 'Visión General',
+      label: 'Visión General',
+      isActive: activeTab === 'Visión General'
     },
     {
       id: 'Contenido',
@@ -144,7 +144,7 @@ export default function CourseView() {
     isViewMode: true,
     tabs: headerTabs,
     onTabChange: handleTabChange,
-    ...(activeTab === 'Dashboard' && {
+    ...(activeTab === 'Visión General' && {
       actions: [
         <Button
           key="continue"
@@ -223,7 +223,7 @@ export default function CourseView() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'Dashboard':
+      case 'Visión General':
         return <CourseDashboardTab courseId={course?.id} />;
       case 'Contenido':
         return <CourseContentTab courseId={course?.id} />;

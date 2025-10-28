@@ -254,7 +254,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     }
 
     return {
-      progressPct: Math.round(Number(progressPct)),
+      progressPct: Number(progressPct).toFixed(1),
       doneLessons,
       totalLessons,
       studyTimeFormatted,
@@ -292,9 +292,9 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
 
       {/* Top Row - Main Stats */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Progress Card - No clickeable */}
-        <StatCard>
-          <StatCardTitle showArrow={false}>Progreso Total</StatCardTitle>
+        {/* Progress Card - Navega a Lecciones */}
+        <StatCard onCardClick={() => navigateToTab('Lecciones')}>
+          <StatCardTitle>Progreso Total</StatCardTitle>
           <StatCardValue>{stats.progressPct}%</StatCardValue>
           <StatCardMeta>
             {stats.doneLessons} de {stats.totalLessons} lecciones
