@@ -1,50 +1,113 @@
+// /api/paypal/create-order.ts (Node runtime, NO EDGE)
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { corsHeaders, err, ok, getCoursePriceUSD, paypalFetch } from './_utils';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === 'OPTIONS') return res.status(200).setHeader('Access-Control-Allow-Headers', corsHeaders['Access-Control-Allow-Headers']).setHeader('Access-Control-Allow-Methods', corsHeaders['Access-Control-Allow-Methods']).setHeader('Access-Control-Allow-Origin', corsHeaders['Access-Control-Allow-Origin']).end('ok');
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const cors = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
+
+  if (req.method === "OPTIONS") {
+    Object.entries(cors).forEach(([key, value]) => res.setHeader(key, value));
+    return res.status(200).send("ok");
+  }
+  if (req.method !== "POST") {
+    Object.entries(cors).forEach(([key, value]) => res.setHeader(key, value));
+    return res.status(405).json({ ok: false, error: "Method not allowed" });
+  }
 
   try {
-    if (req.method !== 'POST') return err(res, 'Method not allowed', 405);
-    const { user_id, course_slug } = req.body || {};
-    if (!user_id || !course_slug) return err(res, 'Faltan user_id o course_slug');
+    // Body mínimo: { order_id, amountUsd, description }
+    // Si no me mandan amount/description desde el front, poné defaults temporales.
+    const { order_id, amountUsd, description } = req.body ?? {};
+    if (!order_id) throw new Error("Falta 'order_id'");
 
-    const { currency, amount } = await getCoursePriceUSD(course_slug);
+    const cid = process.env.PAYPAL_CLIENT_ID;
+    const csec = process.env.PAYPAL_CLIENT_SECRET;
+    const env = (process.env.PAYPAL_ENV || "sandbox").toLowerCase();
+    const base =
+      process.env.PAYPAL_BASE_URL ||
+      (env === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com");
 
-    const custom = JSON.stringify({ user_id, course_slug });
+    if (!cid || !csec) throw new Error("Faltan PAYPAL_CLIENT_ID o PAYPAL_CLIENT_SECRET");
 
-    const baseUrl = req.headers['x-forwarded-proto'] 
-      ? `${req.headers['x-forwarded-proto']}://${req.headers['x-forwarded-host'] || req.headers['host']}`
-      : `https://${req.headers['host']}`;
+    // 1) OAuth
+    const auth = Buffer.from(`${cid}:${csec}`).toString("base64");
+    const tokenResp = await fetch(`${base}/v1/oauth2/token`, {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: "grant_type=client_credentials",
+    });
 
-    const order = await paypalFetch('/v2/checkout/orders', {
-      method: 'POST',
+    const tokenText = await tokenResp.text();
+    if (!tokenResp.ok) {
+      // PayPal devuelve JSON, pero si por algún motivo no lo es, igual lo registramos
+      console.error("PayPal OAuth error:", tokenResp.status, tokenText);
+      Object.entries(cors).forEach(([key, value]) => res.setHeader(key, value));
+      return res.status(500).json({
+        ok: false,
+        error: `OAuth PayPal falló: ${tokenResp.status}`,
+        details: tokenText,
+      });
+    }
+    const tokenJson = JSON.parse(tokenText);
+    const access_token = tokenJson.access_token;
+    if (!access_token) throw new Error("No se obtuvo 'access_token' de PayPal");
+
+    // 2) Create Order
+    const value = typeof amountUsd === "number" ? amountUsd.toFixed(2) : "169.00"; // default temporal
+    const desc = description || `Order ${order_id}`;
+
+    const createResp = await fetch(`${base}/v2/checkout/orders`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
-        intent: 'CAPTURE',
+        intent: "CAPTURE",
         purchase_units: [
           {
-            amount: { currency_code: currency, value: amount },
-            custom_id: custom,
+            amount: { currency_code: "USD", value },
+            description: desc,
           },
         ],
         application_context: {
-          shipping_preference: 'NO_SHIPPING',
-          user_action: 'PAY_NOW',
-          return_url: `${baseUrl}/api/paypal/capture-and-redirect?course_slug=${encodeURIComponent(course_slug)}`,
-          cancel_url: `${baseUrl}/learning/courses/${encodeURIComponent(course_slug)}`
+          brand_name: "Archub",
+          user_action: "PAY_NOW",
         },
       }),
     });
 
-    // Find the approval link from the order response
-    const approvalLink = order.links?.find((link: any) => link.rel === 'approve')?.href;
-    
-    return ok(res, { 
-      orderID: order.id,
-      approvalUrl: approvalLink 
-    });
+    const createText = await createResp.text();
+    // PayPal responde JSON; si no, igual parseamos defensivo
+    let createJson: any;
+    try {
+      createJson = JSON.parse(createText);
+    } catch {
+      createJson = { raw: createText };
+    }
+
+    if (!createResp.ok) {
+      console.error("PayPal Create Order error:", createResp.status, createJson);
+      Object.entries(cors).forEach(([key, value]) => res.setHeader(key, value));
+      return res
+        .status(500)
+        .json({ ok: false, error: `CreateOrder falló: ${createResp.status}`, details: createJson });
+    }
+
+    Object.entries(cors).forEach(([key, value]) => res.setHeader(key, value));
+    return res.status(200).json({ ok: true, paypal_order: createJson });
   } catch (e: any) {
-    return err(res, e.message || 'Error creando orden', 500);
+    console.error("create-order ERROR:", e);
+    res.setHeader("Content-Type", "application/json");
+    Object.entries(cors).forEach(([key, value]) => res.setHeader(key, value));
+    return res
+      .status(500)
+      .send(JSON.stringify({ ok: false, error: e?.message ?? "Unknown error" }));
   }
 }

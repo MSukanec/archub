@@ -274,34 +274,46 @@ export default function PaymentMethodModal({
         throw new Error('No se pudo obtener el ID del usuario');
       }
 
-      // Create PayPal order
-      const createOrderResponse = await fetch('/api/paypal/create-order', {
+      // Generate unique order ID
+      const order_id = `${userRecord.id}_${courseSlug}_${Date.now()}`;
+      
+      // Get amount from priceData if available
+      const amountUsd = priceData?.amount ? Number(priceData.amount) : undefined;
+      const courseTitle = (priceData as any)?.courses?.title || courseSlug;
+      const description = `${courseTitle} - Suscripción Anual`;
+
+      // Create PayPal order using robust pattern
+      const res = await fetch('/api/paypal/create-order', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify({
-          user_id: userRecord.id,
-          course_slug: courseSlug
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id, amountUsd, description }),
       });
 
-      const orderData = await createOrderResponse.json();
-
-      if (!createOrderResponse.ok) {
-        console.error('Error al crear orden de PayPal:', orderData);
-        throw new Error(orderData?.error || 'No se pudo crear la orden de PayPal');
+      const text = await res.text();
+      let payload: any;
+      try {
+        payload = JSON.parse(text);
+      } catch {
+        payload = { ok: false, error: text };
       }
 
-      const approvalUrl = orderData.approvalUrl;
+      if (!res.ok || !payload?.ok) {
+        console.error('Error al crear orden de PayPal:', payload);
+        throw new Error(payload?.error || `HTTP ${res.status}`);
+      }
+
+      const paypal_order = payload.paypal_order;
       
-      if (!approvalUrl) {
+      // Extract approval URL from PayPal order
+      const approvalLink = paypal_order?.links?.find((link: any) => link.rel === 'approve');
+      
+      if (!approvalLink?.href) {
+        console.error('PayPal order sin approval link:', paypal_order);
         throw new Error('No se recibió la URL de aprobación de PayPal');
       }
 
-      // Redirect to PayPal approval URL (sandbox or production based on backend config)
-      window.location.href = approvalUrl;
+      // Redirect to PayPal approval URL
+      window.location.href = approvalLink.href;
       
     } catch (error: any) {
       toast({
