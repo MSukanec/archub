@@ -1,24 +1,29 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui/stat-card'
 import { BookOpen, CheckCircle, Clock, FileText, Bookmark, Megaphone, Info } from 'lucide-react'
 import { DiscordWidget } from '@/components/learning/DiscordWidget'
 import { useLocation, useParams } from 'wouter'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useCoursePlayerStore } from '@/stores/coursePlayerStore'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { ProgressChart } from '@/components/charts/courses/ProgressChart'
+import { Button } from '@/components/ui/button'
 
 interface CourseDashboardTabProps {
   courseId?: string;
 }
 
+type Period = 'Semana' | 'Mes' | 'Trimestre' | 'Año';
+
 export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps) {
   const [, navigate] = useLocation();
   const { id: courseSlug } = useParams<{ id: string }>();
   const goToLesson = useCoursePlayerStore(s => s.goToLesson);
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Mes');
 
   // Handler to navigate to a specific tab
   const navigateToTab = (tab: string) => {
@@ -333,6 +338,64 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     enabled: !!courseId && !!supabase
   });
 
+  // Get lesson progress history for chart
+  const { data: progressHistory = [] } = useQuery({
+    queryKey: ['progress-history', courseId],
+    queryFn: async () => {
+      if (!courseId || !supabase) return [];
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return [];
+
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser?.email) return [];
+
+      const { data: userRecord } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', authUser.id)
+        .single();
+
+      if (!userRecord) return [];
+
+      // Get all modules for this course
+      const { data: courseModules } = await supabase
+        .from('course_modules')
+        .select('id')
+        .eq('course_id', courseId);
+
+      if (!courseModules || courseModules.length === 0) return [];
+
+      const moduleIds = courseModules.map(m => m.id);
+
+      // Get all lessons for these modules
+      const { data: courseLessons } = await supabase
+        .from('course_lessons')
+        .select('id')
+        .in('module_id', moduleIds);
+
+      if (!courseLessons || courseLessons.length === 0) return [];
+
+      const lessonIds = courseLessons.map(l => l.id);
+
+      // Get all progress records for these lessons
+      const { data, error } = await supabase
+        .from('course_lesson_progress')
+        .select('updated_at, last_position_sec, is_completed')
+        .eq('user_id', userRecord.id)
+        .in('lesson_id', lessonIds)
+        .order('updated_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching progress history:', error);
+        return [];
+      }
+
+      return data || [];
+    },
+    enabled: !!courseId && !!supabase
+  });
+
   // Get user's study time this month from v_user_study_time
   const { data: monthlyStudyTime } = useQuery({
     queryKey: ['monthly-study-time'],
@@ -503,6 +566,31 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
           <DiscordWidget />
         </div>
       </div>
+
+      {/* Progress Chart */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg font-semibold">Progreso</CardTitle>
+            <div className="flex gap-2">
+              {(['Semana', 'Mes', 'Trimestre', 'Año'] as Period[]).map((period) => (
+                <Button
+                  key={period}
+                  variant={selectedPeriod === period ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setSelectedPeriod(period)}
+                  className={selectedPeriod === period ? '' : 'text-muted-foreground'}
+                >
+                  {period}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <ProgressChart progressData={progressHistory} selectedPeriod={selectedPeriod} />
+        </CardContent>
+      </Card>
 
       {/* Top Row - Main Stats */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
