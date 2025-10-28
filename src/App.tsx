@@ -78,6 +78,7 @@ import LearningDashboard from "@/pages/learning/dashboard/LearningDashboard";
 import CourseList from "@/pages/learning/course/CourseList";
 import CourseView from "@/pages/learning/course/CourseView";
 import PaymentReturn from "@/pages/learning/PaymentReturn";
+import Checkout from "@/pages/Checkout";
 
 // Notifications
 import Notifications from "@/pages/Notifications";
@@ -164,10 +165,12 @@ function Router() {
         <Route path="/analysis/materials/:id" component={MaterialsView} />
         
         {/* Learning Routes */}
+        <Route path="/checkout/:courseSlug" component={Checkout} />
         <Route path="/learning/dashboard" component={LearningDashboard} />
         <Route path="/learning/courses" component={CourseList} />
         <Route path="/learning/courses/:id" component={CourseView} />
         <Route path="/learning/retorno" component={PaymentReturn} />
+        <Route path="/learning/payment-return" component={PaymentReturn} />
 
         {/* Finances Routes */}
         <Route path="/finances/dashboard" component={FinancesCapitalMovements} />

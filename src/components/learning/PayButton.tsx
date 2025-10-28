@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { ShoppingCart } from 'lucide-react';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useLocation } from 'wouter';
 
 interface PayButtonProps {
   courseSlug: string;
@@ -17,13 +17,10 @@ export default function PayButton({
   variant = 'default',
   size = 'sm'
 }: PayButtonProps) {
-  const { openModal } = useGlobalModalStore();
+  const [, navigate] = useLocation();
 
   const handlePay = () => {
-    openModal('payment-method', {
-      courseSlug,
-      currency
-    });
+    navigate(`/checkout/${courseSlug}`);
   };
 
   return (
