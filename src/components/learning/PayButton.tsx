@@ -35,7 +35,7 @@ export default function PayButton({
       data-testid="button-pay-course"
     >
       <ShoppingCart className="h-4 w-4 mr-1" />
-      Comprar
+      Suscribirme
     </Button>
   );
 }

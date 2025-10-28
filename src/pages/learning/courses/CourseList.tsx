@@ -7,7 +7,6 @@ import { useQuery } from '@tanstack/react-query'
 import { useLocation } from 'wouter'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { format } from 'date-fns'
@@ -186,32 +185,59 @@ export default function CourseList() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as CourseTabFilter)} className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
-            <TabsTrigger value="enrolled" data-testid="tab-enrolled">
-              Inscripto {enrolledCount > 0 && `(${enrolledCount})`}
-            </TabsTrigger>
-            <TabsTrigger value="completed" data-testid="tab-completed">
-              Completados {completedCount > 0 && `(${completedCount})`}
-            </TabsTrigger>
-            <TabsTrigger value="all" data-testid="tab-all">
-              Todos
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant={activeTab === 'all' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setActiveTab('all')}
+            className="rounded-full"
+            data-testid="tab-all"
+          >
+            Todos
+          </Button>
+          <Button
+            variant={activeTab === 'enrolled' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setActiveTab('enrolled')}
+            className="rounded-full"
+            data-testid="tab-enrolled"
+          >
+            Inscripto {enrolledCount > 0 && `(${enrolledCount})`}
+          </Button>
+          <Button
+            variant={activeTab === 'completed' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setActiveTab('completed')}
+            className="rounded-full"
+            data-testid="tab-completed"
+          >
+            Finalizados {completedCount > 0 && `(${completedCount})`}
+          </Button>
+        </div>
 
         {filteredCourses.length === 0 ? (
-          <EmptyState
-            icon={<BookOpen className="w-12 h-12" />}
-            title="No hay cursos disponibles"
-            description={
-              activeTab === 'enrolled' 
-                ? "No estás inscripto en ningún curso actualmente" 
-                : activeTab === 'completed'
-                ? "Aún no has completado ningún curso"
-                : "Actualmente no hay cursos activos para mostrar"
-            }
-          />
+          <div className="flex flex-col items-center gap-4">
+            <EmptyState
+              icon={<BookOpen className="w-12 h-12" />}
+              title="No hay cursos disponibles"
+              description={
+                activeTab === 'enrolled' 
+                  ? "No estás inscripto en ningún curso actualmente" 
+                  : activeTab === 'completed'
+                  ? "Aún no has completado ningún curso"
+                  : "Actualmente no hay cursos activos para mostrar"
+              }
+            />
+            {activeTab !== 'all' && (
+              <Button
+                variant="default"
+                onClick={() => setActiveTab('all')}
+                data-testid="button-view-all-courses"
+              >
+                Ver todos los cursos
+              </Button>
+            )}
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredCourses.map(course => {
