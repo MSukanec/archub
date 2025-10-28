@@ -7,6 +7,7 @@ import { DiscordWidget } from '@/components/learning/DiscordWidget'
 import { useLocation, useParams } from 'wouter'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useCoursePlayerStore } from '@/stores/coursePlayerStore'
 
 interface CourseDashboardTabProps {
   courseId?: string;
@@ -15,6 +16,7 @@ interface CourseDashboardTabProps {
 export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps) {
   const [, navigate] = useLocation();
   const { id: courseSlug } = useParams<{ id: string }>();
+  const goToLesson = useCoursePlayerStore(s => s.goToLesson);
 
   // Handler to navigate to a specific tab
   const navigateToTab = (tab: string) => {
@@ -165,6 +167,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         .select(`
           id,
           body,
+          lesson_id,
           created_at,
           course_lessons (
             title
@@ -232,6 +235,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         .select(`
           id,
           body,
+          lesson_id,
           time_sec,
           created_at,
           course_lessons (
@@ -507,9 +511,9 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
           <StatCardMeta>{stats.subscriptionMetaFormatted}</StatCardMeta>
         </StatCard>
 
-        {/* Progress Card - Navega a Lecciones */}
-        <StatCard onCardClick={() => navigateToTab('Lecciones')}>
-          <StatCardTitle>Progreso Total</StatCardTitle>
+        {/* Progress Card - No clickeable */}
+        <StatCard>
+          <StatCardTitle showArrow={false}>Progreso Total</StatCardTitle>
           <StatCardValue>{stats.progressPct}%</StatCardValue>
           <StatCardMeta>
             {stats.doneLessons} de {stats.totalLessons} lecciones
@@ -534,8 +538,8 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       {/* Second Row - Notes and Markers */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Notes Card - Navega a Apuntes */}
-        <StatCard>
-          <StatCardTitle showArrow={false}>Apuntes Creados</StatCardTitle>
+        <StatCard onCardClick={() => navigateToTab('Apuntes')}>
+          <StatCardTitle>Apuntes Creados</StatCardTitle>
           <StatCardContent>
             {recentNotes.length === 0 ? (
               <div className="text-center py-8">
@@ -547,8 +551,14 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                 <div className="space-y-2">
                   {recentNotes.map((note: any) => (
                     <div 
-                      key={note.id} 
-                      className="group/item flex items-start gap-3 p-3 rounded-lg border border-border/40 bg-transparent hover:bg-accent/5 hover:border-accent/50 transition-all duration-200"
+                      key={note.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (note.lesson_id) {
+                          goToLesson(note.lesson_id, null);
+                        }
+                      }}
+                      className="group/item flex items-start gap-3 p-3 rounded-lg border border-border/40 bg-transparent hover:bg-accent/5 hover:border-accent/50 transition-all duration-200 cursor-pointer"
                     >
                       <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-accent/10">
                         <FileText className="w-4 h-4 text-accent" />
@@ -569,10 +579,10 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                     e.stopPropagation();
                     navigateToTab('Apuntes');
                   }}
-                  className="text-xs text-accent hover:underline mt-3 block"
+                  className="text-xs text-accent hover:underline mt-3 block text-center w-full"
                   data-testid="link-view-all-notes"
                 >
-                  Ver todos
+                  Ver todos los apuntes
                 </button>
               </>
             )}
@@ -580,8 +590,8 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         </StatCard>
 
         {/* Markers Card - Navega a Marcadores */}
-        <StatCard>
-          <StatCardTitle showArrow={false}>Marcadores Creados</StatCardTitle>
+        <StatCard onCardClick={() => navigateToTab('Marcadores')}>
+          <StatCardTitle>Marcadores Creados</StatCardTitle>
           <StatCardContent>
             {recentMarkers.length === 0 ? (
               <div className="text-center py-8">
@@ -593,8 +603,14 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                 <div className="space-y-2">
                   {recentMarkers.map((marker: any) => (
                     <div 
-                      key={marker.id} 
-                      className="group/item flex items-start gap-3 p-3 rounded-lg border border-border/40 bg-transparent hover:bg-accent/5 hover:border-accent/50 transition-all duration-200"
+                      key={marker.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (marker.lesson_id) {
+                          goToLesson(marker.lesson_id, marker.time_sec || null);
+                        }
+                      }}
+                      className="group/item flex items-start gap-3 p-3 rounded-lg border border-border/40 bg-transparent hover:bg-accent/5 hover:border-accent/50 transition-all duration-200 cursor-pointer"
                     >
                       <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-accent/10">
                         <Bookmark className="w-4 h-4 text-accent" />
@@ -615,10 +631,10 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                     e.stopPropagation();
                     navigateToTab('Marcadores');
                   }}
-                  className="text-xs text-accent hover:underline mt-3 block"
+                  className="text-xs text-accent hover:underline mt-3 block text-center w-full"
                   data-testid="link-view-all-markers"
                 >
-                  Ver todos
+                  Ver todos los marcadores
                 </button>
               </>
             )}
