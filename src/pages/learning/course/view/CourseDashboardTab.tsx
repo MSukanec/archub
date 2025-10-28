@@ -271,6 +271,43 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     enabled: !!courseId && !!supabase
   });
 
+  // Get user's enrollment for this course
+  const { data: enrollment } = useQuery({
+    queryKey: ['course-enrollment', courseId],
+    queryFn: async () => {
+      if (!courseId || !supabase) return null;
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return null;
+
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser?.email) return null;
+
+      const { data: userRecord } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', authUser.id)
+        .single();
+
+      if (!userRecord) return null;
+
+      const { data, error } = await supabase
+        .from('course_enrollments')
+        .select('started_at, expires_at, status')
+        .eq('course_id', courseId)
+        .eq('user_id', userRecord.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching enrollment:', error);
+        return null;
+      }
+
+      return data;
+    },
+    enabled: !!courseId && !!supabase
+  });
+
   // Calculate stats
   const stats = useMemo(() => {
     const progressPct = courseProgress?.progress_pct || 0;
@@ -305,16 +342,58 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       courseDurationFormatted = `sin contenido`;
     }
 
+    // Calculate subscription days remaining
+    let daysRemaining = 0;
+    let totalDays = 0;
+    let isUnlimited = false;
+    
+    if (enrollment?.expires_at) {
+      const now = new Date();
+      const expiresAt = new Date(enrollment.expires_at);
+      const startedAt = new Date(enrollment.started_at);
+      
+      // Calculate days remaining
+      const msRemaining = expiresAt.getTime() - now.getTime();
+      daysRemaining = Math.max(0, Math.ceil(msRemaining / (1000 * 60 * 60 * 24)));
+      
+      // Calculate total days (started to expires)
+      const msTotal = expiresAt.getTime() - startedAt.getTime();
+      totalDays = Math.ceil(msTotal / (1000 * 60 * 60 * 24));
+    } else {
+      // No expiration date = unlimited access
+      isUnlimited = true;
+    }
+
+    let subscriptionFormatted = '';
+    if (daysRemaining > 0) {
+      subscriptionFormatted = `${daysRemaining} ${daysRemaining === 1 ? 'DÍA' : 'DÍAS'}`;
+    } else if (isUnlimited) {
+      subscriptionFormatted = 'ILIMITADO';
+    } else {
+      subscriptionFormatted = 'EXPIRADO';
+    }
+
+    let subscriptionMetaFormatted = '';
+    if (isUnlimited) {
+      subscriptionMetaFormatted = 'acceso sin límite de tiempo';
+    } else if (totalDays > 0) {
+      subscriptionMetaFormatted = `de ${totalDays} días totales`;
+    } else {
+      subscriptionMetaFormatted = 'suscripción vencida';
+    }
+
     return {
       progressPct: Number(progressPct).toFixed(1),
       doneLessons,
       totalLessons,
       studyTimeFormatted,
       courseDurationFormatted,
+      subscriptionFormatted,
+      subscriptionMetaFormatted,
       notesCount: notesCount || 0,
       markersCount: markersCount || 0
     };
-  }, [courseProgress, studyTime, courseDuration, notesCount, markersCount]);
+  }, [courseProgress, studyTime, courseDuration, enrollment, notesCount, markersCount]);
 
   if (!courseId) {
     return (
@@ -384,6 +463,13 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
 
       {/* Second Row - Additional Stats */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Subscription Days Card - No clickeable */}
+        <StatCard>
+          <StatCardTitle showArrow={false}>Tiempo Restante</StatCardTitle>
+          <StatCardValue>{stats.subscriptionFormatted}</StatCardValue>
+          <StatCardMeta>{stats.subscriptionMetaFormatted}</StatCardMeta>
+        </StatCard>
+
         {/* Markers Card - Navega a Marcadores */}
         <StatCard onCardClick={() => navigateToTab('Marcadores')}>
           <StatCardTitle>Marcadores</StatCardTitle>
@@ -404,8 +490,8 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
           <StatCardMeta>por completar</StatCardMeta>
         </StatCard>
 
-        {/* Discord Widget - Spans 2 columns */}
-        <div className="md:col-span-2">
+        {/* Discord Widget - Spans 1 column */}
+        <div>
           <DiscordWidget />
         </div>
       </div>
