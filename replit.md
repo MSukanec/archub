@@ -30,6 +30,7 @@ Preferred communication style: Simple, everyday language.
 - **Data Flow**: React Query for server state management, Express.js for REST APIs, Drizzle ORM for database operations with extensive cache invalidation.
 - **Database Views**: Exclusive use of database views for data fetching (e.g., `construction_tasks_view`).
 - **PayPal Integration**: Custom implementation with Vercel serverless endpoints (`/api/paypal/*`) and Supabase Edge Function webhook. Order creation resolves `course_id` from `course_slug` and includes metadata in `invoice_id` field with format `user:{user_id};course:{course_id}`. Payment capture handled by frontend, enrollment/logging handled by Supabase webhook.
+- **API Base URL Helper**: `src/utils/apiBase.ts` provides `getApiBase()` function that prioritizes `VITE_API_BASE` environment variable (production/preview) and falls back to `window.location.origin` (local development). Used in all payment API calls to ensure correct endpoint resolution across environments.
 
 ### Feature Specifications
 - **Home Page**: Landing page (/home) after onboarding with personalized welcome message and quick-access cards to main sections (Organización, Proyecto, Capacitaciones, Administración). Maintains sidebar in 'general' level for hub navigation.
@@ -51,7 +52,8 @@ Preferred communication style: Simple, everyday language.
 - **Notification System**: Real-time notifications with bell icon badge, powered by Supabase `notifications` and `user_notifications` tables, supporting read/unread states and click navigation.
 - **Admin Course Management**: Dedicated `AdminCourses` page with a three-tab interface (Dashboard, Alumnos, Cursos) for full CRUD operations on courses, modules, and lessons. Includes analytics, hierarchical tree view with drag & drop reordering, and enrollment management.
 - **Coupon System**: Discount coupon system for courses with database-driven validation, redemption, and Mercado Pago/PayPal integration.
-- **Payment Processing**: Dual payment provider support (Mercado Pago for ARS, PayPal for USD) with webhook-based enrollment. PayPal flow: create-order → user approval → capture-order → webhook enrollment. Mercado Pago flow: create preference → redirect → webhook enrollment.
+- **Payment Processing**: Dual payment provider support (Mercado Pago for ARS, PayPal for USD) with webhook-based enrollment. PayPal flow: create-order → user approval → capture-order → webhook enrollment. Mercado Pago flow: create preference → redirect → webhook enrollment. All payment API calls use `getApiBase()` to construct full URLs for cross-environment compatibility.
+- **Subscription Duration**: `course_prices` table includes `months` field for subscription duration tracking. Admin interface allows setting subscription length (1, 3, 6, 12 months, etc.). Payment flows automatically use configured duration from price data.
 - **Cost System**: Three-tier cost system (Archub Cost, Organization Cost, Independent Cost) for budget items with drag-and-drop reordering.
 
 ### System Design Choices
