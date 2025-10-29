@@ -714,3 +714,51 @@ export type CourseLessonProgress = typeof course_lesson_progress.$inferSelect;
 export type InsertCourseLessonProgress = z.infer<typeof insertCourseLessonProgressSchema>;
 export type CourseLessonNote = typeof course_lesson_notes.$inferSelect;
 export type InsertCourseLessonNote = z.infer<typeof insertCourseLessonNoteSchema>;
+
+// Payment Tables
+export const payments = pgTable("payments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  provider: text("provider").notNull(),
+  provider_payment_id: text("provider_payment_id").notNull().unique(),
+  user_id: uuid("user_id").notNull(),
+  course_id: uuid("course_id").notNull(),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: text("currency").notNull(),
+  status: text("status").notNull().default("pending"),
+  created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const payment_events = pgTable("payment_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  provider: text("provider").notNull(),
+  provider_event_id: text("provider_event_id"),
+  provider_event_type: text("provider_event_type"),
+  status: text("status"),
+  raw_payload: jsonb("raw_payload"),
+  raw_headers: jsonb("raw_headers"),
+  order_id: text("order_id"),
+  custom_id: text("custom_id"),
+  user_hint: text("user_hint"),
+  course_hint: text("course_hint"),
+  provider_payment_id: text("provider_payment_id"),
+  amount: numeric("amount", { precision: 10, scale: 2 }),
+  currency: text("currency"),
+  created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Schemas for payments
+export const insertPaymentSchema = createInsertSchema(payments).omit({
+  id: true,
+  created_at: true,
+});
+
+export const insertPaymentEventSchema = createInsertSchema(payment_events).omit({
+  id: true,
+  created_at: true,
+});
+
+// Types for payments
+export type Payment = typeof payments.$inferSelect;
+export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+export type PaymentEvent = typeof payment_events.$inferSelect;
+export type InsertPaymentEvent = z.infer<typeof insertPaymentEventSchema>;
