@@ -153,8 +153,7 @@ export default function LearningDashboard() {
             </div>
             
             <h1 
-              className="text-4xl md:text-6xl font-bold mb-3 md:mb-4 tracking-tight" 
-              style={{ color: '#ffffff' }}
+              className="text-4xl md:text-6xl font-bold mb-3 md:mb-4 tracking-tight !text-white" 
               data-testid="text-hero-title"
             >
               Master ArchiCAD Online
