@@ -113,6 +113,76 @@ export default function AdminCourseUsersTab() {
       )
     },
     {
+      key: 'currency',
+      label: 'Moneda',
+      render: (enrollment: any) => {
+        const currency = enrollment.payment?.currency || 'N/A';
+        const colors: Record<string, string> = {
+          'ARS': '#6366f1', // indigo
+          'USD': '#10b981', // green
+          'EUR': '#f59e0b'  // amber
+        };
+        return (
+          <Badge 
+            style={{ 
+              backgroundColor: colors[currency] || '#6b7280',
+              color: 'white' 
+            }}
+          >
+            {currency}
+          </Badge>
+        );
+      }
+    },
+    {
+      key: 'amount',
+      label: 'Monto',
+      render: (enrollment: any) => {
+        const amount = enrollment.payment?.amount;
+        const currency = enrollment.payment?.currency || '';
+        if (!amount) return <span className="text-muted-foreground text-sm">-</span>;
+        
+        return (
+          <div className="font-medium text-sm">
+            {currency === 'ARS' ? '$' : currency === 'USD' ? 'US$' : '€'}
+            {Number(amount).toLocaleString('es-AR')}
+          </div>
+        );
+      }
+    },
+    {
+      key: 'provider',
+      label: 'Método de Pago',
+      render: (enrollment: any) => {
+        const provider = enrollment.payment?.provider;
+        if (!provider) return <span className="text-muted-foreground text-sm">-</span>;
+        
+        const providerNames: Record<string, string> = {
+          'mercadopago': 'Mercado Pago',
+          'paypal': 'PayPal',
+          'stripe': 'Stripe'
+        };
+        
+        const providerColors: Record<string, string> = {
+          'mercadopago': '#00b3ff',
+          'paypal': '#0070ba',
+          'stripe': '#635bff'
+        };
+        
+        return (
+          <Badge 
+            variant="outline"
+            style={{ 
+              borderColor: providerColors[provider.toLowerCase()] || '#6b7280',
+              color: providerColors[provider.toLowerCase()] || '#6b7280'
+            }}
+          >
+            {providerNames[provider.toLowerCase()] || provider}
+          </Badge>
+        );
+      }
+    },
+    {
       key: 'status',
       label: 'Estado',
       render: (enrollment: any) => {

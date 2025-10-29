@@ -54,7 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(500).json({ error: "Failed to fetch enrollments" });
       }
 
-      // Fetch progress for all enrollments in parallel
+      // Fetch progress and payment data for all enrollments in parallel
       const enrollmentsWithProgress = await Promise.all(
         (enrollments || []).map(async (enrollment) => {
           // Get all modules for the course
@@ -66,7 +66,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           if (!modules || modules.length === 0) {
             return {
               ...enrollment,
-              progress: { completed_lessons: 0, total_lessons: 0, progress_percentage: 0 }
+              progress: { completed_lessons: 0, total_lessons: 0, progress_percentage: 0 },
+              payment: null
             };
           }
           
@@ -81,7 +82,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           if (!lessons || lessons.length === 0) {
             return {
               ...enrollment,
-              progress: { completed_lessons: 0, total_lessons: 0, progress_percentage: 0 }
+              progress: { completed_lessons: 0, total_lessons: 0, progress_percentage: 0 },
+              payment: null
             };
           }
           
@@ -101,13 +103,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             ? Math.round((completed_lessons / total_lessons) * 100) 
             : 0;
           
+          // Get payment data for this enrollment
+          const { data: paymentData } = await supabase
+            .from('payments')
+            .select('provider, currency, amount, status')
+            .eq('user_id', enrollment.user_id)
+            .eq('course_id', enrollment.course_id)
+            .eq('status', 'completed')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          
           return {
             ...enrollment,
             progress: { 
               completed_lessons, 
               total_lessons, 
               progress_percentage 
-            }
+            },
+            payment: paymentData || null
           };
         })
       );

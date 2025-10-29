@@ -82,7 +82,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .select('amount, currency, created_at, status')
         .eq('status', 'completed');
 
-      console.log('💰 Payments query:', { payments, paymentsError, count: payments?.length || 0 });
+      console.log('💰 Payments query result:');
+      console.log('  - Error:', paymentsError);
+      console.log('  - Count:', payments?.length || 0);
+      console.log('  - Data:', JSON.stringify(payments, null, 2));
 
       const totalRevenue = payments?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 0;
 
