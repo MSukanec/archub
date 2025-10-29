@@ -31,7 +31,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const base = paypalBase();
     const token = await getAccessToken();
 
-    const returnBase = process.env.CHECKOUT_RETURN_URL_BASE || "https://localhost:3000";
+    const returnBase = process.env.CHECKOUT_RETURN_URL_BASE || "https://sukanec.vercel.app";
     const body = {
       intent: "CAPTURE",
       purchase_units: [{
@@ -42,8 +42,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       application_context: {
         brand_name: "Archub",
         user_action: "PAY_NOW",
-        return_url: `${returnBase}/checkout/paypal/return`,
-        cancel_url: `${returnBase}/checkout/paypal/cancel`,
+        return_url: `${returnBase}/api/paypal/capture-and-redirect?course_slug=${course_slug}`,
+        cancel_url: `${returnBase}/learning/courses`,
       }
     };
 
