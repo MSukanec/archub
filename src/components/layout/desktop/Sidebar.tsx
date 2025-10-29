@@ -155,8 +155,7 @@ export function Sidebar() {
       return [
         { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/learning/dashboard' },
         { id: 'courses', label: 'Cursos', icon: GraduationCap, href: '/learning/courses' },
-        { id: 'payment', label: 'Pago', icon: DollarSign, href: '/learning/retorno' },
-        { id: 'community', label: 'Comunidad', icon: MessageCircle, href: 'https://discord.com/channels/868615664070443008' },
+        { id: 'community', label: 'Comunidad Discord', icon: MessageCircle, href: 'https://discord.com/channels/868615664070443008' },
       ];
     }
     
