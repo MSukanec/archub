@@ -1,13 +1,9 @@
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card'
 import { format, subMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Button } from '@/components/ui/button'
-import { RefreshCw } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
-import { queryClient } from '@/lib/queryClient'
 
 interface DashboardStats {
   totalCourses: number
@@ -29,8 +25,6 @@ interface DashboardData {
 }
 
 export default function AdminCourseDashboardTab() {
-  const { toast } = useToast()
-
   // Fetch dashboard data from API
   const { data: dashboardData, isLoading } = useQuery<DashboardData>({
     queryKey: ['/api/admin/dashboard'],
@@ -54,43 +48,6 @@ export default function AdminCourseDashboardTab() {
     staleTime: 0
   })
 
-  // Migration mutation to fix payment user_ids
-  const fixPaymentsMutation = useMutation({
-    mutationFn: async () => {
-      if (!supabase) throw new Error('Supabase not available')
-
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) throw new Error('No session')
-
-      const res = await fetch('/api/admin/fix-payment-userids', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      })
-
-      if (!res.ok) throw new Error('Failed to fix payments')
-      return res.json()
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/dashboard'] })
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/enrollments'] })
-      toast({
-        title: 'Migración completada',
-        description: `${data.updated} pagos actualizados, ${data.skipped} omitidos`
-      })
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Error en migración',
-        description: error.message || 'No se pudo ejecutar la migración',
-        variant: 'destructive'
-      })
-    }
-  })
-
   const stats = dashboardData?.stats
   const recentEnrollments = dashboardData?.recentEnrollments || []
   const upcomingExpirations = dashboardData?.expiringSoon || []
@@ -109,34 +66,6 @@ export default function AdminCourseDashboardTab() {
 
   return (
     <div className="space-y-6">
-      {/* Botón temporal de migración */}
-      {(stats?.totalRevenue === 0 && stats?.totalEnrollments > 0) && (
-        <div className="bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4 flex items-center justify-between">
-          <div>
-            <p className="font-medium text-orange-900 dark:text-orange-100">Datos de pagos necesitan migración</p>
-            <p className="text-sm text-orange-700 dark:text-orange-300">Los ingresos aparecen en $0. Ejecutá la migración para corregir los datos.</p>
-          </div>
-          <Button
-            onClick={() => fixPaymentsMutation.mutate()}
-            disabled={fixPaymentsMutation.isPending}
-            variant="outline"
-            className="border-orange-300 dark:border-orange-700"
-          >
-            {fixPaymentsMutation.isPending ? (
-              <>
-                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                Migrando...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Ejecutar Migración
-              </>
-            )}
-          </Button>
-        </div>
-      )}
-
       {/* Métricas principales - 2 columnas en mobile */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard>
