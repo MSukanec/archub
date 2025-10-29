@@ -3930,41 +3930,148 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).send('Missing token parameter');
       }
 
+      console.log('[PayPal capture-and-redirect] Token:', token, 'course_slug:', course_slug);
+
+      // Capturar la orden en PayPal
       const capture = await paypalFetch(`/v2/checkout/orders/${token}/capture`, {
         method: 'POST',
         body: '',
       });
 
-      const captureId = capture.purchase_units?.[0]?.payments?.captures?.[0]?.id;
+      console.log('[PayPal capture-and-redirect] Capture response:', JSON.stringify(capture, null, 2));
+
+      const orderId = capture.id;
       const status = capture.status;
-      const amount = capture.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value;
-      const currency = capture.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.currency_code;
-      const customRaw = capture.purchase_units?.[0]?.payments?.captures?.[0]?.custom_id;
+      const invoiceId = capture?.purchase_units?.[0]?.invoice_id || null;
+      const amount = capture?.purchase_units?.[0]?.amount?.value || null;
+      const currency = capture?.purchase_units?.[0]?.amount?.currency_code || null;
 
-      let custom: { user_id?: string; course_slug?: string } = {};
-      if (customRaw) {
-        try { custom = JSON.parse(customRaw); } catch { }
+      console.log('[PayPal capture-and-redirect] Order ID:', orderId, 'Status:', status, 'Invoice:', invoiceId);
+
+      // Parsear invoice_id formato "user:UUID;course:UUID"
+      function parseInvoiceId(invoiceId: string): { user?: string; course?: string } {
+        const out: Record<string, string> = {};
+        if (!invoiceId) return out;
+        for (const part of invoiceId.split(';')) {
+          const [k, v] = part.split(':').map((s) => s.trim());
+          if (k && v) out[k] = v;
+        }
+        return out;
       }
 
-      await logPayPalPayment({
-        payment_id: captureId || token,
-        status,
-        amount: String(amount || '0'),
-        currency: currency || 'USD',
-        user_id: custom.user_id,
-        course_slug: custom.course_slug || course_slug,
-        raw: capture,
-      });
+      const { user: userId, course: courseId } = parseInvoiceId(invoiceId || '');
+      console.log('[PayPal capture-and-redirect] Parsed - User ID:', userId, 'Course ID:', courseId);
 
-      if (status === 'COMPLETED' && custom.user_id && (custom.course_slug || course_slug)) {
-        await enrollUserInCourse(custom.user_id, custom.course_slug || course_slug);
+      // 1. Guardar en paypal_events
+      try {
+        await getAdminClient().from('paypal_events').insert({
+          provider_event_id: orderId,
+          provider_event_type: 'PAYMENT.CAPTURE.COMPLETED',
+          status: 'PROCESSED',
+          raw_payload: capture,
+          order_id: orderId,
+          custom_id: invoiceId,
+          user_hint: userId || null,
+          course_hint: courseId || null,
+        });
+        console.log('[PayPal capture-and-redirect] ✅ Guardado en paypal_events');
+      } catch (e: any) {
+        console.error('[PayPal capture-and-redirect] Error insertando en paypal_events:', e);
       }
 
-      const finalSlug = custom.course_slug || course_slug || 'unknown';
-      return res.redirect(307, `/learning/payment-return?status=success&provider=paypal&course=${encodeURIComponent(finalSlug)}`);
+      // 2. Guardar en payment_logs
+      try {
+        await getAdminClient().from('payment_logs').insert({
+          user_id: userId || null,
+          course_id: courseId || null,
+          provider: 'paypal',
+          provider_payment_id: orderId,
+          amount: amount ? parseFloat(amount) : null,
+          currency: currency || 'USD',
+          status: status === 'COMPLETED' ? 'completed' : 'pending',
+          raw_payload: capture,
+        });
+        console.log('[PayPal capture-and-redirect] ✅ Guardado en payment_logs');
+      } catch (e: any) {
+        console.error('[PayPal capture-and-redirect] Error insertando en payment_logs:', e);
+      }
+
+      // 3. Crear enrollment si tenemos user_id y course_id
+      if (userId && courseId && status === 'COMPLETED') {
+        try {
+          const expiresAt = new Date();
+          expiresAt.setDate(expiresAt.getDate() + 365); // 1 año
+
+          await getAdminClient().from('course_enrollments').upsert(
+            {
+              user_id: userId,
+              course_id: courseId,
+              status: 'active',
+              started_at: new Date().toISOString(),
+              expires_at: expiresAt.toISOString(),
+            },
+            { onConflict: 'user_id,course_id' }
+          );
+          console.log('[PayPal capture-and-redirect] ✅ Enrollment creado/actualizado');
+        } catch (e: any) {
+          console.error('[PayPal capture-and-redirect] Error insertando en course_enrollments:', e);
+        }
+      }
+
+      const finalSlug = course_slug || 'master-archicad';
+      
+      // HTML de respuesta con redirección
+      return res.status(200).send(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Pago Exitoso - Archub</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: system-ui; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #f5f5f5;">
+            <div style="text-align: center; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <div style="width: 48px; height: 48px; border: 4px solid #e5e7eb; border-top-color: #2563eb; border-radius: 50%; margin: 0 auto 1rem; animation: spin 1s linear infinite;"></div>
+              <h1 style="color: #16a34a;">✅ Pago Exitoso</h1>
+              <p>Tu pago ha sido procesado correctamente.</p>
+              <p style="color: #6b7280;">Redirigiendo al curso...</p>
+            </div>
+            <style>
+              @keyframes spin {
+                to { transform: rotate(360deg); }
+              }
+            </style>
+            <script>
+              setTimeout(() => {
+                window.location.href = '/learning/courses/${finalSlug}';
+              }, 2000);
+            </script>
+          </body>
+        </html>
+      `);
+
     } catch (error: any) {
-      console.error('Error in capture-and-redirect:', error);
-      return res.redirect(307, `/learning/payment-return?status=error&provider=paypal&message=${encodeURIComponent(error.message)}`);
+      console.error('[PayPal capture-and-redirect] Error fatal:', error);
+      return res.status(200).send(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Error - Archub</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: system-ui; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #f5f5f5;">
+            <div style="text-align: center; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <h1 style="color: #dc2626;">⚠️ Error</h1>
+              <p>Hubo un problema al procesar tu pago.</p>
+              <p style="color: #6b7280; font-size: 0.875rem; margin-top: 1rem;">${String(error?.message || error)}</p>
+              <p style="margin-top: 1rem;">
+                <a href="/learning/courses" style="color: #2563eb; text-decoration: none;">Volver a Capacitaciones</a>
+              </p>
+            </div>
+          </body>
+        </html>
+      `);
     }
   });
 
