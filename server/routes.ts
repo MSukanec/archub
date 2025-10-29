@@ -4328,6 +4328,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // GET /api/checkout/payment-success - Get payment success data
+  app.get("/api/checkout/payment-success", async (req, res) => {
+    try {
+      const { course_slug } = req.query;
+      const userId = (req as any).user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ error: "No autenticado" });
+      }
+
+      if (!course_slug || typeof course_slug !== 'string') {
+        return res.status(400).json({ error: "course_slug requerido" });
+      }
+
+      // Get course
+      const { data: course, error: courseError } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('slug', course_slug)
+        .single();
+
+      if (courseError || !course) {
+        return res.status(404).json({ error: "Curso no encontrado" });
+      }
+
+      // Get enrollment
+      const { data: enrollment, error: enrollError } = await supabase
+        .from('course_enrollments')
+        .select('*')
+        .eq('course_id', course.id)
+        .eq('user_id', userId)
+        .single();
+
+      if (enrollError) {
+        console.error("Error getting enrollment:", enrollError);
+      }
+
+      return res.json({
+        course,
+        enrollment: enrollment || null
+      });
+    } catch (e: any) {
+      console.error("Error in /api/checkout/payment-success:", e);
+      return res.status(500).json({ error: e?.message || "Error interno" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
