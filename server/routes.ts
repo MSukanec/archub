@@ -4305,6 +4305,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // End PayPal Integration Routes
   // ============================================
 
+  // ============================================
+  // Mercado Pago Integration Routes
+  // ============================================
+
+  // POST /api/mp/create-preference - Proxy to Vercel function
+  app.post("/api/mp/create-preference", async (req, res) => {
+    try {
+      const handler = await import('../api/mp/create-preference.js');
+      await handler.default(req as any, res as any);
+    } catch (error: any) {
+      console.error("[MP create-preference] Error:", error);
+      res.status(500).json({ ok: false, error: error.message || String(error) });
+    }
+  });
+
+  // GET /api/mp/success-handler - Verify payment and enroll
+  app.get("/api/mp/success-handler", async (req, res) => {
+    try {
+      const handler = await import('../api/mp/success-handler.js');
+      await handler.default(req as any, res as any);
+    } catch (error: any) {
+      console.error("[MP success-handler] Error:", error);
+      res.status(500).send(`
+        <!DOCTYPE html>
+        <html><head><title>Error - Archub</title><meta charset="UTF-8"></head>
+        <body style="font-family: system-ui; text-align: center; padding: 2rem;">
+          <h1>⚠️ Error</h1>
+          <p>Hubo un problema al procesar tu pago: ${error.message}</p>
+          <p><a href="/learning/courses" style="color: #2563eb;">Volver a Capacitaciones</a></p>
+        </body></html>
+      `);
+    }
+  });
+
+  // POST /api/mp/webhook - Payment notifications from Mercado Pago
+  app.post("/api/mp/webhook", async (req, res) => {
+    try {
+      const handler = await import('../api/mp/webhook.js');
+      await handler.default(req as any, res as any);
+    } catch (error: any) {
+      console.error("[MP webhook] Error:", error);
+      res.status(200).json({ ok: true, error: "logged" });
+    }
+  });
+
+  // ============================================
+  // End Mercado Pago Integration Routes
+  // ============================================
+
   // Diagnostic endpoints for payments
   app.get("/api/diag/last-payment-events", async (req, res) => {
     try {
