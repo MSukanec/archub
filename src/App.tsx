@@ -79,6 +79,9 @@ import CourseList from "@/pages/learning/courses/CourseList";
 import CourseView from "@/pages/learning/courses/CourseView";
 import PaymentReturn from "@/pages/learning/PaymentReturn";
 
+// Checkout Pages
+import PaymentSuccess from "@/pages/checkout/PaymentSuccess";
+
 // Notifications
 import Notifications from "@/pages/Notifications";
 
@@ -168,6 +171,9 @@ function Router() {
         <Route path="/learning/courses" component={CourseList} />
         <Route path="/learning/courses/:id" component={CourseView} />
         <Route path="/learning/retorno" component={PaymentReturn} />
+        
+        {/* Checkout Routes */}
+        <Route path="/checkout/success" component={PaymentSuccess} />
 
         {/* Finances Routes */}
         <Route path="/finances/dashboard" component={FinancesCapitalMovements} />
