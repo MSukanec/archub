@@ -3879,6 +3879,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const host = req.headers['x-forwarded-host'] || req.headers['host'];
       const returnBase = `${protocol}://${host}`;
 
+      // Generate unique invoice_id (PayPal requires uniqueness)
+      const uniqueInvoiceId = `user:${user_id};course:${course.id};ts:${Date.now()}`;
+      
       const createResp = await fetch(`${base}/v2/checkout/orders`, {
         method: "POST",
         headers: {
@@ -3891,7 +3894,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             {
               amount: { currency_code: "USD", value: String(amount_usd) },
               description,
-              invoice_id: `user:${user_id};course:${course.id}`,
+              invoice_id: uniqueInvoiceId,
             },
           ],
           application_context: {

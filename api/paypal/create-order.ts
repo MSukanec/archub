@@ -36,12 +36,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const host = req.headers['x-forwarded-host'] || req.headers.host;
     const returnBase = `${protocol}://${host}`;
     
+    // Generate unique invoice_id (PayPal requires uniqueness for each transaction)
+    const uniqueInvoiceId = `user:${user_id};course:${course.id};ts:${Date.now()}`;
+    
     const body = {
       intent: "CAPTURE",
       purchase_units: [{
         amount: { currency_code: "USD", value: String(amount_usd) },
         description,
-        invoice_id: `user:${user_id};course:${course.id}`,
+        invoice_id: uniqueInvoiceId,
       }],
       application_context: {
         brand_name: "Archub",
