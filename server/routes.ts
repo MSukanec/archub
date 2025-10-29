@@ -3979,8 +3979,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Si tenemos user_id y course_id, crear payment y enrollment
       if (userId && courseId && status === 'COMPLETED') {
         try {
-          // Upsert en payments
-          await getAdminClient().from('payments').upsert({
+          // Insert en payments (ignorar si ya existe)
+          const { error: paymentError } = await getAdminClient().from('payments').insert({
             provider: 'paypal',
             provider_payment_id: providerPaymentId,
             user_id: userId,
@@ -3988,8 +3988,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
             amount: amountValue ? parseFloat(amountValue) : null,
             currency: currencyCode || 'USD',
             status: 'completed',
-          }, { onConflict: 'provider,provider_payment_id' });
-          console.log('[PayPal capture-order] ✅ Payment upserted');
+          });
+          
+          if (paymentError) {
+            // Si el error es por duplicado (código 23505), lo ignoramos
+            if (paymentError.code === '23505') {
+              console.log('[PayPal capture-order] ⚠️ Payment ya existe (ignorado)');
+            } else {
+              console.error('[PayPal capture-order] Error insertando payment:', paymentError);
+            }
+          } else {
+            console.log('[PayPal capture-order] ✅ Payment insertado');
+          }
 
           // Upsert enrollment
           const expiresAt = new Date();
@@ -4097,8 +4107,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Si tenemos user_id y course_id, crear payment y enrollment
       if (userId && courseId && status === 'COMPLETED') {
         try {
-          // Upsert en payments
-          await getAdminClient().from('payments').upsert({
+          // Insert en payments (ignorar si ya existe)
+          const { error: paymentError } = await getAdminClient().from('payments').insert({
             provider: 'paypal',
             provider_payment_id: providerPaymentId,
             user_id: userId,
@@ -4106,8 +4116,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
             amount: amountValue ? parseFloat(amountValue) : null,
             currency: currencyCode || 'USD',
             status: 'completed',
-          }, { onConflict: 'provider,provider_payment_id' });
-          console.log('[PayPal capture-and-redirect] ✅ Payment upserted');
+          });
+          
+          if (paymentError) {
+            // Si el error es por duplicado (código 23505), lo ignoramos
+            if (paymentError.code === '23505') {
+              console.log('[PayPal capture-and-redirect] ⚠️ Payment ya existe (ignorado)');
+            } else {
+              console.error('[PayPal capture-and-redirect] Error insertando payment:', paymentError);
+            }
+          } else {
+            console.log('[PayPal capture-and-redirect] ✅ Payment insertado');
+          }
 
           // Upsert enrollment
           const expiresAt = new Date();

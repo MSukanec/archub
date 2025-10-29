@@ -138,8 +138,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // 2. Si tenemos user_id y course_id, crear payment y enrollment
     if (userId && courseId && status === 'COMPLETED') {
-      // Upsert en payments
-      const { error: paymentError } = await supabase.from('payments').upsert({
+      // Insert en payments (ignorar si ya existe)
+      const { error: paymentError } = await supabase.from('payments').insert({
         provider: 'paypal',
         provider_payment_id: providerPaymentId,
         user_id: userId,
@@ -147,12 +147,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         amount: amountValue ? parseFloat(amountValue) : null,
         currency: currencyCode || 'USD',
         status: 'completed',
-      }, { onConflict: 'provider,provider_payment_id' });
+      });
 
       if (paymentError) {
-        console.error('[PayPal capture-and-redirect] Error insertando en payments:', paymentError);
+        // Si el error es por duplicado (código 23505), lo ignoramos
+        if (paymentError.code === '23505') {
+          console.log('[PayPal capture-and-redirect] ⚠️ Payment ya existe (ignorado)');
+        } else {
+          console.error('[PayPal capture-and-redirect] Error insertando payment:', paymentError);
+        }
       } else {
-        console.log('[PayPal capture-and-redirect] ✅ Payment upserted');
+        console.log('[PayPal capture-and-redirect] ✅ Payment insertado');
       }
 
       // Upsert enrollment
