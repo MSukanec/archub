@@ -79,25 +79,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // Fetch payments
       const { data: payments, error: paymentsError } = await supabase
         .from('payments')
-        .select('amount, currency, created_at, status')
-        .eq('status', 'completed');
+        .select('*');
 
-      console.log('💰 Payments query result:');
-      console.log('  - Error:', paymentsError);
+      console.log('💰 Payments query result (ALL RECORDS):');
+      console.log('  - Error:', JSON.stringify(paymentsError, null, 2));
       console.log('  - Count:', payments?.length || 0);
-      console.log('  - Data:', JSON.stringify(payments, null, 2));
+      console.log('  - Raw data:', JSON.stringify(payments, null, 2));
+      
+      const completedPayments = payments?.filter(p => p.status === 'completed') || [];
+      console.log('  - Completed count:', completedPayments.length);
+      console.log('  - Completed data:', JSON.stringify(completedPayments, null, 2));
 
-      const totalRevenue = payments?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 0;
+      const totalRevenue = completedPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
 
-      const revenueThisMonth = payments?.filter(p => {
+      const revenueThisMonth = completedPayments.filter(p => {
         const date = new Date(p.created_at);
         return date >= thisMonthStart && date <= thisMonthEnd;
-      }).reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 0;
+      }).reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
 
-      const revenueLastMonth = payments?.filter(p => {
+      const revenueLastMonth = completedPayments.filter(p => {
         const date = new Date(p.created_at);
         return date >= lastMonthStart && date <= lastMonthEnd;
-      }).reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 0;
+      }).reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
 
       // Fetch progress
       const { data: progress } = await supabase

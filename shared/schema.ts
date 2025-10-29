@@ -719,12 +719,12 @@ export type InsertCourseLessonNote = z.infer<typeof insertCourseLessonNoteSchema
 export const payments = pgTable("payments", {
   id: uuid("id").primaryKey().defaultRandom(),
   provider: text("provider").notNull(),
-  provider_payment_id: text("provider_payment_id").notNull().unique(),
+  provider_payment_id: text("provider_payment_id"),
   user_id: uuid("user_id").notNull(),
   course_id: uuid("course_id").notNull(),
-  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
-  currency: text("currency").notNull(),
-  status: text("status").notNull().default("pending"),
+  amount: numeric("amount", { precision: 10, scale: 2 }),
+  currency: text("currency"),
+  status: text("status").notNull().default("completed"),
   created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
