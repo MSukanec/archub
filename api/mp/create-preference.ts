@@ -115,7 +115,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     };
     const custom_id = Buffer.from(JSON.stringify(customData)).toString('base64');
 
-    const returnBase = process.env.CHECKOUT_RETURN_URL_BASE || "https://sukanec.vercel.app";
+    // Construir la URL base desde el request (para que funcione en Replit y Vercel)
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    const requestOrigin = `${protocol}://${host}`;
+    
+    // Para back_urls (retorno después del pago), usar el origin del request
+    const returnBase = requestOrigin;
+    
+    // Para notification_url (webhook), usar CHECKOUT_RETURN_URL_BASE si está disponible
+    // (porque el webhook debe ir al servidor público accesible desde MP)
+    const webhookBase = process.env.CHECKOUT_RETURN_URL_BASE || requestOrigin;
     
     const prefBody = {
       items: [
@@ -130,7 +140,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ],
       external_reference: custom_id,
       payer: { email, first_name, last_name },
-      notification_url: `${returnBase}/api/mp/webhook?secret=${MP_WEBHOOK_SECRET}`,
+      notification_url: `${webhookBase}/api/mp/webhook?secret=${MP_WEBHOOK_SECRET}`,
       back_urls: {
         success: `${returnBase}/api/mp/success-handler?course_slug=${course.slug}`,
         failure: `${returnBase}/learning/courses/${course.slug}?payment=failed`,
