@@ -32,20 +32,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const token = await getAccessToken();
 
     const returnBase = process.env.CHECKOUT_RETURN_URL_BASE || "https://sukanec.vercel.app";
-    
-    const customData = JSON.stringify({ 
-      user_id, 
-      course_slug,
-      months: 12
-    });
-    const customIdBase64 = Buffer.from(customData).toString('base64');
-    
     const body = {
       intent: "CAPTURE",
       purchase_units: [{
         amount: { currency_code: "USD", value: String(amount_usd) },
         description,
-        custom_id: customIdBase64,
+        invoice_id: `user:${user_id};course:${course.id}`,
       }],
       application_context: {
         brand_name: "Archub",
