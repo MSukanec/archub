@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
-import { BookOpen, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
+import { BookOpen, ChevronLeft, ChevronRight, CheckCircle, Lock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { useCoursePlayerStore } from '@/stores/coursePlayerStore';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import CourseDashboardTab from './view/CourseDashboardTab';
@@ -16,6 +18,7 @@ import CourseMarkersTab from './view/CourseMarkersTab';
 export default function CourseView() {
   const { id } = useParams<{ id: string }>();
   const [location, navigate] = useLocation();
+  const { data: userData } = useCurrentUser();
   
   // Get store state
   const storeActiveTab = useCoursePlayerStore(s => s.activeTab);
@@ -74,7 +77,7 @@ export default function CourseView() {
   };
   
   // Get course data
-  const { data: course, isLoading } = useQuery({
+  const { data: course, isLoading: courseLoading } = useQuery({
     queryKey: ['course', id],
     queryFn: async () => {
       if (!id || !supabase) return null;
@@ -94,6 +97,41 @@ export default function CourseView() {
     },
     enabled: !!id && !!supabase
   });
+
+  // Check if user is enrolled in this course (SECURITY CHECK)
+  const { data: enrollment, isLoading: enrollmentLoading } = useQuery({
+    queryKey: ['course-enrollment', course?.id, userData?.user?.id],
+    queryFn: async () => {
+      if (!course?.id || !userData?.user?.id || !supabase) return null;
+      
+      // First get user from users table
+      const { data: dbUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', userData.user.id)
+        .maybeSingle();
+      
+      if (!dbUser) return null;
+      
+      // Check enrollment
+      const { data, error } = await supabase
+        .from('course_enrollments')
+        .select('*')
+        .eq('course_id', course.id)
+        .eq('user_id', dbUser.id)
+        .maybeSingle();
+        
+      if (error) {
+        console.error('Error checking enrollment:', error);
+        return null;
+      }
+      
+      return data;
+    },
+    enabled: !!course?.id && !!userData?.user?.id && !!supabase
+  });
+
+  const isLoading = courseLoading || enrollmentLoading;
 
   const headerTabs = [
     {
@@ -214,9 +252,30 @@ export default function CourseView() {
         <div className="text-center py-8">
           <h3 className="text-lg font-medium text-muted-foreground">Curso no encontrado</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            El curso con ID {id} no existe o no tienes permisos para verlo.
+            El curso con ID {id} no existe.
           </p>
         </div>
+      </Layout>
+    );
+  }
+
+  // SECURITY: Check if user is enrolled before showing course content
+  if (!enrollment) {
+    return (
+      <Layout headerProps={headerProps} wide>
+        <EmptyState
+          icon={<Lock />}
+          title="Acceso Restringido"
+          description="No tienes acceso a este curso. Necesitas inscribirte primero para poder ver su contenido."
+          action={
+            <Button 
+              onClick={() => navigate('/learning/courses')}
+              data-testid="button-back-to-courses"
+            >
+              Ver Cursos Disponibles
+            </Button>
+          }
+        />
       </Layout>
     );
   }
