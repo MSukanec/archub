@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
@@ -11,36 +10,51 @@ import { es } from 'date-fns/locale';
 
 export default function PaymentSuccess() {
   const [, navigate] = useLocation();
-  const { data: userData } = useCurrentUser();
+  const { data: userData, isLoading: userLoading } = useCurrentUser();
   
   const urlParams = new URLSearchParams(window.location.search);
   const courseSlug = urlParams.get('course_slug');
   const provider = urlParams.get('provider') || 'paypal';
 
+  console.log('[PaymentSuccess] courseSlug:', courseSlug, 'provider:', provider);
+
   // Get course data
-  const { data: course, isLoading: courseLoading } = useQuery({
+  const { data: course, isLoading: courseLoading, error: courseError } = useQuery({
     queryKey: ['course', courseSlug],
     queryFn: async () => {
-      if (!courseSlug || !supabase) return null;
+      if (!courseSlug || !supabase) {
+        console.log('[PaymentSuccess] No courseSlug or supabase');
+        return null;
+      }
       
+      console.log('[PaymentSuccess] Fetching course:', courseSlug);
       const { data, error } = await supabase
         .from('courses')
         .select('*')
         .eq('slug', courseSlug)
         .single();
         
-      if (error) throw error;
+      if (error) {
+        console.error('[PaymentSuccess] Error fetching course:', error);
+        throw error;
+      }
+      
+      console.log('[PaymentSuccess] Course fetched:', data);
       return data;
     },
     enabled: !!courseSlug && !!supabase
   });
 
   // Get enrollment data with dates
-  const { data: enrollment, isLoading: enrollmentLoading } = useQuery({
+  const { data: enrollment, isLoading: enrollmentLoading, error: enrollmentError } = useQuery({
     queryKey: ['enrollment', course?.id, userData?.user?.id],
     queryFn: async () => {
-      if (!course?.id || !userData?.user?.id || !supabase) return null;
+      if (!course?.id || !userData?.user?.id || !supabase) {
+        console.log('[PaymentSuccess] Missing data for enrollment query');
+        return null;
+      }
       
+      console.log('[PaymentSuccess] Fetching enrollment for course:', course.id, 'user:', userData.user.id);
       const { data, error } = await supabase
         .from('course_enrollments')
         .select('*')
@@ -48,13 +62,28 @@ export default function PaymentSuccess() {
         .eq('user_id', userData.user.id)
         .single();
         
-      if (error) throw error;
+      if (error) {
+        console.error('[PaymentSuccess] Error fetching enrollment:', error);
+        throw error;
+      }
+      
+      console.log('[PaymentSuccess] Enrollment fetched:', data);
       return data;
     },
     enabled: !!course?.id && !!userData?.user?.id && !!supabase
   });
 
-  const isLoading = courseLoading || enrollmentLoading;
+  const isLoading = userLoading || courseLoading || enrollmentLoading;
+
+  console.log('[PaymentSuccess] States:', { 
+    userLoading, 
+    courseLoading, 
+    enrollmentLoading, 
+    isLoading,
+    course: !!course,
+    enrollment: !!enrollment,
+    userData: !!userData
+  });
 
   if (isLoading) {
     return (
@@ -62,6 +91,10 @@ export default function PaymentSuccess() {
         <div className="animate-pulse text-muted-foreground">Cargando...</div>
       </div>
     );
+  }
+
+  if (courseError || enrollmentError) {
+    console.error('[PaymentSuccess] Errors:', { courseError, enrollmentError });
   }
 
   if (!course) {
