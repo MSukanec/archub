@@ -154,36 +154,71 @@ async function upsertEnrollment(args: {
   if (error) console.error("[webhook] upsertEnrollment error:", error);
 }
 
-/** Inserta en payments_log usando TU esquema */
-async function logPaymentRow(row: {
-  provider_event_type: "payment" | "merchant_order" | "other";
+/** Inserta en payment_events (igual que PayPal) */
+async function logPaymentEvent(row: {
+  provider_event_id?: string | null;
+  provider_event_type: string;
+  status: string;
+  raw_payload: any;
+  order_id?: string | null;
+  custom_id?: string | null;
+  user_hint?: string | null;
+  course_hint?: string | null;
   provider_payment_id?: string | null;
-  provider_order_id?: string | null;
-  status?: string | null;
   amount?: number | null;
   currency?: string | null;
-  external_reference?: string | null;
-  raw_payload: any;
-  user_id?: string | null;
-  course_id?: string | null;
 }) {
   const insert = {
-    provider: "mp",
-    provider_payment_id: row.provider_payment_id ?? null,
-    provider_order_id: row.provider_order_id ?? null,
+    provider: "mercadopago",
+    provider_event_id: row.provider_event_id ?? null,
     provider_event_type: row.provider_event_type,
-    status: row.status ?? null,
+    status: row.status,
+    raw_payload: row.raw_payload ?? {},
+    order_id: row.order_id ?? null,
+    custom_id: row.custom_id ?? null,
+    user_hint: row.user_hint ?? null,
+    course_hint: row.course_hint ?? null,
+    provider_payment_id: row.provider_payment_id ?? null,
     amount: row.amount ?? null,
     currency: row.currency ?? null,
-    external_reference: row.external_reference ?? null,
-    raw_payload: row.raw_payload ?? {},
-    user_id: row.user_id ?? null,
-    course_id: row.course_id ?? null,
   };
 
-  const { error } = await supabase.from("payments_log").insert(insert);
+  const { error } = await supabase.from("payment_events").insert(insert);
   if (error)
-    console.error("[webhook] payments_log insert error:", error, insert);
+    console.error("[webhook] payment_events insert error:", error, insert);
+  else
+    console.log("[webhook] ✅ payment_event insertado");
+}
+
+/** Inserta en payments (solo si el pago está aprobado) */
+async function insertPayment(data: {
+  provider_payment_id: string;
+  user_id: string;
+  course_id: string;
+  amount: number | null;
+  currency: string;
+  status: string;
+}) {
+  const { error } = await supabase.from("payments").insert({
+    provider: "mercadopago",
+    provider_payment_id: data.provider_payment_id,
+    user_id: data.user_id,
+    course_id: data.course_id,
+    amount: data.amount,
+    currency: data.currency,
+    status: data.status,
+  });
+
+  if (error) {
+    // Si el error es por duplicado (código 23505), lo ignoramos
+    if (error.code === '23505') {
+      console.log('[webhook] ⚠️ Payment ya existe (ignorado)');
+    } else {
+      console.error("[webhook] payments insert error:", error);
+    }
+  } else {
+    console.log("[webhook] ✅ payment insertado");
+  }
 }
 
 /** ====== HANDLER ====== */
@@ -241,7 +276,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const pay = await mpGetPayment(String(finalId));
       const md = extractMetadata(pay);
       const fromExt = parseExtRef(md.external_reference);
-      const effectiveMonths = md.months ?? fromExt.months ?? null;
+      const effectiveMonths = md.months ?? fromExt.months ?? 12;
       const resolvedUserId = md.user_id ?? fromExt.user_id ?? null;
       const resolvedSlug = md.course_slug ?? fromExt.course_slug ?? null;
 
@@ -249,20 +284,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       let course_id: string | null = null;
       if (resolvedSlug) course_id = await getCourseIdBySlug(resolvedSlug);
 
-      await logPaymentRow({
-        provider_event_type: "payment",
-        provider_payment_id: String(pay?.id ?? ""),
-        provider_order_id: String(pay?.order?.id ?? ""),
-        status: String(pay?.status ?? ""),
-        amount: Number(pay?.transaction_amount ?? 0),
-        currency: String(pay?.currency_id ?? ""),
-        external_reference: md.external_reference ?? null,
+      const providerPaymentId = String(pay?.id ?? "");
+      const status = String(pay?.status ?? "");
+      const amount = Number(pay?.transaction_amount ?? 0);
+      const currency = String(pay?.currency_id ?? "ARS");
+
+      // 1. Insertar en payment_events
+      await logPaymentEvent({
+        provider_event_id: providerPaymentId,
+        provider_event_type: "payment.webhook",
+        status: "PROCESSED",
         raw_payload: pay,
-        user_id: resolvedUserId ?? null,
-        course_id: course_id ?? null,
+        order_id: String(pay?.order?.id ?? ""),
+        custom_id: md.external_reference ?? null,
+        user_hint: resolvedUserId,
+        course_hint: resolvedSlug,
+        provider_payment_id: providerPaymentId,
+        amount: amount || null,
+        currency: currency,
       });
 
-      if (String(pay?.status) === "approved" && resolvedUserId && course_id) {
+      // 2. Si está aprobado, insertar en payments y enrollment
+      if (status === "approved" && resolvedUserId && course_id) {
+        // Insert payment
+        await insertPayment({
+          provider_payment_id: providerPaymentId,
+          user_id: resolvedUserId,
+          course_id: course_id,
+          amount: amount || null,
+          currency: currency,
+          status: "completed",
+        });
+
+        // Upsert enrollment
         await upsertEnrollment({
           user_id: resolvedUserId,
           course_id,
@@ -278,7 +332,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const mo = await mpGetMerchantOrder(String(finalId));
       const md = extractMetadata(mo);
       const fromExt = parseExtRef(md.external_reference);
-      const effectiveMonths = md.months ?? fromExt.months ?? null;
+      const effectiveMonths = md.months ?? fromExt.months ?? 12;
       const resolvedUserId = md.user_id ?? fromExt.user_id ?? null;
       const resolvedSlug =
         md.course_slug ??
@@ -294,20 +348,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       let course_id: string | null = null;
       if (resolvedSlug) course_id = await getCourseIdBySlug(resolvedSlug);
 
-      await logPaymentRow({
-        provider_event_type: "merchant_order",
-        provider_payment_id: null,
-        provider_order_id: String(mo?.id ?? ""),
-        status: String(mo?.status ?? ""),
-        amount: Number(mo?.total_amount ?? 0),
-        currency: null,
-        external_reference: md.external_reference ?? null,
+      const orderId = String(mo?.id ?? "");
+      const amount = Number(mo?.total_amount ?? 0);
+
+      // 1. Insertar en payment_events
+      await logPaymentEvent({
+        provider_event_id: orderId,
+        provider_event_type: "merchant_order.webhook",
+        status: "PROCESSED",
         raw_payload: mo,
-        user_id: resolvedUserId ?? null,
-        course_id: course_id ?? null,
+        order_id: orderId,
+        custom_id: md.external_reference ?? null,
+        user_hint: resolvedUserId,
+        course_hint: resolvedSlug,
+        provider_payment_id: null,
+        amount: amount || null,
+        currency: null,
       });
 
+      // 2. Si está aprobado, insertar en payments y enrollment
       if (approved && resolvedUserId && course_id) {
+        // Obtener el payment_id del primer pago aprobado
+        const approvedPayment = mo?.payments?.find((p: any) => String(p?.status) === "approved");
+        const providerPaymentId = approvedPayment ? String(approvedPayment.id) : null;
+
+        if (providerPaymentId) {
+          await insertPayment({
+            provider_payment_id: providerPaymentId,
+            user_id: resolvedUserId,
+            course_id: course_id,
+            amount: amount || null,
+            currency: "ARS",
+            status: "completed",
+          });
+        }
+
         await upsertEnrollment({
           user_id: resolvedUserId,
           course_id,
@@ -323,17 +398,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // === OTROS / DESCONOCIDOS ===
-    await logPaymentRow({
-      provider_event_type: "other",
+    await logPaymentEvent({
+      provider_event_id: finalId ?? null,
+      provider_event_type: type || "unknown.webhook",
+      status: "PROCESSED",
+      raw_payload: body,
+      order_id: null,
+      custom_id: null,
+      user_hint: null,
+      course_hint: null,
       provider_payment_id: null,
-      provider_order_id: null,
-      status: null,
       amount: null,
       currency: null,
-      external_reference: null,
-      raw_payload: body,
-      user_id: null,
-      course_id: null,
     });
 
     return send(res, 200, {
