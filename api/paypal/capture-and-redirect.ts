@@ -202,7 +202,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           </style>
           <script>
             setTimeout(() => {
-              window.location.href = '/learning/courses/${finalCourseSlug}';
+              window.location.href = '/learning/courses/${finalCourseSlug}?enrolled=true';
             }, 2000);
           </script>
         </body>

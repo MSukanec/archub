@@ -98,11 +98,16 @@ export default function CourseView() {
     enabled: !!id && !!supabase
   });
 
+  // Detect if coming from successful payment
+  const enrolledParam = urlParams.get('enrolled');
+  
   // Check if user is enrolled in this course (SECURITY CHECK)
-  const { data: enrollment, isLoading: enrollmentLoading } = useQuery({
+  const { data: enrollment, isLoading: enrollmentLoading, refetch: refetchEnrollment } = useQuery({
     queryKey: ['course-enrollment', course?.id, userData?.user?.id],
     queryFn: async () => {
       if (!course?.id || !userData?.user?.id || !supabase) return null;
+      
+      console.log('🔍 Verificando inscripción para curso:', course.id, 'usuario:', userData.user.id);
       
       // First get user from users table
       const { data: dbUser } = await supabase
@@ -111,7 +116,12 @@ export default function CourseView() {
         .eq('auth_id', userData.user.id)
         .maybeSingle();
       
-      if (!dbUser) return null;
+      if (!dbUser) {
+        console.log('❌ Usuario no encontrado en tabla users');
+        return null;
+      }
+      
+      console.log('✅ Usuario DB encontrado:', dbUser.id);
       
       // Check enrollment
       const { data, error } = await supabase
@@ -122,14 +132,29 @@ export default function CourseView() {
         .maybeSingle();
         
       if (error) {
-        console.error('Error checking enrollment:', error);
+        console.error('❌ Error verificando inscripción:', error);
         return null;
       }
       
+      console.log('📋 Resultado de inscripción:', data ? '✅ Inscrito' : '❌ No inscrito');
+      
       return data;
     },
-    enabled: !!course?.id && !!userData?.user?.id && !!supabase
+    enabled: !!course?.id && !!userData?.user?.id && !!supabase,
+    staleTime: 0, // Always refetch to ensure fresh enrollment data
+    gcTime: 0 // Don't cache enrollment checks
   });
+  
+  // Force refetch if coming from payment
+  useEffect(() => {
+    if (enrolledParam === 'true' && course?.id && userData?.user?.id) {
+      console.log('🔄 Usuario viene de pago exitoso, forzando refetch de inscripción...');
+      refetchEnrollment();
+      // Clean URL parameter
+      const newUrl = window.location.pathname + (window.location.search.replace(/[?&]enrolled=true/, '').replace(/^\?$/, '') || '');
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [enrolledParam, course?.id, userData?.user?.id, refetchEnrollment]);
 
   const isLoading = courseLoading || enrollmentLoading;
 
