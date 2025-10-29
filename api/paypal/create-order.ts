@@ -31,7 +31,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const base = paypalBase();
     const token = await getAccessToken();
 
-    const returnBase = process.env.CHECKOUT_RETURN_URL_BASE || "https://sukanec.vercel.app";
+    // Use dynamic origin from request (works in Replit preview and production)
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    const returnBase = `${protocol}://${host}`;
+    
     const body = {
       intent: "CAPTURE",
       purchase_units: [{
