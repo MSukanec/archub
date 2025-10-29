@@ -115,9 +115,9 @@ export default function LearningDashboard() {
         {/* Welcome Section */}
         <div className="space-y-2">
           <h2 className="text-2xl font-bold">
-            ¡Bienvenido a Capacitaciones, {userData?.user?.email?.split('@')[0] || 'Usuario'}! 👋
+            ¡Bienvenido a Capacitaciones, {userData?.user?.email?.split('@')[0] || 'Usuario'}!
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Desarrolla tus habilidades profesionales con nuestros cursos especializados en construcción y diseño arquitectónico.
           </p>
         </div>
@@ -145,18 +145,22 @@ export default function LearningDashboard() {
                   color: 'white',
                   borderColor: 'var(--accent)'
                 }}
-                className="text-xs md:text-sm font-medium"
+                className="text-[10px] md:text-xs font-medium uppercase"
                 data-testid="badge-recommended"
               >
                 Recomendado
               </Badge>
             </div>
             
-            <h1 className="text-4xl md:text-6xl font-bold mb-3 md:mb-4 tracking-tight text-white" data-testid="text-hero-title">
+            <h1 
+              className="text-4xl md:text-6xl font-bold mb-3 md:mb-4 tracking-tight" 
+              style={{ color: '#ffffff' }}
+              data-testid="text-hero-title"
+            >
               Master ArchiCAD Online
             </h1>
             
-            <p className="text-sm md:text-base text-gray-400 max-w-2xl mb-6">
+            <p className="text-sm md:text-base max-w-2xl mb-6" style={{ color: '#9ca3af' }}>
               Domina las herramientas más avanzadas de diseño arquitectónico y modelado BIM
             </p>
             
