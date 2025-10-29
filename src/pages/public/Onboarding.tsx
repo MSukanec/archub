@@ -12,6 +12,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { Step1UserData } from "@/components/onboarding/Step1UserData";
+import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
 
 export default function Onboarding() {
   const [, navigate] = useLocation();
@@ -29,11 +30,7 @@ export default function Onboarding() {
 
   // Basic auth check without onboarding redirection
   if (!initialized || authLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white"></div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen size="lg" />;
   }
 
   if (!user) {
@@ -165,7 +162,7 @@ export default function Onboarding() {
     return (
       <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--accent)] mx-auto mb-4"></div>
+          <LoadingSpinner size="xl" />
           <p className="text-[var(--muted-foreground)]">Cargando...</p>
         </div>
       </div>

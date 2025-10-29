@@ -20,6 +20,7 @@ Preferred communication style: Simple, everyday language.
 - **Button Design**: Default button variant uses gradient (yellow hsl(58,77%,51%) to green hsl(76,100%,40%)) matching logo colors.
 - **Onboarding Flow**: Streamlined onboarding automatically sets users to 'professional' mode and navigates directly to /home, skipping SelectMode page.
 - **StatCard Component**: Standardized minimal card design for statistics and KPIs. Features composable subcomponents (`StatCardTitle`, `StatCardValue`, `StatCardMeta`, `StatCardContent`) with preset styling (text-xs uppercase titles, text-5xl values, text-sm metadata). Supports optional navigation via `href` or `onCardClick` props with hover effects (shadow-md) and animated arrow indicator on StatCardTitle. Used in admin, capital, and learning dashboards for visual consistency.
+- **LoadingSpinner Component**: Custom loading component (`src/components/ui-custom/LoadingSpinner.tsx`) featuring Archub logo at center with conic gradient spinner (yellow to green gradient matching button colors). Supports size variants (sm, md, lg, xl) and fullScreen mode. Used in AuthGuard, Onboarding, and other loading states across the application.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui (Radix UI primitives), Tailwind CSS, Zustand for state management, Wouter for routing, TanStack Query for data fetching.

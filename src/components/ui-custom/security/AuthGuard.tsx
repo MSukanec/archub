@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectContextInit } from '@/hooks/use-project-context-init';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
 interface AuthGuardProps {
   children: ReactNode;
@@ -148,11 +149,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   // Loading state
   if (!initialized || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white"></div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen size="lg" />;
   }
 
   // Auth modal for unauthenticated users on protected routes
@@ -169,11 +166,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(location);
   
   if (user && userDataLoading && !isPublicRoute && !isOnboardingRoute) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white"></div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen size="lg" />;
   }
 
   // Block rendering if user needs onboarding but is not on onboarding route
@@ -188,11 +181,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     
     if (needsOnboarding) {
       // Show loading instead of rendering the protected content
-      return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white"></div>
-        </div>
-      );
+      return <LoadingSpinner fullScreen size="lg" />;
     }
   }
 
