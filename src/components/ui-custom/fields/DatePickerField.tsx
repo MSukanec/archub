@@ -40,16 +40,20 @@ export default function DatePickerField({
   }
 
   const handleDateChange = (date: Date | undefined) => {
-    // Solo permitir seleccionar, nunca deseleccionar
     if (date) {
-      // Forzar que la fecha se mantenga en la zona horaria local
-      // Usar toDateString y volver a parsear garantiza que se mantenga el día correcto
-      const dateStr = date.toDateString()
-      const localDate = new Date(dateStr)
-      localDate.setHours(12, 0, 0, 0)
+      // Crear una nueva fecha en timezone local usando los componentes de fecha
+      // Esto evita problemas de conversión UTC
+      const localDate = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+        12, // Hora fija a mediodía para evitar problemas de DST
+        0,
+        0,
+        0
+      )
       onChange(localDate)
     }
-    // Si date es undefined, no hacer nada (evita deselección)
   }
 
   return (
