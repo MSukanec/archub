@@ -158,7 +158,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           const expDate = new Date(e.expires_at!);
           const daysUntilExpiry = Math.floor((expDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
           return daysUntilExpiry > 0 && daysUntilExpiry <= 30;
-        })
+        }),
+        _debug: {
+          paymentsError: paymentsError,
+          paymentsCount: payments?.length || 0,
+          paymentsData: payments,
+          completedCount: completedPayments.length,
+          completedData: completedPayments
+        }
       };
 
       console.log('📊 Dashboard response:', JSON.stringify(responseData, null, 2));
