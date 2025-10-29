@@ -78,11 +78,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       // Fetch payments
       const { data: payments, error: paymentsError } = await supabase
-        .from('payments_log')
+        .from('payments')
         .select('amount, currency, created_at, status')
-        .eq('status', 'approved');
+        .eq('status', 'completed');
 
-      console.log('💰 Payments query:', { payments, paymentsError });
+      console.log('💰 Payments query:', { payments, paymentsError, count: payments?.length || 0 });
 
       const totalRevenue = payments?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 0;
 
