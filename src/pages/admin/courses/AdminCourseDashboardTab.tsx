@@ -34,18 +34,25 @@ export default function AdminCourseDashboardTab() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error('No session')
 
-      const res = await fetch('/api/admin/dashboard', {
+      const res = await fetch(`/api/admin/dashboard?_t=${Date.now()}`, {
         headers: {
-          'Authorization': `Bearer ${session.access_token}`
+          'Authorization': `Bearer ${session.access_token}`,
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
         },
+        cache: 'no-store',
         credentials: 'include'
       })
 
       if (!res.ok) throw new Error('Failed to fetch dashboard data')
-      return res.json()
+      const data = await res.json()
+      console.log('💰 Dashboard data received:', data)
+      return data
     },
     enabled: !!supabase,
-    staleTime: 0
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always'
   })
 
   const stats = dashboardData?.stats
