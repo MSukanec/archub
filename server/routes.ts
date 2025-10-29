@@ -3887,7 +3887,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ ok: false, error: "No se obtuvo 'access_token' de PayPal" });
       }
 
-      // 2) Capture Order (NO escribe en DB, el webhook de Supabase lo hace)
+      // 2) Capture Order
       const capResp = await fetch(`${base}/v2/checkout/orders/${orderId}/capture`, {
         method: "POST",
         headers: {
@@ -3911,6 +3911,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
           error: `Capture fallo ${capResp.status}`,
           details: capJson,
         });
+      }
+
+      console.log('[PayPal capture-order] Capture response:', JSON.stringify(capJson, null, 2));
+
+      // 3) Guardar en la base de datos (en Preview el webhook no funciona, lo hacemos aquí)
+      const captureOrderId = capJson.id;
+      const status = capJson.status;
+      const invoiceId = capJson?.purchase_units?.[0]?.invoice_id || null;
+      const amount = capJson?.purchase_units?.[0]?.amount?.value || null;
+      const currency = capJson?.purchase_units?.[0]?.amount?.currency_code || null;
+
+      console.log('[PayPal capture-order] Order ID:', captureOrderId, 'Status:', status, 'Invoice:', invoiceId);
+
+      // Parsear invoice_id formato "user:UUID;course:UUID"
+      function parseInvoiceId(invoiceId: string): { user?: string; course?: string } {
+        const out: Record<string, string> = {};
+        if (!invoiceId) return out;
+        for (const part of invoiceId.split(';')) {
+          const [k, v] = part.split(':').map((s) => s.trim());
+          if (k && v) out[k] = v;
+        }
+        return out;
+      }
+
+      const { user: userId, course: courseId } = parseInvoiceId(invoiceId || '');
+      console.log('[PayPal capture-order] Parsed - User ID:', userId, 'Course ID:', courseId);
+
+      // Guardar en paypal_events
+      try {
+        await getAdminClient().from('paypal_events').insert({
+          provider_event_id: captureOrderId,
+          provider_event_type: 'PAYMENT.CAPTURE.COMPLETED',
+          status: 'PROCESSED',
+          raw_payload: capJson,
+          order_id: captureOrderId,
+          custom_id: invoiceId,
+          user_hint: userId || null,
+          course_hint: courseId || null,
+        });
+        console.log('[PayPal capture-order] ✅ Guardado en paypal_events');
+      } catch (e: any) {
+        console.error('[PayPal capture-order] Error insertando en paypal_events:', e);
+      }
+
+      // Guardar en payment_logs
+      try {
+        await getAdminClient().from('payment_logs').insert({
+          user_id: userId || null,
+          course_id: courseId || null,
+          provider: 'paypal',
+          provider_payment_id: captureOrderId,
+          amount: amount ? parseFloat(amount) : null,
+          currency: currency || 'USD',
+          status: status === 'COMPLETED' ? 'completed' : 'pending',
+          raw_payload: capJson,
+        });
+        console.log('[PayPal capture-order] ✅ Guardado en payment_logs');
+      } catch (e: any) {
+        console.error('[PayPal capture-order] Error insertando en payment_logs:', e);
+      }
+
+      // Crear enrollment si tenemos user_id y course_id
+      if (userId && courseId && status === 'COMPLETED') {
+        try {
+          const expiresAt = new Date();
+          expiresAt.setDate(expiresAt.getDate() + 365); // 1 año
+
+          await getAdminClient().from('course_enrollments').upsert(
+            {
+              user_id: userId,
+              course_id: courseId,
+              status: 'active',
+              started_at: new Date().toISOString(),
+              expires_at: expiresAt.toISOString(),
+            },
+            { onConflict: 'user_id,course_id' }
+          );
+          console.log('[PayPal capture-order] ✅ Enrollment creado/actualizado');
+        } catch (e: any) {
+          console.error('[PayPal capture-order] Error insertando en course_enrollments:', e);
+        }
       }
 
       return res.status(200).json({ ok: true, capture: capJson });
