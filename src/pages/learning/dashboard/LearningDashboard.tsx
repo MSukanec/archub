@@ -1,9 +1,8 @@
 import { useEffect, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { GraduationCap, BookOpen, Award, CheckCircle2, Sparkles, ArrowRight } from 'lucide-react'
+import { GraduationCap, Sparkles, ArrowRight, CheckCircle2 } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatCard, StatCardTitle } from '@/components/ui/stat-card'
 import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
@@ -19,6 +18,36 @@ import ProgressRing from '@/components/charts/courses/ProgressRing'
 import MiniBar from '@/components/charts/courses/MiniBar'
 import LineStreak from '@/components/charts/courses/LineStreak'
 
+interface DashboardData {
+  global: {
+    done_lessons_total: number
+    total_lessons_total: number
+    progress_pct: number
+  } | null
+  courses: Array<{
+    course_id: string
+    course_title: string
+    course_slug: string
+    progress_pct: number
+    done_lessons: number
+    total_lessons: number
+  }>
+  study: {
+    seconds_lifetime: number
+    seconds_this_month: number
+  }
+  currentStreak: number
+  activeDays: number
+  recentCompletions: Array<{
+    type: string
+    when: string
+    lesson_title: string
+    module_title: string
+    course_title: string
+    course_slug: string
+  }>
+}
+
 export default function LearningDashboard() {
   const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore()
   const { data: userData } = useCurrentUser()
@@ -31,14 +60,14 @@ export default function LearningDashboard() {
     }
   }, [setSidebarContext, setSidebarLevel, sidebarLevel])
 
-  // Fetch all dashboard data from the server
-  const { data: dashboardData, isLoading } = useQuery<any>({
+  // Fetch pre-calculated dashboard data from the server (much faster!)
+  const { data: dashboardData, isLoading } = useQuery<DashboardData>({
     queryKey: ['/api/learning/dashboard'],
     queryFn: async () => {
-      if (!supabase) return null;
+      if (!supabase) return null as any;
       
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return null;
+      if (!session) return null as any;
 
       const response = await fetch('/api/learning/dashboard', {
         headers: {
@@ -48,121 +77,22 @@ export default function LearningDashboard() {
 
       if (!response.ok) {
         console.error('Failed to fetch dashboard data:', await response.text());
-        return null;
+        return null as any;
       }
       
-      const data = await response.json();
-      console.log('📊 Dashboard data received:', data);
-      return data;
+      return response.json();
     },
-    enabled: !!supabase && !!userData
+    enabled: !!supabase && !!userData,
+    staleTime: 30000, // Cache for 30 seconds
   });
 
-  // Calculate derived data
-  const { enrollments = [], progress = [], courseLessons = [], recentCompletions = [] } = dashboardData || {}
-
-  // Calculate global progress from enrollments and progress
-  const global = useMemo(() => {
-    if (!enrollments.length) return null;
-    
-    const courseIds = enrollments.map((e: any) => e.course_id);
-    const relevantLessons = courseLessons.filter((l: any) => 
-      courseIds.includes(l.course_modules?.course_id)
-    );
-    const total_lessons_total = relevantLessons.length;
-    const done_lessons_total = progress.filter((p: any) => 
-      p.is_completed && relevantLessons.some((l: any) => l.id === p.lesson_id)
-    ).length;
-    const progress_pct = total_lessons_total > 0 
-      ? Math.round((done_lessons_total / total_lessons_total) * 100) 
-      : 0;
-    
-    return { done_lessons_total, total_lessons_total, progress_pct };
-  }, [enrollments, courseLessons, progress]);
-
-  // Calculate course progress
-  const courses = useMemo(() => {
-    return enrollments.map((enrollment: any) => {
-      const courseId = enrollment.course_id;
-      const lessons = courseLessons.filter((l: any) => 
-        l.course_modules?.course_id === courseId
-      );
-      const total_lessons = lessons.length;
-      const done_lessons = progress.filter((p: any) => 
-        p.is_completed && lessons.some((l: any) => l.id === p.lesson_id)
-      ).length;
-      const progress_pct = total_lessons > 0 
-        ? Math.round((done_lessons / total_lessons) * 100) 
-        : 0;
-      
-      return {
-        course_id: courseId,
-        course_title: enrollment.courses?.title || 'Sin título',
-        course_slug: enrollment.course_slug || '',
-        progress_pct,
-        done_lessons,
-        total_lessons
-      };
-    });
-  }, [enrollments, courseLessons, progress]);
-
-  // Calculate study time from progress data
-  const study = useMemo(() => {
-    if (!progress.length) return { seconds_lifetime: 0, seconds_this_month: 0 };
-    
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    
-    let seconds_lifetime = 0;
-    let seconds_this_month = 0;
-    
-    progress.forEach((p: any) => {
-      const lastPos = p.last_position_sec || 0;
-      seconds_lifetime += lastPos;
-      
-      const updateDate = new Date(p.updated_at);
-      if (updateDate >= startOfMonth) {
-        seconds_this_month += lastPos;
-      }
-    });
-    
-    return { seconds_lifetime, seconds_this_month };
-  }, [progress]);
-
-  // Calculate active days from progress data
-  const days = useMemo(() => {
-    const cutoffDate = new Date(Date.now() - 60 * 86400000);
-    const daysSet = new Set<string>();
-    
-    progress.forEach((p: any) => {
-      const updateDate = new Date(p.updated_at);
-      if (updateDate >= cutoffDate) {
-        const day = updateDate.toISOString().slice(0, 10);
-        daysSet.add(day);
-      }
-    });
-    
-    return Array.from(daysSet).map(day => ({ day }));
-  }, [progress]);
-
-  const recent = recentCompletions || [];
+  // Derived data (minimal computation)
+  const { global, courses = [], study, currentStreak = 0, recentCompletions = [] } = dashboardData || {}
 
   const hoursData = useMemo(() => ([
     { name: 'Mes', value: Math.round((study?.seconds_this_month ?? 0) / 3600) },
     { name: 'Total', value: Math.round((study?.seconds_lifetime ?? 0) / 3600) }
   ]), [study])
-
-  const streakSeries = useMemo(() => {
-    const set = new Set(days.map(d => d.day))
-    const last30: { day: string; active: number }[] = []
-    const today = new Date()
-    for (let i = 29; i >= 0; i--) {
-      const dt = new Date(today.getTime() - i * 86400000)
-      const key = dt.toISOString().slice(0, 10)
-      last30.push({ day: key, active: set.has(key) ? 1 : 0 })
-    }
-    return last30
-  }, [days])
 
   const coursesSorted = useMemo(() => {
     return [...courses]
@@ -171,21 +101,18 @@ export default function LearningDashboard() {
       .slice(0, 3)
   }, [courses])
 
-  const currentStreak = useMemo(() => {
-    const sorted = [...days].sort((a, b) => b.day.localeCompare(a.day))
-    let streak = 0
-    const today = new Date().toISOString().slice(0, 10)
-    
-    for (let i = 0; i < sorted.length; i++) {
-      const expectedDate = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10)
-      if (sorted[i]?.day === expectedDate) {
-        streak++
-      } else {
-        break
-      }
+  // Simple streak series for visualization
+  const streakSeries = useMemo(() => {
+    const last30: { day: string; active: number }[] = []
+    const today = new Date()
+    for (let i = 29; i >= 0; i--) {
+      const dt = new Date(today.getTime() - i * 86400000)
+      const key = dt.toISOString().slice(0, 10)
+      // Simple visualization - actual data calculated on backend
+      last30.push({ day: key, active: i < currentStreak ? 1 : 0 })
     }
-    return streak
-  }, [days])
+    return last30
+  }, [currentStreak])
 
   const headerProps = {
     title: "Dashboard de Capacitaciones",
@@ -196,6 +123,7 @@ export default function LearningDashboard() {
     return (
       <Layout headerProps={headerProps} wide>
         <div className="space-y-6">
+          <Skeleton className="h-[300px] md:h-[400px] rounded-xl" />
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map(i => (
               <Skeleton key={i} className="h-48" />
@@ -242,7 +170,7 @@ export default function LearningDashboard() {
             }}
           />
           
-          {/* Gradient Overlay for text readability */}
+          {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
           
           {/* Content */}
@@ -399,9 +327,9 @@ export default function LearningDashboard() {
           <p className="text-sm text-muted-foreground mb-4">
             Últimas lecciones en las que trabajaste
           </p>
-          {recent.length > 0 ? (
+          {recentCompletions.length > 0 ? (
             <div className="space-y-3">
-              {recent.map((item: any, index: number) => (
+              {recentCompletions.map((item: any, index: number) => (
                 <div key={index} className="flex items-start gap-3 text-sm pb-3 border-b last:border-0 last:pb-0" data-testid={`recent-activity-${index}`}>
                   <CheckCircle2 
                     className={`h-4 w-4 flex-shrink-0 mt-0.5 ${
