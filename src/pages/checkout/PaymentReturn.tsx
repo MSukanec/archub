@@ -53,27 +53,31 @@ export default function PaymentReturn() {
 
         setCourseData(course);
 
-        const { data: { user } } = await supabase.auth.getUser();
+        // Get current user data (includes user.id which is the UUID from users table)
+        const { data: { session } } = await supabase.auth.getSession();
         
-        if (!user) {
+        if (!session) {
           throw new Error('Usuario no autenticado');
         }
 
-        const { data: userData } = await supabase
-          .from('users')
-          .select('id')
-          .eq('auth_id', user.id)
-          .single();
+        const userResponse = await fetch('/api/current-user', {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        });
 
-        if (!userData) {
-          throw new Error('Usuario no encontrado en la base de datos');
+        if (!userResponse.ok) {
+          throw new Error('No se pudo obtener información del usuario');
         }
+
+        const userData = await userResponse.json();
+        const userId = userData.user.id; // This is already the UUID from users table
 
         const { data: enrollment, error: enrollError } = await supabase
           .from('course_enrollments')
           .select('started_at, expires_at, status')
           .eq('course_id', course.id)
-          .eq('user_id', userData.id)
+          .eq('user_id', userId)
           .maybeSingle();
 
         if (enrollError) {
