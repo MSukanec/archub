@@ -109,26 +109,15 @@ export default function CourseView() {
       
       console.log('🔍 Verificando inscripción para curso:', course.id, 'usuario:', userData.user.id);
       
-      // First get user from users table
-      const { data: dbUser } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_id', userData.user.id)
-        .maybeSingle();
-      
-      if (!dbUser) {
-        console.log('❌ Usuario no encontrado en tabla users');
-        return null;
-      }
-      
-      console.log('✅ Usuario DB encontrado:', dbUser.id);
+      // userData.user.id is already the UUID from users table
+      const userId = userData.user.id;
       
       // Check enrollment
       const { data, error } = await supabase
         .from('course_enrollments')
         .select('*')
         .eq('course_id', course.id)
-        .eq('user_id', dbUser.id)
+        .eq('user_id', userId)
         .maybeSingle();
         
       if (error) {
