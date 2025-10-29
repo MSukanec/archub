@@ -83,7 +83,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     console.log('[PayPal capture-and-redirect] Order ID:', orderId, 'Status:', status, 'Custom ID:', customIdBase64);
 
-    // Decodificar custom_id y resolver course_id
+    // Decodificar custom_id y resolver course_id Y user_id (de auth_id)
+    let authId: string | null = null;
     let userId: string | null = null;
     let courseId: string | null = null;
     let courseSlug: string | null = null;
@@ -92,8 +93,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         const decodedJson = Buffer.from(customIdBase64, 'base64').toString('utf-8');
         const customData = JSON.parse(decodedJson);
-        userId = customData.user_id || null;
+        authId = customData.user_id || null; // Este es el auth_id de Supabase
         courseSlug = customData.course_slug || null;
+        
+        // Convertir auth_id a user_id de la tabla users
+        if (authId) {
+          const { data: dbUser } = await supabase
+            .from('users')
+            .select('id')
+            .eq('auth_id', authId)
+            .maybeSingle();
+          userId = dbUser?.id || null;
+        }
         
         if (courseSlug) {
           const { data: course } = await supabase
@@ -104,13 +115,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           courseId = course?.id || null;
         }
         
-        console.log('[PayPal capture-and-redirect] Decoded custom_id:', { userId, courseSlug, courseId });
+        console.log('[PayPal capture-and-redirect] Decoded custom_id:', { authId, userId, courseSlug, courseId });
       } catch (e) {
         console.error('[PayPal capture-and-redirect] Error decodificando custom_id:', e);
       }
     }
     
-    console.log('[PayPal capture-and-redirect] Parsed - User ID:', userId, 'Course ID:', courseId);
+    console.log('[PayPal capture-and-redirect] Parsed - Auth ID:', authId, 'User ID:', userId, 'Course ID:', courseId);
 
     // === GUARDAR EN LA BASE DE DATOS ===
 
@@ -123,7 +134,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       raw_payload: captureData,
       order_id: orderId,
       custom_id: customIdBase64,
-      user_hint: userId,
+      user_hint: authId,
       course_hint: courseSlug,
       provider_payment_id: providerPaymentId,
       amount: amountValue ? parseFloat(amountValue) : null,
