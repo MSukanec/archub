@@ -76,41 +76,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const orderId = captureData.id;
     const status = captureData.status;
     const captureObj = captureData?.purchase_units?.[0]?.payments?.captures?.[0];
-    const customIdBase64 = captureObj?.custom_id || null;
+    const invoiceId = captureObj?.invoice_id || null;
     const providerPaymentId = captureObj?.id || null;
     const amountValue = captureObj?.amount?.value || null;
     const currencyCode = captureObj?.amount?.currency_code || null;
 
-    console.log('[PayPal capture-and-redirect] Order ID:', orderId, 'Status:', status, 'Custom ID:', customIdBase64);
+    console.log('[PayPal capture-and-redirect] Order ID:', orderId, 'Status:', status, 'Invoice ID:', invoiceId);
 
-    // Decodificar custom_id y resolver course_id
+    // Parse invoice_id: "user:UUID;course:UUID"
     let userId: string | null = null;
     let courseId: string | null = null;
-    let courseSlug: string | null = null;
     
-    if (customIdBase64) {
+    if (invoiceId) {
       try {
-        const decodedJson = Buffer.from(customIdBase64, 'base64').toString('utf-8');
-        const customData = JSON.parse(decodedJson);
-        userId = customData.user_id || null;
-        courseSlug = customData.course_slug || null;
-        
-        if (courseSlug) {
-          const { data: course } = await supabase
-            .from('courses')
-            .select('id')
-            .eq('slug', courseSlug)
-            .maybeSingle();
-          courseId = course?.id || null;
+        const parts = invoiceId.split(';');
+        for (const part of parts) {
+          const [key, value] = part.split(':');
+          if (key === 'user') userId = value;
+          if (key === 'course') courseId = value;
         }
         
-        console.log('[PayPal capture-and-redirect] Decoded custom_id:', { userId, courseSlug, courseId });
+        console.log('[PayPal capture-and-redirect] Parsed invoice_id:', { userId, courseId });
       } catch (e) {
-        console.error('[PayPal capture-and-redirect] Error decodificando custom_id:', e);
+        console.error('[PayPal capture-and-redirect] Error parsing invoice_id:', e);
       }
     }
     
-    console.log('[PayPal capture-and-redirect] Parsed - User ID:', userId, 'Course ID:', courseId);
+    console.log('[PayPal capture-and-redirect] Final - User ID:', userId, 'Course ID:', courseId);
 
     // === GUARDAR EN LA BASE DE DATOS ===
 
@@ -122,9 +114,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       status: 'PROCESSED',
       raw_payload: captureData,
       order_id: orderId,
-      custom_id: customIdBase64,
+      custom_id: invoiceId,
       user_hint: userId,
-      course_hint: courseSlug,
+      course_hint: courseId,
       provider_payment_id: providerPaymentId,
       amount: amountValue ? parseFloat(amountValue) : null,
       currency: currencyCode,
