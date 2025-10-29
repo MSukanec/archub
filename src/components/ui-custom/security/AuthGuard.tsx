@@ -11,7 +11,7 @@ interface AuthGuardProps {
 }
 
 // Define route types for clarity
-const PUBLIC_ROUTES = ['/', '/login', '/register', '/forgot-password'];
+const PUBLIC_ROUTES = ['/', '/login', '/register', '/forgot-password', '/checkout/success'];
 const ONBOARDING_ROUTES = ['/onboarding', '/select-mode'];
 
 export function AuthGuard({ children }: AuthGuardProps) {

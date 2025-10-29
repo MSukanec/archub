@@ -101,21 +101,20 @@ import { ProjectContextInitializer } from "@/components/navigation/ProjectContex
 
 function Router() {
   return (
-    <>
-      {/* Checkout Routes - OUTSIDE AuthGuard for fast loading */}
-      <Route path="/checkout/success" component={PaymentSuccess} />
-      
-      <AuthGuard>
-        <Switch>
-          {/* Public Routes */}
-          <Route path="/" component={Landing} />
-          <Route path="/login" component={Login} />
-          <Route path="/register" component={Register} />
-          <Route path="/forgot-password" component={ForgotPassword} />
+    <AuthGuard>
+      <Switch>
+        {/* Public Routes */}
+        <Route path="/" component={Landing} />
+        <Route path="/login" component={Login} />
+        <Route path="/register" component={Register} />
+        <Route path="/forgot-password" component={ForgotPassword} />
+        
+        {/* Checkout Routes - Public for fast access after payment */}
+        <Route path="/checkout/success" component={PaymentSuccess} />
 
-          {/* Onboarding and Mode Selection Routes */}
-          <Route path="/onboarding" component={Onboarding} />
-          <Route path="/select-mode" component={SelectMode} />
+        {/* Onboarding and Mode Selection Routes */}
+        <Route path="/onboarding" component={Onboarding} />
+        <Route path="/select-mode" component={SelectMode} />
 
         {/* Home - Main landing page after onboarding */}
         <Route path="/home" component={Home} />
@@ -175,9 +174,6 @@ function Router() {
         <Route path="/learning/courses" component={CourseList} />
         <Route path="/learning/courses/:id" component={CourseView} />
         <Route path="/learning/retorno" component={PaymentReturn} />
-        
-        {/* Checkout Routes */}
-        <Route path="/checkout/success" component={PaymentSuccess} />
 
         {/* Finances Routes */}
         <Route path="/finances/dashboard" component={FinancesCapitalMovements} />
@@ -260,11 +256,10 @@ function Router() {
 
 
 
-          {/* 404 Route - Must be last */}
-          <Route path="*" component={NotFound} />
-        </Switch>
-      </AuthGuard>
-    </>
+        {/* 404 Route - Must be last */}
+        <Route path="*" component={NotFound} />
+      </Switch>
+    </AuthGuard>
   );
 }
 
