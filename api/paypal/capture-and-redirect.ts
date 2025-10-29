@@ -75,32 +75,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // === EXTRAER DATOS DEL PAGO ===
     const orderId = captureData.id;
     const status = captureData.status;
-    const customIdBase64 = captureData?.purchase_units?.[0]?.payments?.captures?.[0]?.custom_id || null;
-    const amount = captureData?.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value || null;
-    const currency = captureData?.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.currency_code || null;
+    const captureObj = captureData?.purchase_units?.[0]?.payments?.captures?.[0];
+    const customIdBase64 = captureObj?.custom_id || null;
+    const providerPaymentId = captureObj?.id || null;
+    const amountValue = captureObj?.amount?.value || null;
+    const currencyCode = captureObj?.amount?.currency_code || null;
 
     console.log('[PayPal capture-and-redirect] Order ID:', orderId, 'Status:', status, 'Custom ID:', customIdBase64);
 
-    // Decodificar custom_id desde base64 y parsear JSON
-    let userId: string | undefined;
-    let courseId: string | undefined;
-    let courseSlug: string | undefined;
+    // Decodificar custom_id y resolver course_id
+    let userId: string | null = null;
+    let courseId: string | null = null;
+    let courseSlug: string | null = null;
     
     if (customIdBase64) {
       try {
         const decodedJson = Buffer.from(customIdBase64, 'base64').toString('utf-8');
         const customData = JSON.parse(decodedJson);
-        userId = customData.user_id;
-        courseSlug = customData.course_slug;
+        userId = customData.user_id || null;
+        courseSlug = customData.course_slug || null;
         
-        // Obtener course_id desde course_slug
         if (courseSlug) {
           const { data: course } = await supabase
             .from('courses')
             .select('id')
             .eq('slug', courseSlug)
-            .single();
-          courseId = course?.id;
+            .maybeSingle();
+          courseId = course?.id || null;
         }
         
         console.log('[PayPal capture-and-redirect] Decoded custom_id:', { userId, courseSlug, courseId });
@@ -113,61 +114,57 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // === GUARDAR EN LA BASE DE DATOS ===
 
-    // 1. Guardar en paypal_events
-    const { error: eventError } = await supabase.from('paypal_events').insert({
-      provider_event_id: orderId,
+    // 1. Guardar en payment_events
+    const { error: eventError } = await supabase.from('payment_events').insert({
+      provider: 'paypal',
+      provider_event_id: providerPaymentId,
       provider_event_type: 'PAYMENT.CAPTURE.COMPLETED',
       status: 'PROCESSED',
       raw_payload: captureData,
       order_id: orderId,
       custom_id: customIdBase64,
-      user_hint: userId || null,
-      course_hint: courseId || null,
+      user_hint: userId,
+      course_hint: courseSlug,
+      provider_payment_id: providerPaymentId,
+      amount: amountValue ? parseFloat(amountValue) : null,
+      currency: currencyCode,
     });
 
     if (eventError) {
-      console.error('[PayPal capture-and-redirect] Error insertando en paypal_events:', eventError);
+      console.error('[PayPal capture-and-redirect] Error insertando en payment_events:', eventError);
     } else {
-      console.log('[PayPal capture-and-redirect] ✅ Guardado en paypal_events');
+      console.log('[PayPal capture-and-redirect] ✅ Guardado en payment_events');
     }
 
-    // 2. Guardar en payment_logs (si existe la tabla)
-    try {
-      const { error: logError } = await supabase.from('payment_logs').insert({
-        user_id: userId || null,
-        course_id: courseId || null,
-        provider: 'paypal',
-        provider_payment_id: orderId,
-        amount: amount ? parseFloat(amount) : null,
-        currency: currency || 'USD',
-        status: status === 'COMPLETED' ? 'completed' : 'pending',
-        raw_payload: captureData,
-      });
-
-      if (logError) {
-        console.error('[PayPal capture-and-redirect] Error insertando en payment_logs:', logError);
-      } else {
-        console.log('[PayPal capture-and-redirect] ✅ Guardado en payment_logs');
-      }
-    } catch (e) {
-      console.warn('[PayPal capture-and-redirect] payment_logs table might not exist:', e);
-    }
-
-    // 3. Crear enrollment si tenemos user_id y course_id
+    // 2. Si tenemos user_id y course_id, crear payment y enrollment
     if (userId && courseId && status === 'COMPLETED') {
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 365); // 1 año
+      // Upsert en payments
+      const { error: paymentError } = await supabase.from('payments').upsert({
+        provider: 'paypal',
+        provider_payment_id: providerPaymentId,
+        user_id: userId,
+        course_id: courseId,
+        amount: amountValue ? parseFloat(amountValue) : null,
+        currency: currencyCode || 'USD',
+        status: 'completed',
+      }, { onConflict: 'provider,provider_payment_id' });
 
-      const { error: enrollError } = await supabase.from('course_enrollments').upsert(
-        {
-          user_id: userId,
-          course_id: courseId,
-          status: 'active',
-          started_at: new Date().toISOString(),
-          expires_at: expiresAt.toISOString(),
-        },
-        { onConflict: 'user_id,course_id' }
-      );
+      if (paymentError) {
+        console.error('[PayPal capture-and-redirect] Error insertando en payments:', paymentError);
+      } else {
+        console.log('[PayPal capture-and-redirect] ✅ Payment upserted');
+      }
+
+      // Upsert enrollment
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 365);
+      const { error: enrollError } = await supabase.from('course_enrollments').upsert({
+        user_id: userId,
+        course_id: courseId,
+        status: 'active',
+        started_at: new Date().toISOString(),
+        expires_at: expiresAt.toISOString(),
+      }, { onConflict: 'user_id,course_id' });
 
       if (enrollError) {
         console.error('[PayPal capture-and-redirect] Error insertando en course_enrollments:', enrollError);

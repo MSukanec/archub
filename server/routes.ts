@@ -3915,37 +3915,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('[PayPal capture-order] Capture response:', JSON.stringify(capJson, null, 2));
 
-      // 3) Guardar en la base de datos
+      // 3) Procesar el pago y guardar en base de datos
       const captureOrderId = capJson.id;
       const status = capJson.status;
-      
-      // El custom_id está en captures[0].custom_id y es base64 JSON
-      const customIdBase64 = capJson?.purchase_units?.[0]?.payments?.captures?.[0]?.custom_id || null;
-      const amount = capJson?.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value || null;
-      const currency = capJson?.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.currency_code || null;
+      const captureObj = capJson?.purchase_units?.[0]?.payments?.captures?.[0];
+      const customIdBase64 = captureObj?.custom_id || null;
+      const providerPaymentId = captureObj?.id || null;
+      const amountValue = captureObj?.amount?.value || null;
+      const currencyCode = captureObj?.amount?.currency_code || null;
 
       console.log('[PayPal capture-order] Order ID:', captureOrderId, 'Status:', status, 'Custom ID:', customIdBase64);
 
-      // Decodificar custom_id desde base64 y parsear JSON
-      let userId: string | undefined;
-      let courseId: string | undefined;
-      let courseSlug: string | undefined;
+      // Decodificar custom_id y resolver course_id
+      let userId: string | null = null;
+      let courseId: string | null = null;
+      let courseSlug: string | null = null;
       
       if (customIdBase64) {
         try {
           const decodedJson = Buffer.from(customIdBase64, 'base64').toString('utf-8');
           const customData = JSON.parse(decodedJson);
-          userId = customData.user_id;
-          courseSlug = customData.course_slug;
+          userId = customData.user_id || null;
+          courseSlug = customData.course_slug || null;
           
-          // Obtener course_id desde course_slug
           if (courseSlug) {
             const { data: course } = await getAdminClient()
               .from('courses')
               .select('id')
               .eq('slug', courseSlug)
-              .single();
-            courseId = course?.id;
+              .maybeSingle();
+            courseId = course?.id || null;
           }
           
           console.log('[PayPal capture-order] Decoded custom_id:', { userId, courseSlug, courseId });
@@ -3954,62 +3953,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      const { user: _ignored1, course: _ignored2 } = { user: undefined, course: undefined };
       console.log('[PayPal capture-order] Parsed - User ID:', userId, 'Course ID:', courseId);
 
-      // Guardar en paypal_events
+      // Guardar evento en payment_events
       try {
-        await getAdminClient().from('paypal_events').insert({
-          provider_event_id: captureOrderId,
+        await getAdminClient().from('payment_events').insert({
+          provider: 'paypal',
+          provider_event_id: providerPaymentId,
           provider_event_type: 'PAYMENT.CAPTURE.COMPLETED',
           status: 'PROCESSED',
           raw_payload: capJson,
           order_id: captureOrderId,
           custom_id: customIdBase64,
-          user_hint: userId || null,
-          course_hint: courseId || null,
+          user_hint: userId,
+          course_hint: courseSlug,
+          provider_payment_id: providerPaymentId,
+          amount: amountValue ? parseFloat(amountValue) : null,
+          currency: currencyCode,
         });
-        console.log('[PayPal capture-order] ✅ Guardado en paypal_events');
+        console.log('[PayPal capture-order] ✅ Guardado en payment_events');
       } catch (e: any) {
-        console.error('[PayPal capture-order] Error insertando en paypal_events:', e);
+        console.error('[PayPal capture-order] Error insertando en payment_events:', e);
       }
 
-      // Guardar en payment_logs
-      try {
-        await getAdminClient().from('payment_logs').insert({
-          user_id: userId || null,
-          course_id: courseId || null,
-          provider: 'paypal',
-          provider_payment_id: captureOrderId,
-          amount: amount ? parseFloat(amount) : null,
-          currency: currency || 'USD',
-          status: status === 'COMPLETED' ? 'completed' : 'pending',
-          raw_payload: capJson,
-        });
-        console.log('[PayPal capture-order] ✅ Guardado en payment_logs');
-      } catch (e: any) {
-        console.error('[PayPal capture-order] Error insertando en payment_logs:', e);
-      }
-
-      // Crear enrollment si tenemos user_id y course_id
+      // Si tenemos user_id y course_id, crear payment y enrollment
       if (userId && courseId && status === 'COMPLETED') {
         try {
-          const expiresAt = new Date();
-          expiresAt.setDate(expiresAt.getDate() + 365); // 1 año
+          // Upsert en payments
+          await getAdminClient().from('payments').upsert({
+            provider: 'paypal',
+            provider_payment_id: providerPaymentId,
+            user_id: userId,
+            course_id: courseId,
+            amount: amountValue ? parseFloat(amountValue) : null,
+            currency: currencyCode || 'USD',
+            status: 'completed',
+          }, { onConflict: 'provider,provider_payment_id' });
+          console.log('[PayPal capture-order] ✅ Payment upserted');
 
-          await getAdminClient().from('course_enrollments').upsert(
-            {
-              user_id: userId,
-              course_id: courseId,
-              status: 'active',
-              started_at: new Date().toISOString(),
-              expires_at: expiresAt.toISOString(),
-            },
-            { onConflict: 'user_id,course_id' }
-          );
+          // Upsert enrollment
+          const expiresAt = new Date();
+          expiresAt.setDate(expiresAt.getDate() + 365);
+          await getAdminClient().from('course_enrollments').upsert({
+            user_id: userId,
+            course_id: courseId,
+            status: 'active',
+            started_at: new Date().toISOString(),
+            expires_at: expiresAt.toISOString(),
+          }, { onConflict: 'user_id,course_id' });
           console.log('[PayPal capture-order] ✅ Enrollment creado/actualizado');
         } catch (e: any) {
-          console.error('[PayPal capture-order] Error insertando en course_enrollments:', e);
+          console.error('[PayPal capture-order] Error en payments/enrollment:', e);
         }
       }
 
@@ -4042,32 +4036,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const orderId = capture.id;
       const status = capture.status;
-      const customIdBase64 = capture?.purchase_units?.[0]?.payments?.captures?.[0]?.custom_id || null;
-      const amount = capture?.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value || null;
-      const currency = capture?.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.currency_code || null;
+      const captureObj = capture?.purchase_units?.[0]?.payments?.captures?.[0];
+      const customIdBase64 = captureObj?.custom_id || null;
+      const providerPaymentId = captureObj?.id || null;
+      const amountValue = captureObj?.amount?.value || null;
+      const currencyCode = captureObj?.amount?.currency_code || null;
 
       console.log('[PayPal capture-and-redirect] Order ID:', orderId, 'Status:', status, 'Custom ID:', customIdBase64);
 
-      // Decodificar custom_id desde base64 y parsear JSON
-      let userId: string | undefined;
-      let courseId: string | undefined;
-      let courseSlug: string | undefined;
+      // Decodificar custom_id y resolver course_id
+      let userId: string | null = null;
+      let courseId: string | null = null;
+      let courseSlug: string | null = null;
       
       if (customIdBase64) {
         try {
           const decodedJson = Buffer.from(customIdBase64, 'base64').toString('utf-8');
           const customData = JSON.parse(decodedJson);
-          userId = customData.user_id;
-          courseSlug = customData.course_slug;
+          userId = customData.user_id || null;
+          courseSlug = customData.course_slug || null;
           
-          // Obtener course_id desde course_slug
           if (courseSlug) {
             const { data: course } = await getAdminClient()
               .from('courses')
               .select('id')
               .eq('slug', courseSlug)
-              .single();
-            courseId = course?.id;
+              .maybeSingle();
+            courseId = course?.id || null;
           }
           
           console.log('[PayPal capture-and-redirect] Decoded custom_id:', { userId, courseSlug, courseId });
@@ -4078,59 +4073,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('[PayPal capture-and-redirect] Parsed - User ID:', userId, 'Course ID:', courseId);
 
-      // 1. Guardar en paypal_events
+      // Guardar evento en payment_events
       try {
-        await getAdminClient().from('paypal_events').insert({
-          provider_event_id: orderId,
+        await getAdminClient().from('payment_events').insert({
+          provider: 'paypal',
+          provider_event_id: providerPaymentId,
           provider_event_type: 'PAYMENT.CAPTURE.COMPLETED',
           status: 'PROCESSED',
           raw_payload: capture,
           order_id: orderId,
           custom_id: customIdBase64,
-          user_hint: userId || null,
-          course_hint: courseId || null,
+          user_hint: userId,
+          course_hint: courseSlug,
+          provider_payment_id: providerPaymentId,
+          amount: amountValue ? parseFloat(amountValue) : null,
+          currency: currencyCode,
         });
-        console.log('[PayPal capture-and-redirect] ✅ Guardado en paypal_events');
+        console.log('[PayPal capture-and-redirect] ✅ Guardado en payment_events');
       } catch (e: any) {
-        console.error('[PayPal capture-and-redirect] Error insertando en paypal_events:', e);
+        console.error('[PayPal capture-and-redirect] Error insertando en payment_events:', e);
       }
 
-      // 2. Guardar en payment_logs
-      try {
-        await getAdminClient().from('payment_logs').insert({
-          user_id: userId || null,
-          course_id: courseId || null,
-          provider: 'paypal',
-          provider_payment_id: orderId,
-          amount: amount ? parseFloat(amount) : null,
-          currency: currency || 'USD',
-          status: status === 'COMPLETED' ? 'completed' : 'pending',
-          raw_payload: capture,
-        });
-        console.log('[PayPal capture-and-redirect] ✅ Guardado en payment_logs');
-      } catch (e: any) {
-        console.error('[PayPal capture-and-redirect] Error insertando en payment_logs:', e);
-      }
-
-      // 3. Crear enrollment si tenemos user_id y course_id
+      // Si tenemos user_id y course_id, crear payment y enrollment
       if (userId && courseId && status === 'COMPLETED') {
         try {
-          const expiresAt = new Date();
-          expiresAt.setDate(expiresAt.getDate() + 365); // 1 año
+          // Upsert en payments
+          await getAdminClient().from('payments').upsert({
+            provider: 'paypal',
+            provider_payment_id: providerPaymentId,
+            user_id: userId,
+            course_id: courseId,
+            amount: amountValue ? parseFloat(amountValue) : null,
+            currency: currencyCode || 'USD',
+            status: 'completed',
+          }, { onConflict: 'provider,provider_payment_id' });
+          console.log('[PayPal capture-and-redirect] ✅ Payment upserted');
 
-          await getAdminClient().from('course_enrollments').upsert(
-            {
-              user_id: userId,
-              course_id: courseId,
-              status: 'active',
-              started_at: new Date().toISOString(),
-              expires_at: expiresAt.toISOString(),
-            },
-            { onConflict: 'user_id,course_id' }
-          );
+          // Upsert enrollment
+          const expiresAt = new Date();
+          expiresAt.setDate(expiresAt.getDate() + 365);
+          await getAdminClient().from('course_enrollments').upsert({
+            user_id: userId,
+            course_id: courseId,
+            status: 'active',
+            started_at: new Date().toISOString(),
+            expires_at: expiresAt.toISOString(),
+          }, { onConflict: 'user_id,course_id' });
           console.log('[PayPal capture-and-redirect] ✅ Enrollment creado/actualizado');
         } catch (e: any) {
-          console.error('[PayPal capture-and-redirect] Error insertando en course_enrollments:', e);
+          console.error('[PayPal capture-and-redirect] Error en payments/enrollment:', e);
         }
       }
 
@@ -4204,6 +4195,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ============================================
   // End PayPal Integration Routes
   // ============================================
+
+  // Diagnostic endpoints for payments
+  app.get("/api/diag/last-payment-events", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const { data, error } = await getAdminClient()
+        .from('payment_events')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      
+      if (error) throw error;
+      return res.json({ ok: true, events: data });
+    } catch (e: any) {
+      return res.status(500).json({ ok: false, error: e.message });
+    }
+  });
+
+  app.get("/api/diag/last-payments", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const { data, error } = await getAdminClient()
+        .from('payments')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      
+      if (error) throw error;
+      return res.json({ ok: true, payments: data });
+    } catch (e: any) {
+      return res.status(500).json({ ok: false, error: e.message });
+    }
+  });
 
   // TEMPORARY DEBUG ENDPOINT
   app.get("/api/debug/user-info", async (req, res) => {

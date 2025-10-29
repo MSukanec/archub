@@ -166,24 +166,55 @@ create table public.course_prices (
   )
 ) TABLESPACE pg_default;
 
-Tabla PAYMENTS_LOG:
+Tabla PAYMENT_EVENTS:
 
-create table public.payments_log (
+create table public.payment_events (
   id uuid not null default gen_random_uuid (),
+  provider_event_id text null,
+  provider_event_type text null,
+  status text null default 'RECEIVED'::text,
+  raw_headers jsonb null,
+  raw_payload jsonb not null,
+  created_at timestamp with time zone null default now(),
+  order_id text null,
+  custom_id text null,
+  user_hint text null,
+  course_hint text null,
+  provider text not null default 'paypal'::text,
+  provider_payment_id text null,
+  amount numeric null,
+  currency text null,
+  constraint paypal_events_pkey primary key (id)
+) TABLESPACE pg_default;
+
+create index IF not exists idx_payment_events_provider on public.payment_events using btree (provider) TABLESPACE pg_default;
+
+create index IF not exists idx_payment_events_order_id on public.payment_events using btree (order_id) TABLESPACE pg_default;
+
+create index IF not exists idx_payment_events_custom_id on public.payment_events using btree (custom_id) TABLESPACE pg_default;
+
+TABLA PAYMENTS:
+
+create table public.payments (
+  id uuid not null default gen_random_uuid (),
+  provider text not null,
+  provider_payment_id text null,
   user_id uuid not null,
   course_id uuid not null,
-  provider text not null,
-  provider_payment_id text not null,
-  status text not null,
-  amount numeric(12, 2) null,
+  amount numeric null,
   currency text null,
-  external_reference text null,
-  raw_payload jsonb not null,
+  status text not null default 'completed'::text,
   created_at timestamp with time zone not null default now(),
-  constraint payments_log_pkey primary key (id),
-  constraint payments_log_course_id_fkey foreign KEY (course_id) references courses (id) on delete CASCADE,
-  constraint payments_log_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+  constraint payments_pkey primary key (id)
 ) TABLESPACE pg_default;
+
+create unique INDEX IF not exists uq_payments_provider_payment on public.payments using btree (provider, provider_payment_id) TABLESPACE pg_default
+where
+  (provider_payment_id is not null);
+
+create index IF not exists idx_payments_user on public.payments using btree (user_id) TABLESPACE pg_default;
+
+create index IF not exists idx_payments_course on public.payments using btree (course_id) TABLESPACE pg_default;
 
 TABLA COUPON_COURSES:
 
