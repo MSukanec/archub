@@ -3863,13 +3863,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ ok: false, error: "No se obtuvo 'access_token' de PayPal" });
       }
 
-      // 2) Create Order with custom_id in Base64
-      const metaB64 = Buffer.from(JSON.stringify({ type: "course", user_id, course_slug })).toString("base64");
+      // 2) Resolve course_id from course_slug
+      const { data: course, error: courseError } = await supabase
+        .from('courses')
+        .select('id')
+        .eq('slug', course_slug)
+        .single();
+
+      if (courseError || !course) {
+        return res.status(404).json({ ok: false, error: "Course not found" });
+      }
       
-      // Determine return URL base
+      // Determine return URL base (dynamic for Replit preview and production)
       const protocol = req.headers['x-forwarded-proto'] || (req.secure ? 'https' : 'http');
       const host = req.headers['x-forwarded-host'] || req.headers['host'];
-      const returnBase = process.env.CHECKOUT_RETURN_URL_BASE || `${protocol}://${host}`;
+      const returnBase = `${protocol}://${host}`;
 
       const createResp = await fetch(`${base}/v2/checkout/orders`, {
         method: "POST",
@@ -3883,14 +3891,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             {
               amount: { currency_code: "USD", value: String(amount_usd) },
               description,
-              custom_id: metaB64,
+              invoice_id: `user:${user_id};course:${course.id}`,
             },
           ],
           application_context: {
             brand_name: "Archub",
             user_action: "PAY_NOW",
-            return_url: `${returnBase}/checkout/paypal/return`,
-            cancel_url: `${returnBase}/checkout/paypal/cancel`,
+            return_url: `${returnBase}/api/paypal/capture-and-redirect?course_slug=${course_slug}`,
+            cancel_url: `${returnBase}/learning/courses`,
           },
         }),
       });
