@@ -27,6 +27,18 @@ import paypalLogo from "/Paypal_2014_logo.png";
 import { useCoursePrice } from "@/hooks/useCoursePrice";
 import { getApiBase } from "@/utils/apiBase";
 
+// Helper para hacer fetch con timeout y evitar requests colgadas
+async function fetchWithTimeout(url: string, init: RequestInit = {}, ms = 15000) {
+  const ctrl = new AbortController();
+  const id = setTimeout(() => ctrl.abort(), ms);
+  try {
+    const res = await fetch(url, { ...init, signal: ctrl.signal });
+    return res;
+  } finally {
+    clearTimeout(id);
+  }
+}
+
 interface PaymentMethodModalProps {
   courseSlug: string;
   currency: "ARS" | "USD";
@@ -250,13 +262,17 @@ export default function PaymentMethodModal({
 
       console.log("[MP] Creando preferencia…", requestBody);
 
-      // Llamada al nuevo endpoint en Vercel
+      // Llamada al nuevo endpoint en Vercel con timeout
       const API_BASE = getApiBase();
-      const res = await fetch(`${API_BASE}/api/mp/create-preference`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      });
+      const res = await fetchWithTimeout(
+        `${API_BASE}/api/mp/create-preference`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+        },
+        15000 // timeout de 15 segundos
+      );
 
       const text = await res.text();
       let payload: any;
@@ -347,11 +363,15 @@ export default function PaymentMethodModal({
       console.log("[PayPal] Creando orden…", requestBody);
 
       const API_BASE = getApiBase();
-      const res = await fetch(`${API_BASE}/api/paypal/create-order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      });
+      const res = await fetchWithTimeout(
+        `${API_BASE}/api/paypal/create-order`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+        },
+        15000 // timeout de 15 segundos
+      );
 
       const text = await res.text();
       let payload: any;
