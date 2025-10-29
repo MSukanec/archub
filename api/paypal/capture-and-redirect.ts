@@ -5,17 +5,8 @@ import { corsHeaders, paypalBase, getAccessToken } from './_utils';
 const supabaseUrl = process.env.VITE_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-function parseInvoiceId(invoiceId: string): { user?: string; course?: string } {
-  const out: Record<string, string> = {};
-  if (!invoiceId) return out;
-  for (const part of invoiceId.split(';')) {
-    const [k, v] = part.split(':').map((s) => s.trim());
-    if (k && v) out[k] = v;
-  }
-  return out;
-}
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const supabase = createClient(supabaseUrl, supabaseServiceKey, { auth: { persistSession: false } });
   try {
     const { token, PayerID, course_slug } = req.query;
     
@@ -84,18 +75,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // === EXTRAER DATOS DEL PAGO ===
     const orderId = captureData.id;
     const status = captureData.status;
-    const invoiceId = captureData?.purchase_units?.[0]?.invoice_id || null;
-    const amount = captureData?.purchase_units?.[0]?.amount?.value || null;
-    const currency = captureData?.purchase_units?.[0]?.amount?.currency_code || null;
+    const customIdBase64 = captureData?.purchase_units?.[0]?.payments?.captures?.[0]?.custom_id || null;
+    const amount = captureData?.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value || null;
+    const currency = captureData?.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.currency_code || null;
 
-    console.log('[PayPal capture-and-redirect] Order ID:', orderId, 'Status:', status, 'Invoice:', invoiceId);
+    console.log('[PayPal capture-and-redirect] Order ID:', orderId, 'Status:', status, 'Custom ID:', customIdBase64);
 
-    // Parse invoice_id para obtener user_id y course_id
-    const { user: userId, course: courseId } = parseInvoiceId(invoiceId || '');
+    // Decodificar custom_id desde base64 y parsear JSON
+    let userId: string | undefined;
+    let courseId: string | undefined;
+    let courseSlug: string | undefined;
+    
+    if (customIdBase64) {
+      try {
+        const decodedJson = Buffer.from(customIdBase64, 'base64').toString('utf-8');
+        const customData = JSON.parse(decodedJson);
+        userId = customData.user_id;
+        courseSlug = customData.course_slug;
+        
+        // Obtener course_id desde course_slug
+        if (courseSlug) {
+          const { data: course } = await supabase
+            .from('courses')
+            .select('id')
+            .eq('slug', courseSlug)
+            .single();
+          courseId = course?.id;
+        }
+        
+        console.log('[PayPal capture-and-redirect] Decoded custom_id:', { userId, courseSlug, courseId });
+      } catch (e) {
+        console.error('[PayPal capture-and-redirect] Error decodificando custom_id:', e);
+      }
+    }
+    
     console.log('[PayPal capture-and-redirect] Parsed - User ID:', userId, 'Course ID:', courseId);
 
     // === GUARDAR EN LA BASE DE DATOS ===
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, { auth: { persistSession: false } });
 
     // 1. Guardar en paypal_events
     const { error: eventError } = await supabase.from('paypal_events').insert({
@@ -104,7 +120,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       status: 'PROCESSED',
       raw_payload: captureData,
       order_id: orderId,
-      custom_id: invoiceId,
+      custom_id: customIdBase64,
       user_hint: userId || null,
       course_hint: courseId || null,
     });

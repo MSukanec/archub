@@ -3915,27 +3915,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('[PayPal capture-order] Capture response:', JSON.stringify(capJson, null, 2));
 
-      // 3) Guardar en la base de datos (en Preview el webhook no funciona, lo hacemos aquí)
+      // 3) Guardar en la base de datos
       const captureOrderId = capJson.id;
       const status = capJson.status;
-      const invoiceId = capJson?.purchase_units?.[0]?.invoice_id || null;
-      const amount = capJson?.purchase_units?.[0]?.amount?.value || null;
-      const currency = capJson?.purchase_units?.[0]?.amount?.currency_code || null;
+      
+      // El custom_id está en captures[0].custom_id y es base64 JSON
+      const customIdBase64 = capJson?.purchase_units?.[0]?.payments?.captures?.[0]?.custom_id || null;
+      const amount = capJson?.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value || null;
+      const currency = capJson?.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.currency_code || null;
 
-      console.log('[PayPal capture-order] Order ID:', captureOrderId, 'Status:', status, 'Invoice:', invoiceId);
+      console.log('[PayPal capture-order] Order ID:', captureOrderId, 'Status:', status, 'Custom ID:', customIdBase64);
 
-      // Parsear invoice_id formato "user:UUID;course:UUID"
-      function parseInvoiceId(invoiceId: string): { user?: string; course?: string } {
-        const out: Record<string, string> = {};
-        if (!invoiceId) return out;
-        for (const part of invoiceId.split(';')) {
-          const [k, v] = part.split(':').map((s) => s.trim());
-          if (k && v) out[k] = v;
+      // Decodificar custom_id desde base64 y parsear JSON
+      let userId: string | undefined;
+      let courseId: string | undefined;
+      let courseSlug: string | undefined;
+      
+      if (customIdBase64) {
+        try {
+          const decodedJson = Buffer.from(customIdBase64, 'base64').toString('utf-8');
+          const customData = JSON.parse(decodedJson);
+          userId = customData.user_id;
+          courseSlug = customData.course_slug;
+          
+          // Obtener course_id desde course_slug
+          if (courseSlug) {
+            const { data: course } = await getAdminClient()
+              .from('courses')
+              .select('id')
+              .eq('slug', courseSlug)
+              .single();
+            courseId = course?.id;
+          }
+          
+          console.log('[PayPal capture-order] Decoded custom_id:', { userId, courseSlug, courseId });
+        } catch (e) {
+          console.error('[PayPal capture-order] Error decodificando custom_id:', e);
         }
-        return out;
       }
 
-      const { user: userId, course: courseId } = parseInvoiceId(invoiceId || '');
+      const { user: _ignored1, course: _ignored2 } = { user: undefined, course: undefined };
       console.log('[PayPal capture-order] Parsed - User ID:', userId, 'Course ID:', courseId);
 
       // Guardar en paypal_events
@@ -3946,7 +3965,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: 'PROCESSED',
           raw_payload: capJson,
           order_id: captureOrderId,
-          custom_id: invoiceId,
+          custom_id: customIdBase64,
           user_hint: userId || null,
           course_hint: courseId || null,
         });
@@ -4023,24 +4042,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const orderId = capture.id;
       const status = capture.status;
-      const invoiceId = capture?.purchase_units?.[0]?.invoice_id || null;
-      const amount = capture?.purchase_units?.[0]?.amount?.value || null;
-      const currency = capture?.purchase_units?.[0]?.amount?.currency_code || null;
+      const customIdBase64 = capture?.purchase_units?.[0]?.payments?.captures?.[0]?.custom_id || null;
+      const amount = capture?.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value || null;
+      const currency = capture?.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.currency_code || null;
 
-      console.log('[PayPal capture-and-redirect] Order ID:', orderId, 'Status:', status, 'Invoice:', invoiceId);
+      console.log('[PayPal capture-and-redirect] Order ID:', orderId, 'Status:', status, 'Custom ID:', customIdBase64);
 
-      // Parsear invoice_id formato "user:UUID;course:UUID"
-      function parseInvoiceId(invoiceId: string): { user?: string; course?: string } {
-        const out: Record<string, string> = {};
-        if (!invoiceId) return out;
-        for (const part of invoiceId.split(';')) {
-          const [k, v] = part.split(':').map((s) => s.trim());
-          if (k && v) out[k] = v;
+      // Decodificar custom_id desde base64 y parsear JSON
+      let userId: string | undefined;
+      let courseId: string | undefined;
+      let courseSlug: string | undefined;
+      
+      if (customIdBase64) {
+        try {
+          const decodedJson = Buffer.from(customIdBase64, 'base64').toString('utf-8');
+          const customData = JSON.parse(decodedJson);
+          userId = customData.user_id;
+          courseSlug = customData.course_slug;
+          
+          // Obtener course_id desde course_slug
+          if (courseSlug) {
+            const { data: course } = await getAdminClient()
+              .from('courses')
+              .select('id')
+              .eq('slug', courseSlug)
+              .single();
+            courseId = course?.id;
+          }
+          
+          console.log('[PayPal capture-and-redirect] Decoded custom_id:', { userId, courseSlug, courseId });
+        } catch (e) {
+          console.error('[PayPal capture-and-redirect] Error decodificando custom_id:', e);
         }
-        return out;
       }
-
-      const { user: userId, course: courseId } = parseInvoiceId(invoiceId || '');
+      
       console.log('[PayPal capture-and-redirect] Parsed - User ID:', userId, 'Course ID:', courseId);
 
       // 1. Guardar en paypal_events
@@ -4051,7 +4086,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: 'PROCESSED',
           raw_payload: capture,
           order_id: orderId,
-          custom_id: invoiceId,
+          custom_id: customIdBase64,
           user_hint: userId || null,
           course_hint: courseId || null,
         });
