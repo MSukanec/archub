@@ -28,13 +28,13 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
       if (forceRefresh) {
         console.log("Force refresh requested - calling RPC twice to ensure fresh data");
         // Call RPC twice to force refresh of cached data
-        await authenticatedSupabase.rpc('archub_get_user');
-        const result = await authenticatedSupabase.rpc('archub_get_user');
+        await authenticatedSupabase.rpc('get_user');
+        const result = await authenticatedSupabase.rpc('get_user');
         userData = result.data;
         error = result.error;
       } else {
         // Normal RPC call
-        const result = await authenticatedSupabase.rpc('archub_get_user');
+        const result = await authenticatedSupabase.rpc('get_user');
         userData = result.data;
         error = result.error;
       }

@@ -29,8 +29,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     // ---- Opción 1 (recomendada): usar tu RPC que ya tenías en Replit
-    //    Cambia 'archub_get_user' si tu RPC se llama distinto.
-    let { data: userData, error } = await supabase.rpc("archub_get_user");
+    //    Cambia 'get_user' si tu RPC se llama distinto.
+    let { data: userData, error } = await supabase.rpc("get_user");
 
     // ---- Opción 2 (alternativa): si no tienes RPC, lee directo de la tabla
     // const { data: userData, error } = await supabase

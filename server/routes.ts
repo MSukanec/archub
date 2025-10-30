@@ -162,7 +162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .maybeSingle();
       
       // Get RPC result
-      const { data: rpcUser } = await authenticatedSupabase.rpc('archub_get_user');
+      const { data: rpcUser } = await authenticatedSupabase.rpc('get_user');
       
       // Get enrollments with the correct user_id
       const correctUserId = userByAuthId?.id || userByEmail?.id;
