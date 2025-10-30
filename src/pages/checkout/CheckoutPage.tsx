@@ -53,7 +53,7 @@ interface AppliedCoupon {
 export default function CheckoutPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore();
+  const { setSidebarContext, setSidebarLevel, sidebarLevel, currentSidebarContext } = useNavigationStore();
 
   // Get query params (courseSlug)
   const params = new URLSearchParams(window.location.search);
@@ -63,13 +63,20 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [showBankInfo, setShowBankInfo] = useState(false);
 
-  // Set navigation context for sidebar
+  // Set navigation context for sidebar and restore on unmount
   useEffect(() => {
+    const previousContext = currentSidebarContext;
+    const previousLevel = sidebarLevel;
+    
     setSidebarContext('learning');
-    if (sidebarLevel !== 'general') {
-      setSidebarLevel('learning');
-    }
-  }, [setSidebarContext, setSidebarLevel, sidebarLevel]);
+    setSidebarLevel('learning');
+
+    return () => {
+      // Restore previous sidebar context and level when leaving checkout
+      setSidebarContext(previousContext);
+      setSidebarLevel(previousLevel);
+    };
+  }, [setSidebarContext, setSidebarLevel]);
 
   // Provider/currency según método seleccionado
   const currentProvider = selectedMethod === "paypal" ? "paypal" : "mercadopago";
