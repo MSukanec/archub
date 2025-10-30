@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
+import { Layout } from "@/components/layout/desktop/Layout";
+import { useNavigationStore } from "@/stores/navigationStore";
 import {
   ShoppingCart,
   ArrowLeft,
@@ -51,6 +53,7 @@ interface AppliedCoupon {
 export default function CheckoutPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore();
 
   // Get query params (courseSlug)
   const params = new URLSearchParams(window.location.search);
@@ -59,6 +62,14 @@ export default function CheckoutPage() {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [loading, setLoading] = useState(false);
   const [showBankInfo, setShowBankInfo] = useState(false);
+
+  // Set navigation context for sidebar
+  useEffect(() => {
+    setSidebarContext('learning');
+    if (sidebarLevel !== 'general') {
+      setSidebarLevel('learning');
+    }
+  }, [setSidebarContext, setSidebarLevel, sidebarLevel]);
 
   // Provider/currency según método seleccionado
   const currentProvider = selectedMethod === "paypal" ? "paypal" : "mercadopago";
@@ -469,32 +480,28 @@ Enviá el comprobante a: pagos@archub.com.ar`;
     return null;
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(`/learning/courses/${courseSlug}`)}
-              className="gap-2"
-              data-testid="button-back-to-course"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Volver al curso
-            </Button>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <ShoppingCart className="h-4 w-4" />
-              Checkout Seguro
-            </div>
-          </div>
-        </div>
-      </div>
+  const headerProps = {
+    icon: ShoppingCart,
+    title: "Checkout",
+    pageTitle: "Completá tu compra de forma segura",
+    actions: [
+      <Button
+        key="back"
+        variant="ghost"
+        size="sm"
+        onClick={() => navigate(`/learning/courses/${courseSlug}`)}
+        className="gap-2"
+        data-testid="button-back-to-course"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Volver al curso
+      </Button>
+    ]
+  };
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+  return (
+    <Layout headerProps={headerProps} wide>
+      <div className="max-w-7xl mx-auto py-6 lg:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column - Payment Methods (Mobile: shows second) */}
           <div className="lg:col-span-7 order-2 lg:order-1">
@@ -900,6 +907,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
           </div>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 }
