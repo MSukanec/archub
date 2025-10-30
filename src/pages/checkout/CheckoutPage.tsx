@@ -406,13 +406,14 @@ export default function CheckoutPage() {
         course_slug: courseSlug,
         currency: "ARS",
         months: priceData?.months || 12,
+        ...(appliedCoupon && { code: appliedCoupon.code }), // 🆕 Incluir cupón si existe
         ...(billing && { billing }),
       };
 
       console.log("[MP] Creando preferencia…", requestBody);
 
       const API_BASE = getApiBase();
-      const mpUrl = `${API_BASE}/api/mp/create-preference`;
+      const mpUrl = `${API_BASE}/api/checkout/mp/create`;
 
       const res = await fetchWithTimeout(
         mpUrl,
