@@ -5,10 +5,12 @@ import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle2, XCircle, Eye, AlertCircle } from 'lucide-react';
+import { CheckCircle2, XCircle, Eye, AlertCircle, Inbox } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { queryClient, apiRequest } from '@/lib/queryClient';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { Tabs } from '@/components/ui-custom/Tabs';
 import {
   Dialog,
   DialogContent,
@@ -299,51 +301,40 @@ const AdminPaymentsTransfersTab = () => {
 
   const pendingCount = payments.filter(p => p.status === 'pending').length;
 
+  const filterTabs = [
+    { value: 'all', label: `Todos (${payments.length})` },
+    { value: 'pending', label: `Pendientes (${pendingCount})` },
+    { value: 'approved', label: `Aprobados (${payments.filter(p => p.status === 'approved').length})` },
+    { value: 'rejected', label: `Rechazados (${payments.filter(p => p.status === 'rejected').length})` },
+  ];
+
   return (
     <div className="space-y-4">
-      {/* Filtros rápidos */}
-      <div className="flex gap-2">
-        <Button
-          variant={statusFilter === 'all' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setStatusFilter('all')}
-        >
-          Todos ({payments.length})
-        </Button>
-        <Button
-          variant={statusFilter === 'pending' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setStatusFilter('pending')}
-        >
-          Pendientes ({pendingCount})
-        </Button>
-        <Button
-          variant={statusFilter === 'approved' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setStatusFilter('approved')}
-        >
-          Aprobados ({payments.filter(p => p.status === 'approved').length})
-        </Button>
-        <Button
-          variant={statusFilter === 'rejected' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setStatusFilter('rejected')}
-        >
-          Rechazados ({payments.filter(p => p.status === 'rejected').length})
-        </Button>
-      </div>
-
-      {/* Tabla */}
-      <Table
-        columns={columns}
-        data={filteredPayments}
-        isLoading={isLoading}
-        emptyState={
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">No hay pagos por transferencia</p>
-          </div>
-        }
+      {/* Filtros con Tabs */}
+      <Tabs
+        tabs={filterTabs}
+        value={statusFilter}
+        onValueChange={(value) => setStatusFilter(value as typeof statusFilter)}
       />
+
+      {/* Tabla o EmptyState */}
+      {filteredPayments.length === 0 ? (
+        <EmptyState
+          icon={<Inbox />}
+          title={isLoading ? 'Cargando...' : 'No hay pagos'}
+          description={
+            statusFilter === 'all' 
+              ? 'No se han registrado pagos por transferencia bancaria.'
+              : `No hay pagos ${statusFilter === 'pending' ? 'pendientes' : statusFilter === 'approved' ? 'aprobados' : 'rechazados'}.`
+          }
+        />
+      ) : (
+        <Table
+          columns={columns}
+          data={filteredPayments}
+          isLoading={isLoading}
+        />
+      )}
 
       {/* Modal de comprobante */}
       <Dialog open={receiptModal.open} onOpenChange={(open) => setReceiptModal({ open, url: null })}>

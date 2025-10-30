@@ -4,9 +4,10 @@ import { supabase } from '@/lib/supabase';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card';
-import { CheckCircle2, XCircle, AlertCircle, DollarSign, TrendingUp, Clock } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertCircle, DollarSign, TrendingUp, Clock, Inbox } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 
 interface BankTransferPayment {
   id: string;
@@ -205,20 +206,20 @@ const AdminPaymentsHistoryTab = () => {
         </StatCard>
       </div>
 
-      {/* Tabla completa */}
-      <div className="bg-card border rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4">Historial Completo</h3>
+      {/* Tabla sin Card */}
+      {payments.length === 0 ? (
+        <EmptyState
+          icon={<Inbox />}
+          title={isLoading ? 'Cargando...' : 'No hay pagos'}
+          description="No se han registrado pagos por transferencia bancaria en el sistema."
+        />
+      ) : (
         <Table
           columns={columns}
           data={payments}
           isLoading={isLoading}
-          emptyState={
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">No hay pagos registrados</p>
-            </div>
-          }
         />
-      </div>
+      )}
     </div>
   );
 };
