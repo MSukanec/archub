@@ -3,58 +3,15 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { createClient } from '@supabase/supabase-js';
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
-
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Supabase URL and ANON KEY are required");
-}
-
-// Public client for general queries (with RLS)
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-// Admin client for admin operations (bypasses RLS)
-// This will be undefined if SUPABASE_SERVICE_ROLE_KEY is not set
-const adminSupabase = supabaseServiceKey 
-  ? createClient(supabaseUrl, supabaseServiceKey)
-  : undefined;
-
-// Helper to get admin client or throw error
-function getAdminClient() {
-  if (!adminSupabase) {
-    throw new Error('SUPABASE_SERVICE_ROLE_KEY is not configured. Admin operations require service role key.');
-  }
-  return adminSupabase;
-}
+import { getRouteDeps, supabase, getAdminClient } from './routes/_base';
+import { registerReferenceRoutes } from './routes/reference';
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Get shared dependencies
+  const deps = getRouteDeps();
   
-  // Test endpoint
-  app.get("/api/test", (req, res) => {
-    res.json({ message: "API is working", timestamp: new Date().toISOString() });
-  });
-
-  // Get all countries (public reference data, no auth required)
-  app.get("/api/countries", async (req, res) => {
-    try {
-      const { data: countries, error } = await supabase
-        .from("countries")
-        .select("id, name, country_code, alpha_3")
-        .order("name");
-
-      if (error) {
-        console.error("Error fetching countries:", error);
-        return res.status(500).json({ error: error.message });
-      }
-
-      return res.json(countries || []);
-    } catch (err: any) {
-      console.error("Countries API error:", err);
-      return res.status(500).json({ error: "Internal server error" });
-    }
-  });
+  // Register reference data routes (countries, task parameters, test endpoint)
+  registerReferenceRoutes(app, deps);
 
   // Get current user data
   app.get("/api/current-user", async (req, res) => {
@@ -746,56 +703,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error moving budget item:", error);
       res.status(500).json({ error: "Failed to move budget item" });
-    }
-  });
-
-  // Get task parameter values with expression templates
-  app.get("/api/task-parameter-values", async (req, res) => {
-    try {
-      const { data, error } = await supabase
-        .from('task_parameter_options')
-        .select(`
-          name, 
-          label,
-          task_parameters!inner(expression_template)
-        `);
-      
-      if (error) {
-        console.error("Error fetching task parameter values:", error);
-        return res.status(500).json({ error: "Failed to fetch task parameter values" });
-      }
-      
-      // Flatten the data structure to include expression_template directly
-      const flattenedData = data?.map(item => ({
-        name: item.name,
-        label: item.label,
-        expression_template: item.task_parameters?.expression_template || null
-      })) || [];
-
-      res.json(flattenedData);
-    } catch (error) {
-      console.error("Error fetching task parameter values:", error);
-      res.status(500).json({ error: "Failed to fetch task parameter values" });
-    }
-  });
-
-  // Get all countries
-  app.get("/api/countries", async (req, res) => {
-    try {
-      const { data: countries, error } = await supabase
-        .from('countries')
-        .select('*')
-        .order('name');
-
-      if (error) {
-        console.error("Supabase error fetching countries:", error);
-        return res.status(500).json({ error: "Failed to fetch countries" });
-      }
-
-      res.json(countries);
-    } catch (error) {
-      console.error("Error fetching countries:", error);
-      res.status(500).json({ error: "Failed to fetch countries" });
     }
   });
 
