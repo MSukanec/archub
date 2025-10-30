@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -265,10 +265,26 @@ function Router() {
 
 function App() {
   const { initialize } = useAuthStore();
+  const [location] = useLocation();
 
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  // Bypass AuthGuard completely for checkout success page
+  if (location === '/checkout/success' || location.startsWith('/checkout/success?')) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <ActionBarMobileProvider>
+            <Toaster />
+            <PaymentSuccess />
+            <ModalFactory />
+          </ActionBarMobileProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
