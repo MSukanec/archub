@@ -94,12 +94,46 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
         return res.status(400).json({ error: "order_id, amount, and currency are required" });
       }
 
-      // Insert bank transfer payment record using admin client to bypass RLS
+      // Get course info from checkout session
+      const { data: session } = await adminClient
+        .from('checkout_sessions')
+        .select('course_price_id, course_prices(courses(id, slug))')
+        .eq('id', order_id)
+        .maybeSingle();
+
+      const courseId = (session?.course_prices as any)?.courses?.id || null;
+      const courseSlug = (session?.course_prices as any)?.courses?.slug || null;
+
+      // 1️⃣ PRIMERO: Crear registro en payments (tabla maestra unificada)
+      const { data: payment, error: paymentError } = await adminClient
+        .from('payments')
+        .insert({
+          provider: 'bank_transfer',
+          provider_payment_id: null, // No hay ID externo aún
+          user_id: profile.id,
+          course_id: courseId,
+          product_type: courseId ? 'course' : null,
+          product_id: courseId,
+          amount: String(amount),
+          currency,
+          status: 'pending',
+        })
+        .select()
+        .single();
+
+      if (paymentError || !payment) {
+        console.error("Error creating payment:", paymentError);
+        return res.status(500).json({ error: "Failed to create payment record" });
+      }
+
+      // 2️⃣ SEGUNDO: Crear registro en bank_transfer_payments (detalles específicos)
       const { data: bankTransferPayment, error: insertError } = await adminClient
         .from('bank_transfer_payments')
         .insert({
           order_id,
           user_id: profile.id,
+          course_price_id: session?.course_price_id || null,
+          payment_id: payment.id, // 🔗 Link al payment maestro
           amount: String(amount),
           currency,
           payer_name: payer_name || null,
@@ -111,11 +145,14 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
 
       if (insertError || !bankTransferPayment) {
         console.error("Insert error:", insertError);
+        // Rollback: eliminar el payment si falla
+        await adminClient.from('payments').delete().eq('id', payment.id);
         return res.status(500).json({ error: "Failed to create bank transfer payment" });
       }
 
       return res.json({
         success: true,
+        payment_id: payment.id,
         btp_id: bankTransferPayment.id,
         status: bankTransferPayment.status,
       });

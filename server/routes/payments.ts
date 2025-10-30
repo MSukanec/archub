@@ -1091,6 +1091,7 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         courseSlug = (coursePrice?.courses as any)?.slug || null;
       }
       
+      // 1️⃣ Actualizar bank_transfer_payments
       const { error: updateError } = await adminClient
         .from('bank_transfer_payments')
         .update({ status: 'approved' })
@@ -1100,7 +1101,19 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         console.error("Error updating payment:", updateError);
         return res.status(500).json({ error: "Failed to update payment" });
       }
+
+      // 2️⃣ Actualizar payments (tabla maestra)
+      if (payment.payment_id) {
+        await adminClient
+          .from('payments')
+          .update({ 
+            status: 'completed',
+            approved_at: new Date().toISOString()
+          })
+          .eq('id', payment.payment_id);
+      }
       
+      // 3️⃣ Otorgar acceso al curso
       if (courseSlug && payment.users?.id) {
         await enrollUserInCourse(payment.users.id, courseSlug);
       }
@@ -1142,6 +1155,7 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         return res.status(400).json({ error: "Payment is not pending" });
       }
       
+      // 1️⃣ Actualizar bank_transfer_payments
       const { error: updateError } = await adminClient
         .from('bank_transfer_payments')
         .update({ status: 'rejected' })
@@ -1150,6 +1164,14 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
       if (updateError) {
         console.error("Error updating payment:", updateError);
         return res.status(500).json({ error: "Failed to update payment" });
+      }
+
+      // 2️⃣ Actualizar payments (tabla maestra)
+      if (payment.payment_id) {
+        await adminClient
+          .from('payments')
+          .update({ status: 'rejected' })
+          .eq('id', payment.payment_id);
       }
       
       return res.json({ success: true, message: "Payment rejected" });

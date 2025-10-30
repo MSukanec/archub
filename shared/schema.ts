@@ -721,9 +721,16 @@ export const payments = pgTable("payments", {
   provider: text("provider").notNull(),
   provider_payment_id: text("provider_payment_id"),
   user_id: uuid("user_id").notNull(),
-  course_id: uuid("course_id").notNull(),
+  course_id: uuid("course_id"), // Ahora nullable para soportar suscripciones
+  // 🆕 Nuevas columnas para suscripciones/planes
+  product_type: text("product_type"), // 'course' | 'subscription' | 'plan'
+  product_id: uuid("product_id"),
+  organization_id: uuid("organization_id"),
+  approved_at: timestamp("approved_at", { withTimezone: true }),
+  metadata: jsonb("metadata"),
+  // Existentes
   amount: numeric("amount", { precision: 10, scale: 2 }),
-  currency: text("currency"),
+  currency: text("currency").default("USD"),
   status: text("status").notNull().default("completed"),
   created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
@@ -751,6 +758,7 @@ export const bank_transfer_payments = pgTable("bank_transfer_payments", {
   order_id: uuid("order_id").notNull(),
   user_id: uuid("user_id").notNull(),
   course_price_id: uuid("course_price_id"),
+  payment_id: uuid("payment_id"), // 🆕 FK a payments
   amount: numeric("amount", { precision: 14, scale: 2 }).notNull(),
   currency: text("currency").notNull(),
   receipt_url: text("receipt_url"),
