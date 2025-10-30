@@ -990,8 +990,8 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                   <div className="space-y-4">
                     {/* Course Info */}
                     <div>
-                      <p className="font-medium text-sm text-muted-foreground">Curso</p>
-                      <p className="text-base font-semibold mt-1">{courseTitle}</p>
+                      <p className="text-base font-semibold">{courseTitle}</p>
+                      <p className="text-sm text-muted-foreground mt-1">Suscripción anual</p>
                     </div>
 
                     <Separator />
