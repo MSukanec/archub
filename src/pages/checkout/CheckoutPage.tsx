@@ -1576,19 +1576,19 @@ Titular: DNI 32322767`;
                     ) : (
                       /* File uploaded */
                       <div className="space-y-3">
-                        <div className="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
+                        <div className="p-4 bg-accent/10 border border-accent/30 rounded-lg">
                           <div className="flex items-center gap-2 mb-2">
-                            <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-500" />
-                            <span className="font-semibold text-green-700 dark:text-green-400">
-                              ✅ PENDIENTE DE REVISIÓN
+                            <CheckCircle2 className="h-5 w-5 text-accent" />
+                            <span className="font-semibold text-accent">
+                              PENDIENTE DE REVISIÓN
                             </span>
                           </div>
-                          <p className="text-sm text-green-600 dark:text-green-400">
+                          <p className="text-sm text-accent/80">
                             Tu comprobante ha sido enviado. Te notificaremos cuando sea aprobado.
                           </p>
                         </div>
                         <Button
-                          variant="outline"
+                          variant="secondary"
                           onClick={() => {
                             setReceiptFile(null);
                             setReceiptUploaded(false);
@@ -1606,7 +1606,7 @@ Titular: DNI 32322767`;
 
                   <div className="mt-6">
                     <Button
-                      variant="outline"
+                      variant="secondary"
                       onClick={() => {
                         setShowBankInfo(false);
                         setBankTransferPaymentId(null);
