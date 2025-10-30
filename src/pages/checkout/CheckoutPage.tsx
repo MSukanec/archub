@@ -447,6 +447,8 @@ export default function CheckoutPage() {
 
   const handleTransferPayment = () => {
     setShowBankInfo(true);
+    // Scroll to top para que en mobile el usuario vea la información bancaria
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCopyBankInfo = async () => {
@@ -457,7 +459,7 @@ CBU: 00700634 30004026691416
 Alias: MATIAS.SUKANEC
 Titular: DNI 32322767
 
-Enviá el comprobante a: pagos@archub.com.ar`;
+Enviá el comprobante a: +54 9 11 3227-3000`;
 
     try {
       await navigator.clipboard.writeText(bankInfo);
@@ -822,10 +824,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                     <Separator />
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Enviá el comprobante a</p>
-                      <p className="font-medium">pagos@archub.com.ar</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">WhatsApp</p>
                       <a
                         href="https://wa.me/5491132273000"
                         target="_blank"
@@ -896,7 +894,7 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                       <Button
                         onClick={handleValidateCoupon}
                         disabled={validatingCoupon || !couponCode.trim()}
-                        variant="secondary"
+                        variant="default"
                         data-testid="button-apply-coupon"
                       >
                         {validatingCoupon ? (
