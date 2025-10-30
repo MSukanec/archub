@@ -31,12 +31,16 @@ import {
   User,
   Receipt,
   MessageCircle,
+  Upload,
+  FileCheck,
+  CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCoursePrice } from "@/hooks/useCoursePrice";
 import { getApiBase } from "@/utils/apiBase";
 import { toE164 } from "@/utils/phone";
 import { orderedMethods, getPaymentButtonText } from "@/utils/paymentOrder";
+import { apiRequest } from "@/lib/queryClient";
 import mercadoPagoLogo from "/MercadoPago_logo.png";
 import paypalLogo from "/Paypal_2014_logo.png";
 
@@ -75,6 +79,13 @@ export default function CheckoutPage() {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [loading, setLoading] = useState(false);
   const [showBankInfo, setShowBankInfo] = useState(false);
+
+  // Bank transfer payment states
+  const [bankTransferPaymentId, setBankTransferPaymentId] = useState<string | null>(null);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [receiptUploading, setReceiptUploading] = useState(false);
+  const [receiptUploaded, setReceiptUploaded] = useState(false);
+  const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
 
   // Set navigation context for sidebar and restore on unmount
   useEffect(() => {
@@ -558,8 +569,10 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleTransferPayment = () => {
+  const handleTransferPayment = async () => {
     setShowBankInfo(true);
+    // Create the bank transfer payment record
+    await handleCreateBankTransferPayment();
     // Scroll to top para que en mobile el usuario vea la información bancaria
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -586,6 +599,162 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
         description: "No se pudo copiar la información",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleCreateBankTransferPayment = async () => {
+    try {
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+      if (sessionError || !session?.access_token) {
+        toast({
+          title: "Sesión requerida",
+          description: "Debes iniciar sesión para continuar",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const finalPrice = appliedCoupon
+        ? appliedCoupon.final_price
+        : priceData?.amount || 0;
+
+      const orderId = crypto.randomUUID();
+
+      const API_BASE = getApiBase();
+      const response = await fetch(`${API_BASE}/api/bank-transfer/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          order_id: orderId,
+          amount: finalPrice,
+          currency: currentCurrency,
+          payer_name: `${firstName} ${lastName}`.trim() || undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.btp_id) {
+        throw new Error(data.error || "No se pudo crear el registro de pago");
+      }
+
+      setBankTransferPaymentId(data.btp_id);
+    } catch (error: any) {
+      console.error("Error creating bank transfer payment:", error);
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo crear el registro de pago",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file extension
+    const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png'];
+    const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+    
+    if (!allowedExtensions.includes(fileExtension)) {
+      toast({
+        title: "Archivo no válido",
+        description: `Solo se permiten archivos ${allowedExtensions.join(', ')}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (10MB max)
+    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    if (file.size > maxSize) {
+      toast({
+        title: "Archivo muy grande",
+        description: "El archivo debe ser menor a 10MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setReceiptFile(file);
+  };
+
+  const handleUploadReceipt = async () => {
+    if (!receiptFile || !bankTransferPaymentId) {
+      toast({
+        title: "Error",
+        description: "No hay archivo o ID de pago",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setReceiptUploading(true);
+
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+      if (sessionError || !session?.access_token) {
+        throw new Error("Sesión expirada");
+      }
+
+      // Convert file to base64
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onload = () => {
+          const result = reader.result as string;
+          resolve(result);
+        };
+        reader.onerror = reject;
+      });
+      reader.readAsDataURL(receiptFile);
+      const base64Data = await base64Promise;
+
+      const API_BASE = getApiBase();
+      const response = await fetch(`${API_BASE}/api/bank-transfer/upload`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          btp_id: bankTransferPaymentId,
+          file_name: receiptFile.name,
+          file_data: base64Data,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.receipt_url) {
+        throw new Error(data.error || "No se pudo subir el comprobante");
+      }
+
+      setReceiptUrl(data.receipt_url);
+      setReceiptUploaded(true);
+
+      toast({
+        title: "¡Comprobante enviado!",
+        description: "Tu comprobante fue recibido. Te notificaremos cuando sea aprobado.",
+      });
+    } catch (error: any) {
+      console.error("Error uploading receipt:", error);
+      toast({
+        title: "Error al subir comprobante",
+        description: error.message || "No se pudo subir el archivo",
+        variant: "destructive",
+      });
+    } finally {
+      setReceiptUploading(false);
     }
   };
 
@@ -1350,11 +1519,122 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                       <Copy className="h-4 w-4 mr-2" />
                       Copiar datos
                     </Button>
+                  </div>
+
+                  <Separator className="my-6" />
+
+                  {/* Receipt Upload Section */}
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <Receipt className="h-5 w-5 text-accent mt-1" />
+                      <div>
+                        <h3 className="text-base font-semibold">Subir comprobante</h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Adjuntá tu comprobante de transferencia para confirmar el pago
+                        </p>
+                      </div>
+                    </div>
+
+                    {!receiptFile && !receiptUploaded ? (
+                      /* No file selected */
+                      <div className="space-y-3">
+                        <Input
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          onChange={handleFileSelect}
+                          className="cursor-pointer"
+                          data-testid="input-receipt-file"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Formatos aceptados: PDF, JPG, JPEG, PNG (máx. 10MB)
+                        </p>
+                      </div>
+                    ) : receiptFile && !receiptUploaded ? (
+                      /* File selected but not uploaded */
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
+                          <FileCheck className="h-5 w-5 text-accent" />
+                          <span className="text-sm font-medium flex-1">{receiptFile.name}</span>
+                        </div>
+                        <div className="flex gap-3">
+                          <Button
+                            onClick={handleUploadReceipt}
+                            disabled={receiptUploading}
+                            className="flex-1"
+                            data-testid="button-upload-receipt"
+                          >
+                            {receiptUploading ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Subiendo...
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="h-4 w-4 mr-2" />
+                                Subir comprobante
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setReceiptFile(null);
+                              const input = document.querySelector<HTMLInputElement>('[data-testid="input-receipt-file"]');
+                              if (input) input.value = '';
+                            }}
+                            disabled={receiptUploading}
+                            data-testid="button-change-file"
+                          >
+                            Cambiar archivo
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      /* File uploaded */
+                      <div className="space-y-3">
+                        <div className="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-500" />
+                            <span className="font-semibold text-green-700 dark:text-green-400">
+                              ✅ PENDIENTE DE REVISIÓN
+                            </span>
+                          </div>
+                          <p className="text-sm text-green-600 dark:text-green-400">
+                            Tu comprobante ha sido enviado. Te notificaremos cuando sea aprobado.
+                          </p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setReceiptFile(null);
+                            setReceiptUploaded(false);
+                            const input = document.querySelector<HTMLInputElement>('[data-testid="input-receipt-file"]');
+                            if (input) input.value = '';
+                          }}
+                          className="w-full"
+                          data-testid="button-replace-receipt"
+                        >
+                          Reemplazar comprobante
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-6">
                     <Button
-                      variant="default"
-                      onClick={() => setShowBankInfo(false)}
-                      className="flex-1"
+                      variant="outline"
+                      onClick={() => {
+                        setShowBankInfo(false);
+                        setBankTransferPaymentId(null);
+                        setReceiptFile(null);
+                        setReceiptUploading(false);
+                        setReceiptUploaded(false);
+                        setReceiptUrl(null);
+                      }}
+                      className="w-full"
+                      data-testid="button-back-from-bank-transfer"
                     >
+                      <ArrowLeft className="h-4 w-4 mr-2" />
                       Volver
                     </Button>
                   </div>

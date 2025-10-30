@@ -746,6 +746,23 @@ export const payment_events = pgTable("payment_events", {
   created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const bank_transfer_payments = pgTable("bank_transfer_payments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  order_id: uuid("order_id").notNull(),
+  user_id: uuid("user_id").notNull(),
+  amount: numeric("amount", { precision: 14, scale: 2 }).notNull(),
+  currency: text("currency").notNull(),
+  receipt_url: text("receipt_url"),
+  payer_name: text("payer_name"),
+  payer_note: text("payer_note"),
+  status: text("status").notNull().default("pending"),
+  reviewed_by: uuid("reviewed_by"),
+  reviewed_at: timestamp("reviewed_at", { withTimezone: true }),
+  review_reason: text("review_reason"),
+  created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 // Schemas for payments
 export const insertPaymentSchema = createInsertSchema(payments).omit({
   id: true,
@@ -757,8 +774,16 @@ export const insertPaymentEventSchema = createInsertSchema(payment_events).omit(
   created_at: true,
 });
 
+export const insertBankTransferPaymentSchema = createInsertSchema(bank_transfer_payments).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
 // Types for payments
 export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 export type PaymentEvent = typeof payment_events.$inferSelect;
 export type InsertPaymentEvent = z.infer<typeof insertPaymentEventSchema>;
+export type BankTransferPayment = typeof bank_transfer_payments.$inferSelect;
+export type InsertBankTransferPayment = z.infer<typeof insertBankTransferPaymentSchema>;

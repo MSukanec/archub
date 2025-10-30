@@ -10,6 +10,7 @@ import { registerSubcontractRoutes } from './routes/subcontracts';
 import { registerCourseRoutes } from './routes/courses';
 import { registerAdminRoutes } from './routes/admin';
 import { registerPaymentRoutes } from './routes/payments';
+import { registerBankTransferRoutes } from './routes/bank-transfer';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get shared dependencies
@@ -35,6 +36,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register payment routes (MercadoPago and PayPal checkout, webhooks)
   registerPaymentRoutes(app, deps);
+
+  // Register bank transfer routes (create, upload receipt, get status)
+  registerBankTransferRoutes(app, deps);
 
   // ============================================
   // Mercado Pago Integration Routes (Proxies)
