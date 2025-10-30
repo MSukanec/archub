@@ -887,7 +887,7 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                                   >
                                     <CreditCard className="h-5 w-5 text-accent" />
                                     Mercado Pago
-                                    <Badge variant="secondary" className="text-xs font-normal">
+                                    <Badge variant="outline" className="text-xs font-normal bg-muted/60 border-border/50">
                                       Pago en ARS
                                     </Badge>
                                   </Label>
@@ -927,7 +927,7 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                                   >
                                     <CreditCard className="h-5 w-5 text-accent" />
                                     PayPal
-                                    <Badge variant="secondary" className="text-xs font-normal">
+                                    <Badge variant="outline" className="text-xs font-normal bg-muted/60 border-border/50">
                                       Pago en USD
                                     </Badge>
                                   </Label>
@@ -966,7 +966,7 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                               >
                                 <Building2 className="h-5 w-5 text-accent" />
                                 Transferencia Bancaria
-                                <Badge variant="secondary" className="text-xs font-normal">
+                                <Badge variant="outline" className="text-xs font-normal bg-muted/60 border-border/50">
                                   Pago en ARS
                                 </Badge>
                               </Label>
