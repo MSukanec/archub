@@ -252,6 +252,24 @@ export default function CheckoutPage() {
     }
   }, [country, countries, selectedMethod]);
 
+  // Limpiar cupón cuando cambia la moneda/método de pago
+  // IMPORTANTE: El descuento debe recalcularse con el nuevo precio en la nueva moneda
+  useEffect(() => {
+    if (appliedCoupon) {
+      // Remover el cupón cuando cambia el método de pago
+      setAppliedCoupon(null);
+      setCouponError(null);
+      
+      // Mostrar un mensaje informativo al usuario
+      toast({
+        title: "Cupón removido",
+        description: "Cambiaste de método de pago. Aplicá el cupón nuevamente para recalcular el descuento.",
+        variant: "default",
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMethod, currentCurrency]);
+
   // Atajo de teclado: Enter dispara el CTA si todo está válido
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -954,11 +972,9 @@ Titular: DNI 32322767`;
 
     // Normalize phone to E.164 if provided
     const selectedCountry = countries.find((c) => c.id === country);
-    // Use alpha_3 first (for known countries), fallback to country_code (for others)
     const normalizedPhone = toE164(
       phone, 
-      selectedCountry?.alpha_3,
-      selectedCountry?.country_code
+      selectedCountry?.alpha_3
     );
 
     if (!acceptTerms) {
