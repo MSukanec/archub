@@ -45,7 +45,7 @@ Preferred communication style: Simple, everyday language.
 - **Notification System**: Real-time notifications with bell icon badge, read/unread states, and click navigation.
 - **Admin Course Management**: Dedicated `AdminCourses` page with CRUD operations, analytics, hierarchical tree view, and enrollment management.
 - **Coupon System**: Discount coupon system for courses with database-driven validation and payment integration.
-- **Payment Processing**: Dual payment provider support (Mercado Pago for ARS, PayPal for USD) with webhook-based enrollment.
+- **Payment Processing**: Dual payment provider support (Mercado Pago for ARS, PayPal for USD) with webhook-based enrollment. Bank transfer payment method with receipt upload functionality - users can upload proof of payment (PDF/JPG/PNG) which enters "pending review" status until admin approval.
 - **Subscription Duration**: `course_prices` table includes `months` field for subscription duration tracking.
 - **Cost System**: Three-tier cost system (Archub Cost, Organization Cost, Independent Cost) for budget items.
 
@@ -53,7 +53,7 @@ Preferred communication style: Simple, everyday language.
 - **Vercel Deployment**: Backend routes implemented as Vercel-compatible serverless functions.
 - **Admin Authorization**: Admin endpoints use `AuthError` and verify user roles via `admin_users` view.
 - **SPA Fallback**: `vercel.json` configured for client-side routing and OAuth callbacks.
-- **Backend Modular Architecture**: Monolithic `server/routes.ts` modularized into domain-specific route modules (`reference`, `user`, `projects`, `subcontracts`, `courses`, `admin`, `payments`) using a `RouteDeps` pattern for shared dependencies and consistent authentication. All modules use authenticated Supabase clients and RLS.
+- **Backend Modular Architecture**: Monolithic `server/routes.ts` modularized into domain-specific route modules (`reference`, `user`, `projects`, `subcontracts`, `courses`, `admin`, `payments`, `bank-transfer`) using a `RouteDeps` pattern for shared dependencies and consistent authentication. All modules use authenticated Supabase clients and RLS.
 - **Frontend Performance Optimizations**: Implemented code-splitting and lazy loading for Admin, Learning, and Media pages to reduce initial bundle size and improve load times. Pages are lazy-loaded based on role-restriction, heavy dependencies, or infrequency of access.
 
 ## External Dependencies
