@@ -712,9 +712,18 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
       return;
     }
 
-    // Validate billing data if company
-    if (isCompany) {
-      if (!companyName.trim()) {
+    // Validate billing data if any field is filled
+    const hasBillingData = 
+      billingFullName.trim() ||
+      companyName.trim() ||
+      taxId.trim() ||
+      billingCountry ||
+      billingAddress.trim() ||
+      billingCity.trim() ||
+      billingPostcode.trim();
+
+    if (hasBillingData) {
+      if (isCompany && !companyName.trim()) {
         toast({
           title: "Nombre de empresa requerido",
           description: "Por favor ingresá el nombre de la empresa",
@@ -724,8 +733,8 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
       }
       if (!taxId.trim()) {
         toast({
-          title: "Tax ID requerido",
-          description: "Por favor ingresá el VAT / GST / Tax ID de la empresa",
+          title: "CUIT / Tax ID requerido",
+          description: "Por favor ingresá tu CUIT / VAT / GST / Tax ID",
           variant: "destructive",
         });
         return;
@@ -1106,12 +1115,12 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
 
                                 <div className="space-y-2">
                                   <Label className="text-sm font-medium">
-                                    VAT / GST / Tax ID <span className="text-accent">*</span>
+                                    CUIT / VAT / GST / Tax ID <span className="text-accent">*</span>
                                   </Label>
                                   <Input
                                     value={taxId}
                                     onChange={(e) => setTaxId(e.target.value)}
-                                    placeholder="GB123456789"
+                                    placeholder="20-12345678-9 o GB123456789"
                                     data-testid="input-tax-id"
                                   />
                                   <p className="text-xs text-muted-foreground">
@@ -1179,6 +1188,21 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                                     placeholder="Juan Pérez"
                                     data-testid="input-billing-fullname"
                                   />
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">
+                                    CUIT / VAT / GST / Tax ID <span className="text-accent">*</span>
+                                  </Label>
+                                  <Input
+                                    value={taxId}
+                                    onChange={(e) => setTaxId(e.target.value)}
+                                    placeholder="20-12345678-9 o GB123456789"
+                                    data-testid="input-tax-id-individual"
+                                  />
+                                  <p className="text-xs text-muted-foreground">
+                                    Número de identificación fiscal
+                                  </p>
                                 </div>
 
                                 <div className="space-y-2">
