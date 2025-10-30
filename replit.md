@@ -50,6 +50,11 @@ Preferred communication style: Simple, everyday language.
   - **Backend API**: Three admin endpoints (`GET /api/admin/payments`, `PATCH /:id/approve`, `PATCH /:id/reject`) with `verifyAdmin()` authentication. Approval auto-enrolls users via `enrollUserInCourse()`.
   - **Authentication Pattern**: All queries and mutations use Supabase session tokens with `Authorization: Bearer` headers for admin verification.
 - **Coupon System**: Discount coupon system for courses with database-driven validation and payment integration.
+- **Payment Architecture**: Unified payment system with future subscription support:
+  - **`payments` table**: Master unified table for ALL payments (courses, subscriptions, plans) with generalized fields (`product_type`, `product_id`, `organization_id`, `approved_at`, `metadata`). Tracks payment status lifecycle (pending → completed/rejected).
+  - **`payment_events` table**: Webhook event auditing for PayPal/Mercado Pago (provider logs, raw payloads, event types).
+  - **`bank_transfer_payments` table**: Bank transfer-specific details (receipt_url, payer_name, reviewed_by) linked to `payments` via `payment_id` FK.
+  - **Payment Flow**: All payment methods create records in `payments` first, provider-specific tables link via FK. Webhooks update both `payment_events` and `payments`. Admin approval updates both `payments` (status, approved_at) and `bank_transfer_payments` (status, reviewed_by).
 - **Payment Processing**: Dual payment provider support (Mercado Pago for ARS, PayPal for USD) with webhook-based enrollment. Bank transfer payment method with receipt upload functionality - users can upload proof of payment (PDF/JPG/PNG, max 10MB) which enters "pending review" status until admin approval. Optional Twilio WhatsApp notifications send admin alerts when users upload receipts. Critical user ID mapping: All bank-transfer endpoints resolve public.users profile via auth_id before database operations to avoid RLS violations (auth.users.id ≠ public.users.id).
 - **Subscription Duration**: `course_prices` table includes `months` field for subscription duration tracking.
 - **Cost System**: Three-tier cost system (Archub Cost, Organization Cost, Independent Cost) for budget items.
