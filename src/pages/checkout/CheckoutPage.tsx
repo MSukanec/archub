@@ -583,9 +583,7 @@ export default function CheckoutPage() {
 Número de cuenta: 4026691-4 063-1
 CBU: 00700634 30004026691416
 Alias: MATIAS.SUKANEC
-Titular: DNI 32322767
-
-Enviá el comprobante a: +54 9 11 3227-3000`;
+Titular: DNI 32322767`;
 
     try {
       await navigator.clipboard.writeText(bankInfo);
@@ -1492,20 +1490,6 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Titular</p>
                       <p className="font-medium">DNI 32322767</p>
-                    </div>
-                    <Separator />
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Enviá el comprobante a</p>
-                      <a
-                        href="https://wa.me/5491132273000"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-medium flex items-center gap-2 text-accent hover:underline"
-                        data-testid="link-whatsapp"
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                        +54 9 11 3227-3000
-                      </a>
                     </div>
                   </div>
 
