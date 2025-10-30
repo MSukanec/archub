@@ -45,7 +45,7 @@ Preferred communication style: Simple, everyday language.
 - **Notification System**: Real-time notifications with bell icon badge, read/unread states, and click navigation.
 - **Admin Course Management**: Dedicated `AdminCourses` page with CRUD operations, analytics, hierarchical tree view, and enrollment management.
 - **Coupon System**: Discount coupon system for courses with database-driven validation and payment integration.
-- **Payment Processing**: Dual payment provider support (Mercado Pago for ARS, PayPal for USD) with webhook-based enrollment. Bank transfer payment method with receipt upload functionality - users can upload proof of payment (PDF/JPG/PNG) which enters "pending review" status until admin approval.
+- **Payment Processing**: Dual payment provider support (Mercado Pago for ARS, PayPal for USD) with webhook-based enrollment. Bank transfer payment method with receipt upload functionality - users can upload proof of payment (PDF/JPG/PNG, max 10MB) which enters "pending review" status until admin approval. Optional Twilio WhatsApp notifications send admin alerts when users upload receipts. Critical user ID mapping: All bank-transfer endpoints resolve public.users profile via auth_id before database operations to avoid RLS violations (auth.users.id ≠ public.users.id).
 - **Subscription Duration**: `course_prices` table includes `months` field for subscription duration tracking.
 - **Cost System**: Three-tier cost system (Archub Cost, Organization Cost, Independent Cost) for budget items.
 
@@ -71,3 +71,21 @@ Preferred communication style: Simple, everyday language.
 - **date-fns**: Date manipulation utilities.
 - **React Flow**: For visual parameter dependency editor.
 - **Recharts**: Charting library.
+
+## Environment Variables
+
+### Required (Core Functionality)
+- `DATABASE_URL` - PostgreSQL connection string (Neon/Supabase)
+- `VITE_SUPABASE_URL` - Supabase project URL (frontend)
+- `VITE_SUPABASE_ANON_KEY` - Supabase anonymous key (frontend)
+- `SUPABASE_URL` - Supabase project URL (backend)
+- `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key (backend)
+
+### Optional (WhatsApp Notifications)
+Enable automatic WhatsApp notifications when users upload bank transfer receipts:
+- `TWILIO_ACCOUNT_SID` - Twilio account identifier
+- `TWILIO_AUTH_TOKEN` - Twilio authentication token
+- `TWILIO_WHATSAPP_NUMBER` - Twilio WhatsApp sender number (format: `whatsapp:+14155238886`)
+- `ADMIN_WHATSAPP_NUMBER` - Admin WhatsApp recipient number (format: `whatsapp:+5491132273000`)
+
+**Note**: If Twilio variables are not configured, receipt uploads will function normally but WhatsApp notifications will be silently skipped.
