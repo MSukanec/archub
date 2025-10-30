@@ -509,20 +509,20 @@ Enviá el comprobante a: pagos@archub.com.ar`;
   return (
     <Layout headerProps={headerProps} wide>
       <div className="max-w-7xl mx-auto py-6 lg:py-8">
+        {/* Title Section - Full Width */}
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+            Elegí cómo pagar
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Seleccioná tu método de pago preferido y completá la compra de forma segura
+          </p>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column - Payment Methods (Mobile: shows second) */}
           <div className="lg:col-span-7 order-2 lg:order-1">
             <div className="space-y-6">
-              {/* Title */}
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
-                  Elegí cómo pagar
-                </h1>
-                <p className="text-muted-foreground mt-2">
-                  Seleccioná tu método de pago preferido y completá la compra de forma segura
-                </p>
-              </div>
-
               {!showBankInfo ? (
                 <div className="space-y-6">
                   {/* Subscription Info Banner */}
@@ -550,94 +550,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                       </div>
                     </div>
                   </div>
-
-                  {/* Coupon Section */}
-                  {!appliedCoupon ? (
-                    <div className="bg-card border rounded-lg p-6">
-                      <Label className="text-sm font-medium flex items-center gap-2 mb-3">
-                        <Tag className="h-4 w-4 text-accent" />
-                        Código de descuento (opcional)
-                      </Label>
-                      <div className="space-y-2">
-                        <div className="flex gap-2">
-                          <Input
-                            placeholder="Ingresá tu código"
-                            value={couponCode}
-                            onChange={(e) => {
-                              setCouponCode(e.target.value.toUpperCase());
-                              if (couponError) setCouponError(null);
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" && !validatingCoupon) {
-                                handleValidateCoupon();
-                              }
-                            }}
-                            disabled={validatingCoupon}
-                            className={cn(
-                              "flex-1",
-                              couponError && "border-red-500 focus-visible:ring-red-500"
-                            )}
-                            data-testid="input-coupon-code"
-                          />
-                          <Button
-                            onClick={handleValidateCoupon}
-                            disabled={validatingCoupon || !couponCode.trim()}
-                            variant="secondary"
-                            data-testid="button-apply-coupon"
-                          >
-                            {validatingCoupon ? (
-                              <>
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                Validando
-                              </>
-                            ) : (
-                              "Aplicar"
-                            )}
-                          </Button>
-                        </div>
-                        {couponError && (
-                          <p
-                            className="text-sm text-red-500 flex items-center gap-1.5"
-                            data-testid="coupon-error-message"
-                          >
-                            <X className="h-4 w-4 shrink-0" />
-                            {couponError}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div
-                      className="rounded-lg p-4 flex items-center justify-between border"
-                      style={{
-                        borderColor: "color-mix(in srgb, var(--accent) 30%, transparent)",
-                        backgroundColor: "color-mix(in srgb, var(--accent) 5%, transparent)",
-                      }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-5 w-5" style={{ color: "var(--accent)" }} />
-                        <div>
-                          <p className="text-sm font-medium" style={{ color: "var(--accent)" }}>
-                            {appliedCoupon.code}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {appliedCoupon.type === "percent"
-                              ? `${appliedCoupon.amount}% de descuento`
-                              : `$${appliedCoupon.amount} de descuento`}
-                          </p>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleRemoveCoupon}
-                        className="h-8 px-3"
-                        data-testid="button-remove-coupon"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
 
                   {/* Payment Methods */}
                   <div className="bg-card border rounded-lg p-6">
@@ -827,9 +739,98 @@ Enviá el comprobante a: pagos@archub.com.ar`;
             </div>
           </div>
 
-          {/* Right Column - Order Summary (Mobile: shows first) */}
+          {/* Right Column - Coupon & Order Summary (Mobile: shows first) */}
           <div className="lg:col-span-5 order-1 lg:order-2">
-            <div className="lg:sticky lg:top-24">
+            <div className="lg:sticky lg:top-24 space-y-6">
+              {/* Coupon Section */}
+              {!appliedCoupon ? (
+                <div className="bg-card border rounded-lg p-6">
+                  <Label className="text-sm font-medium flex items-center gap-2 mb-3">
+                    <Tag className="h-4 w-4 text-accent" />
+                    Código de descuento (opcional)
+                  </Label>
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Ingresá tu código"
+                        value={couponCode}
+                        onChange={(e) => {
+                          setCouponCode(e.target.value.toUpperCase());
+                          if (couponError) setCouponError(null);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !validatingCoupon) {
+                            handleValidateCoupon();
+                          }
+                        }}
+                        disabled={validatingCoupon}
+                        className={cn(
+                          "flex-1",
+                          couponError && "border-red-500 focus-visible:ring-red-500"
+                        )}
+                        data-testid="input-coupon-code"
+                      />
+                      <Button
+                        onClick={handleValidateCoupon}
+                        disabled={validatingCoupon || !couponCode.trim()}
+                        variant="secondary"
+                        data-testid="button-apply-coupon"
+                      >
+                        {validatingCoupon ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Validando
+                          </>
+                        ) : (
+                          "Aplicar"
+                        )}
+                      </Button>
+                    </div>
+                    {couponError && (
+                      <p
+                        className="text-sm text-red-500 flex items-center gap-1.5"
+                        data-testid="coupon-error-message"
+                      >
+                        <X className="h-4 w-4 shrink-0" />
+                        {couponError}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div
+                  className="rounded-lg p-4 flex items-center justify-between border"
+                  style={{
+                    borderColor: "color-mix(in srgb, var(--accent) 30%, transparent)",
+                    backgroundColor: "color-mix(in srgb, var(--accent) 5%, transparent)",
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5" style={{ color: "var(--accent)" }} />
+                    <div>
+                      <p className="text-sm font-medium" style={{ color: "var(--accent)" }}>
+                        {appliedCoupon.code}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {appliedCoupon.type === "percent"
+                          ? `${appliedCoupon.amount}% de descuento`
+                          : `$${appliedCoupon.amount} de descuento`}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleRemoveCoupon}
+                    className="h-8 px-3"
+                    data-testid="button-remove-coupon"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+
+              {/* Order Summary */}
               <div className="bg-card border rounded-lg p-6 shadow-sm">
                 <h2 className="text-lg font-semibold mb-4">Resumen de compra</h2>
 
