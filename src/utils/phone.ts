@@ -94,10 +94,42 @@ const DIAL_CODE_MAP: Record<string, string> = {
   'ETH': '+251',  // Etiopía
 };
 
+// Reglas específicas por país para móviles
+// Estas reglas se aplican DESPUÉS de remover el 0 inicial
+const MOBILE_RULES: Record<string, { requiresPrefix?: string; removePrefixes?: string[] }> = {
+  'ARG': {
+    // Argentina: celulares requieren 9 después del código de país
+    // Formato local: 0 11 5478-1234 (Buenos Aires) o 0 351 555-1234 (Córdoba)
+    // Formato E.164: +54 9 11 54781234 o +54 9 351 5551234
+    requiresPrefix: '9'
+  },
+  'MEX': {
+    // México: ya no requiere el 1 en el nuevo formato (2019)
+    // Si viene con 1, lo removemos
+    removePrefixes: ['1']
+  },
+  'BRA': {
+    // Brasil: celulares tienen 9 como primer dígito del número
+    // Ya está incluido en el número local, no hace falta agregarlo
+  }
+};
+
+/**
+ * Convierte un número de teléfono local a formato E.164 internacional
+ * 
+ * @param raw - Número de teléfono en formato local (ej: "011 5478-1234", "1154781234", etc.)
+ * @param countryAlpha3 - Código de país alpha-3 (ej: "ARG", "PER", "USA")
+ * @returns Número en formato E.164 (ej: "+5491154781234") o string vacío si no se puede convertir
+ * 
+ * Ejemplos:
+ * - Argentina móvil: "11 5478 1234" -> "+5491154781234" (agrega el 9)
+ * - Argentina móvil: "0 11 5478 1234" -> "+5491154781234" (remueve el 0, agrega el 9)
+ * - Perú: "987 654 321" -> "+51987654321"
+ * - USA: "555 123 4567" -> "+15551234567"
+ */
 export function toE164(
   raw: string, 
-  countryAlpha3?: string, 
-  fallbackCode?: string  // Reserved for future use, currently unused
+  countryAlpha3?: string
 ): string {
   const trimmed = raw.trim();
   
@@ -105,47 +137,94 @@ export function toE164(
     return '';
   }
 
-  // Remover espacios, guiones y paréntesis
-  const digits = trimmed.replace(/[\s\-()]/g, '');
+  // Remover espacios, guiones, paréntesis y puntos
+  let cleaned = trimmed.replace(/[\s\-().]/g, '');
   
   // Si ya empieza con +, retornar tal cual (ya está en formato E.164)
-  if (digits.startsWith('+')) {
-    return digits;
+  if (cleaned.startsWith('+')) {
+    return cleaned;
   }
   
   // Intentar obtener el código de discado del mapeo
-  let dialCode: string | undefined;
+  if (!countryAlpha3) {
+    console.warn('[toE164] No country code provided, cannot convert to E.164');
+    return '';
+  }
+
+  const dialCode = DIAL_CODE_MAP[countryAlpha3.toUpperCase()];
   
-  if (countryAlpha3) {
-    dialCode = DIAL_CODE_MAP[countryAlpha3.toUpperCase()];
+  if (!dialCode) {
+    console.warn(
+      `[toE164] Country "${countryAlpha3}" not found in dial code mapping. ` +
+      `Phone number cannot be converted to E.164 format. ` +
+      `Returning empty string to prevent invalid data.`
+    );
+    return '';
+  }
+  
+  // PASO 1: Remover el 0 inicial de marcación nacional (muy común en muchos países)
+  // Ejemplos: 
+  // - Argentina: "011 5478 1234" -> "11 5478 1234"
+  // - Perú: "01 987 654" -> "1 987 654"
+  // - España: "612 345 678" (no tiene 0) -> queda igual
+  if (cleaned.startsWith('0')) {
+    cleaned = cleaned.substring(1);
+  }
+  
+  // PASO 2: Aplicar reglas específicas del país para móviles
+  const mobileRule = MOBILE_RULES[countryAlpha3.toUpperCase()];
+  if (mobileRule) {
+    // Remover prefijos si es necesario (ej: México)
+    if (mobileRule.removePrefixes) {
+      for (const prefix of mobileRule.removePrefixes) {
+        if (cleaned.startsWith(prefix)) {
+          cleaned = cleaned.substring(prefix.length);
+          break;
+        }
+      }
+    }
     
-    if (!dialCode) {
-      console.warn(
-        `[toE164] Country "${countryAlpha3}" not found in dial code mapping. ` +
-        `Phone number cannot be converted to E.164 format. ` +
-        `Returning empty string to prevent invalid data.`
-      );
-      // Return empty string instead of generating invalid E.164 numbers
-      // This prevents saving values like "+BGR1234567" to the database
-      return '';
+    // Agregar prefijo requerido (ej: el 9 de Argentina)
+    if (mobileRule.requiresPrefix) {
+      // Solo agregar si no está ya presente
+      if (!cleaned.startsWith(mobileRule.requiresPrefix)) {
+        cleaned = mobileRule.requiresPrefix + cleaned;
+      }
     }
   }
   
-  // Si tenemos un dialCode del mapeo, concatenar
-  if (dialCode) {
-    const result = `${dialCode}${digits}`;
-    
-    // Validar que tenga al menos algunos dígitos después del código de país
-    if (result.replace(/\+/g, '').length >= 5) {
-      return result;
-    }
+  // PASO 3: Construir número E.164
+  const result = `${dialCode}${cleaned}`;
+  
+  // PASO 4: Validación básica de longitud
+  // La mayoría de números tienen entre 8-15 dígitos (excluyendo el +)
+  const digitCount = result.replace(/\+/g, '').length;
+  if (digitCount < 8 || digitCount > 15) {
+    console.warn(
+      `[toE164] Invalid phone number length (${digitCount} digits). ` +
+      `Expected 8-15 digits. Input: "${raw}", Output: "${result}"`
+    );
+    return '';
   }
   
-  // Si no hay dialCode o no es válido, retornar vacío
-  return '';
+  return result;
 }
 
-// Extract phone number without country code for display in PhoneField
+/**
+ * Extrae el número de teléfono sin código de país para mostrarlo en PhoneField
+ * 
+ * @param e164Phone - Número en formato E.164 (ej: "+5491154781234")
+ * @returns Número local sin código de país (ej: "1154781234")
+ * 
+ * Nota: Esta función NO agrega el 0 de marcación nacional porque no sabemos
+ * si el usuario va a copiar/pegar para WhatsApp (no lleva 0) o para llamar localmente (lleva 0).
+ * Es más seguro retornar el número tal cual está guardado.
+ * 
+ * Ejemplos:
+ * - "+5491154781234" -> "91154781234" (mantiene el 9)
+ * - "+51987654321" -> "987654321"
+ * - "+15551234567" -> "5551234567"
+ */
 export function fromE164(e164Phone: string): string {
   if (!e164Phone) return '';
   
@@ -190,4 +269,87 @@ export function fromE164(e164Phone: string): string {
   
   // If we still can't parse it, return the whole thing without the +
   return withoutPlus;
+}
+
+/**
+ * Valida si un número de teléfono es válido en formato E.164
+ * 
+ * @param e164Phone - Número en formato E.164
+ * @returns true si el número parece válido, false si no
+ */
+export function isValidE164(e164Phone: string): boolean {
+  if (!e164Phone) return false;
+  
+  // Debe empezar con +
+  if (!e164Phone.startsWith('+')) return false;
+  
+  // Debe tener solo dígitos después del +
+  const digits = e164Phone.substring(1);
+  if (!/^\d+$/.test(digits)) return false;
+  
+  // Debe tener entre 8-15 dígitos (excluyendo el +)
+  if (digits.length < 8 || digits.length > 15) return false;
+  
+  return true;
+}
+
+/**
+ * Formatea un número E.164 para WhatsApp
+ * WhatsApp acepta números con o sin +, pero es más confiable con +
+ * 
+ * @param e164Phone - Número en formato E.164
+ * @returns URL de WhatsApp lista para usar
+ * 
+ * Ejemplo: "+5491154781234" -> "https://wa.me/5491154781234"
+ */
+export function formatForWhatsApp(e164Phone: string): string {
+  if (!e164Phone) return '';
+  
+  // WhatsApp acepta el número sin el +
+  const phoneNumber = e164Phone.replace('+', '');
+  return `https://wa.me/${phoneNumber}`;
+}
+
+/**
+ * Formatea un número E.164 para mostrar de forma legible
+ * 
+ * @param e164Phone - Número en formato E.164
+ * @param countryAlpha3 - Código de país (opcional, para formato específico del país)
+ * @returns Número formateado para lectura humana
+ * 
+ * Ejemplos:
+ * - "+5491154781234" -> "+54 9 11 5478-1234" (Argentina)
+ * - "+51987654321" -> "+51 987 654 321" (Perú)
+ * - "+15551234567" -> "+1 555-123-4567" (USA)
+ */
+export function formatE164ForDisplay(e164Phone: string, countryAlpha3?: string): string {
+  if (!e164Phone || !e164Phone.startsWith('+')) return e164Phone;
+  
+  // Por ahora retornamos el formato E.164 básico con espacios
+  // En el futuro podemos agregar formatos específicos por país
+  const withoutPlus = e164Phone.substring(1);
+  
+  // Encontrar el código de país
+  const allDialCodes = Object.entries(DIAL_CODE_MAP)
+    .map(([alpha3, code]) => ({ alpha3, code: code.replace('+', '') }))
+    .sort((a, b) => b.code.length - a.code.length);
+  
+  for (const { alpha3, code } of allDialCodes) {
+    if (withoutPlus.startsWith(code)) {
+      const localNumber = withoutPlus.substring(code.length);
+      
+      // Formato básico: +XX XXX XXX XXX
+      if (localNumber.length <= 4) {
+        return `+${code} ${localNumber}`;
+      } else if (localNumber.length <= 7) {
+        return `+${code} ${localNumber.substring(0, 3)} ${localNumber.substring(3)}`;
+      } else if (localNumber.length <= 10) {
+        return `+${code} ${localNumber.substring(0, 3)} ${localNumber.substring(3, 6)} ${localNumber.substring(6)}`;
+      } else {
+        return `+${code} ${localNumber.substring(0, 3)} ${localNumber.substring(3, 7)} ${localNumber.substring(7)}`;
+      }
+    }
+  }
+  
+  return e164Phone;
 }
