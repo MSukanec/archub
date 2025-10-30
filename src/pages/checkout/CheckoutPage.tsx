@@ -525,32 +525,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
             <div className="space-y-6">
               {!showBankInfo ? (
                 <div className="space-y-6">
-                  {/* Subscription Info Banner */}
-                  <div
-                    className="rounded-lg p-4 border"
-                    style={{
-                      borderColor: "color-mix(in srgb, var(--accent) 30%, transparent)",
-                      backgroundColor: "color-mix(in srgb, var(--accent) 10%, transparent)",
-                    }}
-                  >
-                    <div className="flex items-start gap-3">
-                      <Calendar className="h-5 w-5 mt-0.5 flex-shrink-0" style={{ color: "var(--accent)" }} />
-                      <div>
-                        <p className="text-sm font-medium" style={{ color: "var(--accent)" }}>
-                          Suscripción Anual - Acceso por 365 días corridos
-                        </p>
-                        <p
-                          className="text-xs mt-1"
-                          style={{
-                            color: "color-mix(in srgb, var(--accent) 80%, transparent)",
-                          }}
-                        >
-                          Disfrutá del curso completo durante un año desde la fecha de compra
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Payment Methods */}
                   <div className="bg-card border rounded-lg p-6">
                     <h2 className="text-lg font-semibold mb-4">Métodos de pago</h2>
@@ -653,26 +627,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                       </div>
                     </RadioGroup>
                   </div>
-
-                  {/* Action Button */}
-                  <Button
-                    onClick={handleContinue}
-                    disabled={!selectedMethod || loading || priceLoading}
-                    className="w-full h-12 text-base font-medium"
-                    data-testid="button-continue-payment"
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                        Procesando...
-                      </>
-                    ) : (
-                      <>
-                        Continuar al pago
-                        <ArrowLeft className="h-5 w-5 ml-2 rotate-180" />
-                      </>
-                    )}
-                  </Button>
                 </div>
               ) : (
                 /* Bank Transfer Info */
@@ -900,6 +854,26 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                         <p>Soporte incluido durante todo el período</p>
                       </div>
                     </div>
+
+                    {/* Action Button */}
+                    <Button
+                      onClick={handleContinue}
+                      disabled={!selectedMethod || loading || priceLoading}
+                      className="w-full h-12 text-base font-medium mt-6"
+                      data-testid="button-continue-payment"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                          Procesando...
+                        </>
+                      ) : (
+                        <>
+                          Continuar al pago
+                          <ArrowLeft className="h-5 w-5 ml-2 rotate-180" />
+                        </>
+                      )}
+                    </Button>
                   </div>
                 )}
               </div>
