@@ -172,6 +172,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const finalCourseSlug = typeof course_slug === 'string' ? course_slug : 'master-archicad';
 
+    // Redirect to unified success page (React component)
+    return res.redirect(303, `/checkout/success?course_slug=${finalCourseSlug}&provider=paypal&user_id=${userId}`);
+    
+    /* CÓDIGO ANTERIOR (HTML inline) - AHORA USA PÁGINA REACT UNIFICADA
     // Get course and enrollment data for success page
     const { data: courseData } = await supabase
       .from('courses')
@@ -397,6 +401,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         </body>
       </html>
     `);
+    */
     
   } catch (e: any) {
     console.error('[PayPal capture-and-redirect] Error fatal:', e);

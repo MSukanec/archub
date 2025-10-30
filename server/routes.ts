@@ -36,6 +36,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ message: "API is working", timestamp: new Date().toISOString() });
   });
 
+  // Unified checkout success endpoint - works for ALL payment providers
+  app.get("/api/checkout/success", async (req, res) => {
+    try {
+      const { course_slug, provider = 'paypal', user_id } = req.query;
+
+      if (!course_slug) {
+        return res.status(400).json({ error: "course_slug is required" });
+      }
+
+      // Get course data
+      const { data: course, error: courseError } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('slug', course_slug)
+        .single();
+
+      if (courseError || !course) {
+        console.error('[checkout/success] Course error:', courseError);
+        return res.status(404).json({ error: "Course not found" });
+      }
+
+      // Get enrollment data (if user_id provided)
+      let enrollment = null;
+      if (user_id) {
+        const { data: enrollData } = await getAdminClient()
+          .from('course_enrollments')
+          .select('*')
+          .eq('course_id', course.id)
+          .eq('user_id', user_id)
+          .single();
+        
+        enrollment = enrollData;
+      }
+
+      return res.json({
+        success: true,
+        course,
+        enrollment,
+        provider,
+      });
+    } catch (err: any) {
+      console.error('[checkout/success] Error:', err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // Get all countries (public reference data, no auth required)
   app.get("/api/countries", async (req, res) => {
     try {
