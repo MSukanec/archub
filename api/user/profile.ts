@@ -44,6 +44,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       country,
       birthdate,
       avatar_url,
+      phone_e164,
     } = req.body;
 
     // Validate that we're updating the correct user
@@ -59,6 +60,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (last_name !== undefined) userDataUpdates.last_name = last_name;
     if (country !== undefined) userDataUpdates.country = country;
     if (birthdate !== undefined) userDataUpdates.birthdate = birthdate;
+    if (phone_e164 !== undefined) userDataUpdates.phone_e164 = phone_e164;
 
     // Update user_data if there are changes
     if (Object.keys(userDataUpdates).length > 0) {

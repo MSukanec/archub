@@ -116,6 +116,9 @@ export default function CheckoutPage() {
   // Acceptance checkboxes
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptCommunications, setAcceptCommunications] = useState(false);
+  
+  // Save to profile checkbox
+  const [saveToProfile, setSaveToProfile] = useState(false);
 
   // Course title
   const [courseTitle, setCourseTitle] = useState("Curso");
@@ -500,9 +503,10 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
     }
   };
 
-  const handleContinue = () => {
-    // Validate basic data fields (all required except phone)
-    if (!firstName.trim()) {
+  const handleContinue = async () => {
+    // Validate first_name: 1-100 caracteres, Unicode (acentos, guiones)
+    const trimmedFirstName = firstName.trim();
+    if (!trimmedFirstName) {
       toast({
         title: "Nombre requerido",
         description: "Por favor ingresá tu nombre",
@@ -510,17 +514,29 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
       });
       return;
     }
-
-    if (!lastName.trim()) {
+    if (trimmedFirstName.length > 100) {
       toast({
-        title: "Apellido requerido",
-        description: "Por favor ingresá tu apellido",
+        title: "Nombre muy largo",
+        description: "El nombre debe tener máximo 100 caracteres",
         variant: "destructive",
       });
       return;
     }
 
-    if (!email.trim()) {
+    // Validate last_name: 0-100 caracteres (opcional)
+    const trimmedLastName = lastName.trim();
+    if (trimmedLastName.length > 100) {
+      toast({
+        title: "Apellido muy largo",
+        description: "El apellido debe tener máximo 100 caracteres",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate email: formato válido y normalizar a minúsculas
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
       toast({
         title: "Email requerido",
         description: "Por favor ingresá tu email",
@@ -528,10 +544,8 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
       });
       return;
     }
-
-    // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(trimmedEmail)) {
       toast({
         title: "Email inválido",
         description: "Por favor ingresá un email válido",
@@ -539,7 +553,9 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
       });
       return;
     }
+    const normalizedEmail = trimmedEmail.toLowerCase();
 
+    // Validate country
     if (!country) {
       toast({
         title: "País requerido",
@@ -547,6 +563,24 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
         variant: "destructive",
       });
       return;
+    }
+
+    // Normalize phone to E.164 if provided
+    let normalizedPhone = "";
+    if (phone.trim()) {
+      const selectedCountry = countries.find((c) => c.id === country);
+      if (selectedCountry?.country_code) {
+        // Remover espacios, guiones y paréntesis
+        const digits = phone.replace(/[\s\-()]/g, "");
+        
+        // Si ya empieza con +, usar tal cual
+        if (digits.startsWith("+")) {
+          normalizedPhone = digits;
+        } else {
+          // Agregar el country_code (ej: +54)
+          normalizedPhone = `+${selectedCountry.country_code}${digits}`;
+        }
+      }
     }
 
     if (!acceptTerms) {
@@ -584,6 +618,35 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
         variant: "destructive",
       });
       return;
+    }
+
+    // Save to profile if checkbox is checked
+    if (saveToProfile && userData?.user?.id) {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        
+        if (session?.access_token) {
+          const API_BASE = getApiBase();
+          await fetch(`${API_BASE}/api/user/profile`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              first_name: trimmedFirstName,
+              last_name: trimmedLastName || null,
+              country: country,
+              phone_e164: normalizedPhone || null,
+            }),
+          });
+        }
+      } catch (error) {
+        console.error("Error saving profile data:", error);
+        // Continue with payment even if profile save fails
+      }
     }
 
     switch (selectedMethod) {
@@ -718,6 +781,24 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                           placeholder="Número de teléfono"
                         />
                       </div>
+
+                      {/* Save to Profile Checkbox */}
+                      {userData?.user?.id && (
+                        <div className="flex items-start gap-3 pt-2">
+                          <Checkbox
+                            id="save-to-profile"
+                            checked={saveToProfile}
+                            onCheckedChange={(checked) => setSaveToProfile(checked === true)}
+                            data-testid="checkbox-save-to-profile"
+                          />
+                          <label
+                            htmlFor="save-to-profile"
+                            className="text-sm leading-tight cursor-pointer text-muted-foreground"
+                          >
+                            Guardar estos datos en mi perfil
+                          </label>
+                        </div>
+                      )}
                     </div>
                   </div>
 

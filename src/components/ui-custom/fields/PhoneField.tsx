@@ -54,9 +54,23 @@ export const PhoneField = forwardRef<HTMLInputElement, PhoneFieldProps>(
 
     const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value;
-      // Validación básica: solo números, espacios y guiones
-      const cleanValue = newValue.replace(/[^\d\s-]/g, '');
+      // Permitir solo números, espacios, guiones y paréntesis
+      const cleanValue = newValue.replace(/[^\d\s\-()]/g, '');
       onChange(cleanValue);
+    };
+
+    // Función para normalizar a E.164 (exportada para uso externo)
+    const normalizeToE164 = (phoneNumber: string, dialCode: string): string => {
+      // Remover espacios, guiones y paréntesis
+      const digits = phoneNumber.replace(/[\s\-()]/g, '');
+      
+      // Si ya empieza con +, retornarlo tal cual (asumimos que está en formato E.164)
+      if (digits.startsWith('+')) {
+        return digits;
+      }
+      
+      // Si no empieza con +, agregar el dialCode
+      return `${dialCode}${digits}`;
     };
 
     return (
