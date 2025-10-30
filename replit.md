@@ -44,6 +44,11 @@ Preferred communication style: Simple, everyday language.
 - **Learning Module ("Capacitaciones")**: Course management (courses, modules, lessons), Vimeo integration, lesson progress tracking, advanced student note-taking, course dashboard, course pricing with server-side validation and Mercado Pago integration, Discord integration, deep-link navigation, and table-based notes/markers.
 - **Notification System**: Real-time notifications with bell icon badge, read/unread states, and click navigation.
 - **Admin Course Management**: Dedicated `AdminCourses` page with CRUD operations, analytics, hierarchical tree view, and enrollment management.
+- **Admin Payment Management**: Complete `/admin/payments` section with:
+  - **Transfers Tab**: Manual review workflow for pending bank transfers with approve/reject actions, receipt viewer (PDF/images), status filters, and confirmation dialogs.
+  - **History Tab**: KPI dashboard (pending payments, approved today, total month revenue) with complete payment history table.
+  - **Backend API**: Three admin endpoints (`GET /api/admin/payments`, `PATCH /:id/approve`, `PATCH /:id/reject`) with `verifyAdmin()` authentication. Approval auto-enrolls users via `enrollUserInCourse()`.
+  - **Authentication Pattern**: All queries and mutations use Supabase session tokens with `Authorization: Bearer` headers for admin verification.
 - **Coupon System**: Discount coupon system for courses with database-driven validation and payment integration.
 - **Payment Processing**: Dual payment provider support (Mercado Pago for ARS, PayPal for USD) with webhook-based enrollment. Bank transfer payment method with receipt upload functionality - users can upload proof of payment (PDF/JPG/PNG, max 10MB) which enters "pending review" status until admin approval. Optional Twilio WhatsApp notifications send admin alerts when users upload receipts. Critical user ID mapping: All bank-transfer endpoints resolve public.users profile via auth_id before database operations to avoid RLS violations (auth.users.id ≠ public.users.id).
 - **Subscription Duration**: `course_prices` table includes `months` field for subscription duration tracking.
