@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,19 +15,19 @@ import {
   CreditCard,
   Building2,
   Tag,
-  User,
   X,
   CheckCircle,
   Loader2,
   Copy,
+  Calendar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCoursePrice } from "@/hooks/useCoursePrice";
-import { useUserData } from "@/hooks/use-user-data";
 import { getApiBase } from "@/utils/apiBase";
 import mercadoPagoLogo from "/MercadoPago_logo.png";
 import paypalLogo from "/Paypal_2014_logo.png";
 
+// Helper para hacer fetch con timeout
 async function fetchWithTimeout(url: string, init: RequestInit = {}, ms = 15000) {
   const ctrl = new AbortController();
   const id = setTimeout(() => ctrl.abort(), ms);
@@ -56,6 +55,7 @@ export default function CheckoutPage() {
   const { toast } = useToast();
   const { setSidebarContext, setSidebarLevel, sidebarLevel, currentSidebarContext } = useNavigationStore();
 
+  // Get query params (courseSlug)
   const params = new URLSearchParams(window.location.search);
   const courseSlug = params.get("course") || "";
 
@@ -63,6 +63,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [showBankInfo, setShowBankInfo] = useState(false);
 
+  // Set navigation context for sidebar and restore on unmount
   useEffect(() => {
     const previousContext = currentSidebarContext;
     const previousLevel = sidebarLevel;
@@ -71,11 +72,13 @@ export default function CheckoutPage() {
     setSidebarLevel('learning');
 
     return () => {
+      // Restore previous sidebar context and level when leaving checkout
       setSidebarContext(previousContext);
       setSidebarLevel(previousLevel);
     };
   }, [setSidebarContext, setSidebarLevel]);
 
+  // Provider/currency según método seleccionado
   const currentProvider = selectedMethod === "paypal" ? "paypal" : "mercadopago";
   const currentCurrency = selectedMethod === "paypal" ? "USD" : "ARS";
 
@@ -85,14 +88,13 @@ export default function CheckoutPage() {
     currentProvider
   );
 
-  const { data: userData } = useUserData();
-  const { data: countries } = useQuery({ queryKey: ['/api/countries'] });
-
+  // Cupón
   const [couponCode, setCouponCode] = useState("");
   const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
 
+  // Redirect si no hay courseSlug
   useEffect(() => {
     if (!courseSlug) {
       navigate("/learning/courses");
@@ -203,6 +205,7 @@ export default function CheckoutPage() {
         throw new Error("Debes iniciar sesión para comprar un curso");
       }
 
+      // Si el cupón deja el precio en 0 → inscripción directa
       const currentFinalPrice = appliedCoupon
         ? appliedCoupon.final_price
         : priceData?.amount || 0;
@@ -506,29 +509,139 @@ Enviá el comprobante a: pagos@archub.com.ar`;
   return (
     <Layout headerProps={headerProps} wide>
       <div className="max-w-7xl mx-auto py-6 lg:py-8">
-        <div className="space-y-6">
-          {/* Title Row - Above columns */}
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
-              Elegí cómo pagar
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Seleccioná tu método de pago preferido y completá la compra de forma segura
-            </p>
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Left Column - Payment Methods (Mobile: shows second) */}
+          <div className="lg:col-span-7 order-2 lg:order-1">
+            <div className="space-y-6">
+              {/* Title */}
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+                  Elegí cómo pagar
+                </h1>
+                <p className="text-muted-foreground mt-2">
+                  Seleccioná tu método de pago preferido y completá la compra de forma segura
+                </p>
+              </div>
 
-          {/* Two Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Left Column - Payment Methods */}
-            <div className="lg:col-span-7 order-2 lg:order-1">
               {!showBankInfo ? (
                 <div className="space-y-6">
+                  {/* Subscription Info Banner */}
+                  <div
+                    className="rounded-lg p-4 border"
+                    style={{
+                      borderColor: "color-mix(in srgb, var(--accent) 30%, transparent)",
+                      backgroundColor: "color-mix(in srgb, var(--accent) 10%, transparent)",
+                    }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <Calendar className="h-5 w-5 mt-0.5 flex-shrink-0" style={{ color: "var(--accent)" }} />
+                      <div>
+                        <p className="text-sm font-medium" style={{ color: "var(--accent)" }}>
+                          Suscripción Anual - Acceso por 365 días corridos
+                        </p>
+                        <p
+                          className="text-xs mt-1"
+                          style={{
+                            color: "color-mix(in srgb, var(--accent) 80%, transparent)",
+                          }}
+                        >
+                          Disfrutá del curso completo durante un año desde la fecha de compra
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coupon Section */}
+                  {!appliedCoupon ? (
+                    <div className="bg-card border rounded-lg p-6">
+                      <Label className="text-sm font-medium flex items-center gap-2 mb-3">
+                        <Tag className="h-4 w-4 text-accent" />
+                        Código de descuento (opcional)
+                      </Label>
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Ingresá tu código"
+                            value={couponCode}
+                            onChange={(e) => {
+                              setCouponCode(e.target.value.toUpperCase());
+                              if (couponError) setCouponError(null);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && !validatingCoupon) {
+                                handleValidateCoupon();
+                              }
+                            }}
+                            disabled={validatingCoupon}
+                            className={cn(
+                              "flex-1",
+                              couponError && "border-red-500 focus-visible:ring-red-500"
+                            )}
+                            data-testid="input-coupon-code"
+                          />
+                          <Button
+                            onClick={handleValidateCoupon}
+                            disabled={validatingCoupon || !couponCode.trim()}
+                            variant="secondary"
+                            data-testid="button-apply-coupon"
+                          >
+                            {validatingCoupon ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Validando
+                              </>
+                            ) : (
+                              "Aplicar"
+                            )}
+                          </Button>
+                        </div>
+                        {couponError && (
+                          <p
+                            className="text-sm text-red-500 flex items-center gap-1.5"
+                            data-testid="coupon-error-message"
+                          >
+                            <X className="h-4 w-4 shrink-0" />
+                            {couponError}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      className="rounded-lg p-4 flex items-center justify-between border"
+                      style={{
+                        borderColor: "color-mix(in srgb, var(--accent) 30%, transparent)",
+                        backgroundColor: "color-mix(in srgb, var(--accent) 5%, transparent)",
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-5 w-5" style={{ color: "var(--accent)" }} />
+                        <div>
+                          <p className="text-sm font-medium" style={{ color: "var(--accent)" }}>
+                            {appliedCoupon.code}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {appliedCoupon.type === "percent"
+                              ? `${appliedCoupon.amount}% de descuento`
+                              : `$${appliedCoupon.amount} de descuento`}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleRemoveCoupon}
+                        className="h-8 px-3"
+                        data-testid="button-remove-coupon"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+
                   {/* Payment Methods */}
                   <div className="bg-card border rounded-lg p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <CreditCard className="h-5 w-5" />
-                      <h3 className="text-lg font-semibold">Métodos de pago</h3>
-                    </div>
+                    <h2 className="text-lg font-semibold mb-4">Métodos de pago</h2>
                     <RadioGroup
                       value={selectedMethod || ""}
                       onValueChange={(value) => setSelectedMethod(value as PaymentMethod)}
@@ -628,6 +741,26 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                       </div>
                     </RadioGroup>
                   </div>
+
+                  {/* Action Button */}
+                  <Button
+                    onClick={handleContinue}
+                    disabled={!selectedMethod || loading || priceLoading}
+                    className="w-full h-12 text-base font-medium"
+                    data-testid="button-continue-payment"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                        Procesando...
+                      </>
+                    ) : (
+                      <>
+                        Continuar al pago
+                        <ArrowLeft className="h-5 w-5 ml-2 rotate-180" />
+                      </>
+                    )}
+                  </Button>
                 </div>
               ) : (
                 /* Bank Transfer Info */
@@ -652,36 +785,29 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                       <p className="text-xs text-muted-foreground mb-1">Número de cuenta</p>
                       <p className="font-medium">4026691-4 063-1</p>
                     </div>
-                    <Separator />
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">CBU</p>
                       <p className="font-medium">00700634 30004026691416</p>
                     </div>
-                    <Separator />
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Alias</p>
                       <p className="font-medium">MATIAS.SUKANEC</p>
                     </div>
-                    <Separator />
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Titular</p>
                       <p className="font-medium">DNI 32322767</p>
                     </div>
-                  </div>
-
-                  <div className="mt-6 p-4 rounded-lg bg-accent/10 border border-accent/20">
-                    <p className="text-sm font-medium mb-2">
-                      Enviá el comprobante a:
-                    </p>
-                    <p className="text-sm text-accent font-medium">
-                      pagos@archub.com.ar
-                    </p>
+                    <Separator />
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Enviá el comprobante a</p>
+                      <p className="font-medium">pagos@archub.com.ar</p>
+                    </div>
                   </div>
 
                   <div className="flex gap-3 mt-6">
                     <Button
-                      onClick={handleCopyBankInfo}
                       variant="outline"
+                      onClick={handleCopyBankInfo}
                       className="flex-1"
                       data-testid="button-copy-bank-info"
                     >
@@ -689,239 +815,100 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                       Copiar datos
                     </Button>
                     <Button
+                      variant="secondary"
                       onClick={() => setShowBankInfo(false)}
-                      variant="ghost"
                       className="flex-1"
-                      data-testid="button-back-to-payment-methods"
                     >
-                      <ArrowLeft className="h-4 w-4 mr-2" />
                       Volver
                     </Button>
                   </div>
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Right Column - Summary */}
-            <div className="lg:col-span-5 order-1 lg:order-2 space-y-6">
-              {/* Card 1: Cupón de descuento */}
-              <div className="bg-card border rounded-lg p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Tag className="h-5 w-5" />
-                  <h3 className="text-lg font-semibold">Cupón de descuento</h3>
-                </div>
-                
-                {!appliedCoupon ? (
-                  <div className="space-y-2">
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Ingresá tu código"
-                        value={couponCode}
-                        onChange={(e) => {
-                          setCouponCode(e.target.value.toUpperCase());
-                          if (couponError) setCouponError(null);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && !validatingCoupon) {
-                            handleValidateCoupon();
-                          }
-                        }}
-                        disabled={validatingCoupon}
-                        className={cn(
-                          "flex-1",
-                          couponError && "border-red-500 focus-visible:ring-red-500"
-                        )}
-                        data-testid="input-coupon-code"
-                      />
-                      <Button
-                        onClick={handleValidateCoupon}
-                        disabled={validatingCoupon || !couponCode.trim()}
-                        variant="default"
-                        data-testid="button-apply-coupon"
-                      >
-                        {validatingCoupon ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Validando
-                          </>
-                        ) : (
-                          "Aplicar"
-                        )}
-                      </Button>
-                    </div>
-                    {couponError && (
-                      <p
-                        className="text-sm text-red-500 flex items-center gap-1.5"
-                        data-testid="coupon-error-message"
-                      >
-                        <X className="h-4 w-4 shrink-0" />
-                        {couponError}
-                      </p>
-                    )}
+          {/* Right Column - Order Summary (Mobile: shows first) */}
+          <div className="lg:col-span-5 order-1 lg:order-2">
+            <div className="lg:sticky lg:top-24">
+              <div className="bg-card border rounded-lg p-6 shadow-sm">
+                <h2 className="text-lg font-semibold mb-4">Resumen de compra</h2>
+
+                {priceLoading ? (
+                  <div className="space-y-3">
+                    <div className="h-4 bg-muted animate-pulse rounded" />
+                    <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
                   </div>
                 ) : (
-                  <div
-                    className="rounded-lg p-4 flex items-center justify-between border"
-                    style={{
-                      borderColor: "color-mix(in srgb, var(--accent) 30%, transparent)",
-                      backgroundColor: "color-mix(in srgb, var(--accent) 5%, transparent)",
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-5 w-5" style={{ color: "var(--accent)" }} />
-                      <div>
-                        <p className="text-sm font-medium" style={{ color: "var(--accent)" }}>
-                          {appliedCoupon.code}
+                  <div className="space-y-4">
+                    {/* Course Info */}
+                    <div>
+                      <p className="font-medium text-sm text-muted-foreground">Curso</p>
+                      <p className="text-base font-semibold mt-1">{courseTitle}</p>
+                    </div>
+
+                    <Separator />
+
+                    {/* Price Breakdown */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Precio</span>
+                        <span className="font-medium">
+                          {currentCurrency} ${priceData?.amount?.toLocaleString("es-AR") || "0"}
+                        </span>
+                      </div>
+
+                      {hasDiscount && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Descuento</span>
+                          <span className="font-medium text-accent">
+                            - {currentCurrency} ${appliedCoupon.discount.toLocaleString("es-AR")}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <Separator />
+
+                    {/* Total */}
+                    <div className="flex justify-between items-baseline">
+                      <span className="text-lg font-semibold">Total</span>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold">
+                          {currentCurrency} ${finalPrice.toLocaleString("es-AR")}
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          {appliedCoupon.type === "percent"
-                            ? `${appliedCoupon.amount}% de descuento`
-                            : `$${appliedCoupon.amount} de descuento`}
-                        </p>
+                        {selectedMethod && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {selectedMethod === "paypal" ? "Pago en USD" : "Pago en ARS"}
+                          </p>
+                        )}
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleRemoveCoupon}
-                      className="h-8 px-3"
-                      data-testid="button-remove-coupon"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+
+                    {/* Additional Info */}
+                    <div className="pt-4 space-y-2 text-xs text-muted-foreground">
+                      <div className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 flex-shrink-0 mt-0.5 text-accent" />
+                        <p>Acceso inmediato al curso después del pago</p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 flex-shrink-0 mt-0.5 text-accent" />
+                        <p>Suscripción válida por 365 días desde la compra</p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 flex-shrink-0 mt-0.5 text-accent" />
+                        <p>Soporte incluido durante todo el período</p>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
 
-              {/* Card 2: Datos personales */}
-              <div className="bg-card border rounded-lg p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <User className="h-5 w-5" />
-                  <h3 className="text-lg font-semibold">Datos personales</h3>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="first-name">Nombre</Label>
-                    <Input
-                      id="first-name"
-                      value={userData?.first_name || "No especificado"}
-                      disabled
-                      className="bg-muted"
-                      data-testid="input-first-name"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="last-name">Apellido</Label>
-                    <Input
-                      id="last-name"
-                      value={userData?.last_name || "No especificado"}
-                      disabled
-                      className="bg-muted"
-                      data-testid="input-last-name"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="country">País</Label>
-                    <Input
-                      id="country"
-                      value={
-                        userData?.country && countries && Array.isArray(countries)
-                          ? countries.find((c: any) => c.id === userData.country)?.name || "No especificado"
-                          : "No especificado"
-                      }
-                      disabled
-                      className="bg-muted"
-                      data-testid="input-country"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="birthdate">Fecha de nacimiento</Label>
-                    <Input
-                      id="birthdate"
-                      value={
-                        userData?.birthdate 
-                          ? new Date(userData.birthdate).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-                          : "No especificado"
-                      }
-                      disabled
-                      className="bg-muted"
-                      data-testid="input-birthdate"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 3: Resumen de compra */}
-              <div className="bg-card border rounded-lg p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <ShoppingCart className="h-5 w-5" />
-                  <h3 className="text-lg font-semibold">Resumen de compra</h3>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium">{courseTitle}</p>
-                      <p className="text-sm text-muted-foreground">Suscripción Anual</p>
-                    </div>
-                    {priceLoading ? (
-                      <div className="h-6 w-20 bg-muted animate-pulse rounded" />
-                    ) : (
-                      <p className="font-medium">
-                        {currentCurrency} {priceData?.amount?.toFixed(2) || "0.00"}
-                      </p>
-                    )}
-                  </div>
-
-                  {hasDiscount && (
-                    <>
-                      <Separator />
-                      <div className="flex justify-between items-center text-sm">
-                        <p className="text-muted-foreground">Descuento</p>
-                        <p className="text-accent font-medium">
-                          - {currentCurrency} {appliedCoupon.discount.toFixed(2)}
-                        </p>
-                      </div>
-                    </>
-                  )}
-
-                  <Separator />
-
-                  <div className="flex justify-between items-center">
-                    <p className="text-lg font-semibold">Total</p>
-                    {priceLoading ? (
-                      <div className="h-7 w-24 bg-muted animate-pulse rounded" />
-                    ) : (
-                      <p className="text-xl font-bold">
-                        {currentCurrency} {finalPrice.toFixed(2)}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Botón Continuar - Moved inside summary card */}
-                  <Button
-                    onClick={handleContinue}
-                    disabled={!selectedMethod || loading || priceLoading}
-                    className="w-full h-12 text-base font-medium mt-4"
-                    data-testid="button-continue-payment"
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                        Procesando...
-                      </>
-                    ) : (
-                      <>
-                        Continuar al pago
-                        <ArrowLeft className="h-5 w-5 ml-2 rotate-180" />
-                      </>
-                    )}
-                  </Button>
-                </div>
+              {/* Security Badge */}
+              <div className="mt-4 text-center text-xs text-muted-foreground">
+                <p className="flex items-center justify-center gap-1.5">
+                  <span className="inline-block w-2 h-2 rounded-full bg-green-500" />
+                  Pago seguro y encriptado
+                </p>
               </div>
             </div>
           </div>
