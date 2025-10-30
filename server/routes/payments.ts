@@ -4,6 +4,37 @@ import { extractToken, createAuthenticatedClient, getAdminClient, supabase } fro
 import { createClient } from '@supabase/supabase-js';
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 
+/**
+ * Helper function to verify admin access
+ */
+async function verifyAdmin(authHeader: string) {
+  const token = authHeader.substring(7);
+  
+  const authSupabase = createClient(
+    process.env.VITE_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false } }
+  );
+  
+  const { data: { user }, error } = await authSupabase.auth.getUser(token);
+  
+  if (error || !user) {
+    return { isAdmin: false, error: "Invalid or expired token" };
+  }
+  
+  const { data: adminCheck } = await authSupabase
+    .from('admin_users')
+    .select('auth_id')
+    .eq('auth_id', user.id)
+    .maybeSingle();
+  
+  if (!adminCheck) {
+    return { isAdmin: false, error: "Admin access required" };
+  }
+  
+  return { isAdmin: true, user };
+}
+
 // ==================== PAYPAL HELPER FUNCTIONS ====================
 
 function getPayPalBaseUrl() {
@@ -945,5 +976,155 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
       ok: false,
       message: "Este endpoint no se usa. El webhook válido es la Edge Function `paypal_webhook` en Supabase."
     });
+  });
+
+  // ==================== ADMIN PAYMENT MANAGEMENT ====================
+  
+  // GET /api/admin/payments - Get all bank transfer payments (admin only)
+  app.get("/api/admin/payments", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const { isAdmin, error } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error });
+      }
+      
+      const adminClient = getAdminClient();
+      
+      const { data: payments, error: paymentsError } = await adminClient
+        .from('bank_transfer_payments')
+        .select(`
+          *,
+          users!bank_transfer_payments_user_id_fkey(id, full_name, email),
+          course_prices(
+            id,
+            amount,
+            currency_code,
+            months,
+            courses(id, title, slug)
+          )
+        `)
+        .order('created_at', { ascending: false });
+      
+      if (paymentsError) {
+        console.error("Error fetching payments:", paymentsError);
+        return res.status(500).json({ error: "Failed to fetch payments" });
+      }
+      
+      return res.json(payments);
+    } catch (error: any) {
+      console.error("Error in /api/admin/payments:", error);
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
+
+  // PATCH /api/admin/payments/:id/approve - Approve bank transfer payment (admin only)
+  app.patch("/api/admin/payments/:id/approve", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const { isAdmin, error } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error });
+      }
+      
+      const { id } = req.params;
+      const adminClient = getAdminClient();
+      
+      const { data: payment, error: fetchError } = await adminClient
+        .from('bank_transfer_payments')
+        .select(`
+          *,
+          users!bank_transfer_payments_user_id_fkey(id, full_name, email),
+          course_prices(
+            id,
+            courses(id, slug)
+          )
+        `)
+        .eq('id', id)
+        .single();
+      
+      if (fetchError || !payment) {
+        return res.status(404).json({ error: "Payment not found" });
+      }
+      
+      if (payment.status !== 'pending') {
+        return res.status(400).json({ error: "Payment is not pending" });
+      }
+      
+      const { error: updateError } = await adminClient
+        .from('bank_transfer_payments')
+        .update({ status: 'approved' })
+        .eq('id', id);
+      
+      if (updateError) {
+        console.error("Error updating payment:", updateError);
+        return res.status(500).json({ error: "Failed to update payment" });
+      }
+      
+      const courseSlug = payment.course_prices?.courses?.slug;
+      if (courseSlug && payment.users?.id) {
+        await enrollUserInCourse(payment.users.id, courseSlug);
+      }
+      
+      return res.json({ success: true, message: "Payment approved and user enrolled" });
+    } catch (error: any) {
+      console.error("Error in /api/admin/payments/:id/approve:", error);
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
+
+  // PATCH /api/admin/payments/:id/reject - Reject bank transfer payment (admin only)
+  app.patch("/api/admin/payments/:id/reject", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const { isAdmin, error } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error });
+      }
+      
+      const { id } = req.params;
+      const adminClient = getAdminClient();
+      
+      const { data: payment, error: fetchError } = await adminClient
+        .from('bank_transfer_payments')
+        .select('id, status')
+        .eq('id', id)
+        .single();
+      
+      if (fetchError || !payment) {
+        return res.status(404).json({ error: "Payment not found" });
+      }
+      
+      if (payment.status !== 'pending') {
+        return res.status(400).json({ error: "Payment is not pending" });
+      }
+      
+      const { error: updateError } = await adminClient
+        .from('bank_transfer_payments')
+        .update({ status: 'rejected' })
+        .eq('id', id);
+      
+      if (updateError) {
+        console.error("Error updating payment:", updateError);
+        return res.status(500).json({ error: "Failed to update payment" });
+      }
+      
+      return res.json({ success: true, message: "Payment rejected" });
+    } catch (error: any) {
+      console.error("Error in /api/admin/payments/:id/reject:", error);
+      return res.status(500).json({ error: "Internal error" });
+    }
   });
 }

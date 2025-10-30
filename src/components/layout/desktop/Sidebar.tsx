@@ -37,7 +37,8 @@ import {
   BookOpen,
   ChevronDown,
   ArrowLeft,
-  MessageCircle
+  MessageCircle,
+  Wallet
 } from "lucide-react";
 import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -145,6 +146,7 @@ export function Sidebar() {
     } else if (sidebarLevel === 'admin' && isAdmin) {
       return [
         { id: 'community', label: 'Comunidad', icon: Users, href: '/admin/community' },
+        { id: 'payments', label: 'Pagos', icon: Wallet, href: '/admin/payments' },
         { id: 'courses', label: 'Cursos', icon: BookOpen, href: '/admin/courses' },
         { id: 'tasks', label: 'Tareas', icon: ListTodo, href: '/admin/tasks' },
         { id: 'costs', label: 'Costos', icon: DollarSign, href: '/admin/costs' },

@@ -60,6 +60,7 @@ import Activity from "@/pages/professional/organization/Activity";
 
 // Admin Pages (Lazy Loaded - solo admins las usan)
 const AdminCommunity = lazy(() => import("@/pages/admin/community/AdminCommunity"));
+const AdminPayments = lazy(() => import("@/pages/admin/payments/AdminPayments"));
 const AdminCosts = lazy(() => import("@/pages/admin/costs/AdminCosts"));
 const AdminTasks = lazy(() => import("@/pages/admin/tasks/AdminTasks"));
 const AdminGeneral = lazy(() => import("@/pages/admin/general/AdminGeneral"));
@@ -232,6 +233,14 @@ function Router() {
             </AuthAdmin>
           </Suspense>
         </Route>
+        <Route path="/admin/payments">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <AuthAdmin>
+              <AdminPayments />
+            </AuthAdmin>
+          </Suspense>
+        </Route>
+
 
 
 

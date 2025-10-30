@@ -20,7 +20,8 @@ import {
   BookOpen,
   ListTodo,
   GraduationCap,
-  MessageCircle
+  MessageCircle,
+  Wallet
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,6 +72,7 @@ const PAGE_CONFIG: Record<string, { name: string; icon: any }> = {
   
   // Admin
   '/admin/community': { name: 'Comunidad', icon: Users },
+  '/admin/payments': { name: 'Pagos', icon: Wallet },
   '/admin/courses': { name: 'Cursos', icon: BookOpen },
   '/admin/tasks': { name: 'Tareas', icon: ListTodo },
   '/admin/costs': { name: 'Costos', icon: DollarSign },

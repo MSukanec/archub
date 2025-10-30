@@ -52,6 +52,7 @@ const PAGE_NAMES: Record<string, string> = {
   
   // Admin
   '/admin/community': 'Comunidad',
+  '/admin/payments': 'Pagos',
   '/admin/costs': 'Costos',
   '/admin/tasks': 'Tareas',
   '/admin/general': 'General',
