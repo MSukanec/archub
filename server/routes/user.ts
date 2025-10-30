@@ -115,12 +115,20 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
         return res.status(400).json({ error: "User ID is required" });
       }
 
+      // Get the authorization token and create authenticated client for RLS
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
       console.log("Updating profile for user:", user_id);
 
       // Update user_data table - now includes first_name, last_name, birthdate, country and phone_e164
       if (birthdate !== undefined || country !== undefined || first_name !== undefined || last_name !== undefined || phone_e164 !== undefined) {
         // Check if user_data record exists
-        const { data: existingData } = await supabase
+        const { data: existingData } = await authenticatedSupabase
           .from('user_data')
           .select('id')
           .eq('user_id', user_id)
@@ -135,19 +143,20 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
 
         if (existingData) {
           // Update existing record
-          const { error } = await supabase
+          const { error } = await authenticatedSupabase
             .from('user_data')
             .update(updateData)
             .eq('user_id', user_id);
           
           if (error) {
             console.error("Error updating user_data:", error);
+            return res.status(500).json({ error: "Failed to update user data", details: error });
           } else {
             console.log("Updated user_data successfully");
           }
         } else {
           // Insert new record
-          const { error } = await supabase
+          const { error } = await authenticatedSupabase
             .from('user_data')
             .insert({
               user_id,
@@ -156,6 +165,7 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
           
           if (error) {
             console.error("Error inserting user_data:", error);
+            return res.status(500).json({ error: "Failed to insert user data", details: error });
           } else {
             console.log("Inserted user_data successfully");
           }
@@ -164,7 +174,7 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
 
       // Update user_preferences table
       if (theme !== undefined || sidebar_docked !== undefined) {
-        const { data: existingPrefs } = await supabase
+        const { data: existingPrefs } = await authenticatedSupabase
           .from('user_preferences')
           .select('id')
           .eq('user_id', user_id)
@@ -175,18 +185,19 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
         if (sidebar_docked !== undefined) prefsData.sidebar_docked = sidebar_docked;
 
         if (existingPrefs) {
-          const { error } = await supabase
+          const { error } = await authenticatedSupabase
             .from('user_preferences')
             .update(prefsData)
             .eq('user_id', user_id);
           
           if (error) {
             console.error("Error updating user_preferences:", error);
+            return res.status(500).json({ error: "Failed to update user preferences", details: error });
           } else {
             console.log("Updated user_preferences successfully");
           }
         } else {
-          const { error } = await supabase
+          const { error } = await authenticatedSupabase
             .from('user_preferences')
             .insert({
               user_id,
@@ -195,6 +206,7 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
           
           if (error) {
             console.error("Error inserting user_preferences:", error);
+            return res.status(500).json({ error: "Failed to insert user preferences", details: error });
           } else {
             console.log("Inserted user_preferences successfully");
           }
@@ -208,13 +220,14 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
         if (avatar_url !== undefined) userUpdateData.avatar_url = avatar_url;
 
         if (Object.keys(userUpdateData).length > 0) {
-          const { error } = await supabase
+          const { error } = await authenticatedSupabase
             .from('users')
             .update(userUpdateData)
             .eq('id', user_id);
 
           if (error) {
             console.error("Error updating users table:", error);
+            return res.status(500).json({ error: "Failed to update user profile", details: error });
           } else {
             console.log("Updated users table successfully");
           }
