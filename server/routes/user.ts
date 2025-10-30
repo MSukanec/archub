@@ -106,6 +106,7 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
         last_name,
         birthdate,
         country,
+        phone_e164,
         theme,
         sidebar_docked
       } = req.body;
@@ -116,8 +117,8 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
 
       console.log("Updating profile for user:", user_id);
 
-      // Update user_data table - now includes first_name, last_name, birthdate and country
-      if (birthdate !== undefined || country !== undefined || first_name !== undefined || last_name !== undefined) {
+      // Update user_data table - now includes first_name, last_name, birthdate, country and phone_e164
+      if (birthdate !== undefined || country !== undefined || first_name !== undefined || last_name !== undefined || phone_e164 !== undefined) {
         // Check if user_data record exists
         const { data: existingData } = await supabase
           .from('user_data')
@@ -130,6 +131,7 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
         if (country !== undefined && country !== "") updateData.country = country;
         if (first_name !== undefined && first_name !== "") updateData.first_name = first_name;
         if (last_name !== undefined && last_name !== "") updateData.last_name = last_name;
+        if (phone_e164 !== undefined && phone_e164 !== "") updateData.phone_e164 = phone_e164;
 
         if (existingData) {
           // Update existing record
@@ -209,7 +211,7 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
           const { error } = await supabase
             .from('users')
             .update(userUpdateData)
-            .eq('auth_id', user_id);
+            .eq('id', user_id);
 
           if (error) {
             console.error("Error updating users table:", error);

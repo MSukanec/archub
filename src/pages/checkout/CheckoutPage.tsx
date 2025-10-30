@@ -1032,6 +1032,7 @@ Titular: DNI 32322767`;
               Authorization: `Bearer ${session.access_token}`,
             },
             body: JSON.stringify({
+              user_id: userData.user.id,
               first_name: trimmedFirstName,
               last_name: trimmedLastName || null,
               country: country,
