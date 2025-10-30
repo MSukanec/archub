@@ -73,12 +73,12 @@ import TaskView from "@/pages/professional/analysis/TaskView";
 import MaterialsView from "@/pages/professional/analysis/material-costs/MaterialsView";
 import GeneralCosts from "@/pages/professional/finances/general-costs/GeneralCosts";
 
-// Learning Pages
-import LearningDashboard from "@/pages/learning/dashboard/LearningDashboard";
-import CourseList from "@/pages/learning/courses/CourseList";
-import CourseView from "@/pages/learning/courses/CourseView";
-import PaymentReturn from "@/pages/learning/PaymentReturn";
-import CheckoutPage from "@/pages/checkout/CheckoutPage";
+// Learning Pages (Lazy Loaded - incluye reproductor Vimeo pesado)
+const LearningDashboard = lazy(() => import("@/pages/learning/dashboard/LearningDashboard"));
+const CourseList = lazy(() => import("@/pages/learning/courses/CourseList"));
+const CourseView = lazy(() => import("@/pages/learning/courses/CourseView"));
+const PaymentReturn = lazy(() => import("@/pages/learning/PaymentReturn"));
+const CheckoutPage = lazy(() => import("@/pages/checkout/CheckoutPage"));
 
 // Notifications
 import Notifications from "@/pages/Notifications";
@@ -173,12 +173,32 @@ function Router() {
         <Route path="/analysis/:id" component={TaskView} />
         <Route path="/analysis/materials/:id" component={MaterialsView} />
         
-        {/* Learning Routes */}
-        <Route path="/learning/dashboard" component={LearningDashboard} />
-        <Route path="/learning/courses" component={CourseList} />
-        <Route path="/learning/courses/:id" component={CourseView} />
-        <Route path="/learning/retorno" component={PaymentReturn} />
-        <Route path="/checkout" component={CheckoutPage} />
+        {/* Learning Routes - Lazy Loaded (incluye reproductor Vimeo pesado) */}
+        <Route path="/learning/dashboard">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <LearningDashboard />
+          </Suspense>
+        </Route>
+        <Route path="/learning/courses">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <CourseList />
+          </Suspense>
+        </Route>
+        <Route path="/learning/courses/:id">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <CourseView />
+          </Suspense>
+        </Route>
+        <Route path="/learning/retorno">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <PaymentReturn />
+          </Suspense>
+        </Route>
+        <Route path="/checkout">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <CheckoutPage />
+          </Suspense>
+        </Route>
 
         {/* Finances Routes */}
         <Route path="/finances/dashboard" component={FinancesCapitalMovements} />
