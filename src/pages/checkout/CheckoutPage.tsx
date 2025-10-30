@@ -385,6 +385,9 @@ export default function CheckoutPage() {
         throw new Error("No se pudo obtener el ID interno del usuario");
       }
 
+      // Save billing profile if user filled billing data
+      await saveBillingProfile(userRecord.id);
+
       const billing = getBillingData();
       const requestBody = {
         user_id: userRecord.id,
@@ -474,6 +477,9 @@ export default function CheckoutPage() {
       if (!userRecord) {
         throw new Error("No se pudo obtener el ID del usuario");
       }
+
+      // Save billing profile if user filled billing data
+      await saveBillingProfile(userRecord.id);
 
       const finalAmount = appliedCoupon
         ? appliedCoupon.final_price
@@ -607,6 +613,40 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
       city: billingCity.trim() || undefined,
       postcode: billingPostcode.trim() || undefined,
     };
+  };
+
+  // Helper to save billing profile before payment
+  const saveBillingProfile = async (internalUserId: string) => {
+    const billing = getBillingData();
+    if (!billing) {
+      return; // No billing data, skip
+    }
+
+    try {
+      const { error } = await supabase
+        .from('billing_profiles')
+        .upsert({
+          user_id: internalUserId,
+          is_company: billing.is_company,
+          full_name: billing.full_name || null,
+          company_name: billing.company_name || null,
+          tax_id: billing.tax_id || null,
+          country_id: billing.country_id || null,
+          address_line1: billing.address_line1 || null,
+          city: billing.city || null,
+          postcode: billing.postcode || null,
+        }, {
+          onConflict: 'user_id'
+        });
+
+      if (error) {
+        console.error('[billing_profiles] Error saving billing profile:', error);
+      } else {
+        console.log('[billing_profiles] Billing profile saved successfully');
+      }
+    } catch (e) {
+      console.error('[billing_profiles] Unexpected error:', e);
+    }
   };
 
   const handleContinue = async () => {
