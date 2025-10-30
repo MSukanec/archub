@@ -1,10 +1,10 @@
 import type { Express } from "express";
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Environment variables
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Environment variables (exported for backward compatibility during migration)
+export const supabaseUrl = process.env.VITE_SUPABASE_URL;
+export const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+export const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error("Supabase URL and ANON KEY are required");

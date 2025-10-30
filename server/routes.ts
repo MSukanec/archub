@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { createClient } from '@supabase/supabase-js';
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
-import { getRouteDeps, supabase, getAdminClient } from './routes/_base';
+import { getRouteDeps, supabase, getAdminClient, supabaseUrl, supabaseServiceKey } from './routes/_base';
 import { registerReferenceRoutes } from './routes/reference';
 
 export async function registerRoutes(app: Express): Promise<Server> {
