@@ -270,9 +270,11 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
       }
 
       // Create preference
-      const appUrl = process.env.APP_URL || process.env.REPL_SLUG 
-        ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`
-        : 'http://localhost:5000';
+      // Use REPLIT_DOMAINS for production deployment, or fallback to manual APP_URL or localhost
+      const appUrl = process.env.APP_URL || 
+        (process.env.REPLIT_DOMAINS 
+          ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`
+          : 'http://localhost:5000');
 
       const preferenceData = {
         items: [
