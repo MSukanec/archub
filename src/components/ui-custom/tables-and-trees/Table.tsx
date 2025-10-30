@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 
 type SortDirection = "asc" | "desc" | null;
 
@@ -107,7 +108,12 @@ interface TableProps<T = any> {
     width?: string; // Nuevo: ancho personalizado (ej: "10%", "100px", etc.)
   }[];
   data: T[];
-  emptyState?: React.ReactNode;
+  emptyState?: React.ReactNode; // DEPRECATED: Usar emptyStateConfig en su lugar
+  emptyStateConfig?: {
+    icon?: React.ReactNode;
+    title: string;
+    description?: string;
+  };
   isLoading?: boolean;
   className?: string;
   // Nuevas props para selección múltiple
@@ -188,6 +194,7 @@ export function Table<T = any>({
   columns,
   data,
   emptyState,
+  emptyStateConfig,
   isLoading = false,
   className,
   selectable = false,
@@ -918,9 +925,21 @@ export function Table<T = any>({
         <div>
           {!hasOriginalData ? (
             // Mostrar empty state cuando no hay datos originales
-            <div className="p-8 text-center">
-              {emptyState}
-            </div>
+            emptyStateConfig ? (
+              <EmptyState
+                icon={emptyStateConfig.icon}
+                title={emptyStateConfig.title}
+                description={emptyStateConfig.description}
+              />
+            ) : emptyState ? (
+              <div className="p-8 text-center">
+                {emptyState}
+              </div>
+            ) : (
+              <div className="p-8 text-center text-muted-foreground">
+                No hay datos disponibles
+              </div>
+            )
           ) : !hasFilteredData && hasActiveSearch ? (
             // Mostrar mensaje específico cuando hay búsqueda activa pero sin resultados
             <div className="p-8 text-center">
@@ -1065,9 +1084,21 @@ export function Table<T = any>({
       {/* Mobile Card View */}
       <div className="lg:hidden">
         {!hasOriginalData ? (
-          <div className="p-8 text-center">
-            {emptyState}
-          </div>
+          emptyStateConfig ? (
+            <EmptyState
+              icon={emptyStateConfig.icon}
+              title={emptyStateConfig.title}
+              description={emptyStateConfig.description}
+            />
+          ) : emptyState ? (
+            <div className="p-8 text-center">
+              {emptyState}
+            </div>
+          ) : (
+            <div className="p-8 text-center text-muted-foreground">
+              No hay datos disponibles
+            </div>
+          )
         ) : !hasFilteredData && hasActiveSearch ? (
           <div className="p-8 text-center">
             <div className="text-sm text-muted-foreground">

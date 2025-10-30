@@ -207,19 +207,16 @@ const AdminPaymentsHistoryTab = () => {
       </div>
 
       {/* Tabla sin Card */}
-      {payments.length === 0 ? (
-        <EmptyState
-          icon={<Inbox />}
-          title={isLoading ? 'Cargando...' : 'No hay pagos'}
-          description="No se han registrado pagos por transferencia bancaria en el sistema."
-        />
-      ) : (
-        <Table
-          columns={columns}
-          data={payments}
-          isLoading={isLoading}
-        />
-      )}
+      <Table
+        columns={columns}
+        data={payments}
+        isLoading={isLoading}
+        emptyStateConfig={{
+          icon: <Inbox />,
+          title: isLoading ? 'Cargando...' : 'No hay pagos',
+          description: 'No se han registrado pagos por transferencia bancaria en el sistema.'
+        }}
+      />
     </div>
   );
 };

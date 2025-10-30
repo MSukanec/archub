@@ -317,24 +317,19 @@ const AdminPaymentsTransfersTab = () => {
         onValueChange={(value) => setStatusFilter(value as typeof statusFilter)}
       />
 
-      {/* Tabla o EmptyState */}
-      {filteredPayments.length === 0 ? (
-        <EmptyState
-          icon={<Inbox />}
-          title={isLoading ? 'Cargando...' : 'No hay pagos'}
-          description={
-            statusFilter === 'all' 
-              ? 'No se han registrado pagos por transferencia bancaria.'
-              : `No hay pagos ${statusFilter === 'pending' ? 'pendientes' : statusFilter === 'approved' ? 'aprobados' : 'rechazados'}.`
-          }
-        />
-      ) : (
-        <Table
-          columns={columns}
-          data={filteredPayments}
-          isLoading={isLoading}
-        />
-      )}
+      {/* Tabla */}
+      <Table
+        columns={columns}
+        data={filteredPayments}
+        isLoading={isLoading}
+        emptyStateConfig={{
+          icon: <Inbox />,
+          title: isLoading ? 'Cargando...' : 'No hay pagos',
+          description: statusFilter === 'all' 
+            ? 'No se han registrado pagos por transferencia bancaria.'
+            : `No hay pagos ${statusFilter === 'pending' ? 'pendientes' : statusFilter === 'approved' ? 'aprobados' : 'rechazados'}.`
+        }}
+      />
 
       {/* Modal de comprobante */}
       <Dialog open={receiptModal.open} onOpenChange={(open) => setReceiptModal({ open, url: null })}>
