@@ -7,8 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Layout } from "@/components/layout/desktop/Layout";
 import { useNavigationStore } from "@/stores/navigationStore";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCountries } from "@/hooks/use-countries";
+import { PhoneField } from "@/components/ui-custom/fields/PhoneField";
 import {
   ShoppingCart,
   ArrowLeft,
@@ -20,6 +24,7 @@ import {
   Loader2,
   Copy,
   Calendar,
+  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCoursePrice } from "@/hooks/useCoursePrice";
@@ -93,6 +98,27 @@ export default function CheckoutPage() {
   const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
+
+  // User data and countries
+  const { data: userData } = useCurrentUser();
+  const { data: countries = [] } = useCountries();
+
+  // Basic data form fields
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [country, setCountry] = useState("");
+  const [phone, setPhone] = useState("");
+
+  // Load user data
+  useEffect(() => {
+    if (userData) {
+      setFirstName(userData.user_data?.first_name || "");
+      setLastName(userData.user_data?.last_name || "");
+      setEmail(userData.user?.email || "");
+      setCountry(userData.user_data?.country || "");
+    }
+  }, [userData]);
 
   // Redirect si no hay courseSlug
   useEffect(() => {
@@ -447,6 +473,54 @@ Enviá el comprobante a: pagos@archub.com.ar`;
   };
 
   const handleContinue = () => {
+    // Validate basic data fields (all required except phone)
+    if (!firstName.trim()) {
+      toast({
+        title: "Nombre requerido",
+        description: "Por favor ingresá tu nombre",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!lastName.trim()) {
+      toast({
+        title: "Apellido requerido",
+        description: "Por favor ingresá tu apellido",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!email.trim()) {
+      toast({
+        title: "Email requerido",
+        description: "Por favor ingresá tu email",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast({
+        title: "Email inválido",
+        description: "Por favor ingresá un email válido",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!country) {
+      toast({
+        title: "País requerido",
+        description: "Por favor seleccioná tu país",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!selectedMethod) {
       toast({
         title: "Seleccioná un método de pago",
@@ -525,6 +599,83 @@ Enviá el comprobante a: pagos@archub.com.ar`;
             <div className="space-y-6">
               {!showBankInfo ? (
                 <div className="space-y-6">
+                  {/* Basic Data */}
+                  <div className="bg-card border rounded-lg p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <User className="h-5 w-5 text-accent" />
+                      <h2 className="text-lg font-semibold">Datos Básicos</h2>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium">
+                            Nombre <span className="text-destructive">*</span>
+                          </Label>
+                          <Input
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                            placeholder="Tu nombre"
+                            data-testid="input-first-name"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium">
+                            Apellido <span className="text-destructive">*</span>
+                          </Label>
+                          <Input
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                            placeholder="Tu apellido"
+                            data-testid="input-last-name"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">
+                          Email <span className="text-destructive">*</span>
+                        </Label>
+                        <Input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="tu@email.com"
+                          data-testid="input-email"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">
+                          País <span className="text-destructive">*</span>
+                        </Label>
+                        <Select value={country} onValueChange={setCountry}>
+                          <SelectTrigger data-testid="select-country">
+                            <SelectValue placeholder="Seleccioná tu país" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {countries.map((c: any) => (
+                              <SelectItem key={c.id} value={c.id}>
+                                {c.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">
+                          Teléfono
+                        </Label>
+                        <PhoneField
+                          value={phone}
+                          onChange={setPhone}
+                          placeholder="Número de teléfono"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Payment Methods */}
                   <div className="bg-card border rounded-lg p-6">
                     <h2 className="text-lg font-semibold mb-4">Métodos de pago</h2>
