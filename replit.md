@@ -62,6 +62,45 @@ Preferred communication style: Simple, everyday language.
 - **Admin Authorization**: Admin endpoints use `AuthError` and verify user roles via `admin_users` view.
 - **SPA Fallback**: `vercel.json` configured for client-side routing and OAuth callbacks.
 
+### Backend Modular Architecture (Oct 2025 Refactoring)
+
+**Overview**: The monolithic `server/routes.ts` (~4,000 lines) was modularized into domain-specific route modules to improve maintainability and code organization. Final result: `server/routes.ts` reduced to **203 lines** (95% reduction).
+
+**Structure**:
+```
+server/
+├── routes.ts (203 lines) - Main router, imports and registers all modules
+└── routes/
+    ├── _base.ts - Shared utilities (Supabase clients, auth helpers, RouteDeps pattern)
+    ├── reference.ts (2 endpoints) - Countries, task parameters
+    ├── user.ts (8 endpoints) - User profile, preferences, current-user
+    ├── projects.ts (12 endpoints) - Projects, budgets, budget-items, design-phase-tasks
+    ├── subcontracts.ts (16 endpoints) - Movements, subcontract management
+    ├── courses.ts (7 endpoints) - Lessons, courses, enrollments, learning dashboard
+    ├── admin.ts (11 endpoints) - Admin-only operations, user management
+    └── payments.ts (7 endpoints) - MercadoPago, PayPal, webhooks, checkout
+```
+
+**RouteDeps Pattern**: All modules receive a `RouteDeps` object containing shared dependencies (`app`, `getAdminClient`, `createAuthenticatedClient`, `extractToken`, `verifyAdmin`). This eliminates code duplication and ensures consistent authentication handling across modules.
+
+**Endpoint Map**:
+- **Reference** (`/api/countries`, `/api/task-parameters`)
+- **User** (`/api/current-user`, `/api/user/*`)
+- **Projects** (`/api/projects/*`, `/api/budgets/*`, `/api/budget-items/*`, `/api/design-phase-tasks/*`, `/api/organization-task-prices/*`)
+- **Subcontracts** (`/api/movements/bulk`, `/api/movement-subcontracts/*`, `/api/subcontract-*`)
+- **Courses** (`/api/lessons/*`, `/api/courses/*`, `/api/user/all-progress`, `/api/user/enrollments`, `/api/learning/dashboard`)
+- **Admin** (`/api/admin/*` - 11 operations including users, courses, coupons, payments)
+- **Payments** (`/api/checkout/*`, `/api/webhooks/mp`, `/api/paypal/*` - MercadoPago & PayPal integrations)
+
+**Security**: All modules use authenticated Supabase clients (via `createAuthenticatedClient`) to ensure proper Row Level Security (RLS) enforcement. Admin endpoints additionally verify user roles via `verifyAdmin` helper.
+
+**Benefits**:
+- Improved code organization and maintainability
+- Easier to locate and modify domain-specific logic
+- Reduced cognitive load (each module is self-contained)
+- Consistent authentication patterns across all endpoints
+- Zero regressions (all endpoints preserved with identical logic)
+
 ## External Dependencies
 
 - **Supabase**: Authentication, Database (PostgreSQL), Storage.
