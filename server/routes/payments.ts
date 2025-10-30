@@ -568,24 +568,41 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
 
       console.log('✅ Enrollment created successfully');
 
-      // Log payment
-      const { error: logError } = await supabase
-        .from('payments_log')
+      // 1️⃣ Log webhook event (auditoría)
+      await supabase
+        .from('payment_events')
         .insert({
-          user_id: metadata.user_id,
-          course_id: metadata.course_id,
           provider: 'mercadopago',
+          provider_event_id: String(paymentData.id),
+          provider_event_type: paymentData.status,
+          status: 'completed',
           provider_payment_id: String(paymentData.id),
-          status: paymentData.status,
           amount: metadata.final_price,
           currency: 'ARS',
-          external_reference: paymentData.external_reference,
+          user_hint: metadata.user_id,
+          course_hint: metadata.course_id,
           raw_payload: paymentData
-        });
+        })
+        .select()
+        .single();
 
-      if (logError) {
-        console.error('Error logging payment (non-critical):', logError);
-      }
+      // 2️⃣ Create/update payment record (tabla maestra unificada)
+      await supabase
+        .from('payments')
+        .upsert({
+          provider: 'mercadopago',
+          provider_payment_id: String(paymentData.id),
+          user_id: metadata.user_id,
+          course_id: metadata.course_id,
+          product_type: 'course',
+          product_id: metadata.course_id,
+          amount: metadata.final_price,
+          currency: 'ARS',
+          status: 'completed',
+          approved_at: new Date().toISOString()
+        }, {
+          onConflict: 'provider,provider_payment_id'
+        });
 
       // Redeem coupon if present
       if (metadata.coupon_code && metadata.coupon_id) {
@@ -1143,7 +1160,7 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
       
       const { data: payment, error: fetchError } = await adminClient
         .from('bank_transfer_payments')
-        .select('id, status')
+        .select('id, status, payment_id')
         .eq('id', id)
         .single();
       
