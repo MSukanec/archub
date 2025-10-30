@@ -44,9 +44,11 @@ import BudgetView from "@/pages/professional/budgets/BudgetView";
 import ConstructionSubcontracts from "@/pages/professional/project/construction/subcontracts/Subcontracts";
 import SubcontractView from "@/pages/professional/project/construction/subcontracts/SubcontractView";
 import ConstructionIndirects from "@/pages/professional/project/construction/indirects/Indirects";
-import Media from "@/pages/professional/media/Media";
 import Contacts from "@/pages/professional/contacts/Contacts";
 import Calendar from "@/pages/professional/calendar/Calendar";
+
+// Media Pages (Lazy Loaded - incluye librerías pesadas de PDF)
+const Media = lazy(() => import("@/pages/professional/media/Media"));
 
 import OrganizationDashboard from "@/pages/professional/organization/OrganizationDashboard";
 
@@ -147,7 +149,11 @@ function Router() {
         {/* General Routes */}
         <Route path="/project/dashboard" component={Project} />
         <Route path="/clients" component={Clients} />
-        <Route path="/media" component={Media} />
+        <Route path="/media">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <Media />
+          </Suspense>
+        </Route>
         <Route path="/budgets" component={Budgets} />
         <Route path="/professional/budgets" component={Budgets} />
         <Route path="/professional/budgets/view/:id" component={BudgetView} />
