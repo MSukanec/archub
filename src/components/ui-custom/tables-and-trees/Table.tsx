@@ -926,11 +926,13 @@ export function Table<T = any>({
           {!hasOriginalData ? (
             // Mostrar empty state cuando no hay datos originales
             emptyStateConfig ? (
-              <EmptyState
-                icon={emptyStateConfig.icon}
-                title={emptyStateConfig.title}
-                description={emptyStateConfig.description}
-              />
+              <div className="p-6">
+                <EmptyState
+                  icon={emptyStateConfig.icon}
+                  title={emptyStateConfig.title}
+                  description={emptyStateConfig.description}
+                />
+              </div>
             ) : emptyState ? (
               <div className="p-8 text-center">
                 {emptyState}
@@ -1085,11 +1087,13 @@ export function Table<T = any>({
       <div className="lg:hidden">
         {!hasOriginalData ? (
           emptyStateConfig ? (
-            <EmptyState
-              icon={emptyStateConfig.icon}
-              title={emptyStateConfig.title}
-              description={emptyStateConfig.description}
-            />
+            <div className="p-6">
+              <EmptyState
+                icon={emptyStateConfig.icon}
+                title={emptyStateConfig.title}
+                description={emptyStateConfig.description}
+              />
+            </div>
           ) : emptyState ? (
             <div className="p-8 text-center">
               {emptyState}
