@@ -21,6 +21,7 @@ Preferred communication style: Simple, everyday language.
 - **Onboarding Flow**: Streamlined onboarding sets users to 'professional' mode and navigates directly to /home.
 - **StatCard Component**: Standardized minimal card design for statistics and KPIs, featuring composable subcomponents and optional navigation.
 - **LoadingSpinner Component**: Custom spinner (`src/components/ui-custom/LoadingSpinner.tsx`) with Archub logo and conic gradient.
+- **Checkout UX Improvements**: Replaced billing info Accordion with Switch control ("Necesito factura") for better UX. Conditional validation - CUIT/Tax ID only required when invoice switch is enabled. Billing data submission only when switch is ON.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui, Tailwind CSS, Zustand, Wouter, TanStack Query.
