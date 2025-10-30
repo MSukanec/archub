@@ -10,6 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Switch } from "@/components/ui/switch";
 import { Layout } from "@/components/layout/desktop/Layout";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -123,6 +125,16 @@ export default function CheckoutPage() {
   // Save to profile checkbox
   const [saveToProfile, setSaveToProfile] = useState(false);
 
+  // Billing data (optional)
+  const [isCompany, setIsCompany] = useState(false);
+  const [billingFullName, setBillingFullName] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [taxId, setTaxId] = useState("");
+  const [billingCountry, setBillingCountry] = useState("");
+  const [billingAddress, setBillingAddress] = useState("");
+  const [billingCity, setBillingCity] = useState("");
+  const [billingPostcode, setBillingPostcode] = useState("");
+
   // Course title
   const [courseTitle, setCourseTitle] = useState("Curso");
 
@@ -151,6 +163,19 @@ export default function CheckoutPage() {
       setCountry(userData.user_data?.country || "");
     }
   }, [userData]);
+
+  // Prefill billing data from main form
+  useEffect(() => {
+    if (firstName && lastName && !billingFullName) {
+      setBillingFullName(`${firstName} ${lastName}`.trim());
+    }
+  }, [firstName, lastName, billingFullName]);
+
+  useEffect(() => {
+    if (country && !billingCountry) {
+      setBillingCountry(country);
+    }
+  }, [country, billingCountry]);
 
   // Redirect si no hay courseSlug
   useEffect(() => {
@@ -360,11 +385,13 @@ export default function CheckoutPage() {
         throw new Error("No se pudo obtener el ID interno del usuario");
       }
 
+      const billing = getBillingData();
       const requestBody = {
         user_id: userRecord.id,
         course_slug: courseSlug,
         currency: "ARS",
         months: priceData?.months || 12,
+        ...(billing && { billing }),
       };
 
       console.log("[MP] Creando preferencia…", requestBody);
@@ -460,11 +487,13 @@ export default function CheckoutPage() {
       const courseTitle = (priceData as any)?.courses?.title || courseSlug;
       const description = `${courseTitle} - Suscripción Anual`;
 
+      const billing = getBillingData();
       const requestBody = {
         user_id: userRecord.id,
         course_slug: courseSlug,
         amount_usd: finalAmount,
         description,
+        ...(billing && { billing }),
       };
 
       console.log("[PayPal] Creando orden…", requestBody);
@@ -551,6 +580,33 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
         variant: "destructive",
       });
     }
+  };
+
+  // Helper to build billing object if any field is filled
+  const getBillingData = () => {
+    const hasBillingData = 
+      billingFullName.trim() ||
+      companyName.trim() ||
+      taxId.trim() ||
+      billingCountry ||
+      billingAddress.trim() ||
+      billingCity.trim() ||
+      billingPostcode.trim();
+
+    if (!hasBillingData) {
+      return undefined;
+    }
+
+    return {
+      is_company: isCompany,
+      full_name: billingFullName.trim() || undefined,
+      company_name: companyName.trim() || undefined,
+      tax_id: taxId.trim() || undefined,
+      country_id: billingCountry || undefined,
+      address_line1: billingAddress.trim() || undefined,
+      city: billingCity.trim() || undefined,
+      postcode: billingPostcode.trim() || undefined,
+    };
   };
 
   const handleContinue = async () => {
@@ -654,6 +710,34 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
         variant: "destructive",
       });
       return;
+    }
+
+    // Validate billing data if company
+    if (isCompany) {
+      if (!companyName.trim()) {
+        toast({
+          title: "Nombre de empresa requerido",
+          description: "Por favor ingresá el nombre de la empresa",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (!taxId.trim()) {
+        toast({
+          title: "Tax ID requerido",
+          description: "Por favor ingresá el VAT / GST / Tax ID de la empresa",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (!billingCountry) {
+        toast({
+          title: "País de facturación requerido",
+          description: "Por favor seleccioná el país para la factura",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     // Save to profile if checkbox is checked
@@ -978,6 +1062,177 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                         );
                       })}
                     </RadioGroup>
+                  </div>
+
+                  {/* Billing Accordion (Optional) */}
+                  <div className="bg-card border rounded-lg p-6">
+                    <Accordion type="single" collapsible data-testid="billing-accordion">
+                      <AccordionItem value="billing" className="border-none">
+                        <AccordionTrigger className="hover:no-underline py-0">
+                          <div className="flex items-center gap-2">
+                            <Receipt className="h-5 w-5 text-accent" />
+                            <h2 className="text-lg font-semibold">Necesito factura (opcional)</h2>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="pt-4">
+                          <div className="space-y-4">
+                            {/* Company Toggle */}
+                            <div className="flex items-center justify-between">
+                              <Label htmlFor="is-company" className="text-sm font-medium">
+                                Factura a empresa
+                              </Label>
+                              <Switch
+                                id="is-company"
+                                checked={isCompany}
+                                onCheckedChange={setIsCompany}
+                                data-testid="switch-is-company"
+                              />
+                            </div>
+
+                            {isCompany ? (
+                              /* Company Fields */
+                              <div className="space-y-4">
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">
+                                    Nombre de empresa <span className="text-accent">*</span>
+                                  </Label>
+                                  <Input
+                                    value={companyName}
+                                    onChange={(e) => setCompanyName(e.target.value)}
+                                    placeholder="Empresa S.A."
+                                    data-testid="input-company-name"
+                                  />
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">
+                                    VAT / GST / Tax ID <span className="text-accent">*</span>
+                                  </Label>
+                                  <Input
+                                    value={taxId}
+                                    onChange={(e) => setTaxId(e.target.value)}
+                                    placeholder="GB123456789"
+                                    data-testid="input-tax-id"
+                                  />
+                                  <p className="text-xs text-muted-foreground">
+                                    Número de identificación fiscal
+                                  </p>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">
+                                    País <span className="text-accent">*</span>
+                                  </Label>
+                                  <Select value={billingCountry} onValueChange={setBillingCountry}>
+                                    <SelectTrigger data-testid="select-billing-country">
+                                      <SelectValue placeholder="Seleccioná el país" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {countries.map((c) => (
+                                        <SelectItem key={c.id} value={c.id}>
+                                          {c.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">Dirección (opcional)</Label>
+                                  <Input
+                                    value={billingAddress}
+                                    onChange={(e) => setBillingAddress(e.target.value)}
+                                    placeholder="Calle y número"
+                                    data-testid="input-billing-address"
+                                  />
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Ciudad (opcional)</Label>
+                                    <Input
+                                      value={billingCity}
+                                      onChange={(e) => setBillingCity(e.target.value)}
+                                      placeholder="Ciudad"
+                                      data-testid="input-billing-city"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Código Postal (opcional)</Label>
+                                    <Input
+                                      value={billingPostcode}
+                                      onChange={(e) => setBillingPostcode(e.target.value)}
+                                      placeholder="1234"
+                                      data-testid="input-billing-postcode"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              /* Individual Fields */
+                              <div className="space-y-4">
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">Nombre completo</Label>
+                                  <Input
+                                    value={billingFullName}
+                                    onChange={(e) => setBillingFullName(e.target.value)}
+                                    placeholder="Juan Pérez"
+                                    data-testid="input-billing-fullname"
+                                  />
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">País</Label>
+                                  <Select value={billingCountry} onValueChange={setBillingCountry}>
+                                    <SelectTrigger data-testid="select-billing-country-individual">
+                                      <SelectValue placeholder="Seleccioná el país" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {countries.map((c) => (
+                                        <SelectItem key={c.id} value={c.id}>
+                                          {c.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">Dirección (opcional)</Label>
+                                  <Input
+                                    value={billingAddress}
+                                    onChange={(e) => setBillingAddress(e.target.value)}
+                                    placeholder="Calle y número"
+                                    data-testid="input-billing-address-individual"
+                                  />
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Ciudad (opcional)</Label>
+                                    <Input
+                                      value={billingCity}
+                                      onChange={(e) => setBillingCity(e.target.value)}
+                                      placeholder="Ciudad"
+                                      data-testid="input-billing-city-individual"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Código Postal (opcional)</Label>
+                                    <Input
+                                      value={billingPostcode}
+                                      onChange={(e) => setBillingPostcode(e.target.value)}
+                                      placeholder="1234"
+                                      data-testid="input-billing-postcode-individual"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
                   </div>
                 </div>
               ) : (
