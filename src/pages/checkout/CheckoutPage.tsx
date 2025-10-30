@@ -439,23 +439,18 @@ export default function CheckoutPage() {
       // Save billing profile if user filled billing data
       await saveBillingProfile(userRecord.id);
 
-      const billing = getBillingData();
       const requestBody = {
-        courseSlug, // ✅ camelCase para coincidir con el backend
-        ...(appliedCoupon && { code: appliedCoupon.code }), // 🆕 Incluir cupón si existe
-        ...(billing && { billing }),
+        user_id: userRecord.id,
+        course_slug: courseSlug,
+        currency: "ARS",
+        months: priceData?.months || 12,
+        ...(appliedCoupon && { code: appliedCoupon.code }),
       };
 
       console.log("[MP] Creando preferencia…", requestBody);
 
-      // Get session token for authentication
-      const { data: { session: mpSession }, error: mpSessionError } = await supabase.auth.getSession();
-      if (mpSessionError || !mpSession?.access_token) {
-        throw new Error("Debes iniciar sesión para comprar un curso");
-      }
-
       const API_BASE = getApiBase();
-      const mpUrl = `${API_BASE}/api/checkout/mp/create`;
+      const mpUrl = `${API_BASE}/api/mp/create-preference`;
 
       const res = await fetchWithTimeout(
         mpUrl,
@@ -463,7 +458,6 @@ export default function CheckoutPage() {
           method: "POST",
           headers: { 
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${mpSession.access_token}` // 🔐 Auth header
           },
           body: JSON.stringify(requestBody),
         },
@@ -484,13 +478,50 @@ export default function CheckoutPage() {
         data: payload,
       });
 
-      if (!res.ok || !payload?.init_point) {
+      if (!res.ok) {
+        // Si el cupón da 100% descuento, usar flujo de inscripción gratuita
+        if (payload?.free_enrollment && appliedCoupon) {
+          console.log("[MP] Cupón da acceso gratuito, usando free-enroll...");
+          
+          const freeEnrollResponse = await fetch(`${API_BASE}/api/checkout/free-enroll`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              courseSlug,
+              code: appliedCoupon.code,
+            }),
+          });
+
+          const freeEnrollData = await freeEnrollResponse.json();
+          if (!freeEnrollResponse.ok) {
+            console.error("Error al inscribir con cupón 100%:", freeEnrollData);
+            throw new Error(freeEnrollData?.error || "No se pudo completar la inscripción");
+          }
+
+          toast({
+            title: "¡Inscripción exitosa!",
+            description: "Te inscribiste correctamente al curso. Ya podés acceder al contenido.",
+          });
+
+          setTimeout(() => {
+            window.location.assign(`/learning/courses/${courseSlug}`);
+          }, 1500);
+          return;
+        }
+        
         console.error("[MP] Error al crear preferencia:", payload);
         throw new Error(
           payload?.error
             ? `No se pudo crear la preferencia: ${String(payload.error)}`
             : `create-preference falló: status=${res.status}`
         );
+      }
+
+      if (!payload?.init_point) {
+        throw new Error("La preferencia no tiene init_point");
       }
 
       console.log("[MP] Redirigiendo a:", payload.init_point);

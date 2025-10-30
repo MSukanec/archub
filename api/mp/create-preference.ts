@@ -32,7 +32,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { user_id, course_slug, currency = "ARS", months = 12 } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    const { user_id, course_slug, currency = "ARS", months = 12, code } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
     if (!user_id || !course_slug) {
       return res
@@ -81,12 +81,67 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .json({ ok: false, error: "No hay precio activo para ese curso + moneda" });
     }
 
-    const unit_price = Number(chosen.amount);
+    let unit_price = Number(chosen.amount);
     if (!Number.isFinite(unit_price) || unit_price <= 0) {
       return res
         .setHeader("Access-Control-Allow-Origin", "*")
         .status(500)
         .json({ ok: false, error: "Precio inválido" });
+    }
+
+    let couponData: any = null;
+
+    // Validar cupón si se proporcionó (server-side validation)
+    if (code && code.trim()) {
+      const { data: validationResult, error: couponError } = await supabase.rpc('validate_coupon', {
+        p_code: code.trim(),
+        p_course_id: course.id,
+        p_price: unit_price,
+        p_currency: currency
+      });
+
+      if (couponError) {
+        console.error('[MP create-preference] Error validating coupon:', couponError);
+        return res
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .status(400)
+          .json({ ok: false, error: "Error validando cupón" });
+      }
+
+      if (!validationResult || !validationResult.ok) {
+        return res
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .status(400)
+          .json({ 
+            ok: false,
+            error: "Cupón inválido", 
+            reason: validationResult?.reason || 'UNKNOWN'
+          });
+      }
+
+      // Cupón válido - aplicar descuento
+      couponData = validationResult;
+      const finalPrice = Number(validationResult.final_price);
+      
+      // Si el cupón da 100% descuento, el frontend debe usar /api/checkout/free-enroll
+      if (!Number.isFinite(finalPrice) || finalPrice <= 0) {
+        return res
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .status(400)
+          .json({ 
+            ok: false,
+            error: "Este cupón otorga acceso gratuito. Usa el flujo de inscripción gratuita.",
+            free_enrollment: true,
+            coupon_code: code.trim()
+          });
+      }
+      
+      unit_price = finalPrice;
+      console.log('[MP create-preference] Cupón aplicado:', {
+        code: code.trim(),
+        discount: validationResult.discount,
+        final_price: unit_price
+      });
     }
 
     // Obtener datos del usuario
@@ -108,11 +163,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Usar custom_id en base64 (igual que PayPal)
-    const customData = {
+    const customData: any = {
       user_id,
       course_slug: course.slug,
       months: chosen.months || months,
+      list_price: chosen.amount,
+      final_price: unit_price,
     };
+
+    // Agregar info del cupón si se aplicó
+    if (couponData) {
+      customData.coupon_code = code.trim().toUpperCase();
+      customData.coupon_id = couponData.coupon_id;
+      customData.discount = couponData.discount;
+    }
+
     const custom_id = Buffer.from(JSON.stringify(customData)).toString('base64');
 
     // Construir la URL base desde el request (para que funcione en Replit y Vercel)
@@ -152,7 +217,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       statement_descriptor: "ARCHUB",
     };
 
-    console.log("[MP create-preference] Creando preferencia para:", { user_id, course_slug, unit_price, currency });
+    console.log("[MP create-preference] Creando preferencia para:", { 
+      user_id, 
+      course_slug, 
+      unit_price, 
+      currency,
+      hasCoupon: !!couponData,
+      couponCode: couponData ? code.trim() : null
+    });
 
     const r = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",
