@@ -1,5 +1,5 @@
 import { Switch, Route } from "wouter";
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -56,16 +56,16 @@ import Onboarding from "@/pages/public/Onboarding";
 import SelectMode from "@/pages/public/SelectMode";
 import Activity from "@/pages/professional/organization/Activity";
 
-// Admin Pages
-import AdminCommunity from "@/pages/admin/community/AdminCommunity";
-import AdminCosts from "@/pages/admin/costs/AdminCosts";
-import AdminTasks from "@/pages/admin/tasks/AdminTasks";
-import AdminGeneral from "@/pages/admin/general/AdminGeneral";
-import AdminCourses from "@/pages/admin/courses/AdminCourses";
-import AdminCourseView from "@/pages/admin/courses/AdminCourseView";
+// Admin Pages (Lazy Loaded - solo admins las usan)
+const AdminCommunity = lazy(() => import("@/pages/admin/community/AdminCommunity"));
+const AdminCosts = lazy(() => import("@/pages/admin/costs/AdminCosts"));
+const AdminTasks = lazy(() => import("@/pages/admin/tasks/AdminTasks"));
+const AdminGeneral = lazy(() => import("@/pages/admin/general/AdminGeneral"));
+const AdminCourses = lazy(() => import("@/pages/admin/courses/AdminCourses"));
+const AdminCourseView = lazy(() => import("@/pages/admin/courses/AdminCourseView"));
 
-// Provider Pages  
-import Products from "@/pages/providers/products/Products";
+// Provider Pages (Lazy Loaded - solo admins las usan)
+const Products = lazy(() => import("@/pages/providers/products/Products"));
 
 // Analysis Pages
 import Analysis from "@/pages/professional/analysis/Analysis";
@@ -96,6 +96,15 @@ import Home from "@/pages/Home";
 import NotFound from "@/pages/public/NotFound";
 import { ModalFactory } from "@/components/modal/form/ModalFactory";
 import { ProjectContextInitializer } from "@/components/navigation/ProjectContextInitializer";
+import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
+
+function LazyLoadFallback() {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <LoadingSpinner size="lg" />
+    </div>
+  );
+}
 
 function Router() {
   return (
@@ -189,11 +198,13 @@ function Router() {
 
 
 
-        {/* Admin Routes */}
+        {/* Admin Routes - Lazy Loaded (solo se cargan cuando un admin accede) */}
         <Route path="/admin/community">
-          <AuthAdmin>
-            <AdminCommunity />
-          </AuthAdmin>
+          <Suspense fallback={<LazyLoadFallback />}>
+            <AuthAdmin>
+              <AdminCommunity />
+            </AuthAdmin>
+          </Suspense>
         </Route>
 
 
@@ -206,46 +217,60 @@ function Router() {
 
 
         <Route path="/admin/costs">
-          <AuthAdmin>
-            <AdminCosts />
-          </AuthAdmin>
+          <Suspense fallback={<LazyLoadFallback />}>
+            <AuthAdmin>
+              <AdminCosts />
+            </AuthAdmin>
+          </Suspense>
         </Route>
 
         <Route path="/admin/tasks">
-          <AuthAdmin>
-            <AdminTasks />
-          </AuthAdmin>
+          <Suspense fallback={<LazyLoadFallback />}>
+            <AuthAdmin>
+              <AdminTasks />
+            </AuthAdmin>
+          </Suspense>
         </Route>
 
         <Route path="/admin/general">
-          <AuthAdmin>
-            <AdminGeneral />
-          </AuthAdmin>
+          <Suspense fallback={<LazyLoadFallback />}>
+            <AuthAdmin>
+              <AdminGeneral />
+            </AuthAdmin>
+          </Suspense>
         </Route>
 
         <Route path="/admin/courses/:id">
-          <AuthAdmin>
-            <AdminCourseView />
-          </AuthAdmin>
+          <Suspense fallback={<LazyLoadFallback />}>
+            <AuthAdmin>
+              <AdminCourseView />
+            </AuthAdmin>
+          </Suspense>
         </Route>
 
         <Route path="/admin/courses">
-          <AuthAdmin>
-            <AdminCourses />
-          </AuthAdmin>
+          <Suspense fallback={<LazyLoadFallback />}>
+            <AuthAdmin>
+              <AdminCourses />
+            </AuthAdmin>
+          </Suspense>
         </Route>
 
-        {/* Provider Routes */}
+        {/* Provider Routes - Lazy Loaded (solo se cargan cuando un admin accede) */}
         <Route path="/proveedor/productos">
-          <AuthAdmin>
-            <Products />
-          </AuthAdmin>
+          <Suspense fallback={<LazyLoadFallback />}>
+            <AuthAdmin>
+              <Products />
+            </AuthAdmin>
+          </Suspense>
         </Route>
         
         <Route path="/providers/products">
-          <AuthAdmin>
-            <Products />
-          </AuthAdmin>
+          <Suspense fallback={<LazyLoadFallback />}>
+            <AuthAdmin>
+              <Products />
+            </AuthAdmin>
+          </Suspense>
         </Route>
 
 
