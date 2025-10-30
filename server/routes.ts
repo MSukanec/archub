@@ -155,6 +155,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch user data", details: error });
     }
   });
+
+  // Get user_data (personal information for checkout, etc)
+  app.get("/api/user-data", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      const token = authHeader.substring(7);
+      const authenticatedSupabase = createClient(
+        process.env.SUPABASE_URL!,
+        process.env.SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+
+      // Get auth user
+      const { data: { user: authUser }, error: authError } = await authenticatedSupabase.auth.getUser();
+      if (authError || !authUser) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      // Get user_id from users table
+      const { data: userRecord, error: userError } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', authUser.id)
+        .single();
+
+      if (userError || !userRecord) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Get user_data
+      const { data: userData, error: dataError } = await authenticatedSupabase
+        .from('user_data')
+        .select('*')
+        .eq('user_id', userRecord.id)
+        .single();
+
+      if (dataError) {
+        // If no user_data exists yet, return null
+        if (dataError.code === 'PGRST116') {
+          return res.json(null);
+        }
+        return res.status(500).json({ error: "Failed to fetch user data" });
+      }
+
+      res.json(userData);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      res.status(500).json({ error: "Failed to fetch user data" });
+    }
+  });
   
   // Delete project safely - server-side implementation
   app.delete("/api/projects/:projectId", async (req, res) => {
