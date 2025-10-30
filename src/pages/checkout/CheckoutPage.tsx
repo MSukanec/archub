@@ -402,15 +402,18 @@ export default function CheckoutPage() {
 
       const billing = getBillingData();
       const requestBody = {
-        user_id: userRecord.id,
-        course_slug: courseSlug,
-        currency: "ARS",
-        months: priceData?.months || 12,
+        courseSlug, // ✅ camelCase para coincidir con el backend
         ...(appliedCoupon && { code: appliedCoupon.code }), // 🆕 Incluir cupón si existe
         ...(billing && { billing }),
       };
 
       console.log("[MP] Creando preferencia…", requestBody);
+
+      // Get session token for authentication
+      const { data: { session: mpSession }, error: mpSessionError } = await supabase.auth.getSession();
+      if (mpSessionError || !mpSession?.access_token) {
+        throw new Error("Debes iniciar sesión para comprar un curso");
+      }
 
       const API_BASE = getApiBase();
       const mpUrl = `${API_BASE}/api/checkout/mp/create`;
@@ -419,7 +422,10 @@ export default function CheckoutPage() {
         mpUrl,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${mpSession.access_token}` // 🔐 Auth header
+          },
           body: JSON.stringify(requestBody),
         },
         15000
