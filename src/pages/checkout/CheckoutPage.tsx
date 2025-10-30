@@ -32,6 +32,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useCoursePrice } from "@/hooks/useCoursePrice";
 import { getApiBase } from "@/utils/apiBase";
+import { toE164 } from "@/utils/phone";
 import mercadoPagoLogo from "/MercadoPago_logo.png";
 import paypalLogo from "/Paypal_2014_logo.png";
 
@@ -566,22 +567,8 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
     }
 
     // Normalize phone to E.164 if provided
-    let normalizedPhone = "";
-    if (phone.trim()) {
-      const selectedCountry = countries.find((c) => c.id === country);
-      if (selectedCountry?.country_code) {
-        // Remover espacios, guiones y paréntesis
-        const digits = phone.replace(/[\s\-()]/g, "");
-        
-        // Si ya empieza con +, usar tal cual
-        if (digits.startsWith("+")) {
-          normalizedPhone = digits;
-        } else {
-          // Agregar el country_code (ej: +54)
-          normalizedPhone = `+${selectedCountry.country_code}${digits}`;
-        }
-      }
-    }
+    const selectedCountry = countries.find((c) => c.id === country);
+    const normalizedPhone = toE164(phone, selectedCountry?.country_code);
 
     if (!acceptTerms) {
       toast({
