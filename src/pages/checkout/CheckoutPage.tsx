@@ -25,6 +25,8 @@ import {
   Copy,
   Calendar,
   User,
+  Receipt,
+  MessageCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCoursePrice } from "@/hooks/useCoursePrice";
@@ -594,8 +596,8 @@ Enviá el comprobante a: pagos@archub.com.ar`;
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column - Payment Methods (Mobile: shows second) */}
-          <div className="lg:col-span-7 order-2 lg:order-1">
+          {/* Left Column - Payment Methods (Mobile: shows first) */}
+          <div className="lg:col-span-7 order-1 lg:order-1">
             <div className="space-y-6">
               {!showBankInfo ? (
                 <div className="space-y-6">
@@ -678,7 +680,10 @@ Enviá el comprobante a: pagos@archub.com.ar`;
 
                   {/* Payment Methods */}
                   <div className="bg-card border rounded-lg p-6">
-                    <h2 className="text-lg font-semibold mb-4">Métodos de pago</h2>
+                    <div className="flex items-center gap-2 mb-4">
+                      <CreditCard className="h-5 w-5 text-accent" />
+                      <h2 className="text-lg font-semibold">Métodos de pago</h2>
+                    </div>
                     <RadioGroup
                       value={selectedMethod || ""}
                       onValueChange={(value) => setSelectedMethod(value as PaymentMethod)}
@@ -819,11 +824,24 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                       <p className="text-xs text-muted-foreground mb-1">Enviá el comprobante a</p>
                       <p className="font-medium">pagos@archub.com.ar</p>
                     </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">WhatsApp</p>
+                      <a
+                        href="https://wa.me/5491132273000"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium flex items-center gap-2 text-accent hover:underline"
+                        data-testid="link-whatsapp"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        +54 9 11 3227-3000
+                      </a>
+                    </div>
                   </div>
 
                   <div className="flex gap-3 mt-6">
                     <Button
-                      variant="outline"
+                      variant="default"
                       onClick={handleCopyBankInfo}
                       className="flex-1"
                       data-testid="button-copy-bank-info"
@@ -832,7 +850,7 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                       Copiar datos
                     </Button>
                     <Button
-                      variant="secondary"
+                      variant="default"
                       onClick={() => setShowBankInfo(false)}
                       className="flex-1"
                     >
@@ -844,8 +862,8 @@ Enviá el comprobante a: pagos@archub.com.ar`;
             </div>
           </div>
 
-          {/* Right Column - Coupon & Order Summary (Mobile: shows first) */}
-          <div className="lg:col-span-5 order-1 lg:order-2">
+          {/* Right Column - Coupon & Order Summary (Mobile: shows second) */}
+          <div className="lg:col-span-5 order-2 lg:order-2">
             <div className="lg:sticky lg:top-24 space-y-6">
               {/* Coupon Section */}
               {!appliedCoupon ? (
@@ -937,7 +955,10 @@ Enviá el comprobante a: pagos@archub.com.ar`;
 
               {/* Order Summary */}
               <div className="bg-card border rounded-lg p-6 shadow-sm">
-                <h2 className="text-lg font-semibold mb-4">Resumen de compra</h2>
+                <div className="flex items-center gap-2 mb-4">
+                  <Receipt className="h-5 w-5 text-accent" />
+                  <h2 className="text-lg font-semibold">Resumen de compra</h2>
+                </div>
 
                 {priceLoading ? (
                   <div className="space-y-3">
