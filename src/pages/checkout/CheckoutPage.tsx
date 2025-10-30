@@ -126,6 +126,7 @@ export default function CheckoutPage() {
   const [saveToProfile, setSaveToProfile] = useState(false);
 
   // Billing data (optional)
+  const [needsInvoice, setNeedsInvoice] = useState(false);
   const [isCompany, setIsCompany] = useState(false);
   const [billingFullName, setBillingFullName] = useState("");
   const [companyName, setCompanyName] = useState("");
@@ -588,18 +589,9 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
     }
   };
 
-  // Helper to build billing object if any field is filled
+  // Helper to build billing object only if user needs invoice
   const getBillingData = () => {
-    const hasBillingData = 
-      billingFullName.trim() ||
-      companyName.trim() ||
-      taxId.trim() ||
-      billingCountry ||
-      billingAddress.trim() ||
-      billingCity.trim() ||
-      billingPostcode.trim();
-
-    if (!hasBillingData) {
+    if (!needsInvoice) {
       return undefined;
     }
 
@@ -752,17 +744,8 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
       return;
     }
 
-    // Validate billing data if any field is filled
-    const hasBillingData = 
-      billingFullName.trim() ||
-      companyName.trim() ||
-      taxId.trim() ||
-      billingCountry ||
-      billingAddress.trim() ||
-      billingCity.trim() ||
-      billingPostcode.trim();
-
-    if (hasBillingData) {
+    // Validate billing data only if user needs invoice
+    if (needsInvoice) {
       if (isCompany && !companyName.trim()) {
         toast({
           title: "Nombre de empresa requerido",
@@ -1113,18 +1096,26 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                     </RadioGroup>
                   </div>
 
-                  {/* Billing Accordion (Optional) */}
+                  {/* Billing Section (Optional) */}
                   <div className="bg-card border rounded-lg p-6">
-                    <Accordion type="single" collapsible data-testid="billing-accordion">
-                      <AccordionItem value="billing" className="border-none">
-                        <AccordionTrigger className="hover:no-underline py-0">
-                          <div className="flex items-center gap-2">
-                            <Receipt className="h-5 w-5 text-accent" />
-                            <h2 className="text-lg font-semibold">Necesito factura (opcional)</h2>
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="pt-4">
-                          <div className="space-y-4">
+                    {/* Switch to toggle invoice */}
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <Receipt className="h-5 w-5 text-accent" />
+                        <h2 className="text-lg font-semibold">Necesito factura (opcional)</h2>
+                      </div>
+                      <Switch
+                        id="needs-invoice"
+                        checked={needsInvoice}
+                        onCheckedChange={setNeedsInvoice}
+                        data-testid="switch-needs-invoice"
+                      />
+                    </div>
+
+                    {/* Show billing fields only when switch is ON */}
+                    {needsInvoice && (
+                      <div className="space-y-4 pt-4 border-t">
+                        <div className="space-y-4">
                             {/* Company Toggle */}
                             <div className="flex items-center justify-between">
                               <Label htmlFor="is-company" className="text-sm font-medium">
@@ -1294,9 +1285,8 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                               </div>
                             )}
                           </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (
