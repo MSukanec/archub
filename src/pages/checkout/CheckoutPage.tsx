@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import { Layout } from "@/components/layout/desktop/Layout";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -157,6 +158,53 @@ export default function CheckoutPage() {
       navigate("/learning/courses");
     }
   }, [courseSlug, navigate]);
+
+  // Preselección inteligente de método de pago cuando cambia el país
+  useEffect(() => {
+    if (!selectedMethod && country && countries.length > 0) {
+      const countryData = countries.find((c) => c.id === country);
+      const isLATAM = ["ARG", "BRA", "CHL", "COL", "MEX", "PER", "URY", "PRY"].includes(
+        countryData?.alpha_3 || ""
+      );
+      // Si es LATAM → MercadoPago, si no → PayPal
+      setSelectedMethod(isLATAM ? "mercadopago" : "paypal");
+    }
+  }, [country, countries, selectedMethod]);
+
+  // Atajo de teclado: Enter dispara el CTA si todo está válido
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter" && !showBankInfo) {
+        const isFormValid =
+          selectedMethod &&
+          !loading &&
+          !priceLoading &&
+          acceptTerms &&
+          acceptCommunications &&
+          firstName.trim() &&
+          email.trim() &&
+          country;
+
+        if (isFormValid && !(e.target instanceof HTMLTextAreaElement)) {
+          e.preventDefault();
+          handleContinue();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [
+    selectedMethod,
+    loading,
+    priceLoading,
+    acceptTerms,
+    acceptCommunications,
+    firstName,
+    email,
+    country,
+    showBankInfo,
+  ]);
 
   const handleValidateCoupon = async () => {
     if (!couponCode.trim()) {
@@ -747,8 +795,10 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                         <Input
                           type="email"
                           value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          disabled
+                          readOnly
                           placeholder="tu@email.com"
+                          className="bg-muted cursor-not-allowed"
                           data-testid="input-email"
                         />
                       </div>
@@ -836,7 +886,10 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                                     className="flex items-center gap-2 cursor-pointer font-medium"
                                   >
                                     <CreditCard className="h-5 w-5 text-accent" />
-                                    Mercado Pago (ARS)
+                                    Mercado Pago
+                                    <Badge variant="secondary" className="text-xs font-normal">
+                                      Pago en ARS
+                                    </Badge>
                                   </Label>
                                   <p className="text-sm text-muted-foreground mt-1">
                                     Tarjeta de crédito o débito. Pago seguro con redirección.
@@ -873,7 +926,10 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                                     className="flex items-center gap-2 cursor-pointer font-medium"
                                   >
                                     <CreditCard className="h-5 w-5 text-accent" />
-                                    PayPal (USD)
+                                    PayPal
+                                    <Badge variant="secondary" className="text-xs font-normal">
+                                      Pago en USD
+                                    </Badge>
                                   </Label>
                                   <p className="text-sm text-muted-foreground mt-1">
                                     Pago internacional seguro. Acepta tarjetas y saldo PayPal.
@@ -909,7 +965,10 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                                 className="flex items-center gap-2 cursor-pointer font-medium"
                               >
                                 <Building2 className="h-5 w-5 text-accent" />
-                                Transferencia Bancaria (ARS)
+                                Transferencia Bancaria
+                                <Badge variant="secondary" className="text-xs font-normal">
+                                  Pago en ARS
+                                </Badge>
                               </Label>
                               <p className="text-sm text-muted-foreground mt-1">
                                 Transferencia o depósito directo. Aprobación manual.
