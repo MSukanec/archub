@@ -117,6 +117,25 @@ export default function CheckoutPage() {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptCommunications, setAcceptCommunications] = useState(false);
 
+  // Course title
+  const [courseTitle, setCourseTitle] = useState("Curso");
+
+  // Load course title
+  useEffect(() => {
+    if (courseSlug) {
+      supabase
+        .from("courses")
+        .select("title")
+        .eq("slug", courseSlug)
+        .single()
+        .then(({ data }) => {
+          if (data?.title) {
+            setCourseTitle(data.title);
+          }
+        });
+    }
+  }, [courseSlug]);
+
   // Load user data
   useEffect(() => {
     if (userData) {
@@ -582,7 +601,6 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
 
   const finalPrice = appliedCoupon ? appliedCoupon.final_price : priceData?.amount || 0;
   const hasDiscount = appliedCoupon && appliedCoupon.discount > 0;
-  const courseTitle = (priceData as any)?.courses?.title || "Curso";
 
   if (!courseSlug) {
     return null;
