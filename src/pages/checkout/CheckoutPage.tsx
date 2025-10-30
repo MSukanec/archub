@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Layout } from "@/components/layout/desktop/Layout";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -111,6 +112,10 @@ export default function CheckoutPage() {
   const [email, setEmail] = useState("");
   const [country, setCountry] = useState("");
   const [phone, setPhone] = useState("");
+
+  // Acceptance checkboxes
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [acceptCommunications, setAcceptCommunications] = useState(false);
 
   // Load user data
   useEffect(() => {
@@ -520,6 +525,24 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
       toast({
         title: "País requerido",
         description: "Por favor seleccioná tu país",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!acceptTerms) {
+      toast({
+        title: "Aceptación requerida",
+        description: "Debes aceptar los Términos y Condiciones y Políticas de Privacidad",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!acceptCommunications) {
+      toast({
+        title: "Aceptación requerida",
+        description: "Debes aceptar recibir comunicaciones sobre este curso",
         variant: "destructive",
       });
       return;
@@ -1025,10 +1048,60 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                       </div>
                     </div>
 
+                    <Separator className="my-6" />
+
+                    {/* Acceptance Checkboxes */}
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <Checkbox
+                          id="accept-terms"
+                          checked={acceptTerms}
+                          onCheckedChange={(checked) => setAcceptTerms(checked === true)}
+                          data-testid="checkbox-accept-terms"
+                        />
+                        <label
+                          htmlFor="accept-terms"
+                          className="text-sm leading-tight cursor-pointer"
+                        >
+                          Acepto{" "}
+                          <a
+                            href="#"
+                            className="text-accent hover:underline"
+                            onClick={(e) => e.preventDefault()}
+                          >
+                            Términos y Condiciones
+                          </a>{" "}
+                          y{" "}
+                          <a
+                            href="#"
+                            className="text-accent hover:underline"
+                            onClick={(e) => e.preventDefault()}
+                          >
+                            Políticas de Privacidad
+                          </a>
+                        </label>
+                      </div>
+
+                      <div className="flex items-start gap-3">
+                        <Checkbox
+                          id="accept-communications"
+                          checked={acceptCommunications}
+                          onCheckedChange={(checked) => setAcceptCommunications(checked === true)}
+                          data-testid="checkbox-accept-communications"
+                        />
+                        <label
+                          htmlFor="accept-communications"
+                          className="text-sm leading-tight cursor-pointer"
+                        >
+                          Acepto recibir comunicaciones sobre este curso
+                        </label>
+                      </div>
+                    </div>
+
                     {/* Action Button */}
                     <Button
                       onClick={handleContinue}
-                      disabled={!selectedMethod || loading || priceLoading}
+                      disabled={!selectedMethod || loading || priceLoading || !acceptTerms || !acceptCommunications}
                       className="w-full h-12 text-base font-medium mt-6"
                       data-testid="button-continue-payment"
                     >
