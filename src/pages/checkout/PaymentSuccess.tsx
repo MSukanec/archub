@@ -4,24 +4,35 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { CheckCircle2, Calendar, BookOpen, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { supabase } from '@/lib/supabase';
 
 export default function PaymentSuccess() {
   const urlParams = new URLSearchParams(window.location.search);
   const courseSlug = urlParams.get('course_slug');
   const provider = urlParams.get('provider') || 'paypal';
-  const userId = urlParams.get('user_id');
 
-  // Fetch data from unified endpoint
+  // Fetch data from unified endpoint using authenticated request
   const { data, isLoading, error } = useQuery({
-    queryKey: ['/api/checkout/success', courseSlug, provider, userId],
+    queryKey: ['/api/checkout/success', courseSlug, provider],
     queryFn: async () => {
+      // Get current session token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        throw new Error('No authentication session found');
+      }
+
       const params = new URLSearchParams({
         course_slug: courseSlug || '',
         provider,
-        ...(userId && { user_id: userId })
       });
       
-      const response = await fetch(`/api/checkout/success?${params}`);
+      const response = await fetch(`/api/checkout/success?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+      
       if (!response.ok) throw new Error('Failed to fetch course data');
       return response.json();
     },

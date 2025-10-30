@@ -37,15 +37,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Unified checkout success endpoint - works for ALL payment providers
+  // REQUIRES AUTHENTICATION to prevent data leaks
   app.get("/api/checkout/success", async (req, res) => {
     try {
-      const { course_slug, provider = 'paypal', user_id } = req.query;
+      const { course_slug, provider = 'paypal' } = req.query;
 
       if (!course_slug) {
         return res.status(400).json({ error: "course_slug is required" });
       }
 
-      // Get course data
+      // Get the authorization token from headers
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+      
+      // Create authenticated Supabase client
+      const authenticatedSupabase = createClient(
+        supabaseUrl,
+        supabaseAnonKey,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+
+      // Get user from token (this validates the token)
+      const { data: { user }, error: authError } = await authenticatedSupabase.auth.getUser();
+      
+      if (authError || !user) {
+        return res.status(401).json({ error: "Invalid or expired token" });
+      }
+
+      // Get course data (public data, no auth needed)
       const { data: course, error: courseError } = await supabase
         .from('courses')
         .select('*')
@@ -57,18 +86,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Course not found" });
       }
 
-      // Get enrollment data (if user_id provided)
-      let enrollment = null;
-      if (user_id) {
-        const { data: enrollData } = await getAdminClient()
-          .from('course_enrollments')
-          .select('*')
-          .eq('course_id', course.id)
-          .eq('user_id', user_id)
-          .single();
-        
-        enrollment = enrollData;
-      }
+      // Get enrollment data for the AUTHENTICATED user only
+      // Use service-role but filter by authenticated user ID to prevent data leaks
+      const { data: enrollment } = await getAdminClient()
+        .from('course_enrollments')
+        .select('*')
+        .eq('course_id', course.id)
+        .eq('user_id', user.id)  // Only for authenticated user
+        .single();
 
       return res.json({
         success: true,

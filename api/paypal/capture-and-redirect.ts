@@ -173,7 +173,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const finalCourseSlug = typeof course_slug === 'string' ? course_slug : 'master-archicad';
 
     // Redirect to unified success page (React component)
-    return res.redirect(303, `/checkout/success?course_slug=${finalCourseSlug}&provider=paypal&user_id=${userId}`);
+    // Note: user_id is NOT in query params for security - the frontend will get it from auth session
+    return res.redirect(303, `/checkout/success?course_slug=${finalCourseSlug}&provider=paypal`);
     
     /* CÓDIGO ANTERIOR (HTML inline) - AHORA USA PÁGINA REACT UNIFICADA
     // Get course and enrollment data for success page
