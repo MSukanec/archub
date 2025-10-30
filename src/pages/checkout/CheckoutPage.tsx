@@ -585,7 +585,7 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
   };
 
   return (
-    <Layout headerProps={headerProps} wide>
+    <Layout headerProps={headerProps}>
       <div className="max-w-7xl mx-auto py-6 lg:py-8">
         {/* Title Section - Full Width */}
         <div className="mb-6">
@@ -614,7 +614,7 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label className="text-sm font-medium">
-                            Nombre <span className="text-destructive">*</span>
+                            Nombre <span className="text-accent">*</span>
                           </Label>
                           <Input
                             value={firstName}
@@ -625,7 +625,7 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                         </div>
                         <div className="space-y-2">
                           <Label className="text-sm font-medium">
-                            Apellido <span className="text-destructive">*</span>
+                            Apellido <span className="text-accent">*</span>
                           </Label>
                           <Input
                             value={lastName}
@@ -638,7 +638,7 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
 
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">
-                          Email <span className="text-destructive">*</span>
+                          Email <span className="text-accent">*</span>
                         </Label>
                         <Input
                           type="email"
@@ -651,7 +651,7 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
 
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">
-                          País <span className="text-destructive">*</span>
+                          País <span className="text-accent">*</span>
                         </Label>
                         <Select value={country} onValueChange={setCountry}>
                           <SelectTrigger data-testid="select-country">
