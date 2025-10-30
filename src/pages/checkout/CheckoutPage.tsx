@@ -189,6 +189,45 @@ export default function CheckoutPage() {
     }
   }, [country, billingCountry]);
 
+  // Load billing profile when user enables invoice
+  useEffect(() => {
+    if (!needsInvoice || !userData?.user?.id) {
+      return;
+    }
+
+    const loadBillingProfile = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('billing_profiles')
+          .select('*')
+          .eq('user_id', userData.user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error('[billing_profiles] Error loading profile:', error);
+          return;
+        }
+
+        if (data) {
+          console.log('[billing_profiles] Loaded existing profile');
+          // Only set fields that are empty (don't overwrite if user already started filling)
+          if (!isCompany && data.is_company) setIsCompany(data.is_company);
+          if (!billingFullName && data.full_name) setBillingFullName(data.full_name);
+          if (!companyName && data.company_name) setCompanyName(data.company_name);
+          if (!taxId && data.tax_id) setTaxId(data.tax_id);
+          if (!billingCountry && data.country_id) setBillingCountry(data.country_id);
+          if (!billingAddress && data.address_line1) setBillingAddress(data.address_line1);
+          if (!billingCity && data.city) setBillingCity(data.city);
+          if (!billingPostcode && data.postcode) setBillingPostcode(data.postcode);
+        }
+      } catch (e) {
+        console.error('[billing_profiles] Unexpected error:', e);
+      }
+    };
+
+    loadBillingProfile();
+  }, [needsInvoice, userData?.user?.id]);
+
   // Redirect si no hay courseSlug
   useEffect(() => {
     if (!courseSlug) {
