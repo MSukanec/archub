@@ -1,0 +1,544 @@
+import type { Express } from "express";
+import type { RouteDeps } from "./_base";
+
+/**
+ * Register project-related endpoints (projects, budgets, budget items, design phase tasks)
+ */
+export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
+  const { supabase, createAuthenticatedClient, extractToken } = deps;
+
+  // ========== PROJECT ENDPOINTS ==========
+
+  // Delete project safely - server-side implementation
+  app.delete("/api/projects/:projectId", async (req, res) => {
+    try {
+      console.log("Attempting to delete project:", req.params.projectId);
+      
+      // Get the authorization token from headers
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const projectId = req.params.projectId;
+      
+      // Create authenticated Supabase client
+      const authenticatedSupabase = createAuthenticatedClient(token);
+      
+      // Get user organization directly from token instead of heavy RPC call
+      const { data: { user } } = await authenticatedSupabase.auth.getUser();
+      if (!user) {
+        return res.status(401).json({ error: "Invalid authentication" });
+      }
+      
+      // Get organization ID from query parameters (passed from frontend)
+      const organizationId = req.query.organizationId as string;
+      if (!organizationId) {
+        return res.status(400).json({ error: "Organization ID is required" });
+      }
+      
+      // Combined operation: verify ownership and delete in fewer queries
+      // First delete project_data (if exists) - no verification needed since it's linked to project
+      await authenticatedSupabase
+        .from('project_data')
+        .delete()
+        .eq('project_id', projectId);
+      
+      // Delete the main project with organization verification in one step
+      const { error: projectError } = await authenticatedSupabase
+        .from('projects')
+        .delete()
+        .eq('id', projectId)
+        .eq('organization_id', organizationId);
+      
+      if (projectError) {
+        console.error("Error deleting project:", projectError);
+        return res.status(500).json({ error: "Failed to delete project", details: projectError });
+      }
+      
+      console.log("Project deleted successfully:", projectId);
+      res.json({ success: true, message: "Project deleted successfully" });
+      
+    } catch (error) {
+      console.error("Error in delete project endpoint:", error);
+      res.status(500).json({ error: "Internal server error", details: error });
+    }
+  });
+
+  // ========== BUDGET ENDPOINTS ==========
+
+  // Get budgets for a project
+  app.get("/api/budgets", async (req, res) => {
+    try {
+      const { project_id, organization_id } = req.query;
+      
+      if (!project_id || !organization_id) {
+        return res.status(400).json({ error: "project_id and organization_id are required" });
+      }
+
+      // Get the authorization token from headers
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      const { data: budgets, error } = await authenticatedSupabase
+        .from('budgets')
+        .select(`
+          *,
+          currency:currencies!currency_id(id, code, name, symbol)
+        `)
+        .eq('project_id', project_id)
+        .eq('organization_id', organization_id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error fetching budgets:", error);
+        return res.status(500).json({ error: "Failed to fetch budgets" });
+      }
+
+      // Calcular el total para cada presupuesto
+      const budgetsWithTotals = await Promise.all(
+        (budgets || []).map(async (budget) => {
+          const { data: items, error: itemsError } = await authenticatedSupabase
+            .from('budget_items')
+            .select(`
+              unit_price, 
+              quantity, 
+              markup_pct, 
+              tax_pct
+            `)
+            .eq('budget_id', budget.id);
+
+          if (itemsError) {
+            console.error(`Error fetching items for budget ${budget.id}:`, itemsError);
+            return { ...budget, total: 0 };
+          }
+
+          let total = 0;
+
+          // Calcular totales para cada item
+          for (const item of items || []) {
+            const quantity = item.quantity || 1;
+            
+            // Calcular el total del item (con markup y tax)
+            const subtotal = (item.unit_price || 0) * quantity;
+            const markupAmount = subtotal * ((item.markup_pct || 0) / 100);
+            const taxableAmount = subtotal + markupAmount;
+            const taxAmount = taxableAmount * ((item.tax_pct || 0) / 100);
+            const itemTotal = taxableAmount + taxAmount;
+            total += itemTotal;
+          }
+
+          return { 
+            ...budget, 
+            total
+          };
+        })
+      );
+
+      res.json(budgetsWithTotals);
+    } catch (error) {
+      console.error("Error fetching budgets:", error);
+      res.status(500).json({ error: "Failed to fetch budgets" });
+    }
+  });
+
+  // Create a new budget
+  app.post("/api/budgets", async (req, res) => {
+    try {
+      const budgetData = req.body;
+
+      // Get the authorization token from headers
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      const { data: budget, error } = await authenticatedSupabase
+        .from('budgets')
+        .insert(budgetData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating budget:", error);
+        return res.status(500).json({ error: "Failed to create budget" });
+      }
+
+      res.json(budget);
+    } catch (error) {
+      console.error("Error creating budget:", error);
+      res.status(500).json({ error: "Failed to create budget" });
+    }
+  });
+
+  // Update a budget
+  app.patch("/api/budgets/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+
+      // Get the authorization token from headers
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      const { data: budget, error } = await authenticatedSupabase
+        .from('budgets')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error updating budget:", error);
+        return res.status(500).json({ error: "Failed to update budget" });
+      }
+
+      res.json(budget);
+    } catch (error) {
+      console.error("Error updating budget:", error);
+      res.status(500).json({ error: "Failed to update budget" });
+    }
+  });
+
+  // Delete a budget
+  app.delete("/api/budgets/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      // Get the authorization token from headers
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      const { error } = await authenticatedSupabase
+        .from('budgets')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error("Error deleting budget:", error);
+        return res.status(500).json({ error: "Failed to delete budget" });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting budget:", error);
+      res.status(500).json({ error: "Failed to delete budget" });
+    }
+  });
+
+  // ========== BUDGET ITEMS ENDPOINTS ==========
+
+  // Get budget items for a budget
+  app.get("/api/budget-items", async (req, res) => {
+    try {
+      const { budget_id, organization_id } = req.query;
+      
+      if (!budget_id || !organization_id) {
+        return res.status(400).json({ error: "budget_id and organization_id are required" });
+      }
+
+      // Get the authorization token from headers
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      const { data: budgetItems, error } = await authenticatedSupabase
+        .from('budget_items_view')
+        .select('*, position')
+        .eq('budget_id', budget_id)
+        .eq('organization_id', organization_id)
+        .order('position', { ascending: true })
+        .order('division_order', { ascending: true })
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error fetching budget items:", error);
+        return res.status(500).json({ error: "Failed to fetch budget items" });
+      }
+
+      res.json(budgetItems || []);
+    } catch (error) {
+      console.error("Error fetching budget items:", error);
+      res.status(500).json({ error: "Failed to fetch budget items" });
+    }
+  });
+
+  // Get organization task prices from ORGANIZATION_TASK_PRICES_VIEW
+  app.get("/api/organization-task-prices", async (req, res) => {
+    try {
+      const { organization_id, task_id } = req.query;
+      
+      if (!organization_id) {
+        return res.status(400).json({ error: "organization_id is required" });
+      }
+
+      // Get the authorization token from headers
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      let query = authenticatedSupabase
+        .from('organization_task_prices_view')
+        .select('*')
+        .eq('organization_id', organization_id);
+
+      // If task_id is provided, filter by it (for single task lookup)
+      if (task_id) {
+        const { data: taskPrice, error } = await query
+          .eq('task_id', task_id)
+          .maybeSingle();
+        
+        if (error) {
+          console.error("Error fetching organization task price:", error);
+          return res.status(500).json({ error: "Failed to fetch organization task price" });
+        }
+
+        return res.json(taskPrice);
+      } else {
+        // Return all task prices for the organization
+        const { data: taskPrices, error } = await query
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          console.error("Error fetching organization task prices:", error);
+          return res.status(500).json({ error: "Failed to fetch organization task prices" });
+        }
+
+        return res.json(taskPrices || []);
+      }
+    } catch (error) {
+      console.error("Error fetching organization task prices:", error);
+      res.status(500).json({ error: "Failed to fetch organization task prices" });
+    }
+  });
+
+  // Create a new budget item
+  app.post("/api/budget-items", async (req, res) => {
+    try {
+      const budgetItemData = req.body;
+
+      // Get the authorization token from headers
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      const { data: budgetItem, error } = await authenticatedSupabase
+        .from('budget_items')
+        .insert(budgetItemData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating budget item:", error);
+        return res.status(500).json({ error: "Failed to create budget item" });
+      }
+
+      res.json(budgetItem);
+    } catch (error) {
+      console.error("Error creating budget item:", error);
+      res.status(500).json({ error: "Failed to create budget item" });
+    }
+  });
+
+  // Update a budget item
+  app.patch("/api/budget-items/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+
+      // Get the authorization token from headers
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      const { data: budgetItem, error } = await authenticatedSupabase
+        .from('budget_items')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error updating budget item:", error);
+        return res.status(500).json({ error: "Failed to update budget item" });
+      }
+
+      res.json(budgetItem);
+    } catch (error) {
+      console.error("Error updating budget item:", error);
+      res.status(500).json({ error: "Failed to update budget item" });
+    }
+  });
+
+  // Delete a budget item
+  app.delete("/api/budget-items/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      // Get the authorization token from headers
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      const { error } = await authenticatedSupabase
+        .from('budget_items')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error("Error deleting budget item:", error);
+        return res.status(500).json({ error: "Failed to delete budget item" });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting budget item:", error);
+      res.status(500).json({ error: "Failed to delete budget item" });
+    }
+  });
+
+  // Move budget item (reorder)
+  app.post("/api/budget-items/move", async (req, res) => {
+    try {
+      const { budget_id, item_id, prev_item_id, next_item_id } = req.body;
+
+      if (!budget_id || !item_id) {
+        return res.status(400).json({ error: "budget_id and item_id are required" });
+      }
+
+      // Get the authorization token from headers
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      const { data, error } = await authenticatedSupabase.rpc('budget_item_move', {
+        p_budget_id: budget_id,
+        p_item_id: item_id,
+        p_prev_item_id: prev_item_id,
+        p_next_item_id: next_item_id,
+      });
+
+      if (error) {
+        console.error("Error moving budget item:", error);
+        return res.status(500).json({ error: "Failed to move budget item" });
+      }
+
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error("Error moving budget item:", error);
+      res.status(500).json({ error: "Failed to move budget item" });
+    }
+  });
+
+  // ========== DESIGN PHASE TASKS ENDPOINTS ==========
+
+  // Create design phase task endpoint
+  app.post("/api/design-phase-tasks", async (req, res) => {
+    try {
+      const {
+        project_phase_id,
+        name,
+        description,
+        start_date,
+        end_date,
+        assigned_to,
+        status,
+        priority,
+        created_by
+      } = req.body;
+
+      if (!project_phase_id || !name || !created_by) {
+        return res.status(400).json({ error: "Missing required fields: project_phase_id, name, created_by" });
+      }
+
+      // Get the authorization token from headers
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // Get the highest position for ordering
+      const { data: existingTasks } = await authenticatedSupabase
+        .from('design_phase_tasks')
+        .select('position')
+        .eq('project_phase_id', project_phase_id)
+        .order('position', { ascending: false })
+        .limit(1);
+
+      const nextPosition = existingTasks && existingTasks.length > 0 ? existingTasks[0].position + 1 : 1;
+
+      const { data, error } = await authenticatedSupabase
+        .from('design_phase_tasks')
+        .insert({
+          project_phase_id,
+          name,
+          description,
+          start_date,
+          end_date,
+          assigned_to,
+          status: status || 'pendiente',
+          priority: priority || 'media',
+          position: nextPosition,
+          is_active: true,
+          created_by
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating design phase task:", error);
+        return res.status(500).json({ error: "Failed to create design phase task" });
+      }
+
+      res.json(data);
+    } catch (error) {
+      console.error("Error creating design phase task:", error);
+      res.status(500).json({ error: "Failed to create design phase task" });
+    }
+  });
+}
