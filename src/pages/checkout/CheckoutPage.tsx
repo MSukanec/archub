@@ -574,7 +574,7 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
         key="back"
         variant="ghost"
         size="sm"
-        onClick={() => navigate(`/learning/courses/${courseSlug}`)}
+        onClick={() => navigate("/learning/courses")}
         className="gap-2"
         data-testid="button-back-to-course"
       >
