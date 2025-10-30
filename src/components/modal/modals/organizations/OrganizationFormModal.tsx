@@ -88,7 +88,7 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
           throw new Error('No se pudo actualizar la organización')
         }
       } else {
-        const { data, error } = await supabase.rpc('archub_new_organization', {
+        const { data, error } = await supabase.rpc('handle_new_organization', {
           _organization_name: formData.name,
           _user_id: userData?.user?.id
         })
