@@ -38,7 +38,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useCoursePrice } from "@/hooks/useCoursePrice";
 import { getApiBase } from "@/utils/apiBase";
-import { toE164 } from "@/utils/phone";
+import { toE164, fromE164 } from "@/utils/phone";
 import { orderedMethods, getPaymentButtonText } from "@/utils/paymentOrder";
 import { apiRequest } from "@/lib/queryClient";
 import mercadoPagoLogo from "/MercadoPago_logo.png";
@@ -173,6 +173,11 @@ export default function CheckoutPage() {
       setLastName(userData.user_data?.last_name || "");
       setEmail(userData.user?.email || "");
       setCountry(userData.user_data?.country || "");
+      
+      // Load phone number without country code for PhoneField display
+      if (userData.user_data?.phone_e164) {
+        setPhone(fromE164(userData.user_data.phone_e164));
+      }
     }
   }, [userData]);
 
@@ -949,7 +954,12 @@ Titular: DNI 32322767`;
 
     // Normalize phone to E.164 if provided
     const selectedCountry = countries.find((c) => c.id === country);
-    const normalizedPhone = toE164(phone, selectedCountry?.country_code);
+    // Use alpha_3 first (for known countries), fallback to country_code (for others)
+    const normalizedPhone = toE164(
+      phone, 
+      selectedCountry?.alpha_3,
+      selectedCountry?.country_code
+    );
 
     if (!acceptTerms) {
       toast({
@@ -1025,19 +1035,28 @@ Titular: DNI 32322767`;
         
         if (session?.access_token) {
           const API_BASE = getApiBase();
+          
+          // Only save phone_e164 if we have a valid E.164 number
+          // This prevents saving invalid numbers like "+BGR1234567" for unmapped countries
+          const profileData: any = {
+            user_id: userData.user.id,
+            first_name: trimmedFirstName,
+            last_name: trimmedLastName || null,
+            country: country,
+          };
+          
+          // Only include phone_e164 if we successfully normalized it
+          if (normalizedPhone) {
+            profileData.phone_e164 = normalizedPhone;
+          }
+          
           await fetch(`${API_BASE}/api/user/profile`, {
             method: "PATCH",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${session.access_token}`,
             },
-            body: JSON.stringify({
-              user_id: userData.user.id,
-              first_name: trimmedFirstName,
-              last_name: trimmedLastName || null,
-              country: country,
-              phone_e164: normalizedPhone || null,
-            }),
+            body: JSON.stringify(profileData),
           });
         }
       } catch (error) {
