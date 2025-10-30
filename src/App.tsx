@@ -79,9 +79,6 @@ import CourseList from "@/pages/learning/courses/CourseList";
 import CourseView from "@/pages/learning/courses/CourseView";
 import PaymentReturn from "@/pages/learning/PaymentReturn";
 
-// Checkout Pages
-import PaymentSuccess from "@/pages/checkout/PaymentSuccess";
-
 // Notifications
 import Notifications from "@/pages/Notifications";
 
@@ -99,24 +96,16 @@ import NotFound from "@/pages/public/NotFound";
 import { ModalFactory } from "@/components/modal/form/ModalFactory";
 import { ProjectContextInitializer } from "@/components/navigation/ProjectContextInitializer";
 
-// Public routes that DON'T go through AuthGuard
-function PublicRoutes() {
-  return (
-    <Switch>
-      <Route path="/" component={Landing} />
-      <Route path="/login" component={Login} />
-      <Route path="/register" component={Register} />
-      <Route path="/forgot-password" component={ForgotPassword} />
-      <Route path="/checkout/success" component={PaymentSuccess} />
-    </Switch>
-  );
-}
-
-// Protected routes that go through AuthGuard
-function PrivateRoutes() {
+function Router() {
   return (
     <AuthGuard>
       <Switch>
+        {/* Public Routes */}
+        <Route path="/" component={Landing} />
+        <Route path="/login" component={Login} />
+        <Route path="/register" component={Register} />
+        <Route path="/forgot-password" component={ForgotPassword} />
+
         {/* Onboarding and Mode Selection Routes */}
         <Route path="/onboarding" component={Onboarding} />
         <Route path="/select-mode" component={SelectMode} />
@@ -266,20 +255,6 @@ function PrivateRoutes() {
       </Switch>
     </AuthGuard>
   );
-}
-
-// Main router that chooses between public and private
-function Router() {
-  const currentPath = window.location.pathname;
-  
-  // Public routes (no AuthGuard)
-  const publicPaths = ['/', '/login', '/register', '/forgot-password', '/checkout/success'];
-  if (publicPaths.some(path => currentPath === path || currentPath.startsWith(path + '?'))) {
-    return <PublicRoutes />;
-  }
-  
-  // All other routes go through AuthGuard
-  return <PrivateRoutes />;
 }
 
 function App() {
