@@ -999,23 +999,41 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         .from('bank_transfer_payments')
         .select(`
           *,
-          users!bank_transfer_payments_user_id_fkey(id, full_name, email),
-          course_prices(
-            id,
-            amount,
-            currency_code,
-            months,
-            courses(id, title, slug)
-          )
+          users!bank_transfer_payments_user_id_fkey(id, full_name, email)
         `)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false});
       
       if (paymentsError) {
         console.error("Error fetching payments:", paymentsError);
         return res.status(500).json({ error: "Failed to fetch payments" });
       }
       
-      return res.json(payments);
+      // Now fetch course_price info for each payment via order_id
+      const enrichedPayments = await Promise.all(
+        (payments || []).map(async (payment) => {
+          // Get course_price_id from checkout_sessions via order_id
+          const { data: session } = await adminClient
+            .from('checkout_sessions')
+            .select('course_price_id')
+            .eq('id', payment.order_id)
+            .maybeSingle();
+          
+          if (!session?.course_price_id) {
+            return { ...payment, course_prices: null };
+          }
+          
+          // Get course_price details
+          const { data: coursePrice } = await adminClient
+            .from('course_prices')
+            .select('id, amount, currency_code, months, courses(id, title, slug)')
+            .eq('id', session.course_price_id)
+            .maybeSingle();
+          
+          return { ...payment, course_prices: coursePrice };
+        })
+      );
+      
+      return res.json(enrichedPayments);
     } catch (error: any) {
       console.error("Error in /api/admin/payments:", error);
       return res.status(500).json({ error: "Internal error" });
@@ -1042,11 +1060,7 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         .from('bank_transfer_payments')
         .select(`
           *,
-          users!bank_transfer_payments_user_id_fkey(id, full_name, email),
-          course_prices(
-            id,
-            courses(id, slug)
-          )
+          users!bank_transfer_payments_user_id_fkey(id, full_name, email)
         `)
         .eq('id', id)
         .single();
@@ -1059,6 +1073,24 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         return res.status(400).json({ error: "Payment is not pending" });
       }
       
+      // Get course info via order_id
+      const { data: session } = await adminClient
+        .from('checkout_sessions')
+        .select('course_price_id')
+        .eq('id', payment.order_id)
+        .maybeSingle();
+      
+      let courseSlug: string | null = null;
+      if (session?.course_price_id) {
+        const { data: coursePrice } = await adminClient
+          .from('course_prices')
+          .select('courses!inner(slug)')
+          .eq('id', session.course_price_id)
+          .maybeSingle();
+        
+        courseSlug = (coursePrice?.courses as any)?.slug || null;
+      }
+      
       const { error: updateError } = await adminClient
         .from('bank_transfer_payments')
         .update({ status: 'approved' })
@@ -1069,7 +1101,6 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         return res.status(500).json({ error: "Failed to update payment" });
       }
       
-      const courseSlug = payment.course_prices?.courses?.slug;
       if (courseSlug && payment.users?.id) {
         await enrollUserInCourse(payment.users.id, courseSlug);
       }
