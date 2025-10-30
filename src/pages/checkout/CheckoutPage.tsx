@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils";
 import { useCoursePrice } from "@/hooks/useCoursePrice";
 import { getApiBase } from "@/utils/apiBase";
 import { toE164 } from "@/utils/phone";
+import { orderedMethods, getPaymentButtonText } from "@/utils/paymentOrder";
 import mercadoPagoLogo from "/MercadoPago_logo.png";
 import paypalLogo from "/Paypal_2014_logo.png";
 
@@ -652,6 +653,18 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
   const finalPrice = appliedCoupon ? appliedCoupon.final_price : priceData?.amount || 0;
   const hasDiscount = appliedCoupon && appliedCoupon.discount > 0;
 
+  // Ordenar métodos de pago según el país seleccionado
+  const selectedCountryData = useMemo(() => {
+    return countries.find((c) => c.id === country);
+  }, [countries, country]);
+
+  const paymentMethodsOrder = useMemo(() => {
+    return orderedMethods(selectedCountryData?.alpha_3);
+  }, [selectedCountryData]);
+
+  // Texto del botón según método seleccionado
+  const buttonText = getPaymentButtonText(selectedMethod);
+
   if (!courseSlug) {
     return null;
   }
@@ -801,97 +814,110 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                       className="space-y-3"
                       data-testid="payment-method-radio-group"
                     >
-                      {/* Mercado Pago */}
-                      <div
-                        className={cn(
-                          "relative flex items-start space-x-4 rounded-lg border-2 p-4 cursor-pointer transition-all hover:border-accent/50",
-                          selectedMethod === "mercadopago"
-                            ? "border-accent bg-accent/5 shadow-sm"
-                            : "border-border"
-                        )}
-                        onClick={() => setSelectedMethod("mercadopago")}
-                        data-testid="payment-option-mercadopago"
-                      >
-                        <RadioGroupItem value="mercadopago" id="mercadopago" className="mt-0.5" />
-                        <div className="flex-1 flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <Label
-                              htmlFor="mercadopago"
-                              className="flex items-center gap-2 cursor-pointer font-medium"
+                      {paymentMethodsOrder.map((method) => {
+                        if (method === "mercadopago") {
+                          return (
+                            <div
+                              key="mercadopago"
+                              className={cn(
+                                "relative flex items-start space-x-4 rounded-lg border-2 p-4 cursor-pointer transition-all hover:border-accent/50",
+                                selectedMethod === "mercadopago"
+                                  ? "border-accent bg-accent/5 shadow-sm"
+                                  : "border-border"
+                              )}
+                              onClick={() => setSelectedMethod("mercadopago")}
+                              data-testid="payment-option-mercadopago"
                             >
-                              <CreditCard className="h-5 w-5 text-accent" />
-                              Mercado Pago (ARS)
-                            </Label>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              Tarjeta de crédito o débito. Pago seguro con redirección.
-                            </p>
-                          </div>
-                          <img
-                            src={mercadoPagoLogo}
-                            alt="Mercado Pago"
-                            className="h-10 sm:h-12 object-contain flex-shrink-0"
-                          />
-                        </div>
-                      </div>
+                              <RadioGroupItem value="mercadopago" id="mercadopago" className="mt-0.5" />
+                              <div className="flex-1 flex items-start justify-between gap-4">
+                                <div className="flex-1">
+                                  <Label
+                                    htmlFor="mercadopago"
+                                    className="flex items-center gap-2 cursor-pointer font-medium"
+                                  >
+                                    <CreditCard className="h-5 w-5 text-accent" />
+                                    Mercado Pago (ARS)
+                                  </Label>
+                                  <p className="text-sm text-muted-foreground mt-1">
+                                    Tarjeta de crédito o débito. Pago seguro con redirección.
+                                  </p>
+                                </div>
+                                <img
+                                  src={mercadoPagoLogo}
+                                  alt="Mercado Pago"
+                                  className="h-10 sm:h-12 object-contain flex-shrink-0"
+                                />
+                              </div>
+                            </div>
+                          );
+                        }
 
-                      {/* PayPal */}
-                      <div
-                        className={cn(
-                          "relative flex items-start space-x-4 rounded-lg border-2 p-4 cursor-pointer transition-all hover:border-accent/50",
-                          selectedMethod === "paypal"
-                            ? "border-accent bg-accent/5 shadow-sm"
-                            : "border-border"
-                        )}
-                        onClick={() => setSelectedMethod("paypal")}
-                        data-testid="payment-option-paypal"
-                      >
-                        <RadioGroupItem value="paypal" id="paypal" className="mt-0.5" />
-                        <div className="flex-1 flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <Label
-                              htmlFor="paypal"
-                              className="flex items-center gap-2 cursor-pointer font-medium"
+                        if (method === "paypal") {
+                          return (
+                            <div
+                              key="paypal"
+                              className={cn(
+                                "relative flex items-start space-x-4 rounded-lg border-2 p-4 cursor-pointer transition-all hover:border-accent/50",
+                                selectedMethod === "paypal"
+                                  ? "border-accent bg-accent/5 shadow-sm"
+                                  : "border-border"
+                              )}
+                              onClick={() => setSelectedMethod("paypal")}
+                              data-testid="payment-option-paypal"
                             >
-                              <CreditCard className="h-5 w-5 text-accent" />
-                              PayPal (USD)
-                            </Label>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              Pago internacional seguro. Acepta tarjetas y saldo PayPal.
-                            </p>
-                          </div>
-                          <img
-                            src={paypalLogo}
-                            alt="PayPal"
-                            className="h-10 sm:h-12 object-contain flex-shrink-0"
-                          />
-                        </div>
-                      </div>
+                              <RadioGroupItem value="paypal" id="paypal" className="mt-0.5" />
+                              <div className="flex-1 flex items-start justify-between gap-4">
+                                <div className="flex-1">
+                                  <Label
+                                    htmlFor="paypal"
+                                    className="flex items-center gap-2 cursor-pointer font-medium"
+                                  >
+                                    <CreditCard className="h-5 w-5 text-accent" />
+                                    PayPal (USD)
+                                  </Label>
+                                  <p className="text-sm text-muted-foreground mt-1">
+                                    Pago internacional seguro. Acepta tarjetas y saldo PayPal.
+                                  </p>
+                                </div>
+                                <img
+                                  src={paypalLogo}
+                                  alt="PayPal"
+                                  className="h-10 sm:h-12 object-contain flex-shrink-0"
+                                />
+                              </div>
+                            </div>
+                          );
+                        }
 
-                      {/* Transferencia */}
-                      <div
-                        className={cn(
-                          "relative flex items-start space-x-4 rounded-lg border-2 p-4 cursor-pointer transition-all hover:border-accent/50",
-                          selectedMethod === "transfer"
-                            ? "border-accent bg-accent/5 shadow-sm"
-                            : "border-border"
-                        )}
-                        onClick={() => setSelectedMethod("transfer")}
-                        data-testid="payment-option-transfer"
-                      >
-                        <RadioGroupItem value="transfer" id="transfer" className="mt-0.5" />
-                        <div className="flex-1">
-                          <Label
-                            htmlFor="transfer"
-                            className="flex items-center gap-2 cursor-pointer font-medium"
+                        // transfer
+                        return (
+                          <div
+                            key="transfer"
+                            className={cn(
+                              "relative flex items-start space-x-4 rounded-lg border-2 p-4 cursor-pointer transition-all hover:border-accent/50",
+                              selectedMethod === "transfer"
+                                ? "border-accent bg-accent/5 shadow-sm"
+                                : "border-border"
+                            )}
+                            onClick={() => setSelectedMethod("transfer")}
+                            data-testid="payment-option-transfer"
                           >
-                            <Building2 className="h-5 w-5 text-accent" />
-                            Transferencia Bancaria (ARS)
-                          </Label>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Transferencia o depósito directo. Aprobación manual.
-                          </p>
-                        </div>
-                      </div>
+                            <RadioGroupItem value="transfer" id="transfer" className="mt-0.5" />
+                            <div className="flex-1">
+                              <Label
+                                htmlFor="transfer"
+                                className="flex items-center gap-2 cursor-pointer font-medium"
+                              >
+                                <Building2 className="h-5 w-5 text-accent" />
+                                Transferencia Bancaria (ARS)
+                              </Label>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                Transferencia o depósito directo. Aprobación manual.
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </RadioGroup>
                   </div>
                 </div>
@@ -1198,7 +1224,7 @@ Enviá el comprobante a: +54 9 11 3227-3000`;
                         </>
                       ) : (
                         <>
-                          Continuar al pago
+                          {buttonText}
                           <ArrowLeft className="h-5 w-5 ml-2 rotate-180" />
                         </>
                       )}
