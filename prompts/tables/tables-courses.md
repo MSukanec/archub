@@ -360,7 +360,7 @@ VISTA course_user_global_progress_view
   }
 ]
 
-VISTA user_study_time_view:
+VISTA course_user_study_time_view:
 
 [
   {

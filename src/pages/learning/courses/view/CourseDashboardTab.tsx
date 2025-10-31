@@ -416,7 +416,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     enabled: !!courseId && !!supabase
   });
 
-  // Get user's study time this month from user_study_time_view
+  // Get user's study time this month from course_user_study_time_view
   const { data: monthlyStudyTime } = useQuery({
     queryKey: ['monthly-study-time'],
     queryFn: async () => {
@@ -437,7 +437,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       if (!userRecord) return { seconds_this_month: 0 };
 
       const { data, error } = await supabase
-        .from('user_study_time_view')
+        .from('course_user_study_time_view')
         .select('seconds_this_month')
         .eq('user_id', userRecord.id)
         .maybeSingle();
