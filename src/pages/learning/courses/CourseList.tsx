@@ -29,7 +29,7 @@ export default function CourseList() {
     }
   }, [setSidebarContext, setSidebarLevel, sidebarLevel])
 
-  // 🚀 OPTIMIZACIÓN: Usar endpoint backend que accede a vistas optimizadas
+  // 🚀 OPTIMIZACIÓN: Cache ultra-agresivo para performance
   const { data: courseProgressData = [] } = useQuery({
     queryKey: ['/api/user/course-progress'],
     queryFn: async () => {
@@ -52,9 +52,8 @@ export default function CourseList() {
       return response.json();
     },
     enabled: !!supabase,
-    staleTime: 10000, // 🚀 10 segundos para detectar progreso nuevo
-    gcTime: 300000,
-    refetchInterval: 15000 // 🚀 Auto-refrescar cada 15 segundos
+    staleTime: Infinity, // ⚡ Cache infinito - solo refresca manualmente
+    gcTime: 600000 // 10 minutos
   });
 
   const { data: enrollments = [] } = useQuery<any[]>({
@@ -75,9 +74,8 @@ export default function CourseList() {
       return response.json();
     },
     enabled: !!supabase,
-    staleTime: 5000, // 🚀 5 segundos para detectar nuevas inscripciones rápido
-    gcTime: 300000,
-    refetchInterval: 10000 // 🚀 Auto-refrescar cada 10 segundos
+    staleTime: Infinity, // ⚡ Cache infinito - solo invalida cuando hay cambios reales
+    gcTime: 600000
   });
 
   // Obtener total de lecciones y duración por curso
