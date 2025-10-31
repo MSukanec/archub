@@ -138,17 +138,31 @@ const AdminCommunityUsers = () => {
     }
   })
 
-  // Delete user mutation
+  // Delete user mutation (uses backend API to bypass RLS)
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: string) => {
       if (!supabase) throw new Error('Supabase not initialized')
       
-      const { error } = await supabase
-        .from('users')
-        .update({ is_active: false })
-        .eq('id', userId)
+      // Get current session token
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No active session')
       
-      if (error) throw error
+      // Call backend API endpoint with admin authentication
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ is_active: false })
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to deactivate user')
+      }
+      
+      return response.json()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] })
