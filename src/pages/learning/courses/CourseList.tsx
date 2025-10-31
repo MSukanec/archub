@@ -61,8 +61,9 @@ export default function CourseList() {
       return data || [];
     },
     enabled: !!supabase,
-    staleTime: 30000, // Cache 30 segundos
-    gcTime: 300000
+    staleTime: 10000, // 🚀 10 segundos para detectar progreso nuevo
+    gcTime: 300000,
+    refetchInterval: 15000 // 🚀 Auto-refrescar cada 15 segundos
   });
 
   const { data: enrollments = [] } = useQuery<any[]>({
@@ -83,8 +84,9 @@ export default function CourseList() {
       return response.json();
     },
     enabled: !!supabase,
-    staleTime: 60000,
-    gcTime: 300000
+    staleTime: 5000, // 🚀 5 segundos para detectar nuevas inscripciones rápido
+    gcTime: 300000,
+    refetchInterval: 10000 // 🚀 Auto-refrescar cada 10 segundos
   });
 
   // Obtener total de lecciones y duración por curso

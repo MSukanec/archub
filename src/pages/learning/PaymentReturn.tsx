@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { queryClient } from '@/lib/queryClient';
 
 export default function PaymentReturn() {
   const [, navigate] = useLocation();
@@ -70,6 +71,9 @@ export default function PaymentReturn() {
 
         if (enrollment) {
           setStatus('success');
+          // 🚀 CRÍTICO: Invalidar cache para que el botón cambie inmediatamente
+          queryClient.invalidateQueries({ queryKey: ['/api/user/enrollments'] });
+          queryClient.invalidateQueries({ queryKey: ['course-progress-view'] });
           return;
         }
 

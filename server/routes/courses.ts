@@ -477,25 +477,41 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         });
       }
       
-      // Get enrolled course IDs
-      const courseIds = enrollments.map((e: any) => e.course_id);
-      
-      // Execute remaining queries in parallel, but ONLY for enrolled courses
-      const [progressResult, courseLessonsResult, recentCompletionsResult] = await Promise.all([
-        // Get all progress for this user
+      // 🚀 OPTIMIZACIÓN: Usar vistas pre-calculadas en paralelo
+      const [
+        globalProgressResult,
+        courseProgressResult,
+        studyTimeResult,
+        activeDaysResult,
+        recentCompletionsResult
+      ] = await Promise.all([
+        // Vista global de progreso (1 query simple)
         authenticatedSupabase
-          .from('course_lesson_progress')
+          .from('course_user_global_progress_view')
+          .select('*')
+          .eq('user_id', dbUser.id)
+          .maybeSingle(),
+        
+        // Vista de progreso por curso (1 query con join pre-calculado)
+        authenticatedSupabase
+          .from('course_progress_view')
           .select('*')
           .eq('user_id', dbUser.id),
         
-        // Get ONLY lessons from enrolled courses (not ALL lessons!)
+        // Vista de tiempo de estudio (1 query simple)
         authenticatedSupabase
-          .from('course_lessons')
-          .select('id, module_id, course_modules!inner(course_id)')
-          .eq('is_active', true)
-          .in('course_modules.course_id', courseIds),
+          .from('course_user_study_time_view')
+          .select('*')
+          .eq('user_id', dbUser.id)
+          .maybeSingle(),
         
-        // Get recent completions using optimized view (much faster!)
+        // Vista de días activos (1 query simple)
+        authenticatedSupabase
+          .from('course_user_active_days_view')
+          .select('*')
+          .eq('user_id', dbUser.id),
+        
+        // Vista de completados recientes (ya optimizada)
         authenticatedSupabase
           .from('course_lesson_completions_view')
           .select('*')
@@ -507,84 +523,52 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       ]);
       
       // Check for errors
-      if (progressResult.error) {
-        console.error("Error fetching progress:", progressResult.error);
-        throw progressResult.error;
+      if (globalProgressResult.error) {
+        console.error("Error fetching global progress:", globalProgressResult.error);
+        throw globalProgressResult.error;
       }
-      
-      if (courseLessonsResult.error) {
-        console.error("Error fetching course lessons:", courseLessonsResult.error);
-        throw courseLessonsResult.error;
+      if (courseProgressResult.error) {
+        console.error("Error fetching course progress:", courseProgressResult.error);
+        throw courseProgressResult.error;
       }
-      
+      if (studyTimeResult.error) {
+        console.error("Error fetching study time:", studyTimeResult.error);
+        throw studyTimeResult.error;
+      }
+      if (activeDaysResult.error) {
+        console.error("Error fetching active days:", activeDaysResult.error);
+        throw activeDaysResult.error;
+      }
       if (recentCompletionsResult.error) {
         console.error("Error fetching recent completions:", recentCompletionsResult.error);
         throw recentCompletionsResult.error;
       }
       
-      const progress = progressResult.data || [];
-      const courseLessons = courseLessonsResult.data || [];
+      // Datos ya pre-calculados de las vistas
+      const globalProgress = globalProgressResult.data;
+      const courseProgress = courseProgressResult.data || [];
+      const studyTime = studyTimeResult.data;
+      const activeDays = activeDaysResult.data || [];
       
-      // Calculate global progress
-      const total_lessons_total = courseLessons.length;
-      const done_lessons_total = progress.filter((p: any) => p.is_completed).length;
-      const global_progress_pct = total_lessons_total > 0 
-        ? Math.round((done_lessons_total / total_lessons_total) * 100) 
-        : 0;
-      
-      // Calculate course-specific progress
+      // Mapear progreso por curso con info de enrollment
       const courses = enrollments.map((enrollment: any) => {
-        const courseId = enrollment.course_id;
-        const lessons = courseLessons.filter((l: any) => l.course_modules?.course_id === courseId);
-        const total_lessons = lessons.length;
-        const lessonIds = lessons.map((l: any) => l.id);
-        const done_lessons = progress.filter((p: any) => 
-          p.is_completed && lessonIds.includes(p.lesson_id)
-        ).length;
-        const progress_pct = total_lessons > 0 
-          ? Math.round((done_lessons / total_lessons) * 100) 
-          : 0;
+        const progress = courseProgress.find((p: any) => p.course_id === enrollment.course_id);
         
         return {
-          course_id: courseId,
+          course_id: enrollment.course_id,
           course_title: enrollment.courses?.title || 'Sin título',
           course_slug: enrollment.courses?.slug || '',
-          progress_pct,
-          done_lessons,
-          total_lessons
+          progress_pct: progress ? Math.round(progress.progress_pct) : 0,
+          done_lessons: progress?.done_lessons || 0,
+          total_lessons: progress?.total_lessons || 0
         };
       });
       
-      // Calculate study time
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      let seconds_lifetime = 0;
-      let seconds_this_month = 0;
+      // Calcular streak (días consecutivos desde hoy hacia atrás)
+      const sortedDays = activeDays
+        .map((d: any) => d.day)
+        .sort((a, b) => b.localeCompare(a));
       
-      progress.forEach((p: any) => {
-        const lastPos = p.last_position_sec || 0;
-        seconds_lifetime += lastPos;
-        
-        const updateDate = new Date(p.updated_at);
-        if (updateDate >= startOfMonth) {
-          seconds_this_month += lastPos;
-        }
-      });
-      
-      // Calculate active days and streak
-      const cutoffDate = new Date(Date.now() - 60 * 86400000);
-      const daysSet = new Set<string>();
-      
-      progress.forEach((p: any) => {
-        const updateDate = new Date(p.updated_at);
-        if (updateDate >= cutoffDate) {
-          const day = updateDate.toISOString().slice(0, 10);
-          daysSet.add(day);
-        }
-      });
-      
-      // Calculate current streak
-      const sortedDays = Array.from(daysSet).sort((a, b) => b.localeCompare(a));
       let currentStreak = 0;
       for (let i = 0; i < sortedDays.length; i++) {
         const expectedDate = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
@@ -607,20 +591,24 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         };
       });
       
-      // Return pre-calculated data (no heavy computation needed on frontend!)
+      // Return pre-calculated data (no heavy computation needed!)
       res.json({
-        global: {
-          done_lessons_total,
-          total_lessons_total,
-          progress_pct: global_progress_pct
+        global: globalProgress ? {
+          done_lessons_total: globalProgress.done_lessons_total || 0,
+          total_lessons_total: globalProgress.total_lessons_total || 0,
+          progress_pct: Math.round(globalProgress.progress_pct || 0)
+        } : {
+          done_lessons_total: 0,
+          total_lessons_total: 0,
+          progress_pct: 0
         },
         courses: courses,
         study: {
-          seconds_lifetime,
-          seconds_this_month
+          seconds_lifetime: studyTime?.seconds_lifetime || 0,
+          seconds_this_month: studyTime?.seconds_this_month || 0
         },
         currentStreak,
-        activeDays: sortedDays.length,
+        activeDays: activeDays.length,
         recentCompletions
       });
     } catch (error) {

@@ -77,7 +77,9 @@ export default function LearningDashboard() {
       return response.json();
     },
     enabled: !!supabase && !!userData,
-    staleTime: 30000,
+    staleTime: 10000, // 🚀 10 segundos para refrescar rápido
+    gcTime: 300000,
+    refetchInterval: 20000 // 🚀 Auto-refrescar cada 20 segundos
   });
 
   const { global, courses = [], currentStreak = 0 } = dashboardData || {}
