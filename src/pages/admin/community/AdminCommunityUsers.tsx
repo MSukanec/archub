@@ -105,82 +105,36 @@ const AdminCommunityUsers = () => {
   const queryClient = useQueryClient()
   const { openModal } = useGlobalModalStore()
 
-  // Fetch users with statistics
+  // Fetch users with statistics from backend API (bypasses RLS)
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['admin-users', searchValue, sortBy, statusFilter, showActiveOnly],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized')
       
-      let query = supabase
-        .from('users')
-        .select(`
-          *,
-          user_data (
-            first_name,
-            last_name,
-            country
-          )
-        `)
+      // Get current session token
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No active session')
       
-      // Apply filters
-      if (searchValue) {
-        query = query.or(`full_name.ilike.%${searchValue}%,email.ilike.%${searchValue}%`)
+      // Build query parameters
+      const params = new URLSearchParams()
+      if (searchValue) params.append('search', searchValue)
+      if (sortBy) params.append('sortBy', sortBy)
+      if (statusFilter !== 'all') params.append('statusFilter', statusFilter)
+      
+      // Call backend API endpoint with admin authentication
+      const response = await fetch(`/api/admin/users?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to fetch users')
       }
       
-      if (statusFilter !== 'all') {
-        query = query.eq('is_active', statusFilter === 'active')
-      }
-      
-      // Apply sorting
-      if (sortBy === 'name') {
-        query = query.order('full_name', { ascending: true })
-      } else if (sortBy === 'email') {
-        query = query.order('email', { ascending: true })
-      } else {
-        query = query.order('created_at', { ascending: false })
-      }
-      
-      const { data, error } = await query
-      if (error) throw error
-      
-      // Get user presence data
-      // IMPORTANTE: user_presence.user_id guarda auth_id (de Supabase Auth), no users.id
-      const authIds = data.map(u => u.auth_id);
-      
-      const { data: presenceData } = await supabase
-        .from('user_presence')
-        .select('user_id, last_seen_at')
-        .in('user_id', authIds);
-      
-      // Crear un map usando auth_id como clave
-      const presenceMap = new Map(presenceData?.map(p => [p.user_id, p.last_seen_at]) ?? []);
-      
-      // Get organization counts for each user
-      const usersWithCounts = await Promise.all(
-        data.map(async (user) => {
-          const { count } = await supabase
-            .from('organization_members')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', user.id)
-            .eq('is_active', true)
-          
-          return {
-            ...user,
-            organizations_count: count || 0,
-            last_seen_at: presenceMap.get(user.auth_id) || null // Buscar por auth_id
-          }
-        })
-      )
-      
-      // Ordenar por última actividad (más reciente primero)
-      const sortedUsers = usersWithCounts.sort((a, b) => {
-        if (!a.last_seen_at && !b.last_seen_at) return 0;
-        if (!a.last_seen_at) return 1; // Sin actividad al final
-        if (!b.last_seen_at) return -1; // Sin actividad al final
-        return new Date(b.last_seen_at).getTime() - new Date(a.last_seen_at).getTime();
-      });
-      
-      return sortedUsers
+      return response.json()
     }
   })
 
