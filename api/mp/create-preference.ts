@@ -50,7 +50,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .json({ ok: false, error: "Faltan user_id o course_slug" });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Extract auth token from header for authenticated RPC calls
+    // (Required for validate_coupon RPC which uses auth.uid())
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.replace(/^Bearer\s+/i, "");
+    
+    if (!token) {
+      return res
+        .setHeader("Access-Control-Allow-Origin", "*")
+        .status(401)
+        .json({ ok: false, error: "Missing authorization token" });
+    }
+    
+    // Create authenticated client for RPC (needed for validate_coupon which uses auth.uid())
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } }
+    });
 
     // Obtener curso
     const { data: course, error: courseError } = await supabase
@@ -114,8 +129,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         p_code: code.trim(),
         p_course_id: course.id,
         p_price: unit_price,
-        p_currency: currency,
-        p_user_id: user_id
+        p_currency: currency
       });
 
       if (couponError) {
