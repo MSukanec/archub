@@ -1149,7 +1149,10 @@ Titular: DNI 32322767`;
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column - Payment Methods (Mobile: shows first) */}
-          <div className="lg:col-span-7 order-1 lg:order-1">
+          <div className={cn(
+            "order-1 lg:order-1",
+            showBankInfo ? "lg:col-span-12" : "lg:col-span-7"
+          )}>
             <div className="space-y-6">
               {!showBankInfo ? (
                 <div className="space-y-6">
@@ -1609,7 +1612,7 @@ Titular: DNI 32322767`;
                       <Separator />
                       <div>
                         <p className="text-xs text-muted-foreground mb-1">Monto a pagar</p>
-                        <p className="font-medium text-lg">
+                        <p className="font-bold text-lg">
                           {new Intl.NumberFormat('es-AR', {
                             style: 'currency',
                             currency: currentCurrency,
@@ -1683,12 +1686,12 @@ Titular: DNI 32322767`;
                             {receiptUploading ? (
                               <>
                                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                Subiendo...
+                                Enviando...
                               </>
                             ) : (
                               <>
                                 <Upload className="h-4 w-4 mr-2" />
-                                Subir comprobante
+                                Confirmar y enviar comprobante
                               </>
                             )}
                           </Button>
@@ -1759,10 +1762,11 @@ Titular: DNI 32322767`;
           </div>
 
           {/* Right Column - Coupon & Order Summary (Mobile: shows second) */}
-          <div className="lg:col-span-5 order-2 lg:order-2">
-            <div className="lg:sticky lg:top-24 space-y-6">
-              {/* Coupon Section */}
-              {!appliedCoupon ? (
+          {!showBankInfo && (
+            <div className="lg:col-span-5 order-2 lg:order-2">
+              <div className="lg:sticky lg:top-24 space-y-6">
+                {/* Coupon Section */}
+                {!appliedCoupon ? (
                 <div className="bg-card border rounded-lg p-6">
                   <Label className="text-sm font-medium flex items-center gap-2 mb-3">
                     <Tag className="h-4 w-4 text-accent" />
@@ -2005,6 +2009,7 @@ Titular: DNI 32322767`;
               </div>
             </div>
           </div>
+          )}
         </div>
       </div>
     </Layout>
