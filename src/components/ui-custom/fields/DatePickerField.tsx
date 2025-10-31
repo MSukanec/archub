@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { CalendarIcon } from 'lucide-react'
@@ -28,6 +29,8 @@ export default function DatePickerField({
   minDate,
   maxDate
 }: DatePickerFieldProps) {
+  const [open, setOpen] = useState(false)
+
   const isDateDisabled = (date: Date) => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
@@ -53,6 +56,7 @@ export default function DatePickerField({
         0
       )
       onChange(localDate)
+      setOpen(false) // Cerrar el popover automáticamente
     } else {
       // Permitir limpiar la fecha seleccionada
       onChange(undefined)
@@ -60,7 +64,7 @@ export default function DatePickerField({
   }
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
           type="button"
