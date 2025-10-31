@@ -731,6 +731,7 @@ Titular: DNI 32322767`;
         },
         body: JSON.stringify({
           order_id: orderId,
+          course_slug: courseSlug,
           amount: finalPrice,
           currency: currentCurrency,
           payer_name: `${firstName} ${lastName}`.trim() || undefined,

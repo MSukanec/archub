@@ -87,22 +87,26 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
         return res.status(404).json({ error: "User profile not found" });
       }
 
-      const { order_id, amount, currency, payer_name, payer_note } = req.body;
+      const { order_id, course_slug, amount, currency, payer_name, payer_note } = req.body;
 
       // Validate required fields
-      if (!order_id || !amount || !currency) {
-        return res.status(400).json({ error: "order_id, amount, and currency are required" });
+      if (!order_id || !course_slug || !amount || !currency) {
+        return res.status(400).json({ error: "order_id, course_slug, amount, and currency are required" });
       }
 
-      // Get course info from checkout session
-      const { data: session } = await adminClient
-        .from('checkout_sessions')
-        .select('course_price_id, course_prices(courses(id, slug))')
-        .eq('id', order_id)
+      // Get course info from course_slug
+      const { data: course, error: courseError } = await adminClient
+        .from('courses')
+        .select('id')
+        .eq('slug', course_slug)
         .maybeSingle();
 
-      const courseId = (session?.course_prices as any)?.courses?.id || null;
-      const courseSlug = (session?.course_prices as any)?.courses?.slug || null;
+      if (courseError || !course) {
+        console.error('Error fetching course:', courseError);
+        return res.status(404).json({ error: "Course not found" });
+      }
+
+      const courseId = course.id;
 
       // 1️⃣ PRIMERO: Crear registro en payments (tabla maestra unificada)
       const { data: payment, error: paymentError } = await adminClient
@@ -132,7 +136,6 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
         .insert({
           order_id,
           user_id: profile.id,
-          course_price_id: session?.course_price_id || null,
           payment_id: payment.id, // 🔗 Link al payment maestro
           amount: String(amount),
           currency,
