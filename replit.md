@@ -44,7 +44,9 @@ Archub is a comprehensive construction management platform designed to optimize 
   - `src/hooks/use-contacts.ts` - Added graceful error handling for stack depth exceeded errors
   - `src/components/learning/DiscordWidget.tsx` - Changed button text to "Ir a foro de consultas"
 - **Error handling strategy**: Queries that fail now return default/empty values with zero retries and infinite cache to prevent error spam
-- **UX improvements**: Removed unnecessary padding in empty states for mobile views
+- **UX improvements**: 
+  - Removed unnecessary padding in empty states for mobile views
+  - Added "Continuar viendo" card in course dashboard that takes users to their last watched lesson at the exact second they left off
 - **Result**: Zero 500 errors visible to users, all data loads correctly through authenticated backend
 
 ## User Preferences

@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { queryClient } from '@/lib/queryClient'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui/stat-card'
-import { BookOpen, CheckCircle, Clock, FileText, Bookmark, Megaphone, Info, PlayCircle } from 'lucide-react'
+import { BookOpen, CheckCircle, Clock, FileText, Bookmark, Megaphone, Info, PlayCircle, Play } from 'lucide-react'
 import { DiscordWidget } from '@/components/learning/DiscordWidget'
 import { useLocation, useParams } from 'wouter'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -343,6 +343,95 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     enabled: !!courseId && !!supabase
   });
 
+  // Get last lesson in progress (for "Continue watching" card)
+  const { data: lastLesson } = useQuery({
+    queryKey: ['last-lesson-progress', courseId],
+    queryFn: async () => {
+      if (!courseId || !supabase) return null;
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return null;
+
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser?.email) return null;
+
+      const { data: userRecord } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', authUser.id)
+        .single();
+
+      if (!userRecord) return null;
+
+      // Get all modules for this course
+      const { data: courseModules } = await supabase
+        .from('course_modules')
+        .select('id')
+        .eq('course_id', courseId);
+
+      if (!courseModules || courseModules.length === 0) return null;
+
+      const moduleIds = courseModules.map(m => m.id);
+
+      // Get all lessons for these modules
+      const { data: courseLessons } = await supabase
+        .from('course_lessons')
+        .select('id')
+        .in('module_id', moduleIds);
+
+      if (!courseLessons || courseLessons.length === 0) return null;
+
+      const lessonIds = courseLessons.map(l => l.id);
+
+      // Get the most recent lesson in progress (not completed) or the most recently updated
+      const { data: progressData, error } = await supabase
+        .from('course_lesson_progress')
+        .select(`
+          lesson_id,
+          last_position_sec,
+          is_completed,
+          updated_at,
+          course_lessons (
+            id,
+            title,
+            duration_sec
+          )
+        `)
+        .eq('user_id', userRecord.id)
+        .in('lesson_id', lessonIds)
+        .order('updated_at', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        console.error('Error fetching last lesson:', error);
+        return null;
+      }
+
+      if (!progressData || progressData.length === 0) return null;
+
+      // Find first lesson that's not completed
+      const inProgressLesson = progressData.find(p => !p.is_completed);
+      
+      // If no lesson in progress, return the most recently updated one
+      const selectedLesson = inProgressLesson || progressData[0];
+
+      const lessonData = Array.isArray(selectedLesson.course_lessons) 
+        ? selectedLesson.course_lessons[0] 
+        : selectedLesson.course_lessons;
+
+      return {
+        lesson_id: selectedLesson.lesson_id,
+        lesson_title: lessonData?.title || 'Sin título',
+        last_position_sec: selectedLesson.last_position_sec || 0,
+        duration_sec: lessonData?.duration_sec || 0,
+        is_completed: selectedLesson.is_completed
+      };
+    },
+    enabled: !!courseId && !!supabase,
+    staleTime: 10000, // 10 seconds
+    refetchInterval: 15000 // Auto refresh every 15s
+  });
+
   // Get user's study time using backend endpoint (avoids RLS issues with views)
   const { data: monthlyStudyTime } = useQuery({
     queryKey: ['monthly-study-time'],
@@ -503,6 +592,45 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
           <DiscordWidget />
         </div>
       </div>
+
+      {/* Continue Watching Card */}
+      {lastLesson && (
+        <Card className="border-accent/20 bg-gradient-to-br from-accent/5 to-accent/10 hover:shadow-lg transition-all duration-200">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                  Continuar viendo
+                </p>
+                <h3 className="font-semibold text-base mb-1 text-foreground">
+                  {lastLesson.lesson_title}
+                </h3>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  <span>
+                    {Math.floor(lastLesson.last_position_sec / 60)}:{String(Math.floor(lastLesson.last_position_sec % 60)).padStart(2, '0')} / {Math.floor(lastLesson.duration_sec / 60)}:{String(Math.floor(lastLesson.duration_sec % 60)).padStart(2, '0')}
+                  </span>
+                </div>
+                {/* Progress bar */}
+                <div className="mt-2 w-full bg-muted/30 rounded-full h-1.5">
+                  <div 
+                    className="bg-accent h-1.5 rounded-full transition-all duration-300"
+                    style={{ width: `${lastLesson.duration_sec > 0 ? (lastLesson.last_position_sec / lastLesson.duration_sec) * 100 : 0}%` }}
+                  />
+                </div>
+              </div>
+              <Button
+                onClick={() => goToLesson(lastLesson.lesson_id, lastLesson.last_position_sec)}
+                className="flex-shrink-0"
+                data-testid="button-continue-watching"
+              >
+                <Play className="mr-2 h-4 w-4" />
+                Continuar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Top Row - Main Stats */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
