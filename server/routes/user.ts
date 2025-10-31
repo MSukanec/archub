@@ -262,10 +262,18 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
         return res.status(400).json({ error: "Missing user_id or organization_id" });
       }
 
+      // Get the authorization token and create authenticated client for RLS
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
       // Fetching user organization preferences
 
       // First try to get existing preferences
-      const { data, error } = await supabase
+      const { data, error } = await authenticatedSupabase
         .from('user_organization_preferences')
         .select('*')
         .eq('user_id', user_id)
@@ -277,7 +285,7 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
           console.log("🔧 No preferences found, creating default ones for new user");
           
           // Create default preferences for new user
-          const { data: newPreferences, error: createError } = await supabase
+          const { data: newPreferences, error: createError } = await authenticatedSupabase
             .from('user_organization_preferences')
             .upsert(
               {
@@ -430,9 +438,17 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
         return res.status(400).json({ error: "Missing organization_id or user_id" });
       }
 
+      // Get the authorization token and create authenticated client for RLS
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
       console.log("🔧 Updating user organization preferences", { user_id, organization_id, last_project_id });
 
-      const { data, error } = await supabase
+      const { data, error } = await authenticatedSupabase
         .from('user_organization_preferences')
         .upsert(
           {

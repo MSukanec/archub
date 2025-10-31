@@ -1,6 +1,7 @@
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { useCurrentUser } from './use-current-user'
+import { supabase } from '@/lib/supabase'
 
 interface UserOrganizationPreferences {
   id: string
@@ -20,10 +21,16 @@ export function useUserOrganizationPreferences(organizationId: string | undefine
     queryFn: async (): Promise<UserOrganizationPreferences | null> => {
       if (!userId || !organizationId) return null
 
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session) {
+        throw new Error('No active session');
+      }
+
       const response = await fetch(`/api/user/organization-preferences?user_id=${userId}&organization_id=${organizationId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.session.access_token}`,
         },
       })
 
@@ -58,10 +65,16 @@ export function useUpdateUserOrganizationPreferences() {
 
       console.log("🔧 Updating user organization preferences", { userId, organizationId, lastProjectId });
 
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session) {
+        throw new Error('No active session');
+      }
+
       const response = await fetch('/api/user/update-organization-preferences', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.session.access_token}`,
           'x-user-id': userId,
         },
         body: JSON.stringify({
