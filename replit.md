@@ -55,7 +55,7 @@ Preferred communication style: Simple, everyday language.
   - **`payment_events` table**: Webhook event auditing for PayPal/Mercado Pago (provider logs, raw payloads, event types).
   - **`bank_transfer_payments` table**: Bank transfer-specific details (receipt_url, payer_name, reviewed_by) linked to `payments` via `payment_id` FK.
   - **Payment Flow**: All payment methods create records in `payments` first, provider-specific tables link via FK. Webhooks update both `payment_events` and `payments`. Admin approval updates both `payments` (status, approved_at) and `bank_transfer_payments` (status, reviewed_by).
-- **Payment Processing**: Dual payment provider support (Mercado Pago for ARS, PayPal for USD) with webhook-based enrollment. Bank transfer payment method with receipt upload functionality - users can upload proof of payment (PDF/JPG/PNG, max 10MB) which enters "pending review" status until admin approval. Optional Twilio WhatsApp notifications send admin alerts when users upload receipts. Critical user ID mapping: All bank-transfer endpoints resolve public.users profile via auth_id before database operations to avoid RLS violations (auth.users.id ≠ public.users.id).
+- **Payment Processing**: Dual payment provider support (Mercado Pago for ARS, PayPal for USD) with webhook-based enrollment. Bank transfer payment method with receipt upload functionality - users can upload proof of payment (PDF/JPG/PNG, max 10MB) which enters "pending review" status until admin approval. `bank_transfer_payments` table stores `course_id` directly for improved performance and reliability. Both upload and approval endpoints include defensive fallback to `checkout_sessions` for legacy records, with early-fail validation preventing partial updates. Optional Twilio WhatsApp notifications send admin alerts when users upload receipts. Critical user ID mapping: All bank-transfer endpoints resolve public.users profile via auth_id before database operations to avoid RLS violations (auth.users.id ≠ public.users.id).
 - **Subscription Duration**: `course_prices` table includes `months` field for subscription duration tracking.
 - **Cost System**: Three-tier cost system (Archub Cost, Organization Cost, Independent Cost) for budget items.
 
@@ -65,7 +65,7 @@ Preferred communication style: Simple, everyday language.
 - **SPA Fallback**: `vercel.json` configured for client-side routing and OAuth callbacks.
 - **Backend Modular Architecture**: Monolithic `server/routes.ts` modularized into domain-specific route modules (`reference`, `user`, `projects`, `subcontracts`, `courses`, `admin`, `payments`, `bank-transfer`) using a `RouteDeps` pattern for shared dependencies and consistent authentication. All modules use authenticated Supabase clients and RLS.
 - **Frontend Performance Optimizations**: Implemented code-splitting and lazy loading for Admin, Learning, and Media pages to reduce initial bundle size and improve load times. Pages are lazy-loaded based on role-restriction, heavy dependencies, or infrequency of access.
-- **Database Views for Learning Module**: Optimized Supabase views for fast data access:
+- **Database Views for Learning Module**: Optimized Supabase views following `course_*_view` naming convention for consistency:
   - `course_lessons_total_view`: Total lessons per course
   - `course_progress_view`: User progress per course (used in CourseDashboardTab)
   - `course_user_active_days_view`: User activity tracking
