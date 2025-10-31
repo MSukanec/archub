@@ -542,7 +542,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         {/* Notes Card - Navega a Apuntes */}
         <StatCard onCardClick={() => navigateToTab('Apuntes')}>
           <StatCardTitle>Apuntes Creados</StatCardTitle>
-          <StatCardContent>
+          <StatCardContent className={recentNotes.length === 0 ? "mt-2" : "mt-4"}>
             {recentNotes.length === 0 ? (
               <EmptyState
                   icon={<FileText />}
@@ -620,7 +620,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         {/* Markers Card - Navega a Marcadores */}
         <StatCard onCardClick={() => navigateToTab('Marcadores')}>
           <StatCardTitle>Marcadores Creados</StatCardTitle>
-          <StatCardContent>
+          <StatCardContent className={recentMarkers.length === 0 ? "mt-2" : "mt-4"}>
             {recentMarkers.length === 0 ? (
               <EmptyState
                   icon={<Bookmark />}
