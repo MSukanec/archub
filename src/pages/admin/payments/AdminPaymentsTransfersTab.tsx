@@ -115,45 +115,8 @@ const AdminPaymentsTransfersTab = () => {
     },
   });
 
-  const rejectPaymentMutation = useMutation({
-    mutationFn: async (paymentId: string) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const response = await fetch(`/api/admin/payments/${paymentId}/reject`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to reject payment');
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/payments'] });
-      toast({
-        title: 'Pago rechazado',
-        description: 'El pago ha sido rechazado.',
-      });
-      setConfirmAction({ open: false, payment: null, action: 'reject' });
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo rechazar el pago',
-        variant: 'destructive',
-      });
-    },
-  });
-
   const handleApprove = (payment: BankTransferPayment) => {
     setConfirmAction({ open: true, payment, action: 'approve' });
-  };
-
-  const handleReject = (payment: BankTransferPayment) => {
-    setConfirmAction({ open: true, payment, action: 'reject' });
   };
 
   const handleViewReceipt = (url: string | null) => {
@@ -197,16 +160,11 @@ const AdminPaymentsTransfersTab = () => {
       ),
     },
     {
-      key: 'course',
-      label: 'Curso',
+      key: 'product',
+      label: 'Producto',
       width: '25%',
       render: (payment: BankTransferPayment) => (
-        <div className="flex flex-col">
-          <span className="text-sm">{payment.course_prices?.courses?.title}</span>
-          <span className="text-xs text-muted-foreground">
-            {payment.course_prices?.months} {payment.course_prices?.months === 1 ? 'mes' : 'meses'}
-          </span>
-        </div>
+        <span className="text-sm">{payment.course_prices?.courses?.title || 'N/A'}</span>
       ),
     },
     {
@@ -233,7 +191,7 @@ const AdminPaymentsTransfersTab = () => {
       render: (payment: BankTransferPayment) => {
         if (payment.status === 'pending') {
           return (
-            <Badge className="bg-accent/10 text-accent border-accent/30">
+            <Badge className="bg-[hsl(var(--warning))] text-[hsl(var(--warning-text))] border-[hsl(var(--warning))]">
               <AlertCircle className="h-3 w-3 mr-1" />
               Pendiente
             </Badge>
@@ -241,14 +199,14 @@ const AdminPaymentsTransfersTab = () => {
         }
         if (payment.status === 'approved') {
           return (
-            <Badge className="bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800">
+            <Badge variant="secondary" className="bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400">
               <CheckCircle2 className="h-3 w-3 mr-1" />
               Aprobado
             </Badge>
           );
         }
         return (
-          <Badge className="bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800">
+          <Badge variant="destructive">
             <XCircle className="h-3 w-3 mr-1" />
             Rechazado
           </Badge>
@@ -262,7 +220,6 @@ const AdminPaymentsTransfersTab = () => {
       render: (payment: BankTransferPayment) => (
         <div className="flex items-center gap-2">
           <Button
-            variant="ghost"
             size="sm"
             onClick={() => handleViewReceipt(payment.receipt_url)}
             data-testid={`button-view-receipt-${payment.id}`}
@@ -271,28 +228,14 @@ const AdminPaymentsTransfersTab = () => {
             Ver
           </Button>
           {payment.status === 'pending' && (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleApprove(payment)}
-                className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950/20"
-                data-testid={`button-approve-${payment.id}`}
-              >
-                <CheckCircle2 className="h-4 w-4 mr-1" />
-                Aprobar
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleReject(payment)}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
-                data-testid={`button-reject-${payment.id}`}
-              >
-                <XCircle className="h-4 w-4 mr-1" />
-                Rechazar
-              </Button>
-            </>
+            <Button
+              size="sm"
+              onClick={() => handleApprove(payment)}
+              data-testid={`button-approve-${payment.id}`}
+            >
+              <CheckCircle2 className="h-4 w-4 mr-1" />
+              Aprobar
+            </Button>
           )}
         </div>
       ),
@@ -361,25 +304,12 @@ const AdminPaymentsTransfersTab = () => {
       <AlertDialog open={confirmAction.open} onOpenChange={(open) => !open && setConfirmAction({ open, payment: null, action: 'approve' })}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {confirmAction.action === 'approve' ? 'Aprobar Pago' : 'Rechazar Pago'}
-            </AlertDialogTitle>
+            <AlertDialogTitle>Aprobar Pago</AlertDialogTitle>
             <AlertDialogDescription>
-              {confirmAction.action === 'approve' ? (
-                <>
-                  ¿Estás seguro de que deseas aprobar este pago?
-                  <br />
-                  <br />
-                  El usuario <strong>{confirmAction.payment?.users?.full_name || confirmAction.payment?.users?.email}</strong> será inscrito automáticamente en el curso <strong>{confirmAction.payment?.course_prices?.courses?.title}</strong>.
-                </>
-              ) : (
-                <>
-                  ¿Estás seguro de que deseas rechazar este pago?
-                  <br />
-                  <br />
-                  El usuario <strong>{confirmAction.payment?.users?.full_name || confirmAction.payment?.users?.email}</strong> NO será inscrito en el curso.
-                </>
-              )}
+              ¿Estás seguro de que deseas aprobar este pago?
+              <br />
+              <br />
+              El usuario <strong>{confirmAction.payment?.users?.full_name || confirmAction.payment?.users?.email}</strong> será inscrito automáticamente en el curso <strong>{confirmAction.payment?.course_prices?.courses?.title}</strong>.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -387,16 +317,11 @@ const AdminPaymentsTransfersTab = () => {
             <AlertDialogAction
               onClick={() => {
                 if (confirmAction.payment) {
-                  if (confirmAction.action === 'approve') {
-                    approvePaymentMutation.mutate(confirmAction.payment.id);
-                  } else {
-                    rejectPaymentMutation.mutate(confirmAction.payment.id);
-                  }
+                  approvePaymentMutation.mutate(confirmAction.payment.id);
                 }
               }}
-              className={confirmAction.action === 'reject' ? 'bg-red-600 hover:bg-red-700' : ''}
             >
-              {confirmAction.action === 'approve' ? 'Aprobar' : 'Rechazar'}
+              Aprobar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
