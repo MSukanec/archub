@@ -7,6 +7,106 @@ import type { RouteDeps } from "./_base";
 export function registerUserRoutes(app: Express, deps: RouteDeps): void {
   const { supabase, createAuthenticatedClient, extractToken } = deps;
 
+  // ========== COURSE PROGRESS ENDPOINT ==========
+  
+  // GET /api/user/course-progress - Get user's course progress from optimized view
+  // Optional query param: course_id to filter by specific course
+  app.get("/api/user/course-progress", async (req, res) => {
+    try {
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = createAuthenticatedClient(token);
+      
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      // Get user from users table by auth_id
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      if (!dbUser) {
+        return res.json([]);
+      }
+      
+      // Build query
+      let query = authenticatedSupabase
+        .from('course_progress_view')
+        .select('*')
+        .eq('user_id', dbUser.id);
+      
+      // Optional filter by course_id
+      const courseId = req.query.course_id as string;
+      if (courseId) {
+        query = query.eq('course_id', courseId);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) {
+        console.error('Error fetching course progress:', error);
+        return res.status(500).json({ error: 'Failed to fetch course progress' });
+      }
+      
+      res.json(data || []);
+    } catch (error) {
+      console.error('Error in /api/user/course-progress:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // GET /api/user/study-time - Get user's study time metrics from optimized view
+  app.get("/api/user/study-time", async (req, res) => {
+    try {
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = createAuthenticatedClient(token);
+      
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      // Get user from users table by auth_id
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      if (!dbUser) {
+        return res.json({ seconds_lifetime: 0, seconds_this_month: 0 });
+      }
+      
+      // Use optimized view
+      const { data, error } = await authenticatedSupabase
+        .from('course_user_study_time_view')
+        .select('*')
+        .eq('user_id', dbUser.id)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error fetching study time:', error);
+        return res.status(500).json({ error: 'Failed to fetch study time' });
+      }
+      
+      res.json(data || { seconds_lifetime: 0, seconds_this_month: 0 });
+    } catch (error) {
+      console.error('Error in /api/user/study-time:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   // Get current user data
   app.get("/api/current-user", async (req, res) => {
     try {

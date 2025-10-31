@@ -29,36 +29,27 @@ export default function CourseList() {
     }
   }, [setSidebarContext, setSidebarLevel, sidebarLevel])
 
-  // 🚀 OPTIMIZACIÓN: Usar vistas pre-calculadas de Supabase
+  // 🚀 OPTIMIZACIÓN: Usar endpoint backend que accede a vistas optimizadas
   const { data: courseProgressData = [] } = useQuery({
-    queryKey: ['course-progress-view'],
+    queryKey: ['/api/user/course-progress'],
     queryFn: async () => {
       if (!supabase) return [];
       
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return [];
 
-      // Obtener el user_id de la tabla users
-      const { data: userData } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_id', user.id)
-        .maybeSingle();
+      const response = await fetch('/api/user/course-progress', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
       
-      if (!userData) return [];
-
-      // Usar la vista optimizada course_progress_view
-      const { data, error } = await supabase
-        .from('course_progress_view')
-        .select('*')
-        .eq('user_id', userData.id);
-      
-      if (error) {
-        console.error('Error fetching course progress:', error);
+      if (!response.ok) {
+        console.error('Error fetching course progress:', await response.text());
         return [];
       }
       
-      return data || [];
+      return response.json();
     },
     enabled: !!supabase,
     staleTime: 10000, // 🚀 10 segundos para detectar progreso nuevo

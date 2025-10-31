@@ -31,6 +31,17 @@ Archub is a comprehensive construction management platform designed to optimize 
 - **Frontend caching**: 10s staleTime with 20s auto-refresh
 - **Result**: Dashboard load time reduced from 10+ seconds to sub-second
 
+#### Critical Bug Fix - RLS Errors (500)
+- **Problem**: Frontend queries directly to Supabase views caused 500 errors due to missing RLS policies
+- **Solution**: Created backend API endpoints that safely access views with proper authentication:
+  - `GET /api/user/course-progress` - Get user's course progress (supports optional course_id filter)
+  - `GET /api/user/study-time` - Get user's study time metrics
+- **Files updated**: 
+  - `server/routes/user.ts` - Added new endpoints
+  - `src/pages/learning/courses/CourseList.tsx` - Uses backend endpoint instead of direct view query
+  - `src/pages/learning/courses/view/CourseDashboardTab.tsx` - Uses backend endpoints instead of direct view queries
+- **Result**: Zero 500 errors, all data loads correctly through authenticated backend
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

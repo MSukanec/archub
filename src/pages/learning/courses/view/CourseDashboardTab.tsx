@@ -52,7 +52,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     }
   }, [courseId]);
 
-  // Get course progress using the course_progress_view
+  // Get course progress using backend endpoint (avoids RLS issues with views)
   const { data: courseProgress } = useQuery({
     queryKey: ['course-progress', courseId],
     queryFn: async () => {
@@ -61,30 +61,20 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return null;
 
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!authUser?.email) return null;
+      const response = await fetch(`/api/user/course-progress?course_id=${courseId}`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
 
-      const { data: userRecord } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_id', authUser.id)
-        .single();
-
-      if (!userRecord) return null;
-
-      const { data, error } = await supabase
-        .from('course_progress_view')
-        .select('*')
-        .eq('course_id', courseId)
-        .eq('user_id', userRecord.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching course progress:', error);
+      if (!response.ok) {
+        console.error('Error fetching course progress:', await response.text());
         return null;
       }
 
-      return data;
+      const data = await response.json();
+      // Backend returns array, we need single object
+      return data && data.length > 0 ? data[0] : null;
     },
     enabled: !!courseId && !!supabase
   });
@@ -416,7 +406,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     enabled: !!courseId && !!supabase
   });
 
-  // Get user's study time this month from course_user_study_time_view
+  // Get user's study time using backend endpoint (avoids RLS issues with views)
   const { data: monthlyStudyTime } = useQuery({
     queryKey: ['monthly-study-time'],
     queryFn: async () => {
@@ -425,28 +415,18 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return { seconds_this_month: 0 };
 
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!authUser?.email) return { seconds_this_month: 0 };
+      const response = await fetch('/api/user/study-time', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
 
-      const { data: userRecord } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_id', authUser.id)
-        .single();
-
-      if (!userRecord) return { seconds_this_month: 0 };
-
-      const { data, error } = await supabase
-        .from('course_user_study_time_view')
-        .select('seconds_this_month')
-        .eq('user_id', userRecord.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching monthly study time:', error);
+      if (!response.ok) {
+        console.error('Error fetching study time:', await response.text());
         return { seconds_this_month: 0 };
       }
 
+      const data = await response.json();
       return { seconds_this_month: data?.seconds_this_month || 0 };
     },
     enabled: !!supabase
