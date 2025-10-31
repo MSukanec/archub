@@ -34,6 +34,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const { user_id, course_slug, currency = "ARS", months = 12, code } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
+    console.log('[MP create-preference] Request received:', {
+      user_id,
+      course_slug,
+      currency,
+      months,
+      hasCouponCode: !!code,
+      couponCode: code ? code.trim() : null
+    });
+
     if (!user_id || !course_slug) {
       return res
         .setHeader("Access-Control-Allow-Origin", "*")
@@ -93,11 +102,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Validar cupón si se proporcionó (server-side validation)
     if (code && code.trim()) {
+      console.log('[MP create-preference] Validando cupón:', {
+        code: code.trim(),
+        user_id,
+        course_id: course.id,
+        price: unit_price,
+        currency
+      });
+
       const { data: validationResult, error: couponError } = await supabase.rpc('validate_coupon', {
         p_code: code.trim(),
         p_course_id: course.id,
         p_price: unit_price,
-        p_currency: currency
+        p_currency: currency,
+        p_user_id: user_id
       });
 
       if (couponError) {
@@ -105,10 +123,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res
           .setHeader("Access-Control-Allow-Origin", "*")
           .status(400)
-          .json({ ok: false, error: "Error validando cupón" });
+          .json({ ok: false, error: "Error validando cupón", details: couponError.message });
       }
 
       if (!validationResult || !validationResult.ok) {
+        console.error('[MP create-preference] Cupón inválido:', {
+          code: code.trim(),
+          reason: validationResult?.reason,
+          validationResult
+        });
         return res
           .setHeader("Access-Control-Allow-Origin", "*")
           .status(400)
