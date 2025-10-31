@@ -62,6 +62,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const { selectedProjectId, setSelectedProject } = useProjectContext();
   
   const [expandedProjectSelector, setExpandedProjectSelector] = useState(false);
+  const [expandedOrganizationSelector, setExpandedOrganizationSelector] = useState(false);
   
   // Bloquear scroll del body cuando el menú está abierto
   useEffect(() => {
@@ -440,43 +441,84 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             </nav>
           </div>
 
-          {/* Footer con selector de proyecto y avatar */}
+          {/* Footer con selector contextual y avatar */}
           <div className="p-4 border-t border-[var(--main-sidebar-border)]">
             <div className="flex items-center gap-3">
-              {/* Selector de proyecto - lado izquierdo */}
-              <div className="flex-1 relative">
-                <button
-                  onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
-                  className="w-full p-3 text-left bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-[var(--main-sidebar-fg)] flex items-center shadow-sm hover:bg-[var(--card-hover-bg)] transition-colors duration-150"
-                >
-                  <FolderOpen className="h-5 w-5 mr-3" />
-                  <span className="flex-1 truncate text-sm">
-                    {currentProjectName}
-                  </span>
-                  <ChevronDown className={cn(
-                    "h-5 w-5 transition-transform duration-200",
-                    expandedProjectSelector && "rotate-180"
-                  )} />
-                </button>
-                
-                {/* Lista de proyectos expandida */}
-                {expandedProjectSelector && (
-                  <div className="absolute bottom-full left-0 right-0 mb-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-lg max-h-40 overflow-y-auto z-10">
-                    {projectsData?.map((project: any) => (
+              {/* Selector contextual según sidebarLevel */}
+              {sidebarLevel === 'organization' && (
+                /* Selector de Organizaciones */
+                <div className="flex-1 relative">
+                  <button
+                    onClick={() => setExpandedOrganizationSelector(!expandedOrganizationSelector)}
+                    className="w-full p-3 text-left bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-[var(--main-sidebar-fg)] flex items-center shadow-sm hover:bg-[var(--card-hover-bg)] transition-colors duration-150"
+                  >
+                    <Building className="h-5 w-5 mr-3" />
+                    <span className="flex-1 truncate text-sm">
+                      {currentOrganization?.name || "Seleccionar organización"}
+                    </span>
+                    <ChevronDown className={cn(
+                      "h-5 w-5 transition-transform duration-200",
+                      expandedOrganizationSelector && "rotate-180"
+                    )} />
+                  </button>
+                  
+                  {/* Lista de organizaciones expandida */}
+                  {expandedOrganizationSelector && (
+                    <div className="absolute bottom-full left-0 right-0 mb-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-lg max-h-40 overflow-y-auto z-10">
                       <button
-                        key={project.id}
-                        onClick={() => handleProjectSelect(project.id)}
-                        className={cn(
-                          "w-full p-3 text-left text-sm hover:bg-[var(--card-hover-bg)] transition-colors duration-150 text-[var(--main-sidebar-fg)]",
-                          project.id === selectedProjectId && "bg-[hsl(76,100%,40%)] text-white"
-                        )}
+                        className="w-full p-3 text-left text-sm bg-[hsl(76,100%,40%)] text-white"
                       >
-                        {project.name}
+                        {currentOrganization?.name || "Organización actual"}
                       </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+                      <div className="p-3 text-center text-xs text-[var(--main-sidebar-fg)] opacity-60">
+                        Multi-organización próximamente
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {sidebarLevel === 'project' && (
+                /* Selector de Proyectos */
+                <div className="flex-1 relative">
+                  <button
+                    onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
+                    className="w-full p-3 text-left bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-[var(--main-sidebar-fg)] flex items-center shadow-sm hover:bg-[var(--card-hover-bg)] transition-colors duration-150"
+                  >
+                    <FolderOpen className="h-5 w-5 mr-3" />
+                    <span className="flex-1 truncate text-sm">
+                      {currentProjectName}
+                    </span>
+                    <ChevronDown className={cn(
+                      "h-5 w-5 transition-transform duration-200",
+                      expandedProjectSelector && "rotate-180"
+                    )} />
+                  </button>
+                  
+                  {/* Lista de proyectos expandida */}
+                  {expandedProjectSelector && (
+                    <div className="absolute bottom-full left-0 right-0 mb-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-lg max-h-40 overflow-y-auto z-10">
+                      {projectsData?.map((project: any) => (
+                        <button
+                          key={project.id}
+                          onClick={() => handleProjectSelect(project.id)}
+                          className={cn(
+                            "w-full p-3 text-left text-sm hover:bg-[var(--card-hover-bg)] transition-colors duration-150 text-[var(--main-sidebar-fg)]",
+                            project.id === selectedProjectId && "bg-[hsl(76,100%,40%)] text-white"
+                          )}
+                        >
+                          {project.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Spacer para admin y learning (sin selector) */}
+              {(sidebarLevel === 'admin' || sidebarLevel === 'learning' || sidebarLevel === 'general') && (
+                <div className="flex-1" />
+              )}
 
               {/* Avatar del usuario con badge de notificaciones */}
               <div className="relative">
