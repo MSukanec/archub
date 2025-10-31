@@ -117,6 +117,7 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
         .insert({
           order_id,
           user_id: profile.id,
+          course_id: courseId, // ✅ Guardamos el course_id aquí
           payment_id: null, // Se llenará cuando suba el comprobante
           amount: String(amount),
           currency,
@@ -196,25 +197,10 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
         return res.status(400).json({ error: "Cannot upload receipt for non-pending payment" });
       }
 
-      // Get course info from order_id -> checkout_sessions -> course_prices -> courses
-      const { data: session } = await adminClient
-        .from('checkout_sessions')
-        .select('course_price_id')
-        .eq('id', existingPayment.order_id)
-        .maybeSingle();
-
-      let courseId: string | null = null;
-      if (session?.course_price_id) {
-        const { data: coursePrice } = await adminClient
-          .from('course_prices')
-          .select('courses!inner(id)')
-          .eq('id', session.course_price_id)
-          .maybeSingle();
-        
-        if (coursePrice) {
-          courseId = (coursePrice.courses as any)?.id || null;
-        }
-      }
+      // ✅ Usamos el course_id que guardamos al crear la transferencia
+      const courseId = existingPayment.course_id;
+      
+      console.log('[bank-transfer/upload] Using course_id from bank_transfer_payment:', courseId);
 
       // Validate file extension
       const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png'];

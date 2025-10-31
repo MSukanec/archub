@@ -137,17 +137,36 @@ async function enrollUserInCourse(user_id: string, course_id: string, months: nu
   
   console.log('📚 [enrollUserInCourse] Enrollment data:', enrollmentData);
   
+  // Usar INSERT simple - si el usuario ya está inscrito, el constraint único lo detectará
   const { data, error } = await getAdminClient()
     .from('course_enrollments')
-    .upsert(enrollmentData, { onConflict: 'user_id,course_id' })
+    .insert(enrollmentData)
     .select();
   
   if (error) {
+    // Si el error es por duplicado (usuario ya inscrito), es aceptable
+    if (error.code === '23505') {
+      console.log('⚠️ [enrollUserInCourse] User already enrolled, extending expiration...');
+      // Actualizar solo la fecha de expiración
+      const { data: updated, error: updateError } = await getAdminClient()
+        .from('course_enrollments')
+        .update({ expires_at: expiresAt.toISOString(), status: 'active' })
+        .eq('user_id', user_id)
+        .eq('course_id', course_id)
+        .select();
+      
+      if (updateError) {
+        console.error('❌ [enrollUserInCourse] ERROR updating expiration:', updateError);
+        throw updateError;
+      }
+      console.log('✅ [enrollUserInCourse] Success! Expiration extended:', updated);
+      return updated;
+    }
     console.error('❌ [enrollUserInCourse] ERROR:', error);
     throw error;
   }
   
-  console.log('✅ [enrollUserInCourse] Success! Enrollment created/updated:', data);
+  console.log('✅ [enrollUserInCourse] Success! Enrollment created:', data);
   return data;
 }
 

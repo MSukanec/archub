@@ -757,8 +757,9 @@ export const bank_transfer_payments = pgTable("bank_transfer_payments", {
   id: uuid("id").primaryKey().defaultRandom(),
   order_id: uuid("order_id").notNull(),
   user_id: uuid("user_id").notNull(),
+  course_id: uuid("course_id"), // ID del curso (guardado al crear)
   course_price_id: uuid("course_price_id"),
-  payment_id: uuid("payment_id"), // 🆕 FK a payments
+  payment_id: uuid("payment_id"), // FK a payments
   amount: numeric("amount", { precision: 14, scale: 2 }).notNull(),
   currency: text("currency").notNull(),
   receipt_url: text("receipt_url"),
