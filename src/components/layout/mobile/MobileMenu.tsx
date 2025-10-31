@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
   X,
@@ -19,11 +19,13 @@ import {
   Layers,
   ListTodo,
   BookOpen,
+  ArrowLeft,
+  MessageCircle,
+  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
@@ -37,6 +39,8 @@ import { useProjectContext } from "@/stores/projectContext";
 import { useCourseSidebarStore } from "@/stores/sidebarStore";
 import { CourseSidebar } from "@/components/layout/CourseSidebar";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
 
 interface MobileMenuProps {
   onClose: () => void;
@@ -55,7 +59,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { sidebarLevel, setSidebarLevel } = useNavigationStore();
-  const { selectedProjectId, setSelectedProject, setCurrentOrganization } = useProjectContext();
+  const { selectedProjectId, setSelectedProject } = useProjectContext();
   
   const [expandedProjectSelector, setExpandedProjectSelector] = useState(false);
   
@@ -78,6 +82,13 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const currentProjectName = currentProject?.name || "Seleccionar proyecto";
   const isAdmin = useIsAdmin();
   const { toast } = useToast();
+
+  // Obtener notificaciones para el badge
+  const { data: notifications } = useQuery<any[]>({
+    queryKey: ['/api/notifications'],
+    enabled: !!userData?.user?.id,
+  });
+  const unreadCount = Array.isArray(notifications) ? notifications.filter((n: any) => !n.read_at).length : 0;
 
   // CourseSidebar state
   const { isVisible: isCourseSidebarVisible, modules, lessons, currentLessonId } = useCourseSidebarStore();
@@ -118,6 +129,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     if (href === '/organization/dashboard') {
       return location === '/organization/dashboard';
     }
+    if (href.startsWith('http')) {
+      return false; // External links are never "active"
+    }
     return location === href || location.startsWith(href + '/');
   };
 
@@ -154,6 +168,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     } else if (sidebarLevel === 'admin' && isAdmin) {
       return [
         { id: 'community', label: 'Comunidad', icon: Users, href: '/admin/community' },
+        { id: 'payments', label: 'Pagos', icon: Wallet, href: '/admin/payments' },
         { id: 'courses', label: 'Cursos', icon: BookOpen, href: '/admin/courses' },
         { id: 'tasks', label: 'Tareas', icon: ListTodo, href: '/admin/tasks' },
         { id: 'costs', label: 'Costos', icon: DollarSign, href: '/admin/costs' },
@@ -164,6 +179,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       return [
         { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/learning/dashboard' },
         { id: 'courses', label: 'Cursos', icon: GraduationCap, href: '/learning/courses' },
+        { id: 'community', label: 'Comunidad Discord', icon: MessageCircle, href: 'https://discord.com/channels/868615664070443008' },
       ];
     }
     
@@ -181,17 +197,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     }
     closeMenu();
     onClose();
-  };
-
-  // Función para obtener el título del nivel actual
-  const getCurrentTitle = () => {
-    const titleMap = {
-      'organization': 'Organización',
-      'project': 'Proyecto',
-      'admin': 'Administración',
-      'learning': 'Capacitación'
-    };
-    return titleMap[sidebarLevel as keyof typeof titleMap] || 'Menú';
   };
 
   // Configuración de divisores con texto (igual que desktop)
@@ -224,10 +229,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       >
         {/* Main Menu Panel */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Header con título ARCHUB y botón de cierre */}
-          <div className="flex justify-between items-center h-14 px-4 pr-6 border-b border-[var(--main-sidebar-border)]">
+          {/* Header con botón de cierre */}
+          <div className="flex justify-between items-center h-14 px-4 border-b border-[var(--main-sidebar-border)]">
             <h1 className="text-lg font-semibold text-[var(--main-sidebar-fg)]">
-              {getCurrentTitle()}
+              Menú
             </h1>
             <Button
               variant="ghost"
@@ -242,180 +247,197 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           {/* Navigation Menu - Scrollable */}
           <div className="flex-1 px-4 py-4 overflow-y-auto">
             <nav className="space-y-2">
-              {navigationItems.map((item, index) => {
-                const isActive = isButtonActive(item.href);
-                const dividerInfo = getDividerInfo(item, index);
-                
-                const button = (
+              {sidebarLevel === 'general' ? (
+                /* MENU GENERAL - NIVEL 1 */
+                <>
+                  {/* Botón Inicio */}
                   <button
                     onClick={() => {
-                      navigate(item.href);
+                      navigate('/home');
                       handleCloseMenu();
                     }}
                     className={cn(
                       "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-                      isActive
+                      location === '/home'
                         ? "bg-[hsl(76,100%,40%)] text-white" 
                         : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
                     )}
+                    data-testid="button-mobile-home"
                   >
-                    <item.icon className="h-5 w-5" />
-                    {item.label}
+                    <Home className="h-5 w-5" />
+                    Inicio
                   </button>
-                );
-                
-                return (
-                  <div key={item.id}>
-                    {item.restricted ? (
-                      <PlanRestricted reason={item.restricted}>
-                        {button}
-                      </PlanRestricted>
-                    ) : (
-                      button
-                    )}
-                    {dividerInfo.show && (
-                      <div className="my-3 flex items-center gap-2 w-full">
-                        <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                        <span className="text-[10px] font-medium text-[var(--main-sidebar-fg)] opacity-60 px-1">
-                          {dividerInfo.text}
-                        </span>
-                        <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                      </div>
-                    )}
+
+                  {/* Divisor "Secciones" */}
+                  <div className="my-3 flex items-center gap-2 w-full">
+                    <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+                    <span className="text-[10px] font-medium text-[var(--main-sidebar-fg)] opacity-60 px-1">
+                      Secciones
+                    </span>
+                    <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
                   </div>
-                );
-              })}
+
+                  {/* Botón Organización */}
+                  <button
+                    onClick={() => {
+                      setSidebarLevel('organization');
+                      navigate('/organization/dashboard');
+                    }}
+                    className={cn(
+                      "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
+                      (location.startsWith('/organization') || location.startsWith('/contacts') || location.startsWith('/movements') || location.startsWith('/finances') || location.startsWith('/analysis'))
+                        ? "bg-[hsl(76,100%,40%)] text-white" 
+                        : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
+                    )}
+                    data-testid="button-mobile-organization"
+                  >
+                    <Building className="h-5 w-5" />
+                    Organización
+                  </button>
+
+                  {/* Botón Proyecto */}
+                  <button
+                    onClick={() => {
+                      if (!projectsData || projectsData.length === 0) {
+                        toast({
+                          title: "No hay proyectos creados",
+                          description: "Crea un proyecto primero desde Organización",
+                          variant: "destructive"
+                        });
+                        return;
+                      }
+                      if (!selectedProjectId) {
+                        toast({
+                          title: "No hay proyecto seleccionado",
+                          description: "Selecciona un proyecto primero",
+                          variant: "destructive"
+                        });
+                        return;
+                      }
+                      setSidebarLevel('project');
+                      navigate('/project/dashboard');
+                    }}
+                    disabled={!projectsData || projectsData.length === 0}
+                    className={cn(
+                      "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150",
+                      (!projectsData || projectsData.length === 0)
+                        ? "opacity-50 cursor-not-allowed bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)]"
+                        : (location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients'))
+                          ? "bg-[hsl(76,100%,40%)] text-white shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5" 
+                          : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)] shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5"
+                    )}
+                    data-testid="button-mobile-project"
+                  >
+                    <FolderOpen className="h-5 w-5" />
+                    Proyecto
+                  </button>
+
+                  {/* Botón Capacitaciones */}
+                  <button
+                    onClick={() => {
+                      setSidebarLevel('learning');
+                      navigate('/learning/dashboard');
+                    }}
+                    className={cn(
+                      "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
+                      location.startsWith('/learning')
+                        ? "bg-[hsl(76,100%,40%)] text-white" 
+                        : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
+                    )}
+                    data-testid="button-mobile-learning"
+                  >
+                    <GraduationCap className="h-5 w-5" />
+                    Capacitaciones
+                  </button>
+
+                  {/* Botón Administración - solo si es admin */}
+                  {isAdmin && (
+                    <button
+                      onClick={() => {
+                        setSidebarLevel('admin');
+                        navigate('/admin/community');
+                      }}
+                      className={cn(
+                        "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
+                        location.startsWith('/admin')
+                          ? "bg-[hsl(76,100%,40%)] text-white" 
+                          : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
+                      )}
+                      data-testid="button-mobile-admin"
+                    >
+                      <Crown className="h-5 w-5" />
+                      Administración
+                    </button>
+                  )}
+                </>
+              ) : (
+                /* MENU ESPECÍFICO - NIVEL 2 */
+                <>
+                  {/* Botón VOLVER */}
+                  <button
+                    onClick={() => {
+                      setSidebarLevel('general');
+                      navigate('/home');
+                    }}
+                    className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
+                    data-testid="button-mobile-back"
+                  >
+                    <ArrowLeft className="h-5 w-5" />
+                    Volver
+                  </button>
+
+                  {/* Botones de navegación de segundo nivel */}
+                  {navigationItems.map((item, index) => {
+                    const isActive = isButtonActive(item.href);
+                    const dividerInfo = getDividerInfo(item, index);
+                    const isExternal = item.href.startsWith('http');
+                    
+                    const button = (
+                      <button
+                        onClick={() => {
+                          if (isExternal) {
+                            window.open(item.href, '_blank');
+                          } else {
+                            navigate(item.href);
+                            handleCloseMenu();
+                          }
+                        }}
+                        className={cn(
+                          "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
+                          isActive
+                            ? "bg-[hsl(76,100%,40%)] text-white" 
+                            : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
+                        )}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        {item.label}
+                      </button>
+                    );
+                    
+                    return (
+                      <div key={item.id}>
+                        {item.restricted ? (
+                          <PlanRestricted reason={item.restricted}>
+                            {button}
+                          </PlanRestricted>
+                        ) : (
+                          button
+                        )}
+                        {dividerInfo.show && (
+                          <div className="my-3 flex items-center gap-2 w-full">
+                            <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+                            <span className="text-[10px] font-medium text-[var(--main-sidebar-fg)] opacity-60 px-1">
+                              {dividerInfo.text}
+                            </span>
+                            <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </>
+              )}
             </nav>
-          </div>
-
-          {/* Bottom Controls */}
-          <div className="p-4 space-y-2 border-t border-[var(--main-sidebar-border)]">
-            {/* Inicio Button */}
-            <button
-              onClick={() => {
-                setSidebarLevel('general');
-                navigate('/home');
-                handleCloseMenu();
-              }}
-              className={cn(
-                "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-                sidebarLevel === 'general'
-                  ? "bg-[hsl(76,100%,40%)] text-white" 
-                  : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
-              )}
-              data-testid="button-mobile-home"
-            >
-              <Home className="h-5 w-5" />
-              Inicio
-            </button>
-
-            {/* Divider "Secciones" */}
-            <div className="my-3 flex items-center gap-2 w-full">
-              <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-              <span className="text-[10px] font-medium text-[var(--main-sidebar-fg)] opacity-60 px-1">
-                Secciones
-              </span>
-              <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-            </div>
-
-            {/* Organization Button */}
-            <button
-              onClick={() => {
-                setSidebarLevel('organization');
-                navigate('/organization/dashboard');
-                handleCloseMenu();
-              }}
-              className={cn(
-                "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-                sidebarLevel === 'organization'
-                  ? "bg-[hsl(76,100%,40%)] text-white" 
-                  : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
-              )}
-            >
-              <Building className="h-5 w-5" />
-              Organización
-            </button>
-
-            {/* Project Button */}
-            <button
-              onClick={() => {
-                if (!projectsData || projectsData.length === 0) {
-                  toast({
-                    title: "No hay proyectos creados",
-                    description: "Crea un proyecto primero desde Organización",
-                    variant: "destructive"
-                  });
-                  return;
-                }
-                if (!selectedProjectId) {
-                  toast({
-                    title: "No hay proyecto seleccionado",
-                    description: "Selecciona un proyecto primero",
-                    variant: "destructive"
-                  });
-                  return;
-                }
-                if (sidebarLevel === 'project') {
-                  setSidebarLevel('organization');
-                } else {
-                  setSidebarLevel('project');
-                }
-              }}
-              disabled={!projectsData || projectsData.length === 0}
-              className={cn(
-                "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150",
-                (!projectsData || projectsData.length === 0)
-                  ? "opacity-50 cursor-not-allowed bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)]"
-                  : sidebarLevel === 'project'
-                    ? "bg-[hsl(76,100%,40%)] text-white shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5" 
-                    : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)] shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5"
-              )}
-            >
-              <FolderOpen className="h-5 w-5" />
-              Proyecto
-            </button>
-
-            {/* Admin Button - solo si es admin */}
-            {isAdmin && (
-              <button
-                onClick={() => {
-                  if (sidebarLevel === 'admin') {
-                    setSidebarLevel('organization');
-                  } else {
-                    setSidebarLevel('admin');
-                  }
-                }}
-                className={cn(
-                  "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-                  sidebarLevel === 'admin'
-                    ? "bg-[hsl(76,100%,40%)] text-white" 
-                    : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
-                )}
-              >
-                <Crown className="h-5 w-5" />
-                Administración
-              </button>
-            )}
-
-            {/* Learning Button */}
-            <button
-              onClick={() => {
-                if (sidebarLevel === 'learning') {
-                  setSidebarLevel('organization');
-                } else {
-                  setSidebarLevel('learning');
-                }
-              }}
-              className={cn(
-                "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-                sidebarLevel === 'learning'
-                  ? "bg-[hsl(76,100%,40%)] text-white" 
-                  : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
-              )}
-            >
-              <GraduationCap className="h-5 w-5" />
-              Capacitación
-            </button>
           </div>
 
           {/* Footer con selector de proyecto y avatar */}
@@ -456,22 +478,28 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 )}
               </div>
 
-              {/* Notificaciones */}
-              <NotificationBell isExpanded={true} />
-
-              {/* Avatar del usuario - lado derecho */}
-              <Avatar 
-                className="h-12 w-12 cursor-pointer hover:opacity-80 transition-opacity"
-                onClick={() => {
-                  navigate('/profile');
-                  handleCloseMenu();
-                }}
-              >
-                <AvatarImage src={userData?.user?.avatar_url} />
-                <AvatarFallback className="bg-[var(--accent)] text-white text-sm">
-                  {userData?.user?.full_name?.substring(0, 2)?.toUpperCase() || 'U'}
-                </AvatarFallback>
-              </Avatar>
+              {/* Avatar del usuario con badge de notificaciones */}
+              <div className="relative">
+                <Avatar 
+                  className="h-12 w-12 cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => {
+                    navigate('/profile');
+                    handleCloseMenu();
+                  }}
+                >
+                  <AvatarImage src={userData?.user?.avatar_url} />
+                  <AvatarFallback className="bg-[var(--accent)] text-white text-sm">
+                    {userData?.user?.full_name?.substring(0, 2)?.toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                {unreadCount > 0 && (
+                  <Badge 
+                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs border-2 border-[var(--card-bg)]"
+                  >
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
         </div>
