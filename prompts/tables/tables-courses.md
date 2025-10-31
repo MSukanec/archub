@@ -377,7 +377,7 @@ VISTA course_user_study_time_view:
   }
 ]
 
-VISTA lesson_completions_view (optimización para dashboard):
+VISTA course_lesson_completions_view (optimización para dashboard):
 
 [
   {

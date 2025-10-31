@@ -198,9 +198,41 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
       }
 
       // ✅ Usamos el course_id que guardamos al crear la transferencia
-      const courseId = existingPayment.course_id;
+      let courseId = existingPayment.course_id;
       
-      console.log('[bank-transfer/upload] Using course_id from bank_transfer_payment:', courseId);
+      // 🛡️ Fallback: Si course_id es null (registro viejo), buscar desde checkout_sessions
+      if (!courseId && existingPayment.order_id) {
+        console.warn('[bank-transfer/upload] course_id is null, attempting fallback from checkout_sessions');
+        const { data: session } = await adminClient
+          .from('checkout_sessions')
+          .select('course_price_id')
+          .eq('id', existingPayment.order_id)
+          .maybeSingle();
+        
+        if (session?.course_price_id) {
+          const { data: coursePrice } = await adminClient
+            .from('course_prices')
+            .select('courses!inner(id)')
+            .eq('id', session.course_price_id)
+            .maybeSingle();
+          
+          if (coursePrice) {
+            courseId = (coursePrice.courses as any)?.id || null;
+            console.log('[bank-transfer/upload] Fallback successful, found course_id:', courseId);
+          }
+        }
+      }
+      
+      console.log('[bank-transfer/upload] Using course_id:', courseId);
+      
+      // ⚠️ VALIDATE EARLY: No courseId = fail before any uploads
+      if (!courseId) {
+        console.error('❌ [bank-transfer/upload] Missing courseId - cannot process upload');
+        return res.status(400).json({ 
+          error: "Cannot process payment upload", 
+          details: "Course ID not found. Please contact support - this payment may have corrupted data."
+        });
+      }
 
       // Validate file extension
       const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png'];

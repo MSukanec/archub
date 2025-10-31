@@ -65,6 +65,14 @@ Preferred communication style: Simple, everyday language.
 - **SPA Fallback**: `vercel.json` configured for client-side routing and OAuth callbacks.
 - **Backend Modular Architecture**: Monolithic `server/routes.ts` modularized into domain-specific route modules (`reference`, `user`, `projects`, `subcontracts`, `courses`, `admin`, `payments`, `bank-transfer`) using a `RouteDeps` pattern for shared dependencies and consistent authentication. All modules use authenticated Supabase clients and RLS.
 - **Frontend Performance Optimizations**: Implemented code-splitting and lazy loading for Admin, Learning, and Media pages to reduce initial bundle size and improve load times. Pages are lazy-loaded based on role-restriction, heavy dependencies, or infrequency of access.
+- **Database Views for Learning Module**: Optimized Supabase views for fast data access:
+  - `course_lessons_total_view`: Total lessons per course
+  - `course_progress_view`: User progress per course (used in CourseDashboardTab)
+  - `course_user_active_days_view`: User activity tracking
+  - `course_user_course_done_view`: Completed lessons per course/user
+  - `course_user_global_progress_view`: Global user progress across all courses
+  - `course_user_study_time_view`: User study time metrics (used in CourseDashboardTab)
+  - `course_lesson_completions_view`: Pre-computed lesson completions with joins (replaces 4-level nested joins, improves /api/learning/dashboard from 12s → <1s)
 
 ## External Dependencies
 

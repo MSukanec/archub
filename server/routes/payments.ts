@@ -1135,7 +1135,39 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
       }
       
       // ✅ Usamos el course_id que está guardado directamente en bank_transfer_payments
-      const courseId = payment.course_id;
+      let courseId = payment.course_id;
+      
+      // 🛡️ Fallback: Si course_id es null (registro viejo), buscar desde checkout_sessions
+      if (!courseId && payment.order_id) {
+        console.warn('[approve] course_id is null, attempting fallback from checkout_sessions');
+        const { data: session } = await adminClient
+          .from('checkout_sessions')
+          .select('course_price_id')
+          .eq('id', payment.order_id)
+          .maybeSingle();
+        
+        if (session?.course_price_id) {
+          const { data: coursePrice } = await adminClient
+            .from('course_prices')
+            .select('courses!inner(id)')
+            .eq('id', session.course_price_id)
+            .maybeSingle();
+          
+          if (coursePrice) {
+            courseId = (coursePrice.courses as any)?.id || null;
+            console.log('[approve] Fallback successful, found course_id:', courseId);
+          }
+        }
+      }
+      
+      // ⚠️ VALIDATE EARLY: No courseId = fail before any updates
+      if (!courseId) {
+        console.error('❌ [approve] Missing courseId - cannot approve payment without valid course');
+        return res.status(400).json({ 
+          error: "Cannot approve payment", 
+          details: "Course ID not found. Please contact support - this payment may have corrupted data."
+        });
+      }
       
       // Get months from course_price if available
       let months: number = 12; // Default 12 months
@@ -1150,6 +1182,12 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
           months = coursePrice.months || 12;
         }
       }
+      
+      console.log('✅ [approve] Validation passed, proceeding with approval:', {
+        courseId,
+        userId: payment.users?.id,
+        months
+      });
       
       // 1️⃣ Actualizar bank_transfer_payments
       const { error: updateError } = await adminClient
@@ -1174,33 +1212,15 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
       }
       
       // 3️⃣ Otorgar acceso al curso
-      console.log('🔍 [approve] Checking enrollment conditions:', {
-        courseId,
-        paymentUsers: payment.users,
-        userId: payment.users?.id,
-        hasUsers: !!payment.users,
-        months
-      });
-      
-      if (!courseId) {
-        console.error('❌ [approve] Missing courseId - cannot enroll user');
-        return res.status(500).json({ 
-          error: "Failed to enroll user", 
-          details: "Course ID not found. The payment was approved but enrollment failed." 
-        });
-      }
-      
       if (!payment.users?.id) {
-        console.error('❌ [approve] Missing user ID - cannot enroll user', {
-          paymentUsersStructure: payment.users
-        });
+        console.error('❌ [approve] Missing user ID - cannot enroll user');
         return res.status(500).json({ 
           error: "Failed to enroll user", 
-          details: "User ID not found in payment record. The payment was approved but enrollment failed." 
+          details: "User ID not found in payment record." 
         });
       }
       
-      console.log('✅ [approve] Conditions met, enrolling user...');
+      console.log('✅ [approve] All validations passed, enrolling user...');
       try {
         await enrollUserInCourse(payment.users.id, courseId, months);
         console.log('✅ [approve] User enrolled successfully');

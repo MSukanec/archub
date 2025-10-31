@@ -497,7 +497,7 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         
         // Get recent completions using optimized view (much faster!)
         authenticatedSupabase
-          .from('lesson_completions_view')
+          .from('course_lesson_completions_view')
           .select('*')
           .eq('user_id', dbUser.id)
           .eq('is_completed', true)

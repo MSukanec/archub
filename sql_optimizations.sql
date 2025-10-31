@@ -14,7 +14,7 @@
 -- Esta vista pre-calcula los joins complejos de completions
 -- En lugar de hacer 4 joins cada vez, ahora solo consultamos la vista
 
-CREATE OR REPLACE VIEW lesson_completions_view AS
+CREATE OR REPLACE VIEW course_lesson_completions_view AS
 SELECT 
     clp.id AS progress_id,
     clp.user_id,
@@ -60,13 +60,13 @@ ON course_enrollments(user_id);
 -- Asegura que los usuarios puedan leer la vista con Row Level Security
 
 -- Permitir SELECT a usuarios autenticados
-GRANT SELECT ON lesson_completions_view TO authenticated;
+GRANT SELECT ON course_lesson_completions_view TO authenticated;
 
 -- ============== CONFIRMACIÓN ==============
 -- Si todo se ejecutó correctamente, deberías ver:
--- - 1 vista creada: lesson_completions_view
+-- - 1 vista creada: course_lesson_completions_view
 -- - 4 índices creados
 -- - Permisos otorgados
 
 -- Para verificar que la vista funciona, ejecuta:
--- SELECT * FROM lesson_completions_view LIMIT 5;
+-- SELECT * FROM course_lesson_completions_view LIMIT 5;
