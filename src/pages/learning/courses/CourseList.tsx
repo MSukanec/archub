@@ -48,7 +48,9 @@ export default function CourseList() {
       if (!response.ok) return [];
       return response.json();
     },
-    enabled: !!supabase
+    enabled: !!supabase,
+    staleTime: 60000, // Cache 1 minuto
+    gcTime: 300000 // Mantener en cache 5 minutos
   });
 
   const { data: enrollments = [] } = useQuery<any[]>({
@@ -69,23 +71,32 @@ export default function CourseList() {
       return response.json();
     },
     enabled: !!supabase,
-    staleTime: 0
+    staleTime: 60000, // Cache 1 minuto
+    gcTime: 300000 // Mantener en cache 5 minutos
   });
 
   const { data: courseLessons = [] } = useQuery({
-    queryKey: ['all-course-lessons'],
+    queryKey: ['all-course-lessons', courses.map(c => c.id)],
     queryFn: async () => {
-      if (!supabase) return [];
+      if (!supabase || courses.length === 0) return [];
+      
+      const courseIds = courses.map(c => c.id);
       
       const { data, error } = await supabase
         .from('course_lessons')
         .select('id, module_id, duration_sec, course_modules!inner(course_id)')
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .in('course_modules.course_id', courseIds);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching course lessons:', error);
+        return [];
+      }
       return data || [];
     },
-    enabled: !!supabase
+    enabled: !!supabase && courses.length > 0,
+    staleTime: 300000, // Cache 5 minutos (las lecciones no cambian frecuentemente)
+    gcTime: 600000 // Mantener en cache 10 minutos
   });
 
   const courseProgress = useMemo(() => {
