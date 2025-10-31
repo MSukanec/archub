@@ -1134,24 +1134,19 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         return res.status(400).json({ error: "Payment is not pending" });
       }
       
-      // Get course info via order_id
-      const { data: session } = await adminClient
-        .from('checkout_sessions')
-        .select('course_price_id')
-        .eq('id', payment.order_id)
-        .maybeSingle();
+      // ✅ Usamos el course_id que está guardado directamente en bank_transfer_payments
+      const courseId = payment.course_id;
       
-      let courseId: string | null = null;
+      // Get months from course_price if available
       let months: number = 12; // Default 12 months
-      if (session?.course_price_id) {
+      if (payment.course_price_id) {
         const { data: coursePrice } = await adminClient
           .from('course_prices')
-          .select('months, courses!inner(id)')
-          .eq('id', session.course_price_id)
+          .select('months')
+          .eq('id', payment.course_price_id)
           .maybeSingle();
         
         if (coursePrice) {
-          courseId = (coursePrice.courses as any)?.id || null;
           months = coursePrice.months || 12;
         }
       }
