@@ -108,35 +108,16 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
 
       const courseId = course.id;
 
-      // 1️⃣ PRIMERO: Crear registro en payments (tabla maestra unificada)
-      const { data: payment, error: paymentError } = await adminClient
-        .from('payments')
-        .insert({
-          provider: 'bank_transfer',
-          provider_payment_id: null, // No hay ID externo aún
-          user_id: profile.id,
-          course_id: courseId,
-          product_type: courseId ? 'course' : null,
-          product_id: courseId,
-          amount: String(amount),
-          currency,
-          status: 'pending',
-        })
-        .select()
-        .single();
+      // ⚠️ NO creamos registro en payments aquí - solo cuando se suba el comprobante
+      // Esto evita "pagos fantasma" de usuarios que seleccionan transferencia pero nunca suben comprobante
 
-      if (paymentError || !payment) {
-        console.error("Error creating payment:", paymentError);
-        return res.status(500).json({ error: "Failed to create payment record" });
-      }
-
-      // 2️⃣ SEGUNDO: Crear registro en bank_transfer_payments (detalles específicos)
+      // Crear solo registro en bank_transfer_payments (sin payment_id todavía)
       const { data: bankTransferPayment, error: insertError } = await adminClient
         .from('bank_transfer_payments')
         .insert({
           order_id,
           user_id: profile.id,
-          payment_id: payment.id, // 🔗 Link al payment maestro
+          payment_id: null, // Se llenará cuando suba el comprobante
           amount: String(amount),
           currency,
           payer_name: payer_name || null,
@@ -148,14 +129,12 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
 
       if (insertError || !bankTransferPayment) {
         console.error("Insert error:", insertError);
-        // Rollback: eliminar el payment si falla
-        await adminClient.from('payments').delete().eq('id', payment.id);
         return res.status(500).json({ error: "Failed to create bank transfer payment" });
       }
 
       return res.json({
         success: true,
-        payment_id: payment.id,
+        payment_id: null, // No hay payment_id todavía
         btp_id: bankTransferPayment.id,
         status: bankTransferPayment.status,
       });
@@ -217,6 +196,26 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
         return res.status(400).json({ error: "Cannot upload receipt for non-pending payment" });
       }
 
+      // Get course info from order_id -> checkout_sessions -> course_prices -> courses
+      const { data: session } = await adminClient
+        .from('checkout_sessions')
+        .select('course_price_id')
+        .eq('id', existingPayment.order_id)
+        .maybeSingle();
+
+      let courseId: string | null = null;
+      if (session?.course_price_id) {
+        const { data: coursePrice } = await adminClient
+          .from('course_prices')
+          .select('courses!inner(id)')
+          .eq('id', session.course_price_id)
+          .maybeSingle();
+        
+        if (coursePrice) {
+          courseId = (coursePrice.courses as any)?.id || null;
+        }
+      }
+
       // Validate file extension
       const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png'];
       const fileExtension = file_name.substring(file_name.lastIndexOf('.')).toLowerCase();
@@ -250,10 +249,41 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
         .from('bank-transfer-receipts')
         .getPublicUrl(filePath);
 
-      // Update receipt_url in database
+      // 1️⃣ Crear registro en payments SOLO si no existe todavía (evita duplicados en re-uploads)
+      let paymentId = existingPayment.payment_id;
+      
+      if (!paymentId) {
+        const { data: payment, error: paymentError } = await adminClient
+          .from('payments')
+          .insert({
+            provider: 'bank_transfer',
+            provider_payment_id: btp_id, // Usamos el btp_id como referencia
+            user_id: profile.id,
+            course_id: courseId,
+            product_type: courseId ? 'course' : null,
+            product_id: courseId,
+            amount: String(existingPayment.amount),
+            currency: existingPayment.currency,
+            status: 'pending',
+          })
+          .select()
+          .single();
+
+        if (paymentError || !payment) {
+          console.error("Error creating payment:", paymentError);
+          return res.status(500).json({ error: "Failed to create payment record" });
+        }
+        
+        paymentId = payment.id;
+      } else {
+        console.log('[bank-transfer/upload] Payment already exists, reusing:', paymentId);
+      }
+
+      // 2️⃣ Actualizar bank_transfer_payments con payment_id y receipt_url
       const { error: updateError } = await authenticatedSupabase
         .from('bank_transfer_payments')
         .update({ 
+          payment_id: paymentId, // 🔗 Link al payment maestro
           receipt_url: publicUrl,
           updated_at: new Date().toISOString(),
         })
@@ -261,6 +291,10 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
 
       if (updateError) {
         console.error("Update error:", updateError);
+        // Rollback: eliminar el payment si fue creado en este request y falla la actualización
+        if (paymentId !== existingPayment.payment_id) {
+          await adminClient.from('payments').delete().eq('id', paymentId);
+        }
         return res.status(500).json({ error: "Failed to update receipt URL" });
       }
 
