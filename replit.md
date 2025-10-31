@@ -44,6 +44,24 @@ Preferred communication style: Simple, everyday language.
 - **Frontend Performance Optimizations**: Implemented code-splitting and lazy loading for Admin, Learning, and Media pages to reduce initial bundle size and improve load times.
 - **Performance Optimizations (Gacela Mode)**: Focused on sub-second page loads by using database views, smart caching, pre-computed calculations, and optimized backend endpoints to replace slow client-side queries and direct Supabase view calls, effectively eliminating 500 RLS errors.
 
+### Recent Changes
+
+#### Admin Users RLS Bypass Fix (Oct 31, 2025)
+- **Problem**: Admin users tab couldn't display users when RLS policies were enabled because it made direct Supabase client queries subject to RLS restrictions
+- **Solution**: Created backend API endpoints with service role authentication to bypass RLS for admin operations:
+  - `GET /api/admin/users` - List all users with stats (search, filter, sort support)
+  - `PATCH /api/admin/users/:id` - Update user status (deactivate/activate)
+- **Files updated**:
+  - `server/routes/admin.ts` - Added user management endpoints with `verifyAdmin()` and `getAdminClient()`
+  - `src/pages/admin/community/AdminCommunityUsers.tsx` - Migrated from direct Supabase queries to backend API calls
+- **Result**: Admin users tab now works correctly with RLS enabled, admins can view and manage all users regardless of RLS policies
+
+#### Learning Dashboard Cache Strategy (Oct 31, 2025)
+- **Problem**: Dashboard showed empty state after enrollment because cache wasn't refreshing
+- **Solution**: Changed from infinite cache to always-fresh strategy (`staleTime: 0`, `refetchOnMount: 'always'`)
+- **Cache invalidation**: PaymentReturn now invalidates `/api/learning/dashboard` after successful enrollment
+- **Result**: Newly enrolled courses appear immediately in dashboard with accurate 0% progress state
+
 ## External Dependencies
 
 - **Supabase**: Authentication, Database (PostgreSQL), Storage.
