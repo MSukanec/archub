@@ -26,6 +26,7 @@ export default function CourseView() {
   const currentLessonId = useCoursePlayerStore(s => s.currentLessonId);
   const pendingSeek = useCoursePlayerStore(s => s.pendingSeek);
   const resetStore = useCoursePlayerStore(s => s.reset);
+  const goToLesson = useCoursePlayerStore(s => s.goToLesson);
   
   // Parse query params from window.location.search (more reliable than wouter's location)
   const urlParams = new URLSearchParams(window.location.search);
@@ -133,6 +134,72 @@ export default function CourseView() {
     staleTime: 0, // Always refetch to ensure fresh enrollment data
     gcTime: 0 // Don't cache enrollment checks
   });
+
+  // Get last lesson in progress (for smart "Continue Course" button)
+  const { data: lastLesson } = useQuery({
+    queryKey: ['last-lesson-progress-header', course?.id, userData?.user?.id],
+    queryFn: async () => {
+      if (!course?.id || !userData?.user?.id || !supabase) return null;
+      
+      // Get all modules for this course
+      const { data: courseModules } = await supabase
+        .from('course_modules')
+        .select('id')
+        .eq('course_id', course.id);
+
+      if (!courseModules || courseModules.length === 0) return null;
+
+      const moduleIds = courseModules.map(m => m.id);
+
+      // Get all lessons for these modules
+      const { data: courseLessons } = await supabase
+        .from('course_lessons')
+        .select('id')
+        .in('module_id', moduleIds)
+        .order('order_index', { ascending: true });
+
+      if (!courseLessons || courseLessons.length === 0) return null;
+
+      const lessonIds = courseLessons.map(l => l.id);
+      const firstLessonId = courseLessons[0].id;
+
+      // Get the most recent lesson in progress
+      const { data: progressData } = await supabase
+        .from('course_lesson_progress')
+        .select(`
+          lesson_id,
+          last_position_sec,
+          is_completed,
+          updated_at
+        `)
+        .eq('user_id', userData.user.id)
+        .in('lesson_id', lessonIds)
+        .order('updated_at', { ascending: false })
+        .limit(10);
+
+      if (!progressData || progressData.length === 0) {
+        // No progress yet, return first lesson
+        return {
+          lesson_id: firstLessonId,
+          last_position_sec: 0
+        };
+      }
+
+      // Find first lesson that's not completed
+      const inProgressLesson = progressData.find(p => !p.is_completed);
+      
+      // If no lesson in progress, return the most recently updated one
+      const selectedLesson = inProgressLesson || progressData[0];
+
+      return {
+        lesson_id: selectedLesson.lesson_id,
+        last_position_sec: selectedLesson.last_position_sec || 0
+      };
+    },
+    enabled: !!course?.id && !!userData?.user?.id && !!supabase,
+    staleTime: 10000, // 10 seconds
+    refetchInterval: 15000 // Auto refresh every 15s
+  });
   
   // Force refetch if coming from payment
   useEffect(() => {
@@ -202,7 +269,13 @@ export default function CourseView() {
           key="continue"
           variant="default"
           size="sm"
-          onClick={() => handleTabChange('Lecciones')}
+          onClick={() => {
+            if (lastLesson) {
+              goToLesson(lastLesson.lesson_id, lastLesson.last_position_sec);
+            } else {
+              handleTabChange('Lecciones');
+            }
+          }}
           data-testid="button-continue-course"
         >
           Continuar Curso

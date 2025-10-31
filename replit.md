@@ -46,7 +46,8 @@ Archub is a comprehensive construction management platform designed to optimize 
 - **Error handling strategy**: Queries that fail now return default/empty values with zero retries and infinite cache to prevent error spam
 - **UX improvements**: 
   - Removed unnecessary padding in empty states for mobile views
-  - Added "Continuar viendo" card in course dashboard that takes users to their last watched lesson at the exact second they left off
+  - Added "Continuar viendo" card in course dashboard that takes users to their last watched lesson at the exact second they left off (only visible when user has started at least one lesson)
+  - Enhanced "CONTINUAR CURSO" button to intelligently navigate: goes to last watched lesson at exact second if progress exists, otherwise starts from first lesson
 - **Result**: Zero 500 errors visible to users, all data loads correctly through authenticated backend
 
 ## User Preferences
