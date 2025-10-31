@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle2, XCircle, Eye, AlertCircle, Inbox } from 'lucide-react';
-import { format } from 'date-fns';
+import { CheckCircle2, XCircle, Eye, AlertCircle, Inbox, Clock, TrendingUp } from 'lucide-react';
+import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Tabs } from '@/components/ui-custom/Tabs';
@@ -59,6 +60,35 @@ const AdminPaymentsTransfersTab = () => {
       return response.json();
     },
   });
+
+  const stats = useMemo(() => {
+    const now = new Date();
+    const currentMonthStart = startOfMonth(now);
+    const currentMonthEnd = endOfMonth(now);
+
+    const pendingPayments = payments.filter(p => p.status === 'pending');
+    const approvedPayments = payments.filter(p => p.status === 'approved');
+    
+    const approvedThisMonth = approvedPayments.filter(p => 
+      isWithinInterval(new Date(p.created_at), { start: currentMonthStart, end: currentMonthEnd })
+    );
+
+    const totalAmountThisMonth = approvedThisMonth.reduce((sum, p) => {
+      if (p.currency === 'ARS') {
+        return sum + p.amount;
+      }
+      return sum + (p.amount * 1000);
+    }, 0);
+
+    return {
+      pending: pendingPayments.length,
+      approvedToday: approvedPayments.filter(p => {
+        const paymentDate = new Date(p.created_at);
+        return paymentDate.toDateString() === now.toDateString();
+      }).length,
+      totalMonthARS: totalAmountThisMonth,
+    };
+  }, [payments]);
 
   const handleViewReceipt = (payment: BankTransferPayment) => {
     if (!payment.receipt_url) {
@@ -187,7 +217,44 @@ const AdminPaymentsTransfersTab = () => {
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {/* KPIs */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StatCard>
+          <div className="flex items-center justify-between">
+            <StatCardTitle showArrow={false}>Pendientes de Revisión</StatCardTitle>
+            <Clock className="h-5 w-5 text-accent" />
+          </div>
+          <StatCardValue>{stats.pending}</StatCardValue>
+          <StatCardMeta>pagos esperando aprobación</StatCardMeta>
+        </StatCard>
+
+        <StatCard>
+          <div className="flex items-center justify-between">
+            <StatCardTitle showArrow={false}>Aprobados Hoy</StatCardTitle>
+            <CheckCircle2 className="h-5 w-5 text-green-600" />
+          </div>
+          <StatCardValue>{stats.approvedToday}</StatCardValue>
+          <StatCardMeta>pagos aprobados hoy</StatCardMeta>
+        </StatCard>
+
+        <StatCard>
+          <div className="flex items-center justify-between">
+            <StatCardTitle showArrow={false}>Total del Mes</StatCardTitle>
+            <TrendingUp className="h-5 w-5 text-blue-600" />
+          </div>
+          <StatCardValue>
+            {new Intl.NumberFormat('es-AR', {
+              style: 'currency',
+              currency: 'ARS',
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
+            }).format(stats.totalMonthARS)}
+          </StatCardValue>
+          <StatCardMeta>pagos aprobados este mes</StatCardMeta>
+        </StatCard>
+      </div>
+
       {/* Filtros con Tabs */}
       <Tabs
         tabs={filterTabs}
