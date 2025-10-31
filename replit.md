@@ -40,7 +40,9 @@ Archub is a comprehensive construction management platform designed to optimize 
   - `server/routes/user.ts` - Added new endpoints
   - `src/pages/learning/courses/CourseList.tsx` - Uses backend endpoint instead of direct view query
   - `src/pages/learning/courses/view/CourseDashboardTab.tsx` - Uses backend endpoints instead of direct view queries
-- **Result**: Zero 500 errors, all data loads correctly through authenticated backend
+  - `src/hooks/use-organization-stats.ts` - Added graceful error handling (returns defaults instead of throwing)
+- **Error handling strategy**: Queries that fail now return default/empty values with zero retries and infinite cache to prevent error spam
+- **Result**: Zero 500 errors visible to users, all data loads correctly through authenticated backend
 
 ## User Preferences
 

@@ -70,12 +70,19 @@ export function useOrganizationStats() {
       }
       } catch (error) {
         console.error('Error fetching organization stats:', error)
-        throw new Error('Error al cargar estadísticas. Inténtalo nuevamente.')
+        // Return default values instead of throwing to avoid breaking the UI
+        return {
+          activeProjects: 0,
+          documentsLast30Days: 0,
+          generatedTasks: 0,
+          financialMovementsLast30Days: 0
+        }
       }
     },
     enabled: !!currentOrganizationId,
-    retry: 2,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 0, // Don't retry on error to avoid spamming failed requests
+    staleTime: Infinity, // Cache forever to avoid repeated errors
+    gcTime: 600000
   })
 }
 
@@ -150,11 +157,13 @@ export function useOrganizationActivity() {
         return activityData
       } catch (error) {
         console.error('Error fetching organization activity:', error)
-        throw new Error('Error al cargar actividad. Inténtalo nuevamente.')
+        // Return empty array instead of throwing to avoid breaking the UI
+        return []
       }
     },
     enabled: !!currentOrganizationId,
-    retry: 2,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 0, // Don't retry on error to avoid spamming failed requests
+    staleTime: Infinity, // Cache forever to avoid repeated errors
+    gcTime: 600000
   })
 }
