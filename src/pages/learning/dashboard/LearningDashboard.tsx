@@ -196,11 +196,12 @@ export default function LearningDashboard() {
                 {coursesSorted.map((course) => (
                   <div 
                     key={course.course_id}
-                    className="flex items-center gap-4 p-4 rounded-lg border hover:border-accent/50 transition-all cursor-pointer"
+                    className="flex flex-col md:flex-row md:items-center gap-4 p-4 rounded-lg border hover:border-accent/50 transition-all cursor-pointer"
                     onClick={() => navigate(`/learning/courses/${course.course_slug}`)}
                     data-testid={`continue-course-${course.course_id}`}
                   >
-                    <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
+                    {/* Imagen - arriba en mobile, izquierda en desktop */}
+                    <div className="w-full md:w-24 h-40 md:h-24 rounded-lg overflow-hidden md:flex-shrink-0 bg-muted">
                       <img 
                         src="/ArchiCADCourse.jpg" 
                         alt={course.course_title}
@@ -208,24 +209,32 @@ export default function LearningDashboard() {
                       />
                     </div>
                     
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold truncate mb-1" data-testid="text-continue-course-title">
+                    {/* Contenido - stack vertical en mobile y desktop */}
+                    <div className="flex-1 min-w-0 space-y-3">
+                      <h4 className="font-semibold truncate" data-testid="text-continue-course-title">
                         {course.course_title}
                       </h4>
-                      <p className="text-sm text-muted-foreground mb-2">
+                      <p className="text-sm text-muted-foreground">
                         {course.done_lessons} de {course.total_lessons} lecciones completadas
                       </p>
-                      <Progress value={course.progress_pct} className="h-2" />
-                    </div>
-                    
-                    <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                      <span className="text-2xl font-bold" style={{ color: 'var(--accent)' }}>
-                        {course.progress_pct}%
-                      </span>
-                      <Button size="sm" onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/learning/courses/${course.course_slug}`);
-                      }}>
+                      
+                      {/* Barra y porcentaje juntos */}
+                      <div className="flex items-center gap-3">
+                        <Progress value={course.progress_pct} className="h-2 flex-1" />
+                        <span className="text-xl md:text-2xl font-bold flex-shrink-0" style={{ color: 'var(--accent)' }}>
+                          {course.progress_pct}%
+                        </span>
+                      </div>
+                      
+                      {/* Botón - full width en mobile, auto en desktop */}
+                      <Button 
+                        className="w-full md:w-auto"
+                        size="sm" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/learning/courses/${course.course_slug}`);
+                        }}
+                      >
                         Continuar
                         <ArrowRight className="ml-1 h-4 w-4" />
                       </Button>
