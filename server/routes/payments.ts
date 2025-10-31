@@ -122,19 +122,33 @@ async function logPayPalPayment(payload: {
 }
 
 async function enrollUserInCourse(user_id: string, course_id: string, months: number = 12) {
+  console.log('📚 [enrollUserInCourse] Starting enrollment...', { user_id, course_id, months });
+  
   const expiresAt = new Date();
   expiresAt.setMonth(expiresAt.getMonth() + months);
   
-  await getAdminClient().from('course_enrollments').upsert(
-    { 
-      user_id, 
-      course_id, 
-      status: 'active',
-      started_at: new Date().toISOString(),
-      expires_at: expiresAt.toISOString()
-    },
-    { onConflict: 'user_id,course_id' }
-  );
+  const enrollmentData = { 
+    user_id, 
+    course_id, 
+    status: 'active',
+    started_at: new Date().toISOString(),
+    expires_at: expiresAt.toISOString()
+  };
+  
+  console.log('📚 [enrollUserInCourse] Enrollment data:', enrollmentData);
+  
+  const { data, error } = await getAdminClient()
+    .from('course_enrollments')
+    .upsert(enrollmentData, { onConflict: 'user_id,course_id' })
+    .select();
+  
+  if (error) {
+    console.error('❌ [enrollUserInCourse] ERROR:', error);
+    throw error;
+  }
+  
+  console.log('✅ [enrollUserInCourse] Success! Enrollment created/updated:', data);
+  return data;
 }
 
 // ==================== PAYMENT ROUTES ====================
@@ -1146,8 +1160,42 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
       }
       
       // 3️⃣ Otorgar acceso al curso
-      if (courseId && payment.users?.id) {
+      console.log('🔍 [approve] Checking enrollment conditions:', {
+        courseId,
+        paymentUsers: payment.users,
+        userId: payment.users?.id,
+        hasUsers: !!payment.users,
+        months
+      });
+      
+      if (!courseId) {
+        console.error('❌ [approve] Missing courseId - cannot enroll user');
+        return res.status(500).json({ 
+          error: "Failed to enroll user", 
+          details: "Course ID not found. The payment was approved but enrollment failed." 
+        });
+      }
+      
+      if (!payment.users?.id) {
+        console.error('❌ [approve] Missing user ID - cannot enroll user', {
+          paymentUsersStructure: payment.users
+        });
+        return res.status(500).json({ 
+          error: "Failed to enroll user", 
+          details: "User ID not found in payment record. The payment was approved but enrollment failed." 
+        });
+      }
+      
+      console.log('✅ [approve] Conditions met, enrolling user...');
+      try {
         await enrollUserInCourse(payment.users.id, courseId, months);
+        console.log('✅ [approve] User enrolled successfully');
+      } catch (enrollError: any) {
+        console.error('❌ [approve] Enrollment failed:', enrollError);
+        return res.status(500).json({ 
+          error: "Failed to enroll user", 
+          details: enrollError.message 
+        });
       }
       
       return res.json({ success: true, message: "Payment approved and user enrolled" });
