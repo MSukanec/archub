@@ -687,4 +687,41 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
       return res.status(500).json({ error: "Internal error" });
     }
   });
+
+  // PATCH /api/admin/users/:id - Update user (deactivate)
+  app.patch("/api/admin/users/:id", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const { isAdmin, error } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error });
+      }
+      
+      const adminClient = getAdminClient();
+      const { id } = req.params;
+      const { is_active } = req.body;
+      
+      // Update user
+      const { data, error: updateError } = await adminClient
+        .from('users')
+        .update({ is_active })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (updateError) {
+        console.error("Error updating user:", updateError);
+        return res.status(500).json({ error: "Failed to update user" });
+      }
+      
+      return res.json(data);
+    } catch (error: any) {
+      console.error("Error in PATCH /api/admin/users/:id:", error);
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
 }
