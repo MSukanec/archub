@@ -585,4 +585,106 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
       return res.status(500).json({ error: "Internal error" });
     }
   });
+
+  // ==================== USER MANAGEMENT ====================
+
+  // GET /api/admin/users - Get all users with stats
+  app.get("/api/admin/users", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const { isAdmin, error } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error });
+      }
+      
+      const adminClient = getAdminClient();
+      
+      // Get query parameters for filtering
+      const searchValue = req.query.search as string || '';
+      const sortBy = req.query.sortBy as string || 'created_at';
+      const statusFilter = req.query.statusFilter as string || 'all';
+      
+      // Build query
+      let query = adminClient
+        .from('users')
+        .select(`
+          *,
+          user_data (
+            first_name,
+            last_name,
+            country
+          )
+        `);
+      
+      // Apply filters
+      if (searchValue) {
+        query = query.or(`full_name.ilike.%${searchValue}%,email.ilike.%${searchValue}%`);
+      }
+      
+      if (statusFilter !== 'all') {
+        query = query.eq('is_active', statusFilter === 'active');
+      }
+      
+      // Apply sorting
+      if (sortBy === 'name') {
+        query = query.order('full_name', { ascending: true });
+      } else if (sortBy === 'email') {
+        query = query.order('email', { ascending: true });
+      } else {
+        query = query.order('created_at', { ascending: false });
+      }
+      
+      const { data, error: usersError } = await query;
+      
+      if (usersError) {
+        console.error("Error fetching users:", usersError);
+        return res.status(500).json({ error: "Failed to fetch users" });
+      }
+      
+      // Get user presence data
+      const authIds = data.map(u => u.auth_id);
+      
+      const { data: presenceData } = await adminClient
+        .from('user_presence')
+        .select('user_id, last_seen_at')
+        .in('user_id', authIds);
+      
+      // Create presence map using auth_id as key
+      const presenceMap = new Map(presenceData?.map(p => [p.user_id, p.last_seen_at]) ?? []);
+      
+      // Get organization counts for each user
+      const usersWithCounts = await Promise.all(
+        data.map(async (user) => {
+          const { count } = await adminClient
+            .from('organization_members')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('is_active', true);
+          
+          return {
+            ...user,
+            organizations_count: count || 0,
+            last_seen_at: presenceMap.get(user.auth_id) || null
+          };
+        })
+      );
+      
+      // Sort by last activity (most recent first)
+      const sortedUsers = usersWithCounts.sort((a, b) => {
+        if (!a.last_seen_at && !b.last_seen_at) return 0;
+        if (!a.last_seen_at) return 1;
+        if (!b.last_seen_at) return -1;
+        return new Date(b.last_seen_at).getTime() - new Date(a.last_seen_at).getTime();
+      });
+      
+      return res.json(sortedUsers);
+    } catch (error: any) {
+      console.error("Error in /api/admin/users:", error);
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
 }
