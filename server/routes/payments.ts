@@ -121,10 +121,19 @@ async function logPayPalPayment(payload: {
   });
 }
 
-async function enrollUserInCourse(user_id: string, course_slug: string) {
+async function enrollUserInCourse(user_id: string, course_id: string, months: number = 12) {
+  const expiresAt = new Date();
+  expiresAt.setMonth(expiresAt.getMonth() + months);
+  
   await getAdminClient().from('course_enrollments').upsert(
-    { user_id, course_slug, started_at: new Date().toISOString() },
-    { onConflict: 'user_id,course_slug' }
+    { 
+      user_id, 
+      course_id, 
+      status: 'active',
+      started_at: new Date().toISOString(),
+      expires_at: expiresAt.toISOString()
+    },
+    { onConflict: 'user_id,course_id' }
   );
 }
 
@@ -1099,15 +1108,19 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         .eq('id', payment.order_id)
         .maybeSingle();
       
-      let courseSlug: string | null = null;
+      let courseId: string | null = null;
+      let months: number = 12; // Default 12 months
       if (session?.course_price_id) {
         const { data: coursePrice } = await adminClient
           .from('course_prices')
-          .select('courses!inner(slug)')
+          .select('months, courses!inner(id)')
           .eq('id', session.course_price_id)
           .maybeSingle();
         
-        courseSlug = (coursePrice?.courses as any)?.slug || null;
+        if (coursePrice) {
+          courseId = (coursePrice.courses as any)?.id || null;
+          months = coursePrice.months || 12;
+        }
       }
       
       // 1️⃣ Actualizar bank_transfer_payments
@@ -1133,8 +1146,8 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
       }
       
       // 3️⃣ Otorgar acceso al curso
-      if (courseSlug && payment.users?.id) {
-        await enrollUserInCourse(payment.users.id, courseSlug);
+      if (courseId && payment.users?.id) {
+        await enrollUserInCourse(payment.users.id, courseId, months);
       }
       
       return res.json({ success: true, message: "Payment approved and user enrolled" });
