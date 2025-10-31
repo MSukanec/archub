@@ -4,6 +4,15 @@
 
 Archub is a comprehensive construction management platform designed to optimize operations, enhance collaboration, and improve efficiency in the construction industry. It provides tools for project tracking, team management, budget monitoring, financial management with multi-currency support, robust document management, a detailed project dashboard with KPIs, and a learning module for professional development. Archub aims to streamline workflows and provide a unified platform for all construction project needs.
 
+## Recent Changes (Oct 31, 2025)
+
+### Course List Performance Optimization
+- **Eliminated slow queries**: Replaced `/api/user/all-progress` endpoint call with direct Supabase view queries
+- **View-based architecture**: CourseList now uses `course_progress_view` for instant progress data instead of scanning `course_lesson_progress` table
+- **Aggressive caching**: Implemented 30-second cache for progress data, 60-second cache for enrollments, 5-minute cache for course structure
+- **Simplified calculations**: Removed heavy client-side progress calculations in favor of pre-computed database views
+- **Expected improvement**: Sub-second page loads after initial cache population (previously 7+ seconds)
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

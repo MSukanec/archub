@@ -10,8 +10,6 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { Tabs } from '@/components/ui-custom/Tabs'
 import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
 import PayButton from '@/components/learning/PayButton'
 import { Button } from '@/components/ui/button'
 
@@ -31,26 +29,40 @@ export default function CourseList() {
     }
   }, [setSidebarContext, setSidebarLevel, sidebarLevel])
 
-  const { data: allProgress = [] } = useQuery<any[]>({
-    queryKey: ['/api/user/all-progress'],
+  // 🚀 OPTIMIZACIÓN: Usar vistas pre-calculadas de Supabase
+  const { data: courseProgressData = [] } = useQuery({
+    queryKey: ['course-progress-view'],
     queryFn: async () => {
       if (!supabase) return [];
       
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return [];
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
 
-      const response = await fetch('/api/user/all-progress', {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      });
+      // Obtener el user_id de la tabla users
+      const { data: userData } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      if (!userData) return [];
 
-      if (!response.ok) return [];
-      return response.json();
+      // Usar la vista optimizada course_progress_view
+      const { data, error } = await supabase
+        .from('course_progress_view')
+        .select('*')
+        .eq('user_id', userData.id);
+      
+      if (error) {
+        console.error('Error fetching course progress:', error);
+        return [];
+      }
+      
+      return data || [];
     },
     enabled: !!supabase,
-    staleTime: 60000, // Cache 1 minuto
-    gcTime: 300000 // Mantener en cache 5 minutos
+    staleTime: 30000, // Cache 30 segundos
+    gcTime: 300000
   });
 
   const { data: enrollments = [] } = useQuery<any[]>({
@@ -71,12 +83,13 @@ export default function CourseList() {
       return response.json();
     },
     enabled: !!supabase,
-    staleTime: 60000, // Cache 1 minuto
-    gcTime: 300000 // Mantener en cache 5 minutos
+    staleTime: 60000,
+    gcTime: 300000
   });
 
-  const { data: courseLessons = [] } = useQuery({
-    queryKey: ['all-course-lessons', courses.map(c => c.id)],
+  // Obtener total de lecciones y duración por curso
+  const { data: courseLessonsData = [] } = useQuery({
+    queryKey: ['course-lessons-summary', courses.map(c => c.id)],
     queryFn: async () => {
       if (!supabase || courses.length === 0) return [];
       
@@ -84,7 +97,7 @@ export default function CourseList() {
       
       const { data, error } = await supabase
         .from('course_lessons')
-        .select('id, module_id, duration_sec, course_modules!inner(course_id)')
+        .select('id, duration_sec, course_modules!inner(course_id)')
         .eq('is_active', true)
         .in('course_modules.course_id', courseIds);
       
@@ -95,51 +108,47 @@ export default function CourseList() {
       return data || [];
     },
     enabled: !!supabase && courses.length > 0,
-    staleTime: 300000, // Cache 5 minutos (las lecciones no cambian frecuentemente)
-    gcTime: 600000 // Mantener en cache 10 minutos
+    staleTime: 300000,
+    gcTime: 600000
   });
 
+  // 🚀 ULTRA-RÁPIDO: Usar datos pre-calculados de la vista
   const courseProgress = useMemo(() => {
-    const progressMap = new Map<string, { completed: number; total: number; percentage: number; lastActivity?: Date; totalDurationSec: number }>();
+    const progressMap = new Map<string, { completed: number; total: number; percentage: number; totalDurationSec: number }>();
     
     courses.forEach(course => {
-      const lessons = courseLessons.filter((l: any) => 
+      // Buscar progreso pre-calculado de la vista
+      const viewProgress = courseProgressData.find((p: any) => p.course_id === course.id);
+      
+      // Calcular duración total del curso
+      const courseLessons = courseLessonsData.filter((l: any) => 
         l.course_modules?.course_id === course.id
       );
-      
-      const totalLessons = lessons.length;
-      
-      const totalDurationSec = lessons.reduce((sum: number, lesson: any) => {
-        return sum + (lesson.duration_sec || 0);
-      }, 0);
-      
-      const completedLessons = allProgress.filter((p: any) => 
-        p.is_completed && lessons.some((l: any) => l.id === p.lesson_id)
+      const totalDurationSec = courseLessons.reduce((sum: number, lesson: any) => 
+        sum + (lesson.duration_sec || 0), 0
       );
       
-      const courseLessonIds = lessons.map((l: any) => l.id);
-      const courseProgressRecords = allProgress.filter((p: any) => 
-        courseLessonIds.includes(p.lesson_id)
-      );
-      
-      const lastActivity = courseProgressRecords.length > 0
-        ? new Date(Math.max(...courseProgressRecords.map((p: any) => new Date(p.last_watched_at || p.updated_at).getTime())))
-        : undefined;
-      
-      const completedCount = completedLessons.length;
-      const percentage = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
-      
-      progressMap.set(course.id, {
-        completed: completedCount,
-        total: totalLessons,
-        percentage,
-        lastActivity,
-        totalDurationSec
-      });
+      if (viewProgress) {
+        // Usar datos de la vista (súper rápido)
+        progressMap.set(course.id, {
+          completed: viewProgress.done_lessons || 0,
+          total: viewProgress.total_lessons || 0,
+          percentage: Math.round(viewProgress.progress_pct || 0),
+          totalDurationSec
+        });
+      } else {
+        // Si no hay progreso, el curso es nuevo para el usuario
+        progressMap.set(course.id, {
+          completed: 0,
+          total: courseLessons.length,
+          percentage: 0,
+          totalDurationSec
+        });
+      }
     });
     
     return progressMap;
-  }, [courses, courseLessons, allProgress]);
+  }, [courses, courseProgressData, courseLessonsData]);
 
   const filteredCourses = useMemo(() => {
     const activeCourses = courses.filter(c => c.is_active && c.visibility !== 'draft');
@@ -301,11 +310,6 @@ export default function CourseList() {
                       </div>
                     )}
 
-                    {hasEnrollment && progress.lastActivity && (
-                      <div className="text-xs text-muted-foreground mb-3">
-                        Última actividad: {format(progress.lastActivity, "dd 'de' MMMM 'a las' HH:mm", { locale: es })}
-                      </div>
-                    )}
 
                     <div className={hasEnrollment ? '' : 'mt-auto'}>
                       {hasEnrollment ? (
