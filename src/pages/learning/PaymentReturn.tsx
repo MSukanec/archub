@@ -74,6 +74,7 @@ export default function PaymentReturn() {
           // 🚀 CRÍTICO: Invalidar cache para que el botón cambie inmediatamente
           queryClient.invalidateQueries({ queryKey: ['/api/user/enrollments'] });
           queryClient.invalidateQueries({ queryKey: ['course-progress-view'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/learning/dashboard'] }); // Refresh dashboard
           return;
         }
 

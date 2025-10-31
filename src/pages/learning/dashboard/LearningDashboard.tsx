@@ -77,13 +77,15 @@ export default function LearningDashboard() {
       return response.json();
     },
     enabled: !!supabase && !!userData,
-    staleTime: Infinity, // ⚡ Cache infinito para máxima velocidad
-    gcTime: 600000
+    staleTime: 0, // ⚡ Always fetch fresh data when navigating to dashboard
+    gcTime: 600000, // Keep in cache for 10 minutes for instant navigation
+    refetchOnMount: 'always' // Always refetch when component mounts
   });
 
   const { global, courses = [], currentStreak = 0 } = dashboardData || {}
   
-  const hasEnrollments = global && global.total_lessons_total > 0;
+  // User has enrollments if they have courses (even if not started yet)
+  const hasEnrollments = courses && courses.length > 0;
 
   const coursesSorted = courses
     .filter(c => c.progress_pct >= 0 && c.progress_pct < 100)

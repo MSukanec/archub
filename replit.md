@@ -28,8 +28,9 @@ Archub is a comprehensive construction management platform designed to optimize 
   - `course_user_study_time_view` for study time metrics
   - `course_user_active_days_view` for streak calculation
   - `course_lesson_completions_view` for recent activity
-- **Frontend caching**: 10s staleTime with 20s auto-refresh
-- **Result**: Dashboard load time reduced from 10+ seconds to sub-second
+- **Frontend caching**: Changed from infinite cache to always-fresh strategy (`staleTime: 0`, `refetchOnMount: 'always'`) to ensure users see updated enrollment data
+- **Cache invalidation**: PaymentReturn now invalidates `/api/learning/dashboard` on successful enrollment
+- **Result**: Dashboard load time reduced from 10+ seconds to sub-second with accurate real-time data
 
 #### Critical Bug Fix - RLS Errors (500)
 - **Problem**: Frontend queries directly to Supabase views and tables caused 500 errors due to missing RLS policies or stack depth limits
