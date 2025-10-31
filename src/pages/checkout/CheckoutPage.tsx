@@ -1584,55 +1584,73 @@ Titular: DNI 32322767`;
                     </div>
                   </div>
 
-                  <div className="space-y-4 bg-muted/30 p-4 rounded-lg font-mono text-sm">
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Banco</p>
-                      <p className="font-medium">Banco Galicia - Caja de Ahorro en Pesos</p>
-                    </div>
-                    <Separator />
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Número de cuenta</p>
-                      <p className="font-medium">4026691-4 063-1</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">CBU</p>
-                      <p className="font-medium">00700634 30004026691416</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Alias</p>
-                      <p className="font-medium">MATIAS.SUKANEC</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Titular</p>
-                      <p className="font-medium">DNI 32322767</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 mt-6">
-                    <Button
-                      variant="default"
-                      onClick={handleCopyBankInfo}
-                      className="flex-1"
-                      data-testid="button-copy-bank-info"
-                    >
-                      <Copy className="h-4 w-4 mr-2" />
-                      Copiar datos
-                    </Button>
-                  </div>
-
-                  <Separator className="my-6" />
-
-                  {/* Receipt Upload Section */}
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <Receipt className="h-5 w-5 text-accent mt-1" />
+                  {!receiptUploaded && (
+                    <div className="space-y-4 bg-muted/30 p-4 rounded-lg font-mono text-sm">
                       <div>
-                        <h3 className="text-base font-semibold">Subir comprobante</h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Adjuntá tu comprobante de transferencia para confirmar el pago
+                        <p className="text-xs text-muted-foreground mb-1">Banco</p>
+                        <p className="font-medium">Banco Galicia - Caja de Ahorro en Pesos</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-1">Número de cuenta</p>
+                        <p className="font-medium">4026691-4 063-1</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-1">CBU</p>
+                        <p className="font-medium">00700634 30004026691416</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-1">Alias</p>
+                        <p className="font-medium">MATIAS.SUKANEC</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-1">Titular</p>
+                        <p className="font-medium">DNI 32322767</p>
+                      </div>
+                      <Separator />
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-1">Monto a pagar</p>
+                        <p className="font-medium text-lg">
+                          {new Intl.NumberFormat('es-AR', {
+                            style: 'currency',
+                            currency: currentCurrency,
+                            minimumFractionDigits: 0,
+                          }).format(appliedCoupon ? appliedCoupon.final_price : (priceData?.amount || 0))}
                         </p>
                       </div>
                     </div>
+                  )}
+
+                  {!receiptUploaded && (
+                    <>
+                      <div className="flex gap-3 mt-6">
+                        <Button
+                          variant="default"
+                          onClick={handleCopyBankInfo}
+                          className="flex-1"
+                          data-testid="button-copy-bank-info"
+                        >
+                          <Copy className="h-4 w-4 mr-2" />
+                          Copiar datos
+                        </Button>
+                      </div>
+
+                      <Separator className="my-6" />
+                    </>
+                  )}
+
+                  {/* Receipt Upload Section */}
+                  <div className="space-y-4">
+                    {!receiptUploaded && (
+                      <div className="flex items-start gap-3">
+                        <Receipt className="h-5 w-5 text-accent mt-1" />
+                        <div>
+                          <h3 className="text-base font-semibold">Subir comprobante</h3>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Adjuntá tu comprobante de transferencia para confirmar el pago
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                     {!receiptFile && !receiptUploaded ? (
                       /* No file selected */
@@ -1675,7 +1693,7 @@ Titular: DNI 32322767`;
                             )}
                           </Button>
                           <Button
-                            variant="outline"
+                            variant="secondary"
                             onClick={() => {
                               setReceiptFile(null);
                               const input = document.querySelector<HTMLInputElement>('[data-testid="input-receipt-file"]');
@@ -1702,40 +1720,38 @@ Titular: DNI 32322767`;
                             Tu comprobante ha sido enviado. Te notificaremos cuando sea aprobado.
                           </p>
                         </div>
-                        <Button
-                          variant="secondary"
-                          onClick={() => {
-                            setReceiptFile(null);
-                            setReceiptUploaded(false);
-                            const input = document.querySelector<HTMLInputElement>('[data-testid="input-receipt-file"]');
-                            if (input) input.value = '';
-                          }}
-                          className="w-full"
-                          data-testid="button-replace-receipt"
-                        >
-                          Reemplazar comprobante
-                        </Button>
                       </div>
                     )}
                   </div>
 
                   <div className="mt-6">
-                    <Button
-                      variant="secondary"
-                      onClick={() => {
-                        setShowBankInfo(false);
-                        setBankTransferPaymentId(null);
-                        setReceiptFile(null);
-                        setReceiptUploading(false);
-                        setReceiptUploaded(false);
-                        setReceiptUrl(null);
-                      }}
-                      className="w-full"
-                      data-testid="button-back-from-bank-transfer"
-                    >
-                      <ArrowLeft className="h-4 w-4 mr-2" />
-                      Volver
-                    </Button>
+                    {receiptUploaded ? (
+                      <Button
+                        variant="default"
+                        onClick={() => navigate('/learning/courses')}
+                        className="w-full"
+                        data-testid="button-back-to-courses"
+                      >
+                        Volver a cursos
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          setShowBankInfo(false);
+                          setBankTransferPaymentId(null);
+                          setReceiptFile(null);
+                          setReceiptUploading(false);
+                          setReceiptUploaded(false);
+                          setReceiptUrl(null);
+                        }}
+                        className="w-full"
+                        data-testid="button-back-from-bank-transfer"
+                      >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Volver
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}
