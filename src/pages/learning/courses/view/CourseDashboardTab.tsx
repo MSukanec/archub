@@ -52,7 +52,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     }
   }, [courseId]);
 
-  // Get course progress using the v_course_progress view
+  // Get course progress using the course_progress_view
   const { data: courseProgress } = useQuery({
     queryKey: ['course-progress', courseId],
     queryFn: async () => {
@@ -73,7 +73,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       if (!userRecord) return null;
 
       const { data, error } = await supabase
-        .from('v_course_progress')
+        .from('course_progress_view')
         .select('*')
         .eq('course_id', courseId)
         .eq('user_id', userRecord.id)
@@ -416,7 +416,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     enabled: !!courseId && !!supabase
   });
 
-  // Get user's study time this month from v_user_study_time
+  // Get user's study time this month from user_study_time_view
   const { data: monthlyStudyTime } = useQuery({
     queryKey: ['monthly-study-time'],
     queryFn: async () => {
@@ -437,7 +437,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       if (!userRecord) return { seconds_this_month: 0 };
 
       const { data, error } = await supabase
-        .from('v_user_study_time')
+        .from('user_study_time_view')
         .select('seconds_this_month')
         .eq('user_id', userRecord.id)
         .maybeSingle();

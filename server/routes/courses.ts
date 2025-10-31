@@ -495,26 +495,10 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
           .eq('is_active', true)
           .in('course_modules.course_id', courseIds),
         
-        // Get recent completions (last 10)
+        // Get recent completions using optimized view (much faster!)
         authenticatedSupabase
-          .from('course_lesson_progress')
-          .select(`
-            *,
-            course_lessons!inner(
-              id,
-              title,
-              course_modules!inner(
-                id,
-                title,
-                course_id,
-                courses!inner(
-                  id,
-                  title,
-                  slug
-                )
-              )
-            )
-          `)
+          .from('lesson_completions_view')
+          .select('*')
           .eq('user_id', dbUser.id)
           .eq('is_completed', true)
           .not('completed_at', 'is', null)
@@ -611,19 +595,15 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         }
       }
       
-      // Format recent completions
+      // Format recent completions (view already has flat structure!)
       const recentCompletions = (recentCompletionsResult.data || []).map((completion: any) => {
-        const lesson = completion.course_lessons;
-        const module = lesson?.course_modules;
-        const course = module?.courses;
-        
         return {
           type: 'completed',
           when: completion.completed_at,
-          lesson_title: lesson?.title || 'Sin título',
-          module_title: module?.title || 'Sin módulo',
-          course_title: course?.title || 'Sin curso',
-          course_slug: course?.slug || ''
+          lesson_title: completion.lesson_title || 'Sin título',
+          module_title: completion.module_title || 'Sin módulo',
+          course_title: completion.course_title || 'Sin curso',
+          course_slug: completion.course_slug || ''
         };
       });
       

@@ -271,7 +271,7 @@ create trigger trg_coupons_set_updated BEFORE
 update on coupons for EACH row
 execute FUNCTION set_updated_at ();
 
-VISTA v_course_lessons_total
+VISTA course_lessons_total_view
 
 [
   {
@@ -284,7 +284,7 @@ VISTA v_course_lessons_total
   }
 ]
 
-VISTA v_course_progress
+VISTA course_progress_view
 
 [
   {
@@ -309,7 +309,7 @@ VISTA v_course_progress
   }
 ]
 
-VISTA v_user_active_days:
+VISTA user_active_days_view:
 
 [
   {
@@ -322,7 +322,7 @@ VISTA v_user_active_days:
   }
 ]
 
-VISTA v_user_course_done:
+VISTA user_course_done_view:
 
 [
   {
@@ -339,7 +339,7 @@ VISTA v_user_course_done:
   }
 ]
 
-VISTA v_user_global_progress
+VISTA user_global_progress_view
 
 [
   {
@@ -360,7 +360,7 @@ VISTA v_user_global_progress
   }
 ]
 
-VISTA v_user_study_time:
+VISTA user_study_time_view:
 
 [
   {
@@ -374,5 +374,70 @@ VISTA v_user_study_time:
   {
     "column_name": "seconds_this_month",
     "data_type": "bigint"
+  }
+]
+
+VISTA lesson_completions_view (optimización para dashboard):
+
+[
+  {
+    "column_name": "progress_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "user_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "lesson_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "is_completed",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "completed_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "last_position_sec",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "lesson_id_ref",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "lesson_title",
+    "data_type": "text"
+  },
+  {
+    "column_name": "module_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "module_title",
+    "data_type": "text"
+  },
+  {
+    "column_name": "course_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "course_id_ref",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "course_title",
+    "data_type": "text"
+  },
+  {
+    "column_name": "course_slug",
+    "data_type": "text"
   }
 ]
