@@ -487,9 +487,17 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
         return res.status(400).json({ error: "Missing organizationId or user_id" });
       }
 
+      // Get the authorization token and create authenticated client for RLS
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
       console.log("🔧 Getting user organization preferences", { user_id, organizationId });
 
-      const { data, error } = await supabase
+      const { data, error } = await authenticatedSupabase
         .from('user_organization_preferences')
         .select('*')
         .eq('user_id', user_id)
