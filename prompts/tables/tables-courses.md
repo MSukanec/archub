@@ -309,7 +309,7 @@ VISTA course_progress_view
   }
 ]
 
-VISTA user_active_days_view:
+VISTA course_user_active_days_view:
 
 [
   {
