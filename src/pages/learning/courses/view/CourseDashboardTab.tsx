@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { queryClient } from '@/lib/queryClient'
@@ -11,7 +11,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useCoursePlayerStore } from '@/stores/coursePlayerStore'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { ProgressChart } from '@/components/charts/courses/ProgressChart'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 
@@ -19,14 +18,11 @@ interface CourseDashboardTabProps {
   courseId?: string;
 }
 
-type Period = 'Semana' | 'Mes' | 'Trimestre' | 'Año';
-
 export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps) {
   const [, navigate] = useLocation();
   const { id: courseSlug } = useParams<{ id: string }>();
   const goToLesson = useCoursePlayerStore(s => s.goToLesson);
   const setActiveTab = useCoursePlayerStore(s => s.setActiveTab);
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Mes');
 
   // Handler to navigate to a specific tab
   const navigateToTab = (tab: string) => {
@@ -47,7 +43,6 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       queryClient.invalidateQueries({ queryKey: ['recent-markers', courseId] });
       queryClient.invalidateQueries({ queryKey: ['course-duration', courseId] });
       queryClient.invalidateQueries({ queryKey: ['course-enrollment', courseId] });
-      queryClient.invalidateQueries({ queryKey: ['progress-history', courseId] });
       queryClient.invalidateQueries({ queryKey: ['monthly-study-time'] });
     }
   }, [courseId]);
@@ -348,64 +343,6 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     enabled: !!courseId && !!supabase
   });
 
-  // Get lesson progress history for chart
-  const { data: progressHistory = [] } = useQuery({
-    queryKey: ['progress-history', courseId],
-    queryFn: async () => {
-      if (!courseId || !supabase) return [];
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return [];
-
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!authUser?.email) return [];
-
-      const { data: userRecord } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_id', authUser.id)
-        .single();
-
-      if (!userRecord) return [];
-
-      // Get all modules for this course
-      const { data: courseModules } = await supabase
-        .from('course_modules')
-        .select('id')
-        .eq('course_id', courseId);
-
-      if (!courseModules || courseModules.length === 0) return [];
-
-      const moduleIds = courseModules.map(m => m.id);
-
-      // Get all lessons for these modules
-      const { data: courseLessons } = await supabase
-        .from('course_lessons')
-        .select('id')
-        .in('module_id', moduleIds);
-
-      if (!courseLessons || courseLessons.length === 0) return [];
-
-      const lessonIds = courseLessons.map(l => l.id);
-
-      // Get all progress records for these lessons
-      const { data, error } = await supabase
-        .from('course_lesson_progress')
-        .select('updated_at, last_position_sec, is_completed')
-        .eq('user_id', userRecord.id)
-        .in('lesson_id', lessonIds)
-        .order('updated_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching progress history:', error);
-        return [];
-      }
-
-      return data || [];
-    },
-    enabled: !!courseId && !!supabase
-  });
-
   // Get user's study time using backend endpoint (avoids RLS issues with views)
   const { data: monthlyStudyTime } = useQuery({
     queryKey: ['monthly-study-time'],
@@ -567,39 +504,6 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         </div>
       </div>
 
-      {/* Progress Chart */}
-      <div className="relative group">
-        {/* Header */}
-        <div className="flex flex-row items-start justify-between mb-4">
-          <div className="flex flex-col gap-2">
-            <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-              Progreso
-            </p>
-          </div>
-          
-          {/* Period selector buttons */}
-          <div className="flex items-center gap-2">
-            {(['Semana', 'Mes', 'Trimestre', 'Año'] as Period[]).map((period) => (
-              <button
-                key={period}
-                onClick={() => setSelectedPeriod(period)}
-                className={`px-3 py-1 text-sm rounded transition-colors ${
-                  selectedPeriod === period
-                    ? 'bg-[hsl(var(--accent-hsl))] text-background font-medium'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                data-testid={`button-period-${period.toLowerCase()}`}
-              >
-                {period}
-              </button>
-            ))}
-          </div>
-        </div>
-        
-        {/* Gráfico */}
-        <ProgressChart progressData={progressHistory} selectedPeriod={selectedPeriod} />
-      </div>
-
       {/* Top Row - Main Stats */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Subscription Days Card - No clickeable */}
@@ -640,8 +544,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
           <StatCardTitle>Apuntes Creados</StatCardTitle>
           <StatCardContent>
             {recentNotes.length === 0 ? (
-              <div className="py-4">
-                <EmptyState
+              <EmptyState
                   icon={<FileText />}
                   title="No hay apuntes aún"
                   description="Comienza a tomar apuntes durante tus lecciones"
@@ -661,7 +564,6 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                   }
                   className="min-h-0 md:min-h-0"
                 />
-              </div>
             ) : (
               <>
                 <div className="space-y-2">
@@ -720,8 +622,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
           <StatCardTitle>Marcadores Creados</StatCardTitle>
           <StatCardContent>
             {recentMarkers.length === 0 ? (
-              <div className="py-4">
-                <EmptyState
+              <EmptyState
                   icon={<Bookmark />}
                   title="No hay marcadores aún"
                   description="Crea marcadores en momentos clave de tus lecciones"
@@ -741,7 +642,6 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                   }
                   className="min-h-0 md:min-h-0"
                 />
-              </div>
             ) : (
               <>
                 <div className="space-y-2">

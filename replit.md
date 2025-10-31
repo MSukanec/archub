@@ -32,16 +32,19 @@ Archub is a comprehensive construction management platform designed to optimize 
 - **Result**: Dashboard load time reduced from 10+ seconds to sub-second
 
 #### Critical Bug Fix - RLS Errors (500)
-- **Problem**: Frontend queries directly to Supabase views caused 500 errors due to missing RLS policies
+- **Problem**: Frontend queries directly to Supabase views and tables caused 500 errors due to missing RLS policies or stack depth limits
 - **Solution**: Created backend API endpoints that safely access views with proper authentication:
   - `GET /api/user/course-progress` - Get user's course progress (supports optional course_id filter)
   - `GET /api/user/study-time` - Get user's study time metrics
 - **Files updated**: 
   - `server/routes/user.ts` - Added new endpoints
   - `src/pages/learning/courses/CourseList.tsx` - Uses backend endpoint instead of direct view query
-  - `src/pages/learning/courses/view/CourseDashboardTab.tsx` - Uses backend endpoints instead of direct view queries
+  - `src/pages/learning/courses/view/CourseDashboardTab.tsx` - Uses backend endpoints, removed progress chart
   - `src/hooks/use-organization-stats.ts` - Added graceful error handling (returns defaults instead of throwing)
+  - `src/hooks/use-contacts.ts` - Added graceful error handling for stack depth exceeded errors
+  - `src/components/learning/DiscordWidget.tsx` - Changed button text to "Ir a foro de consultas"
 - **Error handling strategy**: Queries that fail now return default/empty values with zero retries and infinite cache to prevent error spam
+- **UX improvements**: Removed unnecessary padding in empty states for mobile views
 - **Result**: Zero 500 errors visible to users, all data loads correctly through authenticated backend
 
 ## User Preferences

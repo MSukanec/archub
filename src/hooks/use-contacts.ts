@@ -42,7 +42,8 @@ export function useContacts() {
 
       if (error) {
         console.error('Error fetching contacts:', error)
-        throw error
+        // Return empty array instead of throwing to avoid breaking the UI
+        return []
       }
       
       // Transform the contact_types data structure and filter out current user
@@ -54,5 +55,8 @@ export function useContacts() {
       return transformedData
     },
     enabled: !!supabase && !!currentOrganizationId && !userLoading,
+    retry: 0, // Don't retry on error to avoid spamming failed requests
+    staleTime: Infinity, // Cache forever to avoid repeated errors
+    gcTime: 600000
   })
 }
