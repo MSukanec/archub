@@ -73,6 +73,7 @@ import { CourseEnrollmentModal } from '../modals/admin/CourseEnrollmentModal';
 import { CouponFormModal } from '../modals/admin/CouponFormModal';
 import PaymentMethodModal from '../modals/PaymentMethodModal';
 import { NotificationFormModal } from '../modals/admin/NotificationFormModal';
+import BankTransferReceiptModal from '../modals/admin/BankTransferReceiptModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -250,6 +251,11 @@ export function ModalFactory() {
       />;
     case 'notification':
       return <NotificationFormModal modalData={data || undefined} onClose={closeModal} />;
+    case 'bank-transfer-receipt':
+      return <BankTransferReceiptModal 
+        receiptUrl={data?.receiptUrl || null}
+        paymentId={data?.paymentId || ''}
+      />;
     default:
       return null;
   }

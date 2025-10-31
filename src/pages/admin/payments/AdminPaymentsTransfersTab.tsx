@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Button } from '@/components/ui/button';
@@ -8,25 +8,9 @@ import { useToast } from '@/hooks/use-toast';
 import { CheckCircle2, XCircle, Eye, AlertCircle, Inbox } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { queryClient, apiRequest } from '@/lib/queryClient';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Tabs } from '@/components/ui-custom/Tabs';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 interface BankTransferPayment {
   id: string;
@@ -57,14 +41,8 @@ interface BankTransferPayment {
 
 const AdminPaymentsTransfersTab = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
-  const [receiptModal, setReceiptModal] = useState<{ open: boolean; url: string | null }>({ open: false, url: null });
-  const [confirmAction, setConfirmAction] = useState<{ open: boolean; payment: BankTransferPayment | null; action: 'approve' | 'reject' }>({ 
-    open: false, 
-    payment: null, 
-    action: 'approve' 
-  });
-
   const { toast } = useToast();
+  const { openModal } = useGlobalModalStore();
 
   const { data: payments = [], isLoading } = useQuery<BankTransferPayment[]>({
     queryKey: ['/api/admin/payments'],
@@ -82,45 +60,8 @@ const AdminPaymentsTransfersTab = () => {
     },
   });
 
-  const approvePaymentMutation = useMutation({
-    mutationFn: async (paymentId: string) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const response = await fetch(`/api/admin/payments/${paymentId}/approve`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to approve payment');
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/payments'] });
-      toast({
-        title: 'Pago aprobado',
-        description: 'El pago ha sido aprobado y el usuario ha sido inscrito al curso.',
-      });
-      setConfirmAction({ open: false, payment: null, action: 'approve' });
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo aprobar el pago',
-        variant: 'destructive',
-      });
-    },
-  });
-
-  const handleApprove = (payment: BankTransferPayment) => {
-    setConfirmAction({ open: true, payment, action: 'approve' });
-  };
-
-  const handleViewReceipt = (url: string | null) => {
-    if (!url) {
+  const handleViewReceipt = (payment: BankTransferPayment) => {
+    if (!payment.receipt_url) {
       toast({
         title: 'Sin comprobante',
         description: 'Este pago no tiene comprobante adjunto',
@@ -128,7 +69,11 @@ const AdminPaymentsTransfersTab = () => {
       });
       return;
     }
-    setReceiptModal({ open: true, url });
+    
+    openModal('bank-transfer-receipt', {
+      receiptUrl: payment.receipt_url,
+      paymentId: payment.id,
+    });
   };
 
   const filteredPayments = statusFilter === 'all' 
@@ -221,22 +166,12 @@ const AdminPaymentsTransfersTab = () => {
         <div className="flex items-center gap-2">
           <Button
             size="sm"
-            onClick={() => handleViewReceipt(payment.receipt_url)}
+            onClick={() => handleViewReceipt(payment)}
             data-testid={`button-view-receipt-${payment.id}`}
           >
             <Eye className="h-4 w-4 mr-1" />
             Ver
           </Button>
-          {payment.status === 'pending' && (
-            <Button
-              size="sm"
-              onClick={() => handleApprove(payment)}
-              data-testid={`button-approve-${payment.id}`}
-            >
-              <CheckCircle2 className="h-4 w-4 mr-1" />
-              Aprobar
-            </Button>
-          )}
         </div>
       ),
     },
@@ -273,59 +208,6 @@ const AdminPaymentsTransfersTab = () => {
             : `No hay pagos ${statusFilter === 'pending' ? 'pendientes' : statusFilter === 'approved' ? 'aprobados' : 'rechazados'}.`
         }}
       />
-
-      {/* Modal de comprobante */}
-      <Dialog open={receiptModal.open} onOpenChange={(open) => setReceiptModal({ open, url: null })}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>Comprobante de Transferencia</DialogTitle>
-          </DialogHeader>
-          <div className="mt-4">
-            {receiptModal.url && (
-              receiptModal.url.endsWith('.pdf') ? (
-                <iframe
-                  src={receiptModal.url}
-                  className="w-full h-[600px] border rounded"
-                  title="Comprobante de pago"
-                />
-              ) : (
-                <img
-                  src={receiptModal.url}
-                  alt="Comprobante de pago"
-                  className="w-full h-auto max-h-[600px] object-contain border rounded"
-                />
-              )
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* AlertDialog de confirmación */}
-      <AlertDialog open={confirmAction.open} onOpenChange={(open) => !open && setConfirmAction({ open, payment: null, action: 'approve' })}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Aprobar Pago</AlertDialogTitle>
-            <AlertDialogDescription>
-              ¿Estás seguro de que deseas aprobar este pago?
-              <br />
-              <br />
-              El usuario <strong>{confirmAction.payment?.users?.full_name || confirmAction.payment?.users?.email}</strong> será inscrito automáticamente en el curso <strong>{confirmAction.payment?.course_prices?.courses?.title}</strong>.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (confirmAction.payment) {
-                  approvePaymentMutation.mutate(confirmAction.payment.id);
-                }
-              }}
-            >
-              Aprobar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };
