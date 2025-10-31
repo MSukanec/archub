@@ -81,7 +81,14 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
       }
       
       // Handle user_data updates
-      const birthdateString = data.birthdate?.toISOString().split('T')[0] || null
+      // Usar componentes de fecha en lugar de toISOString() para evitar problemas de timezone
+      let birthdateString: string | null = null;
+      if (data.birthdate) {
+        const year = data.birthdate.getFullYear();
+        const month = String(data.birthdate.getMonth() + 1).padStart(2, '0');
+        const day = String(data.birthdate.getDate()).padStart(2, '0');
+        birthdateString = `${year}-${month}-${day}`;
+      }
       const currentBirthdateString = userData?.user_data?.birthdate || null
       
       if (data.firstName !== userData?.user_data?.first_name ||
@@ -175,7 +182,15 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
       setFirstName(userData.user_data?.first_name || '')
       setLastName(userData.user_data?.last_name || '')
       setCountry(userData.user_data?.country || '')
-      setBirthdate(userData.user_data?.birthdate ? new Date(userData.user_data.birthdate) : undefined)
+      
+      // Parsear fecha correctamente para evitar problemas de timezone
+      if (userData.user_data?.birthdate) {
+        const [year, month, day] = userData.user_data.birthdate.split('-').map(Number);
+        setBirthdate(new Date(year, month - 1, day, 12, 0, 0, 0));
+      } else {
+        setBirthdate(undefined);
+      }
+      
       setAvatarUrl(userData.user?.avatar_url || '')
     }
   }, [userData])

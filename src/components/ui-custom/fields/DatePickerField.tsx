@@ -53,6 +53,9 @@ export default function DatePickerField({
         0
       )
       onChange(localDate)
+    } else {
+      // Permitir limpiar la fecha seleccionada
+      onChange(undefined)
     }
   }
 
