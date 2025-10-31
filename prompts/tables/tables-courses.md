@@ -339,7 +339,7 @@ VISTA user_course_done_view:
   }
 ]
 
-VISTA user_global_progress_view
+VISTA course_user_global_progress_view
 
 [
   {
