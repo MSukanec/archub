@@ -355,7 +355,7 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
         .from('course_enrollments')
         .select(`
           *,
-          users!inner(id, full_name, email),
+          users!inner(id, full_name, email, avatar_url),
           courses!inner(id, title)
         `)
         .order('started_at', { ascending: false });
