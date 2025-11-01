@@ -727,14 +727,14 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
       }
       
       // Get user presence data
-      const authIds = data.map(u => u.auth_id);
+      const userIds = data.map(u => u.id);
       
       const { data: presenceData } = await adminClient
         .from('user_presence')
         .select('user_id, last_seen_at')
-        .in('user_id', authIds);
+        .in('user_id', userIds);
       
-      // Create presence map using auth_id as key
+      // Create presence map using user.id as key
       const presenceMap = new Map(presenceData?.map(p => [p.user_id, p.last_seen_at]) ?? []);
       
       // Get organization counts for each user
@@ -749,7 +749,7 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
           return {
             ...user,
             organizations_count: count || 0,
-            last_seen_at: presenceMap.get(user.auth_id) || null
+            last_seen_at: presenceMap.get(user.id) || null
           };
         })
       );
