@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { Tag } from 'lucide-react'
+import { Tag, Plus, Search } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +10,10 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import AdminCourseCouponRow from '@/components/ui/data-row/rows/AdminCourseCouponRow'
+import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
+import { useMobile } from '@/hooks/use-mobile'
+import { useEffect } from 'react'
 
 interface Coupon {
   id: string;
@@ -31,6 +35,44 @@ interface Coupon {
 export default function AdminCourseCouponTab() {
   const { toast } = useToast()
   const { openModal } = useGlobalModalStore()
+  const isMobile = useMobile()
+  
+  const { 
+    setActions, 
+    setShowActionBar, 
+    clearActions,
+  } = useActionBarMobile()
+
+  // Configure mobile action bar
+  useEffect(() => {
+    if (isMobile) {
+      setActions({
+        search: {
+          id: 'search',
+          icon: Search,
+          label: 'Buscar',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+        create: {
+          id: 'create',
+          icon: Plus,
+          label: 'Crear Cupón',
+          onClick: () => openModal('coupon', {}),
+          variant: 'primary'
+        },
+      })
+      setShowActionBar(true)
+    }
+
+    // Cleanup when component unmounts
+    return () => {
+      if (isMobile) {
+        clearActions()
+      }
+    }
+  }, [isMobile, setActions, setShowActionBar, clearActions, openModal])
   
   const { data: coupons = [], isLoading: couponsLoading, refetch } = useQuery({
     queryKey: ['coupons'],
@@ -194,6 +236,13 @@ export default function AdminCourseCouponTab() {
           data={coupons}
           columns={couponColumns}
           isLoading={couponsLoading}
+          renderCard={(coupon) => (
+            <AdminCourseCouponRow
+              coupon={coupon}
+              onClick={() => handleEditCoupon(coupon)}
+              density="normal"
+            />
+          )}
           emptyState={
             <EmptyState
               icon={<Tag className="w-12 h-12" />}

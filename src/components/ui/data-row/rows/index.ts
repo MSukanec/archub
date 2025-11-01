@@ -29,3 +29,6 @@ export { default as ProjectRow } from './ProjectRow';
 
 export { default as AdminCourseStudentRow } from './AdminCourseStudentRow';
 export type { Enrollment, EnrollmentProgress } from './AdminCourseStudentRow';
+
+export { default as AdminCourseCouponRow } from './AdminCourseCouponRow';
+export type { Coupon } from './AdminCourseCouponRow';
