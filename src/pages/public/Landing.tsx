@@ -159,7 +159,7 @@ export default function Landing() {
                           border: 'none'
                         }}
                       >
-                        Dashboard
+                        Ingresar
                       </Button>
                     </Link>
 

@@ -16,14 +16,14 @@ import { useToast } from '@/hooks/use-toast';
 // Mapeo de rutas a nombres de páginas
 const PAGE_NAMES: Record<string, string> = {
   // Organization level
-  '/organization/dashboard': 'Resumen de Organización',
+  '/organization/dashboard': 'Visión General',
   '/organization/projects': 'Gestión de Proyectos',
   '/organization/personnel': 'Personal',
   '/organization/activity': 'Actividad',
   '/organization/preferences': 'Preferencias',
   
   // Project level
-  '/project/dashboard': 'Resumen de Proyecto',
+  '/project/dashboard': 'Visión General',
   '/project/gantt': 'Gantt',
   '/project/kanban': 'Kanban',
   '/budgets': 'Cómputo y Presupuesto',

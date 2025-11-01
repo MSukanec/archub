@@ -145,7 +145,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const getNavigationItems = (): SidebarItem[] => {
     if (sidebarLevel === 'organization') {
       return [
-        { id: 'dashboard', label: 'Resumen de Organización', icon: Home, href: '/organization/dashboard' },
+        { id: 'dashboard', label: 'Visión General', icon: Home, href: '/organization/dashboard' },
         { id: 'projects', label: 'Gestión de Proyectos', icon: Building, href: '/organization/projects' },
         { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts' },
         { id: 'analysis', label: 'Análisis de Costos', icon: FileText, href: '/analysis' },
@@ -157,7 +157,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       ];
     } else if (sidebarLevel === 'project' && selectedProjectId) {
       return [
-        { id: 'dashboard', label: 'Resumen de Proyecto', icon: Home, href: '/project/dashboard' },
+        { id: 'dashboard', label: 'Visión General', icon: Home, href: '/project/dashboard' },
         { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets' },
         { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel', restricted: 'coming_soon' },
         { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials', restricted: 'coming_soon' },
