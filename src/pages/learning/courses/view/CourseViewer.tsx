@@ -469,8 +469,9 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
                   disabled={markCompleteMutation.isPending || currentProgress?.is_completed}
                   data-testid="button-mark-complete-inline"
                   title={currentProgress?.is_completed ? 'Completada' : 'Marcar como Completa'}
+                  className={currentProgress?.is_completed ? "text-green-600 hover:text-green-700" : ""}
                 >
-                  <CheckCircle className={currentProgress?.is_completed ? "w-5 h-5 text-[var(--accent)]" : "w-5 h-5"} />
+                  <CheckCircle className="w-5 h-5" />
                 </Button>
               </div>
             </div>

@@ -23,7 +23,7 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
 
   // Fetch markers with React Query (optimized backend endpoint)
   const { data: markers = [], isLoading } = useQuery<CourseLessonNote[]>({
-    queryKey: ['/api/lessons', lessonId, 'markers'],
+    queryKey: [`/api/lessons/${lessonId}/markers`],
     enabled: !!lessonId,
     staleTime: 10000, // Cache for 10 seconds
   });
@@ -60,7 +60,7 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/lessons', lessonId, 'markers'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/lessons/${lessonId}/markers`] });
       toast({
         title: 'Marcador agregado',
         description: `Marcador creado en ${formatTime(currentTime)}`
@@ -84,7 +84,7 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/lessons', lessonId, 'markers'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/lessons/${lessonId}/markers`] });
     },
     onError: () => {
       toast({
@@ -101,7 +101,7 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
       return apiRequest('DELETE', `/api/lessons/${lessonId}/markers/${markerId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/lessons', lessonId, 'markers'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/lessons/${lessonId}/markers`] });
       toast({
         title: 'Marcador eliminado',
         description: 'El marcador se eliminó correctamente'
@@ -148,7 +148,7 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
 
     // Optimistic update in cache
     queryClient.setQueryData<CourseLessonNote[]>(
-      ['/api/lessons', lessonId, 'markers'],
+      [`/api/lessons/${lessonId}/markers`],
       (old = []) => old.map(m => m.id === markerId ? { ...m, body: newBody } : m)
     );
 

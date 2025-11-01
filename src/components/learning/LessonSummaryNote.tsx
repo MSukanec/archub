@@ -20,7 +20,7 @@ export function LessonSummaryNote({ lessonId }: LessonSummaryNoteProps) {
 
   // Fetch summary note with React Query (optimized backend endpoint)
   const { data: note, isLoading } = useQuery<CourseLessonNote | null>({
-    queryKey: ['/api/lessons', lessonId, 'summary-note'],
+    queryKey: [`/api/lessons/${lessonId}/summary-note`],
     enabled: !!lessonId,
     staleTime: 30000, // Cache for 30 seconds
   });
@@ -35,7 +35,7 @@ export function LessonSummaryNote({ lessonId }: LessonSummaryNoteProps) {
     },
     onSuccess: () => {
       setSaveStatus('saved');
-      queryClient.invalidateQueries({ queryKey: ['/api/lessons', lessonId, 'summary-note'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/lessons/${lessonId}/summary-note`] });
       
       if (savedTimerRef.current) {
         clearTimeout(savedTimerRef.current);

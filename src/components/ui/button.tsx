@@ -18,7 +18,7 @@ const buttonVariants = cva(
         secondary:
           "bg-[var(--button-secondary-bg)] text-[var(--button-ghost-text)] border border-[var(--main-sidebar-border)] hover:bg-[var(--button-secondary-hover-bg)] hover:text-[var(--button-ghost-hover-text)] hover:border-[var(--main-sidebar-border)] rounded-lg px-3 py-1.5 md:py-1.5 py-3 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 gap-2 text-sm font-medium [&_svg]:size-4",
         ghost:
-          "bg-transparent text-[var(--button-ghost-text)] hover:bg-transparent hover:text-[var(--button-ghost-hover-text)] rounded-lg border border-[var(--button-ghost-border)] hover:border-[var(--button-ghost-hover-border)] px-2 py-2 [&_svg]:size-4",
+          "bg-transparent text-[var(--button-ghost-text)] hover:bg-transparent hover:text-[var(--button-ghost-hover-text)] rounded-lg px-2 py-2 [&_svg]:size-4",
         link: "text-accent underline-offset-4 hover:underline px-2 py-1",
       },
       size: {

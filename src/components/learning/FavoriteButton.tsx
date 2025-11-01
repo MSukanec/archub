@@ -37,30 +37,27 @@ export function FavoriteButton({
 
   if (variant === 'icon') {
     return (
-      <button
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={(e) => {
           e.stopPropagation();
           toggleFavorite();
         }}
         disabled={isLoading}
-        className={cn(
-          "inline-flex items-center justify-center p-1.5 transition-all duration-150",
-          "disabled:opacity-50 disabled:cursor-not-allowed",
-          className
-        )}
+        className={cn(className)}
         data-testid={`button-favorite-lesson-${lessonId}`}
         title={displayFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
       >
         <Heart
           className={cn(
-            iconSizes[size],
-            "transition-all duration-150",
+            "h-5 w-5 transition-all duration-150",
             displayFavorite 
               ? "fill-red-500 text-red-500" 
               : "text-muted-foreground hover:text-red-500"
           )}
         />
-      </button>
+      </Button>
     );
   }
 
