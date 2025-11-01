@@ -202,13 +202,21 @@ export default function Home() {
     <Layout headerProps={headerProps} wide={true}>
       <div className="space-y-6">
         {/* Welcome Section */}
-        <div className="space-y-2">
-          <h2 className="text-3xl font-semibold text-foreground">
+        <div className="space-y-1">
+          {/* Desktop: saludo y nombre en una línea */}
+          <h2 className="hidden md:block text-3xl font-semibold text-foreground">
             {greeting}, {userData?.user_data?.first_name || 'Usuario'}
           </h2>
-          <p className="text-muted-foreground capitalize">
-            {currentDate}
-          </p>
+          
+          {/* Mobile: saludo pequeño y gris, nombre en segunda línea */}
+          <div className="md:hidden">
+            <p className="text-sm text-muted-foreground">
+              {greeting},
+            </p>
+            <h2 className="text-2xl font-semibold text-foreground">
+              {userData?.user_data?.first_name || 'Usuario'}
+            </h2>
+          </div>
         </div>
 
         {/* Banner Principal - Primeros Pasos - COMENTADO */}
