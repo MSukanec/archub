@@ -88,9 +88,6 @@ export function useMovements(organizationId?: string | undefined, projectId?: st
     queryFn: async () => {
       if (!effectiveOrgId) return []
 
-      console.log('Fetching movements for organization:', effectiveOrgId, 'project:', effectiveProjectId)
-      console.log('Project filter active:', !!effectiveProjectId)
-
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
@@ -147,33 +144,17 @@ export function useMovements(organizationId?: string | undefined, projectId?: st
       // If project is specified, filter by project
       // Only filter by project if projectId is explicitly provided and not null
       if (effectiveProjectId && effectiveProjectId !== 'null') {
-        console.log('Filtering by project_id:', effectiveProjectId);
         query = query.eq('project_id', effectiveProjectId);
-      } else {
-        console.log('Not filtering by project - showing all movements for organization');
       }
 
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching movements:', error)
         return []
       }
 
       if (!data || data.length === 0) {
-        console.log('No movements found for organization:', effectiveOrgId)
         return []
-      }
-
-      console.log('Found movements:', data.length)
-      if (data.length > 0) {
-        console.log('Sample movement data:', {
-          project_id: data[0]?.project_id,
-          organization_id: data[0]?.organization_id,
-          description: data[0]?.description
-        })
-        console.log('Expected organization_id:', effectiveOrgId)
-        console.log('Expected project_id:', effectiveProjectId)
       }
 
       // All data now comes from the view, no need for additional queries
@@ -220,9 +201,6 @@ export function useMovements(organizationId?: string | undefined, projectId?: st
           indirect: movement.indirect
         }
       });
-
-      console.log('Transformed movements:', transformedData.length);
-      
       
       return transformedData as Movement[];
     },

@@ -73,7 +73,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
     // WAIT for userData to load before making any routing decisions
     if (!userData) {
-      console.log('AuthGuard: Waiting for userData to load...');
       return;
     }
 
@@ -89,16 +88,13 @@ export function AuthGuard({ children }: AuthGuardProps) {
     if (onboardingBypass) {
       // Clear bypass if it's from a different user or if user hasn't completed onboarding
       if (!onboardingCompleted || bypassUserId !== userData.user?.id) {
-        console.log('AuthGuard: Clearing bypass for incomplete onboarding or different user');
         localStorage.removeItem('onboarding_bypass');
         localStorage.removeItem('onboarding_bypass_user_id');
       } else {
         // Bypass active for completed users - skip all onboarding checks
-        console.log('AuthGuard: Bypass active, skipping onboarding checks');
         
         // Reset completing flag if we're on dashboard with completed onboarding
         if (onboardingCompleted && completingOnboarding && (location.includes('/dashboard') || location.includes('/organization'))) {
-          console.log('AuthGuard: Resetting completingOnboarding flag');
           setCompletingOnboarding(false);
         }
         
@@ -109,7 +105,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
     // Don't interfere during onboarding completion process
     if (completingOnboarding) {
-      console.log('AuthGuard: Onboarding completion in progress, not redirecting');
       return;
     }
 
@@ -119,7 +114,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
     if (needsOnboarding && !isOnboardingRoute) {
       // Redirect to onboarding
       if (lastNavigationRef.current !== '/onboarding') {
-        console.log('AuthGuard: User needs onboarding, redirecting to /onboarding');
         lastNavigationRef.current = '/onboarding';
         navigate('/onboarding');
       }
@@ -131,7 +125,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
     
     // CASE 4: Redirect authenticated users away from public routes (only after onboarding check passes)
     if (isPublicRoute) {
-      console.log('AuthGuard: Authenticated user on public route, redirecting to dashboard');
       navigate('/organization/dashboard');
       return;
     }

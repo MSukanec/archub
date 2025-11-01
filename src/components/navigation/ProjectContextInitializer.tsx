@@ -23,8 +23,6 @@ export function ProjectContextInitializer() {
   const initializedForOrg = useRef<string | null>(null)
 
   useEffect(() => {
-    console.log("🔧 ProjectContextInit: Initializing organization context", currentOrganizationId);
-    
     // Si tenemos organización y preferencias, pero no proyecto seleccionado
     if (currentOrganizationId && orgPreferences && !selectedProjectId) {
       const lastProjectId = orgPreferences.last_project_id
@@ -32,7 +30,6 @@ export function ProjectContextInitializer() {
       // Solo cargar automáticamente el último proyecto si no hemos inicializado esta organización antes
       // Esto previene la recarga automática cuando el usuario explícitamente selecciona la vista de organización
       if (lastProjectId && initializedForOrg.current !== currentOrganizationId) {
-        console.log("🔧 ProjectContextInit: Loading last project for organization", currentOrganizationId, "->", lastProjectId);
         setSelectedProject(lastProjectId, currentOrganizationId)
         initializedForOrg.current = currentOrganizationId
       } else if (!lastProjectId) {
