@@ -420,61 +420,94 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
 
   return (
     <div className="space-y-6">
-
-      {/* Vimeo Video Player */}
       {currentLesson?.vimeo_video_id ? (
-        <div>
-          <VimeoPlayer 
-            vimeoId={currentLesson.vimeo_video_id}
-            initialPosition={initialPosition}
-            onProgress={handleVideoProgress}
-            onPlayerReady={setVimeoPlayer}
-            onSeekApplied={() => {
-              clearPendingSeek();
-            }}
-          />
-          
-          {/* Título y Acciones - Layout 2 columnas */}
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-[1fr,auto] gap-4 items-start">
-            {/* Columna Izquierda: Título + Duración */}
-            <div className="space-y-1">
-              <h2 className="text-xl font-semibold">{currentLesson.title}</h2>
-              {currentLesson.duration_sec && (
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  <span>Duración: {formatDuration(currentLesson.duration_sec)}</span>
-                </div>
-              )}
+        <>
+          {/* Layout de 3 columnas: Video (2 cols) + Marcadores sidebar (1 col) */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Columnas 1 y 2: Video Player */}
+            <div className="lg:col-span-2">
+              <VimeoPlayer 
+                vimeoId={currentLesson.vimeo_video_id}
+                initialPosition={initialPosition}
+                onProgress={handleVideoProgress}
+                onPlayerReady={setVimeoPlayer}
+                onSeekApplied={() => {
+                  clearPendingSeek();
+                }}
+              />
             </div>
 
-            {/* Columna Derecha: Botones de Acción */}
-            <div className="flex items-center gap-2">
-              {/* Botón Favorito */}
-              {courseId && (
-                <FavoriteButton 
-                  lessonId={currentLesson.id}
-                  courseId={courseId}
-                  isFavorite={currentProgress?.is_favorite || false}
-                  variant="icon"
-                  size="lg"
-                />
-              )}
-              
-              {/* Botón Marcar como Completa */}
-              <Button
-                variant={currentProgress?.is_completed ? "secondary" : "default"}
-                size="sm"
-                onClick={handleMarkComplete}
-                disabled={markCompleteMutation.isPending || currentProgress?.is_completed}
-                data-testid="button-mark-complete-inline"
-                className="whitespace-nowrap"
-              >
-                <CheckCircle className="w-4 h-4 mr-1.5" />
-                {currentProgress?.is_completed ? 'Completada' : (markCompleteMutation.isPending ? 'Marcando...' : 'Marcar como Completa')}
-              </Button>
+            {/* Columna 3: Marcadores (sticky) */}
+            {activeLessonId && (
+              <div className="lg:sticky lg:top-4 lg:self-start">
+                <div className="bg-card border rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Bookmark className="h-5 w-5 text-[var(--accent)]" />
+                    <h3 className="font-semibold">Marcadores</h3>
+                  </div>
+                  <LessonMarkers lessonId={activeLessonId} vimeoPlayer={vimeoPlayer} />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Card con datos del video - Debajo del player */}
+          <div className="bg-card border rounded-lg p-6">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr,auto] gap-4 items-start">
+              {/* Columna Izquierda: Título + Duración */}
+              <div className="space-y-1">
+                <h2 className="text-xl font-semibold">{currentLesson.title}</h2>
+                {currentLesson.duration_sec && (
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <Clock className="h-4 w-4" />
+                    <span>Duración: {formatDuration(currentLesson.duration_sec)}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Columna Derecha: Botones de Acción */}
+              <div className="flex items-center gap-2">
+                {/* Botón Favorito */}
+                {courseId && (
+                  <FavoriteButton 
+                    lessonId={currentLesson.id}
+                    courseId={courseId}
+                    isFavorite={currentProgress?.is_favorite || false}
+                    variant="icon"
+                    size="lg"
+                  />
+                )}
+                
+                {/* Botón Marcar como Completa */}
+                <Button
+                  variant={currentProgress?.is_completed ? "secondary" : "default"}
+                  size="sm"
+                  onClick={handleMarkComplete}
+                  disabled={markCompleteMutation.isPending || currentProgress?.is_completed}
+                  data-testid="button-mark-complete-inline"
+                  className="whitespace-nowrap"
+                >
+                  <CheckCircle className="w-4 h-4 mr-1.5" />
+                  {currentProgress?.is_completed ? 'Completada' : (markCompleteMutation.isPending ? 'Marcando...' : 'Marcar como Completa')}
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
+
+          {/* Card de Apuntes - Debajo de los datos del video */}
+          {activeLessonId && (
+            <div className="bg-card border rounded-lg p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <FileText className="h-5 w-5 text-[var(--accent)]" />
+                <h3 className="font-semibold">Mis Apuntes</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Resumen general de la lección - se guarda automáticamente mientras escribes.
+              </p>
+              <LessonSummaryNote lessonId={activeLessonId} />
+            </div>
+          )}
+        </>
       ) : (
         <div className="bg-muted/20 rounded-lg border-2 border-dashed border-muted-foreground/20 aspect-video flex items-center justify-center">
           <div className="text-center">
@@ -482,51 +515,6 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
             <p className="text-lg font-medium text-muted-foreground">
               {activeLessonId ? 'Esta lección no tiene video disponible' : 'Selecciona una lección para comenzar'}
             </p>
-          </div>
-        </div>
-      )}
-
-      {/* Lesson Notes and Markers - Preferences Style Layout */}
-      {activeLessonId && (
-        <div className="space-y-8 mt-8">
-          {/* Summary Notes Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column - Description */}
-            <div>
-              <div className="flex items-center gap-2 mb-6">
-                <FileText className="h-5 w-5 text-[var(--accent)]" />
-                <h2 className="text-lg font-semibold">Mis Apuntes</h2>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Resumen general de la lección - se guarda automáticamente mientras escribes.
-              </p>
-            </div>
-
-            {/* Right Column - Content */}
-            <div>
-              <LessonSummaryNote lessonId={activeLessonId} />
-            </div>
-          </div>
-
-          <hr className="border-t border-[var(--section-divider)] my-8" />
-
-          {/* Markers Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column - Description */}
-            <div>
-              <div className="flex items-center gap-2 mb-6">
-                <Bookmark className="h-5 w-5 text-[var(--accent)]" />
-                <h2 className="text-lg font-semibold">Marcadores</h2>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Crea marcadores en momentos específicos del video para poder volver a ellos fácilmente.
-              </p>
-            </div>
-
-            {/* Right Column - Content */}
-            <div>
-              <LessonMarkers lessonId={activeLessonId} vimeoPlayer={vimeoPlayer} />
-            </div>
           </div>
         </div>
       )}

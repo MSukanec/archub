@@ -303,7 +303,7 @@ export default function CourseView() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps} wide>
+      <Layout headerProps={headerProps} wide={false}>
         <div className="space-y-6">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-32 bg-muted/20 rounded-lg animate-pulse" />
@@ -315,7 +315,7 @@ export default function CourseView() {
 
   if (!course) {
     return (
-      <Layout headerProps={headerProps} wide>
+      <Layout headerProps={headerProps} wide={false}>
         <div className="text-center py-8">
           <h3 className="text-lg font-medium text-muted-foreground">Curso no encontrado</h3>
           <p className="text-sm text-muted-foreground mt-1">
@@ -329,7 +329,7 @@ export default function CourseView() {
   // SECURITY: Check if user is enrolled before showing course content
   if (!enrollment) {
     return (
-      <Layout headerProps={headerProps} wide>
+      <Layout headerProps={headerProps} wide={false}>
         <EmptyState
           icon={<Lock />}
           title="Acceso Restringido"
@@ -372,7 +372,7 @@ export default function CourseView() {
   };
 
   return (
-    <Layout headerProps={headerProps} wide>
+    <Layout headerProps={headerProps} wide={false}>
       {renderTabContent()}
     </Layout>
   );
