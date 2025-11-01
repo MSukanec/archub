@@ -44,8 +44,8 @@ export function FavoriteButton({
         }}
         disabled={isLoading}
         className={cn(
-          "inline-flex items-center justify-center rounded-full p-1.5 transition-all duration-150",
-          "hover:ring-2 hover:ring-red-500 hover:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed",
+          "inline-flex items-center justify-center p-1.5 transition-all duration-150",
+          "disabled:opacity-50 disabled:cursor-not-allowed",
           className
         )}
         data-testid={`button-favorite-lesson-${lessonId}`}
@@ -57,7 +57,7 @@ export function FavoriteButton({
             "transition-all duration-150",
             displayFavorite 
               ? "fill-red-500 text-red-500" 
-              : "text-muted-foreground"
+              : "text-muted-foreground hover:text-red-500"
           )}
         />
       </button>

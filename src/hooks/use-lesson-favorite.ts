@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
 
 interface UseLessonFavoriteProps {
   lessonId: string;
@@ -10,6 +11,7 @@ interface UseLessonFavoriteProps {
 
 export function useLessonFavorite({ lessonId, courseId, currentlyFavorite }: UseLessonFavoriteProps) {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [optimisticFavorite, setOptimisticFavorite] = useState<boolean | null>(null);
 
   const toggleFavoriteMutation = useMutation({
@@ -39,19 +41,52 @@ export function useLessonFavorite({ lessonId, courseId, currentlyFavorite }: Use
 
       return response.json();
     },
-    onSuccess: () => {
-      // Invalidar solo el cache de progreso específico
-      queryClient.invalidateQueries({ 
-        queryKey: ['/api/courses', courseId, 'progress'],
-        exact: false 
+    onMutate: async (isFavorite: boolean) => {
+      // ⚡ OPTIMISTIC UPDATE - Cancelar queries en progreso
+      await queryClient.cancelQueries({ queryKey: ['/api/courses', courseId, 'progress'] });
+
+      // Guardar snapshot anterior para rollback
+      const previousProgress = queryClient.getQueryData(['/api/courses', courseId, 'progress']);
+
+      // Actualizar cache optimistamente
+      queryClient.setQueryData(['/api/courses', courseId, 'progress'], (old: any) => {
+        if (!old || !Array.isArray(old)) return old;
+        
+        return old.map((item: any) => 
+          item.lesson_id === lessonId 
+            ? { ...item, is_favorite: isFavorite }
+            : item
+        );
+      });
+
+      return { previousProgress };
+    },
+    onSuccess: (data, isFavorite) => {
+      // Mostrar toast de éxito
+      toast({
+        title: isFavorite ? "Agregado a favoritos" : "Quitado de favoritos",
+        description: isFavorite 
+          ? "La lección fue agregada a tus favoritos" 
+          : "La lección fue quitada de tus favoritos",
       });
       
-      // Limpiar estado optimista después de éxito
+      // Limpiar estado optimista
       setOptimisticFavorite(null);
     },
-    onError: (error: any) => {
+    onError: (error: any, _isFavorite, context) => {
+      // Revertir cache al estado anterior
+      if (context?.previousProgress) {
+        queryClient.setQueryData(['/api/courses', courseId, 'progress'], context.previousProgress);
+      }
+      
       console.error('Error toggling favorite:', error);
-      // Revertir estado optimista en caso de error
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo marcar como favorito",
+        variant: "destructive",
+      });
+      
+      // Revertir estado optimista
       setOptimisticFavorite(null);
     },
   });
@@ -59,16 +94,16 @@ export function useLessonFavorite({ lessonId, courseId, currentlyFavorite }: Use
   const toggleFavorite = () => {
     const newValue = !currentlyFavorite;
     
-    // ⚡ UPDATE OPTIMISTA INSTANTÁNEO
+    // ⚡ UPDATE UI INSTANTÁNEO
     setOptimisticFavorite(newValue);
     
-    // Ejecutar mutación en background
+    // Ejecutar mutación con optimistic update
     toggleFavoriteMutation.mutate(newValue);
   };
 
   return {
     toggleFavorite,
     isLoading: toggleFavoriteMutation.isPending,
-    optimisticFavorite, // Exponer estado optimista para UI
+    optimisticFavorite,
   };
 }
