@@ -9,6 +9,99 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
 
   // ========== PROJECT ENDPOINTS ==========
 
+  // GET /api/projects - Optimized endpoint to fetch all projects for an organization
+  app.get("/api/projects", async (req, res) => {
+    try {
+      const { organization_id } = req.query;
+      
+      if (!organization_id) {
+        return res.status(400).json({ error: "organization_id is required" });
+      }
+
+      // Get the authorization token from headers
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // BULK QUERY 1: Get all projects for organization
+      const { data: projects, error: projectsError } = await authenticatedSupabase
+        .from('projects')
+        .select('*')
+        .eq('organization_id', organization_id)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (projectsError) {
+        console.error("Error fetching projects:", projectsError);
+        return res.status(500).json({ error: "Failed to fetch projects" });
+      }
+
+      if (!projects || projects.length === 0) {
+        return res.json([]);
+      }
+
+      // Get all unique project IDs and created_by IDs
+      const projectIds = projects.map(p => p.id);
+      const creatorIdsSet = new Set(projects.map(p => p.created_by).filter(Boolean));
+      const creatorIds = Array.from(creatorIdsSet);
+
+      // BULK QUERY 2: Get all project_data for these projects
+      const { data: projectDataList } = await authenticatedSupabase
+        .from('project_data')
+        .select('*, project_types!project_type_id(id, name), project_modalities!modality_id(id, name)')
+        .in('project_id', projectIds);
+
+      // BULK QUERY 3: Get all organization_members for creators
+      const { data: orgMembers } = await authenticatedSupabase
+        .from('organization_members')
+        .select('id, users!inner(id, full_name, email, avatar_url, user_data(first_name, last_name))')
+        .in('id', creatorIds);
+
+      // Create lookup maps for fast access
+      const projectDataMap = new Map();
+      (projectDataList || []).forEach(pd => {
+        projectDataMap.set(pd.project_id, {
+          project_type_id: pd.project_type_id,
+          modality_id: pd.modality_id,
+          project_image_url: pd.project_image_url,
+          project_type: pd.project_types,
+          modality: pd.project_modalities
+        });
+      });
+
+      const creatorsMap = new Map();
+      (orgMembers || []).forEach(om => {
+        if (om.users && Array.isArray(om.users) && om.users.length > 0) {
+          const user = om.users[0];
+          creatorsMap.set(om.id, {
+            id: user.id,
+            full_name: user.full_name,
+            email: user.email,
+            avatar_url: user.avatar_url,
+            first_name: user.user_data?.[0]?.first_name,
+            last_name: user.user_data?.[0]?.last_name
+          });
+        }
+      });
+
+      // Combine data in memory
+      const transformedProjects = projects.map(project => ({
+        ...project,
+        project_data: projectDataMap.get(project.id) || null,
+        creator: creatorsMap.get(project.created_by) || undefined
+      }));
+
+      res.json(transformedProjects);
+    } catch (error) {
+      console.error("Error in /api/projects endpoint:", error);
+      res.status(500).json({ error: "Failed to fetch projects" });
+    }
+  });
+
   // Delete project safely - server-side implementation
   app.delete("/api/projects/:projectId", async (req, res) => {
     try {
