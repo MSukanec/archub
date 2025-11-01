@@ -20,8 +20,17 @@ export function useLessonFavorite({ lessonId, courseId, currentlyFavorite }: Use
         throw new Error('Supabase client not initialized');
       }
 
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !session?.access_token) {
+      // Get session with error handling
+      let session = null;
+      try {
+        const { data } = await supabase.auth.getSession();
+        session = data?.session;
+      } catch (error) {
+        // Silently handle auth errors - no session available
+        throw new Error('No hay sesión activa');
+      }
+      
+      if (!session?.access_token) {
         throw new Error('No hay sesión activa');
       }
 

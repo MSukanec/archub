@@ -57,7 +57,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       // Set up auth state change listener
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        console.log('🔧 AuthStore: Auth state changed:', event, !!session?.user);
+        // Silently handle auth state changes - no console log
         
         if (event === 'SIGNED_OUT' || !session?.user) {
           set({ user: null, loading: false });
@@ -139,15 +139,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
 
       if (error) {
-        console.error('Google OAuth error:', error);
+        // Silently handle OAuth errors
         set({ loading: false });
         throw error;
       }
 
-      // The redirect will happen automatically
-      console.log('Google OAuth initiated successfully');
+      // The redirect will happen automatically - no console log
     } catch (error) {
-      console.error('Google sign-in error:', error);
+      // Silently handle Google sign-in errors
       set({ loading: false });
       throw error;
     }
@@ -155,11 +154,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     if (!supabase) {
-      console.error("Supabase client not initialized");
+      // Silently handle missing client
       return;
     }
     
-    console.log('🔧 AuthStore: Fast logout with session clear');
+    // Fast logout with session clear - no console log
     
     try {
       // Clear user state immediately - no waiting
@@ -187,9 +186,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         localStorage.removeItem('supabase-auth-token');
         
         sessionStorage.clear();
-        console.log('🔧 AuthStore: Cleared', keysToRemove.length, 'Supabase tokens');
+        // Silently clear tokens - no console log
       } catch (e) {
-        console.error('🔧 AuthStore: Error clearing storage:', e);
+        // Silently handle storage errors
       }
       
       // IMMEDIATE redirect after quick cleanup - use navigate for faster transition
@@ -202,8 +201,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
       
     } catch (error) {
-      console.error('🔧 AuthStore: Error during logout:', error);
-      // Force redirect even on error
+      // Silently handle logout errors and force redirect
       set({ user: null, loading: false, initialized: true });
       const currentPath = window.location.pathname;
       if (currentPath !== '/') {

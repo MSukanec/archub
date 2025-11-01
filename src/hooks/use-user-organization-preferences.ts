@@ -21,16 +21,25 @@ export function useUserOrganizationPreferences(organizationId: string | undefine
     queryFn: async (): Promise<UserOrganizationPreferences | null> => {
       if (!userId || !organizationId) return null
 
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session) {
-        throw new Error('No active session');
+      // Get session with error handling
+      let session = null;
+      try {
+        const { data } = await supabase.auth.getSession();
+        session = data?.session;
+      } catch (error) {
+        // Silently handle auth errors
+        return null;
+      }
+      
+      if (!session) {
+        return null; // Return null instead of throwing
       }
 
       const response = await fetch(`/api/user/organization-preferences?user_id=${userId}&organization_id=${organizationId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.session.access_token}`,
+          'Authorization': `Bearer ${session.access_token}`,
         },
       })
 
@@ -63,18 +72,25 @@ export function useUpdateUserOrganizationPreferences() {
         throw new Error('User not authenticated')
       }
 
-      console.log("🔧 Updating user organization preferences", { userId, organizationId, lastProjectId });
-
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session) {
-        throw new Error('No active session');
+      // Get session with error handling
+      let session = null;
+      try {
+        const { data } = await supabase.auth.getSession();
+        session = data?.session;
+      } catch (error) {
+        // Silently handle auth errors
+        return null;
+      }
+      
+      if (!session) {
+        return null; // Return null instead of throwing
       }
 
       const response = await fetch('/api/user/update-organization-preferences', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.session.access_token}`,
+          'Authorization': `Bearer ${session.access_token}`,
           'x-user-id': userId,
         },
         body: JSON.stringify({
@@ -88,11 +104,9 @@ export function useUpdateUserOrganizationPreferences() {
       }
 
       const data = await response.json()
-      console.log("🔧 Successfully updated user organization preferences", data);
       return data
     },
     onSuccess: (data) => {
-      console.log("🔧 Mutation onSuccess", data);
       // Invalidar cache para actualizar datos
       queryClient.invalidateQueries({ 
         queryKey: ['user-organization-preferences', userId, data.organization_id] 

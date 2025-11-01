@@ -111,31 +111,40 @@ export function useCurrentUser(forceRefresh?: boolean) {
     queryKey: ['current-user'],
     queryFn: async () => {
       if (!authUser) {
-        throw new Error('User not authenticated')
+        // Return null instead of throwing when not authenticated
+        return null as any;
       }
       
 
-      // Get the session token to send to the server
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-      
-      if (sessionError) {
-        throw new Error(`Session error: ${sessionError.message}`)
-      }
-      
-      let token = sessionData?.session?.access_token
-      
-      if (!token || !sessionData?.session) {
-        // Don't try to refresh during logout process
-        if (authLoading) {
-          throw new Error('User is logging out')
+      // Get the session token to send to the server, wrapped in try-catch
+      let token = null;
+      try {
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+        
+        if (sessionError) {
+          // Silently handle auth errors, return null
+          return null as any;
         }
         
-        // Try to refresh the session
-        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
-        if (refreshError || !refreshData?.session?.access_token) {
-          throw new Error('No valid authentication token available')
+        token = sessionData?.session?.access_token
+        
+        if (!token || !sessionData?.session) {
+          // Don't try to refresh during logout process
+          if (authLoading) {
+            return null as any;
+          }
+          
+          // Try to refresh the session
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
+          if (refreshError || !refreshData?.session?.access_token) {
+            // No valid session, return null instead of throwing
+            return null as any;
+          }
+          token = refreshData.session.access_token
         }
-        token = refreshData.session.access_token
+      } catch (error) {
+        // Silently handle any auth errors
+        return null as any;
       }
 
       // Add refresh parameter if forced refresh is requested
@@ -152,21 +161,27 @@ export function useCurrentUser(forceRefresh?: boolean) {
 
       // Handle user not found (deleted from database)
       if (response.status === 404) {
-        console.log('🚨 User deleted from database but session still active - logging out automatically')
+        // Silently handle deleted user - no console log to avoid spam
         // Force logout since user no longer exists in database
         await logout()
-        throw new Error('User not found in database - session invalidated')
+        return null as any;
+      }
+
+      // Silently handle 400/401 auth errors
+      if (response.status === 400 || response.status === 401) {
+        return null as any;
       }
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`)
+        // Silently handle other errors
+        return null as any;
       }
 
       const userData = await response.json()
       
       if (!userData) {
-        throw new Error('No user data returned')
+        // No user data returned, return null silently
+        return null as any;
       }
 
       return userData as UserData
@@ -174,13 +189,22 @@ export function useCurrentUser(forceRefresh?: boolean) {
     enabled: !!authUser && !authLoading,
     // Add small delay after login to let session stabilize
     refetchInterval: false,
-    retry: (failureCount, error) => {
-      // Don't retry if user is logging out, not authenticated, or was deleted
-      if (authLoading || !authUser || error.message.includes('logging out') || error.message.includes('session invalidated')) {
-        return false
+    retry: (failureCount, error: any) => {
+      // Never retry on 400/401 auth errors
+      if (error?.message?.includes('400') || error?.message?.includes('401')) {
+        return false;
       }
-      return failureCount < 2
+      // Don't retry on any auth-related errors
+      if (authLoading || !authUser || 
+          error?.message?.toLowerCase().includes('auth') || 
+          error?.message?.toLowerCase().includes('session') ||
+          error?.message?.includes('logging out') || 
+          error?.message?.includes('invalidated')) {
+        return false;
+      }
+      // No retries for any errors
+      return false;
     },
-    staleTime: forceRefresh ? 0 : 5 * 60 * 1000, // No cache when force refresh
+    staleTime: forceRefresh ? 0 : 5 * 60 * 1000, // Cache for 5 minutes to reduce calls
   })
 }

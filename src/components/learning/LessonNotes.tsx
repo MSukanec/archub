@@ -24,7 +24,15 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
       try {
         setIsLoading(true);
         isInitialLoadRef.current = true;
-        const { data: { session } } = await supabase.auth.getSession();
+        // Get session with error handling
+        let session = null;
+        try {
+          const { data } = await supabase.auth.getSession();
+          session = data?.session;
+        } catch (error) {
+          // Silently handle auth errors
+          return;
+        }
         if (!session) return;
 
         const response = await fetch(`/api/lessons/${lessonId}/notes`, {
@@ -80,7 +88,16 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
 
     debounceTimerRef.current = setTimeout(async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        // Get session with error handling
+        let session = null;
+        try {
+          const { data } = await supabase.auth.getSession();
+          session = data?.session;
+        } catch (error) {
+          // Silently handle auth errors
+          setSaveStatus('error');
+          return;
+        }
         if (!session) {
           setSaveStatus('error');
           return;
