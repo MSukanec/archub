@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave'
 import { useMutation } from '@tanstack/react-query'
-import { queryClient } from '@/lib/queryClient'
+import { queryClient, apiRequest } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
 import { useSidebarStore, useSecondarySidebarStore } from '@/stores/sidebarStore'
 import { useThemeStore } from '@/stores/themeStore'
@@ -37,21 +37,11 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
       if (data.sidebarDocked !== userData?.preferences?.sidebar_docked ||
           data.theme !== userData?.preferences?.theme) {
         
-        const response = await fetch('/api/user/profile', {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            user_id: userData?.user?.id,
-            sidebar_docked: data.sidebarDocked,
-            theme: data.theme,
-          }),
+        await apiRequest('PATCH', '/api/user/profile', {
+          user_id: userData?.user?.id,
+          sidebar_docked: data.sidebarDocked,
+          theme: data.theme,
         })
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
       }
       
       return data
