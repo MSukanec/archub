@@ -102,75 +102,39 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
     refetchOnMount: 'always'
   });
 
-  // Get notes count per lesson
-  const { data: notesData = [] } = useQuery({
-    queryKey: ['course-lesson-notes-count', courseId],
-    queryFn: async () => {
-      if (!courseId || !supabase) return [];
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return [];
+  // Get notes for this course using optimized backend API
+  const { data: notesResponse } = useQuery<any[]>({
+    queryKey: ['/api/courses', courseId, 'notes'],
+    enabled: !!courseId
+  });
 
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!authUser?.email) return [];
-
-      const { data: userRecord } = await supabase
-        .from('users')
-        .select('id')
-        .ilike('email', authUser.email)
-        .single();
-
-      if (!userRecord) return [];
-
-      // Get all modules for this course
-      const { data: courseModules } = await supabase
-        .from('course_modules')
-        .select('id')
-        .eq('course_id', courseId);
-
-      if (!courseModules || courseModules.length === 0) return [];
-
-      const moduleIds = courseModules.map(m => m.id);
-
-      // Get all lessons for these modules
-      const { data: courseLessons } = await supabase
-        .from('course_lessons')
-        .select('id')
-        .in('module_id', moduleIds);
-
-      if (!courseLessons || courseLessons.length === 0) return [];
-
-      const lessonIds = courseLessons.map(l => l.id);
-
-      // Get notes count per lesson
-      const { data, error } = await supabase
-        .from('course_lesson_notes')
-        .select('lesson_id, note_type')
-        .eq('user_id', userRecord.id)
-        .in('lesson_id', lessonIds);
-
-      if (error) return [];
-      
-      return data || [];
-    },
-    enabled: !!courseId && !!supabase
+  // Get markers for this course using optimized backend API  
+  const { data: markersResponse } = useQuery<any[]>({
+    queryKey: ['/api/courses', courseId, 'markers'],
+    enabled: !!courseId
   });
 
   // Process data into rows
   const tableData = useMemo<LessonRowData[]>(() => {
     if (!lessons.length || !modules.length) return [];
 
-    // Count notes and markers per lesson
+    // Count notes and markers per lesson from API responses
     const notesCountMap: Record<string, { notes: number; markers: number }> = {};
-    notesData.forEach((note) => {
+    
+    // Count summary notes (Apuntes)
+    (notesResponse || []).forEach((note: any) => {
       if (!notesCountMap[note.lesson_id]) {
         notesCountMap[note.lesson_id] = { notes: 0, markers: 0 };
       }
-      if (note.note_type === 'marker') {
-        notesCountMap[note.lesson_id].markers++;
-      } else {
-        notesCountMap[note.lesson_id].notes++;
+      notesCountMap[note.lesson_id].notes++;
+    });
+    
+    // Count markers
+    (markersResponse || []).forEach((marker: any) => {
+      if (!notesCountMap[marker.lesson_id]) {
+        notesCountMap[marker.lesson_id] = { notes: 0, markers: 0 };
       }
+      notesCountMap[marker.lesson_id].markers++;
     });
 
     // Build module map
@@ -214,7 +178,7 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
     });
 
     return rows;
-  }, [lessons, modules, courseProgress, notesData]);
+  }, [lessons, modules, courseProgress, notesResponse, markersResponse]);
 
   const formatDuration = (seconds: number | null) => {
     if (!seconds) return '-';
@@ -258,7 +222,7 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
     },
     {
       key: 'notes_count',
-      label: 'Notas',
+      label: 'Apuntes',
       width: '10%',
       render: (row: LessonRowData) => (
         <span className="text-sm">{row.notes_count}</span>
@@ -296,28 +260,28 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
       width: '20%',
       sortable: false,
       render: (row: LessonRowData) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           {/* 🌟 BOTÓN DE FAVORITO */}
           <FavoriteButton 
             lessonId={row.id}
             courseId={courseId!}
             isFavorite={row.is_favorite}
             variant="icon"
-            size="md"
+            size="lg"
           />
           
           {/* BOTÓN IR A LECCIÓN */}
           <Button
-            variant="default"
-            size="sm"
+            variant="ghost"
+            size="icon"
             onClick={(e) => {
               e.stopPropagation();
               handleGoToLesson(row.id);
             }}
             data-testid={`button-go-to-lesson-${row.id}`}
+            title="Ir a Lección"
           >
-            <ArrowRight className="h-4 w-4 mr-2" />
-            Ir a Lección
+            <ArrowRight className="h-5 w-5" />
           </Button>
         </div>
       )
@@ -338,11 +302,21 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
         data={tableData}
         columns={columns}
         groupBy="groupKey"
-        renderGroupHeader={(groupKey: string, groupRows: LessonRowData[]) => (
-          <div className="col-span-full text-sm font-semibold py-2">
-            {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'lección' : 'lecciones'})
-          </div>
-        )}
+        renderGroupHeader={(groupKey: string, groupRows: LessonRowData[]) => {
+          // Calculate total duration for this module
+          const totalDuration = groupRows.reduce((sum, row) => {
+            return sum + (row.duration_sec || 0);
+          }, 0);
+          
+          return (
+            <div className="col-span-full text-sm font-semibold py-2 flex items-center gap-3">
+              <span>{groupKey}</span>
+              <span className="text-muted-foreground font-normal">
+                ({groupRows.length} {groupRows.length === 1 ? 'lección' : 'lecciones'} · {formatDuration(totalDuration)})
+              </span>
+            </div>
+          );
+        }}
         renderCard={(row: LessonRowData) => (
           <LessonRow
             lesson={row}
