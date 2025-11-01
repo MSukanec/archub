@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bookmark, Plus, Trash2, Pin, Clock, Check, Loader2 } from 'lucide-react';
+import { Bookmark, Plus, Trash2, Pin, Clock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import type { CourseLessonNote } from '@shared/schema';
 
 interface LessonMarkersProps {
@@ -16,32 +17,16 @@ interface MarkerWithSaveStatus extends CourseLessonNote {
 }
 
 export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
-  const [markers, setMarkers] = useState<MarkerWithSaveStatus[]>([]);
   const [currentTime, setCurrentTime] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
   const debounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
-  // Get user ID
-  useEffect(() => {
-    const getUserId = async () => {
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!authUser?.email) return;
-
-      const { data: userRecord } = await supabase
-        .from('users')
-        .select('id')
-        .ilike('email', authUser.email)
-        .single();
-
-      if (userRecord) {
-        setUserId(userRecord.id);
-      }
-    };
-
-    getUserId();
-  }, []);
+  // Fetch markers with React Query (optimized backend endpoint)
+  const { data: markers = [], isLoading } = useQuery<CourseLessonNote[]>({
+    queryKey: ['/api/lessons', lessonId, 'markers'],
+    enabled: !!lessonId,
+    staleTime: 10000, // Cache for 10 seconds
+  });
 
   // Track current video time
   useEffect(() => {
@@ -60,35 +45,6 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
     return () => clearInterval(interval);
   }, [vimeoPlayer]);
 
-  // Load markers
-  useEffect(() => {
-    const loadMarkers = async () => {
-      if (!userId) return;
-
-      try {
-        setIsLoading(true);
-        const { data, error } = await supabase
-          .from('course_lesson_notes')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('lesson_id', lessonId)
-          .eq('note_type', 'marker')
-          .order('is_pinned', { ascending: false })
-          .order('time_sec', { ascending: true })
-          .order('created_at', { ascending: true });
-
-        if (error) throw error;
-        setMarkers(data || []);
-      } catch (error) {
-        console.error('Error loading markers:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadMarkers();
-  }, [lessonId, userId]);
-
   const formatTime = (seconds: number | null): string => {
     if (seconds === null) return '0:00';
     const mins = Math.floor(seconds / 60);
@@ -96,8 +52,73 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Create marker mutation
+  const createMarkerMutation = useMutation({
+    mutationFn: async (time_sec: number) => {
+      return apiRequest('POST', `/api/lessons/${lessonId}/markers`, {
+        body: '',
+        time_sec
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/lessons', lessonId, 'markers'] });
+      toast({
+        title: 'Marcador agregado',
+        description: `Marcador creado en ${formatTime(currentTime)}`
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'Error',
+        description: 'No se pudo agregar el marcador',
+        variant: 'destructive'
+      });
+    }
+  });
+
+  // Update marker mutation
+  const updateMarkerMutation = useMutation({
+    mutationFn: async ({ markerId, body, is_pinned }: { markerId: string; body?: string; is_pinned?: boolean }) => {
+      return apiRequest('PATCH', `/api/lessons/${lessonId}/markers/${markerId}`, {
+        ...(body !== undefined && { body }),
+        ...(is_pinned !== undefined && { is_pinned })
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/lessons', lessonId, 'markers'] });
+    },
+    onError: () => {
+      toast({
+        title: 'Error',
+        description: 'No se pudo actualizar el marcador',
+        variant: 'destructive'
+      });
+    }
+  });
+
+  // Delete marker mutation
+  const deleteMarkerMutation = useMutation({
+    mutationFn: async (markerId: string) => {
+      return apiRequest('DELETE', `/api/lessons/${lessonId}/markers/${markerId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/lessons', lessonId, 'markers'] });
+      toast({
+        title: 'Marcador eliminado',
+        description: 'El marcador se eliminó correctamente'
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'Error',
+        description: 'No se pudo eliminar el marcador',
+        variant: 'destructive'
+      });
+    }
+  });
+
   const handleAddMarker = async () => {
-    if (!userId || !vimeoPlayer) return;
+    if (!vimeoPlayer) return;
 
     try {
       const time = await vimeoPlayer.getCurrentTime();
@@ -114,77 +135,29 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
         return;
       }
 
-      const { data, error } = await supabase
-        .from('course_lesson_notes')
-        .insert({
-          user_id: userId,
-          lesson_id: lessonId,
-          note_type: 'marker',
-          body: '',
-          time_sec: roundedTime,
-          is_pinned: false
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      setMarkers(prev => {
-        const updated = [...prev, data];
-        return updated.sort((a, b) => {
-          if (a.is_pinned !== b.is_pinned) return b.is_pinned ? 1 : -1;
-          if (a.time_sec !== b.time_sec) return (a.time_sec || 0) - (b.time_sec || 0);
-          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-        });
-      });
-
-      toast({
-        title: 'Marcador agregado',
-        description: `Marcador creado en ${formatTime(roundedTime)}`
-      });
+      createMarkerMutation.mutate(roundedTime);
     } catch (error) {
       console.error('Error adding marker:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo agregar el marcador',
-        variant: 'destructive'
-      });
     }
   };
 
   const handleBodyChange = (markerId: string, newBody: string) => {
-    // Update local state immediately
-    setMarkers(prev => prev.map(m => 
-      m.id === markerId ? { ...m, body: newBody, isSaving: true } : m
-    ));
-
     // Clear existing timer for this marker
     const existingTimer = debounceTimersRef.current.get(markerId);
     if (existingTimer) {
       clearTimeout(existingTimer);
     }
 
-    // Set new timer
-    const timer = setTimeout(async () => {
-      try {
-        const { error } = await supabase
-          .from('course_lesson_notes')
-          .update({ body: newBody })
-          .eq('id', markerId);
+    // Optimistic update in cache
+    queryClient.setQueryData<CourseLessonNote[]>(
+      ['/api/lessons', lessonId, 'markers'],
+      (old = []) => old.map(m => m.id === markerId ? { ...m, body: newBody } : m)
+    );
 
-        if (error) throw error;
-
-        setMarkers(prev => prev.map(m => 
-          m.id === markerId ? { ...m, isSaving: false } : m
-        ));
-      } catch (error) {
-        console.error('Error saving marker body:', error);
-        setMarkers(prev => prev.map(m => 
-          m.id === markerId ? { ...m, isSaving: false } : m
-        ));
-      } finally {
-        debounceTimersRef.current.delete(markerId);
-      }
+    // Set new timer for debounced save
+    const timer = setTimeout(() => {
+      updateMarkerMutation.mutate({ markerId, body: newBody });
+      debounceTimersRef.current.delete(markerId);
     }, 600);
 
     debounceTimersRef.current.set(markerId, timer);
@@ -204,65 +177,19 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
     }
   };
 
-  const handleTogglePin = async (markerId: string, currentPinned: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('course_lesson_notes')
-        .update({ is_pinned: !currentPinned })
-        .eq('id', markerId);
-
-      if (error) throw error;
-
-      setMarkers(prev => {
-        const updated = prev.map(m => 
-          m.id === markerId ? { ...m, is_pinned: !currentPinned } : m
-        );
-        return updated.sort((a, b) => {
-          if (a.is_pinned !== b.is_pinned) return b.is_pinned ? 1 : -1;
-          if (a.time_sec !== b.time_sec) return (a.time_sec || 0) - (b.time_sec || 0);
-          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-        });
-      });
-    } catch (error) {
-      console.error('Error toggling pin:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo fijar el marcador',
-        variant: 'destructive'
-      });
-    }
+  const handleTogglePin = (markerId: string, currentPinned: boolean) => {
+    updateMarkerMutation.mutate({ markerId, is_pinned: !currentPinned });
   };
 
-  const handleDeleteMarker = async (markerId: string) => {
-    try {
-      const { error } = await supabase
-        .from('course_lesson_notes')
-        .delete()
-        .eq('id', markerId);
-
-      if (error) throw error;
-
-      setMarkers(prev => prev.filter(m => m.id !== markerId));
-      
-      toast({
-        title: 'Marcador eliminado',
-        description: 'El marcador se eliminó correctamente'
-      });
-    } catch (error) {
-      console.error('Error deleting marker:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo eliminar el marcador',
-        variant: 'destructive'
-      });
-    }
+  const handleDeleteMarker = (markerId: string) => {
+    deleteMarkerMutation.mutate(markerId);
   };
 
   if (isLoading) {
     return (
-      <div className="bg-card border border-border rounded-lg p-6 animate-pulse">
-        <div className="h-8 bg-muted rounded w-1/3 mb-4"></div>
-        <div className="h-20 bg-muted rounded"></div>
+      <div className="space-y-4 animate-pulse">
+        <div className="h-10 bg-muted/20 rounded-lg"></div>
+        <div className="h-20 bg-muted/20 rounded-lg"></div>
       </div>
     );
   }
@@ -275,7 +202,7 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
           size="sm"
           variant="default"
           className="gap-2"
-          disabled={!vimeoPlayer}
+          disabled={!vimeoPlayer || createMarkerMutation.isPending}
           data-testid="button-add-marker"
         >
           <Plus className="h-4 w-4" />
@@ -305,17 +232,14 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
                 </span>
               </div>
 
-              <div className="flex-1 relative">
+              <div className="flex-1">
                 <Input
                   value={marker.body}
                   onChange={(e) => handleBodyChange(marker.id, e.target.value)}
                   placeholder="Descripción del marcador..."
-                  className="h-9 pr-8"
+                  className="h-9"
                   data-testid={`marker-input-${marker.id}`}
                 />
-                {marker.isSaving && (
-                  <Loader2 className="h-3 w-3 animate-spin absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                )}
               </div>
 
               <div className="flex items-center gap-1">
@@ -333,6 +257,7 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
                   variant="ghost"
                   onClick={() => handleTogglePin(marker.id, marker.is_pinned)}
                   className="h-8 px-2"
+                  disabled={updateMarkerMutation.isPending}
                   data-testid={`button-pin-${marker.id}`}
                 >
                   <Pin className={`h-4 w-4 ${marker.is_pinned ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
@@ -342,6 +267,7 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
                   variant="ghost"
                   onClick={() => handleDeleteMarker(marker.id)}
                   className="h-8 px-2 text-destructive hover:text-destructive"
+                  disabled={deleteMarkerMutation.isPending}
                   data-testid={`button-delete-${marker.id}`}
                 >
                   <Trash2 className="h-4 w-4" />

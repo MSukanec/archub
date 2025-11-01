@@ -1,11 +1,9 @@
 # Archub - Construction Management Platform
 
 ## Overview
-
 Archub is a comprehensive construction management platform designed to optimize operations, enhance collaboration, and improve efficiency in the construction industry. It provides tools for project tracking, team management, budget monitoring, financial management with multi-currency support, robust document management, a detailed project dashboard with KPIs, and a learning module for professional development. Archub aims to streamline workflows and provide a unified platform for all construction project needs.
 
 ## User Preferences
-
 Preferred communication style: Simple, everyday language.
 
 ## System Architecture
@@ -16,9 +14,8 @@ Preferred communication style: Simple, everyday language.
 - **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub. Mobile menu mirrors desktop sidebar.
 - **Button Design**: Default button variant uses a yellow to green gradient matching logo colors.
 - **Onboarding Flow**: Streamlined onboarding sets users to 'professional' mode and navigates directly to /home.
-- **StatCard Component**: Standardized minimal card design for statistics and KPIs.
-- **LoadingSpinner Component**: Custom spinner with Archub logo and conic gradient.
-- **Checkout UX Improvements**: Replaced billing info Accordion with Switch control for better UX, with conditional validation for CUIT/Tax ID.
+- **Component Standardization**: Standardized `StatCard` and custom `LoadingSpinner` components.
+- **Checkout UX**: Replaced billing info Accordion with Switch control for improved user experience.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui, Tailwind CSS, Zustand, Wouter, TanStack Query.
@@ -26,125 +23,27 @@ Preferred communication style: Simple, everyday language.
 - **Database**: PostgreSQL with Drizzle ORM.
 - **Authentication**: Supabase Auth (Email/password, Google OAuth).
 - **Data Flow**: React Query for server state, Express.js for REST APIs, Drizzle ORM for database operations with cache invalidation.
-- **Database Views**: Extensive use of optimized database views (e.g., `course_progress_view`, `course_user_study_time_view`) for efficient data fetching, especially in the learning module.
+- **Database Views**: Extensive use of optimized database views (e.g., `course_progress_view`) for efficient data fetching.
 - **API Base URL Helper**: `src/utils/apiBase.ts` for environment-aware API endpoint resolution.
 
 ### Feature Specifications
 - **Core Modules**: Home page, Project Management (Gantt, Kanban), Financial Management (multi-currency, budgets), Document Management (versioning, file explorer), Learning Module, and Notification System.
-- **Learning Module ("Capacitaciones")**: Course management, Vimeo integration, lesson progress tracking, advanced note-taking, course dashboard, course pricing with server-side validation, Mercado Pago integration, Discord integration, and deep-link navigation.
-- **Admin Management**: Dedicated sections for Admin Course Management (CRUD, analytics, enrollment) and Admin Payment Management.
-- **Admin Payment Management**: Includes a "Transfers Tab" for manual review of pending bank transfers with approve/reject actions and a "History Tab" with KPIs and full payment history. Backend API supports admin endpoints with `verifyAdmin()` authentication and automatic user enrollment on approval.
+- **Learning Module ("Capacitaciones")**: Course management, Vimeo integration, lesson progress tracking, advanced note-taking, course dashboard, course pricing with server-side validation, Mercado Pago integration, Discord integration, and deep-link navigation. Includes lesson favorites system.
+- **Admin Management**: Dedicated sections for Admin Course Management (CRUD, analytics, enrollment) and Admin Payment Management with mobile UI improvements.
+- **Admin Payment Management**: Includes "Transfers Tab" for manual review of bank transfers and "History Tab" with KPIs.
 - **Coupon System**: Discount coupon system for courses with database-driven validation.
-- **Payment Architecture**: Unified `payments` table for all payment types (courses, subscriptions, plans) with generalized fields. `payment_events` table for webhook auditing, and `bank_transfer_payments` for specific bank transfer details. Supports dual payment providers (Mercado Pago for ARS, PayPal for USD) and a bank transfer method with receipt upload and admin approval workflow. Includes optional Twilio WhatsApp notifications for admin alerts on receipt uploads.
+- **Payment Architecture**: Unified `payments` table for all payment types, `payment_events` for webhook auditing, and `bank_transfer_payments` for specific bank transfer details. Supports dual payment providers (Mercado Pago for ARS, PayPal for USD) and bank transfer method with admin approval.
 - **Access Control**: `PlanRestricted` component system with admin bypass.
 - **Cost System**: Three-tier cost system (Archub Cost, Organization Cost, Independent Cost) for budget items.
+- **User Activity Tracking**: User presence heartbeat functionality reactivated for real-time activity status in admin panels.
 
 ### System Design Choices
-- **Backend Modular Architecture**: Monolithic `server/routes.ts` modularized into domain-specific route modules using a `RouteDeps` pattern for shared dependencies and consistent authentication with Supabase clients and RLS.
-- **Frontend Performance Optimizations**: Implemented code-splitting and lazy loading for Admin, Learning, and Media pages to reduce initial bundle size and improve load times.
-- **Performance Optimizations (Gacela Mode)**: Focused on sub-second page loads by using database views, smart caching, pre-computed calculations, and optimized backend endpoints to replace slow client-side queries and direct Supabase view calls, effectively eliminating 500 RLS errors.
-
-### Recent Changes
-
-#### Admin Users & Enrollments RLS Bypass Fix (Oct 31, 2025)
-- **Problem**: Admin users tab and enrollment modal couldn't display or modify users/enrollments when RLS policies were enabled because they made direct Supabase client queries subject to RLS restrictions
-- **Solution**: Created backend API endpoints with service role authentication to bypass RLS for admin operations:
-  - `GET /api/admin/users` - List all users with stats (search, filter, sort support)
-  - `PATCH /api/admin/users/:id` - Update user status (deactivate/activate)
-  - `POST /api/admin/enrollments` - Create course enrollment
-  - `PATCH /api/admin/enrollments/:id` - Update course enrollment
-- **Files updated**:
-  - `server/routes/admin.ts` - Added user management and enrollment mutation endpoints with `verifyAdmin()` and `getAdminClient()`
-  - `src/pages/admin/community/AdminCommunityUsers.tsx` - Migrated from direct Supabase queries to backend API calls
-  - `src/components/modal/modals/admin/CourseEnrollmentModal.tsx` - Changed users query and enrollment mutations (create/update) to use backend API endpoints
-- **Result**: Admin users tab and enrollment modal now work correctly with RLS enabled, admins can view and manage all users and create/update enrollments regardless of RLS policies
-
-#### Learning Dashboard Cache Strategy (Oct 31, 2025)
-- **Problem**: Dashboard showed empty state after enrollment because cache wasn't refreshing
-- **Solution**: Changed from infinite cache to always-fresh strategy (`staleTime: 0`, `refetchOnMount: 'always'`)
-- **Cache invalidation**: PaymentReturn now invalidates `/api/learning/dashboard` after successful enrollment
-- **Result**: Newly enrolled courses appear immediately in dashboard with accurate 0% progress state
-
-#### Mobile UI Improvements for Admin Modules (Nov 01, 2025)
-- **Feature**: Implemented comprehensive mobile ActionBar with filtering and search across admin interfaces
-- **Components created**:
-  - `AdminCourseStudentRow` - Mobile row component for course enrollments with avatar, progress, and course info
-  - `AdminCourseCouponRow` - Mobile row component for coupons with status badges and redemption stats
-  - `AdminPaymentTransferRow` - Mobile row component for bank transfer payments with receipt button
-- **Pages enhanced**:
-  - `AdminCourseUsersTab` - Full mobile ActionBar (Home, Search, Create, Filter, Notifications) with search by user/course and filters by status/course
-  - `AdminCourseCouponTab` - Full mobile ActionBar with search by code and filters by status/type
-  - `AdminPaymentsTransfersTab` - Mobile ActionBar with search by user/course and filter by status; KPIs optimized for 2-column grid on mobile (2 top, 1 bottom)
-- **Mobile UX Pattern**: All admin mobile rows follow DataRowCard pattern with avatar (left), content (center), trailing info (right), and expandable details section with action buttons
-- **Result**: Admin modules now have full-featured mobile experience with search, filters, and clean mobile-optimized layouts
-
-#### Course Content Table Redesign (Nov 01, 2025)
-- **Feature**: Completely redesigned CourseContentTab to show all lessons in a comprehensive table format
-- **Table Implementation**:
-  - Uses Table component with `groupBy` and `renderGroupHeader` to create gray header rows for each module
-  - Columns: Nombre (30%), Duración (12%), Notas (10%), Marcadores (12%), Completada (16%), Acciones (20%)
-  - Actions column includes "Ir a Lección" button (default variant) that navigates to the lesson
-  - Grouped by module with visual separators showing module name and lesson count
-- **Component created**:
-  - `LessonRow` - Mobile row component following DataRowCard pattern (no avatar), lesson title, module info, stats (duration, notes, markers) with inline status badge, and full-width "Ir a Lección" button at bottom
-- **Navigation logic**:
-  - Implements same deep-link navigation as CourseMarkersTab: `setCurrentLesson`, `navigate` with URL params (tab, lesson), and `goToLesson` from store
-  - Properly switches to "Lecciones" tab and loads the selected lesson
-- **Data sources**:
-  - Modules from `course_modules`
-  - Lessons from `course_lessons`
-  - Progress from `/api/courses/{id}/progress`
-  - Notes and markers count from `course_lesson_notes` filtered by `note_type`
-- **Result**: Users can now see all course content in a single organized table view with full mobile support, making it easy to navigate between lessons and see progress at a glance
-
-#### Lesson Selection Logic Fix (Nov 01, 2025)
-- **Problem**: CourseViewer was selecting incorrect initial lesson - using first lesson from unordered array instead of first lesson from first module, and not remembering last viewed lesson
-- **Solution**: Implemented intelligent lesson selection with proper ordering and resume functionality:
-  1. Priority 1: Use `initialLessonId` if provided (deep links, markers)
-  2. Priority 2: Resume from last viewed lesson (most recent `updated_at` in `progressData`)
-  3. Priority 3: Start from first lesson of first module (using `orderedLessons[0]` instead of `lessons[0]`)
-- **Files updated**:
-  - `src/pages/learning/courses/view/CourseViewer.tsx` - Fixed lesson selection logic to use properly ordered lessons and implement resume functionality
-- **Result**: Users now correctly start from the first lesson of the first module on first visit, and automatically resume from their last viewed lesson on subsequent visits
-
-#### Lesson Favorites Implementation (Nov 01, 2025)
-- **Feature**: Complete lesson favorites system allowing users to mark lessons as favorites for quick access
-- **Database changes**:
-  - Added `is_favorite` boolean column to `course_lesson_progress` table (default false)
-  - Created partial index `idx_lesson_progress_favorites` for optimized favorite queries
-  - Migration script: `migrations/add_lesson_favorites.sql`
-- **Backend implementation**:
-  - New endpoint `PATCH /api/lessons/:id/favorite` in `server/routes/courses.ts`
-  - Toggle favorite status with automatic progress record creation
-  - Proper Supabase authentication and cache invalidation
-- **Frontend components**:
-  - `src/components/learning/FavoriteButton.tsx` - Reusable favorite toggle button (icon and button variants)
-  - `src/hooks/use-lesson-favorite.ts` - React hook with optimistic updates and cache invalidation
-- **UI Integration**:
-  - CourseContentTab: Star button in "Acciones" column (left of "Ir a Lección" button)
-  - Desktop view: Icon button with hover effect (filled/outline star)
-  - Mobile view: Icon button in LessonRow alongside "Ir a Lección" (flex-1)
-- **Files updated**:
-  - `shared/schema.ts` - Added `is_favorite` field to schema
-  - `src/pages/learning/courses/view/CourseContentTab.tsx` - Desktop table integration
-  - `src/components/ui/data-row/rows/LessonRow.tsx` - Mobile card integration
-- **Result**: Users can now mark/unmark lessons as favorites with instant visual feedback, both on desktop and mobile. Favorites state persists in database and survives page refreshes.
-
-#### User Presence Heartbeat Reactivation (Nov 01, 2025)
-- **Problem**: Heartbeat functionality was temporarily disabled in `ProjectContextInitializer.tsx`, preventing tracking of user last activity
-- **Solution**: Reactivated the `useHeartbeat` hook that sends periodic updates to `user_presence` table every 30 seconds
-- **Components**:
-  - `src/hooks/use-heartbeat.ts` - Hook that calls Supabase RPC function `heartbeat` every 30 seconds
-  - `src/components/navigation/ProjectContextInitializer.tsx` - Now actively calls useHeartbeat with currentOrganizationId
-  - `server/routes/admin.ts` - Backend already queries `user_presence` table and joins with users data
-  - `src/pages/admin/community/AdminCommunityUsers.tsx` - Shows "Última Actividad" column with real-time status
-- **Database requirements**:
-  - Table `public.user_presence` with columns: user_id, org_id, last_seen_at, status, updated_from
-  - RPC function `public.heartbeat(p_org_id uuid, p_status text, p_from text)` to upsert presence data
-- **Result**: Admins can now see real-time user activity status in Admin Community Users page, showing "Activo ahora" for users active within 90 seconds or relative time for last activity
+- **Backend Modular Architecture**: Monolithic `server/routes.ts` modularized into domain-specific route modules using a `RouteDeps` pattern for shared dependencies and consistent authentication.
+- **Frontend Performance Optimizations**: Implemented code-splitting and lazy loading for Admin, Learning, and Media pages.
+- **Performance Optimizations (Gacela Mode)**: Focused on sub-second page loads using database views, smart caching, pre-computed calculations, and optimized backend endpoints to replace slow client-side queries and direct Supabase view calls.
+- **Lesson Viewer Performance**: Refactored lesson notes and markers with backend API endpoints and React Query for sub-second load times and caching.
 
 ## External Dependencies
-
 - **Supabase**: Authentication, Database (PostgreSQL), Storage.
 - **Neon Database**: Serverless PostgreSQL hosting.
 - **Radix UI**: Headless component primitives.

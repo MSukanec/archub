@@ -375,6 +375,358 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
     }
   });
 
+  // ========== OPTIMIZED SUMMARY NOTE ENDPOINTS ==========
+
+  // GET /api/lessons/:lessonId/summary-note - Get summary note for a lesson (optimized)
+  app.get("/api/lessons/:lessonId/summary-note", async (req, res) => {
+    try {
+      const { lessonId } = req.params;
+      
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = createAuthenticatedClient(token);
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      if (!dbUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      const { data: note, error } = await authenticatedSupabase
+        .from('course_lesson_notes')
+        .select('*')
+        .eq('user_id', dbUser.id)
+        .eq('lesson_id', lessonId)
+        .eq('note_type', 'summary')
+        .maybeSingle();
+      
+      if (error) {
+        console.error("Error fetching summary note:", error);
+        return res.status(500).json({ error: "Failed to fetch summary note" });
+      }
+      
+      res.json(note);
+    } catch (error) {
+      console.error("Error fetching summary note:", error);
+      res.status(500).json({ error: "Failed to fetch summary note" });
+    }
+  });
+
+  // PUT /api/lessons/:lessonId/summary-note - Upsert summary note (optimized)
+  app.put("/api/lessons/:lessonId/summary-note", async (req, res) => {
+    try {
+      const { lessonId } = req.params;
+      const { body } = req.body;
+      
+      if (body === undefined || typeof body !== 'string') {
+        return res.status(400).json({ error: "Body must be a string" });
+      }
+      
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = createAuthenticatedClient(token);
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      if (!dbUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Check for existing summary note
+      const { data: existingNote } = await authenticatedSupabase
+        .from('course_lesson_notes')
+        .select('id')
+        .eq('user_id', dbUser.id)
+        .eq('lesson_id', lessonId)
+        .eq('note_type', 'summary')
+        .maybeSingle();
+      
+      let noteData;
+      
+      if (existingNote) {
+        // Update existing note
+        const { data, error } = await authenticatedSupabase
+          .from('course_lesson_notes')
+          .update({
+            body,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingNote.id)
+          .select()
+          .single();
+        
+        if (error) {
+          console.error("Error updating summary note:", error);
+          return res.status(500).json({ error: "Failed to update summary note" });
+        }
+        
+        noteData = data;
+      } else {
+        // Insert new note
+        const { data, error } = await authenticatedSupabase
+          .from('course_lesson_notes')
+          .insert({
+            user_id: dbUser.id,
+            lesson_id: lessonId,
+            note_type: 'summary',
+            body,
+            time_sec: null,
+            is_pinned: false
+          })
+          .select()
+          .single();
+        
+        if (error) {
+          console.error("Error creating summary note:", error);
+          return res.status(500).json({ error: "Failed to create summary note" });
+        }
+        
+        noteData = data;
+      }
+      
+      res.json(noteData);
+    } catch (error) {
+      console.error("Error saving summary note:", error);
+      res.status(500).json({ error: "Failed to save summary note" });
+    }
+  });
+
+  // ========== OPTIMIZED MARKERS ENDPOINTS ==========
+
+  // GET /api/lessons/:lessonId/markers - Get all markers for a lesson (optimized)
+  app.get("/api/lessons/:lessonId/markers", async (req, res) => {
+    try {
+      const { lessonId } = req.params;
+      
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = createAuthenticatedClient(token);
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      if (!dbUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      const { data: markers, error } = await authenticatedSupabase
+        .from('course_lesson_notes')
+        .select('*')
+        .eq('user_id', dbUser.id)
+        .eq('lesson_id', lessonId)
+        .eq('note_type', 'marker')
+        .order('is_pinned', { ascending: false })
+        .order('time_sec', { ascending: true })
+        .order('created_at', { ascending: true });
+      
+      if (error) {
+        console.error("Error fetching markers:", error);
+        return res.status(500).json({ error: "Failed to fetch markers" });
+      }
+      
+      res.json(markers || []);
+    } catch (error) {
+      console.error("Error fetching markers:", error);
+      res.status(500).json({ error: "Failed to fetch markers" });
+    }
+  });
+
+  // POST /api/lessons/:lessonId/markers - Create a new marker (optimized)
+  app.post("/api/lessons/:lessonId/markers", async (req, res) => {
+    try {
+      const { lessonId } = req.params;
+      const { body, time_sec } = req.body;
+      
+      if (time_sec === undefined || typeof time_sec !== 'number') {
+        return res.status(400).json({ error: "time_sec must be a number" });
+      }
+      
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = createAuthenticatedClient(token);
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      if (!dbUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      const { data: marker, error } = await authenticatedSupabase
+        .from('course_lesson_notes')
+        .insert({
+          user_id: dbUser.id,
+          lesson_id: lessonId,
+          note_type: 'marker',
+          body: body || '',
+          time_sec,
+          is_pinned: false
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Error creating marker:", error);
+        return res.status(500).json({ error: "Failed to create marker" });
+      }
+      
+      res.json(marker);
+    } catch (error) {
+      console.error("Error creating marker:", error);
+      res.status(500).json({ error: "Failed to create marker" });
+    }
+  });
+
+  // PATCH /api/lessons/:lessonId/markers/:markerId - Update a marker (optimized)
+  app.patch("/api/lessons/:lessonId/markers/:markerId", async (req, res) => {
+    try {
+      const { lessonId, markerId } = req.params;
+      const { body, is_pinned } = req.body;
+      
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = createAuthenticatedClient(token);
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      if (!dbUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      const updateData: any = {
+        updated_at: new Date().toISOString()
+      };
+      
+      if (body !== undefined) updateData.body = body;
+      if (is_pinned !== undefined) updateData.is_pinned = is_pinned;
+      
+      const { data: marker, error } = await authenticatedSupabase
+        .from('course_lesson_notes')
+        .update(updateData)
+        .eq('id', markerId)
+        .eq('user_id', dbUser.id)
+        .eq('lesson_id', lessonId)
+        .eq('note_type', 'marker')
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Error updating marker:", error);
+        return res.status(500).json({ error: "Failed to update marker" });
+      }
+      
+      res.json(marker);
+    } catch (error) {
+      console.error("Error updating marker:", error);
+      res.status(500).json({ error: "Failed to update marker" });
+    }
+  });
+
+  // DELETE /api/lessons/:lessonId/markers/:markerId - Delete a marker (optimized)
+  app.delete("/api/lessons/:lessonId/markers/:markerId", async (req, res) => {
+    try {
+      const { lessonId, markerId } = req.params;
+      
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = createAuthenticatedClient(token);
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      if (!dbUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      const { error } = await authenticatedSupabase
+        .from('course_lesson_notes')
+        .delete()
+        .eq('id', markerId)
+        .eq('user_id', dbUser.id)
+        .eq('lesson_id', lessonId)
+        .eq('note_type', 'marker');
+      
+      if (error) {
+        console.error("Error deleting marker:", error);
+        return res.status(500).json({ error: "Failed to delete marker" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting marker:", error);
+      res.status(500).json({ error: "Failed to delete marker" });
+    }
+  });
+
   // ========== USER PROGRESS ENDPOINTS ==========
 
   // GET /api/user/all-progress - Get all lesson progress for current user

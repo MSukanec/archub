@@ -1,7 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
-import { FileText, Check, Loader2, AlertCircle } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Check, Loader2, AlertCircle } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
-import { supabase } from '@/lib/supabase';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import type { CourseLessonNote } from '@shared/schema';
 
 interface LessonSummaryNoteProps {
   lessonId: string;
@@ -12,156 +14,74 @@ type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 export function LessonSummaryNote({ lessonId }: LessonSummaryNoteProps) {
   const [noteText, setNoteText] = useState('');
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
-  const [isLoading, setIsLoading] = useState(true);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const savedTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isInitialLoadRef = useRef(true);
-  const initialNoteTextRef = useRef('');
 
-  useEffect(() => {
-    const loadNote = async () => {
-      try {
-        setIsLoading(true);
-        isInitialLoadRef.current = true;
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
+  // Fetch summary note with React Query (optimized backend endpoint)
+  const { data: note, isLoading } = useQuery<CourseLessonNote | null>({
+    queryKey: ['/api/lessons', lessonId, 'summary-note'],
+    enabled: !!lessonId,
+    staleTime: 30000, // Cache for 30 seconds
+  });
 
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-        if (!authUser?.email) return;
-
-        const { data: userRecord } = await supabase
-          .from('users')
-          .select('id')
-          .ilike('email', authUser.email)
-          .single();
-
-        if (!userRecord) return;
-
-        const { data: note } = await supabase
-          .from('course_lesson_notes')
-          .select('*')
-          .eq('user_id', userRecord.id)
-          .eq('lesson_id', lessonId)
-          .eq('note_type', 'summary')
-          .maybeSingle();
-        
-        if (note) {
-          setNoteText(note.body);
-          initialNoteTextRef.current = note.body;
-        } else {
-          setNoteText('');
-          initialNoteTextRef.current = '';
-        }
-      } catch (error) {
-        console.error('Error loading summary note:', error);
-      } finally {
-        setIsLoading(false);
-        setTimeout(() => {
-          isInitialLoadRef.current = false;
-        }, 100);
+  // Update mutation
+  const saveMutation = useMutation({
+    mutationFn: async (body: string) => {
+      return apiRequest('PUT', `/api/lessons/${lessonId}/summary-note`, { body });
+    },
+    onMutate: () => {
+      setSaveStatus('saving');
+    },
+    onSuccess: () => {
+      setSaveStatus('saved');
+      queryClient.invalidateQueries({ queryKey: ['/api/lessons', lessonId, 'summary-note'] });
+      
+      if (savedTimerRef.current) {
+        clearTimeout(savedTimerRef.current);
       }
-    };
+      savedTimerRef.current = setTimeout(() => {
+        setSaveStatus('idle');
+      }, 800);
+    },
+    onError: () => {
+      setSaveStatus('error');
+    }
+  });
 
-    loadNote();
-  }, [lessonId]);
-
+  // Initialize noteText when data loads
   useEffect(() => {
+    if (note) {
+      setNoteText(note.body || '');
+    } else {
+      setNoteText('');
+    }
+    // Mark initial load as done after a delay
+    setTimeout(() => {
+      isInitialLoadRef.current = false;
+    }, 100);
+  }, [note]);
+
+  // Auto-save with debounce
+  useEffect(() => {
+    // Don't auto-save during initial load
     if (isInitialLoadRef.current) {
       return;
     }
 
-    if (noteText.trim() === '' && initialNoteTextRef.current === '') {
+    // Don't save if note is empty and was empty initially
+    if (noteText.trim() === '' && (!note || note.body === '')) {
       return;
     }
 
+    // Clear existing timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
 
-    setSaveStatus('saving');
-
-    debounceTimerRef.current = setTimeout(async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          setSaveStatus('error');
-          return;
-        }
-
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-        if (!authUser?.email) {
-          setSaveStatus('error');
-          return;
-        }
-
-        const { data: userRecord } = await supabase
-          .from('users')
-          .select('id')
-          .ilike('email', authUser.email)
-          .single();
-
-        if (!userRecord) {
-          setSaveStatus('error');
-          return;
-        }
-
-        // Check if a summary note already exists
-        const { data: existingNote } = await supabase
-          .from('course_lesson_notes')
-          .select('id')
-          .eq('user_id', userRecord.id)
-          .eq('lesson_id', lessonId)
-          .eq('note_type', 'summary')
-          .single();
-
-        let error;
-        
-        if (existingNote) {
-          // Update existing note
-          const result = await supabase
-            .from('course_lesson_notes')
-            .update({
-              body: noteText,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', existingNote.id);
-          error = result.error;
-        } else {
-          // Insert new note
-          const result = await supabase
-            .from('course_lesson_notes')
-            .insert({
-              user_id: userRecord.id,
-              lesson_id: lessonId,
-              note_type: 'summary',
-              body: noteText,
-              time_sec: null,
-              is_pinned: false
-            });
-          error = result.error;
-        }
-
-        if (error) {
-          console.error('Failed to save summary note:', error);
-          setSaveStatus('error');
-          return;
-        }
-
-        initialNoteTextRef.current = noteText;
-        setSaveStatus('saved');
-
-        if (savedTimerRef.current) {
-          clearTimeout(savedTimerRef.current);
-        }
-
-        savedTimerRef.current = setTimeout(() => {
-          setSaveStatus('idle');
-        }, 800);
-
-      } catch (error) {
-        console.error('Error saving summary note:', error);
-        setSaveStatus('error');
-      }
+    // Debounce save
+    debounceTimerRef.current = setTimeout(() => {
+      saveMutation.mutate(noteText);
     }, 700);
 
     return () => {
@@ -204,10 +124,8 @@ export function LessonSummaryNote({ lessonId }: LessonSummaryNoteProps) {
 
   if (isLoading) {
     return (
-      <div className="bg-card border border-border rounded-lg p-6 animate-pulse">
-        <div className="h-8 bg-muted rounded w-1/3 mb-3"></div>
-        <div className="h-4 bg-muted rounded w-2/3 mb-4"></div>
-        <div className="h-32 bg-muted rounded"></div>
+      <div className="space-y-3 animate-pulse">
+        <div className="h-[150px] bg-muted/20 rounded-lg"></div>
       </div>
     );
   }
