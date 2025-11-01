@@ -1353,6 +1353,10 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
 
   // ========== LEARNING DASHBOARD ENDPOINT ==========
 
+  // Simple in-memory cache for dashboard data
+  const dashboardCache = new Map<string, { data: any; timestamp: number }>();
+  const CACHE_TTL = 30000; // 30 seconds cache
+
   // GET /api/learning/dashboard - Consolidated endpoint for dashboard data
   app.get("/api/learning/dashboard", async (req, res) => {
     try {
@@ -1388,6 +1392,14 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         });
       }
       
+      // Check cache first
+      const cacheKey = `dashboard_${dbUser.id}`;
+      const cached = dashboardCache.get(cacheKey);
+      if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
+        console.log('📦 Dashboard API: Returning cached data for user:', dbUser.id);
+        return res.json(cached.data);
+      }
+      
       // Get enrollments first (small query)
       const { data: enrollments, error: enrollmentsError } = await authenticatedSupabase
         .from('course_enrollments')
@@ -1411,7 +1423,67 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         });
       }
       
-      // 🚀 OPTIMIZACIÓN: Usar vistas pre-calculadas en paralelo
+      // 🚀 OPTIMIZACIÓN: Usar vistas pre-calculadas en paralelo con timing logs
+      const startTotal = Date.now();
+      console.log('📊 Dashboard API: Starting queries for user:', dbUser.id);
+      
+      // Execute each query with timing
+      const startGlobal = Date.now();
+      const globalProgressPromise = authenticatedSupabase
+        .from('course_user_global_progress_view')
+        .select('*')
+        .eq('user_id', dbUser.id)
+        .maybeSingle()
+        .then(result => {
+          console.log(`⏱️ Global Progress View: ${Date.now() - startGlobal}ms`);
+          return result;
+        });
+      
+      const startCourse = Date.now();
+      const courseProgressPromise = authenticatedSupabase
+        .from('course_progress_view')
+        .select('*')
+        .eq('user_id', dbUser.id)
+        .then(result => {
+          console.log(`⏱️ Course Progress View: ${Date.now() - startCourse}ms`);
+          return result;
+        });
+      
+      const startStudy = Date.now();
+      const studyTimePromise = authenticatedSupabase
+        .from('course_user_study_time_view')
+        .select('*')
+        .eq('user_id', dbUser.id)
+        .maybeSingle()
+        .then(result => {
+          console.log(`⏱️ Study Time View: ${Date.now() - startStudy}ms`);
+          return result;
+        });
+      
+      const startActive = Date.now();
+      const activeDaysPromise = authenticatedSupabase
+        .from('course_user_active_days_view')
+        .select('*')
+        .eq('user_id', dbUser.id)
+        .then(result => {
+          console.log(`⏱️ Active Days View: ${Date.now() - startActive}ms`);
+          return result;
+        });
+      
+      const startCompletions = Date.now();
+      const recentCompletionsPromise = authenticatedSupabase
+        .from('course_lesson_completions_view')
+        .select('*')
+        .eq('user_id', dbUser.id)
+        .eq('is_completed', true)
+        .not('completed_at', 'is', null)
+        .order('completed_at', { ascending: false })
+        .limit(10)
+        .then(result => {
+          console.log(`⏱️ Recent Completions View: ${Date.now() - startCompletions}ms`);
+          return result;
+        });
+      
       const [
         globalProgressResult,
         courseProgressResult,
@@ -1419,42 +1491,20 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         activeDaysResult,
         recentCompletionsResult
       ] = await Promise.all([
-        // Vista global de progreso (1 query simple)
-        authenticatedSupabase
-          .from('course_user_global_progress_view')
-          .select('*')
-          .eq('user_id', dbUser.id)
-          .maybeSingle(),
-        
-        // Vista de progreso por curso (1 query con join pre-calculado)
-        authenticatedSupabase
-          .from('course_progress_view')
-          .select('*')
-          .eq('user_id', dbUser.id),
-        
-        // Vista de tiempo de estudio (1 query simple)
-        authenticatedSupabase
-          .from('course_user_study_time_view')
-          .select('*')
-          .eq('user_id', dbUser.id)
-          .maybeSingle(),
-        
-        // Vista de días activos (1 query simple)
-        authenticatedSupabase
-          .from('course_user_active_days_view')
-          .select('*')
-          .eq('user_id', dbUser.id),
-        
-        // Vista de completados recientes (ya optimizada)
-        authenticatedSupabase
-          .from('course_lesson_completions_view')
-          .select('*')
-          .eq('user_id', dbUser.id)
-          .eq('is_completed', true)
-          .not('completed_at', 'is', null)
-          .order('completed_at', { ascending: false })
-          .limit(10)
+        globalProgressPromise,
+        courseProgressPromise,
+        studyTimePromise,
+        activeDaysPromise,
+        recentCompletionsPromise
       ]);
+      
+      console.log(`📊 Dashboard API: All queries completed in ${Date.now() - startTotal}ms`);
+      
+      // Log individual query results for debugging
+      if (globalProgressResult.error || courseProgressResult.error || studyTimeResult.error || 
+          activeDaysResult.error || recentCompletionsResult.error) {
+        console.error('⚠️ Dashboard API: Some queries had errors');
+      }
       
       // Check for errors
       if (globalProgressResult.error) {
@@ -1525,8 +1575,8 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         };
       });
       
-      // Return pre-calculated data (no heavy computation needed!)
-      res.json({
+      // Prepare response data
+      const responseData = {
         global: globalProgress ? {
           done_lessons_total: globalProgress.done_lessons_total || 0,
           total_lessons_total: globalProgress.total_lessons_total || 0,
@@ -1544,9 +1594,252 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         currentStreak,
         activeDays: activeDays.length,
         recentCompletions
+      };
+      
+      // Store in cache
+      dashboardCache.set(cacheKey, {
+        data: responseData,
+        timestamp: Date.now()
       });
+      console.log('💾 Dashboard API: Cached data for user:', dbUser.id);
+      
+      // Return pre-calculated data (no heavy computation needed!)
+      res.json(responseData);
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
+      res.status(500).json({ error: "Failed to fetch dashboard data" });
+    }
+  });
+
+  // ========== OPTIMIZED LEARNING DASHBOARD ENDPOINT (V2) ==========
+  
+  // GET /api/learning/dashboard-fast - Optimized version using direct queries
+  app.get("/api/learning/dashboard-fast", async (req, res) => {
+    try {
+      const startTotal = Date.now();
+      
+      // Extract and validate token
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      // Create authenticated Supabase client
+      const authenticatedSupabase = createAuthenticatedClient(token);
+      
+      // Get current user
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      // Get user from users table by auth_id
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      if (!dbUser) {
+        return res.json({
+          global: null,
+          courses: [],
+          study: { seconds_lifetime: 0, seconds_this_month: 0 },
+          currentStreak: 0,
+          activeDays: 0,
+          recentCompletions: []
+        });
+      }
+      
+      console.log('🚀 Dashboard Fast API: Starting optimized queries for user:', dbUser.id);
+      
+      // Optimized Query 1: Get enrollments with course info (small, fast)
+      const startEnroll = Date.now();
+      const { data: enrollments, error: enrollError } = await authenticatedSupabase
+        .from('course_enrollments')
+        .select(`
+          course_id,
+          courses!inner(id, title, slug)
+        `)
+        .eq('user_id', dbUser.id);
+        
+      console.log(`⚡ Enrollments: ${Date.now() - startEnroll}ms`);
+      
+      if (!enrollments || enrollments.length === 0) {
+        console.log('📊 Dashboard Fast API: No enrollments, returning early');
+        return res.json({
+          global: null,
+          courses: [],
+          study: { seconds_lifetime: 0, seconds_this_month: 0 },
+          currentStreak: 0,
+          activeDays: 0,
+          recentCompletions: []
+        });
+      }
+      
+      const courseIds = enrollments.map(e => e.course_id);
+      
+      // Optimized Query 2: Get lesson progress for enrolled courses only
+      const startProgress = Date.now();
+      const { data: progressData } = await authenticatedSupabase
+        .from('course_lesson_progress')
+        .select(`
+          lesson_id,
+          is_completed,
+          completed_at,
+          last_position_sec,
+          course_lessons!inner(
+            id,
+            title,
+            duration_sec,
+            course_modules!inner(
+              course_id,
+              title
+            )
+          )
+        `)
+        .eq('user_id', dbUser.id)
+        .in('course_lessons.course_modules.course_id', courseIds);
+      
+      console.log(`⚡ Progress data: ${Date.now() - startProgress}ms`);
+      
+      // Calculate aggregated data locally (much faster than views)
+      const progressByCourse = new Map();
+      const completedLessons = [];
+      let totalCompleted = 0;
+      let totalLessons = 0;
+      let totalStudyTime = 0;
+      const activeDaysSet = new Set();
+      
+      // Get total lessons count per course
+      const startLessons = Date.now();
+      const { data: lessonsCount } = await authenticatedSupabase
+        .from('course_lessons')
+        .select(`
+          id,
+          course_modules!inner(course_id)
+        `)
+        .in('course_modules.course_id', courseIds)
+        .eq('is_active', true);
+      
+      console.log(`⚡ Lessons count: ${Date.now() - startLessons}ms`);
+      
+      // Build course progress map
+      for (const course of enrollments) {
+        progressByCourse.set(course.course_id, {
+          completed: 0,
+          total: 0,
+          course_id: course.course_id,
+          title: course.courses?.title,
+          slug: course.courses?.slug
+        });
+      }
+      
+      // Count lessons per course
+      if (lessonsCount) {
+        for (const lesson of lessonsCount) {
+          const courseId = lesson.course_modules?.course_id;
+          if (courseId && progressByCourse.has(courseId)) {
+            progressByCourse.get(courseId).total++;
+            totalLessons++;
+          }
+        }
+      }
+      
+      // Process progress data
+      if (progressData) {
+        for (const progress of progressData) {
+          const courseId = progress.course_lessons?.course_modules?.course_id;
+          
+          // Track completed lessons
+          if (progress.is_completed && courseId) {
+            if (progressByCourse.has(courseId)) {
+              progressByCourse.get(courseId).completed++;
+            }
+            totalCompleted++;
+            
+            // Track for recent completions
+            if (progress.completed_at) {
+              completedLessons.push({
+                completed_at: progress.completed_at,
+                lesson_title: progress.course_lessons?.title || 'Sin título',
+                module_title: progress.course_lessons?.course_modules?.title || 'Sin módulo',
+                course_title: progressByCourse.get(courseId)?.title || 'Sin curso',
+                course_slug: progressByCourse.get(courseId)?.slug || ''
+              });
+              
+              // Track active days
+              const day = new Date(progress.completed_at).toISOString().slice(0, 10);
+              activeDaysSet.add(day);
+            }
+          }
+          
+          // Calculate study time
+          if (progress.last_position_sec) {
+            totalStudyTime += progress.last_position_sec;
+          }
+        }
+      }
+      
+      // Format courses with progress
+      const courses = Array.from(progressByCourse.values()).map(course => ({
+        course_id: course.course_id,
+        course_title: course.title || 'Sin título',
+        course_slug: course.slug || '',
+        progress_pct: course.total > 0 ? Math.round((course.completed / course.total) * 100) : 0,
+        done_lessons: course.completed,
+        total_lessons: course.total
+      }));
+      
+      // Calculate global progress
+      const globalProgress = totalLessons > 0 ? {
+        done_lessons_total: totalCompleted,
+        total_lessons_total: totalLessons,
+        progress_pct: Math.round((totalCompleted / totalLessons) * 100)
+      } : null;
+      
+      // Sort and limit recent completions
+      const recentCompletions = completedLessons
+        .sort((a, b) => b.completed_at.localeCompare(a.completed_at))
+        .slice(0, 10)
+        .map(c => ({
+          type: 'completed',
+          when: c.completed_at,
+          ...c
+        }));
+      
+      // Calculate current streak (simplified)
+      const sortedDays = Array.from(activeDaysSet).sort((a, b) => b.localeCompare(a));
+      let currentStreak = 0;
+      const today = new Date().toISOString().slice(0, 10);
+      
+      for (let i = 0; i < sortedDays.length; i++) {
+        const expectedDate = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+        if (sortedDays[i] === expectedDate) {
+          currentStreak++;
+        } else {
+          break;
+        }
+      }
+      
+      console.log(`🎯 Dashboard Fast API: Total time: ${Date.now() - startTotal}ms`);
+      
+      // Return optimized response
+      res.json({
+        global: globalProgress,
+        courses: courses,
+        study: {
+          seconds_lifetime: totalStudyTime,
+          seconds_this_month: totalStudyTime // Simplified for now
+        },
+        currentStreak,
+        activeDays: activeDaysSet.size,
+        recentCompletions
+      });
+      
+    } catch (error) {
+      console.error("Error in dashboard-fast:", error);
       res.status(500).json({ error: "Failed to fetch dashboard data" });
     }
   });

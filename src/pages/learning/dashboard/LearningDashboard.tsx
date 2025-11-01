@@ -55,19 +55,26 @@ export default function LearningDashboard() {
     }
   }, [setSidebarContext, setSidebarLevel, sidebarLevel])
 
+  // Use optimized endpoint for better performance
+  const useOptimizedEndpoint = true; // Toggle this to compare performance
+  const endpoint = useOptimizedEndpoint ? '/api/learning/dashboard-fast' : '/api/learning/dashboard';
+  
   const { data: dashboardData, isLoading } = useQuery<DashboardData>({
-    queryKey: ['/api/learning/dashboard'],
+    queryKey: [endpoint],
     queryFn: async () => {
       if (!supabase) return null as any;
       
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return null as any;
 
-      const response = await fetch('/api/learning/dashboard', {
+      const startTime = Date.now();
+      const response = await fetch(endpoint, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }
       });
+      const loadTime = Date.now() - startTime;
+      console.log(`📊 Dashboard loaded in ${loadTime}ms using ${endpoint}`);
 
       if (!response.ok) {
         console.error('Failed to fetch dashboard data:', await response.text());
@@ -77,7 +84,7 @@ export default function LearningDashboard() {
       return response.json();
     },
     enabled: !!supabase && !!userData,
-    staleTime: 0, // ⚡ Always fetch fresh data when navigating to dashboard
+    staleTime: 30000, // Cache for 30 seconds to reduce load
     gcTime: 600000, // Keep in cache for 10 minutes for instant navigation
     refetchOnMount: 'always' // Always refetch when component mounts
   });
