@@ -17,7 +17,7 @@ create table if not exists public.user_presence (
   updated_from text null,
   constraint user_presence_pkey primary key (user_id),
   constraint user_presence_user_fkey foreign key (user_id) 
-    references auth.users (id) on delete cascade
+    references public.users (id) on delete cascade
 ) tablespace pg_default;
 
 -- Crear índice para optimizar búsquedas por organización
@@ -71,13 +71,31 @@ $$;
 alter table public.user_presence enable row level security;
 
 -- Política para que los usuarios puedan ver su propia presencia
-create policy "Users can view their own presence"
+create policy "Users can view own presence"
   on public.user_presence
   for select
   using (user_id = auth.uid());
 
--- Política para que los usuarios puedan actualizar su propia presencia vía RPC
--- (La función heartbeat usa security definer, así que bypasea RLS)
+-- Políticas para INSERT/UPDATE (la función heartbeat usa security definer)
+create policy "Enable insert for authenticated users"
+  on public.user_presence
+  for insert
+  to authenticated
+  with check (true);
+
+create policy "Enable update for authenticated users"
+  on public.user_presence
+  for update
+  to authenticated
+  using (true)
+  with check (true);
+
+-- Política para service_role (backend admin)
+create policy "Service role can view all presence"
+  on public.user_presence
+  for select
+  to service_role
+  using (true);
 
 -- 4. VERIFICACIÓN
 -- Ejecuta estas queries para verificar que todo está configurado:
