@@ -81,6 +81,18 @@ Preferred communication style: Simple, everyday language.
 - **Files updated**: `src/pages/learning/courses/view/CourseViewer.tsx`
 - **Result**: Lesson viewer now runs smoothly without console spam or performance degradation
 
+#### API Request Authorization Fix (Nov 01, 2025)
+- **Problem**: Summary notes and markers were failing to save with 401 (Unauthorized) errors, even with RLS disabled
+- **Root cause**: `apiRequest` helper function in `queryClient.ts` was not sending the Authorization header with user's session token
+- **Solution**: Updated `apiRequest` to automatically fetch the current Supabase session and include the access token in request headers
+- **Implementation**:
+  - Import `supabase` client into `queryClient.ts`
+  - Call `supabase.auth.getSession()` to get current session
+  - Add `Authorization: Bearer ${session.access_token}` header to all API requests
+- **Impact**: All mutations using `apiRequest` (notes, markers, progress, favorites) now properly authenticate
+- **Files updated**: `src/lib/queryClient.ts`
+- **Result**: Summary notes and markers save successfully without 401 errors, RLS policies now work correctly for authenticated users
+
 ## External Dependencies
 - **Supabase**: Authentication, Database (PostgreSQL), Storage.
 - **Neon Database**: Serverless PostgreSQL hosting.
