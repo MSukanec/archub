@@ -35,8 +35,90 @@ interface Project {
 
 export function useProjects(organizationId: string | undefined) {
   return useQuery<Project[]>({
-    queryKey: ['/api/projects', organizationId],
-    enabled: !!organizationId,
+    queryKey: ['projects', organizationId],
+    queryFn: async () => {
+      if (!supabase || !organizationId) {
+        throw new Error('Organization ID required')
+      }
+
+      const { data, error } = await supabase
+        .from('projects')
+        .select(`
+          *,
+          project_data (
+            project_type_id,
+            modality_id,
+            project_image_url,
+            project_types!project_type_id (
+              id,
+              name
+            ),
+            project_modalities!modality_id (
+              id,
+              name
+            )
+          ),
+          organization_members!created_by (
+            id,
+            users (
+              id,
+              full_name,
+              email,
+              avatar_url,
+              user_data (
+                first_name,
+                last_name
+              )
+            )
+          )
+        `)
+        .eq('organization_id', organizationId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+      
+      if (error) {
+        throw error
+      }
+      
+      // Transform the data to match our interface
+      const transformedData = (data || []).map(project => {
+        // Handle project_data which can be an array or object
+        let projectData = null
+        if (project.project_data) {
+          const pd = Array.isArray(project.project_data) ? project.project_data[0] : project.project_data
+          if (pd) {
+            projectData = {
+              project_type_id: pd.project_type_id,
+              modality_id: pd.modality_id,
+              project_image_url: pd.project_image_url,
+              project_type: pd.project_types,
+              modality: pd.project_modalities
+            }
+          }
+        }
+        
+        const transformedProject = {
+          ...project,
+          project_data: projectData,
+          creator: project.organization_members?.users ? {
+            id: project.organization_members.users.id,
+            full_name: project.organization_members.users.full_name,
+            email: project.organization_members.users.email,
+            avatar_url: project.organization_members.users.avatar_url,
+            first_name: project.organization_members.users.user_data?.[0]?.first_name,
+            last_name: project.organization_members.users.user_data?.[0]?.last_name
+          } : undefined
+        }
+        
+        // Check if this project is the currently selected one
+        transformedProject.is_active = false
+        
+        return transformedProject
+      })
+
+      return transformedData
+    },
+    enabled: !!organizationId && !!supabase,
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 }
