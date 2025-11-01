@@ -31,19 +31,19 @@ export default function LessonRow({ lesson, courseId, onGoToLesson }: LessonRowP
     <DataRowCard
       data-testid={`lesson-row-${lesson.id}`}
     >
-      {/* Content Section */}
-      <div className="flex-1 min-w-0 space-y-2">
-        {/* Lesson Title */}
-        <p className="font-medium text-sm">
+      {/* Layout vertical completo */}
+      <div className="w-full space-y-3">
+        {/* 1. Nombre de Lección */}
+        <p className="font-medium text-sm leading-tight">
           {lesson.title}
         </p>
 
-        {/* Module Info */}
+        {/* 2. Nombre de Módulo */}
         <p className="text-xs text-muted-foreground">
           {lesson.module_title}
         </p>
 
-        {/* Stats Row with Badge inline */}
+        {/* 3. Datos / Badge */}
         <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
           <div className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
@@ -57,7 +57,7 @@ export default function LessonRow({ lesson, courseId, onGoToLesson }: LessonRowP
             <Bookmark className="h-3 w-3" />
             <span>{lesson.markers_count}</span>
           </div>
-          {/* Badge inline con stats */}
+          {/* Badge de estado */}
           {lesson.is_completed ? (
             <Badge variant="secondary" className="bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400 text-xs">
               <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -70,33 +70,35 @@ export default function LessonRow({ lesson, courseId, onGoToLesson }: LessonRowP
             </Badge>
           )}
         </div>
-      </div>
 
-      {/* Action Buttons - Full Width Below */}
-      <div className="col-span-full pt-3 border-t border-border/50 flex items-center gap-2">
-        {/* 🌟 BOTÓN DE FAVORITO */}
-        <FavoriteButton 
-          lessonId={lesson.id}
-          courseId={courseId}
-          isFavorite={lesson.is_favorite}
-          variant="icon"
-          size="md"
-        />
-        
-        {/* BOTÓN IR A LECCIÓN */}
-        <Button
-          variant="default"
-          size="sm"
-          className="flex-1"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onGoToLesson(lesson.id);
-          }}
-          data-testid={`button-go-to-lesson-${lesson.id}`}
-        >
-          Ir a Lección
-        </Button>
+        {/* 4. Botones: 2/3 Ir a Lección + 1/3 Favorito */}
+        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border/50">
+          {/* Botón Ir a Lección (2/3) */}
+          <Button
+            variant="default"
+            size="sm"
+            className="col-span-2"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onGoToLesson(lesson.id);
+            }}
+            data-testid={`button-go-to-lesson-${lesson.id}`}
+          >
+            Ir a Lección
+          </Button>
+
+          {/* Botón Favorito (1/3) */}
+          <div className="flex items-center justify-center">
+            <FavoriteButton 
+              lessonId={lesson.id}
+              courseId={courseId}
+              isFavorite={lesson.is_favorite}
+              variant="icon"
+              size="md"
+            />
+          </div>
+        </div>
       </div>
     </DataRowCard>
   );
