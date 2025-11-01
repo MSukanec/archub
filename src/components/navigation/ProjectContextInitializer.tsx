@@ -13,8 +13,8 @@ export function ProjectContextInitializer() {
   const { data: userData } = useCurrentUser()
   const { currentOrganizationId, selectedProjectId, setSelectedProject } = useProjectContext()
   
-  // TEMPORALMENTE DESACTIVADO: Enviar heartbeat periódico para tracking de presencia
-  // useHeartbeat(currentOrganizationId)
+  // Enviar heartbeat periódico para tracking de presencia
+  useHeartbeat(currentOrganizationId)
   
   // Obtener las preferencias de la organización actual
   const { data: orgPreferences } = useUserOrganizationPreferences(currentOrganizationId || undefined)

@@ -107,6 +107,19 @@ Preferred communication style: Simple, everyday language.
   - `src/pages/learning/courses/view/CourseViewer.tsx` - Fixed lesson selection logic to use properly ordered lessons and implement resume functionality
 - **Result**: Users now correctly start from the first lesson of the first module on first visit, and automatically resume from their last viewed lesson on subsequent visits
 
+#### User Presence Heartbeat Reactivation (Nov 01, 2025)
+- **Problem**: Heartbeat functionality was temporarily disabled in `ProjectContextInitializer.tsx`, preventing tracking of user last activity
+- **Solution**: Reactivated the `useHeartbeat` hook that sends periodic updates to `user_presence` table every 30 seconds
+- **Components**:
+  - `src/hooks/use-heartbeat.ts` - Hook that calls Supabase RPC function `heartbeat` every 30 seconds
+  - `src/components/navigation/ProjectContextInitializer.tsx` - Now actively calls useHeartbeat with currentOrganizationId
+  - `server/routes/admin.ts` - Backend already queries `user_presence` table and joins with users data
+  - `src/pages/admin/community/AdminCommunityUsers.tsx` - Shows "Última Actividad" column with real-time status
+- **Database requirements**:
+  - Table `public.user_presence` with columns: user_id, org_id, last_seen_at, status, updated_from
+  - RPC function `public.heartbeat(p_org_id uuid, p_status text, p_from text)` to upsert presence data
+- **Result**: Admins can now see real-time user activity status in Admin Community Users page, showing "Activo ahora" for users active within 90 seconds or relative time for last activity
+
 ## External Dependencies
 
 - **Supabase**: Authentication, Database (PostgreSQL), Storage.
