@@ -26,3 +26,6 @@ export { default as ContactRow } from './ContactRow';
 export { default as TaskRow } from './TaskRow';
 
 export { default as ProjectRow } from './ProjectRow';
+
+export { default as AdminCourseStudentRow } from './AdminCourseStudentRow';
+export type { Enrollment, EnrollmentProgress } from './AdminCourseStudentRow';
