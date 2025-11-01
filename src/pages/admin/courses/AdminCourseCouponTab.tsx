@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { Tag, Plus, Search } from 'lucide-react'
+import { Tag, Plus, Search, Filter, Bell } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Badge } from '@/components/ui/badge'
@@ -13,7 +13,7 @@ import { supabase } from '@/lib/supabase'
 import AdminCourseCouponRow from '@/components/ui/data-row/rows/AdminCourseCouponRow'
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
-import { useEffect } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 
 interface Coupon {
   id: string;
@@ -41,38 +41,21 @@ export default function AdminCourseCouponTab() {
     setActions, 
     setShowActionBar, 
     clearActions,
+    setFilterConfig,
+    searchValue: mobileSearchValue,
+    setSearchValue: setMobileSearchValue
   } = useActionBarMobile()
 
-  // Configure mobile action bar
-  useEffect(() => {
-    if (isMobile) {
-      setActions({
-        search: {
-          id: 'search',
-          icon: Search,
-          label: 'Buscar',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
-        },
-        create: {
-          id: 'create',
-          icon: Plus,
-          label: 'Crear Cupón',
-          onClick: () => openModal('coupon', {}),
-          variant: 'primary'
-        },
-      })
-      setShowActionBar(true)
-    }
+  const [searchValue, setSearchValue] = useState("")
+  const [filterByStatus, setFilterByStatus] = useState("all")
+  const [filterByType, setFilterByType] = useState("all")
 
-    // Cleanup when component unmounts
-    return () => {
-      if (isMobile) {
-        clearActions()
-      }
+  // Sync search values between mobile and desktop
+  useEffect(() => {
+    if (isMobile && mobileSearchValue !== searchValue) {
+      setSearchValue(mobileSearchValue)
     }
-  }, [isMobile, setActions, setShowActionBar, clearActions, openModal])
+  }, [mobileSearchValue, isMobile])
   
   const { data: coupons = [], isLoading: couponsLoading, refetch } = useQuery({
     queryKey: ['coupons'],
@@ -95,6 +78,138 @@ export default function AdminCourseCouponTab() {
       })) as Coupon[];
     }
   });
+
+  // Get coupon status helper
+  const getCouponStatus = (coupon: Coupon) => {
+    const now = new Date()
+    const isExpired = coupon.expires_at && new Date(coupon.expires_at) < now
+    const notStarted = coupon.starts_at && new Date(coupon.starts_at) > now
+    const limitReached = coupon.max_redemptions && (coupon.total_uses || 0) >= coupon.max_redemptions
+
+    if (!coupon.is_active) return 'inactive'
+    if (isExpired) return 'expired'
+    if (notStarted) return 'scheduled'
+    if (limitReached) return 'limit_reached'
+    return 'active'
+  }
+
+  // Filter coupons
+  const filteredCoupons = useMemo(() => {
+    return coupons.filter(coupon => {
+      // Search filter
+      if (searchValue) {
+        const search = searchValue.toLowerCase()
+        const code = coupon.code?.toLowerCase() || ''
+        
+        if (!code.includes(search)) {
+          return false
+        }
+      }
+
+      // Status filter
+      if (filterByStatus !== "all") {
+        const status = getCouponStatus(coupon)
+        if (status !== filterByStatus) {
+          return false
+        }
+      }
+
+      // Type filter
+      if (filterByType !== "all" && coupon.type !== filterByType) {
+        return false
+      }
+
+      return true
+    })
+  }, [coupons, searchValue, filterByStatus, filterByType])
+
+  // Configure mobile action bar
+  useEffect(() => {
+    if (isMobile) {
+      setActions({
+        search: {
+          id: 'search',
+          icon: Search,
+          label: 'Buscar',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+        create: {
+          id: 'create',
+          icon: Plus,
+          label: 'Crear Cupón',
+          onClick: () => handleCreateCoupon(),
+          variant: 'primary'
+        },
+        filter: {
+          id: 'filter',
+          icon: Filter,
+          label: 'Filtros',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+        notifications: {
+          id: 'notifications',
+          icon: Bell,
+          label: 'Notificaciones',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+      })
+      setShowActionBar(true)
+    }
+
+    // Cleanup when component unmounts
+    return () => {
+      if (isMobile) {
+        clearActions()
+      }
+    }
+  }, [isMobile, setActions, setShowActionBar, clearActions])
+
+  // Separate effect for filter configuration
+  useEffect(() => {
+    if (isMobile) {
+      setFilterConfig({
+        filters: [
+          {
+            label: 'Filtrar por estado',
+            value: filterByStatus,
+            onChange: setFilterByStatus,
+            placeholder: 'Todos los estados',
+            allOptionLabel: 'Todos los estados',
+            options: [
+              { value: 'active', label: 'Activo' },
+              { value: 'inactive', label: 'Inactivo' },
+              { value: 'expired', label: 'Vencido' },
+              { value: 'scheduled', label: 'Programado' },
+              { value: 'limit_reached', label: 'Límite alcanzado' }
+            ]
+          },
+          {
+            label: 'Filtrar por tipo',
+            value: filterByType,
+            onChange: setFilterByType,
+            placeholder: 'Todos los tipos',
+            allOptionLabel: 'Todos los tipos',
+            options: [
+              { value: 'percent', label: 'Porcentaje' },
+              { value: 'fixed', label: 'Monto Fijo' }
+            ]
+          }
+        ],
+        onClearFilters: () => {
+          setSearchValue("")
+          setMobileSearchValue("")
+          setFilterByStatus("all")
+          setFilterByType("all")
+        }
+      })
+    }
+  }, [filterByStatus, filterByType, isMobile])
 
   const handleCreateCoupon = () => {
     openModal('coupon', {});
@@ -231,9 +346,9 @@ export default function AdminCourseCouponTab() {
 
   return (
     <>
-      {coupons.length > 0 ? (
+      {filteredCoupons.length > 0 ? (
         <Table
-          data={coupons}
+          data={filteredCoupons}
           columns={couponColumns}
           isLoading={couponsLoading}
           renderCard={(coupon) => (

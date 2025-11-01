@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { Plus, Users, Search } from 'lucide-react'
+import { Plus, Users, Search, Filter, Bell } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Badge } from '@/components/ui/badge'
@@ -14,7 +14,7 @@ import { queryClient } from '@/lib/queryClient'
 import AdminCourseStudentRow from '@/components/ui/data-row/rows/AdminCourseStudentRow'
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
-import { useEffect } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 
 export default function AdminCourseUsersTab() {
   const { toast } = useToast()
@@ -25,38 +25,21 @@ export default function AdminCourseUsersTab() {
     setActions, 
     setShowActionBar, 
     clearActions,
+    setFilterConfig,
+    searchValue: mobileSearchValue,
+    setSearchValue: setMobileSearchValue
   } = useActionBarMobile()
 
-  // Configure mobile action bar
-  useEffect(() => {
-    if (isMobile) {
-      setActions({
-        search: {
-          id: 'search',
-          icon: Search,
-          label: 'Buscar',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
-        },
-        create: {
-          id: 'create',
-          icon: Plus,
-          label: 'Inscribir Alumno',
-          onClick: () => openModal('course-enrollment', {}),
-          variant: 'primary'
-        },
-      })
-      setShowActionBar(true)
-    }
+  const [searchValue, setSearchValue] = useState("")
+  const [filterByStatus, setFilterByStatus] = useState("all")
+  const [filterByCourse, setFilterByCourse] = useState("all")
 
-    // Cleanup when component unmounts
-    return () => {
-      if (isMobile) {
-        clearActions()
-      }
+  // Sync search values between mobile and desktop
+  useEffect(() => {
+    if (isMobile && mobileSearchValue !== searchValue) {
+      setSearchValue(mobileSearchValue)
     }
-  }, [isMobile, setActions, setShowActionBar, clearActions, openModal])
+  }, [mobileSearchValue, isMobile])
 
   // Fetch enrollments with user and course data
   const { data: enrollments = [], isLoading } = useQuery({
@@ -81,6 +64,128 @@ export default function AdminCourseUsersTab() {
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     refetchOnWindowFocus: false
   });
+
+  // Get available courses and statuses for filters
+  const availableCourses = useMemo(() => Array.from(
+    new Set(enrollments.map((e: any) => e.courses?.title).filter(Boolean))
+  ), [enrollments])
+
+  const availableStatuses = useMemo(() => Array.from(
+    new Set(enrollments.map((e: any) => e.status).filter(Boolean))
+  ), [enrollments])
+
+  // Filter enrollments
+  const filteredEnrollments = useMemo(() => {
+    return enrollments.filter((enrollment: any) => {
+      // Search filter
+      if (searchValue) {
+        const search = searchValue.toLowerCase()
+        const userName = enrollment.users?.full_name?.toLowerCase() || ''
+        const userEmail = enrollment.users?.email?.toLowerCase() || ''
+        const courseName = enrollment.courses?.title?.toLowerCase() || ''
+        
+        if (!userName.includes(search) && !userEmail.includes(search) && !courseName.includes(search)) {
+          return false
+        }
+      }
+
+      // Status filter
+      if (filterByStatus !== "all" && enrollment.status !== filterByStatus) {
+        return false
+      }
+
+      // Course filter
+      if (filterByCourse !== "all" && enrollment.courses?.title !== filterByCourse) {
+        return false
+      }
+
+      return true
+    })
+  }, [enrollments, searchValue, filterByStatus, filterByCourse])
+
+  // Configure mobile action bar
+  useEffect(() => {
+    if (isMobile) {
+      setActions({
+        search: {
+          id: 'search',
+          icon: Search,
+          label: 'Buscar',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+        create: {
+          id: 'create',
+          icon: Plus,
+          label: 'Inscribir Alumno',
+          onClick: () => handleCreateEnrollment(),
+          variant: 'primary'
+        },
+        filter: {
+          id: 'filter',
+          icon: Filter,
+          label: 'Filtros',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+        notifications: {
+          id: 'notifications',
+          icon: Bell,
+          label: 'Notificaciones',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+      })
+      setShowActionBar(true)
+    }
+
+    // Cleanup when component unmounts
+    return () => {
+      if (isMobile) {
+        clearActions()
+      }
+    }
+  }, [isMobile, setActions, setShowActionBar, clearActions])
+
+  // Separate effect for filter configuration
+  useEffect(() => {
+    if (isMobile && availableCourses.length > 0) {
+      setFilterConfig({
+        filters: [
+          {
+            label: 'Filtrar por estado',
+            value: filterByStatus,
+            onChange: setFilterByStatus,
+            placeholder: 'Todos los estados',
+            allOptionLabel: 'Todos los estados',
+            options: [
+              { value: 'active', label: 'Activo' },
+              { value: 'completed', label: 'Completado' },
+              { value: 'expired', label: 'Expirado' },
+              { value: 'cancelled', label: 'Cancelado' }
+            ]
+          },
+          {
+            label: 'Filtrar por curso',
+            value: filterByCourse,
+            onChange: setFilterByCourse,
+            placeholder: 'Todos los cursos',
+            allOptionLabel: 'Todos los cursos',
+            options: availableCourses.map(course => ({ value: course!, label: course! }))
+          }
+        ],
+        onClearFilters: () => {
+          setSearchValue("")
+          setMobileSearchValue("")
+          setFilterByStatus("all")
+          setFilterByCourse("all")
+        }
+      })
+    }
+  }, [filterByStatus, filterByCourse, availableCourses, isMobile])
 
   // Delete enrollment mutation
   const deleteEnrollmentMutation = useMutation({
@@ -326,9 +431,9 @@ export default function AdminCourseUsersTab() {
 
   return (
     <>
-      {enrollments.length > 0 ? (
+      {filteredEnrollments.length > 0 ? (
         <Table
-          data={enrollments}
+          data={filteredEnrollments}
           columns={columns}
           isLoading={isLoading}
           renderCard={(enrollment) => (
