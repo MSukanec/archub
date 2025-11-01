@@ -27,33 +27,21 @@ export default function LessonRow({ lesson, onGoToLesson }: LessonRowProps) {
   return (
     <DataRowCard
       data-testid={`lesson-row-${lesson.id}`}
-      onClick={() => onGoToLesson(lesson.id)}
     >
-      {/* Avatar Section - Completion Icon */}
-      <div className="flex-shrink-0">
-        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-          {lesson.is_completed ? (
-            <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-          ) : (
-            <Circle className="h-5 w-5 text-muted-foreground" />
-          )}
-        </div>
-      </div>
-
       {/* Content Section */}
-      <div className="flex-1 min-w-0 space-y-1.5">
+      <div className="flex-1 min-w-0 space-y-2">
         {/* Lesson Title */}
-        <p className="font-medium text-sm truncate">
+        <p className="font-medium text-sm">
           {lesson.title}
         </p>
 
         {/* Module Info */}
-        <p className="text-xs text-muted-foreground truncate">
+        <p className="text-xs text-muted-foreground">
           {lesson.module_title}
         </p>
 
-        {/* Stats Row */}
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        {/* Stats Row with Badge inline */}
+        <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
           <div className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
             <span>{formatDuration(lesson.duration_sec)}</span>
@@ -66,29 +54,29 @@ export default function LessonRow({ lesson, onGoToLesson }: LessonRowProps) {
             <Bookmark className="h-3 w-3" />
             <span>{lesson.markers_count}</span>
           </div>
+          {/* Badge inline con stats */}
+          {lesson.is_completed ? (
+            <Badge variant="secondary" className="bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400 text-xs">
+              <CheckCircle2 className="h-3 w-3 mr-1" />
+              Completada
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-muted-foreground text-xs">
+              <Circle className="h-3 w-3 mr-1" />
+              Pendiente
+            </Badge>
+          )}
         </div>
       </div>
 
-      {/* Trailing Section - Status Badge */}
-      <div className="flex-shrink-0 flex flex-col items-end gap-1">
-        {lesson.is_completed ? (
-          <Badge variant="secondary" className="bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400 text-xs">
-            Completada
-          </Badge>
-        ) : (
-          <Badge variant="outline" className="text-muted-foreground text-xs">
-            Pendiente
-          </Badge>
-        )}
-      </div>
-
-      {/* Expandable Details Section - Action Button */}
+      {/* Action Button - Full Width Below */}
       <div className="col-span-full pt-3 border-t border-border/50">
         <Button
           variant="default"
           size="sm"
           className="w-full"
           onClick={(e) => {
+            e.preventDefault();
             e.stopPropagation();
             onGoToLesson(lesson.id);
           }}

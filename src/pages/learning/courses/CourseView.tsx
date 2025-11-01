@@ -372,7 +372,7 @@ export default function CourseView() {
       case 'Visión General':
         return <CourseDashboardTab courseId={course?.id} />;
       case 'Contenido':
-        return <CourseContentTab courseId={course?.id} />;
+        return <CourseContentTab courseId={course?.id} courseSlug={id} />;
       case 'Lecciones':
         return (
           <CourseViewer 

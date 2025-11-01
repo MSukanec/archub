@@ -86,7 +86,10 @@ Preferred communication style: Simple, everyday language.
   - Actions column includes "Ir a Lección" button (default variant) that navigates to the lesson
   - Grouped by module with visual separators showing module name and lesson count
 - **Component created**:
-  - `LessonRow` - Mobile row component following DataRowCard pattern with completion icon avatar, lesson title, module info, stats (duration, notes, markers), status badge, and full-width "Ir a Lección" button
+  - `LessonRow` - Mobile row component following DataRowCard pattern (no avatar), lesson title, module info, stats (duration, notes, markers) with inline status badge, and full-width "Ir a Lección" button at bottom
+- **Navigation logic**:
+  - Implements same deep-link navigation as CourseMarkersTab: `setCurrentLesson`, `navigate` with URL params (tab, lesson), and `goToLesson` from store
+  - Properly switches to "Lecciones" tab and loads the selected lesson
 - **Data sources**:
   - Modules from `course_modules`
   - Lessons from `course_lessons`

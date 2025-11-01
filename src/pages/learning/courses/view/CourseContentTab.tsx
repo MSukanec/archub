@@ -1,15 +1,18 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useLocation } from 'wouter'
 import { supabase } from '@/lib/supabase'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { CheckCircle2, Circle, ArrowRight } from 'lucide-react'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
+import { useCoursePlayerStore } from '@/stores/coursePlayerStore'
 import LessonRow from '@/components/ui/data-row/rows/LessonRow'
 
 interface CourseContentTabProps {
   courseId?: string;
+  courseSlug?: string;
 }
 
 interface LessonRowData {
@@ -25,8 +28,10 @@ interface LessonRowData {
   groupKey: string; // Para el groupBy
 }
 
-export default function CourseContentTab({ courseId }: CourseContentTabProps) {
+export default function CourseContentTab({ courseId, courseSlug }: CourseContentTabProps) {
+  const [, navigate] = useLocation()
   const { setCurrentLesson } = useCourseSidebarStore()
+  const goToLesson = useCoursePlayerStore(s => s.goToLesson)
 
   // Get course modules
   const { data: modules = [] } = useQuery({
@@ -218,7 +223,19 @@ export default function CourseContentTab({ courseId }: CourseContentTabProps) {
   }
 
   const handleGoToLesson = (lessonId: string) => {
+    // Set the current lesson in the sidebar
     setCurrentLesson(lessonId);
+    
+    // Use the store to navigate (this will switch to "Lecciones" tab and set the lesson)
+    goToLesson(lessonId, null);
+    
+    // Update URL with deep link params (for browser navigation and refresh support)
+    if (courseSlug) {
+      const params = new URLSearchParams();
+      params.set('tab', 'Lecciones');
+      params.set('lesson', lessonId);
+      navigate(`/learning/courses/${courseSlug}?${params.toString()}`);
+    }
   };
 
   const columns = [
