@@ -334,7 +334,7 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
   
   // ==================== ENROLLMENT MANAGEMENT ====================
 
-  // GET /api/admin/enrollments - Get all enrollments with progress
+  // GET /api/admin/enrollments - Get all enrollments with progress (OPTIMIZED)
   app.get("/api/admin/enrollments", async (req, res) => {
     try {
       const authHeader = req.headers.authorization;
@@ -350,84 +350,136 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
       const adminClient = getAdminClient();
       const { course_id } = req.query;
       
-      // Fetch enrollments with users and courses
-      let query = adminClient
+      // QUERY 1: Fetch ALL enrollments with users, courses, and payments
+      let enrollmentsQuery = adminClient
         .from('course_enrollments')
         .select(`
           *,
           users!inner(id, full_name, email, avatar_url),
-          courses!inner(id, title)
+          courses!inner(id, title),
+          payments(id, amount, currency, provider, status)
         `)
         .order('started_at', { ascending: false });
       
       if (course_id) {
-        query = query.eq('course_id', course_id);
+        enrollmentsQuery = enrollmentsQuery.eq('course_id', course_id);
       }
       
-      const { data: enrollments, error: enrollmentsError } = await query;
+      const { data: enrollments, error: enrollmentsError } = await enrollmentsQuery;
       
       if (enrollmentsError) {
         console.error("Error fetching enrollments:", enrollmentsError);
         return res.status(500).json({ error: "Failed to fetch enrollments" });
       }
+
+      if (!enrollments || enrollments.length === 0) {
+        return res.json([]);
+      }
       
-      // Fetch progress for all enrollments in parallel
-      const enrollmentsWithProgress = await Promise.all(
-        (enrollments || []).map(async (enrollment) => {
-          // Get all modules for the course
-          const { data: modules } = await adminClient
-            .from('course_modules')
-            .select('id')
-            .eq('course_id', enrollment.course_id);
-          
-          if (!modules || modules.length === 0) {
-            return {
-              ...enrollment,
-              progress: { completed_lessons: 0, total_lessons: 0, progress_percentage: 0 }
-            };
+      // Extract unique course IDs and user IDs
+      const courseIds = Array.from(new Set(enrollments.map(e => e.course_id)));
+      const userIds = Array.from(new Set(enrollments.map(e => e.user_id)));
+      
+      // QUERY 2: Fetch ALL modules for ALL courses at once
+      const { data: allModules } = await adminClient
+        .from('course_modules')
+        .select('id, course_id')
+        .in('course_id', courseIds);
+      
+      if (!allModules || allModules.length === 0) {
+        // No modules = no lessons = 0% progress for everyone
+        return res.json(enrollments.map(e => ({
+          ...e,
+          payment: Array.isArray(e.payments) ? e.payments[0] : e.payments,
+          progress: { completed_lessons: 0, total_lessons: 0, progress_percentage: 0 }
+        })));
+      }
+      
+      // Create course_id -> module_ids mapping
+      const courseModulesMap = new Map<string, string[]>();
+      allModules.forEach(module => {
+        if (!courseModulesMap.has(module.course_id)) {
+          courseModulesMap.set(module.course_id, []);
+        }
+        courseModulesMap.get(module.course_id)!.push(module.id);
+      });
+      
+      const allModuleIds = allModules.map(m => m.id);
+      
+      // QUERY 3: Fetch ALL lessons for ALL modules at once
+      const { data: allLessons } = await adminClient
+        .from('course_lessons')
+        .select('id, module_id')
+        .in('module_id', allModuleIds);
+      
+      if (!allLessons || allLessons.length === 0) {
+        // No lessons = 0% progress for everyone
+        return res.json(enrollments.map(e => ({
+          ...e,
+          payment: Array.isArray(e.payments) ? e.payments[0] : e.payments,
+          progress: { completed_lessons: 0, total_lessons: 0, progress_percentage: 0 }
+        })));
+      }
+      
+      // Create module_id -> lesson_ids mapping
+      const moduleLessonsMap = new Map<string, string[]>();
+      allLessons.forEach(lesson => {
+        if (!moduleLessonsMap.has(lesson.module_id)) {
+          moduleLessonsMap.set(lesson.module_id, []);
+        }
+        moduleLessonsMap.get(lesson.module_id)!.push(lesson.id);
+      });
+      
+      const allLessonIds = allLessons.map(l => l.id);
+      
+      // QUERY 4: Fetch ALL progress for ALL users and ALL lessons at once
+      const { data: allProgress } = await adminClient
+        .from('course_lesson_progress')
+        .select('user_id, lesson_id, is_completed')
+        .in('user_id', userIds)
+        .in('lesson_id', allLessonIds)
+        .eq('is_completed', true);
+      
+      // Create user_id -> Set<completed_lesson_ids> mapping
+      const userProgressMap = new Map<string, Set<string>>();
+      (allProgress || []).forEach(progress => {
+        if (!userProgressMap.has(progress.user_id)) {
+          userProgressMap.set(progress.user_id, new Set());
+        }
+        userProgressMap.get(progress.user_id)!.add(progress.lesson_id);
+      });
+      
+      // COMBINE: Calculate progress for each enrollment in memory (super fast)
+      const enrollmentsWithProgress = enrollments.map(enrollment => {
+        const moduleIds = courseModulesMap.get(enrollment.course_id) || [];
+        
+        // Get all lesson IDs for this course
+        const lessonIds = moduleIds.flatMap(moduleId => 
+          moduleLessonsMap.get(moduleId) || []
+        );
+        
+        const total_lessons = lessonIds.length;
+        
+        // Get completed lessons for this user
+        const completedLessons = userProgressMap.get(enrollment.user_id) || new Set();
+        const completed_lessons = lessonIds.filter(lessonId => 
+          completedLessons.has(lessonId)
+        ).length;
+        
+        const progress_percentage = total_lessons > 0 
+          ? Math.round((completed_lessons / total_lessons) * 100) 
+          : 0;
+        
+        return {
+          ...enrollment,
+          payment: Array.isArray(enrollment.payments) ? enrollment.payments[0] : enrollment.payments,
+          progress: { 
+            completed_lessons, 
+            total_lessons, 
+            progress_percentage 
           }
-          
-          const moduleIds = modules.map(m => m.id);
-          
-          // Get all lessons for these modules
-          const { data: lessons } = await adminClient
-            .from('course_lessons')
-            .select('id')
-            .in('module_id', moduleIds);
-          
-          if (!lessons || lessons.length === 0) {
-            return {
-              ...enrollment,
-              progress: { completed_lessons: 0, total_lessons: 0, progress_percentage: 0 }
-            };
-          }
-          
-          const lessonIds = lessons.map(l => l.id);
-          const total_lessons = lessons.length;
-          
-          // Get completed lessons for this user
-          const { data: progressData } = await adminClient
-            .from('course_lesson_progress')
-            .select('id, is_completed')
-            .eq('user_id', enrollment.user_id)
-            .in('lesson_id', lessonIds)
-            .eq('is_completed', true);
-          
-          const completed_lessons = progressData?.length || 0;
-          const progress_percentage = total_lessons > 0 
-            ? Math.round((completed_lessons / total_lessons) * 100) 
-            : 0;
-          
-          return {
-            ...enrollment,
-            progress: { 
-              completed_lessons, 
-              total_lessons, 
-              progress_percentage 
-            }
-          };
-        })
-      );
+        };
+      });
       
       return res.json(enrollmentsWithProgress);
     } catch (error: any) {
