@@ -296,17 +296,6 @@ export default function CourseView() {
           Anterior
         </Button>,
         <Button
-          key="complete"
-          variant={navigationState.isCompleted ? "secondary" : "default"}
-          size="sm"
-          onClick={navigationState.onMarkComplete}
-          disabled={navigationState.isMarkingComplete || navigationState.isCompleted}
-          data-testid="button-mark-complete"
-        >
-          <CheckCircle className="w-4 h-4 mr-1" />
-          {navigationState.isCompleted ? 'Completada' : (navigationState.isMarkingComplete ? 'Marcando...' : 'Marcar como Completa')}
-        </Button>,
-        <Button
           key="next"
           variant="secondary"
           size="sm"

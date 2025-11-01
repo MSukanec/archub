@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useCallback, useRef, useState } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { Play, BookOpen, CheckCircle, ChevronLeft, ChevronRight, FileText, Bookmark } from 'lucide-react'
+import { Play, BookOpen, CheckCircle, ChevronLeft, ChevronRight, FileText, Bookmark, Clock } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
@@ -11,6 +11,7 @@ import { apiRequest, queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
 import { LessonSummaryNote } from '@/components/learning/LessonSummaryNote'
 import { LessonMarkers } from '@/components/learning/LessonMarkers'
+import { FavoriteButton } from '@/components/learning/FavoriteButton'
 import Player from '@vimeo/player'
 
 interface CourseViewerProps {
@@ -468,13 +469,46 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
               clearPendingSeek();
             }}
           />
-          <div className="mt-4">
-            <h2 className="text-xl font-semibold">{currentLesson.title}</h2>
-            {currentLesson.duration_sec && (
-              <p className="text-sm text-muted-foreground mt-1">
-                Duración: {formatDuration(currentLesson.duration_sec)}
-              </p>
-            )}
+          
+          {/* Título y Acciones - Layout 2 columnas */}
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-[1fr,auto] gap-4 items-start">
+            {/* Columna Izquierda: Título + Duración */}
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold">{currentLesson.title}</h2>
+              {currentLesson.duration_sec && (
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <Clock className="h-4 w-4" />
+                  <span>Duración: {formatDuration(currentLesson.duration_sec)}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Columna Derecha: Botones de Acción */}
+            <div className="flex items-center gap-2">
+              {/* Botón Favorito */}
+              {courseId && (
+                <FavoriteButton 
+                  lessonId={currentLesson.id}
+                  courseId={courseId}
+                  isFavorite={currentProgress?.is_favorite || false}
+                  variant="icon"
+                  size="lg"
+                />
+              )}
+              
+              {/* Botón Marcar como Completa */}
+              <Button
+                variant={currentProgress?.is_completed ? "secondary" : "default"}
+                size="sm"
+                onClick={handleMarkComplete}
+                disabled={markCompleteMutation.isPending || currentProgress?.is_completed}
+                data-testid="button-mark-complete-inline"
+                className="whitespace-nowrap"
+              >
+                <CheckCircle className="w-4 h-4 mr-1.5" />
+                {currentProgress?.is_completed ? 'Completada' : (markCompleteMutation.isPending ? 'Marcando...' : 'Marcar como Completa')}
+              </Button>
+            </div>
           </div>
         </div>
       ) : (
