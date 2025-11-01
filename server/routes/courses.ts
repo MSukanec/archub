@@ -404,18 +404,20 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         return res.status(404).json({ error: "User not found" });
       }
       
-      const { data: note, error } = await authenticatedSupabase
+      // WORKAROUND for stack depth issue - fetch all notes and filter in memory
+      const { data: allNotes, error } = await authenticatedSupabase
         .from('course_lesson_notes')
         .select('*')
         .eq('user_id', dbUser.id)
-        .eq('lesson_id', lessonId)
-        .eq('note_type', 'summary')
-        .maybeSingle();
+        .eq('lesson_id', lessonId);
       
       if (error) {
-        console.error("Error fetching summary note:", error);
+        console.error("Error fetching notes for summary:", error);
         return res.status(500).json({ error: "Failed to fetch summary note" });
       }
+      
+      // Filter for summary note in memory
+      const note = (allNotes || []).find(n => n.note_type === 'summary') || null;
       
       res.json(note);
     } catch (error) {
@@ -457,13 +459,15 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       }
       
       // Check for existing summary note
-      const { data: existingNote } = await authenticatedSupabase
+      // WORKAROUND for stack depth issue - fetch all notes and filter in memory
+      const { data: allNotes } = await authenticatedSupabase
         .from('course_lesson_notes')
-        .select('id')
+        .select('id, note_type')
         .eq('user_id', dbUser.id)
-        .eq('lesson_id', lessonId)
-        .eq('note_type', 'summary')
-        .maybeSingle();
+        .eq('lesson_id', lessonId);
+      
+      // Filter for summary note in memory
+      const existingNote = (allNotes || []).find(n => n.note_type === 'summary') || null;
       
       let noteData;
       
@@ -542,16 +546,27 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         return res.status(404).json({ error: "User not found" });
       }
       
-      const { error } = await authenticatedSupabase
+      // WORKAROUND for stack depth issue - fetch all notes first
+      const { data: allNotes } = await authenticatedSupabase
         .from('course_lesson_notes')
-        .delete()
+        .select('id, note_type')
         .eq('user_id', dbUser.id)
-        .eq('lesson_id', lessonId)
-        .eq('note_type', 'summary');
+        .eq('lesson_id', lessonId);
       
-      if (error) {
-        console.error("Error deleting summary note:", error);
-        return res.status(500).json({ error: "Failed to delete summary note" });
+      // Filter for summary notes in memory
+      const summaryNotes = (allNotes || []).filter(n => n.note_type === 'summary');
+      
+      // Delete each summary note by ID
+      if (summaryNotes.length > 0) {
+        const { error } = await authenticatedSupabase
+          .from('course_lesson_notes')
+          .delete()
+          .in('id', summaryNotes.map(n => n.id));
+        
+        if (error) {
+          console.error("Error deleting summary note:", error);
+          return res.status(500).json({ error: "Failed to delete summary note" });
+        }
       }
       
       res.json({ success: true });
@@ -754,13 +769,24 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       if (body !== undefined) updateData.body = body;
       if (is_pinned !== undefined) updateData.is_pinned = is_pinned;
       
+      // WORKAROUND for stack depth issue - first verify the marker exists and has correct type
+      const { data: existingNote } = await authenticatedSupabase
+        .from('course_lesson_notes')
+        .select('id, note_type')
+        .eq('id', markerId)
+        .eq('user_id', dbUser.id)
+        .eq('lesson_id', lessonId)
+        .single();
+      
+      // Check if it's a marker note
+      if (!existingNote || existingNote.note_type !== 'marker') {
+        return res.status(404).json({ error: "Marker not found" });
+      }
+      
       const { data: marker, error } = await authenticatedSupabase
         .from('course_lesson_notes')
         .update(updateData)
         .eq('id', markerId)
-        .eq('user_id', dbUser.id)
-        .eq('lesson_id', lessonId)
-        .eq('note_type', 'marker')
         .select()
         .single();
       
@@ -803,13 +829,24 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         return res.status(404).json({ error: "User not found" });
       }
       
-      const { error } = await authenticatedSupabase
+      // WORKAROUND for stack depth issue - first verify the marker exists and has correct type
+      const { data: existingNote } = await authenticatedSupabase
         .from('course_lesson_notes')
-        .delete()
+        .select('id, note_type')
         .eq('id', markerId)
         .eq('user_id', dbUser.id)
         .eq('lesson_id', lessonId)
-        .eq('note_type', 'marker');
+        .single();
+      
+      // Check if it's a marker note
+      if (!existingNote || existingNote.note_type !== 'marker') {
+        return res.status(404).json({ error: "Marker not found" });
+      }
+      
+      const { error } = await authenticatedSupabase
+        .from('course_lesson_notes')
+        .delete()
+        .eq('id', markerId);
       
       if (error) {
         console.error("Error deleting marker:", error);
