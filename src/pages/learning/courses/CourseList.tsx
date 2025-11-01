@@ -19,7 +19,6 @@ export default function CourseList() {
   const [activeTab, setActiveTab] = useState<CourseTabFilter>('all')
   const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore()
   
-  const { data: courses = [], isLoading: coursesLoading } = useCourses()
   const [, navigate] = useLocation()
 
   useEffect(() => {
@@ -58,16 +57,17 @@ export default function CourseList() {
   });
 
   // Extraer datos del resultado unificado
+  const courses = fullData?.courses || [];
   const courseProgressData = fullData?.progress || [];
   const enrollments = fullData?.enrollments || [];
 
   // Obtener total de lecciones y duración por curso
   const { data: courseLessonsData = [] } = useQuery({
-    queryKey: ['course-lessons-summary', courses.map(c => c.id)],
+    queryKey: ['course-lessons-summary', courses.map((c: any) => c.id)],
     queryFn: async () => {
       if (!supabase || courses.length === 0) return [];
       
-      const courseIds = courses.map(c => c.id);
+      const courseIds = courses.map((c: any) => c.id);
       
       const { data, error } = await supabase
         .from('course_lessons')
@@ -90,7 +90,7 @@ export default function CourseList() {
   const courseProgress = useMemo(() => {
     const progressMap = new Map<string, { completed: number; total: number; percentage: number; totalDurationSec: number }>();
     
-    courses.forEach(course => {
+    courses.forEach((course: any) => {
       // Buscar progreso pre-calculado de la vista
       const viewProgress = courseProgressData.find((p: any) => p.course_id === course.id);
       
@@ -125,16 +125,16 @@ export default function CourseList() {
   }, [courses, courseProgressData, courseLessonsData]);
 
   const filteredCourses = useMemo(() => {
-    const activeCourses = courses.filter(c => c.is_active && c.visibility !== 'draft');
+    const activeCourses = courses.filter((c: any) => c.is_active && c.visibility !== 'draft');
     
     if (activeTab === 'enrolled') {
-      return activeCourses.filter(course => {
+      return activeCourses.filter((course: any) => {
         const enrollment = enrollments.find((e: any) => e.course_id === course.id && e.status === 'active');
         const progress = courseProgress.get(course.id);
         return enrollment && progress && progress.percentage < 100;
       });
     } else if (activeTab === 'completed') {
-      return activeCourses.filter(course => {
+      return activeCourses.filter((course: any) => {
         const enrollment = enrollments.find((e: any) => e.course_id === course.id && e.status === 'active');
         const progress = courseProgress.get(course.id);
         return enrollment && progress && progress.percentage === 100;
@@ -145,7 +145,7 @@ export default function CourseList() {
   }, [courses, activeTab, enrollments, courseProgress]);
 
   const enrolledCount = useMemo(() => {
-    return courses.filter(course => {
+    return courses.filter((course: any) => {
       const enrollment = enrollments.find((e: any) => e.course_id === course.id && e.status === 'active');
       const progress = courseProgress.get(course.id);
       return enrollment && progress && progress.percentage < 100;
@@ -153,7 +153,7 @@ export default function CourseList() {
   }, [courses, enrollments, courseProgress]);
 
   const completedCount = useMemo(() => {
-    return courses.filter(course => {
+    return courses.filter((course: any) => {
       const enrollment = enrollments.find((e: any) => e.course_id === course.id && e.status === 'active');
       const progress = courseProgress.get(course.id);
       return enrollment && progress && progress.percentage === 100;
@@ -172,7 +172,7 @@ export default function CourseList() {
     actions: []
   };
 
-  if (coursesLoading || fullDataLoading) {
+  if (fullDataLoading) {
     return (
       <Layout headerProps={headerProps} wide>
         <div className="p-8 text-center text-muted-foreground">
@@ -220,7 +220,7 @@ export default function CourseList() {
           />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredCourses.map(course => {
+            {filteredCourses.map((course: any) => {
               const progress = courseProgress.get(course.id) || { completed: 0, total: 0, percentage: 0, totalDurationSec: 0 };
               const enrollment = enrollments.find((e: any) => e.course_id === course.id && e.status === 'active');
               const hasEnrollment = !!enrollment;

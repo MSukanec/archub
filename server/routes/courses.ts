@@ -453,7 +453,7 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         // Get all active courses
         authenticatedSupabase
           .from('courses')
-          .select('id, slug, title, description, cover_url, is_active, visibility')
+          .select('id, slug, title, short_description, cover_url, is_active, visibility')
           .eq('is_active', true)
           .neq('visibility', 'draft'),
         
@@ -480,6 +480,10 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         ...e,
         course_slug: e.courses?.slug
       }));
+      
+      // 🔍 DEBUG: Log enrollments to see what we're returning
+      console.log('📊 ENROLLMENTS DEBUG:', JSON.stringify(enrollments, null, 2));
+      console.log('📊 ENROLLMENTS COUNT:', enrollments.length);
       
       res.json({
         courses: coursesResult.data || [],
