@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { Plus, Users } from 'lucide-react'
+import { Plus, Users, Search } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Badge } from '@/components/ui/badge'
@@ -12,10 +12,51 @@ import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { queryClient } from '@/lib/queryClient'
 import AdminCourseStudentRow from '@/components/ui/data-row/rows/AdminCourseStudentRow'
+import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
+import { useMobile } from '@/hooks/use-mobile'
+import { useEffect } from 'react'
 
 export default function AdminCourseUsersTab() {
   const { toast } = useToast()
   const { openModal } = useGlobalModalStore()
+  const isMobile = useMobile()
+  
+  const { 
+    setActions, 
+    setShowActionBar, 
+    clearActions,
+  } = useActionBarMobile()
+
+  // Configure mobile action bar
+  useEffect(() => {
+    if (isMobile) {
+      setActions({
+        search: {
+          id: 'search',
+          icon: Search,
+          label: 'Buscar',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+        create: {
+          id: 'create',
+          icon: Plus,
+          label: 'Inscribir Alumno',
+          onClick: () => openModal('course-enrollment', {}),
+          variant: 'primary'
+        },
+      })
+      setShowActionBar(true)
+    }
+
+    // Cleanup when component unmounts
+    return () => {
+      if (isMobile) {
+        clearActions()
+      }
+    }
+  }, [isMobile, setActions, setShowActionBar, clearActions, openModal])
 
   // Fetch enrollments with user and course data
   const { data: enrollments = [], isLoading } = useQuery({
