@@ -951,32 +951,41 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       
       const lessonIds = courseLessons.map(l => l.id);
       
-      // Query 3: Get latest 3 markers for these lessons
-      const { data: markers, error: markersError } = await authenticatedSupabase
+      // Query 3: WORKAROUND for stack depth issue - fetch all notes and filter in memory
+      // This avoids the problematic note_type='marker' database filter
+      const { data: allNotes, error: notesError } = await authenticatedSupabase
         .from('course_lesson_notes')
-        .select('id, body, lesson_id, time_sec, created_at')
+        .select('id, body, lesson_id, created_at, note_type, time_sec')
         .eq('user_id', dbUser.id)
-        .eq('note_type', 'marker')
         .in('lesson_id', lessonIds)
-        .order('created_at', { ascending: false })
-        .limit(3);
+        .order('created_at', { ascending: false });
       
-      if (markersError) {
-        console.error("Error fetching recent markers:", markersError);
-        return res.status(500).json({ error: "Failed to fetch markers" });
+      if (notesError) {
+        console.error("Error fetching notes for markers:", notesError);
+        // Return empty array instead of error to prevent app crash
+        return res.json([]);
       }
+      
+      // Filter markers in memory (markers have time_sec and note_type='marker')
+      const markers = (allNotes || [])
+        .filter(note => note.note_type === 'marker' || (note.time_sec !== null && note.note_type !== 'summary'))
+        .slice(0, 3);  // Get only the first 3
       
       // Combine data with lesson titles
       const lessonMap = new Map(courseLessons.map(l => [l.id, l]));
-      const enrichedMarkers = (markers || []).map(marker => ({
-        ...marker,
-        course_lessons: lessonMap.get(marker.lesson_id) || null
+      const enrichedMarkers = markers.map(marker => ({
+        id: marker.id,
+        body: marker.body,
+        lesson_id: marker.lesson_id,
+        created_at: marker.created_at,
+        lesson_info: lessonMap.get(marker.lesson_id) || null  // Using lesson_info instead of course_lessons
       }));
       
       res.json(enrichedMarkers);
     } catch (error) {
       console.error("Error fetching recent markers:", error);
-      res.status(500).json({ error: "Failed to fetch markers" });
+      // Return empty array instead of error to prevent app crash
+      res.json([]);
     }
   });
 

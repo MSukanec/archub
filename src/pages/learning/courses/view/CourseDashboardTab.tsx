@@ -666,7 +666,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
                           <p className="text-sm font-medium text-foreground group-hover/item:text-accent transition-colors truncate">
-                            {marker.course_lessons?.title || 'Sin título'}
+                            {marker.lesson_info?.title || 'Sin título'}
                           </p>
                           <span className="text-xs text-muted-foreground flex-shrink-0">
                             {format(new Date(marker.created_at), 'dd/MM/yy', { locale: es })}
