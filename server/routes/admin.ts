@@ -436,6 +436,87 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
     }
   });
   
+  // POST /api/admin/enrollments - Create enrollment
+  app.post("/api/admin/enrollments", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const { isAdmin, error } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error });
+      }
+      
+      const adminClient = getAdminClient();
+      const { user_id, course_id, status, expires_at } = req.body;
+      
+      const { data, error: insertError } = await adminClient
+        .from('course_enrollments')
+        .insert({
+          user_id,
+          course_id,
+          status,
+          expires_at: expires_at || null,
+          started_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+      
+      if (insertError) {
+        console.error("Error creating enrollment:", insertError);
+        return res.status(500).json({ error: "Failed to create enrollment" });
+      }
+      
+      return res.json(data);
+    } catch (error: any) {
+      console.error("Error in POST /api/admin/enrollments:", error);
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
+
+  // PATCH /api/admin/enrollments/:id - Update enrollment
+  app.patch("/api/admin/enrollments/:id", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const { isAdmin, error } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error });
+      }
+      
+      const adminClient = getAdminClient();
+      const { id } = req.params;
+      const { user_id, course_id, status, expires_at } = req.body;
+      
+      const { data, error: updateError } = await adminClient
+        .from('course_enrollments')
+        .update({
+          user_id,
+          course_id,
+          status,
+          expires_at: expires_at || null,
+        })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (updateError) {
+        console.error("Error updating enrollment:", updateError);
+        return res.status(500).json({ error: "Failed to update enrollment" });
+      }
+      
+      return res.json(data);
+    } catch (error: any) {
+      console.error("Error in PATCH /api/admin/enrollments/:id:", error);
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
+
   // DELETE /api/admin/enrollments/:id
   app.delete("/api/admin/enrollments/:id", async (req, res) => {
     try {
