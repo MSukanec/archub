@@ -414,6 +414,9 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
   // Encontrar la lección actual
   const currentLesson = lessons.find(l => l.id === activeLessonId);
   
+  // Encontrar el módulo al que pertenece la lección
+  const currentModule = currentLesson ? modules.find(m => m.id === currentLesson.module_id) : null;
+  
   // Obtener progreso de la lección actual
   const currentProgress = activeLessonId ? progressMap.get(activeLessonId) : null;
   
@@ -439,7 +442,10 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
 
             {/* Card con datos del video */}
             <div className="bg-card border rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-2">{currentLesson.title}</h2>
+              <h2 className="text-xl font-semibold mb-1">{currentLesson.title}</h2>
+              {currentModule && (
+                <p className="text-sm text-muted-foreground mb-2">{currentModule.name}</p>
+              )}
               {currentLesson.duration_sec && (
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">
                   <Clock className="h-4 w-4" />
