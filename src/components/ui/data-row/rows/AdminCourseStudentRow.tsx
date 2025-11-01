@@ -1,5 +1,4 @@
 import DataRowCard from '../DataRowCard';
-import { Badge } from '@/components/ui/badge';
 import { GraduationCap } from 'lucide-react';
 
 interface EnrollmentProgress {
@@ -54,24 +53,20 @@ const getUserInitials = (enrollment: Enrollment): string => {
   return enrollment.users?.email?.slice(0, 2).toUpperCase() || 'U';
 };
 
-const getStatusColor = (status: Enrollment['status']) => {
-  const colors = {
-    active: 'var(--accent)',
-    completed: '#3b82f6',
-    expired: '#ef4444',
-    cancelled: '#6b7280'
-  };
-  return colors[status] || '#6b7280';
-};
-
-const getStatusLabel = (status: Enrollment['status']) => {
-  const labels = {
-    active: 'Activo',
-    completed: 'Completado',
-    expired: 'Expirado',
-    cancelled: 'Cancelado'
-  };
-  return labels[status] || status;
+// Componente para mostrar el progreso del estudiante
+const StudentProgress = ({ progress }: { progress?: EnrollmentProgress }) => {
+  const percentage = progress?.progress_percentage || 0;
+  
+  return (
+    <div className="text-right">
+      <div className="text-xs text-muted-foreground mb-1">
+        Progreso: {percentage.toFixed(0)}%
+      </div>
+      <div className="text-xs text-muted-foreground">
+        {progress?.completed_lessons || 0} / {progress?.total_lessons || 0} lecciones
+      </div>
+    </div>
+  );
 };
 
 export default function AdminCourseStudentRow({ 
@@ -82,13 +77,6 @@ export default function AdminCourseStudentRow({
   className 
 }: AdminCourseStudentRowProps) {
   
-  const progress = enrollment.progress || { 
-    completed_lessons: 0, 
-    total_lessons: 0, 
-    progress_percentage: 0 
-  };
-  const percentage = progress.progress_percentage || 0;
-
   const cardContent = (
     <>
       {/* Columna de contenido (principal) */}
@@ -105,35 +93,11 @@ export default function AdminCourseStudentRow({
         </div>
       </div>
 
-      {/* Trailing Section - Progreso y Estado */}
-      <div className="flex flex-col items-end gap-1.5 flex-shrink-0 min-w-[100px]">
-        {/* Estado */}
-        <Badge 
-          style={{ 
-            backgroundColor: getStatusColor(enrollment.status), 
-            color: 'white',
-            fontSize: '10px',
-            padding: '2px 6px'
-          }}
-        >
-          {getStatusLabel(enrollment.status)}
-        </Badge>
-        
-        {/* Progreso */}
-        <div className="w-full">
-          <div className="text-right text-xs text-muted-foreground mb-1">
-            {percentage.toFixed(0)}%
-          </div>
-          <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
-            <div 
-              className="h-full rounded-full transition-all duration-300"
-              style={{ 
-                backgroundColor: 'var(--accent)',
-                width: `${percentage}%`
-              }}
-            />
-          </div>
-        </div>
+      {/* Trailing Section - Progreso */}
+      <div className="flex items-center">
+        <StudentProgress progress={enrollment.progress} />
+        {/* Espacio mínimo para chevron si existe */}
+        {onClick && <div className="w-2" />}
       </div>
     </>
   );

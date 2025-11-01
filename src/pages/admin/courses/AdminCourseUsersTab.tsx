@@ -11,6 +11,7 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { queryClient } from '@/lib/queryClient'
+import AdminCourseStudentRow from '@/components/ui/data-row/rows/AdminCourseStudentRow'
 
 export default function AdminCourseUsersTab() {
   const { toast } = useToast()
@@ -289,6 +290,13 @@ export default function AdminCourseUsersTab() {
           data={enrollments}
           columns={columns}
           isLoading={isLoading}
+          renderCard={(enrollment) => (
+            <AdminCourseStudentRow
+              enrollment={enrollment}
+              onClick={() => handleEditEnrollment(enrollment)}
+              density="normal"
+            />
+          )}
           emptyState={
             <EmptyState
               icon={<Users className="w-12 h-12" />}
