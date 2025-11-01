@@ -47,14 +47,15 @@ Preferred communication style: Simple, everyday language.
 ### Recent Changes
 
 #### Admin Users RLS Bypass Fix (Oct 31, 2025)
-- **Problem**: Admin users tab couldn't display users when RLS policies were enabled because it made direct Supabase client queries subject to RLS restrictions
+- **Problem**: Admin users tab and enrollment modal couldn't display users when RLS policies were enabled because they made direct Supabase client queries subject to RLS restrictions
 - **Solution**: Created backend API endpoints with service role authentication to bypass RLS for admin operations:
   - `GET /api/admin/users` - List all users with stats (search, filter, sort support)
   - `PATCH /api/admin/users/:id` - Update user status (deactivate/activate)
 - **Files updated**:
   - `server/routes/admin.ts` - Added user management endpoints with `verifyAdmin()` and `getAdminClient()`
   - `src/pages/admin/community/AdminCommunityUsers.tsx` - Migrated from direct Supabase queries to backend API calls
-- **Result**: Admin users tab now works correctly with RLS enabled, admins can view and manage all users regardless of RLS policies
+  - `src/components/modal/modals/admin/CourseEnrollmentModal.tsx` - Changed users query to use backend API endpoint
+- **Result**: Admin users tab and enrollment modal now work correctly with RLS enabled, admins can view and manage all users regardless of RLS policies
 
 #### Learning Dashboard Cache Strategy (Oct 31, 2025)
 - **Problem**: Dashboard showed empty state after enrollment because cache wasn't refreshing
