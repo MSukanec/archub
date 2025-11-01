@@ -2,15 +2,17 @@ import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
-import { CheckCircle2, Circle } from 'lucide-react'
+import { CheckCircle2, Circle, ArrowRight } from 'lucide-react'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
+import LessonRow from '@/components/ui/data-row/rows/LessonRow'
 
 interface CourseContentTabProps {
   courseId?: string;
 }
 
-interface LessonRow {
+interface LessonRowData {
   id: string;
   title: string;
   duration_sec: number | null;
@@ -150,7 +152,7 @@ export default function CourseContentTab({ courseId }: CourseContentTabProps) {
   });
 
   // Process data into rows
-  const tableData = useMemo<LessonRow[]>(() => {
+  const tableData = useMemo<LessonRowData[]>(() => {
     if (!lessons.length || !modules.length) return [];
 
     // Count notes and markers per lesson
@@ -173,7 +175,7 @@ export default function CourseContentTab({ courseId }: CourseContentTabProps) {
     }, {} as Record<string, any>);
 
     // Map lessons to rows
-    const rows: LessonRow[] = lessons.map((lesson) => {
+    const rows: LessonRowData[] = lessons.map((lesson) => {
       const module = moduleMap[lesson.module_id];
       const isCompleted = courseProgress.some(
         (p: any) => p.lesson_id === lesson.id && p.is_completed
@@ -215,20 +217,24 @@ export default function CourseContentTab({ courseId }: CourseContentTabProps) {
     return `${totalMins}:${secs.toString().padStart(2, '0')}`;
   }
 
+  const handleGoToLesson = (lessonId: string) => {
+    setCurrentLesson(lessonId);
+  };
+
   const columns = [
     {
       key: 'title',
       label: 'Nombre',
-      width: '40%',
-      render: (row: LessonRow) => (
+      width: '30%',
+      render: (row: LessonRowData) => (
         <span className="font-medium">{row.title}</span>
       )
     },
     {
       key: 'duration_sec',
       label: 'Duración',
-      width: '15%',
-      render: (row: LessonRow) => (
+      width: '12%',
+      render: (row: LessonRowData) => (
         <span className="text-sm">{formatDuration(row.duration_sec)}</span>
       )
     },
@@ -236,23 +242,23 @@ export default function CourseContentTab({ courseId }: CourseContentTabProps) {
       key: 'notes_count',
       label: 'Notas',
       width: '10%',
-      render: (row: LessonRow) => (
+      render: (row: LessonRowData) => (
         <span className="text-sm">{row.notes_count}</span>
       )
     },
     {
       key: 'markers_count',
       label: 'Marcadores',
-      width: '15%',
-      render: (row: LessonRow) => (
+      width: '12%',
+      render: (row: LessonRowData) => (
         <span className="text-sm">{row.markers_count}</span>
       )
     },
     {
       key: 'is_completed',
       label: 'Completada',
-      width: '20%',
-      render: (row: LessonRow) => (
+      width: '16%',
+      render: (row: LessonRowData) => (
         row.is_completed ? (
           <Badge variant="secondary" className="bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400">
             <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -264,6 +270,26 @@ export default function CourseContentTab({ courseId }: CourseContentTabProps) {
             Pendiente
           </Badge>
         )
+      )
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      width: '20%',
+      sortable: false,
+      render: (row: LessonRowData) => (
+        <Button
+          variant="default"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleGoToLesson(row.id);
+          }}
+          data-testid={`button-go-to-lesson-${row.id}`}
+        >
+          <ArrowRight className="h-4 w-4 mr-2" />
+          Ir a Lección
+        </Button>
       )
     }
   ];
@@ -282,13 +308,17 @@ export default function CourseContentTab({ courseId }: CourseContentTabProps) {
         data={tableData}
         columns={columns}
         groupBy="groupKey"
-        renderGroupHeader={(groupKey: string, groupRows: LessonRow[]) => (
+        renderGroupHeader={(groupKey: string, groupRows: LessonRowData[]) => (
           <div className="col-span-full text-sm font-semibold py-2">
             {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'lección' : 'lecciones'})
           </div>
         )}
-        onCardClick={(row: LessonRow) => setCurrentLesson(row.id)}
-        getRowClassName={() => 'cursor-pointer hover:bg-muted/30 transition-colors'}
+        renderCard={(row: LessonRowData) => (
+          <LessonRow
+            lesson={row}
+            onGoToLesson={handleGoToLesson}
+          />
+        )}
         emptyStateConfig={{
           title: 'No hay lecciones',
           description: 'Este curso no tiene lecciones disponibles'

@@ -78,6 +78,22 @@ Preferred communication style: Simple, everyday language.
 - **Mobile UX Pattern**: All admin mobile rows follow DataRowCard pattern with avatar (left), content (center), trailing info (right), and expandable details section with action buttons
 - **Result**: Admin modules now have full-featured mobile experience with search, filters, and clean mobile-optimized layouts
 
+#### Course Content Table Redesign (Nov 01, 2025)
+- **Feature**: Completely redesigned CourseContentTab to show all lessons in a comprehensive table format
+- **Table Implementation**:
+  - Uses Table component with `groupBy` and `renderGroupHeader` to create gray header rows for each module
+  - Columns: Nombre (30%), Duración (12%), Notas (10%), Marcadores (12%), Completada (16%), Acciones (20%)
+  - Actions column includes "Ir a Lección" button (default variant) that navigates to the lesson
+  - Grouped by module with visual separators showing module name and lesson count
+- **Component created**:
+  - `LessonRow` - Mobile row component following DataRowCard pattern with completion icon avatar, lesson title, module info, stats (duration, notes, markers), status badge, and full-width "Ir a Lección" button
+- **Data sources**:
+  - Modules from `course_modules`
+  - Lessons from `course_lessons`
+  - Progress from `/api/courses/{id}/progress`
+  - Notes and markers count from `course_lesson_notes` filtered by `note_type`
+- **Result**: Users can now see all course content in a single organized table view with full mobile support, making it easy to navigate between lessons and see progress at a glance
+
 ## External Dependencies
 
 - **Supabase**: Authentication, Database (PostgreSQL), Storage.
