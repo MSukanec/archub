@@ -913,21 +913,24 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         // Instead of fetching ALL lessons then filtering, we fetch recent notes directly
         // and only get lesson info for those specific notes
         
-        // Step 1: Get recent summary notes for this user (limit to 10 to find 3 valid ones)
-        const { data: recentNotes, error: notesError } = await authenticatedSupabase
+        // Step 1: Get recent notes for this user (limit to 20 to find 3 valid summary notes)
+        // WORKAROUND: Fetch ALL notes without note_type filter to avoid stack depth errors
+        const { data: allUserNotes, error: notesError } = await authenticatedSupabase
           .from('course_lesson_notes')
-          .select('id, body, lesson_id, created_at')
+          .select('id, body, lesson_id, created_at, note_type')
           .eq('user_id', dbUser.id)
-          .eq('note_type', 'summary')
           .order('created_at', { ascending: false })
-          .limit(10);
+          .limit(20);
         
-        if (notesError || !recentNotes) {
+        if (notesError || !allUserNotes) {
           console.error('Error fetching notes for recent summaries:', notesError);
           const emptyResult: any[] = [];
           setCache(cacheKey, emptyResult);
           return res.json(emptyResult);
         }
+        
+        // Filter for summary notes in JavaScript
+        const recentNotes = allUserNotes.filter(n => n.note_type === 'summary').slice(0, 10);
         
         if (recentNotes.length === 0) {
           const emptyResult: any[] = [];
@@ -936,7 +939,7 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         }
         
         // Step 2: Get lesson IDs from the notes
-        const lessonIds = [...new Set(recentNotes.map(n => n.lesson_id))];
+        const lessonIds = Array.from(new Set(recentNotes.map(n => n.lesson_id)));
         
         // Batch lesson IDs to avoid large IN queries (max 50 at a time)
         const BATCH_SIZE = 50;
@@ -954,7 +957,7 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
           
           if (lessons) {
             // Get module IDs from these lessons
-            const moduleIds = [...new Set(lessons.map(l => l.module_id))];
+            const moduleIds = Array.from(new Set(lessons.map(l => l.module_id)));
             
             // Check if these modules belong to the course
             const { data: validModules } = await authenticatedSupabase
@@ -1046,36 +1049,29 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         // Instead of fetching ALL lessons then filtering, we fetch recent markers directly
         // and only get lesson info for those specific markers
         
-        // Step 1: Get recent markers for this user (limit to 10 to find 3 valid ones)
-        // Markers are notes with either note_type='marker' or time_sec not null
-        const { data: recentMarkers, error: markersError } = await authenticatedSupabase
+        // Step 1: Get recent notes for this user (limit to 20 to find marker notes)
+        // WORKAROUND: Fetch ALL notes without note_type filter to avoid stack depth errors
+        // Markers are notes with either note_type='marker' or time_sec not null (but not summary)
+        const { data: allUserNotes, error: markersError } = await authenticatedSupabase
           .from('course_lesson_notes')
-          .select('id, body, lesson_id, created_at, time_sec')
+          .select('id, body, lesson_id, created_at, time_sec, note_type')
           .eq('user_id', dbUser.id)
-          .eq('note_type', 'marker')
           .order('created_at', { ascending: false })
-          .limit(10);
+          .limit(20);
         
-        if (markersError || !recentMarkers) {
+        if (markersError || !allUserNotes) {
           console.error('Error fetching notes for markers:', markersError);
           const emptyResult: any[] = [];
           setCache(cacheKey, emptyResult);
           return res.json(emptyResult);
         }
         
-        // Also get notes with time_sec (old-style markers)
-        const { data: timedNotes } = await authenticatedSupabase
-          .from('course_lesson_notes')
-          .select('id, body, lesson_id, created_at, time_sec')
-          .eq('user_id', dbUser.id)
-          .not('time_sec', 'is', null)
-          .neq('note_type', 'summary')
-          .order('created_at', { ascending: false })
-          .limit(10);
-        
-        // Combine both types of markers
-        const allMarkers = [...(recentMarkers || []), ...(timedNotes || [])]
-          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        // Filter for markers in JavaScript (note_type='marker' OR (time_sec not null AND note_type!='summary'))
+        const allMarkers = allUserNotes
+          .filter(note => 
+            note.note_type === 'marker' || 
+            (note.time_sec !== null && note.note_type !== 'summary')
+          )
           .slice(0, 10); // Take top 10 most recent
         
         if (allMarkers.length === 0) {
@@ -1085,7 +1081,7 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         }
         
         // Step 2: Get lesson IDs from the markers
-        const lessonIds = [...new Set(allMarkers.map(m => m.lesson_id))];
+        const lessonIds = Array.from(new Set(allMarkers.map(m => m.lesson_id)));
         
         // Batch lesson IDs to avoid large IN queries (max 50 at a time)
         const BATCH_SIZE = 50;
@@ -1103,7 +1099,7 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
           
           if (lessons) {
             // Get module IDs from these lessons
-            const moduleIds = [...new Set(lessons.map(l => l.module_id))];
+            const moduleIds = Array.from(new Set(lessons.map(l => l.module_id)));
             
             // Check if these modules belong to the course
             const { data: validModules } = await authenticatedSupabase

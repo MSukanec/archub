@@ -55,18 +55,14 @@ export default function VimeoPlayer({ vimeoId, initialPosition = 0, onProgress, 
     
     // Load video if it's a new ID
     if (lastLoadedVideoRef.current !== vimeoId) {
-      console.log('🎬 Cambiando a video Vimeo ID:', vimeoId);
-      
       playerRef.current.loadVideo(vimeoId)
         .then(async () => {
-          console.log('✅ Video cargado exitosamente:', vimeoId);
           lastLoadedVideoRef.current = vimeoId;
           
           // Restore position on new video load
           if (initialPosition > 0) {
             await playerRef.current?.setCurrentTime(initialPosition);
             lastAppliedPositionRef.current = initialPosition;
-            console.log('⏱️ Posición restaurada a:', initialPosition, 'segundos');
             // Notify that seek has been applied
             onSeekApplied?.();
           }
@@ -81,7 +77,6 @@ export default function VimeoPlayer({ vimeoId, initialPosition = 0, onProgress, 
       playerRef.current.setCurrentTime(initialPosition)
         .then(() => {
           lastAppliedPositionRef.current = initialPosition;
-          console.log('⏱️ Posición actualizada a:', initialPosition, 'segundos');
           // Notify that seek has been applied
           onSeekApplied?.();
         })
