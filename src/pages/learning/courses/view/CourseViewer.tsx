@@ -45,7 +45,6 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
   // Sync coursePlayerStore.currentLessonId with sidebar store (UNIDIRECTIONAL: store → sidebar)
   useEffect(() => {
     if (storeLessonId && storeLessonId !== sidebarLessonId) {
-      console.log('🔄 Sincronizando lección desde coursePlayerStore a sidebar:', storeLessonId);
       setCurrentLesson(storeLessonId);
     }
   }, [storeLessonId, setCurrentLesson, sidebarLessonId])
@@ -89,8 +88,6 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
         console.error('Error fetching lessons:', error);
         throw error;
       }
-      
-      console.log('✅ Lecciones cargadas:', data?.length, 'primera:', data?.[0]);
       
       return data || [];
     },
@@ -307,14 +304,12 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
         if (sortedProgress.length > 0) {
           const lastViewedLessonId = sortedProgress[0].lesson_id;
           targetLesson = orderedLessons.find(l => l.id === lastViewedLessonId);
-          console.log('🔄 Continuando desde última lección vista:', targetLesson?.title);
         }
       }
       
       // 3. Si no hay última lección vista, usar la primera del primer módulo
       if (!targetLesson) {
         targetLesson = orderedLessons[0];
-        console.log('🎯 Iniciando desde primera lección del primer módulo:', targetLesson?.title);
       }
       
       if (targetLesson) {
@@ -324,19 +319,6 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderedLessons, activeLessonId, initialLessonId, progressData, goToLesson]);
 
-  // Log de confirmación cuando cambia la lección activa
-  useEffect(() => {
-    if (!activeLessonId) return;
-    console.log('🔍 Buscando lección:', activeLessonId, 'en array de', lessons.length, 'lecciones');
-    console.log('🔍 Primeras 3 lecciones IDs:', lessons.slice(0, 3).map(l => l.id));
-    const currentLesson = lessons.find(l => l.id === activeLessonId);
-    if (currentLesson) {
-      console.log('📚 Lección encontrada ->', currentLesson.title, 
-                  'Vimeo ID ->', currentLesson.vimeo_video_id || 'sin video');
-    } else {
-      console.error('❌ No se encontró la lección con ID:', activeLessonId);
-    }
-  }, [activeLessonId, lessons]);
 
   // Navigation handlers with useCallback - use goToLesson from store
   const handlePrevious = useCallback(() => {
@@ -454,7 +436,6 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
             onProgress={handleVideoProgress}
             onPlayerReady={setVimeoPlayer}
             onSeekApplied={() => {
-              console.log('✅ Seek confirmado por VimeoPlayer, limpiando pendingSeek');
               clearPendingSeek();
             }}
           />

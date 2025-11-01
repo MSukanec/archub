@@ -132,8 +132,6 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
   };
 
   const handleGoToLesson = (lessonId: string, timeSec: number | null) => {
-    console.log('🔗 handleGoToLesson EJECUTADO:', { lessonId, timeSec, courseSlug });
-    
     // Set the current lesson in the sidebar
     setCurrentLesson(lessonId);
     
@@ -150,8 +148,6 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
     
     // Use the store to navigate (this will switch to "Lecciones" tab and set pending seek)
     goToLesson(lessonId, timeSec);
-    
-    console.log('🔗 Navegación completada vía store y URL');
   };
 
   // Render module group header

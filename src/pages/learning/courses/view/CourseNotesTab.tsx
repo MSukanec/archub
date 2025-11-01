@@ -124,8 +124,6 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
   };
 
   const handleGoToLesson = (lessonId: string) => {
-    console.log('🔗 handleGoToLesson EJECUTADO:', { lessonId, courseSlug });
-    
     // Set the current lesson in the sidebar
     setCurrentLesson(lessonId);
     
@@ -139,8 +137,6 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
     
     // Use the store to navigate (this will switch to "Lecciones" tab)
     goToLesson(lessonId, null);
-    
-    console.log('🔗 Navegación completada vía store y URL');
   };
 
   // Render module group header
