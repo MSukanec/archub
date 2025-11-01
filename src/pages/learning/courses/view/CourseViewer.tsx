@@ -198,9 +198,9 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
     }
   }, [activeLessonId, saveProgressMutation]);
 
-  // Mark lesson as complete mutation
+  // Mark lesson as complete mutation (toggle)
   const markCompleteMutation = useMutation({
-    mutationFn: async (lessonId: string) => {
+    mutationFn: async ({ lessonId, isCompleted }: { lessonId: string; isCompleted: boolean }) => {
       // Get the Supabase session token
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -214,10 +214,10 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
           'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({
-          completed_at: new Date().toISOString(),
-          progress_pct: 100,
+          completed_at: isCompleted ? new Date().toISOString() : null,
+          progress_pct: isCompleted ? 100 : 0,
           last_position_sec: 0,
-          is_completed: true
+          is_completed: isCompleted
         }),
         credentials: 'include'
       });
@@ -225,12 +225,12 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
       if (!response.ok) {
         const errorText = await response.text();
         const errorData = errorText ? JSON.parse(errorText) : {};
-        throw new Error(errorData.error || `Failed to mark lesson as complete (${response.status})`);
+        throw new Error(errorData.error || `Failed to update lesson completion status (${response.status})`);
       }
       
       return response.json();
     },
-    onSuccess: async () => {
+    onSuccess: async (_, variables) => {
       // Force refetch of progress data for course and dashboard
       await Promise.all([
         queryClient.refetchQueries({ 
@@ -244,14 +244,14 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
       ]);
       
       toast({
-        title: 'Lección completada',
-        description: 'Has marcado esta lección como completa'
+        title: variables.isCompleted ? 'Lección completada' : 'Lección desmarcada',
+        description: variables.isCompleted ? 'Has marcado esta lección como completa' : 'Has desmarcado esta lección'
       });
     },
     onError: (error) => {
       toast({
         title: 'Error',
-        description: 'No se pudo marcar la lección como completa',
+        description: 'No se pudo actualizar el estado de la lección',
         variant: 'destructive'
       });
     }
@@ -329,9 +329,11 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
 
   const handleMarkComplete = useCallback(() => {
     if (activeLessonId) {
-      markCompleteMutation.mutate(activeLessonId);
+      const progress = progressMap.get(activeLessonId);
+      const isCurrentlyCompleted = progress?.is_completed || false;
+      markCompleteMutation.mutate({ lessonId: activeLessonId, isCompleted: !isCurrentlyCompleted });
     }
-  }, [activeLessonId, markCompleteMutation]);
+  }, [activeLessonId, markCompleteMutation, progressMap]);
 
   // Actualizar targetSeekTime cuando cambia initialSeekTime (para navegación desde marcadores)
   useEffect(() => {
@@ -446,7 +448,7 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
               )}
               
               {/* Línea divisoria */}
-              <hr className="border-t border-border mb-4" />
+              <hr className="border-t border-border mb-2" />
               
               {/* Botones de Acción - Solo iconos */}
               <div className="flex items-center gap-1">
@@ -466,9 +468,9 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
                   variant="ghost"
                   size="icon"
                   onClick={handleMarkComplete}
-                  disabled={markCompleteMutation.isPending || currentProgress?.is_completed}
+                  disabled={markCompleteMutation.isPending}
                   data-testid="button-mark-complete-inline"
-                  title={currentProgress?.is_completed ? 'Completada' : 'Marcar como Completa'}
+                  title={currentProgress?.is_completed ? 'Desmarcar como Completa' : 'Marcar como Completa'}
                   className={currentProgress?.is_completed ? "text-green-600 hover:text-green-700" : ""}
                 >
                   <CheckCircle className="w-5 h-5" />
@@ -506,10 +508,6 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
       {activeLessonId && currentLesson?.vimeo_video_id && (
         <div className="lg:sticky lg:top-4 lg:self-start">
           <div className="bg-card border rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Bookmark className="h-5 w-5 text-[var(--accent)]" />
-              <h3 className="font-semibold">Marcadores</h3>
-            </div>
             <LessonMarkers lessonId={activeLessonId} vimeoPlayer={vimeoPlayer} />
           </div>
         </div>

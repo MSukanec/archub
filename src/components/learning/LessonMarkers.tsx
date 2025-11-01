@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bookmark, Plus, Trash2, Pin, Clock, Loader2 } from 'lucide-react';
+import { Bookmark, Plus, Trash2, Clock, Loader2, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -174,10 +174,6 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
     }
   };
 
-  const handleTogglePin = (markerId: string, currentPinned: boolean) => {
-    updateMarkerMutation.mutate({ markerId, is_pinned: !currentPinned });
-  };
-
   const handleDeleteMarker = (markerId: string) => {
     deleteMarkerMutation.mutate(markerId);
   };
@@ -193,7 +189,11 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
 
   return (
     <div className="space-y-4" data-testid="lesson-markers-container">
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Bookmark className="h-5 w-5 text-[var(--accent)]" />
+          <h3 className="font-semibold">Marcadores</h3>
+        </div>
         <Button
           onClick={handleAddMarker}
           size="sm"
@@ -218,58 +218,50 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
           {markers.map((marker) => (
             <div
               key={marker.id}
-              className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+              className="p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors space-y-2"
               data-testid={`marker-${marker.id}`}
             >
-              <div className="flex items-center gap-2 min-w-[60px]">
-                {marker.is_pinned && <Pin className="h-4 w-4 text-primary" />}
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-mono font-medium">
-                  {formatTime(marker.time_sec)}
-                </span>
+              {/* Primera fila: Tiempo y botones */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-mono font-medium">
+                    {formatTime(marker.time_sec)}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => handleSeekTo(marker.time_sec)}
+                    data-testid={`button-seek-${marker.id}`}
+                    title="Ir a este momento"
+                  >
+                    <ArrowRight className="h-5 w-5" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => handleDeleteMarker(marker.id)}
+                    className="text-destructive hover:text-destructive"
+                    disabled={deleteMarkerMutation.isPending}
+                    data-testid={`button-delete-${marker.id}`}
+                    title="Eliminar marcador"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </Button>
+                </div>
               </div>
 
-              <div className="flex-1">
-                <Input
-                  value={marker.body}
-                  onChange={(e) => handleBodyChange(marker.id, e.target.value)}
-                  placeholder="Descripción del marcador..."
-                  className="h-9"
-                  data-testid={`marker-input-${marker.id}`}
-                />
-              </div>
-
-              <div className="flex items-center gap-1">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handleSeekTo(marker.time_sec)}
-                  className="h-8 px-2"
-                  data-testid={`button-seek-${marker.id}`}
-                >
-                  Ir
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handleTogglePin(marker.id, marker.is_pinned)}
-                  className="h-8 px-2"
-                  disabled={updateMarkerMutation.isPending}
-                  data-testid={`button-pin-${marker.id}`}
-                >
-                  <Pin className={`h-4 w-4 ${marker.is_pinned ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handleDeleteMarker(marker.id)}
-                  className="h-8 px-2 text-destructive hover:text-destructive"
-                  disabled={deleteMarkerMutation.isPending}
-                  data-testid={`button-delete-${marker.id}`}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+              {/* Segunda fila: Input de texto */}
+              <Input
+                value={marker.body}
+                onChange={(e) => handleBodyChange(marker.id, e.target.value)}
+                placeholder="Descripción del marcador..."
+                className="h-9"
+                data-testid={`marker-input-${marker.id}`}
+              />
             </div>
           ))}
         </div>
