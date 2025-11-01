@@ -211,10 +211,9 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Banner Principal - Primeros Pasos */}
-        {showBanner && (
+        {/* Banner Principal - Primeros Pasos - COMENTADO */}
+        {/* {showBanner && (
           <Card className="relative overflow-hidden">
-            {/* Patrón de fondo decorativo */}
             <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" 
                  style={{
                    backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--accent)) 1px, transparent 0)',
@@ -249,7 +248,6 @@ export default function Home() {
               </div>
             </CardHeader>
             <CardContent className="space-y-3 relative">
-              {/* Crear primer proyecto */}
               <Card data-testid="checklist-create-project">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-4">
@@ -286,7 +284,6 @@ export default function Home() {
                 </CardContent>
               </Card>
 
-              {/* Crear primer contacto */}
               <Card data-testid="checklist-create-contact">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-4">
@@ -323,7 +320,6 @@ export default function Home() {
                 </CardContent>
               </Card>
 
-              {/* Crear primer movimiento */}
               <Card data-testid="checklist-create-movement">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-4">
@@ -361,48 +357,11 @@ export default function Home() {
               </Card>
             </CardContent>
           </Card>
-        )}
+        )} */}
 
-        {/* Grid de 4 Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* 1. Continuar donde lo dejaste */}
-          <StatCard className="hover:shadow-lg transition-shadow">
-            <StatCardTitle className="mb-4">Continuar donde lo dejaste</StatCardTitle>
-            <div>
-              {selectedProjectId ? (
-                <div className="space-y-3">
-                  <p className="text-sm text-muted-foreground">
-                    Seguí en <span className="font-medium text-foreground">Proyecto Ejemplo</span> · Dashboard
-                  </p>
-                  <Button className="w-full" onClick={() => {
-                    setSidebarLevel('project');
-                    navigate('/project/dashboard');
-                  }}>
-                    <Play className="w-4 h-4 mr-2" />
-                    Continuar
-                  </Button>
-                </div>
-              ) : (
-                <div className="text-center py-6">
-                  <p className="text-sm text-muted-foreground mb-3">
-                    No hay proyectos recientes
-                  </p>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setSidebarLevel('organization');
-                      navigate('/organization/projects');
-                    }}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Crear proyecto
-                  </Button>
-                </div>
-              )}
-            </div>
-          </StatCard>
-
-          {/* 2. Proyectos activos */}
+        {/* Grid de 3 Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* 1. Proyectos activos */}
           <StatCard className="hover:shadow-lg transition-shadow">
             <div className="flex flex-row items-center justify-between mb-4">
               <StatCardTitle>Proyectos activos</StatCardTitle>
@@ -488,7 +447,7 @@ export default function Home() {
             </div>
           </StatCard>
 
-          {/* 3. Academia */}
+          {/* 2. Academia */}
           <StatCard className="hover:shadow-lg transition-shadow">
             <div className="flex flex-row items-center justify-between mb-4">
               <StatCardTitle>Academia</StatCardTitle>
@@ -534,7 +493,7 @@ export default function Home() {
             </div>
           </StatCard>
 
-          {/* 4. Comunidad / Feedback */}
+          {/* 3. Comunidad / Feedback */}
           <StatCard className="hover:shadow-lg transition-shadow">
             <div className="flex flex-row items-center justify-between mb-4">
               <StatCardTitle>Comunidad</StatCardTitle>
