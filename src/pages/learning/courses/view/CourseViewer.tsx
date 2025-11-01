@@ -425,7 +425,7 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Columnas 1 y 2: Contenido principal (Video, Info, Apuntes) */}
+      {/* Columnas 1 y 2: Contenido principal (Video, Info, Marcadores en mobile, Apuntes) */}
       <div className="lg:col-span-2 space-y-6">
         {currentLesson?.vimeo_video_id ? (
           <>
@@ -484,6 +484,13 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
               </div>
             </div>
 
+            {/* Card de Marcadores - SOLO EN MOBILE (lg:hidden) */}
+            {activeLessonId && (
+              <div className="lg:hidden bg-card border rounded-lg p-4">
+                <LessonMarkers lessonId={activeLessonId} vimeoPlayer={vimeoPlayer} />
+              </div>
+            )}
+
             {/* Card de Apuntes */}
             {activeLessonId && (
               <div className="bg-card border rounded-lg p-6">
@@ -510,9 +517,9 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
         )}
       </div>
 
-      {/* Columna 3: Marcadores sidebar (sticky) */}
+      {/* Columna 3: Marcadores sidebar (sticky) - SOLO EN DESKTOP (hidden lg:block) */}
       {activeLessonId && currentLesson?.vimeo_video_id && (
-        <div className="lg:sticky lg:top-4 lg:self-start">
+        <div className="hidden lg:block lg:sticky lg:top-4 lg:self-start">
           <div className="bg-card border rounded-lg p-4">
             <LessonMarkers lessonId={activeLessonId} vimeoPlayer={vimeoPlayer} />
           </div>
