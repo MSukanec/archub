@@ -2,6 +2,38 @@ import type { Express } from "express";
 import type { RouteDeps } from './_base';
 import { extractToken, createAuthenticatedClient } from './_base';
 
+// Simple in-memory cache for recent notes and markers
+interface CacheEntry {
+  data: any;
+  timestamp: number;
+}
+
+const cache = new Map<string, CacheEntry>();
+const CACHE_TTL = 30 * 1000; // 30 seconds
+
+function getCacheKey(endpoint: string, userId: string, courseId: string): string {
+  return `${endpoint}:${userId}:${courseId}`;
+}
+
+function getFromCache(key: string): any | null {
+  const entry = cache.get(key);
+  if (!entry) return null;
+  
+  if (Date.now() - entry.timestamp > CACHE_TTL) {
+    cache.delete(key);
+    return null;
+  }
+  
+  return entry.data;
+}
+
+function setCache(key: string, data: any): void {
+  cache.set(key, {
+    data,
+    timestamp: Date.now()
+  });
+}
+
 /**
  * Register course-related endpoints (lessons progress, notes, enrollments, dashboard)
  * All endpoints require authentication as they handle user-specific data.
@@ -842,7 +874,7 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
 
   // ========== COURSE NOTES & MARKERS ENDPOINTS (OPTIMIZED) ==========
 
-  // GET /api/courses/:courseId/recent-notes - Get latest 3 notes for a course (OPTIMIZED FOR DASHBOARD)
+  // GET /api/courses/:courseId/recent-notes - Get latest 3 notes for a course (FULLY OPTIMIZED WITH CACHE)
   app.get("/api/courses/:courseId/recent-notes", async (req, res) => {
     try {
       const { courseId } = req.params;
@@ -869,67 +901,113 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         return res.json([]);
       }
       
-      // Query 1: Get all modules for this course
-      const { data: courseModules, error: modulesError } = await authenticatedSupabase
-        .from('course_modules')
-        .select('id')
-        .eq('course_id', courseId);
-      
-      if (modulesError || !courseModules || courseModules.length === 0) {
-        return res.json([]);
+      // Check cache first
+      const cacheKey = getCacheKey('recent-notes', dbUser.id, courseId);
+      const cachedData = getFromCache(cacheKey);
+      if (cachedData !== null) {
+        return res.json(cachedData);
       }
       
-      const moduleIds = courseModules.map(m => m.id);
-      
-      // Query 2: Get all lessons for these modules
-      const { data: courseLessons, error: lessonsError } = await authenticatedSupabase
-        .from('course_lessons')
-        .select('id, title')
-        .in('module_id', moduleIds);
-      
-      if (lessonsError || !courseLessons || courseLessons.length === 0) {
-        return res.json([]);
+      try {
+        // SIMPLIFIED APPROACH: Direct query with limits
+        // Instead of fetching ALL lessons then filtering, we fetch recent notes directly
+        // and only get lesson info for those specific notes
+        
+        // Step 1: Get recent summary notes for this user (limit to 10 to find 3 valid ones)
+        const { data: recentNotes, error: notesError } = await authenticatedSupabase
+          .from('course_lesson_notes')
+          .select('id, body, lesson_id, created_at')
+          .eq('user_id', dbUser.id)
+          .eq('note_type', 'summary')
+          .order('created_at', { ascending: false })
+          .limit(10);
+        
+        if (notesError || !recentNotes) {
+          console.error('Error fetching notes for recent summaries:', notesError);
+          const emptyResult: any[] = [];
+          setCache(cacheKey, emptyResult);
+          return res.json(emptyResult);
+        }
+        
+        if (recentNotes.length === 0) {
+          const emptyResult: any[] = [];
+          setCache(cacheKey, emptyResult);
+          return res.json(emptyResult);
+        }
+        
+        // Step 2: Get lesson IDs from the notes
+        const lessonIds = [...new Set(recentNotes.map(n => n.lesson_id))];
+        
+        // Batch lesson IDs to avoid large IN queries (max 50 at a time)
+        const BATCH_SIZE = 50;
+        const validLessonIds: string[] = [];
+        const lessonInfoMap = new Map<string, any>();
+        
+        for (let i = 0; i < lessonIds.length; i += BATCH_SIZE) {
+          const batch = lessonIds.slice(i, i + BATCH_SIZE);
+          
+          // Get lesson info
+          const { data: lessons } = await authenticatedSupabase
+            .from('course_lessons')
+            .select('id, title, module_id')
+            .in('id', batch);
+          
+          if (lessons) {
+            // Get module IDs from these lessons
+            const moduleIds = [...new Set(lessons.map(l => l.module_id))];
+            
+            // Check if these modules belong to the course
+            const { data: validModules } = await authenticatedSupabase
+              .from('course_modules')
+              .select('id')
+              .eq('course_id', courseId)
+              .in('id', moduleIds);
+            
+            if (validModules) {
+              const validModuleIds = new Set(validModules.map(m => m.id));
+              
+              // Filter lessons that belong to valid modules
+              for (const lesson of lessons) {
+                if (validModuleIds.has(lesson.module_id)) {
+                  validLessonIds.push(lesson.id);
+                  lessonInfoMap.set(lesson.id, { id: lesson.id, title: lesson.title });
+                }
+              }
+            }
+          }
+        }
+        
+        // Step 3: Filter notes to only those from this course and take first 3
+        const courseNotes = recentNotes
+          .filter(note => validLessonIds.includes(note.lesson_id))
+          .slice(0, 3)
+          .map(note => ({
+            id: note.id,
+            body: note.body,
+            lesson_id: note.lesson_id,
+            created_at: note.created_at,
+            course_lessons: lessonInfoMap.get(note.lesson_id) || null
+          }));
+        
+        // Cache the result
+        setCache(cacheKey, courseNotes);
+        
+        res.json(courseNotes);
+      } catch (innerError) {
+        console.error('Unexpected error in recent-notes:', innerError);
+        // Always return empty array on error to prevent crashes
+        const emptyResult: any[] = [];
+        setCache(cacheKey, emptyResult);
+        return res.json(emptyResult);
       }
-      
-      const lessonIds = courseLessons.map(l => l.id);
-      
-      // Query 3: WORKAROUND for stack depth issue - fetch all notes and filter in memory
-      // This avoids the problematic note_type='summary' database filter
-      const { data: allNotes, error: notesError } = await authenticatedSupabase
-        .from('course_lesson_notes')
-        .select('id, body, lesson_id, created_at, note_type')
-        .eq('user_id', dbUser.id)
-        .in('lesson_id', lessonIds)
-        .order('created_at', { ascending: false });
-      
-      if (notesError) {
-        // Return empty array instead of error to prevent app crash
-        return res.json([]);
-      }
-      
-      // Filter summary notes in memory and take only first 3
-      const summaryNotes = (allNotes || [])
-        .filter(note => note.note_type === 'summary')
-        .slice(0, 3);
-      
-      // Combine data with lesson titles
-      const lessonMap = new Map(courseLessons.map(l => [l.id, l]));
-      const enrichedNotes = summaryNotes.map(note => ({
-        id: note.id,
-        body: note.body,
-        lesson_id: note.lesson_id,
-        created_at: note.created_at,
-        course_lessons: lessonMap.get(note.lesson_id) || null
-      }));
-      
-      res.json(enrichedNotes);
     } catch (error) {
+      console.error('Error in recent-notes endpoint:', error);
       // Return empty array instead of error to prevent app crash
       res.json([]);
     }
   });
 
-  // GET /api/courses/:courseId/recent-markers - Get latest 3 markers for a course (OPTIMIZED FOR DASHBOARD)
+  // GET /api/courses/:courseId/recent-markers - Get latest 3 markers for a course (FULLY OPTIMIZED WITH CACHE)
   app.get("/api/courses/:courseId/recent-markers", async (req, res) => {
     try {
       const { courseId } = req.params;
@@ -956,61 +1034,123 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         return res.json([]);
       }
       
-      // Query 1: Get all modules for this course
-      const { data: courseModules, error: modulesError } = await authenticatedSupabase
-        .from('course_modules')
-        .select('id')
-        .eq('course_id', courseId);
-      
-      if (modulesError || !courseModules || courseModules.length === 0) {
-        return res.json([]);
+      // Check cache first
+      const cacheKey = getCacheKey('recent-markers', dbUser.id, courseId);
+      const cachedData = getFromCache(cacheKey);
+      if (cachedData !== null) {
+        return res.json(cachedData);
       }
       
-      const moduleIds = courseModules.map(m => m.id);
-      
-      // Query 2: Get all lessons for these modules
-      const { data: courseLessons, error: lessonsError } = await authenticatedSupabase
-        .from('course_lessons')
-        .select('id, title')
-        .in('module_id', moduleIds);
-      
-      if (lessonsError || !courseLessons || courseLessons.length === 0) {
-        return res.json([]);
+      try {
+        // SIMPLIFIED APPROACH: Direct query with limits
+        // Instead of fetching ALL lessons then filtering, we fetch recent markers directly
+        // and only get lesson info for those specific markers
+        
+        // Step 1: Get recent markers for this user (limit to 10 to find 3 valid ones)
+        // Markers are notes with either note_type='marker' or time_sec not null
+        const { data: recentMarkers, error: markersError } = await authenticatedSupabase
+          .from('course_lesson_notes')
+          .select('id, body, lesson_id, created_at, time_sec')
+          .eq('user_id', dbUser.id)
+          .eq('note_type', 'marker')
+          .order('created_at', { ascending: false })
+          .limit(10);
+        
+        if (markersError || !recentMarkers) {
+          console.error('Error fetching notes for markers:', markersError);
+          const emptyResult: any[] = [];
+          setCache(cacheKey, emptyResult);
+          return res.json(emptyResult);
+        }
+        
+        // Also get notes with time_sec (old-style markers)
+        const { data: timedNotes } = await authenticatedSupabase
+          .from('course_lesson_notes')
+          .select('id, body, lesson_id, created_at, time_sec')
+          .eq('user_id', dbUser.id)
+          .not('time_sec', 'is', null)
+          .neq('note_type', 'summary')
+          .order('created_at', { ascending: false })
+          .limit(10);
+        
+        // Combine both types of markers
+        const allMarkers = [...(recentMarkers || []), ...(timedNotes || [])]
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .slice(0, 10); // Take top 10 most recent
+        
+        if (allMarkers.length === 0) {
+          const emptyResult: any[] = [];
+          setCache(cacheKey, emptyResult);
+          return res.json(emptyResult);
+        }
+        
+        // Step 2: Get lesson IDs from the markers
+        const lessonIds = [...new Set(allMarkers.map(m => m.lesson_id))];
+        
+        // Batch lesson IDs to avoid large IN queries (max 50 at a time)
+        const BATCH_SIZE = 50;
+        const validLessonIds: string[] = [];
+        const lessonInfoMap = new Map<string, any>();
+        
+        for (let i = 0; i < lessonIds.length; i += BATCH_SIZE) {
+          const batch = lessonIds.slice(i, i + BATCH_SIZE);
+          
+          // Get lesson info
+          const { data: lessons } = await authenticatedSupabase
+            .from('course_lessons')
+            .select('id, title, module_id')
+            .in('id', batch);
+          
+          if (lessons) {
+            // Get module IDs from these lessons
+            const moduleIds = [...new Set(lessons.map(l => l.module_id))];
+            
+            // Check if these modules belong to the course
+            const { data: validModules } = await authenticatedSupabase
+              .from('course_modules')
+              .select('id')
+              .eq('course_id', courseId)
+              .in('id', moduleIds);
+            
+            if (validModules) {
+              const validModuleIds = new Set(validModules.map(m => m.id));
+              
+              // Filter lessons that belong to valid modules
+              for (const lesson of lessons) {
+                if (validModuleIds.has(lesson.module_id)) {
+                  validLessonIds.push(lesson.id);
+                  lessonInfoMap.set(lesson.id, { id: lesson.id, title: lesson.title });
+                }
+              }
+            }
+          }
+        }
+        
+        // Step 3: Filter markers to only those from this course and take first 3
+        const courseMarkers = allMarkers
+          .filter(marker => validLessonIds.includes(marker.lesson_id))
+          .slice(0, 3)
+          .map(marker => ({
+            id: marker.id,
+            body: marker.body,
+            lesson_id: marker.lesson_id,
+            created_at: marker.created_at,
+            lesson_info: lessonInfoMap.get(marker.lesson_id) || null
+          }));
+        
+        // Cache the result
+        setCache(cacheKey, courseMarkers);
+        
+        res.json(courseMarkers);
+      } catch (innerError) {
+        console.error('Unexpected error in recent-markers:', innerError);
+        // Always return empty array on error to prevent crashes
+        const emptyResult: any[] = [];
+        setCache(cacheKey, emptyResult);
+        return res.json(emptyResult);
       }
-      
-      const lessonIds = courseLessons.map(l => l.id);
-      
-      // Query 3: WORKAROUND for stack depth issue - fetch all notes and filter in memory
-      // This avoids the problematic note_type='marker' database filter
-      const { data: allNotes, error: notesError } = await authenticatedSupabase
-        .from('course_lesson_notes')
-        .select('id, body, lesson_id, created_at, note_type, time_sec')
-        .eq('user_id', dbUser.id)
-        .in('lesson_id', lessonIds)
-        .order('created_at', { ascending: false });
-      
-      if (notesError) {
-        // Return empty array instead of error to prevent app crash
-        return res.json([]);
-      }
-      
-      // Filter markers in memory (markers have time_sec and note_type='marker')
-      const markers = (allNotes || [])
-        .filter(note => note.note_type === 'marker' || (note.time_sec !== null && note.note_type !== 'summary'))
-        .slice(0, 3);  // Get only the first 3
-      
-      // Combine data with lesson titles
-      const lessonMap = new Map(courseLessons.map(l => [l.id, l]));
-      const enrichedMarkers = markers.map(marker => ({
-        id: marker.id,
-        body: marker.body,
-        lesson_id: marker.lesson_id,
-        created_at: marker.created_at,
-        lesson_info: lessonMap.get(marker.lesson_id) || null  // Using lesson_info instead of course_lessons
-      }));
-      
-      res.json(enrichedMarkers);
     } catch (error) {
+      console.error('Error in recent-markers endpoint:', error);
       // Return empty array instead of error to prevent app crash
       res.json([]);
     }
