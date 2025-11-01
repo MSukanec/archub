@@ -86,69 +86,58 @@ export default function AdminPaymentTransferRow({
       density={density}
       data-testid={`payment-transfer-row-${payment.id}`}
     >
-      {/* Layout vertical con todos los datos apilados */}
-      <div className="space-y-2.5 w-full">
-        {/* Fila 1: Nombre del usuario */}
-        <div>
-          <p className="text-xs text-muted-foreground mb-0.5">Usuario</p>
-          <p className="font-semibold text-sm">
-            {payment.users?.full_name || 'Sin nombre'}
-          </p>
+      <div className="flex flex-col w-full gap-2">
+        {/* Usuario: valor */}
+        <div className="text-sm">
+          <span className="text-muted-foreground">Usuario: </span>
+          <span className="font-medium">{payment.users?.full_name || 'Sin nombre'}</span>
         </div>
 
-        {/* Fila 2: Email */}
-        <div>
-          <p className="text-xs text-muted-foreground mb-0.5">Email</p>
-          <p className="text-sm truncate">
-            {payment.users?.email}
-          </p>
+        {/* Email: valor */}
+        <div className="text-sm truncate">
+          <span className="text-muted-foreground">Email: </span>
+          <span>{payment.users?.email}</span>
         </div>
 
-        {/* Fila 3: Curso */}
-        <div>
-          <p className="text-xs text-muted-foreground mb-0.5">Curso</p>
-          <p className="text-sm font-medium truncate">
-            {payment.course_prices?.courses?.title || 'N/A'}
-          </p>
+        {/* Curso: valor */}
+        <div className="text-sm truncate">
+          <span className="text-muted-foreground">Curso: </span>
+          <span className="font-medium">{payment.course_prices?.courses?.title || 'N/A'}</span>
         </div>
 
-        {/* Fila 4: Monto */}
-        <div>
-          <p className="text-xs text-muted-foreground mb-0.5">Monto</p>
-          <p className="font-semibold text-base">
+        {/* Monto: valor */}
+        <div className="text-sm">
+          <span className="text-muted-foreground">Monto: </span>
+          <span className="font-semibold">
             {new Intl.NumberFormat('es-AR', {
               style: 'currency',
               currency: payment.currency,
               minimumFractionDigits: 0,
             }).format(payment.amount)}
-          </p>
+          </span>
         </div>
 
-        {/* Fila 5: Fecha y Estado */}
-        <div className="flex items-center justify-between gap-2">
+        {/* Fecha: valor + badge */}
+        <div className="text-sm flex items-center gap-2 flex-wrap">
           <div>
-            <p className="text-xs text-muted-foreground mb-0.5">Fecha</p>
-            <p className="text-sm">
-              {format(new Date(payment.created_at), "dd/MM/yy HH:mm", { locale: es })}
-            </p>
+            <span className="text-muted-foreground">Fecha: </span>
+            <span>{format(new Date(payment.created_at), "dd/MM/yy HH:mm", { locale: es })}</span>
           </div>
-          <div>
-            {getStatusBadge()}
-          </div>
+          {getStatusBadge()}
         </div>
-
-        {/* Fila 6: Botón Ver - ancho completo si hay comprobante */}
-        {payment.receipt_url && (
-          <Button
-            className="w-full mt-2"
-            onClick={() => onViewReceipt(payment)}
-            data-testid={`button-view-receipt-${payment.id}`}
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            Ver Comprobante
-          </Button>
-        )}
       </div>
+
+      {/* Botón Ver - ancho completo fuera del contenedor */}
+      {payment.receipt_url && (
+        <Button
+          className="w-full mt-3"
+          onClick={() => onViewReceipt(payment)}
+          data-testid={`button-view-receipt-${payment.id}`}
+        >
+          <Eye className="h-4 w-4 mr-2" />
+          Ver Comprobante
+        </Button>
+      )}
     </DataRowCard>
   );
 }

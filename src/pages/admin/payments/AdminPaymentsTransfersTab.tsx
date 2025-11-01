@@ -44,7 +44,7 @@ interface BankTransferPayment {
 }
 
 const AdminPaymentsTransfersTab = () => {
-  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
   const { toast } = useToast();
   const { openModal } = useGlobalModalStore();
   const isMobile = useMobile();
@@ -315,10 +315,10 @@ const AdminPaymentsTransfersTab = () => {
   const pendingCount = payments.filter(p => p.status === 'pending').length;
 
   const filterTabs = [
-    { value: 'all', label: `Todos (${payments.length})` },
     { value: 'pending', label: `Pendientes (${pendingCount})` },
     { value: 'approved', label: `Aprobados (${payments.filter(p => p.status === 'approved').length})` },
     { value: 'rejected', label: `Rechazados (${payments.filter(p => p.status === 'rejected').length})` },
+    { value: 'all', label: `Todos (${payments.length})` },
   ];
 
   return (
