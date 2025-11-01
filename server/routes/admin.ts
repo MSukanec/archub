@@ -350,14 +350,13 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
       const adminClient = getAdminClient();
       const { course_id } = req.query;
       
-      // QUERY 1: Fetch ALL enrollments with users, courses, and payments
+      // QUERY 1: Fetch ALL enrollments with users and courses
       let enrollmentsQuery = adminClient
         .from('course_enrollments')
         .select(`
           *,
           users!inner(id, full_name, email, avatar_url),
-          courses!inner(id, title),
-          payments(id, amount, currency, provider, status)
+          courses!inner(id, title)
         `)
         .order('started_at', { ascending: false });
       
@@ -365,7 +364,7 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
         enrollmentsQuery = enrollmentsQuery.eq('course_id', course_id);
       }
       
-      const { data: enrollments, error: enrollmentsError } = await enrollmentsQuery;
+      const { data: enrollments, error: enrollmentsError} = await enrollmentsQuery;
       
       if (enrollmentsError) {
         console.error("Error fetching enrollments:", enrollmentsError);
@@ -380,7 +379,22 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
       const courseIds = Array.from(new Set(enrollments.map(e => e.course_id)));
       const userIds = Array.from(new Set(enrollments.map(e => e.user_id)));
       
-      // QUERY 2: Fetch ALL modules for ALL courses at once
+      // QUERY 2: Fetch ALL payments for these users and courses
+      const { data: allPayments } = await adminClient
+        .from('payments')
+        .select('id, amount, currency, provider, status, user_id, course_id')
+        .in('user_id', userIds)
+        .in('course_id', courseIds)
+        .eq('product_type', 'course');
+      
+      // Create (user_id + course_id) -> payment mapping
+      const paymentMap = new Map<string, any>();
+      (allPayments || []).forEach(payment => {
+        const key = `${payment.user_id}_${payment.course_id}`;
+        paymentMap.set(key, payment);
+      });
+      
+      // QUERY 3: Fetch ALL modules for ALL courses at once
       const { data: allModules } = await adminClient
         .from('course_modules')
         .select('id, course_id')
@@ -388,11 +402,14 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
       
       if (!allModules || allModules.length === 0) {
         // No modules = no lessons = 0% progress for everyone
-        return res.json(enrollments.map(e => ({
-          ...e,
-          payment: Array.isArray(e.payments) ? e.payments[0] : e.payments,
-          progress: { completed_lessons: 0, total_lessons: 0, progress_percentage: 0 }
-        })));
+        return res.json(enrollments.map(e => {
+          const paymentKey = `${e.user_id}_${e.course_id}`;
+          return {
+            ...e,
+            payment: paymentMap.get(paymentKey) || null,
+            progress: { completed_lessons: 0, total_lessons: 0, progress_percentage: 0 }
+          };
+        }));
       }
       
       // Create course_id -> module_ids mapping
@@ -406,7 +423,7 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
       
       const allModuleIds = allModules.map(m => m.id);
       
-      // QUERY 3: Fetch ALL lessons for ALL modules at once
+      // QUERY 4: Fetch ALL lessons for ALL modules at once
       const { data: allLessons } = await adminClient
         .from('course_lessons')
         .select('id, module_id')
@@ -414,11 +431,14 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
       
       if (!allLessons || allLessons.length === 0) {
         // No lessons = 0% progress for everyone
-        return res.json(enrollments.map(e => ({
-          ...e,
-          payment: Array.isArray(e.payments) ? e.payments[0] : e.payments,
-          progress: { completed_lessons: 0, total_lessons: 0, progress_percentage: 0 }
-        })));
+        return res.json(enrollments.map(e => {
+          const paymentKey = `${e.user_id}_${e.course_id}`;
+          return {
+            ...e,
+            payment: paymentMap.get(paymentKey) || null,
+            progress: { completed_lessons: 0, total_lessons: 0, progress_percentage: 0 }
+          };
+        }));
       }
       
       // Create module_id -> lesson_ids mapping
@@ -432,7 +452,7 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
       
       const allLessonIds = allLessons.map(l => l.id);
       
-      // QUERY 4: Fetch ALL progress for ALL users and ALL lessons at once
+      // QUERY 5: Fetch ALL progress for ALL users and ALL lessons at once
       const { data: allProgress } = await adminClient
         .from('course_lesson_progress')
         .select('user_id, lesson_id, is_completed')
@@ -470,9 +490,12 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
           ? Math.round((completed_lessons / total_lessons) * 100) 
           : 0;
         
+        // Get payment for this enrollment
+        const paymentKey = `${enrollment.user_id}_${enrollment.course_id}`;
+        
         return {
           ...enrollment,
-          payment: Array.isArray(enrollment.payments) ? enrollment.payments[0] : enrollment.payments,
+          payment: paymentMap.get(paymentKey) || null,
           progress: { 
             completed_lessons, 
             total_lessons, 
