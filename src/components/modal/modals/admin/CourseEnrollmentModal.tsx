@@ -160,17 +160,31 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
     mutationFn: async (data: EnrollmentFormData) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      const { error } = await supabase
-        .from('course_enrollments')
-        .insert({
+      // Get current session token
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No active session');
+      
+      // Call backend API endpoint with admin authentication
+      const response = await fetch('/api/admin/enrollments', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
           user_id: data.user_id,
           course_id: data.course_id,
           status: data.status,
           expires_at: data.expires_at || null,
-          started_at: new Date().toISOString(),
-        });
+        })
+      });
       
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create enrollment');
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/enrollments'] });
@@ -194,17 +208,31 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
     mutationFn: async (data: EnrollmentFormData) => {
       if (!supabase || !enrollment?.id) throw new Error('Enrollment ID is required');
       
-      const { error } = await supabase
-        .from('course_enrollments')
-        .update({
+      // Get current session token
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No active session');
+      
+      // Call backend API endpoint with admin authentication
+      const response = await fetch(`/api/admin/enrollments/${enrollment.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
           user_id: data.user_id,
           course_id: data.course_id,
           status: data.status,
           expires_at: data.expires_at || null,
         })
-        .eq('id', enrollment.id);
+      });
       
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update enrollment');
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/enrollments'] });
