@@ -6,6 +6,7 @@ const DISCORD_INVITE_URL = 'https://discord.com/channels/868615664070443008';
 export function DiscordWidget() {
   return (
     <Button
+      variant="secondary"
       className="w-full h-full"
       onClick={() => window.open(DISCORD_INVITE_URL, '_blank')}
       data-testid="button-discord"

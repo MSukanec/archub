@@ -401,7 +401,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     if (daysRemaining > 0) {
       subscriptionFormatted = `${daysRemaining} ${daysRemaining === 1 ? 'DÍA' : 'DÍAS'}`;
     } else if (isUnlimited) {
-      subscriptionFormatted = 'ILIMITADO';
+      subscriptionFormatted = '-';
     } else {
       subscriptionFormatted = 'EXPIRADO';
     }
@@ -437,69 +437,52 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
 
   return (
     <div className="space-y-6">
-      {/* Announcements and Discord Row */}
+      {/* Continue Watching and Discord Row */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        {/* Instructor Announcement Card - 3 columns */}
-        <Card className="border-accent/20 bg-accent/5 lg:col-span-3">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 mt-1">
-                <Megaphone className="h-5 w-5 text-accent" />
+        {/* Continue Watching Card - 3 columns */}
+        {lastLesson && (
+          <Card className="border-accent/20 bg-gradient-to-br from-accent/5 to-accent/10 hover:shadow-lg transition-all duration-200 lg:col-span-3">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                    Continuar viendo
+                  </p>
+                  <h3 className="font-semibold text-base mb-1 text-foreground">
+                    {lastLesson.lesson_title}
+                  </h3>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    <span>
+                      {Math.floor(lastLesson.last_position_sec / 60)}:{String(Math.floor(lastLesson.last_position_sec % 60)).padStart(2, '0')} / {Math.floor(lastLesson.duration_sec / 60)}:{String(Math.floor(lastLesson.duration_sec % 60)).padStart(2, '0')}
+                    </span>
+                  </div>
+                  {/* Progress bar */}
+                  <div className="mt-2 w-full bg-muted/30 rounded-full h-1.5">
+                    <div 
+                      className="bg-accent h-1.5 rounded-full transition-all duration-300"
+                      style={{ width: `${lastLesson.duration_sec > 0 ? (lastLesson.last_position_sec / lastLesson.duration_sec) * 100 : 0}%` }}
+                    />
+                  </div>
+                </div>
+                <Button
+                  onClick={() => goToLesson(lastLesson.lesson_id, lastLesson.last_position_sec)}
+                  className="flex-shrink-0"
+                  data-testid="button-continue-watching"
+                >
+                  <Play className="mr-2 h-4 w-4" />
+                  Continuar
+                </Button>
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-sm mb-1">Anuncios del Instructor</h3>
-                <p className="text-sm text-muted-foreground">
-                  No hay anuncios en este momento
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Discord Widget - 1 column */}
         <div className="lg:col-span-1">
           <DiscordWidget />
         </div>
       </div>
-
-      {/* Continue Watching Card */}
-      {lastLesson && (
-        <Card className="border-accent/20 bg-gradient-to-br from-accent/5 to-accent/10 hover:shadow-lg transition-all duration-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex-1">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                  Continuar viendo
-                </p>
-                <h3 className="font-semibold text-base mb-1 text-foreground">
-                  {lastLesson.lesson_title}
-                </h3>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  <span>
-                    {Math.floor(lastLesson.last_position_sec / 60)}:{String(Math.floor(lastLesson.last_position_sec % 60)).padStart(2, '0')} / {Math.floor(lastLesson.duration_sec / 60)}:{String(Math.floor(lastLesson.duration_sec % 60)).padStart(2, '0')}
-                  </span>
-                </div>
-                {/* Progress bar */}
-                <div className="mt-2 w-full bg-muted/30 rounded-full h-1.5">
-                  <div 
-                    className="bg-accent h-1.5 rounded-full transition-all duration-300"
-                    style={{ width: `${lastLesson.duration_sec > 0 ? (lastLesson.last_position_sec / lastLesson.duration_sec) * 100 : 0}%` }}
-                  />
-                </div>
-              </div>
-              <Button
-                onClick={() => goToLesson(lastLesson.lesson_id, lastLesson.last_position_sec)}
-                className="flex-shrink-0"
-                data-testid="button-continue-watching"
-              >
-                <Play className="mr-2 h-4 w-4" />
-                Continuar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Top Row - Main Stats */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
