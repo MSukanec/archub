@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -48,85 +47,10 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
   const { openModal } = useGlobalModalStore();
   const { toast } = useToast();
 
-  // Fetch all notes for the course with lesson and module information
-  const { data: notes = [], isLoading } = useQuery({
-    queryKey: ['course-notes', courseId],
-    queryFn: async () => {
-      if (!courseId || !supabase) return [];
-
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return [];
-
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!authUser?.email) return [];
-
-      const { data: userRecord } = await supabase
-        .from('users')
-        .select('id')
-        .ilike('email', authUser.email)
-        .single();
-
-      if (!userRecord) return [];
-
-      // First, get all modules for this course
-      const { data: courseModules } = await supabase
-        .from('course_modules')
-        .select('id')
-        .eq('course_id', courseId);
-
-      if (!courseModules || courseModules.length === 0) return [];
-
-      const moduleIds = courseModules.map(m => m.id);
-
-      // Then get all lessons for these modules
-      const { data: courseLessons } = await supabase
-        .from('course_lessons')
-        .select('id, module_id')
-        .in('module_id', moduleIds);
-
-      if (!courseLessons || courseLessons.length === 0) return [];
-
-      const lessonIds = courseLessons.map(l => l.id);
-
-      // Finally, get all summary notes for these lessons
-      const { data: notesData, error } = await supabase
-        .from('course_lesson_notes')
-        .select(`
-          *,
-          lesson:course_lessons!inner(
-            title,
-            module_id
-          )
-        `)
-        .eq('user_id', userRecord.id)
-        .eq('note_type', 'summary')
-        .in('lesson_id', lessonIds)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching notes:', error);
-        return [];
-      }
-
-      // Get module info for each note
-      const enrichedNotes = await Promise.all(
-        (notesData || []).map(async (note) => {
-          const { data: moduleData } = await supabase
-            .from('course_modules')
-            .select('title, sort_index')
-            .eq('id', note.lesson?.module_id)
-            .single();
-
-          return {
-            ...note,
-            module: moduleData
-          };
-        })
-      );
-
-      return enrichedNotes as NoteWithLesson[];
-    },
-    enabled: !!courseId && !!supabase
+  // Fetch all notes for the course with lesson and module information (OPTIMIZED)
+  const { data: notes = [], isLoading } = useQuery<NoteWithLesson[]>({
+    queryKey: ['/api/courses', courseId, 'notes'],
+    enabled: !!courseId
   });
 
   // Get unique modules from notes
@@ -160,20 +84,20 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
     }));
   }, [filteredNotes]);
 
-  // Delete note mutation
+  // Delete note mutation (OPTIMIZED)
   const deleteNoteMutation = useMutation({
     mutationFn: async (noteId: string) => {
-      if (!supabase) throw new Error('Supabase no disponible');
-
-      const { error } = await supabase
-        .from('course_lesson_notes')
-        .delete()
-        .eq('id', noteId);
-
-      if (error) throw error;
+      const response = await fetch(`/api/notes/${noteId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete note');
+      }
+      return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['course-notes', courseId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/courses', courseId, 'notes'] });
       toast({
         title: "Apunte eliminado",
         description: "El apunte se eliminó correctamente",

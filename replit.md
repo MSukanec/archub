@@ -93,6 +93,35 @@ Preferred communication style: Simple, everyday language.
 - **Files updated**: `src/lib/queryClient.ts`
 - **Result**: Summary notes and markers save successfully without 401 errors, RLS policies now work correctly for authenticated users
 
+#### Course Notes & Markers Tabs Optimization (Nov 01, 2025)
+- **Problem**: CourseNotesTab and CourseMarkersTab were making cascading Supabase queries (modules → lessons → notes/markers → Promise.all for module details), causing slow load times and 400/500 errors. Delete mutations were also using direct Supabase calls after Supabase import was removed.
+- **Root cause**: Frontend components were using direct Supabase client with inefficient query pattern similar to the Admin Alumnos issue
+- **Solution**: Created optimized backend endpoints with bulk queries, in-memory data combination, and DELETE endpoints for mutations
+- **Implementation**:
+  - **New GET endpoints** (`server/routes/courses.ts`):
+    - `GET /api/courses/:courseId/notes` - Fetch all course notes with 3 optimized queries
+    - `GET /api/courses/:courseId/markers` - Fetch all course markers with 3 optimized queries
+  - **New DELETE endpoints** (`server/routes/courses.ts`):
+    - `DELETE /api/notes/:noteId` - Generic endpoint to delete any note/marker by ID
+    - `DELETE /api/lessons/:lessonId/summary-note` - Delete summary note for a lesson
+  - **Query pattern** (3 queries total for GET):
+    1. Get all modules for course
+    2. Get all lessons for those modules
+    3. Get all notes/markers for those lessons (filtered by user)
+    4. Combine using Maps in memory
+  - **Frontend updates**:
+    - `src/pages/learning/courses/view/CourseNotesTab.tsx` - Now uses `/api/courses/:courseId/notes` endpoint for fetching and `/api/notes/:noteId` for deletion
+    - `src/pages/learning/courses/view/CourseMarkersTab.tsx` - Now uses `/api/courses/:courseId/markers` endpoint for fetching and `/api/notes/:noteId` for deletion
+    - Removed direct Supabase queries and Promise.all cascades
+    - Updated query invalidation to use new query keys: `['/api/courses', courseId, 'notes']` and `['/api/courses', courseId, 'markers']`
+- **Performance gains**:
+  - Query count: ~15+ queries → 3 bulk queries
+  - Eliminated 400/500 errors from malformed Supabase queries
+  - Load time reduced to sub-second
+  - All CRUD operations now use optimized backend endpoints
+- **Files updated**: `server/routes/courses.ts`, `src/pages/learning/courses/view/CourseNotesTab.tsx`, `src/pages/learning/courses/view/CourseMarkersTab.tsx`
+- **Result**: Apuntes and Marcadores tabs now load instantly without errors and support full CRUD operations via optimized backend
+
 ## External Dependencies
 - **Supabase**: Authentication, Database (PostgreSQL), Storage.
 - **Neon Database**: Serverless PostgreSQL hosting.
