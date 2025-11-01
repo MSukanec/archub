@@ -28,28 +28,28 @@ export default function MarkerRow({ marker, onGoToMarker, onDelete }: MarkerRowP
     >
       {/* Layout vertical completo */}
       <div className="w-full space-y-3">
-        {/* 1. Nombre de Lección */}
-        <p className="font-medium text-sm leading-tight">
-          {marker.lesson_title}
-        </p>
+        {/* 1. Nombre de Lección + Tiempo (inline) */}
+        <div className="flex items-center justify-between gap-2">
+          <p className="font-medium text-sm leading-tight flex-1">
+            {marker.lesson_title}
+          </p>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground shrink-0">
+            <Clock className="h-3 w-3" />
+            <span className="font-mono font-medium">{formatTime(marker.time_sec)}</span>
+          </div>
+        </div>
 
         {/* 2. Nombre de Módulo */}
         <p className="text-xs text-muted-foreground">
           {marker.module_title}
         </p>
 
-        {/* 3. Tiempo + Texto del marcador */}
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Clock className="h-3 w-3" />
-            <span className="font-mono font-medium">{formatTime(marker.time_sec)}</span>
-          </div>
-          {marker.body && (
-            <p className="text-xs text-muted-foreground line-clamp-3 whitespace-pre-wrap">
-              {marker.body}
-            </p>
-          )}
-        </div>
+        {/* 3. Texto del marcador */}
+        {marker.body && (
+          <p className="text-xs text-muted-foreground line-clamp-3 whitespace-pre-wrap">
+            {marker.body}
+          </p>
+        )}
 
         {/* 4. Botones: IR + ELIMINAR */}
         <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border/50">
