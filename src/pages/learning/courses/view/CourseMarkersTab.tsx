@@ -50,7 +50,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
 
   // Fetch all markers for the course with lesson and module information (OPTIMIZED)
   const { data: markers = [], isLoading } = useQuery<MarkerWithLesson[]>({
-    queryKey: ['/api/courses', courseId, 'markers'],
+    queryKey: [`/api/courses/${courseId}/markers`],
     enabled: !!courseId
   });
 
@@ -105,7 +105,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/courses', courseId, 'markers'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/courses/${courseId}/markers`] });
       toast({
         title: "Marcador eliminado",
         description: "El marcador se eliminó correctamente",

@@ -49,7 +49,7 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
 
   // Fetch all notes for the course with lesson and module information (OPTIMIZED)
   const { data: notes = [], isLoading } = useQuery<NoteWithLesson[]>({
-    queryKey: ['/api/courses', courseId, 'notes'],
+    queryKey: [`/api/courses/${courseId}/notes`],
     enabled: !!courseId
   });
 
@@ -97,7 +97,7 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/courses', courseId, 'notes'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/courses/${courseId}/notes`] });
       toast({
         title: "Apunte eliminado",
         description: "El apunte se eliminó correctamente",
