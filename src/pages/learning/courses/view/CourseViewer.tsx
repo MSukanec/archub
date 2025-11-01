@@ -289,19 +289,43 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [moduleIdsString, lessonIdsString]);
 
-  // Seleccionar automáticamente la lección (inicial o primera) cuando se cargan las lecciones
+  // Seleccionar automáticamente la lección (inicial, última vista, o primera) cuando se cargan las lecciones
   // IMPORTANTE: Usa goToLesson del store para NO sobrescribir navegación desde marcadores
   useEffect(() => {
-    if (lessons.length > 0 && !activeLessonId) {
-      // Si hay initialLessonId, usar esa, si no, la primera
-      const targetLesson = initialLessonId 
-        ? lessons.find(l => l.id === initialLessonId) || lessons[0]
-        : lessons[0];
-      console.log('🎯 Auto-selección inicial de lección:', targetLesson.id);
-      goToLesson(targetLesson.id, null);
+    if (orderedLessons.length > 0 && !activeLessonId) {
+      let targetLesson = null;
+      
+      // 1. Si hay initialLessonId (deep link o marcador), usar esa
+      if (initialLessonId) {
+        targetLesson = orderedLessons.find(l => l.id === initialLessonId);
+      }
+      
+      // 2. Si no, buscar la última lección vista (la más reciente en progressData)
+      if (!targetLesson && progressData && progressData.length > 0) {
+        // Ordenar por updated_at descendente y tomar la primera
+        const sortedProgress = [...progressData]
+          .filter(p => orderedLessons.some(l => l.id === p.lesson_id))
+          .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+        
+        if (sortedProgress.length > 0) {
+          const lastViewedLessonId = sortedProgress[0].lesson_id;
+          targetLesson = orderedLessons.find(l => l.id === lastViewedLessonId);
+          console.log('🔄 Continuando desde última lección vista:', targetLesson?.title);
+        }
+      }
+      
+      // 3. Si no hay última lección vista, usar la primera del primer módulo
+      if (!targetLesson) {
+        targetLesson = orderedLessons[0];
+        console.log('🎯 Iniciando desde primera lección del primer módulo:', targetLesson?.title);
+      }
+      
+      if (targetLesson) {
+        goToLesson(targetLesson.id, null);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lessonIdsString, activeLessonId, initialLessonId, goToLesson]);
+  }, [orderedLessons, activeLessonId, initialLessonId, progressData, goToLesson]);
 
   // Log de confirmación cuando cambia la lección activa
   useEffect(() => {

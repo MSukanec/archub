@@ -97,6 +97,16 @@ Preferred communication style: Simple, everyday language.
   - Notes and markers count from `course_lesson_notes` filtered by `note_type`
 - **Result**: Users can now see all course content in a single organized table view with full mobile support, making it easy to navigate between lessons and see progress at a glance
 
+#### Lesson Selection Logic Fix (Nov 01, 2025)
+- **Problem**: CourseViewer was selecting incorrect initial lesson - using first lesson from unordered array instead of first lesson from first module, and not remembering last viewed lesson
+- **Solution**: Implemented intelligent lesson selection with proper ordering and resume functionality:
+  1. Priority 1: Use `initialLessonId` if provided (deep links, markers)
+  2. Priority 2: Resume from last viewed lesson (most recent `updated_at` in `progressData`)
+  3. Priority 3: Start from first lesson of first module (using `orderedLessons[0]` instead of `lessons[0]`)
+- **Files updated**:
+  - `src/pages/learning/courses/view/CourseViewer.tsx` - Fixed lesson selection logic to use properly ordered lessons and implement resume functionality
+- **Result**: Users now correctly start from the first lesson of the first module on first visit, and automatically resume from their last viewed lesson on subsequent visits
+
 ## External Dependencies
 
 - **Supabase**: Authentication, Database (PostgreSQL), Storage.
