@@ -2,37 +2,29 @@ import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Badge } from '@/components/ui/badge'
-import { BookOpen, Play, List, CheckCircle2 } from 'lucide-react'
+import { Table } from '@/components/ui-custom/tables-and-trees/Table'
+import { CheckCircle2, Circle } from 'lucide-react'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
 
 interface CourseContentTabProps {
   courseId?: string;
 }
 
+interface LessonRow {
+  id: string;
+  title: string;
+  duration_sec: number | null;
+  module_id: string;
+  module_title: string;
+  module_sort_index: number;
+  notes_count: number;
+  markers_count: number;
+  is_completed: boolean;
+  groupKey: string; // Para el groupBy
+}
+
 export default function CourseContentTab({ courseId }: CourseContentTabProps) {
   const { setCurrentLesson } = useCourseSidebarStore()
-
-  // Get course data
-  const { data: courseData } = useQuery({
-    queryKey: ['course', courseId],
-    queryFn: async () => {
-      if (!courseId || !supabase) return null;
-      
-      const { data, error } = await supabase
-        .from('courses')
-        .select('*')
-        .eq('id', courseId)
-        .single();
-        
-      if (error) {
-        console.error('Error fetching course:', error);
-        throw error;
-      }
-      
-      return data;
-    },
-    enabled: !!courseId && !!supabase
-  });
 
   // Get course modules
   const { data: modules = [] } = useQuery({
@@ -103,30 +95,178 @@ export default function CourseContentTab({ courseId }: CourseContentTabProps) {
     refetchOnMount: 'always'
   });
 
-  // Helper functions
-  const getLessonsForModule = (moduleId: string) => {
-    return lessons.filter(lesson => lesson.module_id === moduleId);
-  }
+  // Get notes count per lesson
+  const { data: notesData = [] } = useQuery({
+    queryKey: ['course-lesson-notes-count', courseId],
+    queryFn: async () => {
+      if (!courseId || !supabase) return [];
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return [];
 
-  const isLessonCompleted = (lessonId: string) => {
-    return courseProgress.some((p: any) => p.lesson_id === lessonId && p.is_completed);
-  }
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser?.email) return [];
+
+      const { data: userRecord } = await supabase
+        .from('users')
+        .select('id')
+        .ilike('email', authUser.email)
+        .single();
+
+      if (!userRecord) return [];
+
+      // Get all modules for this course
+      const { data: courseModules } = await supabase
+        .from('course_modules')
+        .select('id')
+        .eq('course_id', courseId);
+
+      if (!courseModules || courseModules.length === 0) return [];
+
+      const moduleIds = courseModules.map(m => m.id);
+
+      // Get all lessons for these modules
+      const { data: courseLessons } = await supabase
+        .from('course_lessons')
+        .select('id')
+        .in('module_id', moduleIds);
+
+      if (!courseLessons || courseLessons.length === 0) return [];
+
+      const lessonIds = courseLessons.map(l => l.id);
+
+      // Get notes count per lesson
+      const { data, error } = await supabase
+        .from('course_lesson_notes')
+        .select('lesson_id, note_type')
+        .eq('user_id', userRecord.id)
+        .in('lesson_id', lessonIds);
+
+      if (error) return [];
+      
+      return data || [];
+    },
+    enabled: !!courseId && !!supabase
+  });
+
+  // Process data into rows
+  const tableData = useMemo<LessonRow[]>(() => {
+    if (!lessons.length || !modules.length) return [];
+
+    // Count notes and markers per lesson
+    const notesCountMap: Record<string, { notes: number; markers: number }> = {};
+    notesData.forEach((note) => {
+      if (!notesCountMap[note.lesson_id]) {
+        notesCountMap[note.lesson_id] = { notes: 0, markers: 0 };
+      }
+      if (note.note_type === 'marker') {
+        notesCountMap[note.lesson_id].markers++;
+      } else {
+        notesCountMap[note.lesson_id].notes++;
+      }
+    });
+
+    // Build module map
+    const moduleMap = modules.reduce((acc, module) => {
+      acc[module.id] = module;
+      return acc;
+    }, {} as Record<string, any>);
+
+    // Map lessons to rows
+    const rows: LessonRow[] = lessons.map((lesson) => {
+      const module = moduleMap[lesson.module_id];
+      const isCompleted = courseProgress.some(
+        (p: any) => p.lesson_id === lesson.id && p.is_completed
+      );
+      const counts = notesCountMap[lesson.id] || { notes: 0, markers: 0 };
+
+      return {
+        id: lesson.id,
+        title: lesson.title,
+        duration_sec: lesson.duration_sec,
+        module_id: lesson.module_id,
+        module_title: module?.title || 'Sin módulo',
+        module_sort_index: module?.sort_index || 0,
+        notes_count: counts.notes,
+        markers_count: counts.markers,
+        is_completed: isCompleted,
+        groupKey: module?.title || 'Sin módulo'
+      };
+    });
+
+    // Sort by module sort_index and then by lesson order
+    rows.sort((a, b) => {
+      if (a.module_sort_index !== b.module_sort_index) {
+        return a.module_sort_index - b.module_sort_index;
+      }
+      // Within same module, maintain lesson order
+      const aLessonIndex = lessons.findIndex(l => l.id === a.id);
+      const bLessonIndex = lessons.findIndex(l => l.id === b.id);
+      return aLessonIndex - bLessonIndex;
+    });
+
+    return rows;
+  }, [lessons, modules, courseProgress, notesData]);
 
   const formatDuration = (seconds: number | null) => {
-    if (!seconds) return 'Sin duración';
+    if (!seconds) return '-';
     const totalMins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    
-    // For module totals (large durations), show hours and minutes
-    if (totalMins >= 60) {
-      const hours = Math.floor(totalMins / 60);
-      const mins = totalMins % 60;
-      return `${hours} hs ${mins} min`;
-    }
-    
-    // For individual lessons, show MM:SS format
     return `${totalMins}:${secs.toString().padStart(2, '0')}`;
   }
+
+  const columns = [
+    {
+      key: 'title',
+      label: 'Nombre',
+      width: '40%',
+      render: (row: LessonRow) => (
+        <span className="font-medium">{row.title}</span>
+      )
+    },
+    {
+      key: 'duration_sec',
+      label: 'Duración',
+      width: '15%',
+      render: (row: LessonRow) => (
+        <span className="text-sm">{formatDuration(row.duration_sec)}</span>
+      )
+    },
+    {
+      key: 'notes_count',
+      label: 'Notas',
+      width: '10%',
+      render: (row: LessonRow) => (
+        <span className="text-sm">{row.notes_count}</span>
+      )
+    },
+    {
+      key: 'markers_count',
+      label: 'Marcadores',
+      width: '15%',
+      render: (row: LessonRow) => (
+        <span className="text-sm">{row.markers_count}</span>
+      )
+    },
+    {
+      key: 'is_completed',
+      label: 'Completada',
+      width: '20%',
+      render: (row: LessonRow) => (
+        row.is_completed ? (
+          <Badge variant="secondary" className="bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400">
+            <CheckCircle2 className="h-3 w-3 mr-1" />
+            Completada
+          </Badge>
+        ) : (
+          <Badge variant="outline" className="text-muted-foreground">
+            <Circle className="h-3 w-3 mr-1" />
+            Pendiente
+          </Badge>
+        )
+      )
+    }
+  ];
 
   if (!courseId) {
     return (
@@ -138,145 +278,22 @@ export default function CourseContentTab({ courseId }: CourseContentTabProps) {
 
   return (
     <div className="space-y-6">
-      {/* Información Básica Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column - Información Básica */}
-        <div>
-          <div className="flex items-center gap-2 mb-6">
-            <BookOpen className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="text-lg font-semibold">Información Básica</h2>
+      <Table
+        data={tableData}
+        columns={columns}
+        groupBy="groupKey"
+        renderGroupHeader={(groupKey: string, groupRows: LessonRow[]) => (
+          <div className="col-span-full text-sm font-semibold py-2">
+            {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'lección' : 'lecciones'})
           </div>
-          <p className="text-sm text-muted-foreground">
-            Datos fundamentales del curso.
-          </p>
-        </div>
-
-        {/* Right Column - Información Básica Content */}
-        <div>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Título del Curso</label>
-              <div className="text-sm text-foreground px-3 py-2 bg-muted/30 rounded-md">
-                {courseData?.title || '-'}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Descripción Corta</label>
-              <div className="text-sm text-foreground px-3 py-2 bg-muted/30 rounded-md min-h-[60px]">
-                {courseData?.short_description || '-'}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Divider */}
-      <hr className="border-border" />
-
-      {/* Contenido del Curso Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column - Content Description */}
-        <div>
-          <div className="flex items-center gap-2 mb-6">
-            <List className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="text-lg font-semibold">Contenido del Curso</h2>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Estructura completa del curso organizada en módulos y lecciones. Los módulos agrupan contenido relacionado, mientras que cada lección representa una unidad específica de aprendizaje.
-          </p>
-        </div>
-
-        {/* Right Column - Content List */}
-        <div>
-          {modules.length === 0 ? (
-            <div className="text-center py-8 bg-muted/10 rounded-lg">
-              <BookOpen className="h-12 w-12 mx-auto mb-3 text-muted-foreground/40" />
-              <p className="text-muted-foreground">No hay módulos disponibles en este curso</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {modules.map((module, index) => {
-                const moduleLessons = getLessonsForModule(module.id);
-                const totalModuleDuration = moduleLessons.reduce((acc, lesson) => acc + (lesson.duration_sec || 0), 0);
-                
-                return (
-                  <div key={module.id} className="border rounded-lg overflow-hidden">
-                    {/* Module Header */}
-                    <div className="bg-muted/30 px-4 py-3 border-b">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold">
-                          Módulo {index + 1}: {module.title}
-                        </h3>
-                        <span className="text-sm text-muted-foreground">
-                          {formatDuration(totalModuleDuration)}
-                        </span>
-                      </div>
-                      <div className="mt-2">
-                        <Badge variant="outline">
-                          {moduleLessons.length} {moduleLessons.length === 1 ? 'lección' : 'lecciones'}
-                        </Badge>
-                      </div>
-                      {module.description && (
-                        <p className="text-sm text-muted-foreground mt-2">
-                          {module.description}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Module Lessons */}
-                    <div className="divide-y">
-                      {moduleLessons.length === 0 ? (
-                        <div className="px-4 py-6 text-center text-sm text-muted-foreground">
-                          No hay lecciones en este módulo
-                        </div>
-                      ) : (
-                        moduleLessons.map((lesson, lessonIndex) => {
-                          const completed = isLessonCompleted(lesson.id);
-                          
-                          return (
-                            <div 
-                              key={lesson.id}
-                              className="px-4 py-3 hover:bg-muted/20 cursor-pointer transition-colors"
-                              onClick={() => setCurrentLesson(lesson.id)}
-                              data-testid={`lesson-card-${lesson.id}`}
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                                  <Play className="h-4 w-4 text-[var(--accent)]" />
-                                </div>
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <p className="text-sm font-medium">
-                                      {lessonIndex + 1}. {lesson.title} · {formatDuration(lesson.duration_sec)}
-                                    </p>
-                                    {completed && (
-                                      <CheckCircle2 
-                                        className="h-4 w-4 flex-shrink-0" 
-                                        style={{ color: 'var(--accent)' }}
-                                        data-testid={`completed-badge-${lesson.id}`}
-                                      />
-                                    )}
-                                  </div>
-                                  {lesson.free_preview && (
-                                    <Badge variant="outline" className="mt-1 text-xs">
-                                      Vista previa gratis
-                                    </Badge>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
+        )}
+        onCardClick={(row: LessonRow) => setCurrentLesson(row.id)}
+        getRowClassName={() => 'cursor-pointer hover:bg-muted/30 transition-colors'}
+        emptyStateConfig={{
+          title: 'No hay lecciones',
+          description: 'Este curso no tiene lecciones disponibles'
+        }}
+      />
     </div>
   )
 }
