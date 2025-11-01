@@ -65,6 +65,19 @@ Preferred communication style: Simple, everyday language.
 - **Cache invalidation**: PaymentReturn now invalidates `/api/learning/dashboard` after successful enrollment
 - **Result**: Newly enrolled courses appear immediately in dashboard with accurate 0% progress state
 
+#### Mobile UI Improvements for Admin Modules (Nov 01, 2025)
+- **Feature**: Implemented comprehensive mobile ActionBar with filtering and search across admin interfaces
+- **Components created**:
+  - `AdminCourseStudentRow` - Mobile row component for course enrollments with avatar, progress, and course info
+  - `AdminCourseCouponRow` - Mobile row component for coupons with status badges and redemption stats
+  - `AdminPaymentTransferRow` - Mobile row component for bank transfer payments with receipt button
+- **Pages enhanced**:
+  - `AdminCourseUsersTab` - Full mobile ActionBar (Home, Search, Create, Filter, Notifications) with search by user/course and filters by status/course
+  - `AdminCourseCouponTab` - Full mobile ActionBar with search by code and filters by status/type
+  - `AdminPaymentsTransfersTab` - Mobile ActionBar with search by user/course and filter by status; KPIs optimized for 2-column grid on mobile (2 top, 1 bottom)
+- **Mobile UX Pattern**: All admin mobile rows follow DataRowCard pattern with avatar (left), content (center), trailing info (right), and expandable details section with action buttons
+- **Result**: Admin modules now have full-featured mobile experience with search, filters, and clean mobile-optimized layouts
+
 ## External Dependencies
 
 - **Supabase**: Authentication, Database (PostgreSQL), Storage.

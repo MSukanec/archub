@@ -32,3 +32,5 @@ export type { Enrollment, EnrollmentProgress } from './AdminCourseStudentRow';
 
 export { default as AdminCourseCouponRow } from './AdminCourseCouponRow';
 export type { Coupon } from './AdminCourseCouponRow';
+
+export { default as AdminPaymentTransferRow } from './AdminPaymentTransferRow';

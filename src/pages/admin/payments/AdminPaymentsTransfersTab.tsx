@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
@@ -6,12 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle2, XCircle, Eye, AlertCircle, Inbox, Clock, TrendingUp } from 'lucide-react';
+import { CheckCircle2, XCircle, Eye, AlertCircle, Inbox, Clock, TrendingUp, Search, Filter, Bell } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Tabs } from '@/components/ui-custom/Tabs';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import AdminPaymentTransferRow from '@/components/ui/data-row/rows/AdminPaymentTransferRow';
+import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
+import { useMobile } from '@/hooks/use-mobile';
 
 interface BankTransferPayment {
   id: string;
@@ -44,6 +47,25 @@ const AdminPaymentsTransfersTab = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const { toast } = useToast();
   const { openModal } = useGlobalModalStore();
+  const isMobile = useMobile();
+  
+  const { 
+    setActions, 
+    setShowActionBar, 
+    clearActions,
+    setFilterConfig,
+    searchValue: mobileSearchValue,
+    setSearchValue: setMobileSearchValue
+  } = useActionBarMobile();
+
+  const [searchValue, setSearchValue] = useState("");
+
+  // Sync search values between mobile and desktop
+  useEffect(() => {
+    if (isMobile && mobileSearchValue !== searchValue) {
+      setSearchValue(mobileSearchValue);
+    }
+  }, [mobileSearchValue, isMobile]);
 
   const { data: payments = [], isLoading } = useQuery<BankTransferPayment[]>({
     queryKey: ['/api/admin/payments'],
@@ -106,9 +128,96 @@ const AdminPaymentsTransfersTab = () => {
     });
   };
 
-  const filteredPayments = statusFilter === 'all' 
-    ? payments 
-    : payments.filter(p => p.status === statusFilter);
+  // Filter payments by status and search
+  const filteredPayments = useMemo(() => {
+    return payments.filter(payment => {
+      // Search filter
+      if (searchValue) {
+        const search = searchValue.toLowerCase();
+        const userName = payment.users?.full_name?.toLowerCase() || '';
+        const userEmail = payment.users?.email?.toLowerCase() || '';
+        const courseName = payment.course_prices?.courses?.title?.toLowerCase() || '';
+        
+        if (!userName.includes(search) && !userEmail.includes(search) && !courseName.includes(search)) {
+          return false;
+        }
+      }
+
+      // Status filter
+      if (statusFilter !== 'all' && payment.status !== statusFilter) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [payments, searchValue, statusFilter]);
+
+  // Configure mobile action bar
+  useEffect(() => {
+    if (isMobile) {
+      setActions({
+        search: {
+          id: 'search',
+          icon: Search,
+          label: 'Buscar',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+        filter: {
+          id: 'filter',
+          icon: Filter,
+          label: 'Filtros',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+        notifications: {
+          id: 'notifications',
+          icon: Bell,
+          label: 'Notificaciones',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+      });
+      setShowActionBar(true);
+    }
+
+    // Cleanup when component unmounts
+    return () => {
+      if (isMobile) {
+        clearActions();
+      }
+    };
+  }, [isMobile, setActions, setShowActionBar, clearActions]);
+
+  // Separate effect for filter configuration
+  useEffect(() => {
+    if (isMobile) {
+      setFilterConfig({
+        filters: [
+          {
+            label: 'Filtrar por estado',
+            value: statusFilter,
+            onChange: (value: string) => setStatusFilter(value as typeof statusFilter),
+            placeholder: 'Todos los estados',
+            allOptionLabel: 'Todos los estados',
+            options: [
+              { value: 'pending', label: 'Pendientes' },
+              { value: 'approved', label: 'Aprobados' },
+              { value: 'rejected', label: 'Rechazados' }
+            ]
+          }
+        ],
+        onClearFilters: () => {
+          setSearchValue("");
+          setMobileSearchValue("");
+          setStatusFilter("all");
+        }
+      });
+    }
+  }, [statusFilter, isMobile]);
 
   const columns = [
     {
@@ -218,8 +327,8 @@ const AdminPaymentsTransfersTab = () => {
 
   return (
     <div className="space-y-6">
-      {/* KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* KPIs - 2 columns on mobile, 3 on desktop */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <StatCard>
           <div className="flex items-center justify-between">
             <StatCardTitle showArrow={false}>Pendientes de Revisión</StatCardTitle>
@@ -238,7 +347,7 @@ const AdminPaymentsTransfersTab = () => {
           <StatCardMeta>pagos aprobados hoy</StatCardMeta>
         </StatCard>
 
-        <StatCard>
+        <StatCard className="col-span-2 md:col-span-1">
           <div className="flex items-center justify-between">
             <StatCardTitle showArrow={false}>Total del Mes</StatCardTitle>
             <TrendingUp className="h-5 w-5 text-blue-600" />
@@ -267,6 +376,13 @@ const AdminPaymentsTransfersTab = () => {
         columns={columns}
         data={filteredPayments}
         isLoading={isLoading}
+        renderCard={(payment) => (
+          <AdminPaymentTransferRow
+            payment={payment}
+            onViewReceipt={handleViewReceipt}
+            density="comfortable"
+          />
+        )}
         emptyStateConfig={{
           icon: <Inbox />,
           title: isLoading ? 'Cargando...' : 'No hay pagos',
