@@ -10,10 +10,10 @@ import { useLocation } from 'wouter';
 import { useCourseSidebarStore } from '@/stores/sidebarStore';
 import { useCoursePlayerStore } from '@/stores/coursePlayerStore';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
-import MarkerCard from '@/components/ui/cards/MarkerCard';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { MarkerRow } from '@/components/ui/data-row/rows';
 
 interface CourseMarkersTabProps {
   courseId: string;
@@ -385,13 +385,19 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
                 {moduleTitle} ({moduleMarkers.length})
               </div>
               {/* Module Cards */}
-              <div className="space-y-3">
+              <div className="space-y-0">
                 {moduleMarkers.map((marker) => (
-                  <MarkerCard
+                  <MarkerRow
                     key={marker.id}
-                    marker={marker}
-                    onGoToLesson={handleGoToLesson}
-                    onDelete={handleDeleteMarker}
+                    marker={{
+                      id: marker.id,
+                      lesson_title: marker.lesson?.title || 'Sin lección',
+                      module_title: marker.module?.title || 'Sin módulo',
+                      time_sec: marker.time_sec,
+                      body: marker.body
+                    }}
+                    onGoToMarker={() => handleGoToLesson(marker.lesson_id, marker.time_sec)}
+                    onDelete={() => handleDeleteMarker(marker)}
                   />
                 ))}
               </div>

@@ -13,6 +13,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { NoteRow } from '@/components/ui/data-row/rows';
 
 interface CourseNotesTabProps {
   courseId: string;
@@ -374,42 +375,19 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
                 {moduleTitle} ({moduleNotes.length})
               </div>
               {/* Module Cards */}
-              <div className="space-y-3">
+              <div className="space-y-0">
                 {moduleNotes.map((note) => (
-                  <div key={note.id} className="bg-card border border-border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="font-medium text-sm">{note.lesson?.title || 'Sin lección'}</div>
-                      {note.is_pinned && (
-                        <Badge variant="secondary" className="text-xs">
-                          Fijado
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
-                      <Calendar className="h-3.5 w-3.5" />
-                      <span>{format(new Date(note.created_at), "d MMM yyyy", { locale: es })}</span>
-                    </div>
-                    <p className="text-sm mb-3 line-clamp-3">{note.body || 'Sin contenido'}</p>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="default"
-                        onClick={() => handleGoToLesson(note.lesson_id)}
-                        className="gap-2 flex-1"
-                      >
-                        Ir a lección
-                        <ArrowRight className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDeleteNote(note)}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
+                  <NoteRow
+                    key={note.id}
+                    note={{
+                      id: note.id,
+                      lesson_title: note.lesson?.title || 'Sin lección',
+                      module_title: note.module?.title || 'Sin módulo',
+                      body: note.body
+                    }}
+                    onGoToNote={() => handleGoToLesson(note.lesson_id)}
+                    onDelete={() => handleDeleteNote(note)}
+                  />
                 ))}
               </div>
             </div>
