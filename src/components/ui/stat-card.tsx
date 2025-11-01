@@ -86,7 +86,7 @@ interface StatCardValueProps {
 }
 
 const StatCardValue = ({ children, className }: StatCardValueProps) => (
-  <div className={cn("text-5xl font-bold text-foreground tracking-tight leading-none mt-2", className)}>
+  <div className={cn("text-3xl md:text-5xl font-bold text-foreground tracking-tight leading-none mt-2", className)}>
     {children}
   </div>
 )

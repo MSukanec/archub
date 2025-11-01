@@ -104,10 +104,6 @@ const AdminPaymentsTransfersTab = () => {
 
     return {
       pending: pendingPayments.length,
-      approvedToday: approvedPayments.filter(p => {
-        const paymentDate = new Date(p.created_at);
-        return paymentDate.toDateString() === now.toDateString();
-      }).length,
       totalMonthARS: totalAmountThisMonth,
     };
   }, [payments]);
@@ -327,8 +323,8 @@ const AdminPaymentsTransfersTab = () => {
 
   return (
     <div className="space-y-6">
-      {/* KPIs - 2 columns on mobile, 3 on desktop */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      {/* KPIs - 2 columns in one row */}
+      <div className="grid grid-cols-2 gap-4">
         <StatCard>
           <div className="flex items-center justify-between">
             <StatCardTitle showArrow={false}>Pendientes de Revisión</StatCardTitle>
@@ -339,15 +335,6 @@ const AdminPaymentsTransfersTab = () => {
         </StatCard>
 
         <StatCard>
-          <div className="flex items-center justify-between">
-            <StatCardTitle showArrow={false}>Aprobados Hoy</StatCardTitle>
-            <CheckCircle2 className="h-5 w-5 text-green-600" />
-          </div>
-          <StatCardValue>{stats.approvedToday}</StatCardValue>
-          <StatCardMeta>pagos aprobados hoy</StatCardMeta>
-        </StatCard>
-
-        <StatCard className="col-span-2 md:col-span-1">
           <div className="flex items-center justify-between">
             <StatCardTitle showArrow={false}>Total del Mes</StatCardTitle>
             <TrendingUp className="h-5 w-5 text-blue-600" />
