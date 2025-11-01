@@ -820,6 +820,166 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
 
   // ========== COURSE NOTES & MARKERS ENDPOINTS (OPTIMIZED) ==========
 
+  // GET /api/courses/:courseId/recent-notes - Get latest 3 notes for a course (OPTIMIZED FOR DASHBOARD)
+  app.get("/api/courses/:courseId/recent-notes", async (req, res) => {
+    try {
+      const { courseId } = req.params;
+      
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = createAuthenticatedClient(token);
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      if (!dbUser) {
+        return res.json([]);
+      }
+      
+      // Query 1: Get all modules for this course
+      const { data: courseModules, error: modulesError } = await authenticatedSupabase
+        .from('course_modules')
+        .select('id')
+        .eq('course_id', courseId);
+      
+      if (modulesError || !courseModules || courseModules.length === 0) {
+        return res.json([]);
+      }
+      
+      const moduleIds = courseModules.map(m => m.id);
+      
+      // Query 2: Get all lessons for these modules
+      const { data: courseLessons, error: lessonsError } = await authenticatedSupabase
+        .from('course_lessons')
+        .select('id, title')
+        .in('module_id', moduleIds);
+      
+      if (lessonsError || !courseLessons || courseLessons.length === 0) {
+        return res.json([]);
+      }
+      
+      const lessonIds = courseLessons.map(l => l.id);
+      
+      // Query 3: Get latest 3 notes for these lessons
+      const { data: notes, error: notesError } = await authenticatedSupabase
+        .from('course_lesson_notes')
+        .select('id, body, lesson_id, created_at')
+        .eq('user_id', dbUser.id)
+        .eq('note_type', 'summary')
+        .in('lesson_id', lessonIds)
+        .order('created_at', { ascending: false })
+        .limit(3);
+      
+      if (notesError) {
+        console.error("Error fetching recent notes:", notesError);
+        return res.status(500).json({ error: "Failed to fetch notes" });
+      }
+      
+      // Combine data with lesson titles
+      const lessonMap = new Map(courseLessons.map(l => [l.id, l]));
+      const enrichedNotes = (notes || []).map(note => ({
+        ...note,
+        course_lessons: lessonMap.get(note.lesson_id) || null
+      }));
+      
+      res.json(enrichedNotes);
+    } catch (error) {
+      console.error("Error fetching recent notes:", error);
+      res.status(500).json({ error: "Failed to fetch notes" });
+    }
+  });
+
+  // GET /api/courses/:courseId/recent-markers - Get latest 3 markers for a course (OPTIMIZED FOR DASHBOARD)
+  app.get("/api/courses/:courseId/recent-markers", async (req, res) => {
+    try {
+      const { courseId } = req.params;
+      
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = createAuthenticatedClient(token);
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      if (!dbUser) {
+        return res.json([]);
+      }
+      
+      // Query 1: Get all modules for this course
+      const { data: courseModules, error: modulesError } = await authenticatedSupabase
+        .from('course_modules')
+        .select('id')
+        .eq('course_id', courseId);
+      
+      if (modulesError || !courseModules || courseModules.length === 0) {
+        return res.json([]);
+      }
+      
+      const moduleIds = courseModules.map(m => m.id);
+      
+      // Query 2: Get all lessons for these modules
+      const { data: courseLessons, error: lessonsError } = await authenticatedSupabase
+        .from('course_lessons')
+        .select('id, title')
+        .in('module_id', moduleIds);
+      
+      if (lessonsError || !courseLessons || courseLessons.length === 0) {
+        return res.json([]);
+      }
+      
+      const lessonIds = courseLessons.map(l => l.id);
+      
+      // Query 3: Get latest 3 markers for these lessons
+      const { data: markers, error: markersError } = await authenticatedSupabase
+        .from('course_lesson_notes')
+        .select('id, body, lesson_id, time_sec, created_at')
+        .eq('user_id', dbUser.id)
+        .eq('note_type', 'marker')
+        .in('lesson_id', lessonIds)
+        .order('created_at', { ascending: false })
+        .limit(3);
+      
+      if (markersError) {
+        console.error("Error fetching recent markers:", markersError);
+        return res.status(500).json({ error: "Failed to fetch markers" });
+      }
+      
+      // Combine data with lesson titles
+      const lessonMap = new Map(courseLessons.map(l => [l.id, l]));
+      const enrichedMarkers = (markers || []).map(marker => ({
+        ...marker,
+        course_lessons: lessonMap.get(marker.lesson_id) || null
+      }));
+      
+      res.json(enrichedMarkers);
+    } catch (error) {
+      console.error("Error fetching recent markers:", error);
+      res.status(500).json({ error: "Failed to fetch markers" });
+    }
+  });
+
   // GET /api/courses/:courseId/notes - Get all notes for a course (OPTIMIZED)
   app.get("/api/courses/:courseId/notes", async (req, res) => {
     try {

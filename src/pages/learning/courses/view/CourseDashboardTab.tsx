@@ -39,8 +39,8 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     if (courseId) {
       queryClient.invalidateQueries({ queryKey: ['course-progress', courseId] });
       queryClient.invalidateQueries({ queryKey: ['study-time', courseId] });
-      queryClient.invalidateQueries({ queryKey: ['recent-notes', courseId] });
-      queryClient.invalidateQueries({ queryKey: ['recent-markers', courseId] });
+      queryClient.invalidateQueries({ queryKey: [`/api/courses/${courseId}/recent-notes`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/courses/${courseId}/recent-markers`] });
       queryClient.invalidateQueries({ queryKey: ['course-duration', courseId] });
       queryClient.invalidateQueries({ queryKey: ['course-enrollment', courseId] });
       queryClient.invalidateQueries({ queryKey: ['monthly-study-time'] });
@@ -133,141 +133,16 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     enabled: !!courseId && !!supabase
   });
 
-  // Get latest 3 notes
+  // Get latest 3 notes (OPTIMIZED with backend endpoint)
   const { data: recentNotes = [] } = useQuery({
-    queryKey: ['recent-notes', courseId],
-    queryFn: async () => {
-      if (!courseId || !supabase) return [];
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return [];
-
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!authUser?.email) return [];
-
-      const { data: userRecord } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_id', authUser.id)
-        .single();
-
-      if (!userRecord) return [];
-
-      // Get all modules for this course
-      const { data: courseModules } = await supabase
-        .from('course_modules')
-        .select('id')
-        .eq('course_id', courseId);
-
-      if (!courseModules || courseModules.length === 0) return [];
-
-      const moduleIds = courseModules.map(m => m.id);
-
-      // Get all lessons for these modules
-      const { data: courseLessons } = await supabase
-        .from('course_lessons')
-        .select('id')
-        .in('module_id', moduleIds);
-
-      if (!courseLessons || courseLessons.length === 0) return [];
-
-      const lessonIds = courseLessons.map(l => l.id);
-
-      // Get latest 3 notes with lesson info
-      const { data, error } = await supabase
-        .from('course_lesson_notes')
-        .select(`
-          id,
-          body,
-          lesson_id,
-          created_at,
-          course_lessons (
-            title
-          )
-        `)
-        .eq('user_id', userRecord.id)
-        .eq('note_type', 'summary')
-        .in('lesson_id', lessonIds)
-        .order('created_at', { ascending: false })
-        .limit(3);
-
-      if (error) {
-        console.error('Error fetching recent notes:', error);
-        return [];
-      }
-
-      return data || [];
-    },
-    enabled: !!courseId && !!supabase
+    queryKey: [`/api/courses/${courseId}/recent-notes`],
+    enabled: !!courseId
   });
 
-  // Get latest 3 markers
+  // Get latest 3 markers (OPTIMIZED with backend endpoint)
   const { data: recentMarkers = [] } = useQuery({
-    queryKey: ['recent-markers', courseId],
-    queryFn: async () => {
-      if (!courseId || !supabase) return [];
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return [];
-
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!authUser?.email) return [];
-
-      const { data: userRecord } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_id', authUser.id)
-        .single();
-
-      if (!userRecord) return [];
-
-      // Get all modules for this course
-      const { data: courseModules } = await supabase
-        .from('course_modules')
-        .select('id')
-        .eq('course_id', courseId);
-
-      if (!courseModules || courseModules.length === 0) return [];
-
-      const moduleIds = courseModules.map(m => m.id);
-
-      // Get all lessons for these modules
-      const { data: courseLessons } = await supabase
-        .from('course_lessons')
-        .select('id')
-        .in('module_id', moduleIds);
-
-      if (!courseLessons || courseLessons.length === 0) return [];
-
-      const lessonIds = courseLessons.map(l => l.id);
-
-      // Get latest 3 markers with lesson info
-      const { data, error } = await supabase
-        .from('course_lesson_notes')
-        .select(`
-          id,
-          body,
-          lesson_id,
-          time_sec,
-          created_at,
-          course_lessons (
-            title
-          )
-        `)
-        .eq('user_id', userRecord.id)
-        .eq('note_type', 'marker')
-        .in('lesson_id', lessonIds)
-        .order('created_at', { ascending: false })
-        .limit(3);
-
-      if (error) {
-        console.error('Error fetching recent markers:', error);
-        return [];
-      }
-
-      return data || [];
-    },
-    enabled: !!courseId && !!supabase
+    queryKey: [`/api/courses/${courseId}/recent-markers`],
+    enabled: !!courseId
   });
 
   // Get total course duration (sum of all lesson durations)
