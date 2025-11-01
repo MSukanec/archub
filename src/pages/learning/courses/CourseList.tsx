@@ -29,54 +29,37 @@ export default function CourseList() {
     }
   }, [setSidebarContext, setSidebarLevel, sidebarLevel])
 
-  // 🚀 OPTIMIZACIÓN: Cache ultra-agresivo para performance
-  const { data: courseProgressData = [] } = useQuery({
-    queryKey: ['/api/user/course-progress'],
+  // 🚀 ULTRA-OPTIMIZADO: UNA sola query para todo (courses + enrollments + progress)
+  const { data: fullData, isLoading: fullDataLoading } = useQuery({
+    queryKey: ['/api/learning/courses-full'],
     queryFn: async () => {
-      if (!supabase) return [];
+      if (!supabase) return { courses: [], enrollments: [], progress: [] };
       
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return [];
+      if (!session) return { courses: [], enrollments: [], progress: [] };
 
-      const response = await fetch('/api/user/course-progress', {
+      const response = await fetch('/api/learning/courses-full', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }
       });
       
       if (!response.ok) {
-        console.error('Error fetching course progress:', await response.text());
-        return [];
+        console.error('Error fetching course data:', await response.text());
+        return { courses: [], enrollments: [], progress: [] };
       }
       
       return response.json();
     },
     enabled: !!supabase,
-    staleTime: Infinity, // ⚡ Cache infinito - solo refresca manualmente
-    gcTime: 600000 // 10 minutos
+    staleTime: 0, // ⚡ SIEMPRE FRESCO - refetch en cada mount
+    gcTime: 600000, // Mantener en cache 10 min
+    refetchOnMount: 'always' // 🔥 CRÍTICO: Siempre refetch después de pagos
   });
 
-  const { data: enrollments = [] } = useQuery<any[]>({
-    queryKey: ['/api/user/enrollments'],
-    queryFn: async () => {
-      if (!supabase) return [];
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return [];
-
-      const response = await fetch('/api/user/enrollments', {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      });
-
-      if (!response.ok) return [];
-      return response.json();
-    },
-    enabled: !!supabase,
-    staleTime: Infinity, // ⚡ Cache infinito - solo invalida cuando hay cambios reales
-    gcTime: 600000
-  });
+  // Extraer datos del resultado unificado
+  const courseProgressData = fullData?.progress || [];
+  const enrollments = fullData?.enrollments || [];
 
   // Obtener total de lecciones y duración por curso
   const { data: courseLessonsData = [] } = useQuery({
@@ -189,7 +172,7 @@ export default function CourseList() {
     actions: []
   };
 
-  if (coursesLoading) {
+  if (coursesLoading || fullDataLoading) {
     return (
       <Layout headerProps={headerProps} wide>
         <div className="p-8 text-center text-muted-foreground">

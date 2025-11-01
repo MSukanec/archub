@@ -35,9 +35,15 @@ export default function PaymentReturn() {
       return;
     }
 
+    // 🚀 OPTIMIZACIÓN CRÍTICA: Invalidar cache INMEDIATAMENTE (optimistic update)
+    // Esto hace que CourseList se refresque ANTES de confirmar el enrollment
+    queryClient.invalidateQueries({ queryKey: ['/api/learning/courses-full'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/user/enrollments'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/learning/dashboard'] });
+
     let timeoutId: NodeJS.Timeout;
     let attempts = 0;
-    const maxAttempts = 40; // 60 seconds maximum (40 * 1.5s)
+    const maxAttempts = 60; // 30 seconds maximum (60 * 500ms)
 
     const checkEnrollment = async () => {
       try {
@@ -71,20 +77,28 @@ export default function PaymentReturn() {
 
         if (enrollment) {
           setStatus('success');
-          // 🚀 CRÍTICO: Invalidar cache para que el botón cambie inmediatamente
+          // 🚀 CRÍTICO: Invalidar TODOS los caches para refresh instantáneo
+          queryClient.invalidateQueries({ queryKey: ['/api/learning/courses-full'] });
           queryClient.invalidateQueries({ queryKey: ['/api/user/enrollments'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/user/course-progress'] });
           queryClient.invalidateQueries({ queryKey: ['course-progress-view'] });
-          queryClient.invalidateQueries({ queryKey: ['/api/learning/dashboard'] }); // Refresh dashboard
+          queryClient.invalidateQueries({ queryKey: ['/api/learning/dashboard'] });
+          
+          // Pre-fetch para hacer la navegación instantánea
+          queryClient.prefetchQuery({ 
+            queryKey: ['/api/learning/courses-full']
+          });
+          
           return;
         }
 
         // Continue polling if not found yet
         attempts++;
         if (attempts < maxAttempts) {
-          timeoutId = setTimeout(checkEnrollment, 1500);
+          timeoutId = setTimeout(checkEnrollment, 500); // ⚡ Reducido de 1.5s a 500ms
         } else {
           setStatus('error');
-          setError('El proceso de pago está tomando más tiempo del esperado. Por favor, verifica tu correo o contacta a soporte.');
+          setError('El proceso de pago está tomando más tiempo del esperado. Por favor, verifica tu correo electrónico o contacta a soporte.');
         }
       } catch (err: any) {
         console.error('Error checking enrollment:', err);

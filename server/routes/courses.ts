@@ -417,6 +417,81 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
     }
   });
 
+  // ========== ULTRA-OPTIMIZED COURSES WITH ENROLLMENT ==========
+  
+  // GET /api/learning/courses-full - ONE query to get ALL course data + enrollments + progress
+  // 🚀 CRITICAL: This endpoint is optimized for instant page loads (sub-second)
+  app.get("/api/learning/courses-full", async (req, res) => {
+    try {
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = createAuthenticatedClient(token);
+      
+      // Get current auth user
+      const { data: { user: authUser }, error: authUserError } = await authenticatedSupabase.auth.getUser();
+      
+      if (authUserError || !authUser) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      // Get user record
+      const { data: userRecord, error: userRecordError } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', authUser.id)
+        .maybeSingle();
+      
+      if (userRecordError || !userRecord) {
+        return res.json({ courses: [], enrollments: [], progress: [] });
+      }
+      
+      // 🚀 Execute ALL queries in parallel for maximum speed
+      const [coursesResult, enrollmentsResult, progressResult] = await Promise.all([
+        // Get all active courses
+        authenticatedSupabase
+          .from('courses')
+          .select('id, slug, title, description, cover_url, is_active, visibility')
+          .eq('is_active', true)
+          .neq('visibility', 'draft'),
+        
+        // Get user's enrollments
+        authenticatedSupabase
+          .from('course_enrollments')
+          .select('id, course_id, user_id, status, created_at, updated_at, courses(slug)')
+          .eq('user_id', userRecord.id),
+        
+        // Get user's progress from optimized view
+        authenticatedSupabase
+          .from('course_progress_view')
+          .select('*')
+          .eq('user_id', userRecord.id)
+      ]);
+      
+      if (coursesResult.error) {
+        console.error('Error fetching courses:', coursesResult.error);
+        return res.status(500).json({ error: 'Failed to fetch courses' });
+      }
+      
+      // Flatten enrollment data
+      const enrollments = (enrollmentsResult.data || []).map((e: any) => ({
+        ...e,
+        course_slug: e.courses?.slug
+      }));
+      
+      res.json({
+        courses: coursesResult.data || [],
+        enrollments: enrollments,
+        progress: progressResult.data || []
+      });
+    } catch (error) {
+      console.error("Error in /api/learning/courses-full:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // ========== LEARNING DASHBOARD ENDPOINT ==========
 
   // GET /api/learning/dashboard - Consolidated endpoint for dashboard data
