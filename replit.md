@@ -51,22 +51,35 @@ Preferred communication style: Simple, everyday language.
 - **Root cause**: Each enrollment triggered separate queries to fetch modules → lessons → progress, causing massive query overhead and slow response times
 - **Solution**: Complete endpoint refactoring with bulk queries and in-memory data combination
 - **Implementation** (`server/routes/admin.ts`):
-  - **Query 1**: Fetch ALL enrollments with joined users, courses, and payments data (1 query)
-  - **Query 2**: Fetch ALL modules for ALL unique courses at once (1 query)
-  - **Query 3**: Fetch ALL lessons for ALL modules at once (1 query)
-  - **Query 4**: Fetch ALL progress records for ALL users and lessons at once (1 query)
-  - **Combine**: Use in-memory Maps (`courseModulesMap`, `moduleLessonsMap`, `userProgressMap`) to calculate progress for each enrollment without additional queries
+  - **Query 1**: Fetch ALL enrollments with joined users and courses (1 query)
+  - **Query 2**: Fetch ALL payments for all users and courses (1 query)
+  - **Query 3**: Fetch ALL modules for ALL unique courses at once (1 query)
+  - **Query 4**: Fetch ALL lessons for ALL modules at once (1 query)
+  - **Query 5**: Fetch ALL progress records for ALL users and lessons at once (1 query)
+  - **Combine**: Use in-memory Maps (`paymentMap`, `courseModulesMap`, `moduleLessonsMap`, `userProgressMap`) to calculate progress for each enrollment without additional queries
 - **Edge cases handled**:
   - Empty enrollments → return empty array immediately
   - No modules/lessons → return 0% progress with payment data intact
   - Safe division by zero in progress calculation
-- **Data normalization**: Payments join returns array, normalized to single payment object with fallback
+- **Data normalization**: Payments mapped by `user_id + course_id` composite key for fast lookup
 - **Performance gains**:
-  - Query count: 150+ queries → 4 bulk queries (97% reduction)
+  - Query count: 150+ queries → 5 bulk queries (97% reduction)
   - Load time: ~15 seconds → <1 second (15x faster)
   - Compatible with both Express (development) and Vercel serverless (production)
 - **Files updated**: `server/routes/admin.ts` - Rewrote entire `/api/admin/enrollments` GET endpoint
 - **Result**: Admin "Alumnos" page now loads instantly with all enrollment data, progress calculations, and payment information displayed correctly
+
+#### Lesson Viewer Console Spam Fix (Nov 01, 2025)
+- **Problem**: CourseViewer component was spamming console with "Navigation state update" messages and causing performance issues
+- **Root cause**: useEffect with unstable dependencies (function references) was executing on every render, causing infinite re-render loop
+- **Solution**: Optimized useEffect dependencies and removed verbose console.log statements
+- **Changes**:
+  - Removed `progressMap`, `onNavigationStateChange`, and handler functions from useEffect dependencies
+  - Added eslint-disable comment to acknowledge intentional dependency optimization
+  - Removed console.log spam: "🔄 Navigation state update", "✅ Lesson marked complete", "🔄 Refetch results"
+  - Removed verbose pendingSeek log
+- **Files updated**: `src/pages/learning/courses/view/CourseViewer.tsx`
+- **Result**: Lesson viewer now runs smoothly without console spam or performance degradation
 
 ## External Dependencies
 - **Supabase**: Authentication, Database (PostgreSQL), Storage.

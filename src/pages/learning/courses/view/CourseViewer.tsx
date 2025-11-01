@@ -239,10 +239,8 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
       return response.json();
     },
     onSuccess: async () => {
-      console.log('✅ Lesson marked complete, refetching queries...');
-      
       // Force refetch of progress data for course and dashboard
-      const results = await Promise.all([
+      await Promise.all([
         queryClient.refetchQueries({ 
           queryKey: ['/api/courses', courseId, 'progress'],
           exact: true 
@@ -252,8 +250,6 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
           exact: true 
         })
       ]);
-      
-      console.log('🔄 Refetch results:', results);
       
       toast({
         title: 'Lección completada',
@@ -371,7 +367,6 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
   // Escuchar pendingSeek del store (para navegación desde marcadores usando el store)
   useEffect(() => {
     if (pendingSeek !== null && pendingSeek !== undefined) {
-      console.log('🎯 pendingSeek detectado desde store:', pendingSeek);
       setTargetSeekTime(pendingSeek);
       // NO limpiar aquí - esperar confirmación del player vía onSeekApplied
     }
@@ -391,13 +386,6 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
         const currentProgress = progressMap.get(activeLessonId);
         const isCompleted = currentProgress?.is_completed || false;
         
-        console.log('🔄 Navigation state update:', { 
-          lessonId: activeLessonId, 
-          isCompleted, 
-          progress: currentProgress,
-          isPending: markCompleteMutation.isPending 
-        });
-        
         onNavigationStateChange({
           hasPrev: navigationInfo.hasPrev,
           hasNext: navigationInfo.hasNext,
@@ -411,7 +399,8 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
         onNavigationStateChange(null);
       }
     }
-  }, [activeLessonId, navigationInfo.hasPrev, navigationInfo.hasNext, orderedLessons.length, markCompleteMutation.isPending, progressMap, onNavigationStateChange, handlePrevious, handleNext, handleMarkComplete]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeLessonId, navigationInfo.hasPrev, navigationInfo.hasNext, orderedLessons.length, markCompleteMutation.isPending]);
 
   // Group lessons by module
   const getLessonsForModule = (moduleId: string) => {
