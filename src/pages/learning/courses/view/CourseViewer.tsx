@@ -419,54 +419,37 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
   const initialPosition = targetSeekTime !== undefined ? targetSeekTime : (currentProgress?.last_position_sec || 0);
 
   return (
-    <div className="space-y-6">
-      {currentLesson?.vimeo_video_id ? (
-        <>
-          {/* Layout de 3 columnas: Video (2 cols) + Marcadores sidebar (1 col) */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Columnas 1 y 2: Video Player */}
-            <div className="lg:col-span-2">
-              <VimeoPlayer 
-                vimeoId={currentLesson.vimeo_video_id}
-                initialPosition={initialPosition}
-                onProgress={handleVideoProgress}
-                onPlayerReady={setVimeoPlayer}
-                onSeekApplied={() => {
-                  clearPendingSeek();
-                }}
-              />
-            </div>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Columnas 1 y 2: Contenido principal (Video, Info, Apuntes) */}
+      <div className="lg:col-span-2 space-y-6">
+        {currentLesson?.vimeo_video_id ? (
+          <>
+            {/* Video Player */}
+            <VimeoPlayer 
+              vimeoId={currentLesson.vimeo_video_id}
+              initialPosition={initialPosition}
+              onProgress={handleVideoProgress}
+              onPlayerReady={setVimeoPlayer}
+              onSeekApplied={() => {
+                clearPendingSeek();
+              }}
+            />
 
-            {/* Columna 3: Marcadores (sticky) */}
-            {activeLessonId && (
-              <div className="lg:sticky lg:top-4 lg:self-start">
-                <div className="bg-card border rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Bookmark className="h-5 w-5 text-[var(--accent)]" />
-                    <h3 className="font-semibold">Marcadores</h3>
-                  </div>
-                  <LessonMarkers lessonId={activeLessonId} vimeoPlayer={vimeoPlayer} />
+            {/* Card con datos del video */}
+            <div className="bg-card border rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-2">{currentLesson.title}</h2>
+              {currentLesson.duration_sec && (
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">
+                  <Clock className="h-4 w-4" />
+                  <span>{formatDuration(currentLesson.duration_sec)}</span>
                 </div>
-              </div>
-            )}
-          </div>
-
-          {/* Card con datos del video - Debajo del player */}
-          <div className="bg-card border rounded-lg p-6">
-            <div className="grid grid-cols-1 md:grid-cols-[1fr,auto] gap-4 items-start">
-              {/* Columna Izquierda: Título + Duración */}
-              <div className="space-y-1">
-                <h2 className="text-xl font-semibold">{currentLesson.title}</h2>
-                {currentLesson.duration_sec && (
-                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    <span>Duración: {formatDuration(currentLesson.duration_sec)}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Columna Derecha: Botones de Acción */}
-              <div className="flex items-center gap-2">
+              )}
+              
+              {/* Línea divisoria */}
+              <hr className="border-t border-border mb-4" />
+              
+              {/* Botones de Acción - Solo iconos */}
+              <div className="flex items-center gap-1">
                 {/* Botón Favorito */}
                 {courseId && (
                   <FavoriteButton 
@@ -480,41 +463,53 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
                 
                 {/* Botón Marcar como Completa */}
                 <Button
-                  variant={currentProgress?.is_completed ? "secondary" : "default"}
-                  size="sm"
+                  variant="ghost"
+                  size="icon"
                   onClick={handleMarkComplete}
                   disabled={markCompleteMutation.isPending || currentProgress?.is_completed}
                   data-testid="button-mark-complete-inline"
-                  className="whitespace-nowrap"
+                  title={currentProgress?.is_completed ? 'Completada' : 'Marcar como Completa'}
                 >
-                  <CheckCircle className="w-4 h-4 mr-1.5" />
-                  {currentProgress?.is_completed ? 'Completada' : (markCompleteMutation.isPending ? 'Marcando...' : 'Marcar como Completa')}
+                  <CheckCircle className={currentProgress?.is_completed ? "w-5 h-5 text-[var(--accent)]" : "w-5 h-5"} />
                 </Button>
               </div>
             </div>
-          </div>
 
-          {/* Card de Apuntes - Debajo de los datos del video */}
-          {activeLessonId && (
-            <div className="bg-card border rounded-lg p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <FileText className="h-5 w-5 text-[var(--accent)]" />
-                <h3 className="font-semibold">Mis Apuntes</h3>
+            {/* Card de Apuntes */}
+            {activeLessonId && (
+              <div className="bg-card border rounded-lg p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <FileText className="h-5 w-5 text-[var(--accent)]" />
+                  <h3 className="font-semibold">Mis Apuntes</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Resumen general de la lección - se guarda automáticamente mientras escribes.
+                </p>
+                <LessonSummaryNote lessonId={activeLessonId} />
               </div>
-              <p className="text-sm text-muted-foreground mb-4">
-                Resumen general de la lección - se guarda automáticamente mientras escribes.
+            )}
+          </>
+        ) : (
+          <div className="bg-muted/20 rounded-lg border-2 border-dashed border-muted-foreground/20 aspect-video flex items-center justify-center">
+            <div className="text-center">
+              <Play className="h-16 w-16 mx-auto mb-4 text-muted-foreground/40" />
+              <p className="text-lg font-medium text-muted-foreground">
+                {activeLessonId ? 'Esta lección no tiene video disponible' : 'Selecciona una lección para comenzar'}
               </p>
-              <LessonSummaryNote lessonId={activeLessonId} />
             </div>
-          )}
-        </>
-      ) : (
-        <div className="bg-muted/20 rounded-lg border-2 border-dashed border-muted-foreground/20 aspect-video flex items-center justify-center">
-          <div className="text-center">
-            <Play className="h-16 w-16 mx-auto mb-4 text-muted-foreground/40" />
-            <p className="text-lg font-medium text-muted-foreground">
-              {activeLessonId ? 'Esta lección no tiene video disponible' : 'Selecciona una lección para comenzar'}
-            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Columna 3: Marcadores sidebar (sticky) */}
+      {activeLessonId && currentLesson?.vimeo_video_id && (
+        <div className="lg:sticky lg:top-4 lg:self-start">
+          <div className="bg-card border rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Bookmark className="h-5 w-5 text-[var(--accent)]" />
+              <h3 className="font-semibold">Marcadores</h3>
+            </div>
+            <LessonMarkers lessonId={activeLessonId} vimeoPlayer={vimeoPlayer} />
           </div>
         </div>
       )}

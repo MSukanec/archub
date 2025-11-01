@@ -22,7 +22,7 @@ interface CourseSidebarProps {
 export function CourseSidebar({ modules, lessons, currentLessonId }: CourseSidebarProps) {
   const { setCurrentLesson } = useCourseSidebarStore();
   const goToLesson = useCoursePlayerStore(s => s.goToLesson);
-  const [isDocked, setIsDocked] = useState(true);
+  const [isDocked, setIsDocked] = useState(false);
   const [isHovered, setHovered] = useState(false);
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   
