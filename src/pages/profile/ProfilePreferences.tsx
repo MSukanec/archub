@@ -9,6 +9,7 @@ import { queryClient, apiRequest } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
 import { useSidebarStore, useSecondarySidebarStore } from '@/stores/sidebarStore'
 import { useThemeStore } from '@/stores/themeStore'
+import { supabase } from '@/lib/supabase'
 
 interface ProfilePreferencesProps {
   user: any;
@@ -37,11 +38,29 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
       if (data.sidebarDocked !== userData?.preferences?.sidebar_docked ||
           data.theme !== userData?.preferences?.theme) {
         
-        await apiRequest('PATCH', '/api/user/profile', {
-          user_id: userData?.user?.id,
-          sidebar_docked: data.sidebarDocked,
-          theme: data.theme,
+        // Get the auth token from Supabase session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        if (sessionError || !session?.access_token) {
+          throw new Error('No se pudo obtener el token de autenticación')
+        }
+        
+        const response = await fetch('/api/user/profile', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            user_id: userData?.user?.id,
+            sidebar_docked: data.sidebarDocked,
+            theme: data.theme,
+          }),
         })
+        
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
+        }
       }
       
       return data
