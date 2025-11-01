@@ -79,37 +79,6 @@ export default function AdminPaymentTransferRow({
       .slice(0, 2);
   };
 
-  const cardContent = (
-    <>
-      {/* Columna de contenido (principal) */}
-      <div className="flex-1 min-w-0">
-        {/* Primera fila - Nombre del usuario */}
-        <div className="font-semibold text-sm truncate">
-          {payment.users?.full_name || 'Sin nombre'}
-        </div>
-
-        {/* Segunda fila - Email */}
-        <div className="text-xs text-muted-foreground truncate">
-          {payment.users?.email}
-        </div>
-      </div>
-
-      {/* Trailing Section - Monto y Fecha */}
-      <div className="flex flex-col items-end gap-0.5">
-        <span className="font-semibold text-sm">
-          {new Intl.NumberFormat('es-AR', {
-            style: 'currency',
-            currency: payment.currency,
-            minimumFractionDigits: 0,
-          }).format(payment.amount)}
-        </span>
-        <span className="text-xs text-muted-foreground">
-          {format(new Date(payment.created_at), 'dd/MM/yy', { locale: es })}
-        </span>
-      </div>
-    </>
-  );
-
   return (
     <DataRowCard
       avatarUrl={payment.users?.avatar_url || undefined}
@@ -117,37 +86,68 @@ export default function AdminPaymentTransferRow({
       density={density}
       data-testid={`payment-transfer-row-${payment.id}`}
     >
-      {cardContent}
-      <div className="space-y-3 mt-3">
-        {/* Curso */}
-        <div className="flex items-start gap-2">
-          <FileText className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-          <div className="flex-1 min-w-0">
-            <p className="text-xs text-muted-foreground">Curso</p>
-            <p className="text-sm font-medium truncate">
-              {payment.course_prices?.courses?.title || 'N/A'}
+      {/* Layout vertical con todos los datos apilados */}
+      <div className="space-y-2.5 w-full">
+        {/* Fila 1: Nombre del usuario */}
+        <div>
+          <p className="text-xs text-muted-foreground mb-0.5">Usuario</p>
+          <p className="font-semibold text-sm">
+            {payment.users?.full_name || 'Sin nombre'}
+          </p>
+        </div>
+
+        {/* Fila 2: Email */}
+        <div>
+          <p className="text-xs text-muted-foreground mb-0.5">Email</p>
+          <p className="text-sm truncate">
+            {payment.users?.email}
+          </p>
+        </div>
+
+        {/* Fila 3: Curso */}
+        <div>
+          <p className="text-xs text-muted-foreground mb-0.5">Curso</p>
+          <p className="text-sm font-medium truncate">
+            {payment.course_prices?.courses?.title || 'N/A'}
+          </p>
+        </div>
+
+        {/* Fila 4: Monto */}
+        <div>
+          <p className="text-xs text-muted-foreground mb-0.5">Monto</p>
+          <p className="font-semibold text-base">
+            {new Intl.NumberFormat('es-AR', {
+              style: 'currency',
+              currency: payment.currency,
+              minimumFractionDigits: 0,
+            }).format(payment.amount)}
+          </p>
+        </div>
+
+        {/* Fila 5: Fecha y Estado */}
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <p className="text-xs text-muted-foreground mb-0.5">Fecha</p>
+            <p className="text-sm">
+              {format(new Date(payment.created_at), "dd/MM/yy HH:mm", { locale: es })}
             </p>
+          </div>
+          <div>
+            {getStatusBadge()}
           </div>
         </div>
 
-        {/* Estado */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {getStatusBadge()}
-          </div>
-          
-          {/* Botón Ver solo si hay comprobante */}
-          {payment.receipt_url && (
-            <Button
-              size="sm"
-              onClick={() => onViewReceipt(payment)}
-              data-testid={`button-view-receipt-${payment.id}`}
-            >
-              <Eye className="h-4 w-4 mr-1" />
-              Ver
-            </Button>
-          )}
-        </div>
+        {/* Fila 6: Botón Ver - ancho completo si hay comprobante */}
+        {payment.receipt_url && (
+          <Button
+            className="w-full mt-2"
+            onClick={() => onViewReceipt(payment)}
+            data-testid={`button-view-receipt-${payment.id}`}
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            Ver Comprobante
+          </Button>
+        )}
       </div>
     </DataRowCard>
   );
