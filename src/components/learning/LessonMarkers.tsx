@@ -37,7 +37,6 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
         const time = await vimeoPlayer.getCurrentTime();
         setCurrentTime(Math.floor(time));
       } catch (error) {
-        console.error('Error getting current time:', error);
       }
     };
 
@@ -137,7 +136,6 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
 
       createMarkerMutation.mutate(roundedTime);
     } catch (error) {
-      console.error('Error adding marker:', error);
     }
   };
 
@@ -173,7 +171,6 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
         description: `Saltando a ${formatTime(timeSec)}`
       });
     } catch (error) {
-      console.error('Error seeking to time:', error);
     }
   };
 

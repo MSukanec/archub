@@ -35,7 +35,6 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
         });
 
         if (!response.ok) {
-          console.error('Failed to load notes:', response.status);
           return;
         }
 
@@ -50,7 +49,6 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
           initialNoteTextRef.current = '';
         }
       } catch (error) {
-        console.error('Error loading notes:', error);
       } finally {
         setIsLoading(false);
         // Marcar que la carga inicial terminó después de un pequeño delay
@@ -102,7 +100,6 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
         });
 
         if (!response.ok) {
-          console.error('Failed to save note:', response.status);
           setSaveStatus('error');
           return;
         }
@@ -120,7 +117,6 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
         }, 800);
 
       } catch (error) {
-        console.error('Error saving note:', error);
         setSaveStatus('error');
       }
     }, 700);

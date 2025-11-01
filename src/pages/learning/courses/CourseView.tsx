@@ -39,7 +39,6 @@ export default function CourseView() {
   // Initialize store with URL tab param if present (runs on mount AND when URL changes)
   useEffect(() => {
     if (tabParam && tabParam !== storeActiveTab) {
-      console.log('🔗 Sincronizando store desde URL:', tabParam);
       setStoreActiveTab(tabParam as any);
       setActiveTab(tabParam);
     } else if (!tabParam && activeTab !== storeActiveTab) {
@@ -51,7 +50,6 @@ export default function CourseView() {
   // Sync activeTab with store ONLY when store changes from external actions (e.g., goToLesson)
   useEffect(() => {
     if (storeActiveTab !== activeTab) {
-      console.log('🔄 Sincronizando tab desde store:', storeActiveTab);
       setActiveTab(storeActiveTab);
     }
   }, [storeActiveTab]); // Note: activeTab intentionally NOT in deps to avoid loops
@@ -90,7 +88,6 @@ export default function CourseView() {
         .single();
         
       if (error) {
-        console.error('Error fetching course:', error);
         throw error;
       }
       
@@ -108,8 +105,6 @@ export default function CourseView() {
     queryFn: async () => {
       if (!course?.id || !userData?.user?.id || !supabase) return null;
       
-      console.log('🔍 Verificando inscripción para curso:', course.id, 'usuario:', userData.user.id);
-      
       // userData.user.id is already the UUID from users table
       const userId = userData.user.id;
       
@@ -122,11 +117,8 @@ export default function CourseView() {
         .maybeSingle();
         
       if (error) {
-        console.error('❌ Error verificando inscripción:', error);
         return null;
       }
-      
-      console.log('📋 Resultado de inscripción:', data ? '✅ Inscrito' : '❌ No inscrito');
       
       return data;
     },
@@ -204,7 +196,6 @@ export default function CourseView() {
   // Force refetch if coming from payment
   useEffect(() => {
     if (enrolledParam === 'true' && course?.id && userData?.user?.id) {
-      console.log('🔄 Usuario viene de pago exitoso, forzando refetch de inscripción...');
       refetchEnrollment();
       // Clean URL parameter
       const newUrl = window.location.pathname + (window.location.search.replace(/[?&]enrolled=true/, '').replace(/^\?$/, '') || '');

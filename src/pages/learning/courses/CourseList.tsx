@@ -44,7 +44,6 @@ export default function CourseList() {
       });
       
       if (!response.ok) {
-        console.error('Error fetching course data:', await response.text());
         return { courses: [], enrollments: [], progress: [] };
       }
       
@@ -76,7 +75,6 @@ export default function CourseList() {
         .in('course_modules.course_id', courseIds);
       
       if (error) {
-        console.error('Error fetching course lessons:', error);
         return [];
       }
       return data || [];

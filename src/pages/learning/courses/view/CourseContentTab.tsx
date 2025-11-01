@@ -48,7 +48,6 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
         .order('sort_index', { ascending: true });
         
       if (error) {
-        console.error('Error fetching course modules:', error);
         throw error;
       }
       
@@ -72,7 +71,6 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
         .order('sort_index', { ascending: true});
         
       if (error) {
-        console.error('Error fetching lessons:', error);
         throw error;
       }
       

@@ -46,7 +46,6 @@ export function registerContactRoutes(app: Express, deps: RouteDeps) {
         .order('first_name', { ascending: true });
       
       if (contactsError) {
-        console.error("Error fetching contacts:", contactsError);
         return res.status(500).json({ error: "Failed to fetch contacts" });
       }
       
@@ -124,7 +123,6 @@ export function registerContactRoutes(app: Express, deps: RouteDeps) {
       
       res.json(enrichedContacts);
     } catch (error) {
-      console.error("Error in contacts endpoint:", error);
       res.status(500).json({ error: "Failed to fetch contacts" });
     }
   });

@@ -112,7 +112,6 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       });
     },
     onError: (error) => {
-      console.error('Error deleting marker:', error);
       toast({
         title: "Error",
         description: "No se pudo eliminar el marcador",

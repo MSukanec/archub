@@ -62,7 +62,6 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
         .order('sort_index', { ascending: true });
         
       if (error) {
-        console.error('Error fetching course modules:', error);
         throw error;
       }
       
@@ -85,7 +84,6 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
         .order('sort_index', { ascending: true });
         
       if (error) {
-        console.error('Error fetching lessons:', error);
         throw error;
       }
       
@@ -109,7 +107,6 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
       });
       
       if (!res.ok) {
-        console.error('Failed to fetch progress:', res.status);
         return [];
       }
       
@@ -177,7 +174,6 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
       
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Auto-save failed:', response.status, errorText);
         throw new Error(`Failed to save progress (${response.status})`);
       }
       
@@ -228,7 +224,6 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
       
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Mark complete failed:', response.status, errorText);
         const errorData = errorText ? JSON.parse(errorText) : {};
         throw new Error(errorData.error || `Failed to mark lesson as complete (${response.status})`);
       }
@@ -254,7 +249,6 @@ export default function CourseViewer({ courseId, onNavigationStateChange, initia
       });
     },
     onError: (error) => {
-      console.error('Error marking lesson as complete:', error);
       toast({
         title: 'Error',
         description: 'No se pudo marcar la lección como completa',

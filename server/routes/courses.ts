@@ -41,7 +41,7 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .maybeSingle();
       
       if (userLookupError || !existingUser) {
-        console.error("User not found in users table:", user.id, userLookupError);
+
         return res.status(404).json({ error: "User not found in database" });
       }
       
@@ -72,13 +72,11 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .single();
       
       if (error) {
-        console.error("Error upserting lesson progress:", error);
         return res.status(500).json({ error: "Failed to update progress" });
       }
       
       res.json(data);
     } catch (error) {
-      console.error("Error updating lesson progress:", error);
       res.status(500).json({ error: "Failed to update progress" });
     }
   });
@@ -113,7 +111,7 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .maybeSingle();
       
       if (userLookupError || !existingUser) {
-        console.error("User not found in users table:", user.id, userLookupError);
+
         return res.status(404).json({ error: "User not found in database" });
       }
       
@@ -137,13 +135,11 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .single();
       
       if (error) {
-        console.error("Error toggling lesson favorite:", error);
         return res.status(500).json({ error: "Failed to toggle favorite" });
       }
       
       res.json(data);
     } catch (error) {
-      console.error("Error toggling lesson favorite:", error);
       res.status(500).json({ error: "Failed to toggle favorite" });
     }
   });
@@ -187,7 +183,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .eq('course_id', courseId);
       
       if (modulesError || !modules) {
-        console.error("Error fetching modules:", modulesError);
         return res.status(500).json({ error: "Failed to fetch course modules" });
       }
       
@@ -204,7 +199,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .in('module_id', moduleIds);
       
       if (lessonsError || !lessons) {
-        console.error("Error fetching lessons:", lessonsError);
         return res.status(500).json({ error: "Failed to fetch lessons" });
       }
       
@@ -222,13 +216,11 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .in('lesson_id', lessonIds);
       
       if (progressError) {
-        console.error("Error fetching progress:", progressError);
         return res.status(500).json({ error: "Failed to fetch progress" });
       }
       
       res.json(progress || []);
     } catch (error) {
-      console.error("Error fetching course progress:", error);
       res.status(500).json({ error: "Failed to fetch progress" });
     }
   });
@@ -273,13 +265,11 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .order('created_at', { ascending: false });
       
       if (error) {
-        console.error("Error fetching notes:", error);
         return res.status(500).json({ error: "Failed to fetch notes" });
       }
       
       res.json(notes || []);
     } catch (error) {
-      console.error("Error fetching lesson notes:", error);
       res.status(500).json({ error: "Failed to fetch notes" });
     }
   });
@@ -342,7 +332,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
           .single();
         
         if (error) {
-          console.error("Error updating note:", error);
           return res.status(500).json({ error: "Failed to update note" });
         }
         
@@ -361,7 +350,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
           .single();
         
         if (error) {
-          console.error("Error creating note:", error);
           return res.status(500).json({ error: "Failed to create note" });
         }
         
@@ -370,7 +358,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       
       res.json(noteData);
     } catch (error) {
-      console.error("Error saving lesson note:", error);
       res.status(500).json({ error: "Failed to save note" });
     }
   });
@@ -412,7 +399,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .eq('lesson_id', lessonId);
       
       if (error) {
-        console.error("Error fetching notes for summary:", error);
         return res.status(500).json({ error: "Failed to fetch summary note" });
       }
       
@@ -421,7 +407,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       
       res.json(note);
     } catch (error) {
-      console.error("Error fetching summary note:", error);
       res.status(500).json({ error: "Failed to fetch summary note" });
     }
   });
@@ -484,7 +469,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
           .single();
         
         if (error) {
-          console.error("Error updating summary note:", error);
           return res.status(500).json({ error: "Failed to update summary note" });
         }
         
@@ -505,7 +489,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
           .single();
         
         if (error) {
-          console.error("Error creating summary note:", error);
           return res.status(500).json({ error: "Failed to create summary note" });
         }
         
@@ -514,7 +497,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       
       res.json(noteData);
     } catch (error) {
-      console.error("Error saving summary note:", error);
       res.status(500).json({ error: "Failed to save summary note" });
     }
   });
@@ -564,14 +546,14 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
           .in('id', summaryNotes.map(n => n.id));
         
         if (error) {
-          console.error("Error deleting summary note:", error);
+    
           return res.status(500).json({ error: "Failed to delete summary note" });
         }
       }
       
       res.json({ success: true });
     } catch (error) {
-      console.error("Error deleting summary note:", error);
+
       res.status(500).json({ error: "Failed to delete summary note" });
     }
   });
@@ -610,13 +592,13 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .eq('user_id', dbUser.id);
       
       if (error) {
-        console.error("Error deleting note:", error);
+  
         return res.status(500).json({ error: "Failed to delete note" });
       }
       
       res.json({ success: true });
     } catch (error) {
-      console.error("Error deleting note:", error);
+
       res.status(500).json({ error: "Failed to delete note" });
     }
   });
@@ -661,7 +643,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .order('created_at', { ascending: true });
       
       if (error) {
-        console.error("Error fetching notes for markers:", error);
         return res.status(500).json({ error: "Failed to fetch markers" });
       }
       
@@ -672,7 +653,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       
       res.json(markers);
     } catch (error) {
-      console.error("Error fetching markers:", error);
       res.status(500).json({ error: "Failed to fetch markers" });
     }
   });
@@ -723,13 +703,13 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .single();
       
       if (error) {
-        console.error("Error creating marker:", error);
+  
         return res.status(500).json({ error: "Failed to create marker" });
       }
       
       res.json(marker);
     } catch (error) {
-      console.error("Error creating marker:", error);
+
       res.status(500).json({ error: "Failed to create marker" });
     }
   });
@@ -791,13 +771,13 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .single();
       
       if (error) {
-        console.error("Error updating marker:", error);
+  
         return res.status(500).json({ error: "Failed to update marker" });
       }
       
       res.json(marker);
     } catch (error) {
-      console.error("Error updating marker:", error);
+
       res.status(500).json({ error: "Failed to update marker" });
     }
   });
@@ -849,13 +829,13 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .eq('id', markerId);
       
       if (error) {
-        console.error("Error deleting marker:", error);
+  
         return res.status(500).json({ error: "Failed to delete marker" });
       }
       
       res.json({ success: true });
     } catch (error) {
-      console.error("Error deleting marker:", error);
+
       res.status(500).json({ error: "Failed to delete marker" });
     }
   });
@@ -923,7 +903,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .order('created_at', { ascending: false });
       
       if (notesError) {
-        console.error("Error fetching notes for recent summaries:", notesError);
         // Return empty array instead of error to prevent app crash
         return res.json([]);
       }
@@ -945,7 +924,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       
       res.json(enrichedNotes);
     } catch (error) {
-      console.error("Error fetching recent notes:", error);
       // Return empty array instead of error to prevent app crash
       res.json([]);
     }
@@ -1012,7 +990,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .order('created_at', { ascending: false });
       
       if (notesError) {
-        console.error("Error fetching notes for markers:", notesError);
         // Return empty array instead of error to prevent app crash
         return res.json([]);
       }
@@ -1034,7 +1011,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       
       res.json(enrichedMarkers);
     } catch (error) {
-      console.error("Error fetching recent markers:", error);
       // Return empty array instead of error to prevent app crash
       res.json([]);
     }
@@ -1101,7 +1077,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .order('created_at', { ascending: false });
       
       if (notesError) {
-        console.error("Error fetching all notes for course:", notesError);
         // Return empty array instead of error to prevent app crash
         return res.json([]);
       }
@@ -1127,7 +1102,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       
       res.json(enrichedNotes);
     } catch (error) {
-      console.error("Error fetching course notes:", error);
       // Return empty array instead of error to prevent app crash
       res.json([]);
     }
@@ -1194,7 +1168,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .order('created_at', { ascending: false });
       
       if (markersError) {
-        console.error("Error fetching all notes for markers:", markersError);
         // Return empty array instead of error to prevent app crash
         return res.json([]);
       }
@@ -1222,7 +1195,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       
       res.json(enrichedMarkers);
     } catch (error) {
-      console.error("Error fetching course markers:", error);
       // Return empty array instead of error to prevent app crash
       res.json([]);
     }
@@ -1267,15 +1239,12 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .eq('user_id', dbUser.id);
       
       if (progressError) {
-        console.error("Error fetching user progress:", progressError);
         return res.status(500).json({ error: "Failed to fetch progress" });
       }
       
-      console.log('📊 /api/user/all-progress returning:', JSON.stringify(progress, null, 2));
       
       res.json(progress || []);
     } catch (error) {
-      console.error("Error fetching user progress:", error);
       res.status(500).json({ error: "Failed to fetch progress" });
     }
   });
@@ -1307,7 +1276,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .maybeSingle();
       
       if (userRecordError || !userRecord) {
-        console.error("Error fetching user record:", userRecordError);
         return res.json([]);
       }
       
@@ -1318,7 +1286,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .eq('user_id', userRecord.id);
       
       if (enrollmentsError) {
-        console.error("Error fetching user enrollments:", enrollmentsError);
         return res.status(500).json({ error: "Failed to fetch enrollments" });
       }
       
@@ -1330,7 +1297,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       
       res.json(formattedEnrollments);
     } catch (error) {
-      console.error("Error fetching user enrollments:", error);
       res.status(500).json({ error: "Failed to fetch enrollments" });
     }
   });
@@ -1389,7 +1355,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       ]);
       
       if (coursesResult.error) {
-        console.error('Error fetching courses:', coursesResult.error);
         return res.status(500).json({ error: 'Failed to fetch courses' });
       }
       
@@ -1400,8 +1365,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       }));
       
       // 🔍 DEBUG: Log enrollments to see what we're returning
-      console.log('📊 ENROLLMENTS DEBUG:', JSON.stringify(enrollments, null, 2));
-      console.log('📊 ENROLLMENTS COUNT:', enrollments.length);
       
       res.json({
         courses: coursesResult.data || [],
@@ -1409,7 +1372,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         progress: progressResult.data || []
       });
     } catch (error) {
-      console.error("Error in /api/learning/courses-full:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   });
@@ -1459,7 +1421,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       const cacheKey = `dashboard_${dbUser.id}`;
       const cached = dashboardCache.get(cacheKey);
       if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
-        console.log('📦 Dashboard API: Returning cached data for user:', dbUser.id);
         return res.json(cached.data);
       }
       
@@ -1470,7 +1431,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .eq('user_id', dbUser.id);
       
       if (enrollmentsError) {
-        console.error("Error fetching enrollments:", enrollmentsError);
         throw enrollmentsError;
       }
       
@@ -1488,7 +1448,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       
       // 🚀 OPTIMIZACIÓN: Usar vistas pre-calculadas en paralelo con timing logs
       const startTotal = Date.now();
-      console.log('📊 Dashboard API: Starting queries for user:', dbUser.id);
       
       // Execute each query with timing
       const startGlobal = Date.now();
@@ -1498,7 +1457,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .eq('user_id', dbUser.id)
         .maybeSingle()
         .then(result => {
-          console.log(`⏱️ Global Progress View: ${Date.now() - startGlobal}ms`);
           return result;
         });
       
@@ -1508,7 +1466,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .select('*')
         .eq('user_id', dbUser.id)
         .then(result => {
-          console.log(`⏱️ Course Progress View: ${Date.now() - startCourse}ms`);
           return result;
         });
       
@@ -1519,7 +1476,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .eq('user_id', dbUser.id)
         .maybeSingle()
         .then(result => {
-          console.log(`⏱️ Study Time View: ${Date.now() - startStudy}ms`);
           return result;
         });
       
@@ -1529,7 +1485,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .select('*')
         .eq('user_id', dbUser.id)
         .then(result => {
-          console.log(`⏱️ Active Days View: ${Date.now() - startActive}ms`);
           return result;
         });
       
@@ -1543,7 +1498,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .order('completed_at', { ascending: false })
         .limit(10)
         .then(result => {
-          console.log(`⏱️ Recent Completions View: ${Date.now() - startCompletions}ms`);
           return result;
         });
       
@@ -1561,33 +1515,26 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         recentCompletionsPromise
       ]);
       
-      console.log(`📊 Dashboard API: All queries completed in ${Date.now() - startTotal}ms`);
       
       // Log individual query results for debugging
       if (globalProgressResult.error || courseProgressResult.error || studyTimeResult.error || 
           activeDaysResult.error || recentCompletionsResult.error) {
-        console.error('⚠️ Dashboard API: Some queries had errors');
       }
       
       // Check for errors
       if (globalProgressResult.error) {
-        console.error("Error fetching global progress:", globalProgressResult.error);
         throw globalProgressResult.error;
       }
       if (courseProgressResult.error) {
-        console.error("Error fetching course progress:", courseProgressResult.error);
         throw courseProgressResult.error;
       }
       if (studyTimeResult.error) {
-        console.error("Error fetching study time:", studyTimeResult.error);
         throw studyTimeResult.error;
       }
       if (activeDaysResult.error) {
-        console.error("Error fetching active days:", activeDaysResult.error);
         throw activeDaysResult.error;
       }
       if (recentCompletionsResult.error) {
-        console.error("Error fetching recent completions:", recentCompletionsResult.error);
         throw recentCompletionsResult.error;
       }
       
@@ -1664,12 +1611,10 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         data: responseData,
         timestamp: Date.now()
       });
-      console.log('💾 Dashboard API: Cached data for user:', dbUser.id);
       
       // Return pre-calculated data (no heavy computation needed!)
       res.json(responseData);
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
       res.status(500).json({ error: "Failed to fetch dashboard data" });
     }
   });
@@ -1715,7 +1660,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         });
       }
       
-      console.log('🚀 Dashboard Fast API: Starting optimized queries for user:', dbUser.id);
       
       // Optimized Query 1: Get enrollments with course info (small, fast)
       const startEnroll = Date.now();
@@ -1727,10 +1671,8 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         `)
         .eq('user_id', dbUser.id);
         
-      console.log(`⚡ Enrollments: ${Date.now() - startEnroll}ms`);
       
       if (!enrollments || enrollments.length === 0) {
-        console.log('📊 Dashboard Fast API: No enrollments, returning early');
         return res.json({
           global: null,
           courses: [],
@@ -1765,7 +1707,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .eq('user_id', dbUser.id)
         .in('course_lessons.course_modules.course_id', courseIds);
       
-      console.log(`⚡ Progress data: ${Date.now() - startProgress}ms`);
       
       // Calculate aggregated data locally (much faster than views)
       const progressByCourse = new Map();
@@ -1786,7 +1727,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .in('course_modules.course_id', courseIds)
         .eq('is_active', true);
       
-      console.log(`⚡ Lessons count: ${Date.now() - startLessons}ms`);
       
       // Build course progress map
       for (const course of enrollments) {
@@ -1886,7 +1826,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         }
       }
       
-      console.log(`🎯 Dashboard Fast API: Total time: ${Date.now() - startTotal}ms`);
       
       // Return optimized response
       res.json({
@@ -1902,7 +1841,6 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       });
       
     } catch (error) {
-      console.error("Error in dashboard-fast:", error);
       res.status(500).json({ error: "Failed to fetch dashboard data" });
     }
   });

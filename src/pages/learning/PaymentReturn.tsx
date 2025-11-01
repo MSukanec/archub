@@ -101,7 +101,6 @@ export default function PaymentReturn() {
           setError('El proceso de pago está tomando más tiempo del esperado. Por favor, verifica tu correo electrónico o contacta a soporte.');
         }
       } catch (err: any) {
-        console.error('Error checking enrollment:', err);
         setStatus('error');
         setError(err.message || 'Error al verificar el estado del pago');
       }

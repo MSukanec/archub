@@ -22,7 +22,6 @@ export const useCoursePlayerStore = create<State>((set) => ({
   ...initialState,
   setActiveTab: (t) => set({ activeTab: t }),
   goToLesson: (lessonId, seek = null) => {
-    console.log('🎯 goToLesson llamado:', { lessonId, seek });
     set({
       activeTab: "Lecciones",
       currentLessonId: lessonId,

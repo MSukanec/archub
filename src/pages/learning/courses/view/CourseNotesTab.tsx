@@ -104,7 +104,6 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
       });
     },
     onError: (error) => {
-      console.error('Error deleting note:', error);
       toast({
         title: "Error",
         description: "No se pudo eliminar el apunte",

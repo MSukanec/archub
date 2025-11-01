@@ -63,7 +63,6 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       });
 
       if (!response.ok) {
-        console.error('Error fetching course progress:', await response.text());
         return null;
       }
 
@@ -122,7 +121,6 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         .in('lesson_id', lessonIds);
 
       if (error) {
-        console.error('Error fetching study time:', error);
         return { total_seconds: 0 };
       }
 
@@ -168,7 +166,6 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         .in('module_id', moduleIds);
 
       if (error) {
-        console.error('Error fetching course duration:', error);
         return { total_seconds: 0 };
       }
 
@@ -209,7 +206,6 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         .maybeSingle();
 
       if (error) {
-        console.error('Error fetching enrollment:', error);
         return null;
       }
 
@@ -278,7 +274,6 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         .limit(10);
 
       if (error) {
-        console.error('Error fetching last lesson:', error);
         return null;
       }
 
@@ -323,7 +318,6 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       });
 
       if (!response.ok) {
-        console.error('Error fetching study time:', await response.text());
         return { seconds_this_month: 0 };
       }
 

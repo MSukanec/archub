@@ -67,17 +67,13 @@ export default function LearningDashboard() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return null as any;
 
-      const startTime = Date.now();
       const response = await fetch(endpoint, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }
       });
-      const loadTime = Date.now() - startTime;
-      console.log(`📊 Dashboard loaded in ${loadTime}ms using ${endpoint}`);
 
       if (!response.ok) {
-        console.error('Failed to fetch dashboard data:', await response.text());
         return null as any;
       }
       

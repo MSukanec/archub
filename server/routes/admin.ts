@@ -64,13 +64,11 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
         .order('created_at', { ascending: false });
       
       if (coursesError) {
-        console.error("Error fetching courses:", coursesError);
         return res.status(500).json({ error: "Failed to fetch courses" });
       }
       
       return res.json(courses);
     } catch (error: any) {
-      console.error("Error in /api/admin/courses:", error);
       return res.status(500).json({ error: "Internal error" });
     }
   });
@@ -98,13 +96,11 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
         .single();
       
       if (courseError) {
-        console.error("Error fetching course:", courseError);
         return res.status(500).json({ error: "Failed to fetch course" });
       }
       
       return res.json(course);
     } catch (error: any) {
-      console.error("Error in /api/admin/courses/:id:", error);
       return res.status(500).json({ error: "Internal error" });
     }
   });
@@ -134,13 +130,11 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
         .single();
       
       if (courseError) {
-        console.error("Error updating course:", courseError);
         return res.status(500).json({ error: "Failed to update course" });
       }
       
       return res.json(course);
     } catch (error: any) {
-      console.error("Error in PATCH /api/admin/courses/:id:", error);
       return res.status(500).json({ error: "Internal error" });
     }
   });
@@ -167,13 +161,11 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
         .eq('id', id);
       
       if (courseError) {
-        console.error("Error deleting course:", courseError);
         return res.status(500).json({ error: "Failed to delete course" });
       }
       
       return res.json({ success: true });
     } catch (error: any) {
-      console.error("Error in DELETE /api/admin/courses/:id:", error);
       return res.status(500).json({ error: "Internal error" });
     }
   });
@@ -208,13 +200,11 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
       const { data: modules, error: modulesError } = await query;
       
       if (modulesError) {
-        console.error("Error fetching modules:", modulesError);
         return res.status(500).json({ error: "Failed to fetch modules" });
       }
       
       return res.json(modules || []);
     } catch (error: any) {
-      console.error("Error in /api/admin/modules:", error);
       return res.status(500).json({ error: "Internal error" });
     }
   });
@@ -244,13 +234,11 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
         .single();
       
       if (moduleError) {
-        console.error("Error updating module:", moduleError);
         return res.status(500).json({ error: "Failed to update module" });
       }
       
       return res.json(module);
     } catch (error: any) {
-      console.error("Error in PATCH /api/admin/modules/:id:", error);
       return res.status(500).json({ error: "Internal error" });
     }
   });
@@ -285,13 +273,11 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
       const { data: lessons, error: lessonsError } = await query;
       
       if (lessonsError) {
-        console.error("Error fetching lessons:", lessonsError);
         return res.status(500).json({ error: "Failed to fetch lessons" });
       }
       
       return res.json(lessons || []);
     } catch (error: any) {
-      console.error("Error in /api/admin/lessons:", error);
       return res.status(500).json({ error: "Internal error" });
     }
   });
@@ -321,13 +307,11 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
         .single();
       
       if (lessonError) {
-        console.error("Error updating lesson:", lessonError);
         return res.status(500).json({ error: "Failed to update lesson" });
       }
       
       return res.json(lesson);
     } catch (error: any) {
-      console.error("Error in PATCH /api/admin/lessons/:id:", error);
       return res.status(500).json({ error: "Internal error" });
     }
   });
@@ -367,7 +351,6 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
       const { data: enrollments, error: enrollmentsError} = await enrollmentsQuery;
       
       if (enrollmentsError) {
-        console.error("Error fetching enrollments:", enrollmentsError);
         return res.status(500).json({ error: "Failed to fetch enrollments" });
       }
 
@@ -506,7 +489,6 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
       
       return res.json(enrollmentsWithProgress);
     } catch (error: any) {
-      console.error("Error in /api/admin/enrollments:", error);
       return res.status(500).json({ error: "Internal error" });
     }
   });
@@ -540,13 +522,11 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
         .single();
       
       if (insertError) {
-        console.error("Error creating enrollment:", insertError);
         return res.status(500).json({ error: "Failed to create enrollment" });
       }
       
       return res.json(data);
     } catch (error: any) {
-      console.error("Error in POST /api/admin/enrollments:", error);
       return res.status(500).json({ error: "Internal error" });
     }
   });
@@ -581,13 +561,11 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
         .single();
       
       if (updateError) {
-        console.error("Error updating enrollment:", updateError);
         return res.status(500).json({ error: "Failed to update enrollment" });
       }
       
       return res.json(data);
     } catch (error: any) {
-      console.error("Error in PATCH /api/admin/enrollments/:id:", error);
       return res.status(500).json({ error: "Internal error" });
     }
   });
@@ -614,13 +592,11 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
         .eq('id', id);
       
       if (deleteError) {
-        console.error("Error deleting enrollment:", deleteError);
         return res.status(500).json({ error: "Failed to delete enrollment" });
       }
       
       return res.json({ success: true });
     } catch (error: any) {
-      console.error("Error in DELETE /api/admin/enrollments/:id:", error);
       return res.status(500).json({ error: "Internal error" });
     }
   });
@@ -737,7 +713,6 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
         expiringSoon: expiringSoonResult.data || []
       });
     } catch (error: any) {
-      console.error("Error in /api/admin/dashboard:", error);
       return res.status(500).json({ error: "Internal error" });
     }
   });
@@ -797,7 +772,6 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
       const { data, error: usersError } = await query;
       
       if (usersError) {
-        console.error("Error fetching users:", usersError);
         return res.status(500).json({ error: "Failed to fetch users" });
       }
       
@@ -839,7 +813,6 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
       
       return res.json(sortedUsers);
     } catch (error: any) {
-      console.error("Error in /api/admin/users:", error);
       return res.status(500).json({ error: "Internal error" });
     }
   });
@@ -870,13 +843,11 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
         .single();
       
       if (updateError) {
-        console.error("Error updating user:", updateError);
         return res.status(500).json({ error: "Failed to update user" });
       }
       
       return res.json(data);
     } catch (error: any) {
-      console.error("Error in PATCH /api/admin/users/:id:", error);
       return res.status(500).json({ error: "Internal error" });
     }
   });
