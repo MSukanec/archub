@@ -653,6 +653,7 @@ export const course_lesson_progress = pgTable("course_lesson_progress", {
   completed_at: timestamp("completed_at", { withTimezone: true }),
   updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   is_completed: boolean("is_completed"),
+  is_favorite: boolean("is_favorite").notNull().default(false), // 🌟 NUEVO: Lecciones favoritas
 }, (table) => ({
   lesson_progress_unique: unique().on(table.user_id, table.lesson_id),
 }));

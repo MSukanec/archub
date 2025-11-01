@@ -83,6 +83,71 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
     }
   });
 
+  // POST /api/lessons/:lessonId/favorite - Toggle lesson as favorite
+  app.post("/api/lessons/:lessonId/favorite", async (req, res) => {
+    try {
+      const { lessonId } = req.params;
+      const { is_favorite } = req.body; // true or false
+      
+      // Extract and validate token
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      // Create authenticated Supabase client
+      const authenticatedSupabase = createAuthenticatedClient(token);
+      
+      // Get current user from Supabase Auth
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      // Get user from users table by auth_id
+      const { data: existingUser, error: userLookupError } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      if (userLookupError || !existingUser) {
+        console.error("User not found in users table:", user.id, userLookupError);
+        return res.status(404).json({ error: "User not found in database" });
+      }
+      
+      const dbUserId = existingUser.id;
+      
+      // Upsert progress with favorite status
+      // Si el usuario no tiene progreso, lo creamos con valores por defecto
+      const { data, error } = await authenticatedSupabase
+        .from('course_lesson_progress')
+        .upsert({
+          user_id: dbUserId,
+          lesson_id: lessonId,
+          is_favorite: is_favorite,
+          progress_pct: 0,  // Default si es nuevo
+          last_position_sec: 0,  // Default si es nuevo
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,lesson_id'
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Error toggling lesson favorite:", error);
+        return res.status(500).json({ error: "Failed to toggle favorite" });
+      }
+      
+      res.json(data);
+    } catch (error) {
+      console.error("Error toggling lesson favorite:", error);
+      res.status(500).json({ error: "Failed to toggle favorite" });
+    }
+  });
+
   // GET /api/courses/:courseId/progress - Get all lesson progress for a course
   app.get("/api/courses/:courseId/progress", async (req, res) => {
     try {
