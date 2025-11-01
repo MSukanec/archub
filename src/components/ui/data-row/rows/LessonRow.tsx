@@ -2,6 +2,7 @@ import { CheckCircle2, Circle, Clock, FileText, Bookmark } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import DataRowCard from '../DataRowCard';
+import { FavoriteButton } from '@/components/learning/FavoriteButton';
 
 interface LessonRowProps {
   lesson: {
@@ -12,11 +13,13 @@ interface LessonRowProps {
     notes_count: number;
     markers_count: number;
     is_completed: boolean;
+    is_favorite: boolean; // 🌟 NUEVO
   };
+  courseId: string; // 🌟 NUEVO: Necesario para FavoriteButton
   onGoToLesson: (lessonId: string) => void;
 }
 
-export default function LessonRow({ lesson, onGoToLesson }: LessonRowProps) {
+export default function LessonRow({ lesson, courseId, onGoToLesson }: LessonRowProps) {
   const formatDuration = (seconds: number | null) => {
     if (!seconds) return '-';
     const totalMins = Math.floor(seconds / 60);
@@ -69,12 +72,22 @@ export default function LessonRow({ lesson, onGoToLesson }: LessonRowProps) {
         </div>
       </div>
 
-      {/* Action Button - Full Width Below */}
-      <div className="col-span-full pt-3 border-t border-border/50">
+      {/* Action Buttons - Full Width Below */}
+      <div className="col-span-full pt-3 border-t border-border/50 flex items-center gap-2">
+        {/* 🌟 BOTÓN DE FAVORITO */}
+        <FavoriteButton 
+          lessonId={lesson.id}
+          courseId={courseId}
+          isFavorite={lesson.is_favorite}
+          variant="icon"
+          size="md"
+        />
+        
+        {/* BOTÓN IR A LECCIÓN */}
         <Button
           variant="default"
           size="sm"
-          className="w-full"
+          className="flex-1"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();

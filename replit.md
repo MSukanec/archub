@@ -107,6 +107,29 @@ Preferred communication style: Simple, everyday language.
   - `src/pages/learning/courses/view/CourseViewer.tsx` - Fixed lesson selection logic to use properly ordered lessons and implement resume functionality
 - **Result**: Users now correctly start from the first lesson of the first module on first visit, and automatically resume from their last viewed lesson on subsequent visits
 
+#### Lesson Favorites Implementation (Nov 01, 2025)
+- **Feature**: Complete lesson favorites system allowing users to mark lessons as favorites for quick access
+- **Database changes**:
+  - Added `is_favorite` boolean column to `course_lesson_progress` table (default false)
+  - Created partial index `idx_lesson_progress_favorites` for optimized favorite queries
+  - Migration script: `migrations/add_lesson_favorites.sql`
+- **Backend implementation**:
+  - New endpoint `PATCH /api/lessons/:id/favorite` in `server/routes/courses.ts`
+  - Toggle favorite status with automatic progress record creation
+  - Proper Supabase authentication and cache invalidation
+- **Frontend components**:
+  - `src/components/learning/FavoriteButton.tsx` - Reusable favorite toggle button (icon and button variants)
+  - `src/hooks/use-lesson-favorite.ts` - React hook with optimistic updates and cache invalidation
+- **UI Integration**:
+  - CourseContentTab: Star button in "Acciones" column (left of "Ir a Lección" button)
+  - Desktop view: Icon button with hover effect (filled/outline star)
+  - Mobile view: Icon button in LessonRow alongside "Ir a Lección" (flex-1)
+- **Files updated**:
+  - `shared/schema.ts` - Added `is_favorite` field to schema
+  - `src/pages/learning/courses/view/CourseContentTab.tsx` - Desktop table integration
+  - `src/components/ui/data-row/rows/LessonRow.tsx` - Mobile card integration
+- **Result**: Users can now mark/unmark lessons as favorites with instant visual feedback, both on desktop and mobile. Favorites state persists in database and survives page refreshes.
+
 #### User Presence Heartbeat Reactivation (Nov 01, 2025)
 - **Problem**: Heartbeat functionality was temporarily disabled in `ProjectContextInitializer.tsx`, preventing tracking of user last activity
 - **Solution**: Reactivated the `useHeartbeat` hook that sends periodic updates to `user_presence` table every 30 seconds

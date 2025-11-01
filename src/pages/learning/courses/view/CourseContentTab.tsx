@@ -9,6 +9,7 @@ import { CheckCircle2, Circle, ArrowRight } from 'lucide-react'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
 import { useCoursePlayerStore } from '@/stores/coursePlayerStore'
 import LessonRow from '@/components/ui/data-row/rows/LessonRow'
+import { FavoriteButton } from '@/components/learning/FavoriteButton'
 
 interface CourseContentTabProps {
   courseId?: string;
@@ -25,6 +26,7 @@ interface LessonRowData {
   notes_count: number;
   markers_count: number;
   is_completed: boolean;
+  is_favorite: boolean; // 🌟 NUEVO: Estado de favorito
   groupKey: string; // Para el groupBy
 }
 
@@ -182,9 +184,9 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
     // Map lessons to rows
     const rows: LessonRowData[] = lessons.map((lesson) => {
       const module = moduleMap[lesson.module_id];
-      const isCompleted = courseProgress.some(
-        (p: any) => p.lesson_id === lesson.id && p.is_completed
-      );
+      const progress = courseProgress.find((p: any) => p.lesson_id === lesson.id);
+      const isCompleted = progress?.is_completed || false;
+      const isFavorite = progress?.is_favorite || false; // 🌟 NUEVO: Obtener estado de favorito
       const counts = notesCountMap[lesson.id] || { notes: 0, markers: 0 };
 
       return {
@@ -197,6 +199,7 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
         notes_count: counts.notes,
         markers_count: counts.markers,
         is_completed: isCompleted,
+        is_favorite: isFavorite, // 🌟 NUEVO: Incluir en el row
         groupKey: module?.title || 'Sin módulo'
       };
     });
@@ -295,18 +298,30 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
       width: '20%',
       sortable: false,
       render: (row: LessonRowData) => (
-        <Button
-          variant="default"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleGoToLesson(row.id);
-          }}
-          data-testid={`button-go-to-lesson-${row.id}`}
-        >
-          <ArrowRight className="h-4 w-4 mr-2" />
-          Ir a Lección
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* 🌟 BOTÓN DE FAVORITO */}
+          <FavoriteButton 
+            lessonId={row.id}
+            courseId={courseId!}
+            isFavorite={row.is_favorite}
+            variant="icon"
+            size="md"
+          />
+          
+          {/* BOTÓN IR A LECCIÓN */}
+          <Button
+            variant="default"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleGoToLesson(row.id);
+            }}
+            data-testid={`button-go-to-lesson-${row.id}`}
+          >
+            <ArrowRight className="h-4 w-4 mr-2" />
+            Ir a Lección
+          </Button>
+        </div>
       )
     }
   ];
@@ -333,6 +348,7 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
         renderCard={(row: LessonRowData) => (
           <LessonRow
             lesson={row}
+            courseId={courseId!}
             onGoToLesson={handleGoToLesson}
           />
         )}
