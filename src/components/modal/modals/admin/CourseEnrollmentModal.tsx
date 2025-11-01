@@ -57,20 +57,37 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch users
+  // Fetch users from backend API (bypasses RLS)
   const { data: users = [] } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
       if (!supabase) return [];
       
-      const { data, error } = await supabase
-        .from('users')
-        .select('id, full_name, email')
-        .eq('is_active', true)
-        .order('full_name', { ascending: true });
-        
-      if (error) throw error;
-      return data || [];
+      // Get current session token
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No active session');
+      
+      // Call backend API endpoint with admin authentication
+      const response = await fetch('/api/admin/users?statusFilter=active&sortBy=name', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch users');
+      }
+      
+      const allUsers = await response.json();
+      
+      // Extract only the fields we need for the combobox
+      return allUsers.map((user: any) => ({
+        id: user.id,
+        full_name: user.full_name,
+        email: user.email
+      }));
     },
     enabled: !!supabase
   });
