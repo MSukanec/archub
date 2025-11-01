@@ -1,6 +1,6 @@
+import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { useToast } from '@/hooks/use-toast';
 
 interface UseLessonFavoriteProps {
   lessonId: string;
@@ -9,8 +9,8 @@ interface UseLessonFavoriteProps {
 }
 
 export function useLessonFavorite({ lessonId, courseId, currentlyFavorite }: UseLessonFavoriteProps) {
-  const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [optimisticFavorite, setOptimisticFavorite] = useState<boolean | null>(null);
 
   const toggleFavoriteMutation = useMutation({
     mutationFn: async (isFavorite: boolean) => {
@@ -40,32 +40,35 @@ export function useLessonFavorite({ lessonId, courseId, currentlyFavorite }: Use
       return response.json();
     },
     onSuccess: () => {
-      // Invalidar cache de progreso del curso
-      queryClient.invalidateQueries({ queryKey: ['/api/courses', courseId, 'progress'] });
-      
-      toast({
-        title: currentlyFavorite ? "Quitado de favoritos" : "Agregado a favoritos",
-        description: currentlyFavorite 
-          ? "La lección fue quitada de tus favoritos" 
-          : "La lección fue agregada a tus favoritos",
+      // Invalidar solo el cache de progreso específico
+      queryClient.invalidateQueries({ 
+        queryKey: ['/api/courses', courseId, 'progress'],
+        exact: false 
       });
+      
+      // Limpiar estado optimista después de éxito
+      setOptimisticFavorite(null);
     },
     onError: (error: any) => {
       console.error('Error toggling favorite:', error);
-      toast({
-        title: "Error",
-        description: error.message || "No se pudo marcar como favorito",
-        variant: "destructive",
-      });
+      // Revertir estado optimista en caso de error
+      setOptimisticFavorite(null);
     },
   });
 
   const toggleFavorite = () => {
-    toggleFavoriteMutation.mutate(!currentlyFavorite);
+    const newValue = !currentlyFavorite;
+    
+    // ⚡ UPDATE OPTIMISTA INSTANTÁNEO
+    setOptimisticFavorite(newValue);
+    
+    // Ejecutar mutación en background
+    toggleFavoriteMutation.mutate(newValue);
   };
 
   return {
     toggleFavorite,
     isLoading: toggleFavoriteMutation.isPending,
+    optimisticFavorite, // Exponer estado optimista para UI
   };
 }

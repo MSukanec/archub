@@ -1,4 +1,4 @@
-import { Star } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLessonFavorite } from '@/hooks/use-lesson-favorite';
 import { cn } from '@/lib/utils';
@@ -20,7 +20,7 @@ export function FavoriteButton({
   size = 'md',
   className 
 }: FavoriteButtonProps) {
-  const { toggleFavorite, isLoading } = useLessonFavorite({ 
+  const { toggleFavorite, isLoading, optimisticFavorite } = useLessonFavorite({ 
     lessonId, 
     courseId, 
     currentlyFavorite: isFavorite 
@@ -32,6 +32,9 @@ export function FavoriteButton({
     lg: 'h-6 w-6'
   };
 
+  // Usar el estado optimista para feedback instantáneo
+  const displayFavorite = optimisticFavorite ?? isFavorite;
+
   if (variant === 'icon') {
     return (
       <button
@@ -41,20 +44,20 @@ export function FavoriteButton({
         }}
         disabled={isLoading}
         className={cn(
-          "inline-flex items-center justify-center rounded-full p-1.5 transition-colors",
-          "hover:bg-accent/50 disabled:opacity-50 disabled:cursor-not-allowed",
+          "inline-flex items-center justify-center rounded-full p-1.5 transition-all duration-150",
+          "hover:ring-2 hover:ring-red-500 hover:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed",
           className
         )}
         data-testid={`button-favorite-lesson-${lessonId}`}
-        title={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
+        title={displayFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
       >
-        <Star
+        <Heart
           className={cn(
             iconSizes[size],
-            "transition-all",
-            isFavorite 
-              ? "fill-yellow-400 text-yellow-400" 
-              : "text-muted-foreground hover:text-yellow-400"
+            "transition-all duration-150",
+            displayFavorite 
+              ? "fill-red-500 text-red-500" 
+              : "text-muted-foreground"
           )}
         />
       </button>
@@ -73,16 +76,16 @@ export function FavoriteButton({
       className={cn("gap-2", className)}
       data-testid={`button-favorite-lesson-${lessonId}`}
     >
-      <Star
+      <Heart
         className={cn(
           iconSizes[size],
-          "transition-all",
-          isFavorite 
-            ? "fill-yellow-400 text-yellow-400" 
+          "transition-all duration-150",
+          displayFavorite 
+            ? "fill-red-500 text-red-500" 
             : "text-muted-foreground"
         )}
       />
-      {isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
+      {displayFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
     </Button>
   );
 }
