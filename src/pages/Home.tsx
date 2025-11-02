@@ -286,13 +286,16 @@ export default function Home() {
       {/* Main Content Area */}
       <div
         className={cn(
-          "flex-1 transition-all duration-300 ease-in-out relative z-10",
+          "flex-1 transition-all duration-300 ease-in-out relative z-10 overflow-y-auto",
           isExpanded ? "ml-64" : "ml-16"
         )}
       >
-        {/* Content */}
-        <div className="h-full flex flex-col items-center justify-center px-8 py-12 overflow-y-auto">
-          <div className="max-w-3xl w-full space-y-8">
+        {/* Contenedor con padding igual que otras páginas */}
+        <div className="p-3">
+          <div className="rounded-xl overflow-hidden h-[calc(100vh-24px)]" style={{ backgroundColor: "var(--layout-bg)" }}>
+            {/* Content centrado */}
+            <div className="h-full flex flex-col items-center justify-center px-8 py-12 overflow-y-auto">
+              <div className="max-w-3xl w-full space-y-8">
             
             {/* Área donde "habla la IA": Saludo inicial O última respuesta */}
             <div className="text-center space-y-6">
@@ -471,6 +474,8 @@ export default function Home() {
                 </div>
               </motion.div>
             )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
