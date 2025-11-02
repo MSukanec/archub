@@ -19,10 +19,11 @@ import {
   Layers,
   ListTodo,
   BookOpen,
-  ArrowLeft,
   MessageCircle,
   Wallet,
+  ChevronLeft,
 } from "lucide-react";
+import { MobileMenuButton } from "./MobileMenuButton";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -200,6 +201,24 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     onClose();
   };
 
+  // Función para obtener el título del menú según el nivel
+  const getMenuTitle = (): string => {
+    switch (sidebarLevel) {
+      case 'general':
+        return 'Menú';
+      case 'organization':
+        return 'Organización';
+      case 'project':
+        return 'Proyecto';
+      case 'learning':
+        return 'Capacitaciones';
+      case 'admin':
+        return 'Administración';
+      default:
+        return 'Menú';
+    }
+  };
+
   // Configuración de divisores con texto (igual que desktop)
   const getDividerInfo = (item: SidebarItem, index: number) => {
     if (sidebarLevel === 'organization') {
@@ -230,74 +249,64 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       >
         {/* Main Menu Panel */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Header con botón de cierre */}
-          <div className="flex justify-between items-center h-14 px-4 border-b border-[var(--main-sidebar-border)]">
-            <h1 className="text-lg font-semibold text-[var(--main-sidebar-fg)]">
-              Menú
+          {/* Header */}
+          <div className="flex items-center h-14 px-4 border-b border-[var(--card-border)] bg-[var(--card-bg)]">
+            {sidebarLevel !== 'general' && (
+              <button
+                onClick={() => {
+                  setSidebarLevel('general');
+                  navigate('/home');
+                }}
+                className="p-2 -ml-2 hover:bg-[var(--card-hover-bg)] rounded-lg transition-colors"
+                data-testid="button-mobile-back"
+              >
+                <ChevronLeft className="h-5 w-5 text-[var(--text-default)]" />
+              </button>
+            )}
+            <h1 className="text-lg font-semibold text-[var(--text-default)] flex-1">
+              {getMenuTitle()}
             </h1>
-            <Button
-              variant="ghost"
-              size="sm"
+            <button
               onClick={handleCloseMenu}
-              className="text-[var(--main-sidebar-fg)] p-2"
+              className="p-2 -mr-2 hover:bg-[var(--card-hover-bg)] rounded-lg transition-colors"
             >
-              <X className="h-5 w-5" />
-            </Button>
+              <X className="h-5 w-5 text-[var(--text-default)]" />
+            </button>
           </div>
 
           {/* Navigation Menu - Scrollable */}
-          <div className="flex-1 px-4 py-4 overflow-y-auto">
-            <nav className="space-y-2">
+          <div className="flex-1 overflow-y-auto">
+            <nav>
               {sidebarLevel === 'general' ? (
                 /* MENU GENERAL - NIVEL 1 */
                 <>
-                  {/* Botón Inicio */}
-                  <button
+                  <MobileMenuButton
+                    icon={Home}
+                    label="Inicio"
                     onClick={() => {
                       navigate('/home');
                       handleCloseMenu();
                     }}
-                    className={cn(
-                      "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-                      location === '/home'
-                        ? "bg-[hsl(76,100%,40%)] text-white" 
-                        : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
-                    )}
-                    data-testid="button-mobile-home"
-                  >
-                    <Home className="h-5 w-5" />
-                    Inicio
-                  </button>
+                    isActive={location === '/home'}
+                    showChevron={false}
+                    testId="button-mobile-home"
+                  />
 
-                  {/* Divisor "Secciones" */}
-                  <div className="my-3 flex items-center gap-2 w-full">
-                    <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                    <span className="text-[10px] font-medium text-[var(--main-sidebar-fg)] opacity-60 px-1">
-                      Secciones
-                    </span>
-                    <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                  </div>
-
-                  {/* Botón Organización */}
-                  <button
+                  <MobileMenuButton
+                    icon={Building}
+                    label="Organización"
                     onClick={() => {
                       setSidebarLevel('organization');
                       navigate('/organization/dashboard');
                     }}
-                    className={cn(
-                      "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-                      (location.startsWith('/organization') || location.startsWith('/contacts') || location.startsWith('/movements') || location.startsWith('/finances') || location.startsWith('/analysis'))
-                        ? "bg-[hsl(76,100%,40%)] text-white" 
-                        : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
-                    )}
-                    data-testid="button-mobile-organization"
-                  >
-                    <Building className="h-5 w-5" />
-                    Organización
-                  </button>
+                    isActive={location.startsWith('/organization') || location.startsWith('/contacts') || location.startsWith('/movements') || location.startsWith('/finances') || location.startsWith('/analysis')}
+                    showChevron={true}
+                    testId="button-mobile-organization"
+                  />
 
-                  {/* Botón Proyecto */}
-                  <button
+                  <MobileMenuButton
+                    icon={FolderOpen}
+                    label="Proyecto"
                     onClick={() => {
                       if (!projectsData || projectsData.length === 0) {
                         toast({
@@ -318,83 +327,49 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       setSidebarLevel('project');
                       navigate('/project/dashboard');
                     }}
+                    isActive={location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients')}
+                    showChevron={true}
                     disabled={!projectsData || projectsData.length === 0}
-                    className={cn(
-                      "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150",
-                      (!projectsData || projectsData.length === 0)
-                        ? "opacity-50 cursor-not-allowed bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)]"
-                        : (location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients'))
-                          ? "bg-[hsl(76,100%,40%)] text-white shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5" 
-                          : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)] shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5"
-                    )}
-                    data-testid="button-mobile-project"
-                  >
-                    <FolderOpen className="h-5 w-5" />
-                    Proyecto
-                  </button>
+                    testId="button-mobile-project"
+                  />
 
-                  {/* Botón Capacitaciones */}
-                  <button
+                  <MobileMenuButton
+                    icon={GraduationCap}
+                    label="Capacitaciones"
                     onClick={() => {
                       setSidebarLevel('learning');
                       navigate('/learning/dashboard');
                     }}
-                    className={cn(
-                      "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-                      location.startsWith('/learning')
-                        ? "bg-[hsl(76,100%,40%)] text-white" 
-                        : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
-                    )}
-                    data-testid="button-mobile-learning"
-                  >
-                    <GraduationCap className="h-5 w-5" />
-                    Capacitaciones
-                  </button>
+                    isActive={location.startsWith('/learning')}
+                    showChevron={true}
+                    testId="button-mobile-learning"
+                  />
 
-                  {/* Botón Administración - solo si es admin */}
                   {isAdmin && (
-                    <button
+                    <MobileMenuButton
+                      icon={Crown}
+                      label="Administración"
                       onClick={() => {
                         setSidebarLevel('admin');
                         navigate('/admin/community');
                       }}
-                      className={cn(
-                        "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-                        location.startsWith('/admin')
-                          ? "bg-[hsl(76,100%,40%)] text-white" 
-                          : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
-                      )}
-                      data-testid="button-mobile-admin"
-                    >
-                      <Crown className="h-5 w-5" />
-                      Administración
-                    </button>
+                      isActive={location.startsWith('/admin')}
+                      showChevron={true}
+                      testId="button-mobile-admin"
+                    />
                   )}
                 </>
               ) : (
                 /* MENU ESPECÍFICO - NIVEL 2 */
                 <>
-                  {/* Botón VOLVER */}
-                  <button
-                    onClick={() => {
-                      setSidebarLevel('general');
-                      navigate('/home');
-                    }}
-                    className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
-                    data-testid="button-mobile-back"
-                  >
-                    <ArrowLeft className="h-5 w-5" />
-                    Volver
-                  </button>
-
-                  {/* Botones de navegación de segundo nivel */}
                   {navigationItems.map((item, index) => {
                     const isActive = isButtonActive(item.href);
-                    const dividerInfo = getDividerInfo(item, index);
                     const isExternal = item.href.startsWith('http');
                     
                     const button = (
-                      <button
+                      <MobileMenuButton
+                        icon={item.icon}
+                        label={item.label}
                         onClick={() => {
                           if (isExternal) {
                             window.open(item.href, '_blank');
@@ -403,16 +378,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                             handleCloseMenu();
                           }
                         }}
-                        className={cn(
-                          "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-                          isActive
-                            ? "bg-[hsl(76,100%,40%)] text-white" 
-                            : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
-                        )}
-                      >
-                        <item.icon className="h-5 w-5" />
-                        {item.label}
-                      </button>
+                        isActive={isActive}
+                        showChevron={false}
+                        testId={`button-mobile-${item.id}`}
+                      />
                     );
                     
                     return (
@@ -423,15 +392,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                           </PlanRestricted>
                         ) : (
                           button
-                        )}
-                        {dividerInfo.show && (
-                          <div className="my-3 flex items-center gap-2 w-full">
-                            <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                            <span className="text-[10px] font-medium text-[var(--main-sidebar-fg)] opacity-60 px-1">
-                              {dividerInfo.text}
-                            </span>
-                            <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                          </div>
                         )}
                       </div>
                     );
