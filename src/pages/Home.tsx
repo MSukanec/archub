@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SmartChatInput } from "@/components/ui-custom/fields/SmartChatInput";
+import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
 
 interface Suggestion {
   label: string;
@@ -48,126 +49,72 @@ export default function Home() {
     setSidebarLevel('general');
   }, [setSidebarLevel]);
 
-  // Cargar historial de chat al montar
+  // Cargar historial y saludo en paralelo al montar
   useEffect(() => {
-    const loadHistory = async () => {
+    const loadData = async () => {
       try {
-        setIsLoadingHistory(true);
-
         // Obtener el token del usuario
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError || !session?.access_token) {
-          // Si no hay sesión, simplemente no cargar historial
           setIsLoadingHistory(false);
+          setIsLoadingGreeting(false);
           return;
         }
 
-        // Llamar al endpoint de historial
-        const response = await fetch('/api/ai/history', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json'
-          }
-        });
+        // Ejecutar ambas llamadas en paralelo
+        const [historyResult, greetingResult] = await Promise.allSettled([
+          // Cargar historial
+          fetch('/api/ai/history', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`,
+              'Content-Type': 'application/json'
+            }
+          }).then(res => res.ok ? res.json() : null),
+          
+          // Cargar saludo
+          fetch('/api/ai/home_greeting', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`,
+              'Content-Type': 'application/json'
+            }
+          }).then(res => res.ok ? res.json() : null)
+        ]);
 
-        if (!response.ok) {
-          console.error('Error fetching history');
-          setIsLoadingHistory(false);
-          return;
-        }
-
-        const data = await response.json();
-        
-        // Inicializar chatMessages con el historial
-        if (data.messages && Array.isArray(data.messages)) {
-          const formattedMessages = data.messages.map((msg: any) => ({
+        // Procesar historial
+        if (historyResult.status === 'fulfilled' && historyResult.value?.messages) {
+          const formattedMessages = historyResult.value.messages.map((msg: any) => ({
             role: msg.role,
             content: msg.content
           }));
           setChatMessages(formattedMessages);
         }
-      } catch (err: any) {
-        console.error('Error loading history:', err);
-      } finally {
         setIsLoadingHistory(false);
-      }
-    };
 
-    if (userData?.user?.id) {
-      loadHistory();
-    }
-  }, [userData?.user?.id]);
-
-  // Fetch del saludo de IA
-  useEffect(() => {
-    const fetchGreeting = async () => {
-      try {
-        setIsLoadingGreeting(true);
-        setError(null);
-
-        // Obtener el token del usuario
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError || !session?.access_token) {
-          throw new Error("No se pudo obtener la sesión del usuario");
+        // Procesar saludo
+        if (greetingResult.status === 'fulfilled' && greetingResult.value) {
+          setGreetingData(greetingResult.value);
+        } else {
+          setError("Error al cargar el saludo");
         }
+        setIsLoadingGreeting(false);
 
-        // Llamar al endpoint de saludo
-        const response = await fetch('/api/ai/home_greeting', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          
-          // Manejar límite de prompts alcanzado
-          if (response.status === 429) {
-            setGreetingData({
-              greeting: errorData.error || "Has alcanzado tu límite de prompts gratuitos según tu plan. Actualiza a PRO para acceso ilimitado.",
-              suggestions: [
-                { label: "Ver planes", action: "/settings/billing" },
-                { label: "Explorar cursos", action: "/learning/courses" },
-                { label: "Ver proyectos", action: "/organization/projects" }
-              ]
-            });
-            setIsLoadingGreeting(false);
-            return;
-          }
-          
-          throw new Error(errorData.error || "Error al obtener el saludo");
-        }
-
-        const data: GreetingData = await response.json();
-        setGreetingData(data);
       } catch (err: any) {
-        console.error('Error fetching greeting:', err);
-        setError(err.message || "Error al cargar el saludo");
-        // Fallback genérico
-        setGreetingData({
-          greeting: `¡Hola, ${userData?.user_data?.first_name || 'Usuario'}! ¿Cómo estás hoy?`,
-          suggestions: [
-            { label: "Explorar cursos", action: "/learning/courses" },
-            { label: "Ver proyectos", action: "/organization/projects" }
-          ]
-        });
-      } finally {
+        console.error('Error loading data:', err);
+        setError(err.message || "Error al cargar los datos");
+        setIsLoadingHistory(false);
         setIsLoadingGreeting(false);
       }
     };
 
     if (userData?.user?.id) {
-      fetchGreeting();
+      setIsLoadingGreeting(true);
+      setIsLoadingHistory(true);
+      loadData();
     }
-  }, [userData?.user?.id, userData?.user_data?.first_name]);
-
-  // Nota: Auto-scroll eliminado porque con historial invertido (más recientes arriba),
-  // el comportamiento natural del scroll ya muestra los mensajes más recientes primero
+  }, [userData?.user?.id]);
 
   // Manejar click en sugerencia
   const handleSuggestionClick = (action: string) => {
@@ -257,11 +204,12 @@ export default function Home() {
   };
 
 
-  if (userLoading || isLoadingHistory) {
+  // Solo mostrar loading si el usuario está cargando, no por el historial
+  if (userLoading) {
     return (
       <Layout wide={true}>
         <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Cargando...</div>
+          <LoadingSpinner size="lg" />
         </div>
       </Layout>
     );
