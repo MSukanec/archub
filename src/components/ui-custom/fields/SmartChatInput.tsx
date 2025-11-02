@@ -15,7 +15,7 @@ export function SmartChatInput({
   value,
   onChange,
   onSubmit,
-  placeholder = "¿Qué te gustaría saber hoy?",
+  placeholder = "¿Qué quieres hacer?",
   disabled = false,
   className
 }: SmartChatInputProps) {
@@ -103,8 +103,8 @@ export function SmartChatInput({
         disabled={!value.trim() || disabled}
         className={cn(
           "flex-shrink-0 p-1.5 rounded-full",
-          "bg-foreground/90 hover:bg-foreground transition-all duration-200",
-          "text-background",
+          "bg-foreground/15 hover:bg-accent transition-all duration-200",
+          "text-foreground hover:text-accent-foreground",
           "disabled:opacity-40 disabled:cursor-not-allowed"
         )}
         aria-label="Enviar mensaje"
