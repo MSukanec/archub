@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { formatCurrency } from '../utils/responseFormatter';
+import { formatCurrency } from '../../utils/responseFormatter';
 
 /**
  * Resumen financiero completo de un proyecto (balance, ingresos, egresos)

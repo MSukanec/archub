@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { formatCurrency, formatDateRange, formatMovementCount } from '../utils/responseFormatter';
-import { convertCurrency } from '../utils/currencyConverter';
+import { formatCurrency, formatDateRange, formatMovementCount } from '../../utils/responseFormatter';
+import { convertCurrency } from '../../utils/currencyConverter';
 
 /**
  * Obtiene TODOS los movimientos (ingresos y egresos) de un contacto específico.

@@ -871,7 +871,7 @@ Maintain a ${tone} tone and respond concisely and helpfully.`
           // Ejecutar la función correspondiente
           switch (toolCall.function.name) {
             case 'getTotalPaymentsByContactAndProject': {
-              const { getTotalPaymentsByContactAndProject } = await import('../../src/ai/tools/getTotalPayments.js');
+              const { getTotalPaymentsByContactAndProject } = await import('../../src/ai/tools/finances/getTotalPayments.js');
               functionResult = await getTotalPaymentsByContactAndProject(
                 args.contactName,
                 args.projectName,
@@ -882,7 +882,7 @@ Maintain a ${tone} tone and respond concisely and helpfully.`
             }
             
             case 'getOrganizationBalance': {
-              const { getOrganizationBalance } = await import('../../src/ai/tools/getOrganizationBalance.js');
+              const { getOrganizationBalance } = await import('../../src/ai/tools/finances/getOrganizationBalance.js');
               functionResult = await getOrganizationBalance(
                 organizationId,
                 authenticatedSupabase,
@@ -893,18 +893,18 @@ Maintain a ${tone} tone and respond concisely and helpfully.`
             }
             
             case 'getProjectFinancialSummary': {
-              const { getProjectFinancialSummary } = await import('../../src/ai/tools/getProjectFinancialSummary.js');
+              const { getProjectFinancialSummary } = await import('../../src/ai/tools/finances/getProjectFinancialSummary.js');
               functionResult = await getProjectFinancialSummary(
                 args.projectName,
                 organizationId,
-                authenticatedSupabase,
-                args.includeBreakdown || false
+                args.includeBreakdown || false,
+                authenticatedSupabase
               );
               break;
             }
             
             case 'getRoleSpending': {
-              const { getRoleSpending } = await import('../../src/ai/tools/getRoleSpending.js');
+              const { getRoleSpending } = await import('../../src/ai/tools/finances/getRoleSpending.js');
               functionResult = await getRoleSpending(
                 args.role,
                 organizationId,
@@ -917,7 +917,7 @@ Maintain a ${tone} tone and respond concisely and helpfully.`
             }
             
             case 'getContactMovements': {
-              const { getContactMovements } = await import('../../src/ai/tools/getContactMovements.js');
+              const { getContactMovements } = await import('../../src/ai/tools/finances/getContactMovements.js');
               functionResult = await getContactMovements(
                 args.contactName,
                 organizationId,
@@ -931,7 +931,7 @@ Maintain a ${tone} tone and respond concisely and helpfully.`
             }
             
             case 'getDateRangeMovements': {
-              const { getDateRangeMovements } = await import('../../src/ai/tools/getDateRangeMovements.js');
+              const { getDateRangeMovements } = await import('../../src/ai/tools/finances/getDateRangeMovements.js');
               functionResult = await getDateRangeMovements(
                 organizationId,
                 args.dateRange,
@@ -944,7 +944,7 @@ Maintain a ${tone} tone and respond concisely and helpfully.`
             }
             
             case 'getCashflowTrend': {
-              const { getCashflowTrend } = await import('../../src/ai/tools/getCashflowTrend.js');
+              const { getCashflowTrend } = await import('../../src/ai/tools/finances/getCashflowTrend.js');
               functionResult = await getCashflowTrend(
                 organizationId,
                 authenticatedSupabase,

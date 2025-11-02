@@ -409,17 +409,17 @@ export default function Home() {
                       className={cn(
                         "w-full h-auto min-h-[60px] py-4 px-5",
                         "flex items-center justify-between gap-4",
-                        "hover:bg-[hsl(var(--accent))]/10 hover:border-accent/40",
+                        "hover:bg-accent hover:text-accent-foreground hover:border-accent",
                         "transition-all duration-200",
                         "group text-left"
                       )}
                       onClick={() => handleSuggestionClick(suggestion.action)}
                       data-testid={`button-suggestion-${index}`}
                     >
-                      <span className="text-base font-medium flex-1 leading-relaxed">
+                      <span className="text-base font-medium flex-1 leading-relaxed group-hover:text-accent-foreground">
                         {suggestion.label}
                       </span>
-                      <ArrowRight className="w-5 h-5 flex-shrink-0 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
+                      <ArrowRight className="w-5 h-5 flex-shrink-0 text-muted-foreground group-hover:text-accent-foreground group-hover:translate-x-1 transition-all" />
                     </Button>
                   </motion.div>
                 ))}

@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { formatCurrency, formatDateRange } from '../utils/responseFormatter';
+import { formatCurrency, formatDateRange } from '../../utils/responseFormatter';
 
 /**
  * Agrupa movimientos por intervalo temporal
