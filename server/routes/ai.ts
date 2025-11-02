@@ -600,6 +600,7 @@ Maintain a ${tone} tone and respond concisely and helpfully.`
         temperature: 0.7,
         max_tokens: 500,
         tools: [
+          // 1. getTotalPaymentsByContactAndProject (ya existe)
           {
             type: "function" as const,
             function: {
@@ -620,38 +621,347 @@ Maintain a ${tone} tone and respond concisely and helpfully.`
                 required: ["contactName", "projectName"]
               }
             }
+          },
+          
+          // 2. getOrganizationBalance (NUEVA)
+          {
+            type: "function" as const,
+            function: {
+              name: "getOrganizationBalance",
+              description: "Calcula el balance general de la organización (ingresos totales - egresos totales). Puede filtrar por moneda específica o convertir todo a una moneda. Útil para '¿Cuál es mi balance actual?' o '¿Cuánto tengo en total?'",
+              parameters: {
+                type: "object",
+                properties: {
+                  currency: {
+                    type: "string",
+                    description: "Código de moneda para filtrar (ej: 'ARS', 'USD'). Opcional."
+                  },
+                  convertTo: {
+                    type: "string",
+                    description: "Código de moneda a la que convertir todos los montos. Opcional."
+                  }
+                },
+                required: []
+              }
+            }
+          },
+          
+          // 3. getProjectFinancialSummary (NUEVA)
+          {
+            type: "function" as const,
+            function: {
+              name: "getProjectFinancialSummary",
+              description: "Obtiene un resumen financiero completo de un proyecto: balance, ingresos totales, egresos totales, y opcionalmente un desglose por categorías. Útil para '¿Cuál es el balance de Casa Blanca?' o 'Dame el resumen financiero del proyecto X'",
+              parameters: {
+                type: "object",
+                properties: {
+                  projectName: {
+                    type: "string",
+                    description: "Nombre del proyecto"
+                  },
+                  includeBreakdown: {
+                    type: "boolean",
+                    description: "Si es true, incluye desglose de las top 3 categorías de gasto. Default: false"
+                  }
+                },
+                required: ["projectName"]
+              }
+            }
+          },
+          
+          // 4. getRoleSpending (NUEVA)
+          {
+            type: "function" as const,
+            function: {
+              name: "getRoleSpending",
+              description: "Calcula gastos totales por rol (subcontratistas, personal, socios). Puede filtrar por proyecto, rango de fechas y moneda. Útil para '¿Cuánto gasté en subcontratistas este mes?' o '¿Cuánto le pagué a mi personal?'",
+              parameters: {
+                type: "object",
+                properties: {
+                  role: {
+                    type: "string",
+                    enum: ["subcontractor", "personnel", "partner"],
+                    description: "Rol a consultar: 'subcontractor' (subcontratistas), 'personnel' (personal/empleados), 'partner' (socios)"
+                  },
+                  projectName: {
+                    type: "string",
+                    description: "Nombre del proyecto para filtrar. Opcional."
+                  },
+                  dateRange: {
+                    type: "object",
+                    properties: {
+                      start: { type: "string", description: "Fecha inicio (YYYY-MM-DD)" },
+                      end: { type: "string", description: "Fecha fin (YYYY-MM-DD)" }
+                    },
+                    description: "Rango de fechas. Opcional."
+                  },
+                  currency: {
+                    type: "string",
+                    description: "Código de moneda para filtrar. Opcional."
+                  }
+                },
+                required: ["role"]
+              }
+            }
+          },
+          
+          // 5. getContactMovements (NUEVA)
+          {
+            type: "function" as const,
+            function: {
+              name: "getContactMovements",
+              description: "Obtiene TODOS los movimientos (ingresos y egresos) de un contacto específico, con balance neto. Más completo que getTotalPaymentsByContactAndProject. Puede filtrar por proyecto, fechas, moneda o convertir. Útil para '¿Cuánto movimiento tuvo Juan en total?' o 'Balance de María en Casa Blanca'",
+              parameters: {
+                type: "object",
+                properties: {
+                  contactName: {
+                    type: "string",
+                    description: "Nombre del contacto"
+                  },
+                  projectName: {
+                    type: "string",
+                    description: "Nombre del proyecto. Opcional."
+                  },
+                  dateRange: {
+                    type: "object",
+                    properties: {
+                      start: { type: "string", description: "Fecha inicio (YYYY-MM-DD)" },
+                      end: { type: "string", description: "Fecha fin (YYYY-MM-DD)" }
+                    },
+                    description: "Rango de fechas. Opcional."
+                  },
+                  currency: {
+                    type: "string",
+                    description: "Código de moneda para filtrar. Opcional."
+                  },
+                  convertTo: {
+                    type: "string",
+                    description: "Código de moneda a la que convertir. Opcional."
+                  }
+                },
+                required: ["contactName"]
+              }
+            }
+          },
+          
+          // 6. getDateRangeMovements (NUEVA)
+          {
+            type: "function" as const,
+            function: {
+              name: "getDateRangeMovements",
+              description: "Obtiene movimientos en un rango de fechas con filtros avanzados y capacidad de agrupar por proyecto, categoría, billetera o tipo. Útil para '¿Cuánto gasté en julio?' o 'Movimientos de agosto agrupados por proyecto'",
+              parameters: {
+                type: "object",
+                properties: {
+                  dateRange: {
+                    type: "object",
+                    properties: {
+                      start: { type: "string", description: "Fecha inicio (YYYY-MM-DD)" },
+                      end: { type: "string", description: "Fecha fin (YYYY-MM-DD)" }
+                    },
+                    required: ["start", "end"],
+                    description: "Rango de fechas requerido"
+                  },
+                  filters: {
+                    type: "object",
+                    properties: {
+                      projectNames: { type: "array", items: { type: "string" }, description: "Nombres de proyectos" },
+                      categories: { type: "array", items: { type: "string" }, description: "Nombres de categorías" },
+                      wallets: { type: "array", items: { type: "string" }, description: "Nombres de billeteras" },
+                      types: { type: "array", items: { type: "string", enum: ["Ingreso", "Egreso"] }, description: "Tipos de movimiento" },
+                      roles: { type: "array", items: { type: "string", enum: ["partner", "subcontractor", "personnel", "client"] }, description: "Roles" }
+                    },
+                    description: "Filtros opcionales"
+                  },
+                  groupBy: {
+                    type: "string",
+                    enum: ["project", "category", "wallet", "type"],
+                    description: "Agrupar resultados por este campo. Opcional."
+                  },
+                  currency: {
+                    type: "string",
+                    description: "Código de moneda para filtrar. Opcional."
+                  }
+                },
+                required: ["dateRange"]
+              }
+            }
+          },
+          
+          // 7. getCashflowTrend (NUEVA)
+          {
+            type: "function" as const,
+            function: {
+              name: "getCashflowTrend",
+              description: "Analiza tendencias de flujo de efectivo en el tiempo con intervalos diarios, semanales o mensuales. Muestra ingresos, egresos, flujo neto y balance acumulado por período. Identifica si la tendencia está mejorando o empeorando. Útil para 'Muéstrame el flujo de efectivo del último trimestre' o '¿Cómo ha sido mi flujo mensual?'",
+              parameters: {
+                type: "object",
+                properties: {
+                  scope: {
+                    type: "string",
+                    enum: ["organization", "project"],
+                    description: "'organization' para toda la org, 'project' para un proyecto específico"
+                  },
+                  projectName: {
+                    type: "string",
+                    description: "Nombre del proyecto (requerido si scope='project'). Opcional si scope='organization'."
+                  },
+                  interval: {
+                    type: "string",
+                    enum: ["daily", "weekly", "monthly"],
+                    description: "Intervalo de agrupación: 'daily', 'weekly', 'monthly'. Default: 'monthly'"
+                  },
+                  dateRange: {
+                    type: "object",
+                    properties: {
+                      start: { type: "string", description: "Fecha inicio (YYYY-MM-DD)" },
+                      end: { type: "string", description: "Fecha fin (YYYY-MM-DD)" }
+                    },
+                    description: "Rango de fechas. Si no se provee, usa últimos 3 meses."
+                  },
+                  currency: {
+                    type: "string",
+                    description: "Código de moneda para filtrar. Opcional."
+                  }
+                },
+                required: ["scope"]
+              }
+            }
           }
         ]
       });
 
-      let responseContent = "";
       const responseMessage = completion.choices[0]?.message;
+      let responseContent = responseMessage?.content || "Lo siento, no pude generar una respuesta.";
       let usage = completion.usage;
 
       // Si la IA decidió usar una función
       if (responseMessage?.tool_calls && responseMessage.tool_calls.length > 0) {
         const toolCall = responseMessage.tool_calls[0];
         
-        if (toolCall.function.name === 'getTotalPaymentsByContactAndProject') {
-          // Verificar que el usuario tenga una organización
-          if (!organizationId) {
+        // Obtener organization_id
+        const { data: userPrefs } = await authenticatedSupabase
+          .from('user_preferences')
+          .select('last_organization_id')
+          .eq('user_id', userId)
+          .maybeSingle();
+        
+        if (!userPrefs?.last_organization_id) {
+          return res.status(400).json({ 
+            error: "No tienes una organización seleccionada. Por favor selecciona una organización primero." 
+          });
+        }
+        
+        const organizationId = userPrefs.last_organization_id;
+        
+        try {
+          // Parse arguments (con manejo de errores)
+          let args: any;
+          try {
+            args = JSON.parse(toolCall.function.arguments);
+          } catch (parseError) {
+            console.error('Error parsing tool arguments:', parseError);
             return res.status(400).json({ 
-              error: "No tienes una organización seleccionada. Por favor selecciona una organización primero." 
+              error: "Error al procesar los parámetros de la consulta." 
             });
           }
           
-          const args = JSON.parse(toolCall.function.arguments);
+          let functionResult: string;
           
-          // Importar y ejecutar la función
-          const { getTotalPaymentsByContactAndProject } = await import('../../src/ai/tools/getTotalPayments.js');
-          const functionResult = await getTotalPaymentsByContactAndProject(
-            args.contactName,
-            args.projectName,
-            organizationId,
-            authenticatedSupabase
-          );
+          // Ejecutar la función correspondiente
+          switch (toolCall.function.name) {
+            case 'getTotalPaymentsByContactAndProject': {
+              const { getTotalPaymentsByContactAndProject } = await import('../../src/ai/tools/getTotalPayments.js');
+              functionResult = await getTotalPaymentsByContactAndProject(
+                args.contactName,
+                args.projectName,
+                organizationId,
+                authenticatedSupabase
+              );
+              break;
+            }
+            
+            case 'getOrganizationBalance': {
+              const { getOrganizationBalance } = await import('../../src/ai/tools/getOrganizationBalance.js');
+              functionResult = await getOrganizationBalance(
+                organizationId,
+                authenticatedSupabase,
+                args.currency,
+                args.convertTo
+              );
+              break;
+            }
+            
+            case 'getProjectFinancialSummary': {
+              const { getProjectFinancialSummary } = await import('../../src/ai/tools/getProjectFinancialSummary.js');
+              functionResult = await getProjectFinancialSummary(
+                args.projectName,
+                organizationId,
+                authenticatedSupabase,
+                args.includeBreakdown || false
+              );
+              break;
+            }
+            
+            case 'getRoleSpending': {
+              const { getRoleSpending } = await import('../../src/ai/tools/getRoleSpending.js');
+              functionResult = await getRoleSpending(
+                args.role,
+                organizationId,
+                authenticatedSupabase,
+                args.projectName,
+                args.dateRange,
+                args.currency
+              );
+              break;
+            }
+            
+            case 'getContactMovements': {
+              const { getContactMovements } = await import('../../src/ai/tools/getContactMovements.js');
+              functionResult = await getContactMovements(
+                args.contactName,
+                organizationId,
+                authenticatedSupabase,
+                args.projectName,
+                args.dateRange,
+                args.currency,
+                args.convertTo
+              );
+              break;
+            }
+            
+            case 'getDateRangeMovements': {
+              const { getDateRangeMovements } = await import('../../src/ai/tools/getDateRangeMovements.js');
+              functionResult = await getDateRangeMovements(
+                organizationId,
+                args.dateRange,
+                authenticatedSupabase,
+                args.filters,
+                args.groupBy,
+                args.currency
+              );
+              break;
+            }
+            
+            case 'getCashflowTrend': {
+              const { getCashflowTrend } = await import('../../src/ai/tools/getCashflowTrend.js');
+              functionResult = await getCashflowTrend(
+                organizationId,
+                authenticatedSupabase,
+                args.scope,
+                args.projectName,
+                args.interval || 'monthly',
+                args.dateRange,
+                args.currency
+              );
+              break;
+            }
+            
+            default:
+              functionResult = `Función ${toolCall.function.name} no implementada.`;
+          }
           
-          // Hacer una segunda llamada a GPT para que procese el resultado
+          // Segunda llamada a OpenAI con el resultado de la función
           const secondCompletion = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: [
@@ -667,16 +977,13 @@ Maintain a ${tone} tone and respond concisely and helpfully.`
             max_tokens: 500
           });
           
-          // Usar la respuesta final procesada
           responseContent = secondCompletion.choices[0]?.message?.content || functionResult;
           usage = secondCompletion.usage || usage;
-        } else {
-          // Función no implementada
-          responseContent = "Lo siento, esa función aún no está disponible.";
+          
+        } catch (toolError) {
+          console.error('Error executing tool:', toolError);
+          responseContent = "Lo siento, hubo un error al consultar los datos. Por favor intenta nuevamente.";
         }
-      } else {
-        // Si no llamó a ninguna función, usar la respuesta directa
-        responseContent = responseMessage?.content || "Lo siento, no pude generar una respuesta.";
       }
 
       // Guardar el mensaje del usuario (no bloqueante)
