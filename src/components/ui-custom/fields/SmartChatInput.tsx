@@ -54,14 +54,11 @@ export function SmartChatInput({
     <div 
       className={cn(
         "relative flex items-end gap-1 sm:gap-2",
-        "w-full rounded-2xl sm:rounded-3xl",
-        "bg-white/5 dark:bg-white/[0.03]",
-        "backdrop-blur-xl",
-        "border transition-all duration-200",
-        isFocused 
-          ? "border-white/20 dark:border-white/[0.15] shadow-xl shadow-black/10" 
-          : "border-white/10 dark:border-white/[0.08] shadow-lg shadow-black/5",
-        "px-3 sm:px-5 py-2 sm:py-2.5",
+        "w-full rounded-full",
+        "bg-background border-2 transition-all duration-200",
+        isFocused ? "border-accent/50" : "border-border",
+        "px-2 sm:px-4 py-2",
+        "shadow-sm hover:shadow-md",
         disabled && "opacity-60 cursor-not-allowed",
         className
       )}
@@ -73,11 +70,11 @@ export function SmartChatInput({
         onClick={handleMicClick}
         disabled={disabled}
         className={cn(
-          "flex-shrink-0 p-1.5 rounded-full",
-          "text-foreground/50 hover:text-foreground/80",
-          "hover:bg-white/10 dark:hover:bg-white/5 transition-colors",
+          "flex-shrink-0 p-1.5 sm:p-2 rounded-full",
+          "text-muted-foreground hover:text-foreground",
+          "hover:bg-accent/10 transition-colors",
           "disabled:opacity-50 disabled:cursor-not-allowed",
-          "self-end mb-0.5"
+          "self-end mb-1"
         )}
         aria-label="Grabar audio"
         data-testid="button-mic"
@@ -98,12 +95,11 @@ export function SmartChatInput({
         rows={1}
         className={cn(
           "flex-1 resize-none bg-transparent",
-          "text-sm sm:text-base font-medium leading-snug sm:leading-relaxed",
-          "placeholder:text-foreground/40",
-          "text-foreground/90",
+          "text-sm sm:text-base leading-5 sm:leading-6",
+          "placeholder:text-muted-foreground/60",
           "focus:outline-none",
           "disabled:cursor-not-allowed",
-          "py-2 sm:py-2.5 px-1 sm:px-2",
+          "py-2 sm:py-3 px-1 sm:px-2",
           "max-h-[200px] overflow-y-auto"
         )}
         style={{
@@ -121,18 +117,18 @@ export function SmartChatInput({
         size="icon"
         className={cn(
           "flex-shrink-0 rounded-full",
-          "w-8 h-8 sm:w-9 sm:h-9",
-          "bg-accent hover:bg-accent/90",
+          "w-8 h-8 sm:w-10 sm:h-10",
+          "bg-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/90",
           "text-accent-foreground",
-          "disabled:opacity-30 disabled:cursor-not-allowed",
+          "disabled:opacity-40 disabled:cursor-not-allowed",
           "transition-all duration-200",
-          "shadow-md hover:shadow-lg",
-          "self-end mb-0.5"
+          "shadow-sm hover:shadow-md",
+          "self-end mb-1"
         )}
         aria-label="Enviar mensaje"
         data-testid="button-send-message"
       >
-        <Send className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+        <Send className="w-4 h-4 sm:w-5 sm:h-5" />
       </Button>
     </div>
   );

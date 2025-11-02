@@ -30,7 +30,6 @@ interface Tab {
 interface LayoutProps {
   children: React.ReactNode;
   wide?: boolean;
-  hideHeader?: boolean;
   headerProps?: {
     icon?: React.ComponentType<any>;
     title?: string;
@@ -73,7 +72,7 @@ interface LayoutProps {
   };
 }
 
-export function Layout({ children, wide = false, hideHeader = false, headerProps }: LayoutProps) {
+export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { isDark, setTheme } = useThemeStore();
   const { data } = useCurrentUser();
   const { showActionBar } = useActionBarMobile();
@@ -107,24 +106,19 @@ export function Layout({ children, wide = false, hideHeader = false, headerProps
           : "var(--main-sidebar-bg)",
       }}
     >
-      {/* Main Header for Desktop - Only shown on desktop when hideHeader is false */}
-      {!isMobile && !hideHeader && <MainHeader />}
+      {/* Main Header for Desktop - Only shown on desktop */}
+      {/* HEADER COMENTADO TEMPORALMENTE PARA PRUEBAS */}
+      {/* {!isMobile && <MainHeader />} */}
       
-      {/* Mobile View */}
+      {/* Mobile View - Unchanged */}
       {isMobile ? (
-        hideHeader ? (
-          <main className={`transition-all duration-300 ease-in-out flex-1 overflow-auto ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}>
+        <HeaderMobile {...(headerProps ?? {})}>
+          <main
+            className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-4 py-3 pb-12 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
+          >
             {children}
           </main>
-        ) : (
-          <HeaderMobile {...(headerProps ?? {})}>
-            <main
-              className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-4 py-3 pb-12 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
-            >
-              {children}
-            </main>
-          </HeaderMobile>
-        )
+        </HeaderMobile>
       ) : (
         /* Desktop View - Frame Layout without Header */
         <div className="flex-1 flex min-h-0">
@@ -142,7 +136,7 @@ export function Layout({ children, wide = false, hideHeader = false, headerProps
             <div className={`flex-1 ${isCourseSidebarVisible ? '' : 'pr-3'} pt-3 pb-3`}>
               <main
                 className={`h-full flex flex-col rounded-2xl overflow-hidden ${!isDocked ? 'w-full' : ''}`}
-                style={hideHeader ? {} : { 
+                style={{ 
                   backgroundColor: "var(--layout-bg)",
                 }}
               >
