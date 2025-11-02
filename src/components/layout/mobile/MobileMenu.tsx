@@ -243,33 +243,33 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       <div 
         className="fixed inset-0 flex flex-row overflow-hidden"
         style={{ 
-          backgroundColor: 'var(--card-bg)'
+          backgroundColor: 'var(--main-sidebar-bg)'
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Main Menu Panel */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="flex items-center h-14 px-4 border-b border-[var(--card-border)] bg-[var(--card-bg)]">
+          <div className="flex items-center h-14 px-4 border-b border-[var(--main-sidebar-border)] bg-[var(--main-sidebar-bg)]">
             {sidebarLevel !== 'general' && (
               <button
                 onClick={() => {
                   setSidebarLevel('general');
                 }}
-                className="p-2 -ml-2 hover:bg-[var(--card-hover-bg)] rounded-lg transition-colors"
+                className="p-2 -ml-2 hover:bg-[var(--main-sidebar-button-hover-bg)] rounded-lg transition-colors"
                 data-testid="button-mobile-back"
               >
-                <ChevronLeft className="h-5 w-5 text-[var(--text-default)]" />
+                <ChevronLeft className="h-5 w-5 text-[var(--main-sidebar-fg)]" />
               </button>
             )}
-            <h1 className="text-lg font-semibold text-[var(--text-default)] flex-1">
+            <h1 className="text-lg font-semibold text-[var(--main-sidebar-fg)] flex-1">
               {getMenuTitle()}
             </h1>
             <button
               onClick={handleCloseMenu}
-              className="p-2 -mr-2 hover:bg-[var(--card-hover-bg)] rounded-lg transition-colors"
+              className="p-2 -mr-2 hover:bg-[var(--main-sidebar-button-hover-bg)] rounded-lg transition-colors"
             >
-              <X className="h-5 w-5 text-[var(--text-default)]" />
+              <X className="h-5 w-5 text-[var(--main-sidebar-fg)]" />
             </button>
           </div>
 

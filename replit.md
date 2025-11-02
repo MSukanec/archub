@@ -46,6 +46,24 @@ Preferred communication style: Simple, everyday language.
 
 ### Recent Changes
 
+#### Mobile Menu Color Variables Standardization (Nov 02, 2025)
+- **Problem**: Mobile menu was using different color variables (`--card-bg`, `--text-muted`, etc.) than desktop sidebar, creating visual inconsistency
+- **Solution**: Updated mobile menu components to use identical sidebar color variables for unified design
+- **Implementation**:
+  - Updated `MobileMenuButton.tsx` to use:
+    - `--main-sidebar-fg` for default icon and text colors
+    - `--main-sidebar-button-hover-bg` for hover states
+    - `--main-sidebar-button-active-bg` for active button backgrounds
+    - `--main-sidebar-button-active-fg` for active text
+    - `--main-sidebar-border` for borders
+    - `--accent` for active icons (consistent with desktop)
+  - Updated `MobileMenu.tsx` header and background to use:
+    - `--main-sidebar-bg` for menu background
+    - `--main-sidebar-fg` for header text and icons
+    - `--main-sidebar-button-hover-bg` for button hover states
+- **Files updated**: `src/components/layout/mobile/MobileMenuButton.tsx`, `src/components/layout/mobile/MobileMenu.tsx`
+- **Result**: Mobile menu now maintains perfect visual coherence with desktop sidebar, using the same dark theme colors, hover effects, and active states
+
 #### Admin Enrollments Endpoint Optimization (Nov 01, 2025)
 - **Problem**: Admin "Alumnos" page had 15-second load time due to inefficient query pattern - 3 queries per enrollment (modules, lessons, progress) executed in `Promise.all`, resulting in 150+ database queries for 50 enrollments
 - **Root cause**: Each enrollment triggered separate queries to fetch modules → lessons → progress, causing massive query overhead and slow response times

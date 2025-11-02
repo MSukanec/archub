@@ -28,21 +28,22 @@ export function MobileMenuButton({
       data-testid={testId}
       className={cn(
         "w-full flex items-center gap-3 px-4 py-3 text-left transition-colors",
-        "border-b border-[var(--card-border)]",
+        "border-b border-[var(--main-sidebar-border)]",
         disabled && "opacity-50 cursor-not-allowed",
-        !disabled && "active:bg-[var(--card-hover-bg)]"
+        !disabled && !isActive && "hover:bg-[var(--main-sidebar-button-hover-bg)]",
+        isActive && "bg-[var(--main-sidebar-button-active-bg)]"
       )}
     >
       <Icon 
         className={cn(
-          "h-5 w-5 flex-shrink-0",
-          isActive ? "text-[var(--accent)]" : "text-[var(--text-muted)]"
+          "h-5 w-5 flex-shrink-0 transition-colors",
+          isActive ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]"
         )} 
       />
       <span 
         className={cn(
-          "flex-1 text-base",
-          isActive ? "text-[var(--text-default)] font-medium" : "text-[var(--text-default)]"
+          "flex-1 text-base transition-colors",
+          isActive ? "text-[var(--main-sidebar-button-active-fg)] font-medium" : "text-[var(--main-sidebar-fg)]"
         )}
       >
         {label}
@@ -50,8 +51,8 @@ export function MobileMenuButton({
       {showChevron && (
         <ChevronRight 
           className={cn(
-            "h-5 w-5 flex-shrink-0",
-            isActive ? "text-[var(--accent)]" : "text-[var(--text-muted)]"
+            "h-5 w-5 flex-shrink-0 transition-colors",
+            isActive ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]"
           )} 
         />
       )}
