@@ -361,4 +361,164 @@ Rules:
       });
     }
   });
+
+  // POST /api/ai/chat - Conversational AI chat
+  app.post("/api/ai/chat", async (req, res) => {
+    try {
+      const openaiApiKey = process.env.OPENAI_API_KEY;
+
+      if (!openaiApiKey) {
+        return res.status(500).json({ error: "Missing OpenAI API key" });
+      }
+
+      // Extraer token y autenticar
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // Obtener el usuario autenticado
+      const { data: { user }, error: authError } = await authenticatedSupabase.auth.getUser();
+      if (authError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      // Obtener el usuario de la tabla users por auth_id
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .single();
+
+      if (!dbUser) {
+        return res.status(404).json({ error: "User not found in database" });
+      }
+
+      const userId = dbUser.id;
+
+      // Obtener el mensaje y el historial del body
+      const { message, history = [] } = req.body;
+
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ error: "Message is required" });
+      }
+
+      // Obtener datos del usuario para contexto
+      const { data: userData } = await authenticatedSupabase
+        .from('users')
+        .select('full_name')
+        .eq('id', userId)
+        .single();
+
+      const { data: preferences } = await authenticatedSupabase
+        .from('ia_user_preferences')
+        .select('display_name, tone, language')
+        .eq('user_id', userId)
+        .single();
+
+      const displayName = preferences?.display_name || userData?.full_name || "Usuario";
+      const tone = preferences?.tone || "amistoso";
+      const language = preferences?.language || "es";
+
+      // Construir el historial de mensajes para GPT
+      const messages = [
+        {
+          role: "system" as const,
+          content: language === 'es'
+            ? `Sos un asistente virtual de Archub, una plataforma de gestión de construcción y arquitectura. 
+Tu nombre es Archub AI. Ayudás a ${displayName} con sus proyectos, cursos, presupuestos y cualquier pregunta relacionada con la plataforma.
+Mantené un tono ${tone} y respondé de forma concisa y útil.`
+            : `You are an AI assistant for Archub, a construction and architecture management platform.
+Your name is Archub AI. You help ${displayName} with their projects, courses, budgets, and any platform-related questions.
+Maintain a ${tone} tone and respond concisely and helpfully.`
+        },
+        // Agregar historial previo
+        ...history.map((msg: any) => ({
+          role: msg.role === 'user' ? 'user' as const : 'assistant' as const,
+          content: msg.content
+        })),
+        // Agregar el mensaje actual del usuario
+        {
+          role: "user" as const,
+          content: message
+        }
+      ];
+
+      // Llamar a GPT-4o
+      const openai = new OpenAI({
+        apiKey: openaiApiKey,
+      });
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: messages,
+        temperature: 0.7,
+        max_tokens: 500
+      });
+
+      const responseContent = completion.choices[0]?.message?.content || "Lo siento, no pude generar una respuesta.";
+      const usage = completion.usage;
+
+      // Guardar el mensaje del usuario (no bloqueante)
+      authenticatedSupabase
+        .from('ia_messages')
+        .insert({
+          user_id: userId,
+          role: 'user',
+          content: message,
+          context_type: 'home_chat'
+        })
+        .then(({ error }) => {
+          if (error) console.error('Error saving user message:', error);
+        });
+
+      // Guardar la respuesta de la IA (no bloqueante)
+      authenticatedSupabase
+        .from('ia_messages')
+        .insert({
+          user_id: userId,
+          role: 'assistant',
+          content: responseContent,
+          context_type: 'home_chat'
+        })
+        .then(({ error }) => {
+          if (error) console.error('Error saving assistant message:', error);
+        });
+
+      // Registrar el uso (no bloqueante)
+      const promptTokens = usage?.prompt_tokens || 0;
+      const completionTokens = usage?.completion_tokens || 0;
+      const totalTokens = usage?.total_tokens || 0;
+      const costUsd = ((promptTokens * 5) / 1000000) + ((completionTokens * 15) / 1000000);
+
+      authenticatedSupabase
+        .from('ia_usage_logs')
+        .insert({
+          user_id: userId,
+          model: 'gpt-4o',
+          provider: 'openai',
+          prompt_tokens: promptTokens,
+          completion_tokens: completionTokens,
+          total_tokens: totalTokens,
+          cost_usd: costUsd,
+          context_type: 'home_chat'
+        })
+        .then(({ error }) => {
+          if (error) console.error('Error logging usage:', error);
+        });
+
+      // Devolver la respuesta
+      return res.status(200).json({
+        response: responseContent
+      });
+
+    } catch (err: any) {
+      console.error('Error in chat:', err);
+      return res.status(500).json({
+        error: "Error processing chat message"
+      });
+    }
+  });
 }

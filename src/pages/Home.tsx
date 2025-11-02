@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, type KeyboardEvent } from "react";
 import { useLocation } from "wouter";
 import { Layout } from "@/components/layout/desktop/Layout";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { supabase } from "@/lib/supabase";
-import { Home as HomeIcon, Sparkles, ArrowRight } from "lucide-react";
+import { Home as HomeIcon, ArrowRight, Send } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Suggestion {
   label: string;
@@ -19,6 +20,11 @@ interface GreetingData {
   suggestions: Suggestion[];
 }
 
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export default function Home() {
   const [, navigate] = useLocation();
   const { data: userData, isLoading: userLoading } = useCurrentUser();
@@ -27,6 +33,12 @@ export default function Home() {
   const [greetingData, setGreetingData] = useState<GreetingData | null>(null);
   const [isLoadingGreeting, setIsLoadingGreeting] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Estados del chat
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [inputMessage, setInputMessage] = useState("");
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Mantener el sidebar en modo general
   useEffect(() => {
@@ -84,6 +96,13 @@ export default function Home() {
     }
   }, [userData?.user?.id, userData?.user_data?.first_name]);
 
+  // Auto-scroll al último mensaje
+  useEffect(() => {
+    if (chatMessages.length > 0) {
+      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chatMessages]);
+
   // Manejar click en sugerencia
   const handleSuggestionClick = (action: string) => {
     // Determinar el nivel del sidebar según la ruta
@@ -98,6 +117,71 @@ export default function Home() {
     }
     
     navigate(action);
+  };
+
+  // Enviar mensaje de chat
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim() || isSendingMessage) return;
+
+    const userMessage = inputMessage.trim();
+    setInputMessage("");
+    
+    // Agregar mensaje del usuario al chat
+    const newUserMessage: ChatMessage = { role: 'user', content: userMessage };
+    setChatMessages(prev => [...prev, newUserMessage]);
+    
+    try {
+      setIsSendingMessage(true);
+
+      // Obtener el token del usuario
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session?.access_token) {
+        throw new Error("No se pudo obtener la sesión del usuario");
+      }
+
+      // Llamar al endpoint de chat
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          history: chatMessages
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al enviar el mensaje");
+      }
+
+      const data = await response.json();
+      
+      // Agregar respuesta de la IA al chat
+      const assistantMessage: ChatMessage = { role: 'assistant', content: data.response };
+      setChatMessages(prev => [...prev, assistantMessage]);
+      
+    } catch (err: any) {
+      console.error('Error sending message:', err);
+      // Agregar mensaje de error
+      const errorMessage: ChatMessage = { 
+        role: 'assistant', 
+        content: "Lo siento, hubo un error al procesar tu mensaje. Por favor intenta nuevamente." 
+      };
+      setChatMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsSendingMessage(false);
+    }
+  };
+
+  // Manejar tecla Enter
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
   };
 
   if (userLoading) {
@@ -125,10 +209,6 @@ export default function Home() {
             {isLoadingGreeting ? (
               // Skeleton loader
               <div className="space-y-4 animate-pulse">
-                <div className="flex items-center justify-center gap-2 mb-6">
-                  <Sparkles className="w-6 h-6 text-accent/60" />
-                  <span className="text-sm text-muted-foreground">Archubita está pensando...</span>
-                </div>
                 <div className="h-12 bg-muted/30 rounded-lg w-3/4 mx-auto"></div>
                 <div className="h-12 bg-muted/20 rounded-lg w-2/3 mx-auto"></div>
               </div>
@@ -140,18 +220,6 @@ export default function Home() {
                 transition={{ duration: 0.6, ease: "easeOut" }}
                 className="space-y-6"
               >
-                {/* Ícono de Archubita */}
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.2, duration: 0.4, ease: "backOut" }}
-                  className="flex justify-center"
-                >
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center border border-accent/20">
-                    <Sparkles className="w-8 h-8 text-accent" />
-                  </div>
-                </motion.div>
-
                 {/* Mensaje de saludo */}
                 <h1 className={cn(
                   "text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight",
@@ -185,55 +253,111 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* Grid de sugerencias */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-3xl mx-auto">
+              {/* Lista de sugerencias */}
+              <div className="space-y-3 max-w-2xl mx-auto">
                 {greetingData.suggestions.map((suggestion, index) => (
                   <motion.div
                     key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.9 + (index * 0.1), duration: 0.4 }}
                   >
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full h-auto py-6 px-6",
-                        "flex flex-col items-start gap-3",
+                        "w-full h-auto min-h-[60px] py-4 px-5",
+                        "flex items-center justify-between gap-4",
                         "hover:bg-accent/5 hover:border-accent/30",
                         "transition-all duration-200",
-                        "group"
+                        "group text-left"
                       )}
                       onClick={() => handleSuggestionClick(suggestion.action)}
                       data-testid={`button-suggestion-${index}`}
                     >
-                      <div className="flex items-center justify-between w-full">
-                        <span className="text-sm font-medium text-left flex-1">
-                          {suggestion.label}
-                        </span>
-                        <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
-                      </div>
+                      <span className="text-base font-medium flex-1 leading-relaxed">
+                        {suggestion.label}
+                      </span>
+                      <ArrowRight className="w-5 h-5 flex-shrink-0 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
                     </Button>
                   </motion.div>
                 ))}
               </div>
             </motion.div>
           )}
-        </div>
 
-        {/* Indicador sutil de IA */}
-        {!isLoadingGreeting && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.2, duration: 0.6 }}
-            className="mt-16 text-center"
-          >
-            <p className="text-xs text-muted-foreground/40 flex items-center justify-center gap-2">
-              <Sparkles className="w-3 h-3" />
-              Generado con Archubita
-            </p>
-          </motion.div>
-        )}
+          {/* Sección de chat conversacional */}
+          {!isLoadingGreeting && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.2, duration: 0.6 }}
+              className="space-y-4 max-w-2xl mx-auto"
+            >
+              {/* Historial de mensajes */}
+              {chatMessages.length > 0 && (
+                <div className="space-y-3 max-h-96 overflow-y-auto p-4 rounded-lg border border-border/50 bg-muted/20" data-testid="chat-messages-container">
+                  {chatMessages.map((msg, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className={cn(
+                        "flex",
+                        msg.role === 'user' ? "justify-end" : "justify-start"
+                      )}
+                      data-testid={`chat-message-${msg.role}-${index}`}
+                    >
+                      <div
+                        className={cn(
+                          "max-w-[80%] rounded-2xl px-4 py-3",
+                          msg.role === 'user'
+                            ? "bg-accent text-accent-foreground"
+                            : "bg-card border border-border text-card-foreground"
+                        )}
+                      >
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                          {msg.content}
+                        </p>
+                      </div>
+                    </motion.div>
+                  ))}
+                  <div ref={chatEndRef} />
+                </div>
+              )}
+
+              {/* Input de mensaje */}
+              <div className="flex gap-2">
+                <Textarea
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Escribe un mensaje..."
+                  className={cn(
+                    "resize-none min-h-[60px] max-h-[120px]",
+                    "focus-visible:ring-accent/50"
+                  )}
+                  disabled={isSendingMessage}
+                  data-testid="input-chat-message"
+                />
+                <Button
+                  onClick={handleSendMessage}
+                  disabled={!inputMessage.trim() || isSendingMessage}
+                  size="icon"
+                  className={cn(
+                    "h-[60px] w-[60px] shrink-0",
+                    "bg-gradient-to-br from-accent to-accent/80",
+                    "hover:from-accent/90 hover:to-accent/70",
+                    "disabled:opacity-50"
+                  )}
+                  data-testid="button-send-message"
+                >
+                  <Send className="w-5 h-5" />
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </div>
       </div>
     </Layout>
   );
