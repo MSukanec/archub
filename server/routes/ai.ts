@@ -123,7 +123,15 @@ async function checkAndIncrementUsageLimit(
 export function registerAIRoutes(app: Express, deps: RouteDeps) {
   const { supabase, createAuthenticatedClient, extractToken } = deps;
 
-  // GET /api/ai/home_greeting - AI-powered home greeting with suggestions
+  // Helper: Determinar period según hora actual (5-13: morning, 13-19: afternoon, 19-5: evening)
+  function getCurrentPeriod(): 'morning' | 'afternoon' | 'evening' {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 13) return 'morning';
+    if (hour >= 13 && hour < 19) return 'afternoon';
+    return 'evening';
+  }
+
+  // GET /api/ai/home_greeting - AI-powered home greeting with suggestions (cached by period)
   app.get("/api/ai/home_greeting", async (req, res) => {
     try {
       const openaiApiKey = process.env.OPENAI_API_KEY;
@@ -160,16 +168,32 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
       const userId = dbUser.id;
 
       // ========================================
-      // 0. VERIFICAR LÍMITES DE USO
+      // 0. VERIFICAR CACHÉ DE SALUDO POR PERIOD
       // ========================================
-      const limitCheck = await checkAndIncrementUsageLimit(userId, authenticatedSupabase);
       
-      if (!limitCheck.allowed) {
-        return res.status(429).json({ 
-          error: limitCheck.message,
-          limitReached: true,
-          remainingPrompts: 0
-        });
+      const currentPeriod = getCurrentPeriod();
+      
+      const { data: cachedGreeting } = await authenticatedSupabase
+        .from('ia_user_greetings')
+        .select('greeting')
+        .eq('user_id', userId)
+        .eq('period', currentPeriod)
+        .maybeSingle();
+      
+      let greetingText: string | null = cachedGreeting?.greeting || null;
+      let shouldGenerateWithGPT = !greetingText;
+
+      // Si NO hay caché, verificar límites de uso
+      if (shouldGenerateWithGPT) {
+        const limitCheck = await checkAndIncrementUsageLimit(userId, authenticatedSupabase);
+        
+        if (!limitCheck.allowed) {
+          return res.status(429).json({ 
+            error: limitCheck.message,
+            limitReached: true,
+            remainingPrompts: 0
+          });
+        }
       }
 
       // ========================================
@@ -331,14 +355,18 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
       }
 
       // ========================================
-      // 4. LLAMAR A GPT-4o
+      // 4. GENERAR O USAR SALUDO CACHEADO
       // ========================================
       
-      const openai = new OpenAI({
-        apiKey: openaiApiKey,
-      });
+      let greetingResponse: GreetingResponse;
 
-      const systemPrompt = language === 'es' 
+      if (shouldGenerateWithGPT) {
+        // GENERAR NUEVO SALUDO CON GPT
+        const openai = new OpenAI({
+          apiKey: openaiApiKey,
+        });
+
+        const systemPrompt = language === 'es' 
         ? `Sos Archubita, la asistente virtual personalizada de Archub, una plataforma de gestión de construcción y arquitectura.
 
 Tu trabajo es:
@@ -399,69 +427,128 @@ Rules:
         response_format: { type: "json_object" }
       });
 
-      const responseContent = completion.choices[0]?.message?.content || "{}";
-      const usage = completion.usage;
-
-      let greetingResponse: GreetingResponse;
-      
-      try {
-        greetingResponse = JSON.parse(responseContent);
+        const responseContent = completion.choices[0]?.message?.content || "{}";
+        const usage = completion.usage;
         
-        // Validar que tenga la estructura esperada
-        if (!greetingResponse.greeting || !Array.isArray(greetingResponse.suggestions)) {
-          throw new Error("Invalid response structure");
+        try {
+          greetingResponse = JSON.parse(responseContent);
+          
+          // Validar que tenga la estructura esperada
+          if (!greetingResponse.greeting || !Array.isArray(greetingResponse.suggestions)) {
+            throw new Error("Invalid response structure");
+          }
+        } catch (parseError) {
+          console.error('Error parsing GPT response:', parseError);
+          // Fallback si la respuesta no es JSON válido
+          greetingResponse = {
+            greeting: `¡Hola, ${displayName}! ¿Cómo estás hoy?`,
+            suggestions: [
+              { label: "Explorar cursos", action: "/learning/courses" },
+              { label: "Ver proyectos", action: "/organization/projects" },
+              { label: "Ir a inicio", action: "/home" }
+            ]
+          };
         }
-      } catch (parseError) {
-        console.error('Error parsing GPT response:', parseError);
-        // Fallback si la respuesta no es JSON válido
-        greetingResponse = {
-          greeting: `¡Hola, ${displayName}! ¿Cómo estás hoy?`,
-          suggestions: [
-            { label: "Explorar cursos", action: "/learning/courses" },
-            { label: "Ver proyectos", action: "/organization/projects" },
-            { label: "Ir a inicio", action: "/home" }
-          ]
-        };
-      }
 
-      // ========================================
-      // 5. REGISTRAR EN TABLAS DE IA (sin bloquear)
-      // ========================================
+        // Guardar el greeting en caché (tabla ia_user_greetings)
+        authenticatedSupabase
+          .from('ia_user_greetings')
+          .upsert({
+            user_id: userId,
+            period: currentPeriod,
+            greeting: greetingResponse.greeting
+          }, {
+            onConflict: 'user_id,period'
+          })
+          .then(({ error }) => {
+            if (error) console.error('Error saving greeting cache:', error);
+          });
+
+        // ========================================
+        // 5. REGISTRAR EN TABLAS DE IA (sin bloquear)
+        // ========================================
+        
+        const promptTokens = usage?.prompt_tokens || 0;
+        const completionTokens = usage?.completion_tokens || 0;
+        const totalTokens = usage?.total_tokens || 0;
+        const costUsd = ((promptTokens * 5) / 1000000) + ((completionTokens * 15) / 1000000);
+
+        // Guardar el mensaje (no bloqueante)
+        authenticatedSupabase
+          .from('ia_messages')
+          .insert({
+            user_id: userId,
+            role: 'assistant',
+            content: greetingResponse.greeting,
+            context_type: 'home_greeting'
+          })
+          .then(({ error }) => {
+            if (error) console.error('Error saving message:', error);
+          });
+
+        // Registrar el uso (no bloqueante)
+        authenticatedSupabase
+          .from('ia_usage_logs')
+          .insert({
+            user_id: userId,
+            model: 'gpt-4o',
+            provider: 'openai',
+            prompt_tokens: promptTokens,
+            completion_tokens: completionTokens,
+            total_tokens: totalTokens,
+            cost_usd: costUsd,
+            context_type: 'home_greeting'
+          })
+          .then(({ error }) => {
+            if (error) console.error('Error logging usage:', error);
+          });
       
-      const promptTokens = usage?.prompt_tokens || 0;
-      const completionTokens = usage?.completion_tokens || 0;
-      const totalTokens = usage?.total_tokens || 0;
-      const costUsd = ((promptTokens * 5) / 1000000) + ((completionTokens * 15) / 1000000);
+      } else {
+        // USAR SALUDO CACHEADO + GENERAR SUGGESTIONS DINÁMICAS
+        // TODO: En el futuro, generar suggestions dinámicas basadas en contexto
+        // Por ahora, usamos suggestions genéricas
+        greetingResponse = {
+          greeting: greetingText!,
+          suggestions: []
+        };
 
-      // Guardar el mensaje (no bloqueante)
-      authenticatedSupabase
-        .from('ia_messages')
-        .insert({
-          user_id: userId,
-          role: 'assistant',
-          content: greetingResponse.greeting,
-          context_type: 'home_greeting'
-        })
-        .then(({ error }) => {
-          if (error) console.error('Error saving message:', error);
-        });
+        // Generar suggestions basadas en contexto actual
+        if (coursesInProgress && coursesInProgress.length > 0) {
+          const course = coursesInProgress[0] as any;
+          if (course?.courses?.slug && course?.courses?.title) {
+            greetingResponse.suggestions.push({
+              label: `Continuar curso '${course.courses.title}'`,
+              action: `/learning/courses/${course.courses.slug}`
+            });
+          }
+        }
 
-      // Registrar el uso (no bloqueante)
-      authenticatedSupabase
-        .from('ia_usage_logs')
-        .insert({
-          user_id: userId,
-          model: 'gpt-4o',
-          provider: 'openai',
-          prompt_tokens: promptTokens,
-          completion_tokens: completionTokens,
-          total_tokens: totalTokens,
-          cost_usd: costUsd,
-          context_type: 'home_greeting'
-        })
-        .then(({ error }) => {
-          if (error) console.error('Error logging usage:', error);
-        });
+        if (activeProjects && activeProjects.length > 0) {
+          greetingResponse.suggestions.push({
+            label: "Revisar proyectos activos",
+            action: "/organization/projects"
+          });
+        }
+
+        if (recentBudgets && recentBudgets.length > 0) {
+          const budget = recentBudgets[0] as any;
+          const project = Array.isArray(budget?.projects) ? budget.projects[0] : budget?.projects;
+          if (project?.name && budget?.name) {
+            greetingResponse.suggestions.push({
+              label: `Revisar presupuesto '${budget.name}' de ${project.name}`,
+              action: "/organization/budgets"
+            });
+          }
+        }
+
+        // Si no hay suggestions específicas, agregar genéricas
+        if (greetingResponse.suggestions.length === 0) {
+          greetingResponse.suggestions = [
+            { label: "Explorar cursos", action: "/learning/courses" },
+            { label: "Ver proyectos", action: "/organization/projects" }
+          ];
+        }
+      }
 
       // ========================================
       // 6. DEVOLVER RESPUESTA
