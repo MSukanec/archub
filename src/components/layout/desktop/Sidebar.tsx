@@ -152,6 +152,7 @@ export function Sidebar() {
         { id: 'costs', label: 'Costos', icon: DollarSign, href: '/admin/costs' },
         { id: 'products', label: 'Productos', icon: Package, href: '/providers/products' },
         { id: 'general', label: 'General', icon: Settings, href: '/admin/general' },
+        { id: 'layout', label: 'Layout', icon: Layers, href: '/admin/layout' },
       ];
     } else if (sidebarLevel === 'learning') {
       return [
@@ -650,6 +651,7 @@ export function Sidebar() {
                     if (item.id === 'dashboard') return { show: true, text: 'Capacitaciones' };
                   } else if (sidebarLevel === 'admin') {
                     if (item.id === 'courses') return { show: true, text: 'Administración' };
+                    if (item.id === 'general') return { show: true, text: 'Layout' };
                   }
                   return { show: false, text: '' };
                 };

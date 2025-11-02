@@ -66,6 +66,7 @@ const AdminTasks = lazy(() => import("@/pages/admin/tasks/AdminTasks"));
 const AdminGeneral = lazy(() => import("@/pages/admin/general/AdminGeneral"));
 const AdminCourses = lazy(() => import("@/pages/admin/courses/AdminCourses"));
 const AdminCourseView = lazy(() => import("@/pages/admin/courses/AdminCourseView"));
+const AdminLayout = lazy(() => import("@/pages/admin/layout/AdminLayout"));
 
 // Provider Pages (Lazy Loaded - solo admins las usan)
 const Products = lazy(() => import("@/pages/providers/products/Products"));
@@ -271,6 +272,14 @@ function Router() {
           <Suspense fallback={<LazyLoadFallback />}>
             <AuthAdmin>
               <AdminGeneral />
+            </AuthAdmin>
+          </Suspense>
+        </Route>
+
+        <Route path="/admin/layout">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <AuthAdmin>
+              <AdminLayout />
             </AuthAdmin>
           </Suspense>
         </Route>
