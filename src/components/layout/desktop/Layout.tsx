@@ -107,9 +107,8 @@ export function Layout({ children, wide = false, hideHeader = false, headerProps
           : "var(--main-sidebar-bg)",
       }}
     >
-      {/* Main Header for Desktop - Only shown on desktop */}
-      {/* HEADER COMENTADO TEMPORALMENTE PARA PRUEBAS */}
-      {/* {!isMobile && <MainHeader />} */}
+      {/* Main Header for Desktop - Only shown on desktop when hideHeader is false */}
+      {!isMobile && !hideHeader && <MainHeader />}
       
       {/* Mobile View */}
       {isMobile ? (
