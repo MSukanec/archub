@@ -192,13 +192,6 @@ export default function Home() {
     const userMessage = inputMessage.trim();
     setInputMessage("");
     
-    // Agregar mensaje del usuario al chat
-    const newUserMessage: ChatMessage = { role: 'user', content: userMessage };
-    setChatMessages(prev => [...prev, newUserMessage]);
-    
-    // Marcar que ahora hay conversación activa en esta sesión
-    setHasActiveConversation(true);
-    
     try {
       setIsSendingMessage(true);
 
@@ -246,18 +239,18 @@ export default function Home() {
 
       const data = await response.json();
       
-      // Agregar respuesta de la IA al chat
+      // Solo agregar mensajes al historial si la petición fue exitosa
+      const newUserMessage: ChatMessage = { role: 'user', content: userMessage };
       const assistantMessage: ChatMessage = { role: 'assistant', content: data.response };
-      setChatMessages(prev => [...prev, assistantMessage]);
+      setChatMessages(prev => [...prev, newUserMessage, assistantMessage]);
+      
+      // Marcar que ahora hay conversación activa en esta sesión
+      setHasActiveConversation(true);
       
     } catch (err: any) {
       console.error('Error sending message:', err);
-      // Agregar mensaje de error
-      const errorMessage: ChatMessage = { 
-        role: 'assistant', 
-        content: "Lo siento, hubo un error al procesar tu mensaje. Por favor intenta nuevamente." 
-      };
-      setChatMessages(prev => [...prev, errorMessage]);
+      // No agregamos mensaje al historial para mantenerlo limpio
+      // El error ya se registró en la consola para debugging
     } finally {
       setIsSendingMessage(false);
     }

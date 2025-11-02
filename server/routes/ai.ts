@@ -361,6 +361,13 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
       
       let greetingResponse: GreetingResponse;
 
+      // Detectar si el usuario es nuevo (sin datos reales)
+      const isNewUser = (
+        (!coursesInProgress || coursesInProgress.length === 0) &&
+        (!activeProjects || activeProjects.length === 0) &&
+        (!recentBudgets || recentBudgets.length === 0)
+      );
+
       if (shouldGenerateWithGPT) {
         // GENERAR NUEVO SALUDO CON GPT
         const openai = new OpenAI({
@@ -395,16 +402,18 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
           if (!greetingResponse.greeting || !Array.isArray(greetingResponse.suggestions)) {
             throw new Error("Invalid response structure");
           }
+
+          // Si el usuario es nuevo, NO mostrar sugerencias inventadas
+          // (esperamos a implementar el tutorial)
+          if (isNewUser) {
+            greetingResponse.suggestions = [];
+          }
         } catch (parseError) {
           console.error('Error parsing GPT response:', parseError);
           // Fallback si la respuesta no es JSON válido
           greetingResponse = {
             greeting: `¡Hola, ${displayName}! ¿Cómo estás hoy?`,
-            suggestions: [
-              { label: "Explorar cursos", action: "/learning/courses" },
-              { label: "Ver proyectos", action: "/organization/projects" },
-              { label: "Ir a inicio", action: "/home" }
-            ]
+            suggestions: [] // No sugerencias para usuarios nuevos
           };
         }
 
@@ -498,13 +507,8 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
           }
         }
 
-        // Si no hay suggestions específicas, agregar genéricas
-        if (greetingResponse.suggestions.length === 0) {
-          greetingResponse.suggestions = [
-            { label: "Explorar cursos", action: "/learning/courses" },
-            { label: "Ver proyectos", action: "/organization/projects" }
-          ];
-        }
+        // NO agregar sugerencias genéricas si el usuario es nuevo
+        // (cuando llegue el tutorial, se agregará una sugerencia específica para eso)
       }
 
       // ========================================
