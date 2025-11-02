@@ -1,189 +1,71 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
 import { Layout } from "@/components/layout/desktop/Layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { StatCard, StatCardTitle } from "@/components/ui/stat-card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { CustomButton } from "@/components/ui-custom/fields/CustomButton";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useNavigationStore } from "@/stores/navigationStore";
-import { useProjectContext } from "@/stores/projectContext";
-import { useIsAdmin } from "@/hooks/use-admin-permissions";
-import { useToast } from "@/hooks/use-toast";
-import { useProjects } from "@/hooks/use-projects";
-import { useCourses } from "@/hooks/use-courses";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
 import { supabase } from "@/lib/supabase";
-import { 
-  Home as HomeIcon, 
-  CheckCircle2,
-  Circle,
-  Sparkles,
-  Play,
-  Plus,
-  CheckSquare,
-  FileUp,
-  UserPlus,
-  FolderOpen,
-  Clock,
-  GraduationCap,
-  MessageSquare,
-  ExternalLink,
-  ArrowRight,
-  X
-} from "lucide-react";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { Home as HomeIcon, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-interface Task {
-  id: string;
-  title: string;
-  project_name: string;
-  assigned_to: string;
-  due_date: string | null;
-}
-
 export default function Home() {
-  const [, navigate] = useLocation();
-  const { data: userData, isLoading } = useCurrentUser();
+  const { data: userData, isLoading: userLoading } = useCurrentUser();
   const { setSidebarLevel } = useNavigationStore();
-  const { selectedProjectId, currentOrganizationId, setSelectedProject } = useProjectContext();
-  const isAdmin = useIsAdmin();
-  const { toast } = useToast();
-
-  const currentDate = format(new Date(), "EEEE, d 'de' MMMM", { locale: es });
-  const greeting = getGreeting();
+  
+  const [greeting, setGreeting] = useState<string>("");
+  const [isLoadingGreeting, setIsLoadingGreeting] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Mantener el sidebar en modo general
   useEffect(() => {
     setSidebarLevel('general');
   }, [setSidebarLevel]);
 
-  // Lógica de banner de bienvenida (Primeros Pasos)
-  const homeChecklist = userData?.preferences?.home_checklist || {
-    create_project: false,
-    create_contact: false,
-    create_movement: false,
-  };
-  
-  const onboardingCompleted = userData?.preferences?.onboarding_completed || false;
-  const bannerDismissed = userData?.preferences?.home_banner_dismissed || false;
-  
-  // Mostrar banner solo si onboarding completado, no dismisseado, y hay al menos un paso pendiente
-  const showBanner = onboardingCompleted && 
-                     !bannerDismissed && 
-                     Object.values(homeChecklist).some(v => !v);
+  // Fetch del saludo de IA
+  useEffect(() => {
+    const fetchGreeting = async () => {
+      try {
+        setIsLoadingGreeting(true);
+        setError(null);
 
-  // Mutación para ocultar el banner
-  const dismissBannerMutation = useMutation({
-    mutationFn: async () => {
-      if (!supabase) throw new Error('Supabase not initialized');
-      
-      const { error } = await supabase.rpc('dismiss_home_banner');
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      toast({
-        title: "Banner ocultado",
-        description: "El banner de bienvenida ha sido ocultado",
-      });
-    },
-    onError: (error) => {
-      console.error('Error dismissing banner:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo ocultar el banner",
-        variant: "destructive"
-      });
-    }
-  });
+        // Obtener el token del usuario
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError || !session?.access_token) {
+          throw new Error("No se pudo obtener la sesión del usuario");
+        }
 
-  function getGreeting() {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Buenos días";
-    if (hour < 20) return "Buenas tardes";
-    return "Buenas noches";
-  }
-
-  // Query para proyectos activos (datos reales)
-  const { data: allProjects = [], isLoading: projectsLoading } = useProjects(currentOrganizationId || undefined);
-  
-  // Filtrar SOLO proyectos con estado "active"
-  const filteredActiveProjects = allProjects.filter(project => project.status === 'active');
-  
-  // Ordenar: proyecto activo primero, luego los demás
-  const activeProjects = filteredActiveProjects.sort((a, b) => {
-    if (a.id === selectedProjectId) return -1;
-    if (b.id === selectedProjectId) return 1;
-    return 0;
-  });
-
-  // Query para cursos
-  const { data: courses = [] } = useCourses();
-  const latestCourse = courses.length > 0 ? courses[0] : null;
-
-  // Mutación para cambiar el proyecto activo
-  const selectProjectMutation = useMutation({
-    mutationFn: async (projectId: string) => {
-      if (!supabase || !userData?.user?.id || !currentOrganizationId) {
-        throw new Error('Required data not available');
-      }
-      
-      const { error } = await supabase
-        .from('user_organization_preferences')
-        .upsert({
-          user_id: userData.user.id,
-          organization_id: currentOrganizationId,
-          last_project_id: projectId,
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id,organization_id'
+        // Llamar al endpoint de saludo
+        const response = await fetch('/api/ai/home_greeting', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json'
+          }
         });
-      
-      if (error) throw error;
-      return projectId;
-    },
-    onSuccess: (projectId) => {
-      setSelectedProject(projectId, currentOrganizationId);
-      
-      queryClient.invalidateQueries({ 
-        queryKey: ['user-organization-preferences', userData?.user?.id, currentOrganizationId] 
-      });
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      
-      // Navegar al dashboard del proyecto
-      setSidebarLevel('project');
-      navigate('/project/dashboard');
-      
-      toast({
-        title: "Proyecto activado",
-        description: "El proyecto ha sido seleccionado correctamente",
-      });
-    },
-    onError: (error) => {
-      console.error('Error selecting project:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo seleccionar el proyecto",
-        variant: "destructive"
-      });
-    }
-  });
 
-  // Query para tareas pendientes (mock por ahora)
-  const { data: upcomingTasks = [] } = useQuery<Task[]>({
-    queryKey: ['upcoming-tasks'],
-    queryFn: async () => {
-      // Mock data - reemplazar con API real
-      return [];
-    }
-  });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Error al obtener el saludo");
+        }
 
-  if (isLoading) {
+        const data = await response.json();
+        setGreeting(data.greeting);
+      } catch (err: any) {
+        console.error('Error fetching greeting:', err);
+        setError(err.message || "Error al cargar el saludo");
+        // Fallback genérico
+        setGreeting(`¡Hola, ${userData?.user_data?.first_name || 'Usuario'}! ¿Cómo estás hoy?`);
+      } finally {
+        setIsLoadingGreeting(false);
+      }
+    };
+
+    if (userData?.user?.id) {
+      fetchGreeting();
+    }
+  }, [userData?.user?.id, userData?.user_data?.first_name]);
+
+  if (userLoading) {
     return (
       <Layout wide={true}>
         <div className="flex items-center justify-center h-64">
@@ -200,340 +82,96 @@ export default function Home() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      <div className="space-y-6">
-        {/* Welcome Section */}
-        <div className="space-y-1">
-          {/* Desktop: saludo y nombre en una línea */}
-          <h2 className="hidden md:block text-3xl font-semibold text-foreground">
-            {greeting}, {userData?.user_data?.first_name || 'Usuario'}
-          </h2>
-          
-          {/* Mobile: saludo pequeño y gris, nombre en segunda línea */}
-          <div className="md:hidden">
-            <p className="text-sm text-muted-foreground">
-              {greeting},
-            </p>
-            <h2 className="text-2xl font-semibold text-foreground">
-              {userData?.user_data?.first_name || 'Usuario'}
-            </h2>
-          </div>
-        </div>
-
-        {/* Banner Principal - Primeros Pasos - COMENTADO */}
-        {/* {showBanner && (
-          <Card className="relative overflow-hidden">
-            <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" 
-                 style={{
-                   backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--accent)) 1px, transparent 0)',
-                   backgroundSize: '32px 32px'
-                 }} 
-            />
-            
-            <CardHeader className="relative">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center border border-accent/20">
-                    <Sparkles className="w-6 h-6 text-accent" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-2xl">¡Bienvenido a Archub!</CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Completa estos pasos para empezar a gestionar tus proyectos
-                    </p>
-                  </div>
+      <div className="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center px-4 py-12">
+        {/* Contenedor principal centrado */}
+        <div className="max-w-4xl w-full space-y-12">
+          {/* Saludo principal con IA */}
+          <div className="text-center space-y-6">
+            {isLoadingGreeting ? (
+              // Skeleton loader
+              <div className="space-y-4 animate-pulse">
+                <div className="flex items-center justify-center gap-2 mb-6">
+                  <Sparkles className="w-6 h-6 text-accent/60" />
+                  <span className="text-sm text-muted-foreground">Archubita está pensando...</span>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => dismissBannerMutation.mutate()}
-                  disabled={dismissBannerMutation.isPending}
-                  data-testid="button-dismiss-banner"
-                  className="flex-shrink-0"
+                <div className="h-12 bg-muted/30 rounded-lg w-3/4 mx-auto"></div>
+                <div className="h-12 bg-muted/20 rounded-lg w-2/3 mx-auto"></div>
+              </div>
+            ) : (
+              // Saludo animado
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="space-y-6"
+              >
+                {/* Ícono de Archubita */}
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, duration: 0.4, ease: "backOut" }}
+                  className="flex justify-center"
                 >
-                  <X className="w-4 h-4 mr-2" />
-                  Ocultar el tutorial
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3 relative">
-              <Card data-testid="checklist-create-project">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-3 flex-1">
-                      {homeChecklist.create_project ? (
-                        <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0" />
-                      ) : (
-                        <Circle className="w-6 h-6 text-muted-foreground flex-shrink-0" />
-                      )}
-                      <div className="flex-1">
-                        <h4 className={cn(
-                          "font-semibold text-base",
-                          homeChecklist.create_project ? "line-through text-muted-foreground" : "text-foreground"
-                        )}>
-                          Crear primer proyecto
-                        </h4>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Organiza tu trabajo creando un proyecto con tareas, presupuesto y equipo
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      className="flex-shrink-0"
-                      onClick={() => {
-                        setSidebarLevel('organization');
-                        navigate('/organization/projects');
-                      }}
-                    >
-                      <ArrowRight className="w-4 h-4 mr-2" />
-                      Ir a Proyectos
-                    </Button>
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center border border-accent/20">
+                    <Sparkles className="w-8 h-8 text-accent" />
                   </div>
-                </CardContent>
-              </Card>
+                </motion.div>
 
-              <Card data-testid="checklist-create-contact">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-3 flex-1">
-                      {homeChecklist.create_contact ? (
-                        <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0" />
-                      ) : (
-                        <Circle className="w-6 h-6 text-muted-foreground flex-shrink-0" />
-                      )}
-                      <div className="flex-1">
-                        <h4 className={cn(
-                          "font-semibold text-base",
-                          homeChecklist.create_contact ? "line-through text-muted-foreground" : "text-foreground"
-                        )}>
-                          Crear primer contacto
-                        </h4>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Gestiona clientes, proveedores y colaboradores en un solo lugar
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      className="flex-shrink-0"
-                      onClick={() => {
-                        setSidebarLevel('organization');
-                        navigate('/contacts');
-                      }}
-                    >
-                      <ArrowRight className="w-4 h-4 mr-2" />
-                      Ir a Contactos
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                {/* Mensaje de saludo */}
+                <h1 className={cn(
+                  "text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight",
+                  "bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent",
+                  "leading-tight"
+                )}>
+                  {greeting}
+                </h1>
 
-              <Card data-testid="checklist-create-movement">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-3 flex-1">
-                      {homeChecklist.create_movement ? (
-                        <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0" />
-                      ) : (
-                        <Circle className="w-6 h-6 text-muted-foreground flex-shrink-0" />
-                      )}
-                      <div className="flex-1">
-                        <h4 className={cn(
-                          "font-semibold text-base",
-                          homeChecklist.create_movement ? "line-through text-muted-foreground" : "text-foreground"
-                        )}>
-                          Crear primer movimiento
-                        </h4>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Registra ingresos y egresos para llevar control financiero de tus proyectos
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      className="flex-shrink-0"
-                      onClick={() => {
-                        setSidebarLevel('organization');
-                        navigate('/movements');
-                      }}
-                    >
-                      <ArrowRight className="w-4 h-4 mr-2" />
-                      Ir a Movimientos
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </CardContent>
-          </Card>
-        )} */}
-
-        {/* Grid de 3 Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* 1. Proyectos activos */}
-          <StatCard className="hover:shadow-lg transition-shadow">
-            <div className="flex flex-row items-center justify-between mb-4">
-              <StatCardTitle>Proyectos activos</StatCardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setSidebarLevel('organization');
-                  navigate('/organization/projects');
-                }}
-              >
-                Ir a Proyectos
-              </Button>
-            </div>
-            <div>
-              {projectsLoading ? (
-                <div className="text-center py-6">
-                  <p className="text-sm text-muted-foreground">Cargando proyectos...</p>
-                </div>
-              ) : activeProjects.length > 0 ? (
-                <div className="space-y-3">
-                  {activeProjects.slice(0, 4).map((project) => {
-                    const isCurrentProject = project.id === selectedProjectId;
-                    
-                    return (
-                      <div
-                        key={project.id}
-                        className={cn(
-                          "p-3 rounded-lg hover:bg-accent/5 transition-colors cursor-pointer",
-                          isCurrentProject ? "border-2 border-[var(--accent)]" : "border border-border"
-                        )}
-                        onClick={() => {
-                          selectProjectMutation.mutate(project.id);
-                        }}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium text-sm truncate">{project.name}</h4>
-                          {isCurrentProject && (
-                            <Badge 
-                              style={{ backgroundColor: 'hsl(var(--accent))', color: 'white' }}
-                              className="text-xs"
-                            >
-                              Activo
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {project.project_data?.project_type?.name || 'Sin tipo'} - {project.project_data?.modality?.name || 'Sin modalidad'}
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {activeProjects.length > 4 && (
-                    <Button 
-                      variant="link" 
-                      className="w-full p-0 h-auto text-sm"
-                      onClick={() => {
-                        setSidebarLevel('organization');
-                        navigate('/organization/projects');
-                      }}
-                    >
-                      Ver todos los proyectos ({activeProjects.length}) →
-                    </Button>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center py-6">
-                  <p className="text-sm text-muted-foreground mb-3">
-                    No hay proyectos activos
+                {error && (
+                  <p className="text-sm text-muted-foreground/60">
+                    (Modo offline)
                   </p>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setSidebarLevel('organization');
-                      navigate('/organization/projects');
-                    }}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Crear proyecto
-                  </Button>
-                </div>
-              )}
-            </div>
-          </StatCard>
+                )}
+              </motion.div>
+            )}
+          </div>
 
-          {/* 2. Academia */}
-          <StatCard className="hover:shadow-lg transition-shadow">
-            <div className="flex flex-row items-center justify-between mb-4">
-              <StatCardTitle>Academia</StatCardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setSidebarLevel('learning');
-                  navigate('/learning/dashboard');
-                }}
-              >
-                Ir a Academia
-              </Button>
-            </div>
-            <div>
-              {latestCourse ? (
-                <div className="space-y-3">
-                  <div className="p-3 rounded-lg bg-accent/5 border border-accent/20">
-                    <h4 className="font-medium text-sm mb-1">Recomendado</h4>
-                    <p className="text-xs text-muted-foreground mb-3">
-                      {latestCourse.title}
-                    </p>
-                    <Button
-                      size="sm"
-                      className="w-full"
-                      onClick={() => {
-                        setSidebarLevel('learning');
-                        navigate('/learning/courses');
-                      }}
-                    >
-                      <Play className="w-4 h-4 mr-2" />
-                      Ver curso
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-6">
-                  <p className="text-sm text-muted-foreground">
-                    No hay cursos disponibles
-                  </p>
-                </div>
-              )}
-            </div>
-          </StatCard>
-
-          {/* 3. Comunidad / Feedback */}
-          <StatCard className="hover:shadow-lg transition-shadow">
-            <div className="flex flex-row items-center justify-between mb-4">
-              <StatCardTitle>Comunidad</StatCardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => window.open('https://discord.com/channels/868615664070443008', '_blank')}
-              >
-                Ir a Discord
-              </Button>
-            </div>
-            <div>
-              <div className="space-y-2">
-                <CustomButton
-                  icon={MessageSquare}
-                  title="Reportar un bug"
-                  onClick={() => window.open('https://discord.com/channels/868615664070443008/1426005460598657056', '_blank')}
-                />
-                <CustomButton
-                  icon={Sparkles}
-                  title="Sugerir una idea"
-                  onClick={() => window.open('https://discord.com/channels/868615664070443008/1426008844353667233', '_blank')}
-                />
-                <CustomButton
-                  icon={MessageSquare}
-                  title="Foro general"
-                  onClick={() => window.open('https://discord.com/channels/868615664070443008/1137167434860732588', '_blank')}
-                />
+          {/* Espacio para sugerencias futuras de IA */}
+          {!isLoadingGreeting && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8, duration: 0.6 }}
+              className="space-y-4"
+            >
+              {/* Placeholder para sugerencias de acción */}
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground/60 mb-8">
+                  {/* Este espacio se usará para mostrar recomendaciones personalizadas */}
+                </p>
               </div>
-            </div>
-          </StatCard>
+
+              {/* Grid de acciones sugeridas (placeholder) */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
+                {/* Los cards de sugerencias aparecerán aquí dinámicamente */}
+              </div>
+            </motion.div>
+          )}
         </div>
+
+        {/* Indicador sutil de IA */}
+        {!isLoadingGreeting && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2, duration: 0.6 }}
+            className="mt-16 text-center"
+          >
+            <p className="text-xs text-muted-foreground/40 flex items-center justify-center gap-2">
+              <Sparkles className="w-3 h-3" />
+              Generado con Archubita
+            </p>
+          </motion.div>
+        )}
       </div>
     </Layout>
   );
