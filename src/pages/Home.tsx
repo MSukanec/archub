@@ -1,14 +1,14 @@
-import { useEffect, useState, useRef, type KeyboardEvent } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { Layout } from "@/components/layout/desktop/Layout";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { supabase } from "@/lib/supabase";
-import { Home as HomeIcon, ArrowRight, Send } from "lucide-react";
+import { Home as HomeIcon, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Textarea } from "@/components/ui/textarea";
+import { SmartChatInput } from "@/components/ui-custom/fields/SmartChatInput";
 
 interface Suggestion {
   label: string;
@@ -230,13 +230,6 @@ export default function Home() {
     }
   };
 
-  // Manejar tecla Enter
-  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
 
   if (userLoading || isLoadingHistory) {
     return (
@@ -322,43 +315,22 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.6 }}
-              className="space-y-3 max-w-2xl mx-auto"
+              className="space-y-2 max-w-2xl mx-auto"
             >
-              <div className="flex gap-2">
-                <Textarea
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Escribe un mensaje..."
-                  className={cn(
-                    "resize-none min-h-[60px] max-h-[120px]",
-                    "focus-visible:ring-accent/50"
-                  )}
-                  disabled={isSendingMessage}
-                  data-testid="input-chat-message"
-                />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!inputMessage.trim() || isSendingMessage}
-                  size="icon"
-                  className={cn(
-                    "h-[60px] w-[60px] shrink-0",
-                    "bg-gradient-to-br from-accent to-accent/80",
-                    "hover:from-accent/90 hover:to-accent/70",
-                    "disabled:opacity-50"
-                  )}
-                  data-testid="button-send-message"
-                >
-                  <Send className="w-5 h-5" />
-                </Button>
-              </div>
+              <SmartChatInput
+                value={inputMessage}
+                onChange={setInputMessage}
+                onSubmit={handleSendMessage}
+                placeholder="Escribe un mensaje..."
+                disabled={isSendingMessage}
+              />
 
               {/* Toggle para ver historial completo */}
               {chatMessages.length > 0 && (
-                <div className="text-center">
+                <div className="text-center pt-1">
                   <button
                     onClick={() => setShowFullHistory(!showFullHistory)}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
+                    className="text-xs text-muted-foreground/70 hover:text-muted-foreground transition-colors"
                     data-testid="button-toggle-history"
                   >
                     {showFullHistory ? "Ocultar historial completo" : "Ver historial completo"}
@@ -437,7 +409,7 @@ export default function Home() {
                       className={cn(
                         "w-full h-auto min-h-[60px] py-4 px-5",
                         "flex items-center justify-between gap-4",
-                        "hover:bg-accent/5 hover:border-accent/30",
+                        "hover:bg-[hsl(var(--accent))]/10 hover:border-accent/40",
                         "transition-all duration-200",
                         "group text-left"
                       )}
