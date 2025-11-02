@@ -40,6 +40,8 @@ export default function Home() {
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [showFullHistory, setShowFullHistory] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  // Controla si hay conversación ACTIVA en esta sesión (no cuenta historial cargado)
+  const [hasActiveConversation, setHasActiveConversation] = useState(false);
 
   // Mantener el sidebar en modo general
   useEffect(() => {
@@ -179,6 +181,9 @@ export default function Home() {
     const newUserMessage: ChatMessage = { role: 'user', content: userMessage };
     setChatMessages(prev => [...prev, newUserMessage]);
     
+    // Marcar que ahora hay conversación activa en esta sesión
+    setHasActiveConversation(true);
+    
     try {
       setIsSendingMessage(true);
 
@@ -254,7 +259,7 @@ export default function Home() {
         {/* Contenedor principal centrado */}
         <div className="max-w-4xl w-full space-y-8">
           
-          {/* Saludo (siempre visible, independiente del historial) */}
+          {/* Área donde "habla la IA": Saludo inicial O última respuesta */}
           <div className="text-center space-y-6">
             {isLoadingGreeting ? (
               // Skeleton loader
@@ -269,18 +274,43 @@ export default function Home() {
                 transition={{ duration: 0.6, ease: "easeOut" }}
                 className="space-y-6"
               >
-                <h1 className={cn(
-                  "text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight",
-                  "bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent",
-                  "leading-tight px-4"
-                )}>
-                  {greetingData?.greeting || ""}
-                </h1>
+                {/* Si hay conversación activa en esta sesión, mostrar última respuesta */}
+                {hasActiveConversation && chatMessages.length > 0 ? (
+                  (() => {
+                    // Encontrar el último mensaje de la IA
+                    const lastAssistantMessage = [...chatMessages]
+                      .reverse()
+                      .find(msg => msg.role === 'assistant');
+                    
+                    return lastAssistantMessage ? (
+                      <div className="max-w-2xl mx-auto">
+                        <p className={cn(
+                          "text-lg md:text-xl font-medium leading-relaxed",
+                          "text-foreground/90",
+                          "px-4"
+                        )}>
+                          {lastAssistantMessage.content}
+                        </p>
+                      </div>
+                    ) : null;
+                  })()
+                ) : (
+                  // Si NO hay conversación activa, mostrar el saludo
+                  <>
+                    <h1 className={cn(
+                      "text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight",
+                      "bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent",
+                      "leading-tight px-4"
+                    )}>
+                      {greetingData?.greeting || ""}
+                    </h1>
 
-                {error && (
-                  <p className="text-sm text-muted-foreground/60">
-                    (Modo offline)
-                  </p>
+                    {error && (
+                      <p className="text-sm text-muted-foreground/60">
+                        (Modo offline)
+                      </p>
+                    )}
+                  </>
                 )}
               </motion.div>
             )}
@@ -378,8 +408,8 @@ export default function Home() {
             </motion.div>
           )}
 
-          {/* Sugerencias de acción (siempre visibles si existen) */}
-          {!isLoadingGreeting && greetingData?.suggestions && greetingData.suggestions.length > 0 && (
+          {/* Sugerencias de acción (solo si NO hay conversación activa) */}
+          {!isLoadingGreeting && !hasActiveConversation && greetingData?.suggestions && greetingData.suggestions.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
