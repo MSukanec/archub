@@ -1,157 +1,77 @@
 # Detalle de las tablas de Supabase para IA:
 
-TABLA CONTACTS:
+--------------- TABLA IA_CONTEXT_SNAPSHOTS:
 
-[
-  {
-    "column_name": "id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "organization_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "first_name",
-    "data_type": "text"
-  },
-  {
-    "column_name": "email",
-    "data_type": "text"
-  },
-  {
-    "column_name": "phone",
-    "data_type": "text"
-  },
-  {
-    "column_name": "company_name",
-    "data_type": "text"
-  },
-  {
-    "column_name": "location",
-    "data_type": "text"
-  },
-  {
-    "column_name": "notes",
-    "data_type": "text"
-  },
-  {
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone"
-  },
-  {
-    "column_name": "last_name",
-    "data_type": "text"
-  },
-  {
-    "column_name": "linked_user_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "full_name",
-    "data_type": "text"
-  },
-  {
-    "column_name": "updated_at",
-    "data_type": "timestamp with time zone"
-  },
-  {
-    "column_name": "national_id",
-    "data_type": "text"
-  },
-  {
-    "column_name": "avatar_attachment_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "avatar_updated_at",
-    "data_type": "timestamp with time zone"
-  }
-]
+create table public.ia_context_snapshots (
+  id uuid not null default gen_random_uuid (),
+  user_id uuid null,
+  organization_id uuid null,
+  type text not null,
+  content text not null,
+  created_at timestamp with time zone null default now(),
+  constraint ia_context_snapshots_pkey primary key (id),
+  constraint ia_context_snapshots_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint ia_context_snapshots_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+) TABLESPACE pg_default;
 
-TABLA CONTACT_TYPES:
+create index IF not exists idx_ia_context_snapshots_type on public.ia_context_snapshots using btree (type) TABLESPACE pg_default;
 
-[
-  {
-    "column_name": "id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "name",
-    "data_type": "text"
-  },
-  {
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone"
-  }
-]
+create index IF not exists idx_ia_context_snapshots_user_org on public.ia_context_snapshots using btree (user_id, organization_id) TABLESPACE pg_default;
 
-TABLA CONTACT_TYPE_LINKS:
+--------------- TABLA IA_MESSAGES:
 
-[
-  {
-    "column_name": "id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "contact_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "contact_type_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone"
-  }
-]
+create table public.ia_messages (
+  id uuid not null default gen_random_uuid (),
+  user_id uuid null,
+  role text not null,
+  content text not null,
+  context_type text null,
+  created_at timestamp with time zone null default now(),
+  constraint ia_messages_pkey primary key (id),
+  constraint ia_messages_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+) TABLESPACE pg_default;
 
-TABLA CONTACT_ATTACHMENTS:
+create index IF not exists idx_ia_messages_user_id on public.ia_messages using btree (user_id) TABLESPACE pg_default;
 
-[
-  {
-    "column_name": "id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "contact_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "storage_bucket",
-    "data_type": "text"
-  },
-  {
-    "column_name": "storage_path",
-    "data_type": "text"
-  },
-  {
-    "column_name": "file_name",
-    "data_type": "text"
-  },
-  {
-    "column_name": "mime_type",
-    "data_type": "text"
-  },
-  {
-    "column_name": "size_bytes",
-    "data_type": "bigint"
-  },
-  {
-    "column_name": "category",
-    "data_type": "text"
-  },
-  {
-    "column_name": "metadata",
-    "data_type": "jsonb"
-  },
-  {
-    "column_name": "created_by",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone"
-  }
-]
+create index IF not exists idx_ia_messages_context_type on public.ia_messages using btree (context_type) TABLESPACE pg_default;
+
+--------------- TABLA IA_USAGE_LOGS:
+
+create table public.ia_usage_logs (
+  id uuid not null default gen_random_uuid (),
+  user_id uuid null,
+  provider text null default 'openai'::text,
+  model text null default 'gpt-4o'::text,
+  prompt_tokens integer null,
+  completion_tokens integer null,
+  total_tokens integer null,
+  cost_usd numeric(6, 4) null,
+  context_type text null,
+  created_at timestamp with time zone null default now(),
+  constraint ia_usage_logs_pkey primary key (id),
+  constraint ia_usage_logs_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create index IF not exists idx_ia_usage_logs_user_id on public.ia_usage_logs using btree (user_id) TABLESPACE pg_default;
+
+create index IF not exists idx_ia_usage_logs_context_type on public.ia_usage_logs using btree (context_type) TABLESPACE pg_default;
+
+--------------- TABLA IA_USER_PREFERENCES:
+
+create table public.ia_user_preferences (
+  user_id uuid not null,
+  display_name text null,
+  tone text null default 'amistoso'::text,
+  language text null default 'es'::text,
+  personality text null,
+  updated_at timestamp with time zone null default now(),
+  constraint ia_user_preferences_pkey primary key (user_id),
+  constraint ia_user_preferences_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create index IF not exists idx_ia_user_preferences_language on public.ia_user_preferences using btree (language) TABLESPACE pg_default;
+
+create trigger trg_set_updated_at_ia_user_preferences BEFORE
+update on ia_user_preferences for EACH row
+execute FUNCTION set_updated_at_ia_user_preferences ();
+
