@@ -16,7 +16,7 @@ Preferred communication style: Simple, everyday language.
 - **Onboarding Flow**: Streamlined onboarding sets users to 'professional' mode and navigates directly to /home.
 - **Component Standardization**: Standardized `StatCard` and custom `LoadingSpinner` components.
 - **Checkout UX**: Replaced billing info Accordion with Switch control for improved user experience.
-- **Home Page UX Flow**: Minimalist AI copilot interface with dynamic greeting/response, input-first conversation, and collapsible history. Initial state shows: Saludo (large text) → Input → Sugerencias. Active conversation shows: Última respuesta IA (smaller text) → Input → Toggle historial → (Sugerencias hidden). "Ver historial completo" toggle reveals full message history below input.
+- **Home Page UX Flow**: Minimalist AI copilot interface with session-based conversation state. The top area is "where the AI speaks" and shows either greeting OR last response (never both). Fresh load/navigation: Saludo (large text) → Input → Sugerencias. During active session: Última respuesta IA (smaller text) → Input → Toggle historial → (Sugerencias hidden). Returning from another page resets to greeting. "Ver historial completo" toggle reveals full message history (newest first) below input. Uses `hasActiveConversation` local state flag to distinguish active session messages from loaded history.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui, Tailwind CSS, Zustand, Wouter, TanStack Query.
