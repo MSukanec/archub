@@ -521,4 +521,65 @@ Maintain a ${tone} tone and respond concisely and helpfully.`
       });
     }
   });
+
+  // GET /api/ai/history - Get chat history for the user
+  app.get("/api/ai/history", async (req, res) => {
+    try {
+      // Extraer token y autenticar
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // Obtener el usuario autenticado
+      const { data: { user }, error: authError } = await authenticatedSupabase.auth.getUser();
+      if (authError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      // Obtener el usuario de la tabla users por auth_id
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .single();
+
+      if (!dbUser) {
+        return res.status(404).json({ error: "User not found in database" });
+      }
+
+      const userId = dbUser.id;
+
+      // Obtener los últimos 50 mensajes del chat del usuario
+      // Ordenamos descendente para obtener los MÁS RECIENTES, luego invertimos para orden cronológico
+      const { data: messages, error: messagesError } = await authenticatedSupabase
+        .from('ia_messages')
+        .select('role, content, created_at')
+        .eq('user_id', userId)
+        .eq('context_type', 'home_chat')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (messagesError) {
+        console.error('Error fetching messages:', messagesError);
+        return res.status(500).json({ error: "Error fetching chat history" });
+      }
+
+      // Invertir el orden para que aparezcan cronológicamente (más viejos primero)
+      const orderedMessages = (messages || []).reverse();
+
+      // Devolver los mensajes en orden cronológico
+      return res.status(200).json({
+        messages: orderedMessages
+      });
+
+    } catch (err: any) {
+      console.error('Error in history:', err);
+      return res.status(500).json({
+        error: "Error fetching chat history"
+      });
+    }
+  });
 }

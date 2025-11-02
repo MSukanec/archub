@@ -39,12 +39,65 @@ export default function Home() {
   const [inputMessage, setInputMessage] = useState("");
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [showFullHistory, setShowFullHistory] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Mantener el sidebar en modo general
   useEffect(() => {
     setSidebarLevel('general');
   }, [setSidebarLevel]);
+
+  // Cargar historial de chat al montar
+  useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        setIsLoadingHistory(true);
+
+        // Obtener el token del usuario
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError || !session?.access_token) {
+          // Si no hay sesión, simplemente no cargar historial
+          setIsLoadingHistory(false);
+          return;
+        }
+
+        // Llamar al endpoint de historial
+        const response = await fetch('/api/ai/history', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          console.error('Error fetching history');
+          setIsLoadingHistory(false);
+          return;
+        }
+
+        const data = await response.json();
+        
+        // Inicializar chatMessages con el historial
+        if (data.messages && Array.isArray(data.messages)) {
+          const formattedMessages = data.messages.map((msg: any) => ({
+            role: msg.role,
+            content: msg.content
+          }));
+          setChatMessages(formattedMessages);
+        }
+      } catch (err: any) {
+        console.error('Error loading history:', err);
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+
+    if (userData?.user?.id) {
+      loadHistory();
+    }
+  }, [userData?.user?.id]);
 
   // Fetch del saludo de IA
   useEffect(() => {
@@ -185,7 +238,7 @@ export default function Home() {
     }
   };
 
-  if (userLoading) {
+  if (userLoading || isLoadingHistory) {
     return (
       <Layout wide={true}>
         <div className="flex items-center justify-center h-64">
