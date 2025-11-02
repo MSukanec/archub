@@ -75,7 +75,7 @@ create trigger trg_set_updated_at_ia_user_preferences BEFORE
 update on ia_user_preferences for EACH row
 execute FUNCTION set_updated_at_ia_user_preferences ();
 
-TABLA IA_USER_USAGE_LIMITS:
+--------------- TABLA IA_USER_USAGE_LIMITS:
 
 create table public.ia_user_usage_limits (
   user_id uuid not null,
@@ -95,3 +95,27 @@ create index IF not exists idx_ia_user_usage_limits_last_reset on public.ia_user
 create trigger trg_reset_prompt_limit BEFORE
 update on ia_user_usage_limits for EACH row
 execute FUNCTION reset_daily_prompt_limit_if_needed ();
+
+--------------- TABLA IA_USER_GREETINGS:
+
+create table public.ia_user_greetings (
+  id uuid not null default gen_random_uuid (),
+  user_id uuid null,
+  period text not null,
+  greeting text not null,
+  created_at timestamp with time zone null default now(),
+  constraint ia_user_greetings_pkey primary key (id),
+  constraint ia_user_greetings_unique unique (user_id, period),
+  constraint ia_user_greetings_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE,
+  constraint ia_user_greetings_period_check check (
+    (
+      period = any (
+        array[
+          'morning'::text,
+          'afternoon'::text,
+          'evening'::text
+        ]
+      )
+    )
+  )
+) TABLESPACE pg_default;
