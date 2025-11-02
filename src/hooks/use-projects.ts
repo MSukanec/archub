@@ -110,9 +110,6 @@ export function useProjects(organizationId: string | undefined) {
           } : undefined
         }
         
-        // Check if this project is the currently selected one
-        transformedProject.is_active = false
-        
         return transformedProject
       })
 
