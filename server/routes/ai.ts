@@ -877,6 +877,14 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
       if (responseMessage?.tool_calls && responseMessage.tool_calls.length > 0) {
         const toolCall = responseMessage.tool_calls[0];
         
+        // Validar que sea un function tool call
+        if (toolCall.type !== 'function') {
+          console.error('Unsupported tool call type:', toolCall.type);
+          return res.status(400).json({ 
+            error: "Tipo de herramienta no soportado." 
+          });
+        }
+        
         // Obtener organization_id
         const { data: userPrefs } = await authenticatedSupabase
           .from('user_preferences')
