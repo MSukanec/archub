@@ -361,6 +361,7 @@ export default function Home() {
                   onSubmit={handleSendMessage}
                   placeholder="Escribe un mensaje..."
                   disabled={isSendingMessage}
+                  variant="minimal"
                 />
 
                 {chatMessages.length > 0 && (
