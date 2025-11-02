@@ -262,7 +262,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 <ChevronLeft className="h-5 w-5 text-[var(--main-sidebar-fg)]" />
               </button>
             )}
-            <h1 className="text-lg font-semibold flex-1" style={{ color: '#ffffff' }}>
+            <h1 className="text-lg font-semibold flex-1 !text-white">
               {getMenuTitle()}
             </h1>
             <button
@@ -413,7 +413,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 <div className="flex-1 relative">
                   <button
                     onClick={() => setExpandedOrganizationSelector(!expandedOrganizationSelector)}
-                    className="w-full p-3 text-left bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-[var(--main-sidebar-fg)] flex items-center shadow-sm hover:bg-[var(--card-hover-bg)] transition-colors duration-150"
+                    className="w-full p-3 text-left border-0 rounded-lg text-[var(--main-sidebar-fg)] flex items-center hover:bg-[var(--main-sidebar-button-hover-bg)] transition-colors duration-150"
+                    style={{ backgroundColor: 'hsl(0, 0%, 20%)' }}
                   >
                     <Building className="h-5 w-5 mr-3" />
                     <span className="flex-1 truncate text-sm">
@@ -427,7 +428,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                   
                   {/* Lista de organizaciones expandida */}
                   {expandedOrganizationSelector && (
-                    <div className="absolute bottom-full left-0 right-0 mb-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-lg max-h-40 overflow-y-auto z-10">
+                    <div className="absolute bottom-full left-0 right-0 mb-1 border-0 rounded-lg shadow-lg max-h-40 overflow-y-auto z-10" style={{ backgroundColor: 'hsl(0, 0%, 20%)' }}>
                       <button
                         className="w-full p-3 text-left text-sm bg-[hsl(76,100%,40%)] text-white"
                       >
@@ -446,7 +447,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 <div className="flex-1 relative">
                   <button
                     onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
-                    className="w-full p-3 text-left bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-[var(--main-sidebar-fg)] flex items-center shadow-sm hover:bg-[var(--card-hover-bg)] transition-colors duration-150"
+                    className="w-full p-3 text-left border-0 rounded-lg text-[var(--main-sidebar-fg)] flex items-center hover:bg-[var(--main-sidebar-button-hover-bg)] transition-colors duration-150"
+                    style={{ backgroundColor: 'hsl(0, 0%, 20%)' }}
                   >
                     <FolderOpen className="h-5 w-5 mr-3" />
                     <span className="flex-1 truncate text-sm">
@@ -460,13 +462,13 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                   
                   {/* Lista de proyectos expandida */}
                   {expandedProjectSelector && (
-                    <div className="absolute bottom-full left-0 right-0 mb-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-lg max-h-40 overflow-y-auto z-10">
+                    <div className="absolute bottom-full left-0 right-0 mb-1 border-0 rounded-lg shadow-lg max-h-40 overflow-y-auto z-10" style={{ backgroundColor: 'hsl(0, 0%, 20%)' }}>
                       {projectsData?.map((project: any) => (
                         <button
                           key={project.id}
                           onClick={() => handleProjectSelect(project.id)}
                           className={cn(
-                            "w-full p-3 text-left text-sm hover:bg-[var(--card-hover-bg)] transition-colors duration-150 text-[var(--main-sidebar-fg)]",
+                            "w-full p-3 text-left text-sm hover:bg-[var(--main-sidebar-button-hover-bg)] transition-colors duration-150 text-[var(--main-sidebar-fg)]",
                             project.id === selectedProjectId && "bg-[hsl(76,100%,40%)] text-white"
                           )}
                         >
