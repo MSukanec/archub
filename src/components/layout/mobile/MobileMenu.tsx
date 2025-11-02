@@ -262,7 +262,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 <ChevronLeft className="h-5 w-5 text-[var(--main-sidebar-fg)]" />
               </button>
             )}
-            <h1 className="text-lg font-semibold text-white flex-1">
+            <h1 className="text-lg font-semibold flex-1" style={{ color: '#ffffff' }}>
               {getMenuTitle()}
             </h1>
             <button
@@ -359,6 +359,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 <>
                   {navigationItems.map((item, index) => {
                     const isActive = isButtonActive(item.href);
+                    const dividerInfo = getDividerInfo(item, index);
                     const isExternal = item.href.startsWith('http');
                     
                     const button = (
@@ -381,6 +382,13 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     
                     return (
                       <div key={item.id}>
+                        {/* Divisor de sección */}
+                        {dividerInfo.show && (
+                          <div className="px-4 py-2 text-xs font-medium uppercase tracking-wider text-[var(--main-sidebar-fg)] opacity-60">
+                            {dividerInfo.text}
+                          </div>
+                        )}
+                        
                         {item.restricted ? (
                           <PlanRestricted reason={item.restricted}>
                             {button}
