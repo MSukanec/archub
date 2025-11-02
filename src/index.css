@@ -467,8 +467,7 @@
 
   body {
     @apply font-sans antialiased;
-    background: linear-gradient(to bottom, var(--layout-bg) 0%, hsl(76, 100%, 97%) 100%);
-    background-attachment: fixed;
+    background-color: var(--layout-bg);
     color: var(--layout-text);
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 400;

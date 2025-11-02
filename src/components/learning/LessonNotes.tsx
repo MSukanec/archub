@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { BookOpen, Check, Loader2, AlertCircle } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/lib/supabase';
+import { useMutation } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
 import type { CourseLessonNote } from '@shared/schema';
 
 interface LessonNotesProps {
@@ -18,6 +20,61 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
   const savedTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isInitialLoadRef = useRef(true);
   const initialNoteTextRef = useRef('');
+
+  // Save note mutation
+  const saveNoteMutation = useMutation({
+    mutationFn: async (body: string) => {
+      const { data } = await supabase.auth.getSession();
+      const session = data?.session;
+      if (!session) throw new Error('No session');
+
+      const response = await fetch(`/api/lessons/${lessonId}/notes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          body,
+          is_pinned: false
+        }),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save note');
+      }
+
+      return response.json();
+    },
+    onMutate: () => {
+      setSaveStatus('saving');
+    },
+    onSuccess: () => {
+      setSaveStatus('saved');
+      // Invalidar el cache de notas del curso para que se actualice la TAB de apuntes
+      queryClient.invalidateQueries({ 
+        queryKey: [`/api/courses`],
+        predicate: (query) => {
+          // Invalidar todas las queries que contengan "/notes" en su key
+          const key = query.queryKey;
+          return Array.isArray(key) && key.some(k => 
+            typeof k === 'string' && k.includes('/notes')
+          );
+        }
+      });
+      
+      if (savedTimerRef.current) {
+        clearTimeout(savedTimerRef.current);
+      }
+      savedTimerRef.current = setTimeout(() => {
+        setSaveStatus('idle');
+      }, 800);
+    },
+    onError: () => {
+      setSaveStatus('error');
+    }
+  });
 
   useEffect(() => {
     const loadNote = async () => {
@@ -84,58 +141,11 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
       clearTimeout(debounceTimerRef.current);
     }
 
-    setSaveStatus('saving');
-
-    debounceTimerRef.current = setTimeout(async () => {
-      try {
-        // Get session with error handling
-        let session = null;
-        try {
-          const { data } = await supabase.auth.getSession();
-          session = data?.session;
-        } catch (error) {
-          // Silently handle auth errors
-          setSaveStatus('error');
-          return;
-        }
-        if (!session) {
-          setSaveStatus('error');
-          return;
-        }
-
-        const response = await fetch(`/api/lessons/${lessonId}/notes`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`
-          },
-          body: JSON.stringify({
-            body: noteText,
-            is_pinned: false
-          }),
-          credentials: 'include'
-        });
-
-        if (!response.ok) {
-          setSaveStatus('error');
-          return;
-        }
-
-        // Actualizar el texto inicial para futuras comparaciones
-        initialNoteTextRef.current = noteText;
-        setSaveStatus('saved');
-
-        if (savedTimerRef.current) {
-          clearTimeout(savedTimerRef.current);
-        }
-
-        savedTimerRef.current = setTimeout(() => {
-          setSaveStatus('idle');
-        }, 800);
-
-      } catch (error) {
-        setSaveStatus('error');
-      }
+    debounceTimerRef.current = setTimeout(() => {
+      // Actualizar el texto inicial para futuras comparaciones
+      initialNoteTextRef.current = noteText;
+      // Usar la mutation para guardar
+      saveNoteMutation.mutate(noteText);
     }, 700);
 
     return () => {
