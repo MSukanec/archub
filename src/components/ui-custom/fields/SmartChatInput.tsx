@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, type KeyboardEvent } from "react";
-import { Search, Send } from "lucide-react";
+import { Search, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SmartChatInputProps {
@@ -51,7 +51,7 @@ export function SmartChatInput({
         "w-full rounded-2xl",
         "bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl",
         "border border-white/20 dark:border-white/10",
-        "px-4 sm:px-5 py-3.5 sm:py-4",
+        "px-4 sm:px-5 py-3 sm:py-3.5",
         "transition-all duration-300",
         isFocused && "shadow-[0_8px_30px_rgb(0,0,0,0.12)] border-white/30 dark:border-white/20",
         !isFocused && "shadow-[0_2px_8px_rgb(0,0,0,0.04),inset_0_1px_0_rgb(255,255,255,0.2)]",
@@ -102,15 +102,15 @@ export function SmartChatInput({
         onClick={onSubmit}
         disabled={!value.trim() || disabled}
         className={cn(
-          "flex-shrink-0 p-2 rounded-full",
-          "bg-accent/90 hover:bg-accent transition-all duration-200",
-          "text-accent-foreground",
+          "flex-shrink-0 p-1.5 rounded-full",
+          "bg-foreground/90 hover:bg-foreground transition-all duration-200",
+          "text-background",
           "disabled:opacity-40 disabled:cursor-not-allowed"
         )}
         aria-label="Enviar mensaje"
         data-testid="button-send-message"
       >
-        <Send className="w-4 h-4" />
+        <ArrowUp className="w-4 h-4" />
       </button>
     </div>
   );
