@@ -269,30 +269,29 @@ export default function Home() {
 
   // Desktop view - custom layout con fondo
   return (
-    <div className="h-screen flex">
-      {/* Sidebar */}
-      <Sidebar />
+    <div className="h-screen flex relative">
+      {/* Background Image - cubre toda la pantalla */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0"
+        style={{
+          backgroundImage: `url(/Background.jpg)`,
+        }}
+      />
+
+      {/* Sidebar - flotando sobre el fondo */}
+      <div className="relative z-20">
+        <Sidebar />
+      </div>
 
       {/* Main Content Area */}
       <div
         className={cn(
-          "flex-1 transition-all duration-300 ease-in-out relative overflow-hidden",
+          "flex-1 transition-all duration-300 ease-in-out relative z-10",
           isExpanded ? "ml-64" : "ml-16"
         )}
       >
-        {/* Background Image con overlay oscuro */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url(/Background.jpg)`,
-          }}
-        >
-          {/* Overlay oscuro para mejor contraste del texto */}
-          <div className="absolute inset-0 bg-black/60 dark:bg-black/70"></div>
-        </div>
-
-        {/* Content - posicionado sobre el fondo */}
-        <div className="relative z-10 h-full flex flex-col items-center justify-center px-8 py-12 overflow-y-auto">
+        {/* Content */}
+        <div className="h-full flex flex-col items-center justify-center px-8 py-12 overflow-y-auto">
           <div className="max-w-3xl w-full space-y-8">
             
             {/* Área donde "habla la IA": Saludo inicial O última respuesta */}
@@ -462,10 +461,10 @@ export default function Home() {
                         onClick={() => handleSuggestionClick(suggestion.action)}
                         data-testid={`button-suggestion-${index}`}
                       >
-                        <span className="text-base font-medium flex-1 leading-relaxed text-white whitespace-normal break-words">
+                        <span className="text-sm font-medium flex-1 leading-relaxed text-white whitespace-normal break-words">
                           {suggestion.label}
                         </span>
-                        <ArrowRight className="w-5 h-5 flex-shrink-0 text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                        <ArrowRight className="w-4 h-4 flex-shrink-0 text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all" />
                       </button>
                     </motion.div>
                   ))}
