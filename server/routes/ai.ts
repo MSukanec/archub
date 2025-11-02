@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import type { RouteDeps } from "./_base";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 
 interface Suggestion {
@@ -10,6 +11,113 @@ interface Suggestion {
 interface GreetingResponse {
   greeting: string;
   suggestions: Suggestion[];
+}
+
+interface UsageLimitCheck {
+  allowed: boolean;
+  message?: string;
+  remainingPrompts?: number;
+}
+
+/**
+ * Verifica y gestiona los límites de uso de IA por usuario
+ * - free: 3 prompts/día
+ * - pro/teams: ilimitado
+ * 
+ * IMPORTANTE: Llamar DESPUÉS de validar el request para evitar consumo de quota con requests malformados
+ */
+async function checkAndIncrementUsageLimit(
+  userId: string,
+  supabase: SupabaseClient
+): Promise<UsageLimitCheck> {
+  try {
+    // 1. Obtener o crear registro de límites
+    let { data: usageLimits, error: fetchError } = await supabase
+      .from('ia_user_usage_limits')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    // Si no existe, crear con valores default (plan='free', daily_limit=3)
+    if (fetchError || !usageLimits) {
+      const { data: newRecord, error: insertError } = await supabase
+        .from('ia_user_usage_limits')
+        .insert({ user_id: userId })
+        .select()
+        .single();
+
+      if (insertError || !newRecord) {
+        console.error('Error creating usage limits:', insertError);
+        // Fail-closed: rechazar en caso de error para evitar bypass de límites
+        return { 
+          allowed: false, 
+          message: "Error verificando límites de uso. Por favor intenta nuevamente." 
+        };
+      }
+
+      usageLimits = newRecord;
+    }
+
+    const plan = usageLimits.plan || 'free';
+    
+    // 2. Planes PRO y TEAMS tienen acceso ilimitado
+    if (plan === 'pro' || plan === 'teams') {
+      // Actualizar last_prompt_at pero NO incrementar contador
+      await supabase
+        .from('ia_user_usage_limits')
+        .update({ last_prompt_at: new Date().toISOString() })
+        .eq('user_id', userId);
+
+      return { allowed: true, remainingPrompts: -1 }; // -1 = ilimitado
+    }
+
+    // 3. Plan FREE: verificar límite diario
+    const currentUsage = usageLimits.prompts_used_today || 0;
+    const dailyLimit = usageLimits.daily_limit || 3;
+
+    if (currentUsage >= dailyLimit) {
+      return {
+        allowed: false,
+        message: `Has alcanzado tu límite diario de ${dailyLimit} prompts. Actualiza a PRO para acceso ilimitado.`,
+        remainingPrompts: 0
+      };
+    }
+
+    // 4. Incrementar contador de forma atómica usando UPDATE condicional
+    // Esto previene race conditions donde múltiples requests concurrentes sobrepasen el límite
+    const { data: updatedData, error: updateError } = await supabase
+      .from('ia_user_usage_limits')
+      .update({
+        prompts_used_today: currentUsage + 1,
+        last_prompt_at: new Date().toISOString()
+      })
+      .eq('user_id', userId)
+      .lt('prompts_used_today', dailyLimit) // Solo actualizar si aún está bajo el límite
+      .select()
+      .single();
+
+    // Si el update falló porque ya se alcanzó el límite en otro request concurrente
+    if (updateError || !updatedData) {
+      return {
+        allowed: false,
+        message: `Has alcanzado tu límite diario de ${dailyLimit} prompts. Actualiza a PRO para acceso ilimitado.`,
+        remainingPrompts: 0
+      };
+    }
+
+    return {
+      allowed: true,
+      remainingPrompts: dailyLimit - currentUsage - 1
+    };
+
+  } catch (err) {
+    console.error('Error in checkAndIncrementUsageLimit:', err);
+    // Fail-closed: rechazar en caso de error para prevenir bypass de límites
+    return { 
+      allowed: false, 
+      message: "Error verificando límites de uso. Por favor intenta nuevamente." 
+    };
+  }
 }
 
 export function registerAIRoutes(app: Express, deps: RouteDeps) {
@@ -50,6 +158,19 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
       }
 
       const userId = dbUser.id;
+
+      // ========================================
+      // 0. VERIFICAR LÍMITES DE USO
+      // ========================================
+      const limitCheck = await checkAndIncrementUsageLimit(userId, authenticatedSupabase);
+      
+      if (!limitCheck.allowed) {
+        return res.status(429).json({ 
+          error: limitCheck.message,
+          limitReached: true,
+          remainingPrompts: 0
+        });
+      }
 
       // ========================================
       // 1. OBTENER DATOS DEL USUARIO
@@ -403,6 +524,19 @@ Rules:
 
       if (!message || typeof message !== 'string') {
         return res.status(400).json({ error: "Message is required" });
+      }
+
+      // ========================================
+      // 0. VERIFICAR LÍMITES DE USO (después de validar request)
+      // ========================================
+      const limitCheck = await checkAndIncrementUsageLimit(userId, authenticatedSupabase);
+      
+      if (!limitCheck.allowed) {
+        return res.status(429).json({ 
+          error: limitCheck.message,
+          limitReached: true,
+          remainingPrompts: 0
+        });
       }
 
       // Obtener datos del usuario para contexto

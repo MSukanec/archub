@@ -36,7 +36,7 @@ Preferred communication style: Simple, everyday language.
 - **Access Control**: `PlanRestricted` component system with admin bypass.
 - **Cost System**: Three-tier cost system (Archub Cost, Organization Cost, Independent Cost) for budget items.
 - **User Activity Tracking**: User presence heartbeat functionality for real-time activity status in admin panels.
-- **AI Integration**: GPT-4o for dynamic, personalized greetings and actionable suggestions on the Home page, using user context from projects, courses, and budgets. Conversational chat with persistent history (latest 50 messages) across sessions.
+- **AI Integration**: GPT-4o for dynamic, personalized greetings and actionable suggestions on the Home page, using user context from projects, courses, and budgets. Conversational chat with persistent history (latest 50 messages) across sessions. Usage limits by plan: free users (3 prompts/day), pro/teams users (unlimited).
 
 ### System Design Choices
 - **Backend Modular Architecture**: Monolithic `server/routes.ts` modularized into domain-specific route modules using a `RouteDeps` pattern for shared dependencies and consistent authentication.
