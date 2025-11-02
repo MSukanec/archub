@@ -267,8 +267,15 @@ export default function Home() {
                 transition={{ duration: 0.6, ease: "easeOut" }}
                 className="space-y-6"
               >
-                {/* Si hay conversación activa en esta sesión, mostrar última respuesta */}
-                {hasActiveConversation && chatMessages.length > 0 ? (
+                {/* Si está enviando mensaje, mostrar "Pensando..." */}
+                {isSendingMessage ? (
+                  <div className="flex items-center justify-center gap-2 py-4">
+                    <div className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                    <span className="text-sm text-muted-foreground ml-2">Pensando...</span>
+                  </div>
+                ) : hasActiveConversation && chatMessages.length > 0 ? (
                   (() => {
                     // Encontrar el último mensaje de la IA
                     const lastAssistantMessage = [...chatMessages]
