@@ -36,7 +36,16 @@ Preferred communication style: Simple, everyday language.
 - **Access Control**: `PlanRestricted` component system with admin bypass.
 - **Cost System**: Three-tier cost system (Archub Cost, Organization Cost, Independent Cost) for budget items.
 - **User Activity Tracking**: User presence heartbeat functionality for real-time activity status in admin panels.
-- **AI Integration**: GPT-4o for dynamic, personalized greetings and actionable suggestions on the Home page, using user context from projects, courses, and budgets. Conversational chat with persistent history (latest 50 messages) across sessions. Usage limits by plan: free users (3 prompts/day), pro/teams users (unlimited). Contextual AI with function calling capabilities for data queries (e.g., payment totals by contact and project using `movements_view`).
+- **AI Integration**: GPT-4o-powered intelligent assistant with comprehensive financial analysis capabilities. Features include dynamic personalized greetings, actionable suggestions based on user context (projects, courses, budgets), and conversational chat with persistent history (latest 50 messages). Usage limits by plan: free users (3 prompts/day), pro/teams users (unlimited). Advanced **AI Financial Analysis System** with 7 specialized function-calling tools:
+  - **getTotalPaymentsByContactAndProject**: Calculates total payments to a specific contact in a project across all roles (partner, subcontractor, personnel, client, member)
+  - **getOrganizationBalance**: Computes overall organization balance (income - expenses) with optional currency filtering and multi-currency conversion support
+  - **getProjectFinancialSummary**: Provides complete project financial overview including balance, income, expenses, and optional breakdown by top 3 spending categories
+  - **getRoleSpending**: Analyzes spending by role (subcontractors, personnel, partners) with filters for projects, date ranges, and currencies
+  - **getContactMovements**: Retrieves ALL movements (income and expenses) for a contact with net balance calculation, supporting project/date/currency filters
+  - **getDateRangeMovements**: Advanced query for movements within date ranges with multiple filters (projects, categories, wallets, types, roles) and grouping capabilities
+  - **getCashflowTrend**: Temporal cashflow analysis with daily/weekly/monthly intervals, showing income, expenses, net flow, accumulated balance, and trend identification (improving/worsening/stable)
+  - **Shared Utilities Module** (`src/ai/utils/`): Natural language date parser (supports "hoy", "este mes", "último trimestre"), currency converter using exchange rates, and consistent response formatters for Spanish output
+  - All functions enforce single-currency validation before aggregation, handle special characters in names safely via JavaScript filtering, use `movements_view` for optimized queries, and provide descriptive error messages for edge cases (multiple currencies, missing data, invalid ranges)
 
 ### System Design Choices
 - **Backend Modular Architecture**: Monolithic `server/routes.ts` modularized into domain-specific route modules using a `RouteDeps` pattern for shared dependencies and consistent authentication.
