@@ -125,6 +125,21 @@ export default function Home() {
 
         if (!response.ok) {
           const errorData = await response.json();
+          
+          // Manejar límite de prompts alcanzado
+          if (response.status === 429) {
+            setGreetingData({
+              greeting: errorData.error || "Has alcanzado tu límite de prompts gratuitos según tu plan. Actualiza a PRO para acceso ilimitado.",
+              suggestions: [
+                { label: "Ver planes", action: "/settings/billing" },
+                { label: "Explorar cursos", action: "/learning/courses" },
+                { label: "Ver proyectos", action: "/organization/projects" }
+              ]
+            });
+            setIsLoadingGreeting(false);
+            return;
+          }
+          
           throw new Error(errorData.error || "Error al obtener el saludo");
         }
 
@@ -208,6 +223,24 @@ export default function Home() {
       });
 
       if (!response.ok) {
+        // Manejar límite de prompts alcanzado
+        if (response.status === 429) {
+          const errorData = await response.json();
+          // NO agregamos el mensaje al historial para evitar confusión
+          // Resetear conversación activa para mostrar el CTA de actualización
+          setHasActiveConversation(false);
+          // Actualizar el área de saludo con el mensaje y CTA claro
+          setGreetingData({
+            greeting: errorData.error || "Has alcanzado tu límite de prompts gratuitos según tu plan. Actualiza a PRO para acceso ilimitado.",
+            suggestions: [
+              { label: "Ver planes", action: "/settings/billing" },
+              { label: "Explorar cursos", action: "/learning/courses" },
+              { label: "Ver proyectos", action: "/organization/projects" }
+            ]
+          });
+          setIsSendingMessage(false);
+          return;
+        }
         throw new Error("Error al enviar el mensaje");
       }
 

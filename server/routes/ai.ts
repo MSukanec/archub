@@ -826,7 +826,7 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
             }
           },
           
-          // 7. getCashflowTrend (NUEVA)
+          // 7. getCashflowTrend
           {
             type: "function" as const,
             function: {
@@ -863,6 +863,44 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
                   }
                 },
                 required: ["scope"]
+              }
+            }
+          },
+          
+          // 8. getProjectsList
+          {
+            type: "function" as const,
+            function: {
+              name: "getProjectsList",
+              description: "Obtiene la lista de proyectos de la organización con información básica (nombre, estado, fechas, prioridad). Útil para responder '¿Cuántos proyectos tengo?', '¿En qué proyectos vengo trabajando?', 'Muéstrame mis proyectos activos'",
+              parameters: {
+                type: "object",
+                properties: {
+                  status: {
+                    type: "string",
+                    description: "Filtrar por estado del proyecto (ej: 'draft', 'active', 'completed'). Opcional."
+                  }
+                },
+                required: []
+              }
+            }
+          },
+          
+          // 9. getProjectDetails
+          {
+            type: "function" as const,
+            function: {
+              name: "getProjectDetails",
+              description: "Obtiene información detallada de un proyecto específico incluyendo descripción, estado, fechas, prioridad, moneda, impuestos, creador, etc. Útil para 'Dame información del proyecto X', 'Detalles del proyecto Casa Blanca', '¿Cuál es la dirección del proyecto Y?'",
+              parameters: {
+                type: "object",
+                properties: {
+                  projectName: {
+                    type: "string",
+                    description: "Nombre del proyecto a buscar (puede ser parcial, búsqueda fuzzy)"
+                  }
+                },
+                required: ["projectName"]
               }
             }
           }
@@ -999,6 +1037,26 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
                 args.interval || 'monthly',
                 args.dateRange,
                 args.currency
+              );
+              break;
+            }
+            
+            case 'getProjectsList': {
+              const { getProjectsList } = await import('../../src/ai/tools/projects/getProjectsList.js');
+              functionResult = await getProjectsList(
+                organizationId,
+                authenticatedSupabase,
+                args.status ? { status: args.status } : undefined
+              );
+              break;
+            }
+            
+            case 'getProjectDetails': {
+              const { getProjectDetails } = await import('../../src/ai/tools/projects/getProjectDetails.js');
+              functionResult = await getProjectDetails(
+                args.projectName,
+                organizationId,
+                authenticatedSupabase
               );
               break;
             }
