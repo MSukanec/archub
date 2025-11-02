@@ -262,7 +262,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 <ChevronLeft className="h-5 w-5 text-[var(--main-sidebar-fg)]" />
               </button>
             )}
-            <h1 className="text-lg font-semibold text-[var(--main-sidebar-fg)] flex-1">
+            <h1 className="text-lg font-semibold text-white flex-1">
               {getMenuTitle()}
             </h1>
             <button
