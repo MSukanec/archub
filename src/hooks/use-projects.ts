@@ -37,7 +37,12 @@ export function useProjects(organizationId: string | undefined) {
   return useQuery<Project[]>({
     queryKey: ['projects', organizationId],
     queryFn: async () => {
+      console.log('=== useProjects DEBUG ===');
+      console.log('organizationId:', organizationId);
+      console.log('supabase:', !!supabase);
+      
       if (!supabase || !organizationId) {
+        console.error('Missing supabase or organizationId');
         throw new Error('Organization ID required')
       }
 
@@ -76,7 +81,10 @@ export function useProjects(organizationId: string | undefined) {
         .eq('is_active', true)
         .order('created_at', { ascending: false })
       
+      console.log('Supabase query result:', { data, error });
+      
       if (error) {
+        console.error('Supabase query error:', error);
         throw error
       }
       
