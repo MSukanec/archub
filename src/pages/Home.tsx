@@ -233,7 +233,7 @@ export default function Home() {
 
   if (userLoading || isLoadingHistory) {
     return (
-      <Layout wide={true}>
+      <Layout wide={true} hideHeader={true}>
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">Cargando...</div>
         </div>
@@ -241,14 +241,10 @@ export default function Home() {
     );
   }
 
-  const headerProps = {
-    icon: HomeIcon,
-    title: "Inicio"
-  };
-
   return (
-    <Layout headerProps={headerProps} wide={true}>
-      <div className="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center px-4 py-12 overflow-x-hidden">
+    <Layout wide={true} hideHeader={true}>
+      {/* Degradado de fondo sutil */}
+      <div className="min-h-screen w-full bg-gradient-to-br from-background via-background to-background/95 flex flex-col items-center justify-center px-4 py-8 sm:py-12 overflow-x-hidden">
         {/* Contenedor principal centrado */}
         <div className="max-w-4xl w-full space-y-8">
           
@@ -411,23 +407,34 @@ export default function Home() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.9 + (index * 0.1), duration: 0.4 }}
                   >
-                    <Button
-                      variant="outline"
+                    <button
                       className={cn(
-                        "w-full h-auto min-h-[56px] py-3 sm:py-4 px-4 sm:px-5",
+                        "w-full h-auto min-h-[52px] sm:min-h-[56px] py-3 sm:py-4 px-4 sm:px-6",
                         "flex items-center justify-between gap-3",
-                        "hover:bg-accent hover:text-accent-foreground hover:border-accent",
-                        "transition-all duration-200",
-                        "group text-left"
+                        "rounded-xl sm:rounded-2xl",
+                        "bg-white/5 dark:bg-white/[0.03]",
+                        "backdrop-blur-xl",
+                        "border border-white/10 dark:border-white/[0.08]",
+                        "shadow-lg shadow-black/5",
+                        "hover:bg-white/10 dark:hover:bg-white/[0.06]",
+                        "hover:border-white/20 dark:hover:border-white/[0.15]",
+                        "hover:shadow-xl hover:shadow-black/10",
+                        "transition-all duration-300 ease-out",
+                        "group text-left",
+                        "relative overflow-hidden",
+                        "before:absolute before:inset-0",
+                        "before:bg-gradient-to-r before:from-white/0 before:via-white/5 before:to-white/0",
+                        "before:translate-x-[-200%] hover:before:translate-x-[200%]",
+                        "before:transition-transform before:duration-700"
                       )}
                       onClick={() => handleSuggestionClick(suggestion.action)}
                       data-testid={`button-suggestion-${index}`}
                     >
-                      <span className="text-sm sm:text-base font-medium flex-1 leading-snug sm:leading-relaxed group-hover:text-accent-foreground whitespace-normal break-words">
+                      <span className="text-sm sm:text-base font-medium flex-1 leading-snug sm:leading-relaxed text-foreground/90 group-hover:text-foreground whitespace-normal break-words relative z-10">
                         {suggestion.label}
                       </span>
-                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-muted-foreground group-hover:text-accent-foreground group-hover:translate-x-1 transition-all" />
-                    </Button>
+                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-foreground/60 group-hover:text-foreground group-hover:translate-x-1 transition-all relative z-10" />
+                    </button>
                   </motion.div>
                 ))}
               </div>
