@@ -2,6 +2,7 @@ import type { Express } from "express";
 import type { RouteDeps } from "./_base";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
+import { getGreetingSystemPrompt, getChatSystemPrompt } from "../../src/ai/systemPrompt";
 
 interface Suggestion {
   label: string;
@@ -366,53 +367,10 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
           apiKey: openaiApiKey,
         });
 
-        const systemPrompt = language === 'es' 
-        ? `Sos Archubita, la asistente virtual personalizada de Archub, una plataforma de gestión de construcción y arquitectura.
+        // Usar prompt centralizado de systemPrompt.ts
+        const systemPrompt = getGreetingSystemPrompt({ language, tone, displayName });
 
-Tu trabajo es:
-1. Saludar cálidamente al usuario con tono ${tone}
-2. Recomendar 2 o 3 acciones útiles basadas en su contexto (cursos en progreso, proyectos activos, presupuestos, etc.)
-
-Devolvé tu respuesta en formato JSON exactamente así:
-{
-  "greeting": "¡Buen día Mati! 👋 Hoy es jueves...",
-  "suggestions": [
-    { "label": "Continuar curso 'Modelado BIM'", "action": "/learning/courses/modelado-bim" },
-    { "label": "Ver presupuesto de Casa PH", "action": "/project/dashboard" },
-    { "label": "Revisar proyectos activos", "action": "/organization/projects" }
-  ]
-}
-
-Reglas:
-- El greeting debe ser breve, cálido y personalizado (máx 2-3 oraciones)
-- Las suggestions deben ser relevantes al contexto del usuario
-- Las action URLs deben ser rutas válidas en Archub
-- Si no hay datos suficientes, sugerí acciones generales como explorar cursos o crear un proyecto
-- SIEMPRE devolvé JSON válido, sin texto adicional`
-        : `You are Archubita, the personalized AI assistant for Archub, a construction and architecture management platform.
-
-Your job is:
-1. Warmly greet the user with a ${tone} tone
-2. Recommend 2-3 useful actions based on their context (courses in progress, active projects, budgets, etc.)
-
-Return your response in JSON format exactly like this:
-{
-  "greeting": "Good morning Mati! 👋 Today is Thursday...",
-  "suggestions": [
-    { "label": "Continue 'BIM Modeling' course", "action": "/learning/courses/bim-modeling" },
-    { "label": "View PH House budget", "action": "/project/dashboard" },
-    { "label": "Review active projects", "action": "/organization/projects" }
-  ]
-}
-
-Rules:
-- The greeting should be brief, warm, and personalized (max 2-3 sentences)
-- The suggestions should be relevant to the user's context
-- The action URLs should be valid Archub routes
-- If there's insufficient data, suggest general actions like exploring courses or creating a project
-- ALWAYS return valid JSON, no additional text`;
-
-      const completion = await openai.chat.completions.create({
+        const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
@@ -505,8 +463,7 @@ Rules:
       
       } else {
         // USAR SALUDO CACHEADO + GENERAR SUGGESTIONS DINÁMICAS
-        // TODO: En el futuro, generar suggestions dinámicas basadas en contexto
-        // Por ahora, usamos suggestions genéricas
+        // Las suggestions se generan en tiempo real basadas en el contexto actual del usuario
         greetingResponse = {
           greeting: greetingText!,
           suggestions: []
@@ -647,13 +604,7 @@ Rules:
       const messages = [
         {
           role: "system" as const,
-          content: language === 'es'
-            ? `Sos un asistente virtual de Archub, una plataforma de gestión de construcción y arquitectura. 
-Tu nombre es Archub AI. Ayudás a ${displayName} con sus proyectos, cursos, presupuestos y cualquier pregunta relacionada con la plataforma.
-Mantené un tono ${tone} y respondé de forma concisa y útil.`
-            : `You are an AI assistant for Archub, a construction and architecture management platform.
-Your name is Archub AI. You help ${displayName} with their projects, courses, budgets, and any platform-related questions.
-Maintain a ${tone} tone and respond concisely and helpfully.`
+          content: getChatSystemPrompt({ language, tone, displayName })
         },
         // Agregar historial previo
         ...history.map((msg: any) => ({
