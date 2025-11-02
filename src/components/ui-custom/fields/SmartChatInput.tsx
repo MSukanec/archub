@@ -103,8 +103,8 @@ export function SmartChatInput({
         disabled={!value.trim() || disabled}
         className={cn(
           "flex-shrink-0 p-1.5 rounded-full",
-          "bg-foreground/15 hover:bg-accent transition-all duration-200",
-          "text-foreground hover:text-accent-foreground",
+          "bg-muted hover:bg-[hsl(var(--accent))] transition-all duration-200",
+          "text-muted-foreground hover:text-[hsl(var(--accent-foreground))]",
           "disabled:opacity-40 disabled:cursor-not-allowed"
         )}
         aria-label="Enviar mensaje"
