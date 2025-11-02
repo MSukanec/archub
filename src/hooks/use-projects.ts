@@ -53,28 +53,7 @@ export function useProjects(organizationId: string | undefined) {
           project_data (
             project_type_id,
             modality_id,
-            project_image_url,
-            project_types!project_type_id (
-              id,
-              name
-            ),
-            project_modalities!modality_id (
-              id,
-              name
-            )
-          ),
-          organization_members!created_by (
-            id,
-            users (
-              id,
-              full_name,
-              email,
-              avatar_url,
-              user_data (
-                first_name,
-                last_name
-              )
-            )
+            project_image_url
           )
         `)
         .eq('organization_id', organizationId)
@@ -98,24 +77,14 @@ export function useProjects(organizationId: string | undefined) {
             projectData = {
               project_type_id: pd.project_type_id,
               modality_id: pd.modality_id,
-              project_image_url: pd.project_image_url,
-              project_type: pd.project_types,
-              modality: pd.project_modalities
+              project_image_url: pd.project_image_url
             }
           }
         }
         
         const transformedProject = {
           ...project,
-          project_data: projectData,
-          creator: project.organization_members?.users ? {
-            id: project.organization_members.users.id,
-            full_name: project.organization_members.users.full_name,
-            email: project.organization_members.users.email,
-            avatar_url: project.organization_members.users.avatar_url,
-            first_name: project.organization_members.users.user_data?.[0]?.first_name,
-            last_name: project.organization_members.users.user_data?.[0]?.last_name
-          } : undefined
+          project_data: projectData
         }
         
         return transformedProject
@@ -144,28 +113,7 @@ export function useProject(projectId: string | undefined) {
           project_data (
             project_type_id,
             modality_id,
-            project_image_url,
-            project_types!project_type_id (
-              id,
-              name
-            ),
-            project_modalities!modality_id (
-              id,
-              name
-            )
-          ),
-          organization_members!created_by (
-            id,
-            users (
-              id,
-              full_name,
-              email,
-              avatar_url,
-              user_data (
-                first_name,
-                last_name
-              )
-            )
+            project_image_url
           )
         `)
         .eq('id', projectId)
@@ -184,24 +132,14 @@ export function useProject(projectId: string | undefined) {
           projectData = {
             project_type_id: pd.project_type_id,
             modality_id: pd.modality_id,
-            project_image_url: pd.project_image_url,
-            project_type: pd.project_types,
-            modality: pd.project_modalities
+            project_image_url: pd.project_image_url
           }
         }
       }
       
       const transformedProject = {
         ...data,
-        project_data: projectData,
-        creator: data.organization_members?.users ? {
-          id: data.organization_members.users.id,
-          full_name: data.organization_members.users.full_name,
-          email: data.organization_members.users.email,
-          avatar_url: data.organization_members.users.avatar_url,
-          first_name: data.organization_members.users.user_data?.[0]?.first_name,
-          last_name: data.organization_members.users.user_data?.[0]?.last_name
-        } : undefined
+        project_data: projectData
       }
 
       return transformedProject
