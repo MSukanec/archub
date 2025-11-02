@@ -267,35 +267,49 @@ export default function Home() {
     );
   }
 
-  // Desktop view - custom layout con fondo
+  // Desktop view - estructura idéntica a Layout.tsx pero con fondo personalizado
   return (
-    <div className="h-screen flex relative">
-      {/* Background Image - cubre toda la pantalla */}
+    <div 
+      className="h-screen flex flex-col"
+      style={{ backgroundColor: "var(--main-sidebar-bg)" }}
+    >
+      {/* Background Image - cubre toda la pantalla, detrás de todo */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0"
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: `url(/Background.jpg)`,
+          zIndex: 0
         }}
       />
 
-      {/* Sidebar - flotando sobre el fondo */}
-      <div className="relative z-20">
-        <Sidebar />
-      </div>
+      {/* Desktop View - Frame Layout sin Header (igual que Layout.tsx) */}
+      <div className="flex-1 flex min-h-0">
+        <div
+          className={cn(
+            "flex-1 flex min-h-0 relative",
+            isDocked ? 'gap-3' : ''
+          )}
+          style={{ borderColor: "var(--main-sidebar-bg)" }}
+        >
+          {/* Sidebar */}
+          <div className="flex-shrink-0 relative z-10">
+            <Sidebar />
+          </div>
 
-      {/* Main Content Area */}
-      <div
-        className={cn(
-          "flex-1 transition-all duration-300 ease-in-out relative z-10 overflow-y-auto",
-          isExpanded ? "ml-64" : "ml-16"
-        )}
-      >
-        {/* Contenedor con padding igual que otras páginas */}
-        <div className="p-3">
-          <div className="rounded-xl overflow-hidden h-[calc(100vh-24px)]" style={{ backgroundColor: "var(--layout-bg)" }}>
-            {/* Content centrado */}
-            <div className="h-full flex flex-col items-center justify-center px-8 py-12 overflow-y-auto">
-              <div className="max-w-3xl w-full space-y-8">
+          {/* Main Content Area - Igual que Layout.tsx */}
+          <div className="flex-1 pr-3 pt-3 pb-3 relative z-10">
+            <main
+              className={cn(
+                "h-full flex flex-col rounded-2xl overflow-hidden",
+                !isDocked ? 'w-full' : ''
+              )}
+              style={{ 
+                backgroundColor: "var(--layout-bg)",
+              }}
+            >
+              {/* Content centrado - sin PageLayout (sin header) */}
+              <div className="h-full flex flex-col items-center justify-center px-8 py-12 overflow-y-auto">
+                <div className="max-w-3xl w-full space-y-8">
             
             {/* Área donde "habla la IA": Saludo inicial O última respuesta */}
             <div className="text-center space-y-6">
@@ -474,8 +488,9 @@ export default function Home() {
                 </div>
               </motion.div>
             )}
+                </div>
               </div>
-            </div>
+            </main>
           </div>
         </div>
       </div>
