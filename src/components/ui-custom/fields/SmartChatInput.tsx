@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, type KeyboardEvent } from "react";
-import { Send, Mic } from "lucide-react";
+import { Search, Command } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 
 interface SmartChatInputProps {
   value: string;
@@ -16,7 +15,7 @@ export function SmartChatInput({
   value,
   onChange,
   onSubmit,
-  placeholder = "Escribe un mensaje...",
+  placeholder = "¿Qué te gustaría saber hoy?",
   disabled = false,
   className
 }: SmartChatInputProps) {
@@ -31,8 +30,8 @@ export function SmartChatInput({
     // Reset height to auto para recalcular
     textarea.style.height = 'auto';
     
-    // Calcular nueva altura (max 200px aprox 8 líneas)
-    const newHeight = Math.min(textarea.scrollHeight, 200);
+    // Calcular nueva altura (max 150px aprox 6 líneas)
+    const newHeight = Math.min(textarea.scrollHeight, 150);
     textarea.style.height = `${newHeight}px`;
   }, [value]);
 
@@ -45,42 +44,31 @@ export function SmartChatInput({
     }
   };
 
-  const handleMicClick = () => {
-    // TODO: Implementar funcionalidad de micrófono
-    console.log('Mic clicked');
-  };
-
   return (
     <div 
       className={cn(
-        "relative flex items-end gap-1 sm:gap-2",
-        "w-full rounded-full",
-        "bg-background border-2 transition-all duration-200",
-        isFocused ? "border-accent/50" : "border-border",
-        "px-2 sm:px-4 py-2",
-        "shadow-sm hover:shadow-md",
+        "relative flex items-center gap-3",
+        "w-full rounded-2xl",
+        "bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl",
+        "border border-white/20 dark:border-white/10",
+        "px-4 sm:px-5 py-3.5 sm:py-4",
+        "transition-all duration-300",
+        isFocused && "shadow-[0_8px_30px_rgb(0,0,0,0.12)] border-white/30 dark:border-white/20",
+        !isFocused && "shadow-[0_2px_8px_rgb(0,0,0,0.04),inset_0_1px_0_rgb(255,255,255,0.2)]",
         disabled && "opacity-60 cursor-not-allowed",
         className
       )}
+      style={{
+        boxShadow: isFocused 
+          ? '0 8px 30px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 0 rgba(0,0,0,0.05)'
+          : '0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.03)'
+      }}
       data-testid="smart-chat-input-container"
     >
-      {/* Botón de micrófono (izquierda) */}
-      <button
-        type="button"
-        onClick={handleMicClick}
-        disabled={disabled}
-        className={cn(
-          "flex-shrink-0 p-1.5 sm:p-2 rounded-full",
-          "text-muted-foreground hover:text-foreground",
-          "hover:bg-accent/10 transition-colors",
-          "disabled:opacity-50 disabled:cursor-not-allowed",
-          "self-end mb-1"
-        )}
-        aria-label="Grabar audio"
-        data-testid="button-mic"
-      >
-        <Mic className="w-4 h-4 sm:w-5 sm:h-5" />
-      </button>
+      {/* Ícono de búsqueda (izquierda) */}
+      <div className="flex-shrink-0 text-muted-foreground/60">
+        <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+      </div>
 
       {/* Textarea expansible */}
       <textarea
@@ -95,41 +83,25 @@ export function SmartChatInput({
         rows={1}
         className={cn(
           "flex-1 resize-none bg-transparent",
-          "text-sm sm:text-base leading-5 sm:leading-6",
-          "placeholder:text-muted-foreground/60",
+          "text-sm leading-5",
+          "text-foreground/90 placeholder:text-muted-foreground/50",
           "focus:outline-none",
           "disabled:cursor-not-allowed",
-          "py-2 sm:py-3 px-1 sm:px-2",
-          "max-h-[200px] overflow-y-auto"
+          "max-h-[150px] overflow-y-auto"
         )}
         style={{
-          minHeight: '24px',
+          minHeight: '20px',
           scrollbarWidth: 'thin'
         }}
         data-testid="input-chat-message"
       />
 
-      {/* Botón de enviar (derecha) */}
-      <Button
-        type="button"
-        onClick={onSubmit}
-        disabled={!value.trim() || disabled}
-        size="icon"
-        className={cn(
-          "flex-shrink-0 rounded-full",
-          "w-8 h-8 sm:w-10 sm:h-10",
-          "bg-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/90",
-          "text-accent-foreground",
-          "disabled:opacity-40 disabled:cursor-not-allowed",
-          "transition-all duration-200",
-          "shadow-sm hover:shadow-md",
-          "self-end mb-1"
-        )}
-        aria-label="Enviar mensaje"
-        data-testid="button-send-message"
-      >
-        <Send className="w-4 h-4 sm:w-5 sm:h-5" />
-      </Button>
+      {/* Atajo de teclado (derecha) */}
+      <div className="flex-shrink-0 flex items-center gap-1 text-muted-foreground/40 text-xs">
+        <Command className="w-3 h-3" />
+        <span>+</span>
+        <span className="font-mono">/</span>
+      </div>
     </div>
   );
 }

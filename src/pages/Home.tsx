@@ -393,44 +393,39 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 0.6 }}
-              className="space-y-6"
+              className="space-y-3 max-w-2xl mx-auto"
             >
-              {/* Título de sección */}
-              <div className="text-center">
-                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                  Acciones sugeridas
-                </p>
-              </div>
-
-              {/* Lista de sugerencias */}
-              <div className="space-y-3 max-w-2xl mx-auto">
-                {greetingData.suggestions.map((suggestion, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.9 + (index * 0.1), duration: 0.4 }}
-                  >
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full h-auto min-h-[56px] py-3 sm:py-4 px-4 sm:px-5",
-                        "flex items-center justify-between gap-3",
-                        "hover:bg-accent hover:text-accent-foreground hover:border-accent",
-                        "transition-all duration-200",
-                        "group text-left"
-                      )}
-                      onClick={() => handleSuggestionClick(suggestion.action)}
-                      data-testid={`button-suggestion-${index}`}
-                    >
-                      <span className="text-sm sm:text-base font-medium flex-1 leading-snug sm:leading-relaxed group-hover:text-accent-foreground whitespace-normal break-words">
-                        {suggestion.label}
-                      </span>
-                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-muted-foreground group-hover:text-accent-foreground group-hover:translate-x-1 transition-all" />
-                    </Button>
-                  </motion.div>
-                ))}
-              </div>
+              {greetingData.suggestions.map((suggestion, index) => (
+                <motion.button
+                  key={index}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.9 + (index * 0.1), duration: 0.4 }}
+                  onClick={() => handleSuggestionClick(suggestion.action)}
+                  className={cn(
+                    "w-full rounded-2xl",
+                    "bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl",
+                    "border border-white/20 dark:border-white/10",
+                    "px-4 sm:px-5 py-3.5 sm:py-4",
+                    "flex items-center justify-between gap-3",
+                    "transition-all duration-300",
+                    "hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:border-white/30 dark:hover:border-white/20",
+                    "group text-left cursor-pointer"
+                  )}
+                  style={{
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.03)'
+                  }}
+                  data-testid={`button-suggestion-${index}`}
+                >
+                  <span className="text-sm font-normal flex-1 leading-relaxed text-foreground/80 group-hover:text-foreground whitespace-normal break-words">
+                    {suggestion.label}
+                  </span>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="text-muted-foreground/40 text-xs">...</span>
+                    <ArrowRight className="w-4 h-4 text-muted-foreground/60 group-hover:text-foreground/80 group-hover:translate-x-1 transition-all" />
+                  </div>
+                </motion.button>
+              ))}
             </motion.div>
           )}
         </div>
