@@ -142,7 +142,7 @@ export function Layout({ children, wide = false, hideHeader = false, headerProps
             <div className={`flex-1 ${isCourseSidebarVisible ? '' : 'pr-3'} pt-3 pb-3`}>
               <main
                 className={`h-full flex flex-col rounded-2xl overflow-hidden ${!isDocked ? 'w-full' : ''}`}
-                style={{ 
+                style={hideHeader ? {} : { 
                   backgroundColor: "var(--layout-bg)",
                 }}
               >

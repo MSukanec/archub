@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SmartChatInput } from "@/components/ui-custom/fields/SmartChatInput";
+import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
 
 interface Suggestion {
   label: string;
@@ -234,8 +235,8 @@ export default function Home() {
   if (userLoading || isLoadingHistory) {
     return (
       <Layout wide={true} hideHeader={true}>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Cargando...</div>
+        <div className="min-h-screen w-full bg-gradient-to-br from-background via-background to-background/95 flex items-center justify-center">
+          <LoadingSpinner size="lg" />
         </div>
       </Layout>
     );
