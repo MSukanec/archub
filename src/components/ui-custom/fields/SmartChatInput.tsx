@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, type KeyboardEvent } from "react";
-import { Search, Command } from "lucide-react";
+import { Search, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SmartChatInputProps {
@@ -96,12 +96,22 @@ export function SmartChatInput({
         data-testid="input-chat-message"
       />
 
-      {/* Atajo de teclado (derecha) */}
-      <div className="flex-shrink-0 flex items-center gap-1 text-muted-foreground/40 text-xs">
-        <Command className="w-3 h-3" />
-        <span>+</span>
-        <span className="font-mono">/</span>
-      </div>
+      {/* Botón de enviar (derecha) */}
+      <button
+        type="button"
+        onClick={onSubmit}
+        disabled={!value.trim() || disabled}
+        className={cn(
+          "flex-shrink-0 p-2 rounded-full",
+          "bg-accent/90 hover:bg-accent transition-all duration-200",
+          "text-accent-foreground",
+          "disabled:opacity-40 disabled:cursor-not-allowed"
+        )}
+        aria-label="Enviar mensaje"
+        data-testid="button-send-message"
+      >
+        <Send className="w-4 h-4" />
+      </button>
     </div>
   );
 }

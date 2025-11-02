@@ -420,10 +420,7 @@ export default function Home() {
                   <span className="text-sm font-normal flex-1 leading-relaxed text-foreground/80 group-hover:text-foreground whitespace-normal break-words">
                     {suggestion.label}
                   </span>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className="text-muted-foreground/40 text-xs">...</span>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground/60 group-hover:text-foreground/80 group-hover:translate-x-1 transition-all" />
-                  </div>
+                  <ArrowRight className="w-4 h-4 flex-shrink-0 text-muted-foreground/60 group-hover:text-foreground/80 group-hover:translate-x-1 transition-all" />
                 </motion.button>
               ))}
             </motion.div>
