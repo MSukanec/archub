@@ -313,10 +313,10 @@ export default function Home() {
                 >
                   {isSendingMessage ? (
                     <div className="flex items-center justify-center gap-2 py-4">
-                      <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                      <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                      <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                      <span className="text-sm text-white/80 ml-2">Pensando...</span>
+                      <div className="w-2 h-2 bg-foreground rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                      <div className="w-2 h-2 bg-foreground rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                      <div className="w-2 h-2 bg-foreground rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                      <span className="text-sm text-muted-foreground ml-2">Pensando...</span>
                     </div>
                   ) : hasActiveConversation && chatMessages.length > 0 ? (
                     (() => {
@@ -326,7 +326,7 @@ export default function Home() {
                       
                       return lastAssistantMessage ? (
                         <div className="max-w-2xl mx-auto">
-                          <p className="text-lg md:text-xl font-medium leading-relaxed text-white/95 px-4">
+                          <p className="text-lg md:text-xl font-medium leading-relaxed text-foreground/90 px-4">
                             {lastAssistantMessage.content}
                           </p>
                         </div>
@@ -334,12 +334,12 @@ export default function Home() {
                     })()
                   ) : (
                     <>
-                      <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight px-4">
+                      <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-tight px-4">
                         {greetingData?.greeting || ""}
                       </h1>
 
                       {error && (
-                        <p className="text-sm text-white/50">
+                        <p className="text-sm text-muted-foreground/50">
                           (Modo offline)
                         </p>
                       )}
@@ -370,7 +370,7 @@ export default function Home() {
                   <div className="text-center pt-1">
                     <button
                       onClick={() => setShowFullHistory(!showFullHistory)}
-                      className="text-xs text-white/60 hover:text-white/90 transition-colors"
+                      className="text-xs text-muted-foreground/70 hover:text-muted-foreground transition-colors"
                       data-testid="button-toggle-history"
                     >
                       {showFullHistory ? "Ocultar historial completo" : "Ver historial completo"}
@@ -389,7 +389,7 @@ export default function Home() {
                 transition={{ duration: 0.3 }}
                 className="max-w-xl mx-auto"
               >
-                <div className="space-y-3 max-h-96 overflow-y-auto p-4 rounded-lg border border-white/10 bg-black/30 backdrop-blur-sm" data-testid="chat-messages-container">
+                <div className="space-y-3 max-h-96 overflow-y-auto p-4 rounded-lg border border-border bg-card/50 backdrop-blur-sm" data-testid="chat-messages-container">
                   {[...chatMessages].reverse().map((msg, index) => (
                     <motion.div
                       key={index}
@@ -407,7 +407,7 @@ export default function Home() {
                           "max-w-[80%] rounded-2xl px-4 py-3",
                           msg.role === 'user'
                             ? "bg-accent text-accent-foreground"
-                            : "bg-white/10 backdrop-blur-sm border border-white/20 text-white"
+                            : "bg-muted/50 backdrop-blur-sm border border-border text-foreground"
                         )}
                       >
                         <p className="text-sm leading-relaxed whitespace-pre-wrap">
@@ -429,7 +429,7 @@ export default function Home() {
                 className="space-y-6"
               >
                 <div className="text-center">
-                  <p className="text-sm font-medium text-white/60 uppercase tracking-wide">
+                  <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                     Acciones sugeridas
                   </p>
                 </div>
@@ -447,16 +447,16 @@ export default function Home() {
                           "w-full h-auto min-h-[60px] py-4 px-6",
                           "flex items-center justify-between gap-3",
                           // Glassmorphism effect
-                          "bg-white/10 backdrop-blur-md",
-                          "border border-white/20",
+                          "bg-background/60 backdrop-blur-md",
+                          "border border-border",
                           "rounded-2xl",
-                          "hover:bg-white/20 hover:border-white/30",
+                          "hover:bg-background/80 hover:border-accent/50",
                           "transition-all duration-300",
                           "group text-left",
                           // Shine effect
                           "relative overflow-hidden",
                           "before:absolute before:inset-0",
-                          "before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent",
+                          "before:bg-gradient-to-r before:from-transparent before:via-accent/10 before:to-transparent",
                           "before:translate-x-[-200%]",
                           "hover:before:translate-x-[200%]",
                           "before:transition-transform before:duration-700"
@@ -464,10 +464,10 @@ export default function Home() {
                         onClick={() => handleSuggestionClick(suggestion.action)}
                         data-testid={`button-suggestion-${index}`}
                       >
-                        <span className="text-sm font-medium flex-1 leading-relaxed text-white whitespace-normal break-words">
+                        <span className="text-sm font-medium flex-1 leading-relaxed text-foreground whitespace-normal break-words">
                           {suggestion.label}
                         </span>
-                        <ArrowRight className="w-4 h-4 flex-shrink-0 text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                        <ArrowRight className="w-4 h-4 flex-shrink-0 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all" />
                       </button>
                     </motion.div>
                   ))}
