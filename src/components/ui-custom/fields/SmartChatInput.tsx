@@ -53,11 +53,11 @@ export function SmartChatInput({
   return (
     <div 
       className={cn(
-        "relative flex items-end gap-2",
+        "relative flex items-end gap-1 sm:gap-2",
         "w-full rounded-full",
         "bg-background border-2 transition-all duration-200",
         isFocused ? "border-accent/50" : "border-border",
-        "px-4 py-2",
+        "px-2 sm:px-4 py-2",
         "shadow-sm hover:shadow-md",
         disabled && "opacity-60 cursor-not-allowed",
         className
@@ -70,7 +70,7 @@ export function SmartChatInput({
         onClick={handleMicClick}
         disabled={disabled}
         className={cn(
-          "flex-shrink-0 p-2 rounded-full",
+          "flex-shrink-0 p-1.5 sm:p-2 rounded-full",
           "text-muted-foreground hover:text-foreground",
           "hover:bg-accent/10 transition-colors",
           "disabled:opacity-50 disabled:cursor-not-allowed",
@@ -79,7 +79,7 @@ export function SmartChatInput({
         aria-label="Grabar audio"
         data-testid="button-mic"
       >
-        <Mic className="w-5 h-5" />
+        <Mic className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
 
       {/* Textarea expansible */}
@@ -95,11 +95,11 @@ export function SmartChatInput({
         rows={1}
         className={cn(
           "flex-1 resize-none bg-transparent",
-          "text-base leading-6",
+          "text-sm sm:text-base leading-5 sm:leading-6",
           "placeholder:text-muted-foreground/60",
           "focus:outline-none",
           "disabled:cursor-not-allowed",
-          "py-3 px-2",
+          "py-2 sm:py-3 px-1 sm:px-2",
           "max-h-[200px] overflow-y-auto"
         )}
         style={{
@@ -117,7 +117,7 @@ export function SmartChatInput({
         size="icon"
         className={cn(
           "flex-shrink-0 rounded-full",
-          "w-10 h-10",
+          "w-8 h-8 sm:w-10 sm:h-10",
           "bg-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/90",
           "text-accent-foreground",
           "disabled:opacity-40 disabled:cursor-not-allowed",
@@ -128,7 +128,7 @@ export function SmartChatInput({
         aria-label="Enviar mensaje"
         data-testid="button-send-message"
       >
-        <Send className="w-5 h-5" />
+        <Send className="w-4 h-4 sm:w-5 sm:h-5" />
       </Button>
     </div>
   );

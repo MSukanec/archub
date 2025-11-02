@@ -248,7 +248,7 @@ export default function Home() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      <div className="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center px-4 py-12">
+      <div className="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center px-4 py-12 overflow-x-hidden">
         {/* Contenedor principal centrado */}
         <div className="max-w-4xl w-full space-y-8">
           
@@ -407,8 +407,8 @@ export default function Home() {
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full h-auto min-h-[60px] py-4 px-5",
-                        "flex items-center justify-between gap-4",
+                        "w-full h-auto min-h-[56px] py-3 sm:py-4 px-4 sm:px-5",
+                        "flex items-center justify-between gap-3",
                         "hover:bg-accent hover:text-accent-foreground hover:border-accent",
                         "transition-all duration-200",
                         "group text-left"
@@ -416,10 +416,10 @@ export default function Home() {
                       onClick={() => handleSuggestionClick(suggestion.action)}
                       data-testid={`button-suggestion-${index}`}
                     >
-                      <span className="text-base font-medium flex-1 leading-relaxed group-hover:text-accent-foreground">
+                      <span className="text-sm sm:text-base font-medium flex-1 leading-snug sm:leading-relaxed group-hover:text-accent-foreground whitespace-normal break-words">
                         {suggestion.label}
                       </span>
-                      <ArrowRight className="w-5 h-5 flex-shrink-0 text-muted-foreground group-hover:text-accent-foreground group-hover:translate-x-1 transition-all" />
+                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-muted-foreground group-hover:text-accent-foreground group-hover:translate-x-1 transition-all" />
                     </Button>
                   </motion.div>
                 ))}
