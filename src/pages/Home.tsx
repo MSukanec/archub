@@ -38,6 +38,7 @@ export default function Home() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isSendingMessage, setIsSendingMessage] = useState(false);
+  const [showFullHistory, setShowFullHistory] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Mantener el sidebar en modo general
@@ -203,8 +204,9 @@ export default function Home() {
     <Layout headerProps={headerProps} wide={true}>
       <div className="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center px-4 py-12">
         {/* Contenedor principal centrado */}
-        <div className="max-w-4xl w-full space-y-12">
-          {/* Saludo principal con IA */}
+        <div className="max-w-4xl w-full space-y-8">
+          
+          {/* Saludo o última respuesta de la IA */}
           <div className="text-center space-y-6">
             {isLoadingGreeting ? (
               // Skeleton loader
@@ -213,33 +215,149 @@ export default function Home() {
                 <div className="h-12 bg-muted/20 rounded-lg w-2/3 mx-auto"></div>
               </div>
             ) : (
-              // Saludo animado
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
                 className="space-y-6"
               >
-                {/* Mensaje de saludo */}
-                <h1 className={cn(
-                  "text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight",
-                  "bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent",
-                  "leading-tight px-4"
-                )}>
-                  {greetingData?.greeting || ""}
-                </h1>
+                {/* Si hay mensajes, mostrar la última respuesta de la IA */}
+                {chatMessages.length > 0 ? (
+                  (() => {
+                    // Encontrar el último mensaje de la IA
+                    const lastAssistantMessage = [...chatMessages]
+                      .reverse()
+                      .find(msg => msg.role === 'assistant');
+                    
+                    return lastAssistantMessage ? (
+                      <div className="max-w-2xl mx-auto">
+                        <p className={cn(
+                          "text-lg md:text-xl font-medium leading-relaxed",
+                          "text-foreground/90",
+                          "px-4"
+                        )}>
+                          {lastAssistantMessage.content}
+                        </p>
+                      </div>
+                    ) : null;
+                  })()
+                ) : (
+                  // Si no hay mensajes, mostrar el saludo inicial
+                  <>
+                    <h1 className={cn(
+                      "text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight",
+                      "bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent",
+                      "leading-tight px-4"
+                    )}>
+                      {greetingData?.greeting || ""}
+                    </h1>
 
-                {error && (
-                  <p className="text-sm text-muted-foreground/60">
-                    (Modo offline)
-                  </p>
+                    {error && (
+                      <p className="text-sm text-muted-foreground/60">
+                        (Modo offline)
+                      </p>
+                    )}
+                  </>
                 )}
               </motion.div>
             )}
           </div>
 
-          {/* Sugerencias de acción */}
-          {!isLoadingGreeting && greetingData?.suggestions && greetingData.suggestions.length > 0 && (
+          {/* Input de mensaje (siempre visible después del saludo/respuesta) */}
+          {!isLoadingGreeting && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="space-y-3 max-w-2xl mx-auto"
+            >
+              <div className="flex gap-2">
+                <Textarea
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Escribe un mensaje..."
+                  className={cn(
+                    "resize-none min-h-[60px] max-h-[120px]",
+                    "focus-visible:ring-accent/50"
+                  )}
+                  disabled={isSendingMessage}
+                  data-testid="input-chat-message"
+                />
+                <Button
+                  onClick={handleSendMessage}
+                  disabled={!inputMessage.trim() || isSendingMessage}
+                  size="icon"
+                  className={cn(
+                    "h-[60px] w-[60px] shrink-0",
+                    "bg-gradient-to-br from-accent to-accent/80",
+                    "hover:from-accent/90 hover:to-accent/70",
+                    "disabled:opacity-50"
+                  )}
+                  data-testid="button-send-message"
+                >
+                  <Send className="w-5 h-5" />
+                </Button>
+              </div>
+
+              {/* Toggle para ver historial completo */}
+              {chatMessages.length > 0 && (
+                <div className="text-center">
+                  <button
+                    onClick={() => setShowFullHistory(!showFullHistory)}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
+                    data-testid="button-toggle-history"
+                  >
+                    {showFullHistory ? "Ocultar historial completo" : "Ver historial completo"}
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* Historial completo (solo si showFullHistory es true) */}
+          {!isLoadingGreeting && showFullHistory && chatMessages.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="max-w-2xl mx-auto"
+            >
+              <div className="space-y-3 max-h-96 overflow-y-auto p-4 rounded-lg border border-border/50 bg-muted/20" data-testid="chat-messages-container">
+                {chatMessages.map((msg, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className={cn(
+                      "flex",
+                      msg.role === 'user' ? "justify-end" : "justify-start"
+                    )}
+                    data-testid={`chat-message-${msg.role}-${index}`}
+                  >
+                    <div
+                      className={cn(
+                        "max-w-[80%] rounded-2xl px-4 py-3",
+                        msg.role === 'user'
+                          ? "bg-accent text-accent-foreground"
+                          : "bg-card border border-border text-card-foreground"
+                      )}
+                    >
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                        {msg.content}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+                <div ref={chatEndRef} />
+              </div>
+            </motion.div>
+          )}
+
+          {/* Sugerencias de acción (solo si NO hay mensajes) */}
+          {!isLoadingGreeting && chatMessages.length === 0 && greetingData?.suggestions && greetingData.suggestions.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -281,79 +399,6 @@ export default function Home() {
                     </Button>
                   </motion.div>
                 ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Sección de chat conversacional */}
-          {!isLoadingGreeting && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.2, duration: 0.6 }}
-              className="space-y-4 max-w-2xl mx-auto"
-            >
-              {/* Historial de mensajes */}
-              {chatMessages.length > 0 && (
-                <div className="space-y-3 max-h-96 overflow-y-auto p-4 rounded-lg border border-border/50 bg-muted/20" data-testid="chat-messages-container">
-                  {chatMessages.map((msg, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className={cn(
-                        "flex",
-                        msg.role === 'user' ? "justify-end" : "justify-start"
-                      )}
-                      data-testid={`chat-message-${msg.role}-${index}`}
-                    >
-                      <div
-                        className={cn(
-                          "max-w-[80%] rounded-2xl px-4 py-3",
-                          msg.role === 'user'
-                            ? "bg-accent text-accent-foreground"
-                            : "bg-card border border-border text-card-foreground"
-                        )}
-                      >
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                          {msg.content}
-                        </p>
-                      </div>
-                    </motion.div>
-                  ))}
-                  <div ref={chatEndRef} />
-                </div>
-              )}
-
-              {/* Input de mensaje */}
-              <div className="flex gap-2">
-                <Textarea
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Escribe un mensaje..."
-                  className={cn(
-                    "resize-none min-h-[60px] max-h-[120px]",
-                    "focus-visible:ring-accent/50"
-                  )}
-                  disabled={isSendingMessage}
-                  data-testid="input-chat-message"
-                />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!inputMessage.trim() || isSendingMessage}
-                  size="icon"
-                  className={cn(
-                    "h-[60px] w-[60px] shrink-0",
-                    "bg-gradient-to-br from-accent to-accent/80",
-                    "hover:from-accent/90 hover:to-accent/70",
-                    "disabled:opacity-50"
-                  )}
-                  data-testid="button-send-message"
-                >
-                  <Send className="w-5 h-5" />
-                </Button>
               </div>
             </motion.div>
           )}
