@@ -16,6 +16,14 @@ export function useHeartbeat(orgId: string | null | undefined) {
       }
 
       try {
+        // CRÍTICO: Verificar que el usuario esté autenticado antes de enviar heartbeat
+        // Esto previene errores 401 durante el proceso de registro
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) {
+          // Usuario no autenticado, no enviar heartbeat
+          return;
+        }
+
         const { error } = await supabase.rpc('heartbeat', { 
           p_org_id: orgId 
         });
