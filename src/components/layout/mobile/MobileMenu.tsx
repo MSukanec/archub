@@ -255,7 +255,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
               <button
                 onClick={() => {
                   setSidebarLevel('general');
-                  navigate('/home');
                 }}
                 className="p-2 -ml-2 hover:bg-[var(--card-hover-bg)] rounded-lg transition-colors"
                 data-testid="button-mobile-back"
@@ -297,7 +296,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     label="Organización"
                     onClick={() => {
                       setSidebarLevel('organization');
-                      navigate('/organization/dashboard');
                     }}
                     isActive={location.startsWith('/organization') || location.startsWith('/contacts') || location.startsWith('/movements') || location.startsWith('/finances') || location.startsWith('/analysis')}
                     showChevron={true}
@@ -325,7 +323,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                         return;
                       }
                       setSidebarLevel('project');
-                      navigate('/project/dashboard');
                     }}
                     isActive={location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients')}
                     showChevron={true}
@@ -338,7 +335,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     label="Capacitaciones"
                     onClick={() => {
                       setSidebarLevel('learning');
-                      navigate('/learning/dashboard');
                     }}
                     isActive={location.startsWith('/learning')}
                     showChevron={true}
@@ -351,7 +347,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       label="Administración"
                       onClick={() => {
                         setSidebarLevel('admin');
-                        navigate('/admin/community');
                       }}
                       isActive={location.startsWith('/admin')}
                       showChevron={true}
