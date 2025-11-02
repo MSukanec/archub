@@ -40,7 +40,6 @@ export default function Home() {
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [showFullHistory, setShowFullHistory] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
-  const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Mantener el sidebar en modo general
   useEffect(() => {
@@ -150,12 +149,8 @@ export default function Home() {
     }
   }, [userData?.user?.id, userData?.user_data?.first_name]);
 
-  // Auto-scroll al último mensaje
-  useEffect(() => {
-    if (chatMessages.length > 0) {
-      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [chatMessages]);
+  // Nota: Auto-scroll eliminado porque con historial invertido (más recientes arriba),
+  // el comportamiento natural del scroll ya muestra los mensajes más recientes primero
 
   // Manejar click en sugerencia
   const handleSuggestionClick = (action: string) => {
@@ -259,7 +254,7 @@ export default function Home() {
         {/* Contenedor principal centrado */}
         <div className="max-w-4xl w-full space-y-8">
           
-          {/* Saludo o última respuesta de la IA */}
+          {/* Saludo (siempre visible, independiente del historial) */}
           <div className="text-center space-y-6">
             {isLoadingGreeting ? (
               // Skeleton loader
@@ -274,43 +269,18 @@ export default function Home() {
                 transition={{ duration: 0.6, ease: "easeOut" }}
                 className="space-y-6"
               >
-                {/* Si hay mensajes, mostrar la última respuesta de la IA */}
-                {chatMessages.length > 0 ? (
-                  (() => {
-                    // Encontrar el último mensaje de la IA
-                    const lastAssistantMessage = [...chatMessages]
-                      .reverse()
-                      .find(msg => msg.role === 'assistant');
-                    
-                    return lastAssistantMessage ? (
-                      <div className="max-w-2xl mx-auto">
-                        <p className={cn(
-                          "text-lg md:text-xl font-medium leading-relaxed",
-                          "text-foreground/90",
-                          "px-4"
-                        )}>
-                          {lastAssistantMessage.content}
-                        </p>
-                      </div>
-                    ) : null;
-                  })()
-                ) : (
-                  // Si no hay mensajes, mostrar el saludo inicial
-                  <>
-                    <h1 className={cn(
-                      "text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight",
-                      "bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent",
-                      "leading-tight px-4"
-                    )}>
-                      {greetingData?.greeting || ""}
-                    </h1>
+                <h1 className={cn(
+                  "text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight",
+                  "bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent",
+                  "leading-tight px-4"
+                )}>
+                  {greetingData?.greeting || ""}
+                </h1>
 
-                    {error && (
-                      <p className="text-sm text-muted-foreground/60">
-                        (Modo offline)
-                      </p>
-                    )}
-                  </>
+                {error && (
+                  <p className="text-sm text-muted-foreground/60">
+                    (Modo offline)
+                  </p>
                 )}
               </motion.div>
             )}
@@ -378,7 +348,7 @@ export default function Home() {
               className="max-w-2xl mx-auto"
             >
               <div className="space-y-3 max-h-96 overflow-y-auto p-4 rounded-lg border border-border/50 bg-muted/20" data-testid="chat-messages-container">
-                {chatMessages.map((msg, index) => (
+                {[...chatMessages].reverse().map((msg, index) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, y: 10 }}
@@ -404,13 +374,12 @@ export default function Home() {
                     </div>
                   </motion.div>
                 ))}
-                <div ref={chatEndRef} />
               </div>
             </motion.div>
           )}
 
-          {/* Sugerencias de acción (solo si NO hay mensajes) */}
-          {!isLoadingGreeting && chatMessages.length === 0 && greetingData?.suggestions && greetingData.suggestions.length > 0 && (
+          {/* Sugerencias de acción (siempre visibles si existen) */}
+          {!isLoadingGreeting && greetingData?.suggestions && greetingData.suggestions.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
