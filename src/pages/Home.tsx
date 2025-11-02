@@ -204,8 +204,8 @@ export default function Home() {
   };
 
 
-  // Solo mostrar loading si el usuario está cargando, no por el historial
-  if (userLoading) {
+  // Mostrar loading si el usuario está cargando O si está cargando el saludo
+  if (userLoading || isLoadingGreeting) {
     return (
       <Layout wide={true}>
         <div className="flex items-center justify-center h-64">
