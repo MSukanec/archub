@@ -75,3 +75,23 @@ create trigger trg_set_updated_at_ia_user_preferences BEFORE
 update on ia_user_preferences for EACH row
 execute FUNCTION set_updated_at_ia_user_preferences ();
 
+TABLA IA_USER_USAGE_LIMITS:
+
+create table public.ia_user_usage_limits (
+  user_id uuid not null,
+  plan text not null default 'free'::text,
+  daily_limit integer not null default 3,
+  prompts_used_today integer not null default 0,
+  last_prompt_at timestamp with time zone null,
+  last_reset_at date null default CURRENT_DATE,
+  constraint ia_user_usage_limits_pkey primary key (user_id),
+  constraint ia_user_usage_limits_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create index IF not exists idx_ia_user_usage_limits_plan on public.ia_user_usage_limits using btree (plan) TABLESPACE pg_default;
+
+create index IF not exists idx_ia_user_usage_limits_last_reset on public.ia_user_usage_limits using btree (last_reset_at) TABLESPACE pg_default;
+
+create trigger trg_reset_prompt_limit BEFORE
+update on ia_user_usage_limits for EACH row
+execute FUNCTION reset_daily_prompt_limit_if_needed ();
