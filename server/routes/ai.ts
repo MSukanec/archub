@@ -915,9 +915,16 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
       let responseContent = responseMessage?.content || "Lo siento, no pude generar una respuesta.";
       let usage = completion.usage;
 
+      console.log('===== AI CHAT DEBUG =====');
+      console.log('Response message tool_calls:', responseMessage?.tool_calls);
+      console.log('Response message content:', responseMessage?.content);
+
       // Si la IA decidió usar una función
       if (responseMessage?.tool_calls && responseMessage.tool_calls.length > 0) {
         const toolCall = responseMessage.tool_calls[0];
+        
+        console.log('Function name:', toolCall.function.name);
+        console.log('Function arguments:', toolCall.function.arguments);
         
         // Validar que sea un function tool call
         if (toolCall.type !== 'function') {
@@ -1068,6 +1075,8 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
             default:
               functionResult = `Función ${toolCall.function.name} no implementada.`;
           }
+          
+          console.log('Function result:', functionResult);
           
           // Segunda llamada a OpenAI con el resultado de la función
           const secondCompletion = await openai.chat.completions.create({
