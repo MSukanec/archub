@@ -12,6 +12,7 @@ import { registerAdminRoutes } from './routes/admin';
 import { registerPaymentRoutes } from './routes/payments';
 import { registerBankTransferRoutes } from './routes/bank-transfer';
 import { registerContactRoutes } from './routes/contacts';
+import { registerAIRoutes } from './routes/ai';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get shared dependencies
@@ -43,6 +44,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register contact routes (professional contacts)
   registerContactRoutes(app, deps);
+
+  // Register AI routes (home greeting, suggestions)
+  registerAIRoutes(app, deps);
 
   // ============================================
   // Mercado Pago Integration Routes (Proxies)

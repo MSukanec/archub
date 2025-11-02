@@ -1,17 +1,30 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
 import { Layout } from "@/components/layout/desktop/Layout";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { supabase } from "@/lib/supabase";
-import { Home as HomeIcon, Sparkles } from "lucide-react";
+import { Home as HomeIcon, Sparkles, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+interface Suggestion {
+  label: string;
+  action: string;
+}
+
+interface GreetingData {
+  greeting: string;
+  suggestions: Suggestion[];
+}
+
 export default function Home() {
+  const [, navigate] = useLocation();
   const { data: userData, isLoading: userLoading } = useCurrentUser();
   const { setSidebarLevel } = useNavigationStore();
   
-  const [greeting, setGreeting] = useState<string>("");
+  const [greetingData, setGreetingData] = useState<GreetingData | null>(null);
   const [isLoadingGreeting, setIsLoadingGreeting] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,13 +61,19 @@ export default function Home() {
           throw new Error(errorData.error || "Error al obtener el saludo");
         }
 
-        const data = await response.json();
-        setGreeting(data.greeting);
+        const data: GreetingData = await response.json();
+        setGreetingData(data);
       } catch (err: any) {
         console.error('Error fetching greeting:', err);
         setError(err.message || "Error al cargar el saludo");
         // Fallback genérico
-        setGreeting(`¡Hola, ${userData?.user_data?.first_name || 'Usuario'}! ¿Cómo estás hoy?`);
+        setGreetingData({
+          greeting: `¡Hola, ${userData?.user_data?.first_name || 'Usuario'}! ¿Cómo estás hoy?`,
+          suggestions: [
+            { label: "Explorar cursos", action: "/learning/courses" },
+            { label: "Ver proyectos", action: "/organization/projects" }
+          ]
+        });
       } finally {
         setIsLoadingGreeting(false);
       }
@@ -64,6 +83,22 @@ export default function Home() {
       fetchGreeting();
     }
   }, [userData?.user?.id, userData?.user_data?.first_name]);
+
+  // Manejar click en sugerencia
+  const handleSuggestionClick = (action: string) => {
+    // Determinar el nivel del sidebar según la ruta
+    if (action.startsWith('/learning')) {
+      setSidebarLevel('learning');
+    } else if (action.startsWith('/organization')) {
+      setSidebarLevel('organization');
+    } else if (action.startsWith('/project')) {
+      setSidebarLevel('project');
+    } else {
+      setSidebarLevel('general');
+    }
+    
+    navigate(action);
+  };
 
   if (userLoading) {
     return (
@@ -119,11 +154,11 @@ export default function Home() {
 
                 {/* Mensaje de saludo */}
                 <h1 className={cn(
-                  "text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight",
+                  "text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight",
                   "bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent",
-                  "leading-tight"
+                  "leading-tight px-4"
                 )}>
-                  {greeting}
+                  {greetingData?.greeting || ""}
                 </h1>
 
                 {error && (
@@ -135,24 +170,51 @@ export default function Home() {
             )}
           </div>
 
-          {/* Espacio para sugerencias futuras de IA */}
-          {!isLoadingGreeting && (
+          {/* Sugerencias de acción */}
+          {!isLoadingGreeting && greetingData?.suggestions && greetingData.suggestions.length > 0 && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 0.6 }}
-              className="space-y-4"
+              className="space-y-6"
             >
-              {/* Placeholder para sugerencias de acción */}
+              {/* Título de sección */}
               <div className="text-center">
-                <p className="text-sm text-muted-foreground/60 mb-8">
-                  {/* Este espacio se usará para mostrar recomendaciones personalizadas */}
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                  Acciones sugeridas
                 </p>
               </div>
 
-              {/* Grid de acciones sugeridas (placeholder) */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
-                {/* Los cards de sugerencias aparecerán aquí dinámicamente */}
+              {/* Grid de sugerencias */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-3xl mx-auto">
+                {greetingData.suggestions.map((suggestion, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.9 + (index * 0.1), duration: 0.4 }}
+                  >
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full h-auto py-6 px-6",
+                        "flex flex-col items-start gap-3",
+                        "hover:bg-accent/5 hover:border-accent/30",
+                        "transition-all duration-200",
+                        "group"
+                      )}
+                      onClick={() => handleSuggestionClick(suggestion.action)}
+                      data-testid={`button-suggestion-${index}`}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="text-sm font-medium text-left flex-1">
+                          {suggestion.label}
+                        </span>
+                        <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
+                      </div>
+                    </Button>
+                  </motion.div>
+                ))}
               </div>
             </motion.div>
           )}
