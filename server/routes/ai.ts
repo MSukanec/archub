@@ -716,4 +716,190 @@ Maintain a ${tone} tone and respond concisely and helpfully.`
       });
     }
   });
+
+  // POST /api/ai/query - AI query with function calling (e.g., payments, projects, etc.)
+  app.post("/api/ai/query", async (req, res) => {
+    try {
+      const { message } = req.body;
+
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ error: "Message is required" });
+      }
+
+      const openaiApiKey = process.env.OPENAI_API_KEY;
+      if (!openaiApiKey) {
+        return res.status(500).json({ error: "Missing OpenAI API key" });
+      }
+
+      // Autenticación
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+      const { data: { user }, error: authError } = await authenticatedSupabase.auth.getUser();
+      
+      if (authError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      // Obtener usuario de la BD
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .single();
+
+      if (!dbUser) {
+        return res.status(404).json({ error: "User not found in database" });
+      }
+
+      const userId = dbUser.id;
+
+      // Verificar límites de uso
+      const limitCheck = await checkAndIncrementUsageLimit(userId, authenticatedSupabase);
+      
+      if (!limitCheck.allowed) {
+        return res.status(429).json({ 
+          error: limitCheck.message,
+          limitReached: true,
+          remainingPrompts: 0
+        });
+      }
+
+      // Obtener organization_id actual del usuario
+      const { data: preferences } = await authenticatedSupabase
+        .from('user_preferences')
+        .select('last_organization_id')
+        .eq('user_id', userId)
+        .single();
+
+      const organizationId = preferences?.last_organization_id;
+      if (!organizationId) {
+        return res.status(400).json({ 
+          error: "No organization selected. Please select an organization first." 
+        });
+      }
+
+      // Inicializar OpenAI
+      const openai = new OpenAI({ apiKey: openaiApiKey });
+
+      // Primera llamada a OpenAI con function calling
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: message }],
+        tools: [{
+          type: "function",
+          function: {
+            name: "getTotalPayments",
+            description: "Devuelve el monto total pagado a un contacto (socio, subcontratista, proveedor, cliente, personal) en un proyecto específico. Útil para preguntas como '¿Cuánto le pagué a Juan en el proyecto Casa Blanca?'",
+            parameters: {
+              type: "object",
+              properties: {
+                contactName: { 
+                  type: "string", 
+                  description: "Nombre del contacto al que se le pagó (ej: 'Alejandro', 'Juan Pérez', 'Constructora ABC')" 
+                },
+                projectName: { 
+                  type: "string", 
+                  description: "Nombre del proyecto donde se realizaron los pagos (ej: 'Casa Blanca', 'Edificio Norte')" 
+                }
+              },
+              required: ["contactName", "projectName"]
+            }
+          }
+        }]
+      });
+
+      const choice = completion.choices[0];
+
+      // Si el modelo decidió llamar a una función
+      if (choice.message.tool_calls && choice.message.tool_calls.length > 0) {
+        const toolCall = choice.message.tool_calls[0];
+        const functionName = (toolCall as any).function.name;
+        const args = JSON.parse((toolCall as any).function.arguments);
+
+        let functionResult = "";
+
+        // Ejecutar la función correspondiente
+        if (functionName === "getTotalPayments") {
+          const { getTotalPaymentsByContactAndProject } = await import('../../src/ai/tools/getTotalPayments.js');
+          
+          functionResult = await getTotalPaymentsByContactAndProject(
+            args.contactName,
+            args.projectName,
+            organizationId,
+            authenticatedSupabase
+          );
+        } else {
+          functionResult = `Función "${functionName}" no implementada`;
+        }
+
+        // Segunda llamada a OpenAI con el resultado de la función
+        const finalCompletion = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            { role: "user", content: message },
+            choice.message,
+            { 
+              role: "tool", 
+              tool_call_id: toolCall.id, 
+              content: functionResult 
+            }
+          ]
+        });
+
+        // Guardar el mensaje del usuario y la respuesta de la IA
+        await authenticatedSupabase.from('ia_messages').insert([
+          {
+            user_id: userId,
+            role: 'user',
+            content: message,
+            context_type: 'query'
+          },
+          {
+            user_id: userId,
+            role: 'assistant',
+            content: finalCompletion.choices[0].message.content || functionResult,
+            context_type: 'query'
+          }
+        ]);
+
+        return res.json({ 
+          response: finalCompletion.choices[0].message.content,
+          functionCalled: functionName,
+          functionResult: functionResult
+        });
+      }
+
+      // Si no llamó a ninguna función, devolver respuesta directa
+      const directResponse = choice.message.content || "Lo siento, no pude procesar tu consulta.";
+
+      // Guardar el mensaje y la respuesta
+      await authenticatedSupabase.from('ia_messages').insert([
+        {
+          user_id: userId,
+          role: 'user',
+          content: message,
+          context_type: 'query'
+        },
+        {
+          user_id: userId,
+          role: 'assistant',
+          content: directResponse,
+          context_type: 'query'
+        }
+      ]);
+
+      res.json({ response: directResponse });
+
+    } catch (error: any) {
+      console.error("Error in AI query endpoint:", error);
+      res.status(500).json({ 
+        error: "Error procesando tu consulta. Por favor intenta nuevamente.",
+        details: error.message 
+      });
+    }
+  });
 }
