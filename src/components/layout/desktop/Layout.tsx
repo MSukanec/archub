@@ -115,6 +115,9 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
         <HeaderMobile {...(headerProps ?? {})}>
           <main
             className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-4 py-3 pb-12 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
+            style={{
+              background: "linear-gradient(to bottom, hsl(0, 0%, 96%), hsl(76, 40%, 94%))",
+            }}
           >
             {children}
           </main>
@@ -137,7 +140,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
               <main
                 className={`h-full flex flex-col rounded-2xl overflow-hidden ${!isDocked ? 'w-full' : ''}`}
                 style={{ 
-                  backgroundColor: "var(--layout-bg)",
+                  background: "linear-gradient(to bottom, hsl(0, 0%, 96%), hsl(76, 40%, 94%))",
                 }}
               >
                 {headerProps ? (
