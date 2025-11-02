@@ -488,14 +488,14 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
               {/* Avatar del usuario con badge de notificaciones */}
               <div className="relative">
                 <Avatar 
-                  className="h-12 w-12 cursor-pointer hover:opacity-80 transition-opacity"
+                  className="h-12 w-12 cursor-pointer hover:opacity-80 transition-opacity border-0 ring-0"
                   onClick={() => {
                     navigate('/profile');
                     handleCloseMenu();
                   }}
                 >
                   <AvatarImage src={userData?.user?.avatar_url} />
-                  <AvatarFallback className="bg-[var(--accent)] text-white text-sm">
+                  <AvatarFallback className="bg-[var(--accent)] text-white text-sm border-0">
                     {userData?.user?.full_name?.substring(0, 2)?.toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
