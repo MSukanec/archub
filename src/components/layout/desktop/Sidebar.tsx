@@ -547,25 +547,35 @@ export function Sidebar() {
                   }}
                   className={cn(
                     "h-[50px] rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center group overflow-hidden",
-                    isExpanded ? "w-full" : "w-8"
+                    isExpanded ? "w-full justify-between" : "w-8"
                   )}
                 >
-                  {/* Logo siempre en la misma posición */}
-                  <div className="flex items-center justify-center w-8 flex-shrink-0">
-                    <img 
-                      src="/ArchubLogo.png" 
-                      alt="Archub Logo" 
-                      className="h-8 w-auto object-contain"
-                    />
+                  <div className="flex items-center overflow-hidden">
+                    {/* Logo siempre en la misma posición */}
+                    <div className="flex items-center justify-center w-8 flex-shrink-0">
+                      <img 
+                        src="/ArchubLogo.png" 
+                        alt="Archub Logo" 
+                        className="h-8 w-auto object-contain"
+                      />
+                    </div>
+                    
+                    {/* Texto que aparece cuando se expande - Nombre de la sección */}
+                    {isExpanded && (
+                      <div className="flex items-center overflow-hidden min-w-0 ml-3">
+                        <span className="text-lg font-normal text-[var(--main-sidebar-fg)] group-hover:text-white truncate">
+                          {sidebarLevel === 'organization' ? 'Organización' :
+                           sidebarLevel === 'project' ? 'Proyecto' :
+                           sidebarLevel === 'learning' ? 'Capacitaciones' :
+                           sidebarLevel === 'admin' ? 'Administración' : 'Archub'}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   
-                  {/* Texto que aparece cuando se expande */}
+                  {/* Icono de volver - solo se muestra cuando está expandido */}
                   {isExpanded && (
-                    <div className="flex items-center overflow-hidden min-w-0 ml-3">
-                      <span className="text-lg font-normal text-[var(--main-sidebar-fg)] group-hover:text-white truncate">
-                        Archub
-                      </span>
-                    </div>
+                    <ArrowLeft className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 flex-shrink-0" />
                   )}
                 </button>
                 

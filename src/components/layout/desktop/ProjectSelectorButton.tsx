@@ -28,8 +28,8 @@ export function ProjectSelectorButton() {
           className="h-8 px-3 text-xs gap-2"
         >
           <FolderOpen className="h-4 w-4 text-[var(--accent)]" />
-          <span className="font-medium">{currentProjectName}</span>
-          <ChevronDown className="h-3 w-3 opacity-60" />
+          <span className="font-medium" style={{ color: 'var(--main-sidebar-fg)' }}>{currentProjectName}</span>
+          <ChevronDown className="h-3 w-3 opacity-60" style={{ color: 'var(--main-sidebar-fg)' }} />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-64 p-2">
