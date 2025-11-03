@@ -286,16 +286,27 @@ export function PageLayout({
             {/* Icon + Title + Description */}
             <div className="flex items-center gap-3">
               {/* Icono de la página (usa prop icon o fallback a PAGE_CONFIG) */}
-              {(icon || PAGE_CONFIG[location]?.icon) && (
-                <span className="text-[var(--accent)] flex-shrink-0">
-                  {icon 
-                    ? (typeof icon === 'function' 
-                        ? React.createElement(icon, { className: "w-6 h-6" })
-                        : icon)
-                    : React.createElement(PAGE_CONFIG[location].icon, { className: "w-6 h-6" })
-                  }
-                </span>
-              )}
+              {(() => {
+                const IconComponent = icon || PAGE_CONFIG[location]?.icon;
+                if (!IconComponent) return null;
+                
+                // Si icon es un ReactElement válido, renderizarlo directamente
+                if (React.isValidElement(IconComponent)) {
+                  return (
+                    <span className="text-[var(--accent)] flex-shrink-0">
+                      {IconComponent}
+                    </span>
+                  );
+                }
+                
+                // Si es un componente, renderizarlo con JSX
+                const Icon = IconComponent as React.ComponentType<any>;
+                return (
+                  <span className="text-[var(--accent)] flex-shrink-0">
+                    <Icon className="w-6 h-6" />
+                  </span>
+                );
+              })()}
               
               {/* Title + Description */}
               <div className="flex flex-col">
