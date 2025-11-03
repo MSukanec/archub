@@ -9,10 +9,10 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { Users, Plus } from 'lucide-react'
 import { InsuranceTab } from '@/components/personnel/insurance/InsuranceTab'
 import { useInsuranceList } from '@/hooks/useInsurances'
-import PersonnelTab from './PersonnelTab'
-import AttendanceTab from './AttendanceTab'
+import PersonnelListTab from './PersonnelListTab'
+import PersonnelAttendanceTab from './PersonnelAttendanceTab'
 
-export default function Labor() {
+export default function Personnel() {
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
@@ -91,7 +91,7 @@ export default function Labor() {
     tabs: [
       {
         id: 'active',
-        label: 'Personal',
+        label: 'Listado de Personal',
         isActive: activeTab === 'active'
       },
       {
@@ -137,7 +137,7 @@ export default function Labor() {
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
         {activeTab === 'active' && (
-          <PersonnelTab
+          <PersonnelListTab
             openModal={openModal}
             handleDeletePersonnel={handleDeletePersonnel}
             insuranceData={insuranceData}
@@ -146,7 +146,7 @@ export default function Labor() {
         )}
 
         {activeTab === 'attendance' && (
-          <AttendanceTab
+          <PersonnelAttendanceTab
             openModal={openModal}
             selectedProjectId={selectedProjectId}
             currentOrganizationId={currentOrganizationId}
