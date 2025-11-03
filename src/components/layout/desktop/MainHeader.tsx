@@ -36,7 +36,7 @@ export function MainHeader({ icon, title }: MainHeaderProps) {
         {/* Left side: Icon + Title */}
         <div className="flex items-center gap-3">
           <PageIcon className="w-6 h-6 main-header-icon" />
-          <h1 className="text-lg main-header-title">
+          <h1 className="text-lg font-normal main-header-title">
             {currentPageName}
           </h1>
         </div>

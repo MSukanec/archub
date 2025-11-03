@@ -202,7 +202,7 @@ export function Sidebar() {
                 <button
                   onClick={() => navigate('/home')}
                   className={cn(
-                    "h-[50px] rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center group overflow-hidden",
+                    "h-[50px] rounded-md cursor-pointer transition-colors flex items-center group overflow-hidden",
                     isExpanded ? "w-full" : "w-8"
                   )}
                 >
@@ -546,7 +546,7 @@ export function Sidebar() {
                     navigate('/home');
                   }}
                   className={cn(
-                    "h-[50px] rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center group overflow-hidden",
+                    "h-[50px] rounded-md cursor-pointer transition-colors flex items-center group overflow-hidden",
                     isExpanded ? "w-full justify-between" : "w-8"
                   )}
                 >

@@ -343,7 +343,7 @@ export function PageLayout({
 
           {/* FILA 2: Tabs a la izquierda + Botones de acción a la derecha */}
           {showSecondRow && (
-            <div className="h-10 flex items-center justify-between border-b border-border relative overflow-hidden">
+            <div className="h-[45px] flex items-center justify-between border-b border-border relative overflow-hidden">
               {/* Left: Tabs */}
               {hasTabs && (
                 <div ref={tabsContainerRef} className="flex items-center relative" style={{ gap: '24px' }}>
@@ -358,7 +358,7 @@ export function PageLayout({
                             : onTabChange?.(tab.id)
                         }
                         disabled={tab.isDisabled}
-                        className={`relative text-sm flex items-center gap-2 px-1 h-10 flex-shrink-0 min-w-0 ${
+                        className={`relative text-sm flex items-center gap-2 px-1 h-[45px] flex-shrink-0 min-w-0 ${
                           tab.isDisabled || tab.isRestricted
                             ? "text-muted-foreground opacity-60 cursor-not-allowed"
                             : tab.isActive
