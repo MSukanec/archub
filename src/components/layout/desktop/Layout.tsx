@@ -20,6 +20,8 @@ import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileCo
 import { useMobile } from "@/hooks/use-mobile";
 import { HeaderMobile } from "@/components/layout/mobile/HeaderMobile";
 import { CourseSidebar } from "@/components/layout/CourseSidebar";
+import { ProjectSelectorButton } from "./ProjectSelectorButton";
+import { OrganizationSelectorButton } from "./OrganizationSelectorButton";
 
 interface Tab {
   id: string;
@@ -79,6 +81,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { showActionBar } = useActionBarMobile();
   const isMobile = useMobile();
   const { isDocked, isHovered } = useSidebarStore();
+  const { sidebarLevel } = useNavigationStore();
   const { isVisible: isCourseSidebarVisible, modules, lessons, currentLessonId } = useCourseSidebarStore();
 
   useEffect(() => {
@@ -97,6 +100,14 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       }
     }
   }, [data?.preferences?.theme]);
+
+  // Determinar qué selector mostrar según el contexto
+  let selectorComponent: React.ReactNode = null;
+  if (sidebarLevel === 'project') {
+    selectorComponent = <ProjectSelectorButton />;
+  } else if (sidebarLevel === 'organization') {
+    selectorComponent = <OrganizationSelectorButton />;
+  }
 
   return (
     <div
@@ -143,6 +154,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                     icon={headerProps.icon}
                     title={headerProps.title}
                     description={headerProps.description}
+                    selector={selectorComponent}
                     tabs={headerProps.tabs?.map((tab) => ({
                       id: tab.id,
                       label: tab.label,
