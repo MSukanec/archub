@@ -28,6 +28,7 @@ import { useProjectsLite } from "@/hooks/use-projects-lite";
 import { useProject } from "@/hooks/use-projects";
 import { useProjectContext } from "@/stores/projectContext";
 import { useNavigationStore } from "@/stores/navigationStore";
+import { useSidebarStore } from "@/stores/sidebarStore";
 import { supabase } from '@/lib/supabase';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
@@ -85,6 +86,7 @@ export function MainHeader() {
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId, setCurrentOrganization, setSelectedProject } = useProjectContext();
   const { setSidebarLevel, sidebarLevel, currentSidebarContext } = useNavigationStore();
+  const { isDocked } = useSidebarStore();
   const { toast } = useToast();
   
   // Detectar si estamos en el contexto de Learning
@@ -184,37 +186,39 @@ export function MainHeader() {
 
   return (
     <div 
-      className="w-full h-12 border-b flex items-center justify-between px-4 z-50"
+      className="w-full h-12 border-b flex items-center justify-between z-50"
       style={{ 
         backgroundColor: "var(--main-sidebar-bg)",
         borderBottomColor: "var(--main-sidebar-border)"
       }}
     >
-      {/* Left side: Logo + Icon + Title */}
-      <div className="flex items-center gap-4">
-        {/* Logo */}
-        <Link href="/home">
-          <div className="shrink-0 w-8 h-8 flex items-center justify-center cursor-pointer">
-            <img 
-              src="/ArchubLogo.png" 
-              alt="Archub" 
-              className="h-8 w-auto"
-            />
+      <div className={`w-full flex items-center justify-between ${isDocked ? 'px-16' : 'px-16'}`}>
+        {/* Left side: Logo + Icon + Title */}
+        <div className="flex items-center gap-4">
+          {/* Logo */}
+          <Link href="/home">
+            <div className="shrink-0 w-8 h-8 flex items-center justify-center cursor-pointer">
+              <img 
+                src="/ArchubLogo.png" 
+                alt="Archub" 
+                className="h-8 w-auto"
+              />
+            </div>
+          </Link>
+
+          {/* Page Icon + Title */}
+          <div className="flex items-center gap-3">
+            <PageIcon className="w-6 h-6 text-[var(--accent)]" />
+            <h1 className="text-xl font-semibold text-[var(--foreground)]">
+              {currentPageName}
+            </h1>
           </div>
-        </Link>
-
-        {/* Page Icon + Title */}
-        <div className="flex items-center gap-3">
-          <PageIcon className="w-6 h-6 text-[var(--accent)]" />
-          <h1 className="text-xl font-semibold text-[var(--foreground)]">
-            {currentPageName}
-          </h1>
         </div>
-      </div>
 
-      {/* Right side: Selector */}
-      <div className="flex items-center">
-        {selectorComponent}
+        {/* Right side: Selector */}
+        <div className="flex items-center">
+          {selectorComponent}
+        </div>
       </div>
     </div>
   );
