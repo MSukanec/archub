@@ -4,9 +4,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Calendar, ChevronLeft, ChevronRight, Download, CalendarDays } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight, Download, CalendarDays, UserX } from 'lucide-react'
 import { format, addDays, eachDayOfInterval, isWeekend, isToday, startOfDay, subDays } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { Tabs } from '@/components/ui-custom/Tabs'
 
 interface Worker {
   id: string
@@ -38,7 +39,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
   onExportAttendance,
   triggerTodayCenter = false,
   onEditAttendance,
-  filterStatus = 'all',
+  filterStatus = 'active',
   onFilterStatusChange
 }) => {
   // Calculate date range: show 3 days before today and 3 days after
@@ -153,12 +154,20 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
     }
   }, [timelineElement, dateRange])
 
-  // Auto-center on component load
+  // Auto-scroll to show the last day at the right edge on component load
   React.useEffect(() => {
-    if (timelineElement) {
-      setTimeout(centerTimelineOnToday, 100)
+    if (timelineElement && dateRange.length > 0) {
+      setTimeout(() => {
+        const columnWidth = 65
+        const containerWidth = timelineElement.clientWidth
+        const totalWidth = dateRange.length * columnWidth
+        // Scroll to show the last day at the right edge
+        if (totalWidth > containerWidth) {
+          timelineElement.scrollLeft = totalWidth - containerWidth
+        }
+      }, 100)
     }
-  }, [timelineElement, centerTimelineOnToday])
+  }, [timelineElement, dateRange])
 
   // Center on today when HOY button is triggered (responds to any change in triggerTodayCenter)
   React.useEffect(() => {
@@ -287,30 +296,14 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
 
           {/* Filter Tabs */}
           {onFilterStatusChange && (
-            <div className="flex items-center gap-1 bg-muted p-1 rounded-md">
-              <button
-                onClick={() => onFilterStatusChange('active')}
-                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-                  filterStatus === 'active'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                data-testid="filter-active"
-              >
-                Activo
-              </button>
-              <button
-                onClick={() => onFilterStatusChange('all')}
-                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-                  filterStatus === 'all'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                data-testid="filter-all"
-              >
-                Todos
-              </button>
-            </div>
+            <Tabs
+              tabs={[
+                { value: 'active', label: 'Activo' },
+                { value: 'all', label: 'Todos' }
+              ]}
+              value={filterStatus}
+              onValueChange={(value) => onFilterStatusChange(value as 'all' | 'active')}
+            />
           )}
 
           {/* Export Button */}
@@ -440,7 +433,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
         {/* Timeline Content with synchronized scrolling */}
         <div 
           ref={setTimelineElement}
-          className="flex-1 overflow-x-scroll gantt-timeline-scroll relative" 
+          className="flex-1 overflow-x-auto gantt-timeline-scroll relative" 
           id="timeline-content-scroll"
           style={{
             scrollbarWidth: 'auto',
@@ -453,7 +446,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
             }
           }}
         >
-          <div style={{ width: `${dateRange.length * 65}px` }}>
+          <div style={{ minWidth: '100%', width: `${dateRange.length * 65}px` }}>
             {/* Timeline Content - matching Gantt design */}
             {Object.entries(groupedWorkers).length > 0 ? (
               Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
@@ -522,8 +515,12 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
                 </div>
               ))
             ) : (
-              <div className="h-32 flex items-center justify-center">
-                <span className="text-[var(--table-row-fg)] text-sm">No se encontraron resultados</span>
+              <div className="h-64 flex flex-col items-center justify-center gap-3 w-full">
+                <UserX className="h-12 w-12 text-muted-foreground opacity-50" />
+                <div className="text-center">
+                  <p className="text-sm font-medium text-[var(--table-row-fg)]">No hay personal activo</p>
+                  <p className="text-xs text-muted-foreground mt-1">Cambia el filtro a "Todos" para ver todo el personal</p>
+                </div>
               </div>
             )}
           </div>

@@ -150,7 +150,7 @@ export default function PersonnelAttendanceTab({
   selectedProjectId,
   currentOrganizationId 
 }: PersonnelAttendanceTabProps) {
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active'>('all')
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active'>('active')
 
   const { data: personnelData = [], isLoading: isPersonnelLoading } = useProjectPersonnel(
     selectedProjectId || undefined
