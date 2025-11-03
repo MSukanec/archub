@@ -118,9 +118,6 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           : "var(--main-sidebar-bg)",
       }}
     >
-      {/* Main Header for Desktop - Only shown on desktop */}
-      {!isMobile && <MainHeader />}
-      
       {/* Mobile View - Unchanged */}
       {isMobile ? (
         <HeaderMobile {...(headerProps ?? {})}>
@@ -131,23 +128,24 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           </main>
         </HeaderMobile>
       ) : (
-        /* Desktop View - Frame Layout without Header */
+        /* Desktop View - Sidebar + MainHeader + Content */
         <div className="flex-1 flex min-h-0">
-          {/* Main Layout Frame - Full height */}
-          <div
-            className={`flex-1 flex min-h-0 relative ${isDocked ? 'gap-3' : ''}`}
-            style={{ borderColor: "var(--main-sidebar-bg)" }}
-          >
-            {/* Tertiary Sidebar - Always pushes content to the side */}
-            <div className="flex-shrink-0">
-              <Sidebar />
-            </div>
+          {/* Sidebar - Full height */}
+          <div className="flex-shrink-0">
+            <Sidebar />
+          </div>
 
-            {/* Main Content Area with rounded corners and framing effect */}
-            <div className={`flex-1 ${isCourseSidebarVisible ? '' : 'pr-3'} pt-3 pb-3 overflow-x-hidden`}>
-              <main
-                className={`h-full flex flex-col rounded-2xl overflow-hidden bg-gradient-to-b from-[hsl(0,0%,96%)] to-[hsl(76,40%,94%)] dark:from-[hsl(0,0%,20%)] dark:to-[hsl(76,30%,15%)] ${!isDocked ? 'w-full' : ''}`}
-              >
+          {/* Main Content Area - MainHeader + Page Content */}
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* Main Header for Desktop */}
+            <MainHeader />
+
+            {/* Page Content with rounded corners and framing effect */}
+            <div className={`flex-1 flex min-h-0 relative ${isDocked ? 'gap-3' : ''}`}>
+              <div className={`flex-1 ${isCourseSidebarVisible ? '' : 'pr-3'} pt-3 pb-3 overflow-x-hidden`}>
+                <main
+                  className={`h-full flex flex-col rounded-2xl overflow-hidden bg-gradient-to-b from-[hsl(0,0%,96%)] to-[hsl(76,40%,94%)] dark:from-[hsl(0,0%,20%)] dark:to-[hsl(76,30%,15%)] ${!isDocked ? 'w-full' : ''}`}
+                >
                 {headerProps ? (
                   <PageLayout
                     icon={headerProps.icon}
@@ -203,7 +201,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                 </div>
               </div>
             )}
-
+          </div>
           </div>
         </div>
       )}
