@@ -4,6 +4,7 @@ export interface MovementRow {
   amount?: number;
   organization_id?: string;
   movement_date?: string;
+  description?: string;
   project_name?: string;
   currency_symbol?: string;
   currency_code?: string;
@@ -25,6 +26,7 @@ export interface MovementQueryOptions {
   includeProject?: boolean;
   includeCurrency?: boolean;
   includeWallet?: boolean;
+  includeDescription?: boolean;
   includeRoles?: {
     partner?: boolean;
     subcontract?: boolean;
@@ -78,6 +80,11 @@ export function getMovementSelectFields(options: MovementQueryOptions = {}): str
 
   // Movement date (muy común, incluir si no se especifica lo contrario)
   fields.push('movement_date');
+
+  // Description
+  if (options.includeDescription) {
+    fields.push('description');
+  }
 
   // Proyectos
   if (options.includeProject) {

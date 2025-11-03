@@ -28,10 +28,11 @@ export async function getContactMovements(
   
   try {
     // Usar query builder con campos específicos:
-    // Necesita: currencies (con exchange_rate), projects, type, TODOS los roles, movement_date
+    // Necesita: currencies (con exchange_rate), projects, type, description, TODOS los roles, movement_date
     let query = buildMovementQuery(supabase, {
       includeProject: true,
       includeCurrency: true,
+      includeDescription: true,
       includeConcepts: {
         type: true
       },
@@ -163,6 +164,36 @@ export async function getContactMovements(
         response += `\n\nPeríodo: **${formatDateRange(dateRange.start, dateRange.end)}**`;
       }
       
+      // Agregar detalle de movimientos individuales (máximo 15)
+      const maxDetails = 15;
+      const shouldShowDetails = filteredMovements.length <= maxDetails;
+      
+      if (shouldShowDetails && filteredMovements.length > 0) {
+        response += '\n\n**Detalle de movimientos:**\n';
+        
+        // Ordenar por fecha descendente (más recientes primero)
+        const sortedMovements = [...filteredMovements].sort((a, b) => {
+          const dateA = new Date(a.movement_date || 0);
+          const dateB = new Date(b.movement_date || 0);
+          return dateB.getTime() - dateA.getTime();
+        });
+        
+        for (const mov of sortedMovements) {
+          const date = mov.movement_date ? new Date(mov.movement_date).toLocaleDateString('es-AR') : 'Sin fecha';
+          const amount = Number(mov.amount || 0);
+          const fromRate = Number(mov.exchange_rate || 1);
+          const convertedAmount = convertCurrency(amount, fromRate, targetRate);
+          const amountFormatted = formatCurrency(convertedAmount, symbol, convertToUpper);
+          const description = mov.description || 'Sin descripción';
+          const type = mov.type_name || 'N/A';
+          const sign = type.toLowerCase() === 'ingreso' ? '+' : '-';
+          
+          response += `- **${date}**: ${sign}${amountFormatted} - ${description}\n`;
+        }
+      } else if (filteredMovements.length > maxDetails) {
+        response += `\n\n(${filteredMovements.length} movimientos en total - mostrando solo resumen)`;
+      }
+      
       return response;
     }
 
@@ -230,6 +261,36 @@ export async function getContactMovements(
     
     if (dateRange) {
       response += `\n\nPeríodo: **${formatDateRange(dateRange.start, dateRange.end)}**`;
+    }
+    
+    // Agregar detalle de movimientos individuales (máximo 15 para evitar saturación)
+    const maxDetails = 15;
+    const shouldShowDetails = filteredMovements.length <= maxDetails;
+    
+    if (shouldShowDetails && filteredMovements.length > 0) {
+      response += '\n\n**Detalle de movimientos:**\n';
+      
+      // Ordenar por fecha descendente (más recientes primero)
+      const sortedMovements = [...filteredMovements].sort((a, b) => {
+        const dateA = new Date(a.movement_date || 0);
+        const dateB = new Date(b.movement_date || 0);
+        return dateB.getTime() - dateA.getTime();
+      });
+      
+      for (const mov of sortedMovements) {
+        const date = mov.movement_date ? new Date(mov.movement_date).toLocaleDateString('es-AR') : 'Sin fecha';
+        const amount = Number(mov.amount || 0);
+        const movSymbol = mov.currency_symbol || '$';
+        const movCurrency = mov.currency_code || '';
+        const amountFormatted = formatCurrency(amount, movSymbol, movCurrency);
+        const description = mov.description || 'Sin descripción';
+        const type = mov.type_name || 'N/A';
+        const sign = type.toLowerCase() === 'ingreso' ? '+' : '-';
+        
+        response += `- **${date}**: ${sign}${amountFormatted} - ${description}\n`;
+      }
+    } else if (filteredMovements.length > maxDetails) {
+      response += `\n\n(${filteredMovements.length} movimientos en total - mostrando solo resumen)`;
     }
     
     return response;
