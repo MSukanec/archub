@@ -70,7 +70,7 @@ export function PersonnelFormModal({ data }: PersonnelFormModalProps) {
   };
 
   // Query para obtener personal ya asignado al proyecto
-  const { data: assignedPersonnel = [] } = useQuery({
+  const { data: assignedPersonnel = [], isLoading: isLoadingAssigned } = useQuery({
     queryKey: ['project-personnel', projectId],
     queryFn: async () => {
       if (!projectId || !supabase) return [];
@@ -83,7 +83,8 @@ export function PersonnelFormModal({ data }: PersonnelFormModalProps) {
       if (error) throw error;
       return data?.map(p => p.contact_id) || [];
     },
-    enabled: !!projectId && !!supabase
+    enabled: !!projectId && !!supabase,
+    staleTime: 0 // Siempre refrescar para obtener datos actualizados
   });
 
   // Filtrar contactos disponibles (no asignados) y ordenar alfabéticamente
@@ -168,8 +169,9 @@ export function PersonnelFormModal({ data }: PersonnelFormModalProps) {
 
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project-personnel'] });
+    onSuccess: async () => {
+      // Forzar refetch inmediato para actualizar la lista
+      await queryClient.refetchQueries({ queryKey: ['project-personnel'] });
       toast({
         title: 'Personal agregado',
         description: 'El personal ha sido asignado al proyecto correctamente'
@@ -222,7 +224,12 @@ export function PersonnelFormModal({ data }: PersonnelFormModalProps) {
 
                   {/* Lista de contactos */}
                   <div className="space-y-2">
-                    {(contacts as any[]).length === 0 ? (
+                    {isLoadingAssigned ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Users className="h-12 w-12 mx-auto mb-2 opacity-50 animate-pulse" />
+                        <p className="text-sm">Cargando contactos disponibles...</p>
+                      </div>
+                    ) : (contacts as any[]).length === 0 ? (
                       <div className="text-center py-8 text-muted-foreground space-y-4">
                         <UserPlus className="h-12 w-12 mx-auto opacity-50" />
                         <div className="space-y-2">

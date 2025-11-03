@@ -113,14 +113,30 @@ export default function PersonnelTab({
           contact:contacts(
             id,
             first_name,
-            last_name
+            last_name,
+            full_name
           )
         `)
         .eq('project_id', selectedProjectId)
-        .order('created_at', { ascending: false })
 
       if (error) throw error
-      return data
+      
+      // Ordenar alfabéticamente por nombre
+      const sorted = (data || []).sort((a: any, b: any) => {
+        const getDisplayName = (contact: any) => {
+          if (!contact) return 'Sin nombre'
+          if (contact.first_name || contact.last_name) {
+            return `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
+          }
+          return contact.full_name || 'Sin nombre'
+        }
+        
+        const nameA = getDisplayName(a.contact).toLowerCase()
+        const nameB = getDisplayName(b.contact).toLowerCase()
+        return nameA.localeCompare(nameB)
+      })
+      
+      return sorted
     },
     enabled: !!selectedProjectId
   })
@@ -154,23 +170,42 @@ export default function PersonnelTab({
       columns={[
         {
           key: "contact",
-          label: "Personal",
+          label: "Nombre",
           width: "30%",
           render: (record: any) => {
             const contact = record.contact
             if (!contact) {
               return <span className="text-muted-foreground">Sin datos</span>
             }
+            
+            // Lógica de nombre display consistente con PersonnelFormModal
+            const displayName = (contact.first_name || contact.last_name) 
+              ? `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
+              : contact.full_name || 'Sin nombre'
+            
+            // Iniciales
+            let initials = '?'
+            if (contact.first_name || contact.last_name) {
+              initials = `${contact.first_name?.charAt(0) || ''}${contact.last_name?.charAt(0) || ''}`.toUpperCase()
+            } else if (contact.full_name) {
+              const parts = contact.full_name.trim().split(' ')
+              if (parts.length >= 2) {
+                initials = `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
+              } else {
+                initials = contact.full_name[0]?.toUpperCase() || '?'
+              }
+            }
+            
             return (
               <div className="flex items-center gap-3">
                 <Avatar className="h-8 w-8">
                   <AvatarFallback className="text-xs">
-                    {contact.first_name?.charAt(0) || ''}{contact.last_name?.charAt(0) || ''}
+                    {initials}
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <p className="font-medium">
-                    {contact.first_name || ''} {contact.last_name || ''}
+                    {displayName}
                   </p>
                 </div>
               </div>
