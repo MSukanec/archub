@@ -119,6 +119,9 @@ interface PageLayoutProps {
   title?: string;
   description?: string;
   
+  // Selector de proyecto/organización
+  selector?: React.ReactNode;
+  
   // Sistema de tabs
   tabs?: Tab[];
   onTabChange?: (tabId: string) => void;
@@ -175,6 +178,7 @@ export function PageLayout({
   icon,
   title,
   description,
+  selector,
   tabs = [],
   onTabChange,
   showHeaderSearch = false,
@@ -216,6 +220,19 @@ export function PageLayout({
   };
 
   const hasTabs = tabs.length > 0;
+  
+  // Determinar si hay botones de acción para mostrar en la segunda fila
+  const hasActionButtons = 
+    showHeaderSearch || 
+    showCurrencySelector || 
+    showHeaderFilter || 
+    showHeaderClearFilters || 
+    actionButton?.additionalButton || 
+    actions.length > 0 || 
+    actionButton;
+  
+  // Mostrar segunda fila si hay tabs O botones de acción
+  const showSecondRow = hasTabs || hasActionButtons;
 
   // Actualizar posición del subrayado animado
   useEffect(() => {
@@ -267,8 +284,8 @@ export function PageLayout({
           <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-3 ${
             isDocked ? 'px-16' : 'px-16'
           }`}>
-          {/* FILA SUPERIOR: Icono + Título + Descripción a la izquierda + Botones de acción a la derecha */}
-          <div className={`min-h-[50px] flex items-center justify-between ${!hasTabs ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
+          {/* FILA 1: Icono + Título + Descripción a la izquierda + Selector a la derecha */}
+          <div className={`min-h-[50px] flex items-center justify-between ${!showSecondRow ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
           {/* Left: Icon + Title + Description */}
           <div className="flex items-center gap-4 py-2">
             {showBackButton && (
@@ -322,273 +339,285 @@ export function PageLayout({
             </div>
           </div>
 
-          {/* Right: Header Action Buttons + Main Action Buttons */}
-          <div className="flex items-center gap-1">
-            {/* Header Search Button (expandible) */}
-            {showHeaderSearch && (
-              <div 
-                className="relative flex items-center"
-                onMouseLeave={() => {
-                  if (isSearchExpanded && !searchFocused) {
-                    setIsSearchExpanded(false);
-                    setSearchFocused(false);
-                  }
-                }}
-              >
-                <div className={`
-                  transition-all duration-300 overflow-hidden
-                  ${isSearchExpanded ? "w-48 opacity-100" : "w-8 opacity-100"}
-                `}>
-                  <div className={`
-                    relative flex items-center h-8 border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] transition-all
-                    ${isSearchExpanded ? "bg-[var(--card-bg)]" : "bg-transparent border-transparent"}
-                  `}>
-                    <Input
-                      placeholder="Buscar..."
-                      value={searchInputValue}
-                      onChange={(e) => handleHeaderSearchChange(e.target.value)}
-                      onFocus={() => setSearchFocused(true)}
-                      onBlur={() => {
-                        setSearchFocused(false);
-                        setTimeout(() => {
-                          if (!searchFocused) {
-                            setIsSearchExpanded(false);
-                          }
-                        }, 150);
-                      }}
-                      className={`
-                        flex-1 h-full text-xs border-0 bg-transparent font-normal
-                        placeholder:text-[var(--muted-foreground)]
-                        focus:ring-0 focus:outline-none
-                        ${isSearchExpanded ? "pl-3 pr-10" : "pl-0 pr-0 opacity-0"}
-                      `}
-                      autoFocus={isSearchExpanded}
-                    />
-                    
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="hover:bg-transparent flex-shrink-0"
-                      onClick={() => {
-                        setIsSearchExpanded(!isSearchExpanded);
-                        if (!isSearchExpanded) {
-                          setTimeout(() => setSearchFocused(true), 100);
+          {/* Right: Selector */}
+          {selector && (
+            <div className="flex items-center">
+              {selector}
+            </div>
+          )}
+        </div>
+
+          {/* FILA 2: Tabs a la izquierda + Botones de acción a la derecha */}
+          {showSecondRow && (
+            <div className="h-8 flex items-center justify-between border-b border-border relative overflow-hidden">
+              {/* Left: Tabs */}
+              {hasTabs && (
+                <div ref={tabsContainerRef} className="flex items-center relative" style={{ gap: '24px' }}>
+                  {tabs.map((tab) => {
+                    const tabContent = (
+                      <button
+                        key={tab.id}
+                        data-tab-id={tab.id}
+                        onClick={() =>
+                          tab.isDisabled || tab.isRestricted
+                            ? undefined
+                            : onTabChange?.(tab.id)
+                        }
+                        disabled={tab.isDisabled}
+                        className={`relative text-sm flex items-center gap-2 px-1 h-8 flex-shrink-0 min-w-0 ${
+                          tab.isDisabled || tab.isRestricted
+                            ? "text-muted-foreground opacity-60 cursor-not-allowed"
+                            : tab.isActive
+                              ? "text-foreground font-medium"
+                              : "text-muted-foreground"
+                        }`}
+                        style={{ 
+                          transition: 'none',
+                          transform: 'translateZ(0)',
+                          willChange: 'auto'
+                        }}
+                      >
+                        {tab.label}
+                        {tab.badge && (
+                          <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
+                            {tab.badge}
+                          </span>
+                        )}
+                      </button>
+                    );
+
+                    // Si la tab está restringida, envolverla con PlanRestricted
+                    if (tab.isRestricted && tab.restrictionReason) {
+                      return (
+                        <PlanRestricted key={tab.id} feature={tab.restrictionReason}>
+                          {tabContent}
+                        </PlanRestricted>
+                      );
+                    }
+
+                    return tabContent;
+                  })}
+                  
+                  {/* Subrayado animado dinámico */}
+                  <div
+                    className="absolute bottom-0 h-[2px] bg-[var(--accent)] transition-all duration-300 ease-out pointer-events-none"
+                    style={{
+                      width: `${underlineStyle.width}px`,
+                      transform: `translateX(${underlineStyle.left}px)`,
+                      opacity: underlineStyle.width > 0 ? 1 : 0,
+                      left: 0
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Right: Action Buttons */}
+              {hasActionButtons && (
+                <div className="flex items-center gap-1">
+                  {/* Header Search Button (expandible) */}
+                  {showHeaderSearch && (
+                    <div 
+                      className="relative flex items-center"
+                      onMouseLeave={() => {
+                        if (isSearchExpanded && !searchFocused) {
+                          setIsSearchExpanded(false);
+                          setSearchFocused(false);
                         }
                       }}
                     >
-                      <Search className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
+                      <div className={`
+                        transition-all duration-300 overflow-hidden
+                        ${isSearchExpanded ? "w-48 opacity-100" : "w-8 opacity-100"}
+                      `}>
+                        <div className={`
+                          relative flex items-center h-8 border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] transition-all
+                          ${isSearchExpanded ? "bg-[var(--card-bg)]" : "bg-transparent border-transparent"}
+                        `}>
+                          <Input
+                            placeholder="Buscar..."
+                            value={searchInputValue}
+                            onChange={(e) => handleHeaderSearchChange(e.target.value)}
+                            onFocus={() => setSearchFocused(true)}
+                            onBlur={() => {
+                              setSearchFocused(false);
+                              setTimeout(() => {
+                                if (!searchFocused) {
+                                  setIsSearchExpanded(false);
+                                }
+                              }, 150);
+                            }}
+                            className={`
+                              flex-1 h-full text-xs border-0 bg-transparent font-normal
+                              placeholder:text-[var(--muted-foreground)]
+                              focus:ring-0 focus:outline-none
+                              ${isSearchExpanded ? "pl-3 pr-10" : "pl-0 pr-0 opacity-0"}
+                            `}
+                            autoFocus={isSearchExpanded}
+                          />
+                          
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="hover:bg-transparent flex-shrink-0"
+                            onClick={() => {
+                              setIsSearchExpanded(!isSearchExpanded);
+                              if (!isSearchExpanded) {
+                                setTimeout(() => setSearchFocused(true), 100);
+                              }
+                            }}
+                          >
+                            <Search className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
-            {/* Currency Selector */}
-            {showCurrencySelector && onCurrencyViewChange && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className=""
-                    title="Vista de moneda"
-                  >
-                    <DollarSign className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-40" align="end">
-                  <div className="space-y-1">
+                  {/* Currency Selector */}
+                  {showCurrencySelector && onCurrencyViewChange && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className=""
+                          title="Vista de moneda"
+                        >
+                          <DollarSign className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-40" align="end">
+                        <div className="space-y-1">
+                          <Button
+                            variant={currencyView === 'discriminado' ? 'default' : 'ghost'}
+                            size="sm"
+                            className="w-full justify-start h-8"
+                            onClick={() => onCurrencyViewChange('discriminado')}
+                          >
+                            Discriminado
+                          </Button>
+                          <Button
+                            variant={currencyView === 'pesificado' ? 'default' : 'ghost'}
+                            size="sm"
+                            className="w-full justify-start h-8"
+                            onClick={() => onCurrencyViewChange('pesificado')}
+                          >
+                            Pesificado
+                          </Button>
+                          <Button
+                            variant={currencyView === 'dolarizado' ? 'default' : 'ghost'}
+                            size="sm"
+                            className="w-full justify-start h-8"
+                            onClick={() => onCurrencyViewChange('dolarizado')}
+                          >
+                            Dolarizado
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+
+                  {/* Header Filter Button */}
+                  {showHeaderFilter && renderHeaderFilterContent && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className={`${isHeaderFilterActive ? "button-secondary-pressed" : ""}`}
+                        >
+                          <Filter className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-56" align="end">
+                        {renderHeaderFilterContent()}
+                      </PopoverContent>
+                    </Popover>
+                  )}
+
+                  {/* Header Clear Filters Button */}
+                  {showHeaderClearFilters && (
                     <Button
-                      variant={currencyView === 'discriminado' ? 'default' : 'ghost'}
+                      variant="ghost"
                       size="sm"
-                      className="w-full justify-start h-8"
-                      onClick={() => onCurrencyViewChange('discriminado')}
+                      className=""
+                      onClick={onHeaderClearFilters}
+                      title="Limpiar filtros"
                     >
-                      Discriminado
+                      <X className="h-4 w-4" />
                     </Button>
+                  )}
+
+                  {/* Separator if there are header actions and main action buttons */}
+                  {(showCurrencySelector || showHeaderSearch || showHeaderFilter || showHeaderClearFilters) && (actionButton?.additionalButton || actionButton || actions.length > 0) && (
+                    <div className="w-px h-6 bg-[var(--card-border)] mx-1" />
+                  )}
+
+                  {/* Additional Button (appears first/left) */}
+                  {actionButton?.additionalButton && (
                     <Button
-                      variant={currencyView === 'pesificado' ? 'default' : 'ghost'}
+                      variant={actionButton.additionalButton.variant || "ghost"}
                       size="sm"
-                      className="w-full justify-start h-8"
-                      onClick={() => onCurrencyViewChange('pesificado')}
+                      onClick={actionButton.additionalButton.onClick}
+                      className="h-8 px-3 text-xs font-normal"
                     >
-                      Pesificado
-                    </Button>
-                    <Button
-                      variant={currencyView === 'dolarizado' ? 'default' : 'ghost'}
-                      size="sm"
-                      className="w-full justify-start h-8"
-                      onClick={() => onCurrencyViewChange('dolarizado')}
-                    >
-                      Dolarizado
-                    </Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            )}
-
-            {/* Header Filter Button */}
-            {showHeaderFilter && renderHeaderFilterContent && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    className={`${isHeaderFilterActive ? "button-secondary-pressed" : ""}`}
-                  >
-                    <Filter className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-56" align="end">
-                  {renderHeaderFilterContent()}
-                </PopoverContent>
-              </Popover>
-            )}
-
-            {/* Header Clear Filters Button */}
-            {showHeaderClearFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className=""
-                onClick={onHeaderClearFilters}
-                title="Limpiar filtros"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-
-            {/* Separator if there are header actions and main action buttons */}
-            {(showCurrencySelector || showHeaderSearch || showHeaderFilter || showHeaderClearFilters) && (actionButton?.additionalButton || actionButton || actions.length > 0) && (
-              <div className="w-px h-6 bg-[var(--card-border)] mx-1" />
-            )}
-
-            {/* Additional Button (appears first/left) */}
-            {actionButton?.additionalButton && (
-              <Button
-                variant={actionButton.additionalButton.variant || "ghost"}
-                size="sm"
-                onClick={actionButton.additionalButton.onClick}
-                className="h-8 px-3 text-xs font-normal"
-              >
-                {actionButton.additionalButton.icon && (
-                  <actionButton.additionalButton.icon className="w-4 h-4 mr-1" />
-                )}
-                {actionButton.additionalButton.label}
-              </Button>
-            )}
-
-            {/* Custom Actions (like PlanRestricted) */}
-            {actions.map((action, index) => (
-              <div key={index}>
-                {action}
-              </div>
-            ))}
-
-            {/* Main Action Button */}
-            {actionButton && (
-              <>
-                {actionButton.dropdown ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="default"
-                        size="sm"
-                        className="h-8 px-3 text-xs font-normal"
-                      >
-                        {actionButton.icon && (
-                          <actionButton.icon className="w-4 h-4 mr-1" />
-                        )}
-                        {actionButton.label}
-                        <ChevronDown className="w-3 h-3 ml-1" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {actionButton.dropdown.map((item, index) => (
-                        <DropdownMenuItem key={index} onClick={item.onClick}>
-                          {item.label}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={actionButton.onClick}
-                    className="h-8 px-3 text-xs font-normal"
-                  >
-                    {actionButton.icon && (
-                      <actionButton.icon className="w-4 h-4 mr-1" />
-                    )}
-                    {actionButton.label}
-                  </Button>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-
-          {/* FILA INFERIOR: Tabs a la izquierda */}
-          {hasTabs && (
-            <div className="h-8 flex items-center border-b border-border relative overflow-hidden">
-              <div ref={tabsContainerRef} className="flex items-center relative w-full" style={{ gap: '24px' }}>
-                {tabs.map((tab) => {
-                  const tabContent = (
-                    <button
-                      key={tab.id}
-                      data-tab-id={tab.id}
-                      onClick={() =>
-                        tab.isDisabled || tab.isRestricted
-                          ? undefined
-                          : onTabChange?.(tab.id)
-                      }
-                      disabled={tab.isDisabled}
-                      className={`relative text-sm flex items-center gap-2 px-1 h-8 flex-shrink-0 min-w-0 ${
-                        tab.isDisabled || tab.isRestricted
-                          ? "text-muted-foreground opacity-60 cursor-not-allowed"
-                          : tab.isActive
-                            ? "text-foreground font-medium"
-                            : "text-muted-foreground"
-                      }`}
-                      style={{ 
-                        transition: 'none',
-                        transform: 'translateZ(0)',
-                        willChange: 'auto'
-                      }}
-                    >
-                      {tab.label}
-                      {tab.badge && (
-                        <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
-                          {tab.badge}
-                        </span>
+                      {actionButton.additionalButton.icon && (
+                        <actionButton.additionalButton.icon className="w-4 h-4 mr-1" />
                       )}
-                    </button>
-                  );
+                      {actionButton.additionalButton.label}
+                    </Button>
+                  )}
 
-                  // Si la tab está restringida, envolverla con PlanRestricted
-                  if (tab.isRestricted && tab.restrictionReason) {
-                    return (
-                      <PlanRestricted key={tab.id} feature={tab.restrictionReason}>
-                        {tabContent}
-                      </PlanRestricted>
-                    );
-                  }
+                  {/* Custom Actions (like PlanRestricted) */}
+                  {actions.map((action, index) => (
+                    <div key={index}>
+                      {action}
+                    </div>
+                  ))}
 
-                  return tabContent;
-                })}
-                
-                {/* Subrayado animado dinámico */}
-                <div
-                  className="absolute bottom-0 h-[2px] bg-[var(--accent)] transition-all duration-300 ease-out pointer-events-none"
-                  style={{
-                    width: `${underlineStyle.width}px`,
-                    transform: `translateX(${underlineStyle.left}px)`,
-                    opacity: underlineStyle.width > 0 ? 1 : 0,
-                    left: 0
-                  }}
-                />
-              </div>
+                  {/* Main Action Button */}
+                  {actionButton && (
+                    <>
+                      {actionButton.dropdown ? (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="default"
+                              size="sm"
+                              className="h-8 px-3 text-xs font-normal"
+                            >
+                              {actionButton.icon && (
+                                <actionButton.icon className="w-4 h-4 mr-1" />
+                              )}
+                              {actionButton.label}
+                              <ChevronDown className="w-3 h-3 ml-1" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {actionButton.dropdown.map((item, index) => (
+                              <DropdownMenuItem key={index} onClick={item.onClick}>
+                                {item.label}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      ) : (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={actionButton.onClick}
+                          className="h-8 px-3 text-xs font-normal"
+                        >
+                          {actionButton.icon && (
+                            <actionButton.icon className="w-4 h-4 mr-1" />
+                          )}
+                          {actionButton.label}
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           )}
           </div>
