@@ -1,0 +1,90 @@
+/**
+ * Convierte un color hexadecimal a RGB
+ * @param hex - Color en formato hex (#RRGGBB o #RGB)
+ * @returns Objeto con valores r, g, b (0-255)
+ */
+export function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  // Remover el # si existe
+  const cleanHex = hex.replace('#', '');
+  
+  // Validar formato
+  if (!/^[0-9A-Fa-f]{6}$/.test(cleanHex) && !/^[0-9A-Fa-f]{3}$/.test(cleanHex)) {
+    return null;
+  }
+  
+  // Expandir formato corto (#RGB → #RRGGBB)
+  const fullHex = cleanHex.length === 3
+    ? cleanHex.split('').map(char => char + char).join('')
+    : cleanHex;
+  
+  const r = parseInt(fullHex.substring(0, 2), 16);
+  const g = parseInt(fullHex.substring(2, 4), 16);
+  const b = parseInt(fullHex.substring(4, 6), 16);
+  
+  return { r, g, b };
+}
+
+/**
+ * Convierte RGB a HSL
+ * @param r - Rojo (0-255)
+ * @param g - Verde (0-255)
+ * @param b - Azul (0-255)
+ * @returns Objeto con valores h (0-360), s (0-100), l (0-100)
+ */
+export function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: number } {
+  r /= 255;
+  g /= 255;
+  b /= 255;
+  
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+  
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    
+    switch (max) {
+      case r:
+        h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+        break;
+      case g:
+        h = ((b - r) / d + 2) / 6;
+        break;
+      case b:
+        h = ((r - g) / d + 4) / 6;
+        break;
+    }
+  }
+  
+  return {
+    h: Math.round(h * 360),
+    s: Math.round(s * 100),
+    l: Math.round(l * 100)
+  };
+}
+
+/**
+ * Convierte un color hexadecimal a HSL
+ * @param hex - Color en formato hex (#RRGGBB o #RGB)
+ * @returns Objeto con valores h (0-360), s (0-100), l (0-100) o null si el formato es inválido
+ */
+export function hexToHsl(hex: string): { h: number; s: number; l: number } | null {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return null;
+  
+  return rgbToHsl(rgb.r, rgb.g, rgb.b);
+}
+
+/**
+ * Formatea HSL para uso en CSS custom properties
+ * @param h - Hue (0-360)
+ * @param s - Saturation (0-100)
+ * @param l - Lightness (0-100)
+ * @returns String en formato "H S% L%"
+ */
+export function formatHslForCss(h: number, s: number, l: number): string {
+  return `${h} ${s}% ${l}%`;
+}

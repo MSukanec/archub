@@ -22,6 +22,7 @@ import { HeaderMobile } from "@/components/layout/mobile/HeaderMobile";
 import { CourseSidebar } from "@/components/layout/CourseSidebar";
 import { ProjectSelectorButton } from "./ProjectSelectorButton";
 import { OrganizationSelectorButton } from "./OrganizationSelectorButton";
+import { useProjectAccentColor } from "@/hooks/use-project-accent-color";
 
 interface Tab {
   id: string;
@@ -83,6 +84,9 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { isDocked, isHovered } = useSidebarStore();
   const { sidebarLevel } = useNavigationStore();
   const { isVisible: isCourseSidebarVisible, modules, lessons, currentLessonId } = useCourseSidebarStore();
+
+  // Hook para color dinámico del accent basado en el proyecto activo
+  useProjectAccentColor();
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
