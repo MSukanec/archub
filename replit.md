@@ -18,6 +18,7 @@ Preferred communication style: Simple, everyday language.
 - **Checkout UX**: Replaced billing info Accordion with Switch control for improved user experience.
 - **Home Page UX Flow**: Minimalist AI copilot interface with session-based conversation state. The top area is "where the AI speaks" and shows either greeting OR last response (never both). Fresh load/navigation: Saludo (large text) → Input → Sugerencias. During active session: Última respuesta IA (smaller text) → Input → Toggle historial → (Sugerencias hidden). Returning from another page resets to greeting. "Ver historial completo" toggle reveals full message history (newest first) below input. Uses `hasActiveConversation` local state flag to distinguish active session messages from loaded history.
 - **AI Disclaimer**: Added user-friendly disclaimer "Archub puede cometer errores. Comprueba la información importante" to Home page for AI response transparency.
+- **PageLayout Header Typography**: Page descriptions use `text-xs` sizing (smaller than tabs) to maintain clear visual hierarchy and prevent confusion with tab navigation.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui, Tailwind CSS, Zustand, Wouter, TanStack Query.
@@ -63,6 +64,7 @@ Preferred communication style: Simple, everyday language.
 - **Personnel Module Organization**: Reorganized from monolithic `ConstructionPersonnel.tsx` to modular structure in `src/pages/professional/personnel/` with separated tab components (Personnel.tsx, PersonnelListTab.tsx, PersonnelAttendanceTab.tsx) following established tab separation pattern for improved code maintainability.
 - **Personnel Assignment Modal Optimization**: Enhanced `PersonnelFormModal.tsx` with real-time search filtering, optimized loading (filters out already assigned personnel), proper avatar display using `avatar_attachment_id` + `contact_attachments`, and corrected name display logic (uses `full_name` when `first_name`/`last_name` unavailable, never shows email as primary name).
 - **Database Table Updates**: Renamed `attendees` table to `personnel_attendees` across all codebase references for consistency with personnel management architecture.
+- **Personnel List Alphabetical Sorting**: Guaranteed alphabetical order through query-level sorting (computed `displayName` field with `localeCompare`) + all Table columns marked `sortable: false` to prevent client-side re-ordering. Eliminates Table's internal sort state to preserve Supabase-provided order.
 
 ## External Dependencies
 - **Supabase**: Authentication.
