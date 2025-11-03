@@ -267,7 +267,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
 
 
   return (
-    <div className="relative border border-border rounded-lg overflow-x-hidden bg-card w-full">
+    <div className="relative border border-border rounded-lg overflow-hidden bg-card w-full">
       {/* Header with title and export */}
       <div className="flex items-center justify-between p-4 border-b border-[var(--table-header-border)] bg-[var(--table-header-bg)] flex-wrap gap-2">
         <div className="min-w-0">
@@ -326,7 +326,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
 
         {/* Timeline Header - Days */}
         <div 
-          className="flex-1 min-w-0 overflow-x-auto" 
+          className="flex-1 overflow-x-auto" 
           id="timeline-header-scroll"
           style={{
             scrollbarWidth: 'none',
@@ -433,7 +433,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
         {/* Timeline Content with synchronized scrolling */}
         <div 
           ref={setTimelineElement}
-          className="flex-1 min-w-0 overflow-x-auto gantt-timeline-scroll relative" 
+          className="flex-1 overflow-x-scroll gantt-timeline-scroll relative" 
           id="timeline-content-scroll"
           style={{
             scrollbarWidth: 'auto',
