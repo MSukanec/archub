@@ -96,7 +96,7 @@ function transformPersonnelAndAttendance(personnelData: any[], attendanceData: a
     return contact.full_name || 'Sin nombre'
   }
 
-  // Filtrar con la misma lógica que PersonnelListTab
+  // Filtrar con LA MISMA lógica que PersonnelListTab
   let filteredPersonnel = personnelData
   if (filterStatus === 'active') {
     filteredPersonnel = personnelData.filter(p => {
