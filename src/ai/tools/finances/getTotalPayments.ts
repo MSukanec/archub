@@ -23,7 +23,7 @@ export async function getTotalPaymentsByContactAndProject(
     // para evitar problemas con caracteres especiales en el nombre
     const { data: movements, error } = await supabase
       .from('movements_view')
-      .select('amount, currency_symbol, currency_code, project_name, partner, subcontract, personnel, client, member')
+      .select('amount, currency_symbol, currency_code, project_name, partner, subcontract, subcontract_contact, personnel, client, member')
       .eq('organization_id', organizationId)
       .ilike('project_name', `%${projectName}%`);
 
@@ -42,7 +42,8 @@ export async function getTotalPaymentsByContactAndProject(
     const filteredMovements = movements.filter(m => {
       // Normalizar cada valor a string vacío si es null/undefined antes de comparar
       const partner = (m.partner ?? '').toLowerCase();
-      const subcontract = (m.subcontract ?? '').toLowerCase();
+      const subcontract = (m.subcontract ?? '').toLowerCase(); // Nombre del subcontrato
+      const subcontractContact = (m.subcontract_contact ?? '').toLowerCase(); // Nombre del subcontratista
       const personnel = (m.personnel ?? '').toLowerCase();
       const client = (m.client ?? '').toLowerCase();
       const member = (m.member ?? '').toLowerCase();
@@ -50,6 +51,7 @@ export async function getTotalPaymentsByContactAndProject(
       return (
         partner.includes(contactNameLower) ||
         subcontract.includes(contactNameLower) ||
+        subcontractContact.includes(contactNameLower) ||
         personnel.includes(contactNameLower) ||
         client.includes(contactNameLower) ||
         member.includes(contactNameLower)
@@ -81,8 +83,10 @@ export async function getTotalPaymentsByContactAndProject(
     const actualProjectName = firstMovement.project_name || projectName;
     
     // Determinar el nombre exacto del contacto (cuál columna matcheó)
+    // Priorizar el nombre del contacto (subcontract_contact) sobre el nombre del subcontrato
     const matchedName = 
       (firstMovement.partner ?? '').toLowerCase().includes(contactNameLower) ? firstMovement.partner :
+      (firstMovement.subcontract_contact ?? '').toLowerCase().includes(contactNameLower) ? firstMovement.subcontract_contact :
       (firstMovement.subcontract ?? '').toLowerCase().includes(contactNameLower) ? firstMovement.subcontract :
       (firstMovement.personnel ?? '').toLowerCase().includes(contactNameLower) ? firstMovement.personnel :
       (firstMovement.client ?? '').toLowerCase().includes(contactNameLower) ? firstMovement.client :

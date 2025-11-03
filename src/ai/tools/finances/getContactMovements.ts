@@ -29,7 +29,7 @@ export async function getContactMovements(
     // Query base: obtener movimientos por organization_id
     let query = supabase
       .from('movements_view')
-      .select('amount, type_name, currency_symbol, currency_code, exchange_rate, movement_date, project_name, partner, subcontract, personnel, client, member');
+      .select('amount, type_name, currency_symbol, currency_code, exchange_rate, movement_date, project_name, partner, subcontract, subcontract_contact, personnel, client, member');
 
     query = query.eq('organization_id', organizationId);
 
@@ -67,7 +67,8 @@ export async function getContactMovements(
     const contactNameLower = contactName.toLowerCase();
     const filteredMovements = movements.filter(m => {
       const partner = (m.partner ?? '').toLowerCase();
-      const subcontract = (m.subcontract ?? '').toLowerCase();
+      const subcontract = (m.subcontract ?? '').toLowerCase(); // Nombre del subcontrato
+      const subcontractContact = (m.subcontract_contact ?? '').toLowerCase(); // Nombre del subcontratista
       const personnel = (m.personnel ?? '').toLowerCase();
       const client = (m.client ?? '').toLowerCase();
       const member = (m.member ?? '').toLowerCase();
@@ -75,6 +76,7 @@ export async function getContactMovements(
       return (
         partner.includes(contactNameLower) ||
         subcontract.includes(contactNameLower) ||
+        subcontractContact.includes(contactNameLower) ||
         personnel.includes(contactNameLower) ||
         client.includes(contactNameLower) ||
         member.includes(contactNameLower)

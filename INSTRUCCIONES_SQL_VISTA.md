@@ -1,3 +1,21 @@
+# Instrucciones para actualizar la vista movements_view
+
+## ⚠️ IMPORTANTE
+Esta actualización es **necesaria** para que la IA pueda distinguir entre el nombre del **subcontrato** y el nombre del **subcontratista** (contacto).
+
+## ¿Qué hace este cambio?
+Agrega un nuevo campo `subcontract_contact` a la vista `movements_view` que contiene el nombre del subcontratista (contacto), diferenciándolo del nombre del subcontrato (`subcontract`).
+
+## Cómo ejecutar la actualización
+
+### Opción 1: Desde Supabase Dashboard (Recomendado)
+
+1. Ve a tu proyecto en Supabase
+2. En el menú lateral, haz click en **SQL Editor**
+3. Crea una nueva query
+4. Copia y pega el siguiente código SQL:
+
+```sql
 drop view if exists public.movements_view;
 
 create or replace view public.movements_view as
@@ -127,3 +145,36 @@ left join public.movement_general_costs mgc
   on mgc.movement_id = m.id
 left join public.general_costs gc
   on gc.id = mgc.general_cost_id;
+```
+
+5. Haz click en **Run** (o presiona `Ctrl + Enter`)
+6. Verifica que se ejecute sin errores
+
+### Opción 2: Desde psql o cualquier cliente de PostgreSQL
+
+Copia el mismo SQL de arriba y ejecútalo en tu cliente SQL preferido.
+
+## ✅ Verificación
+
+Para verificar que la vista se actualizó correctamente, ejecuta:
+
+```sql
+SELECT column_name 
+FROM information_schema.columns 
+WHERE table_name = 'movements_view' 
+  AND column_name = 'subcontract_contact';
+```
+
+Deberías ver una fila con `column_name = subcontract_contact`.
+
+## Resultado
+
+Después de ejecutar esta actualización, la IA podrá responder correctamente a preguntas como:
+
+- ✅ "¿Cuánto le pagué a ALEJANDRO SABATINO este mes?" (busca por nombre del subcontratista)
+- ✅ "Muéstrame los gastos del subcontrato de Instalación Eléctrica" (busca por nombre del subcontrato)
+- ✅ "Dame los movimientos de ALEJANDRO SABATINO en el proyecto Casa Verde" (busca por ambos)
+
+---
+
+**Nota:** Este cambio **NO afecta datos existentes**, solo agrega una nueva columna a la vista para mejorar las búsquedas.
