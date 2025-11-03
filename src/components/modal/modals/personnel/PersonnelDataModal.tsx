@@ -353,12 +353,19 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
     />
   )
 
+  const handleSaveClick = () => {
+    console.log('🔘 Botón Guardar presionado')
+    console.log('📋 Form errors:', form.formState.errors)
+    console.log('📋 Form values:', form.getValues())
+    form.handleSubmit(handleSubmit)()
+  }
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
       rightLabel="Guardar Cambios"
-      onRightClick={form.handleSubmit(handleSubmit)}
+      onRightClick={handleSaveClick}
       submitDisabled={isLoading}
       showLoadingSpinner={isLoading}
     />
