@@ -470,8 +470,9 @@ export function Sidebar() {
                 "flex flex-col gap-[2px]",
                 isExpanded ? "px-[9px]" : "items-center"
               )}>
-                {/* Logo - presente en TODOS los sidebars */}
-                <div className="h-16 flex items-center justify-center mb-2">
+                {/* LOGO Y SELECTORES COMENTADOS PARA PRUEBA */}
+                {/* {/* Logo - presente en TODOS los sidebars */}
+                {/* <div className="h-16 flex items-center justify-center mb-2">
                   <button
                     onClick={() => {
                       setSidebarLevel('general');
@@ -488,10 +489,10 @@ export function Sidebar() {
                       )}
                     />
                   </button>
-                </div>
+                </div> */}
 
-                {/* Selector de Organización - solo en sidebar de organización */}
-                {sidebarLevel === 'organization' && (
+                {/* {/* Selector de Organización - solo en sidebar de organización */}
+                {/* {sidebarLevel === 'organization' && (
                   <div className="h-16 flex items-center justify-center mb-2">
                     <Popover>
                       <PopoverTrigger asChild>
@@ -502,14 +503,14 @@ export function Sidebar() {
                           )}
                         >
                           {/* Icono siempre centrado */}
-                          <div className="flex items-center justify-center w-8 flex-shrink-0">
+                          {/* <div className="flex items-center justify-center w-8 flex-shrink-0">
                             <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
                               <Building className="h-4 w-4" style={{ color: 'var(--accent)' }} />
                             </div>
-                          </div>
+                          </div> */}
                           
                           {/* Texto que aparece cuando se expande */}
-                          {isExpanded && (
+                          {/* {isExpanded && (
                             <div className="flex flex-1 items-center justify-between overflow-hidden min-w-0 ml-3">
                               <div className="flex flex-col justify-center overflow-hidden min-w-0">
                                 <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
@@ -561,10 +562,10 @@ export function Sidebar() {
                       </PopoverContent>
                     </Popover>
                   </div>
-                )}
+                )} */}
                 
-                {/* Selector de Proyecto - solo en sidebar de proyecto */}
-                {sidebarLevel === 'project' && (
+                {/* {/* Selector de Proyecto - solo en sidebar de proyecto */}
+                {/* {sidebarLevel === 'project' && (
                   <div className="h-16 flex items-center justify-center mb-2">
                     <Popover>
                       <PopoverTrigger asChild>
@@ -575,14 +576,14 @@ export function Sidebar() {
                           )}
                         >
                           {/* Icono siempre centrado */}
-                          <div className="flex items-center justify-center w-8 flex-shrink-0">
+                          {/* <div className="flex items-center justify-center w-8 flex-shrink-0">
                             <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
                               <FolderOpen className="h-4 w-4" style={{ color: 'var(--accent)' }} />
                             </div>
-                          </div>
+                          </div> */}
                           
                           {/* Texto que aparece cuando se expande */}
-                          {isExpanded && (
+                          {/* {isExpanded && (
                             <div className="flex flex-1 items-center justify-between overflow-hidden min-w-0 ml-3">
                               <div className="flex flex-col justify-center overflow-hidden min-w-0">
                                 <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
@@ -630,7 +631,7 @@ export function Sidebar() {
                       </PopoverContent>
                     </Popover>
                   </div>
-                )}
+                )} */}
                 
                 {navigationItems.map((item, index) => {
                 if (item.adminOnly && !isAdmin) return null;
