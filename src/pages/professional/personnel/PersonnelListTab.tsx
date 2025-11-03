@@ -129,6 +129,7 @@ export default function PersonnelListTab({
         `)
         .eq('project_id', selectedProjectId)
 
+      console.log('🔍 RAW PERSONNEL DATA:', JSON.stringify(data, null, 2))
       if (error) throw error
       
       // Helper para obtener nombre
