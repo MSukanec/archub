@@ -176,12 +176,16 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
       
       const { data: cachedGreeting } = await authenticatedSupabase
         .from('ia_user_greetings')
-        .select('greeting')
+        .select('greeting, created_at')
         .eq('user_id', userId)
         .eq('period', currentPeriod)
         .maybeSingle();
       
-      let greetingText: string | null = cachedGreeting?.greeting || null;
+      // Verificar que el caché sea de hoy (comparar solo fecha, no hora)
+      const isCacheValid = cachedGreeting && 
+        new Date(cachedGreeting.created_at).toDateString() === new Date().toDateString();
+      
+      let greetingText: string | null = isCacheValid ? cachedGreeting.greeting : null;
       let shouldGenerateWithGPT = !greetingText;
 
       // Si NO hay caché, verificar límites de uso
