@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button"
 import { format } from 'date-fns'
 import { useMemo, useState } from 'react'
 
-// Hook para obtener todo el personal del proyecto
+// Hook para obtener todo el personal del proyecto (con status)
 function useProjectPersonnel(projectId: string | undefined) {
   return useQuery({
-    queryKey: ['project-personnel', projectId],
+    queryKey: ['project-personnel-with-status', projectId],
     queryFn: async () => {
       if (!supabase || !projectId) return []
 
