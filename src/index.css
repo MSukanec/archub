@@ -4,12 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Prevent horizontal scroll on the entire page */
-html, body {
-  overflow-x: hidden !important;
-  max-width: 100vw !important;
-}
-
 :root {
   /* Layout */
   --layout-bg: hsl(0, 0%, 96%); /* Desktop - fondo oscuro que rodea todo */
