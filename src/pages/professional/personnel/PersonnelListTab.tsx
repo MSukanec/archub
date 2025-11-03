@@ -171,10 +171,6 @@ export default function PersonnelListTab({
   return (
     <Table
       data={personnelData}
-      defaultSort={{
-        key: "displayName",
-        direction: "asc"
-      }}
       columns={[
         {
           key: "displayName",

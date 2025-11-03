@@ -314,7 +314,7 @@ export function PageLayout({
                   {PAGE_CONFIG[location]?.name || title || 'Página'}
                 </h1>
                 {description && (
-                  <p className="text-sm text-[var(--muted-foreground)]">
+                  <p className="text-xs text-[var(--muted-foreground)]">
                     {description}
                   </p>
                 )}
