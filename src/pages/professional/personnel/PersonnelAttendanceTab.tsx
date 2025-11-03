@@ -96,17 +96,17 @@ function transformAttendanceData(attendanceData: any[]) {
   return { workers, attendance }
 }
 
-interface AttendanceTabProps {
+interface PersonnelAttendanceTabProps {
   openModal: any
   selectedProjectId: string | null
   currentOrganizationId: string | null
 }
 
-export default function AttendanceTab({ 
+export default function PersonnelAttendanceTab({ 
   openModal, 
   selectedProjectId,
   currentOrganizationId 
-}: AttendanceTabProps) {
+}: PersonnelAttendanceTabProps) {
   const { data: attendanceData = [], isLoading } = useAttendanceData(
     selectedProjectId || undefined,
     currentOrganizationId || undefined

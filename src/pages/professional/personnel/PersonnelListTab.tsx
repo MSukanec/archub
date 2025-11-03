@@ -86,19 +86,19 @@ function renderInsuranceStatusBadge(status: string, daysToExpiry: number | null)
   }
 }
 
-interface PersonnelTabProps {
+interface PersonnelListTabProps {
   openModal: any
   handleDeletePersonnel: (personnelId: string) => Promise<void>
   insuranceData: any[]
   selectedProjectId: string | null
 }
 
-export default function PersonnelTab({ 
+export default function PersonnelListTab({ 
   openModal, 
   handleDeletePersonnel, 
   insuranceData,
   selectedProjectId 
-}: PersonnelTabProps) {
+}: PersonnelListTabProps) {
   const { data: personnelData = [], isLoading: isPersonnelLoading } = useQuery({
     queryKey: ['project-personnel', selectedProjectId],
     queryFn: async () => {
