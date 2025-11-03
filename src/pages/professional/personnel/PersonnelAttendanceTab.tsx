@@ -96,9 +96,14 @@ function transformPersonnelAndAttendance(personnelData: any[], attendanceData: a
     return contact.full_name || 'Sin nombre'
   }
 
+  // Filtrar con la misma lógica que PersonnelListTab
   let filteredPersonnel = personnelData
   if (filterStatus === 'active') {
-    filteredPersonnel = personnelData.filter(p => p.status === 'active')
+    filteredPersonnel = personnelData.filter(p => {
+      // Tratar NULL como 'active' por defecto (para registros antiguos)
+      const personStatus = p.status || 'active'
+      return personStatus === 'active'
+    })
   }
 
   const workers = filteredPersonnel.map(personnel => {
@@ -190,7 +195,8 @@ export default function PersonnelAttendanceTab({
     )
   }
 
-  if (workers.length === 0) {
+  // EmptyState grande: Solo si NO hay personal en el proyecto
+  if (personnelData.length === 0) {
     return (
       <EmptyState
         icon={<UserCheck className="h-12 w-12" />}
@@ -205,6 +211,8 @@ export default function PersonnelAttendanceTab({
     )
   }
 
+  // Siempre mostrar el componente si HAY personal en el proyecto
+  // El empty state interno se muestra si workers.length === 0 (por el filtro)
   return (
     <AttendanceGradebook 
       workers={workers}
