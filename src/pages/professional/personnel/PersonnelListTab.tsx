@@ -247,9 +247,16 @@ export default function PersonnelListTab({
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">
-                    {displayName}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-sm truncate">
+                      {displayName}
+                    </p>
+                    {record.labor_type?.name && (
+                      <Badge className="bg-[hsl(var(--accent))] text-white hover:bg-[hsl(var(--accent))] border-0 flex-shrink-0 text-xs">
+                        {record.labor_type.name}
+                      </Badge>
+                    )}
+                  </div>
                   {record.notes && (
                     <p className="text-xs text-muted-foreground truncate">
                       {record.notes}
@@ -263,7 +270,7 @@ export default function PersonnelListTab({
         {
           key: "start_date",
           label: "Fecha de inicio",
-          width: "12%",
+          width: "15%",
           sortable: true,
           sortType: "date",
           render: (record: any) => {
@@ -274,25 +281,6 @@ export default function PersonnelListTab({
               <span className="text-sm">
                 {format(new Date(record.start_date), 'dd/MM/yyyy')}
               </span>
-            )
-          }
-        },
-        {
-          key: "labor_type",
-          label: "Tipo de Mano de Obra",
-          width: "13%",
-          sortable: true,
-          sortType: "string",
-          render: (record: any) => {
-            if (!record.labor_type?.name) {
-              return <span className="text-sm text-muted-foreground">-</span>
-            }
-            return (
-              <Badge 
-                className="bg-[hsl(var(--accent))] text-white hover:bg-[hsl(var(--accent))] border-0"
-              >
-                {record.labor_type.name}
-              </Badge>
             )
           }
         },
