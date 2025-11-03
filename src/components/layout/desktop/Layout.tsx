@@ -33,6 +33,7 @@ interface LayoutProps {
   headerProps?: {
     icon?: React.ComponentType<any>;
     title?: string;
+    description?: string;
     pageTitle?: string;
     showSearch?: boolean;
     searchValue?: string;
@@ -141,6 +142,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                   <PageLayout
                     icon={headerProps.icon}
                     title={headerProps.title}
+                    description={headerProps.description}
                     tabs={headerProps.tabs?.map((tab) => ({
                       id: tab.id,
                       label: tab.label,

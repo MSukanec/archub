@@ -85,10 +85,7 @@ export default function Personnel() {
   const headerProps = {
     icon: Users,
     title: "Mano de Obra",
-    breadcrumb: [
-      { name: "Construcción", href: "/construction/dashboard" },
-      { name: "Personal", href: "/construction/personnel" }
-    ],
+    description: "Gestiona el personal asignado a tus proyectos, registra asistencias y administra seguros de trabajo.",
     tabs: [
       {
         id: 'dashboard',

@@ -117,6 +117,7 @@ interface PageLayoutProps {
   // Título e icono de la página
   icon?: React.ComponentType<any> | React.ReactNode;
   title?: string;
+  description?: string;
   
   // Sistema de tabs
   tabs?: Tab[];
@@ -173,6 +174,7 @@ interface PageLayoutProps {
 export function PageLayout({
   icon,
   title,
+  description,
   tabs = [],
   onTabChange,
   showHeaderSearch = false,
@@ -265,10 +267,10 @@ export function PageLayout({
           <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-3 ${
             isDocked ? 'px-16' : 'px-16'
           }`}>
-          {/* FILA SUPERIOR: Breadcrumbs e icono/título a la izquierda + Botones de acción a la derecha */}
-          <div className={`h-[50px] flex items-center justify-between ${!hasTabs ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
-          {/* Left: Breadcrumbs + Icon + Title */}
-          <div className="flex items-center gap-4">
+          {/* FILA SUPERIOR: Icono + Título + Descripción a la izquierda + Botones de acción a la derecha */}
+          <div className={`min-h-[50px] flex items-center justify-between ${!hasTabs ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
+          {/* Left: Icon + Title + Description */}
+          <div className="flex items-center gap-4 py-2">
             {showBackButton && (
               <Button
                 variant="ghost"
@@ -281,50 +283,24 @@ export function PageLayout({
               </Button>
             )}
             
-            {/* Icon from sidebar + Breadcrumbs */}
+            {/* Icon + Title + Description */}
             <div className="flex items-center gap-3">
               {/* Icono de la página actual (del sidebar) */}
               {PAGE_CONFIG[location]?.icon && (
                 <span className="text-[var(--accent)] flex-shrink-0">
-                  {React.createElement(PAGE_CONFIG[location].icon, { className: "w-5 h-5" })}
+                  {React.createElement(PAGE_CONFIG[location].icon, { className: "w-6 h-6" })}
                 </span>
               )}
               
-              {/* Breadcrumbs Navigation */}
-              <div className="flex items-center gap-2">
-                {/* Inicio - siempre visible */}
-                <button
-                  onClick={() => {
-                    navigate('/home');
-                  }}
-                  className="text-sm font-semibold text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
-                >
-                  Inicio
-                </button>
-                
-                {/* Sección - si no estamos en general */}
-                {sidebarLevel !== 'general' && (
-                  <>
-                    <span className="text-sm font-semibold text-[var(--muted-foreground)]">/</span>
-                    <button
-                      onClick={() => {
-                        navigate(SECTION_DASHBOARDS[sidebarLevel] || '/home');
-                      }}
-                      className="text-sm font-semibold text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
-                    >
-                      {SECTION_NAMES[sidebarLevel] || 'Sección'}
-                    </button>
-                  </>
-                )}
-                
-                {/* Página actual - si no es el dashboard de la sección ni home */}
-                {location !== '/home' && location !== SECTION_DASHBOARDS[sidebarLevel] && (
-                  <>
-                    <span className="text-sm font-semibold text-[var(--muted-foreground)]">/</span>
-                    <span className="text-sm font-semibold text-[var(--muted-foreground)]">
-                      {PAGE_CONFIG[location]?.name || title || 'Página'}
-                    </span>
-                  </>
+              {/* Title + Description */}
+              <div className="flex flex-col">
+                <h1 className="text-xl font-semibold text-[var(--foreground)]">
+                  {PAGE_CONFIG[location]?.name || title || 'Página'}
+                </h1>
+                {description && (
+                  <p className="text-sm text-[var(--muted-foreground)]">
+                    {description}
+                  </p>
                 )}
               </div>
             </div>
