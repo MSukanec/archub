@@ -129,7 +129,13 @@ export default function PersonnelListTab({
         `)
         .eq('project_id', selectedProjectId)
 
-      if (error) throw error
+      console.log('🔍 === RAW DATA FROM SUPABASE ===')
+      console.log('📦 Total records:', data?.length)
+      console.log('📄 First record:', JSON.stringify(data?.[0], null, 2))
+      if (error) {
+        console.error('❌ Supabase error:', error)
+        throw error
+      }
       
       // Helper para obtener nombre
       const getDisplayName = (contact: any) => {
