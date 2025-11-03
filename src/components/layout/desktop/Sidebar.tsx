@@ -191,7 +191,7 @@ export function Sidebar() {
           )}
         >
           {/* SECCIÓN SUPERIOR: Navegación principal con scroll */}
-          <div className="pt-3 px-0 overflow-y-auto">
+          <div className="px-0 overflow-y-auto">
             {sidebarLevel === 'general' ? (
               /* SIDEBAR GENERAL - HUB CENTRAL */
               <div className={cn(
