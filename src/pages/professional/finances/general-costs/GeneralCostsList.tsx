@@ -5,7 +5,6 @@ import { es } from "date-fns/locale";
 import { useLocation } from "wouter";
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
-import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -54,7 +53,7 @@ export default function GeneralCostsList({ filterByCategory = 'all', filterBySta
 
     const totalGeneralCosts = generalCosts.length;
     const activeGeneralCosts = generalCosts.filter(gc => gc.is_active);
-    const costsWithValues = generalCosts.filter(gc => gc.current_value?.amount);
+    const costsWithValues = generalCosts.filter(gc => (gc as any).current_value?.amount);
     
     // Agrupar por categorías
     const categoryCounts = generalCosts.reduce((acc, cost) => {
@@ -65,7 +64,7 @@ export default function GeneralCostsList({ filterByCategory = 'all', filterBySta
 
     // Calcular valores totales
     const totalValueARS = generalCosts.reduce((sum, cost) => {
-      return sum + (cost.current_value?.amount || 0);
+      return sum + ((cost as any).current_value?.amount || 0);
     }, 0);
 
     const totalValueUSD = totalValueARS / 1125; // Conversión simplificada
@@ -151,7 +150,7 @@ export default function GeneralCostsList({ filterByCategory = 'all', filterBySta
     // Filtro por estado
     const statusFilterMatch = filterByStatus === 'all' || 
       (filterByStatus === 'active' && generalCost.is_active) ||
-      (filterByStatus === 'with_values' && generalCost.current_value?.amount);
+      (filterByStatus === 'with_values' && (generalCost as any).current_value?.amount);
     
     return searchMatch && categoryFilterMatch && statusFilterMatch;
   });
@@ -241,28 +240,6 @@ export default function GeneralCostsList({ filterByCategory = 'all', filterBySta
             </Badge>
           )}
         </div>
-      )
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      render: (generalCost: any) => (
-        <TableActionButtons
-          onEdit={() => handleEdit(generalCost)}
-          onDelete={() => handleDelete(generalCost)}
-          additionalButtons={[
-            <Button
-              key="view"
-              variant="ghost"
-              size="sm"
-              onClick={() => handleView(generalCost.id)}
-              className="h-8 w-8 p-0"
-              title="Ver detalle"
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-          ]}
-        />
       )
     }
   ];
@@ -449,14 +426,35 @@ export default function GeneralCostsList({ filterByCategory = 'all', filterBySta
       <Table
         data={filteredGeneralCosts}
         columns={columns}
-        searchQuery={searchQuery}
-        onSearchQueryChange={setSearchQuery}
-        searchPlaceholder="Buscar gastos generales..."
-        actionButton={{
-          label: "Nuevo Gasto General",
-          onClick: handleCreateGeneralCost,
-          icon: Plus
+        topBar={{
+          searchValue: searchQuery,
+          onSearchChange: setSearchQuery,
+          showSearch: true,
+          customActions: (
+            <Button onClick={handleCreateGeneralCost} size="sm">
+              <Plus className="w-4 h-4 mr-2" />
+              Nuevo Gasto General
+            </Button>
+          )
         }}
+        rowActions={(generalCost) => [
+          {
+            icon: Eye,
+            label: 'Ver detalle',
+            onClick: () => handleView(generalCost.id)
+          },
+          {
+            icon: Edit,
+            label: 'Editar',
+            onClick: () => handleEdit(generalCost)
+          },
+          {
+            icon: Trash2,
+            label: 'Eliminar',
+            onClick: () => handleDelete(generalCost),
+            variant: 'destructive' as const
+          }
+        ]}
       />
     </div>
   );

@@ -141,31 +141,6 @@ const AdminGeneralUnitPresentations = () => {
           {unitPresentation.description || '-'}
         </span>
       )
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      width: '10%',
-      render: (unitPresentation: UnitPresentation) => (
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEdit(unitPresentation)}
-            className="h-7 w-7 p-0"
-          >
-            <Edit className="h-3 w-3" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(unitPresentation)}
-            className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
-        </div>
-      )
     }
   ]
 
@@ -176,6 +151,19 @@ const AdminGeneralUnitPresentations = () => {
         data={sortedUnitPresentations}
         columns={columns}
         isLoading={isLoading}
+        rowActions={(unitPresentation: UnitPresentation) => [
+          {
+            icon: Edit,
+            label: 'Editar',
+            onClick: () => handleEdit(unitPresentation)
+          },
+          {
+            icon: Trash2,
+            label: 'Eliminar',
+            onClick: () => handleDelete(unitPresentation),
+            variant: 'destructive' as const
+          }
+        ]}
         renderCard={(unitPresentation) => (
           <AdminUnitRow
             unitPresentation={unitPresentation}

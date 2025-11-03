@@ -5,7 +5,6 @@ import { es } from "date-fns/locale";
 import { useLocation } from "wouter";
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
-import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -390,28 +389,6 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
         const originalCurrency = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' ? 'USD' : 'ARS';
         return formatSingleCurrency(balanceARS, balanceUSD, originalCurrency);
       }
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      render: (subcontract: any) => (
-        <TableActionButtons
-          onEdit={() => handleEdit(subcontract)}
-          onDelete={() => handleDelete(subcontract)}
-          additionalButtons={[
-            <Button
-              key="view"
-              variant="ghost"
-              size="sm"
-              onClick={() => handleView(subcontract.id)}
-              className="h-8 w-8 p-0"
-              title="Ver detalle"
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-          ]}
-        />
-      )
     }
   ];
 
@@ -614,6 +591,24 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
         <Table 
           data={filteredSubcontracts}
           columns={columns}
+          rowActions={(subcontract) => [
+            {
+              icon: Eye,
+              label: 'Ver Detalle',
+              onClick: () => handleView(subcontract.id)
+            },
+            {
+              icon: Edit,
+              label: 'Editar',
+              onClick: () => handleEdit(subcontract)
+            },
+            {
+              icon: Trash2,
+              label: 'Eliminar',
+              onClick: () => handleDelete(subcontract),
+              variant: 'destructive' as const
+            }
+          ]}
         />
       )}
     </div>

@@ -2,9 +2,8 @@ import { useState, useMemo } from 'react'
 import { useLocation } from 'wouter'
 import { ComboBox as ComboBoxWriteField } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
-import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons'
 import { useMaterials, Material, useDeleteMaterial } from '@/hooks/use-materials'
-import { Package, Eye } from 'lucide-react'
+import { Package, Eye, Edit, Copy, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
@@ -243,35 +242,6 @@ export default function MaterialList() {
           )}
         </div>
       )
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      width: '16%',
-      render: (material: Material) => {
-        // Solo mostrar acciones de edición para materiales que pertenecen a la organización (no del sistema)
-        const canEdit = !material.is_system;
-        
-        return (
-          <TableActionButtons
-            onEdit={canEdit ? () => handleEdit(material) : undefined}
-            onDuplicate={canEdit ? () => handleDuplicate(material) : undefined}
-            onDelete={canEdit ? () => handleDelete(material) : undefined}
-            additionalButtons={[
-              <Button
-                key="view"
-                variant="default"
-                size="sm"
-                onClick={() => handleView(material.id)}
-                className="h-8 px-3 gap-2"
-              >
-                <Eye className="h-3.5 w-3.5" />
-                Ver Detalle
-              </Button>
-            ]}
-          />
-        );
-      }
     }
   ]
   
@@ -340,6 +310,36 @@ export default function MaterialList() {
             data={filteredMaterials}
             columns={materialsColumns}
             groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+            rowActions={(material) => {
+              const actions = [
+                {
+                  icon: Eye,
+                  label: 'Ver Detalle',
+                  onClick: () => handleView(material.id)
+                }
+              ];
+              if (!material.is_system) {
+                actions.push(
+                  {
+                    icon: Edit,
+                    label: 'Editar',
+                    onClick: () => handleEdit(material)
+                  },
+                  {
+                    icon: Copy,
+                    label: 'Duplicar',
+                    onClick: () => handleDuplicate(material)
+                  },
+                  {
+                    icon: Trash2,
+                    label: 'Eliminar',
+                    onClick: () => handleDelete(material),
+                    variant: 'destructive' as const
+                  }
+                );
+              }
+              return actions;
+            }}
             topBar={{
               renderFilterContent: renderFilterContent,
               isFilterActive: isFilterActive,

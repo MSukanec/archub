@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
-import { CheckCircle2, Circle, ArrowRight } from 'lucide-react'
+import { CheckCircle2, Circle, ArrowRight, Star } from 'lucide-react'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
 import { useCoursePlayerStore } from '@/stores/coursePlayerStore'
 import LessonRow from '@/components/ui/data-row/rows/LessonRow'
@@ -253,38 +253,6 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
           </Badge>
         )
       )
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      width: '20%',
-      sortable: false,
-      render: (row: LessonRowData) => (
-        <div className="flex items-center gap-1">
-          {/* 🌟 BOTÓN DE FAVORITO */}
-          <FavoriteButton 
-            lessonId={row.id}
-            courseId={courseId!}
-            isFavorite={row.is_favorite}
-            variant="icon"
-            size="lg"
-          />
-          
-          {/* BOTÓN IR A LECCIÓN */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleGoToLesson(row.id);
-            }}
-            data-testid={`button-go-to-lesson-${row.id}`}
-            title="Ir a Lección"
-          >
-            <ArrowRight className="h-5 w-5" />
-          </Button>
-        </div>
-      )
     }
   ];
 
@@ -302,6 +270,13 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
         data={tableData}
         columns={columns}
         groupBy="groupKey"
+        rowActions={(row: LessonRowData) => [
+          {
+            icon: ArrowRight,
+            label: 'Ir a Lección',
+            onClick: () => handleGoToLesson(row.id)
+          }
+        ]}
         renderGroupHeader={(groupKey: string, groupRows: LessonRowData[]) => {
           // Calculate total duration for this module
           const totalDuration = groupRows.reduce((sum, row) => {

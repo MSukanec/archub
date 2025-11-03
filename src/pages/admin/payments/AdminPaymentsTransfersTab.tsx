@@ -293,23 +293,6 @@ const AdminPaymentsTransfersTab = () => {
         );
       },
     },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      width: '18%',
-      render: (payment: BankTransferPayment) => (
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            onClick={() => handleViewReceipt(payment)}
-            data-testid={`button-view-receipt-${payment.id}`}
-          >
-            <Eye className="h-4 w-4 mr-1" />
-            Ver
-          </Button>
-        </div>
-      ),
-    },
   ];
 
   const pendingCount = payments.filter(p => p.status === 'pending').length;
@@ -363,6 +346,13 @@ const AdminPaymentsTransfersTab = () => {
         columns={columns}
         data={filteredPayments}
         isLoading={isLoading}
+        rowActions={(payment) => [
+          {
+            icon: Eye,
+            label: 'Ver',
+            onClick: () => handleViewReceipt(payment)
+          }
+        ]}
         renderCard={(payment) => (
           <AdminPaymentTransferRow
             payment={payment}

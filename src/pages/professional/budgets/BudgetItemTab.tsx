@@ -12,7 +12,6 @@ import { useToast } from '@/hooks/use-toast'
 import { useProjectContext } from '@/stores/projectContext'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useLocation } from 'wouter'
-import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons'
 
 interface BudgetItemsProps {
   onAddTask?: () => void
@@ -158,29 +157,6 @@ export function BudgetItems({
         }
         return getStatusBadge(budget.status)
       }
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      width: '12%',
-      render: (budget: any) => (
-        <div className="flex items-center gap-1">
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => handleView(budget)}
-            className="h-8"
-          >
-            <Edit className="h-4 w-4 mr-1.5" />
-            Editar
-          </Button>
-          <TableActionButtons
-            onEdit={() => handleEdit(budget)}
-            onDelete={() => handleDelete(budget)}
-            editLabel="Edición Rápida"
-          />
-        </div>
-      )
     }
   ]
 
@@ -222,6 +198,24 @@ export function BudgetItems({
     <Table
       columns={columns}
       data={budgets}
+      rowActions={(budget) => [
+        {
+          icon: Eye,
+          label: 'Ver Presupuesto',
+          onClick: () => handleView(budget)
+        },
+        {
+          icon: Edit,
+          label: 'Edición Rápida',
+          onClick: () => handleEdit(budget)
+        },
+        {
+          icon: Trash2,
+          label: 'Eliminar',
+          onClick: () => handleDelete(budget),
+          variant: 'destructive' as const
+        }
+      ]}
       isLoading={isLoading}
       defaultSort={{ key: 'created_at', direction: 'desc' }}
     />

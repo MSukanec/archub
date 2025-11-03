@@ -167,31 +167,6 @@ const AdminCommunityChangelog = () => {
           {entry.creator?.full_name || 'Desconocido'}
         </span>
       )
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      width: '15%',
-      render: (entry: ChangelogEntry) => (
-        <div className="flex items-center space-x-2">
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => handleEdit(entry)}
-            className=""
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => handleDelete(entry)}
-            className=" text-red-600 hover:text-red-700"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )
     }
   ]
 
@@ -202,6 +177,19 @@ const AdminCommunityChangelog = () => {
         data={changelogEntries}
         columns={columns}
         isLoading={isLoading}
+        rowActions={(entry) => [
+          {
+            icon: Edit,
+            label: 'Editar',
+            onClick: () => handleEdit(entry)
+          },
+          {
+            icon: Trash2,
+            label: 'Eliminar',
+            onClick: () => handleDelete(entry),
+            variant: 'destructive' as const
+          }
+        ]}
         renderCard={(entry) => (
           <AdminChangelogRow
             entry={entry}

@@ -197,42 +197,6 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
           </span>
         </div>
       )
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      sortable: false,
-      render: (note: NoteWithLesson) => (
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="default"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleGoToLesson(note.lesson_id);
-            }}
-            className="gap-2"
-            data-testid={`button-go-to-lesson-${note.id}`}
-          >
-            Ir a lección
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleDeleteNote(note);
-            }}
-            className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
-            data-testid={`button-delete-note-${note.id}`}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )
     }
   ];
 
@@ -301,6 +265,19 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
           data={notesWithModuleTitle}
           columns={columns}
           groupBy="moduleTitle"
+          rowActions={(note) => [
+            {
+              icon: ArrowRight,
+              label: 'Ir a lección',
+              onClick: () => handleGoToLesson(note.lesson_id)
+            },
+            {
+              icon: Trash2,
+              label: 'Eliminar',
+              onClick: () => handleDeleteNote(note),
+              variant: 'destructive' as const
+            }
+          ]}
           renderGroupHeader={renderModuleGroupHeader}
           topBar={{
             showSearch: true,

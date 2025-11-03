@@ -1,11 +1,10 @@
 import { Button } from '@/components/ui/button'
-import { Plus, Users, Search, Filter, Bell } from 'lucide-react'
+import { Plus, Users, Search, Filter, Bell, Edit, Trash2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
@@ -416,16 +415,6 @@ export default function AdminCourseUsersTab() {
           </div>
         );
       }
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      render: (enrollment: any) => (
-        <TableActionButtons
-          onEdit={() => handleEditEnrollment(enrollment)}
-          onDelete={() => handleDeleteEnrollment(enrollment)}
-        />
-      )
     }
   ];
 
@@ -436,6 +425,19 @@ export default function AdminCourseUsersTab() {
           data={filteredEnrollments}
           columns={columns}
           isLoading={isLoading}
+          rowActions={(enrollment) => [
+            {
+              icon: Edit,
+              label: 'Editar',
+              onClick: () => handleEditEnrollment(enrollment)
+            },
+            {
+              icon: Trash2,
+              label: 'Eliminar',
+              onClick: () => handleDeleteEnrollment(enrollment),
+              variant: 'destructive' as const
+            }
+          ]}
           renderCard={(enrollment) => (
             <AdminCourseStudentRow
               enrollment={enrollment}

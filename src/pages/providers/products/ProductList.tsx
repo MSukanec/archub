@@ -291,28 +291,6 @@ export default function ProductList() {
           </div>
         )
       }
-    },
-    {
-      key: 'actions',
-      label: '',
-      width: '8%',
-      render: (product: Product & { isSelected?: boolean }) => {
-        const isSelected = product.isSelected || false
-        return (
-          <div className="flex items-center gap-1">
-            {isSelected && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleEdit(product)}
-                className="h-7 w-7 p-0"
-              >
-                <Edit className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
-        )
-      }
     }
   ]
   
@@ -351,6 +329,13 @@ export default function ProductList() {
             columns={productsColumns}
             groupBy={groupingType === 'none' ? undefined : 'groupKey'}
             getRowClassName={(product: any) => !product.isSelected ? 'opacity-40' : 'opacity-100'}
+            rowActions={(product: any) => !product.isSelected ? [] : [
+              {
+                icon: Edit,
+                label: 'Editar',
+                onClick: () => handleEdit(product)
+              }
+            ]}
             topBar={{
               // 🆕 NUEVA FORMA SIMPLIFICADA - Solo props, sin función personalizada
               groupingOptions: [

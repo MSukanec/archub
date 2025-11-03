@@ -223,30 +223,6 @@ const AdminCommunityNotifications = () => {
           {formatDateCompact(notification.created_at)}
         </span>
       )
-    },
-    {
-      key: 'actions',
-      label: '',
-      width: '10%',
-      render: (notification: Notification) => (
-        <div className="flex items-center space-x-2">
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => handleEdit(notification)}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => handleDelete(notification)}
-            className="text-red-600 hover:text-red-700"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )
     }
   ]
 
@@ -257,6 +233,19 @@ const AdminCommunityNotifications = () => {
         data={notifications}
         columns={columns}
         isLoading={isLoading}
+        rowActions={(notification) => [
+          {
+            icon: Edit,
+            label: 'Editar',
+            onClick: () => handleEdit(notification)
+          },
+          {
+            icon: Trash2,
+            label: 'Eliminar',
+            onClick: () => handleDelete(notification),
+            variant: 'destructive' as const
+          }
+        ]}
         emptyState={
           <div className="text-center py-8 text-muted-foreground">
             <Bell className="h-12 w-12 mx-auto mb-4 opacity-20" />

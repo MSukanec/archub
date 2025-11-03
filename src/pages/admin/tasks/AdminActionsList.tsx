@@ -92,30 +92,6 @@ const AdminActionsList = () => {
         </div>
       ),
     },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      render: (taskKind: TaskKind) => (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEdit(taskKind)}
-            className=""
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(taskKind)}
-            className=" text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      ),
-    },
   ]
 
   return (
@@ -124,6 +100,19 @@ const AdminActionsList = () => {
         data={taskKinds}
         columns={columns}
         isLoading={isLoading}
+        rowActions={(taskKind: TaskKind) => [
+          {
+            icon: Edit,
+            label: 'Editar',
+            onClick: () => handleEdit(taskKind)
+          },
+          {
+            icon: Trash2,
+            label: 'Eliminar',
+            onClick: () => handleDelete(taskKind),
+            variant: 'destructive' as const
+          }
+        ]}
         emptyState={{
           title: "No hay acciones registradas",
           description: "Comienza creando tu primera acción para el sistema.",

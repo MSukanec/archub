@@ -295,42 +295,6 @@ const AdminCostProducts = () => {
           )}
         </div>
       )
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      width: '8%',
-      render: (product: Product) => (
-        <div className="flex items-center justify-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEdit(product)}
-            className="h-8 w-8 p-0"
-            title="Editar producto"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDuplicate(product)}
-            className="h-8 w-8 p-0"
-            title="Duplicar producto"
-          >
-            <Copy className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(product)}
-            className="h-8 w-8 p-0"
-            title="Eliminar producto"
-          >
-            <Trash2 className="h-4 w-4 text-red-500" />
-          </Button>
-        </div>
-      )
     }
   ]
   
@@ -344,6 +308,24 @@ const AdminCostProducts = () => {
         columns={columns}
         isLoading={isLoading}
         groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+        rowActions={(product: Product) => [
+          {
+            icon: Edit,
+            label: 'Editar',
+            onClick: () => handleEdit(product)
+          },
+          {
+            icon: Copy,
+            label: 'Duplicar',
+            onClick: () => handleDuplicate(product)
+          },
+          {
+            icon: Trash2,
+            label: 'Eliminar',
+            onClick: () => handleDelete(product),
+            variant: 'destructive' as const
+          }
+        ]}
         topBar={{
           showSearch: true,
           searchValue: searchValue,

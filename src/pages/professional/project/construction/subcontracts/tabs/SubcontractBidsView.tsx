@@ -273,45 +273,6 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       key: 'status',
       label: 'Estado',
       render: (item: any) => getStatusBadge(item.status, item.id)
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      render: (item: any) => (
-        <div className="flex items-center gap-1">
-          {/* Botón para seleccionar ganadora solo si no es ganadora */}
-          {subcontract?.winner_bid_id !== item.id && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className=""
-              style={{ color: 'var(--accent)' }}
-              onClick={() => handleSelectWinner(item)}
-              title="Seleccionar como ganadora"
-            >
-              <Trophy className="h-4 w-4" />
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            className=""
-            onClick={() => handleEditBid(item)}
-            title="Editar oferta"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className=" text-destructive hover:text-destructive"
-            onClick={() => handleDeleteBid(item)}
-            title="Eliminar oferta"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )
     }
   ];
 
@@ -624,6 +585,30 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
         <Table
           data={sortedBids}
           columns={columns}
+          rowActions={(item) => {
+            const actions = [];
+            if (subcontract?.winner_bid_id !== item.id) {
+              actions.push({
+                icon: Trophy,
+                label: 'Seleccionar como ganadora',
+                onClick: () => handleSelectWinner(item)
+              });
+            }
+            actions.push(
+              {
+                icon: Edit,
+                label: 'Editar oferta',
+                onClick: () => handleEditBid(item)
+              },
+              {
+                icon: Trash2,
+                label: 'Eliminar oferta',
+                onClick: () => handleDeleteBid(item),
+                variant: 'destructive' as const
+              }
+            );
+            return actions;
+          }}
         />
       )}
     </div>

@@ -249,31 +249,6 @@ const AdminCommunityUsers = () => {
           {format(new Date(user.created_at), 'dd/MM/yy', { locale: es })}
         </span>
       )
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      width: '20%',
-      render: (user: User) => (
-        <div className="flex items-center space-x-2">
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => handleEdit(user)}
-            className=""
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => handleDeleteDangerous(user)}
-            className=" text-red-600 hover:text-red-700"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )
     }
   ]
 
@@ -284,6 +259,19 @@ const AdminCommunityUsers = () => {
         data={users}
         columns={columns}
         isLoading={isLoading}
+        rowActions={(user) => [
+          {
+            icon: Edit,
+            label: 'Editar',
+            onClick: () => handleEdit(user)
+          },
+          {
+            icon: Trash2,
+            label: 'Eliminar',
+            onClick: () => handleDeleteDangerous(user),
+            variant: 'destructive' as const
+          }
+        ]}
         renderCard={(user) => (
           <AdminUserRow
             user={user}

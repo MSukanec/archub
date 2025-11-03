@@ -207,42 +207,6 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
           </span>
         </div>
       )
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      sortable: false,
-      render: (marker: MarkerWithLesson) => (
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="default"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleGoToLesson(marker.lesson_id, marker.time_sec);
-            }}
-            className="gap-2"
-            data-testid={`button-go-to-lesson-${marker.id}`}
-          >
-            Ir a lección
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleDeleteMarker(marker);
-            }}
-            className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
-            data-testid={`button-delete-marker-${marker.id}`}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )
     }
   ];
 
@@ -311,6 +275,19 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
           data={markersWithModuleTitle}
           columns={columns}
           groupBy="moduleTitle"
+          rowActions={(marker) => [
+            {
+              icon: ArrowRight,
+              label: 'Ir a lección',
+              onClick: () => handleGoToLesson(marker.lesson_id, marker.time_sec)
+            },
+            {
+              icon: Trash2,
+              label: 'Eliminar',
+              onClick: () => handleDeleteMarker(marker),
+              variant: 'destructive' as const
+            }
+          ]}
           renderGroupHeader={renderModuleGroupHeader}
           topBar={{
             showSearch: true,

@@ -356,54 +356,31 @@ export default function Contacts() {
           {contact.company_name || '—'}
         </div>
       )
-    },
+    }
+  ]
 
+  const getContactRowActions = (contact: any) => [
     {
-      key: "actions" as const,
-      label: "Acciones",
-      sortable: false,
-      className: "w-1/5",
-      render: (contact: any) => (
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation()
-              navigator.clipboard.writeText(`${contact.full_name || `${contact.first_name} ${contact.last_name}`}\nEmail: ${contact.email || 'N/A'}\nTeléfono: ${contact.phone || 'N/A'}\nEmpresa: ${contact.company_name || 'N/A'}`)
-              toast({
-                title: "Información copiada",
-                description: "Los datos del contacto se han copiado al portapapeles"
-              })
-            }}
-            className=""
-          >
-            <Share2 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation()
-              openModal('contact', { editingContact: contact, isEditing: true })
-            }}
-            className=""
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation()
-              handleDeleteContact(contact)
-            }}
-            className=" text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )
+      label: 'Compartir',
+      icon: Share2,
+      onClick: () => {
+        navigator.clipboard.writeText(`${contact.full_name || `${contact.first_name} ${contact.last_name}`}\nEmail: ${contact.email || 'N/A'}\nTeléfono: ${contact.phone || 'N/A'}\nEmpresa: ${contact.company_name || 'N/A'}`)
+        toast({
+          title: "Información copiada",
+          description: "Los datos del contacto se han copiado al portapapeles"
+        })
+      }
+    },
+    {
+      label: 'Editar',
+      icon: Edit,
+      onClick: () => openModal('contact', { editingContact: contact, isEditing: true })
+    },
+    {
+      label: 'Eliminar',
+      icon: Trash2,
+      onClick: () => handleDeleteContact(contact),
+      variant: 'destructive' as const
     }
   ]
 

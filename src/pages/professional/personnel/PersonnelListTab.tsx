@@ -290,37 +290,23 @@ export default function PersonnelListTab({
             const insuranceStatus = getInsuranceStatus(record.contact?.id, insuranceData)
             return renderInsuranceStatusBadge(insuranceStatus.status, insuranceStatus.daysToExpiry)
           }
+        }
+      ]}
+      rowActions={(record: any) => [
+        {
+          label: 'Editar',
+          icon: Edit,
+          onClick: () => openModal('personnel-data', { personnelRecord: record })
         },
         {
-          key: "actions",
-          label: "Acciones",
-          width: "17%",
-          sortable: false,
-          render: (record: any) => (
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => openModal('personnel-data', { personnelRecord: record })}
-                data-testid={`button-edit-personnel-${record.id}`}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => openModal('delete-confirmation', {
-                  title: 'Eliminar Personal',
-                  message: `¿Estás seguro de que deseas eliminar a ${record.contact?.first_name} ${record.contact?.last_name} del proyecto?`,
-                  onConfirm: () => handleDeletePersonnel(record.id)
-                })}
-                className=" text-destructive hover:text-destructive"
-                data-testid={`button-delete-personnel-${record.id}`}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          )
+          label: 'Eliminar',
+          icon: Trash2,
+          onClick: () => openModal('delete-confirmation', {
+            title: 'Eliminar Personal',
+            message: `¿Estás seguro de que deseas eliminar a ${record.contact?.first_name} ${record.contact?.last_name} del proyecto?`,
+            onConfirm: () => handleDeletePersonnel(record.id)
+          }),
+          variant: 'destructive' as const
         }
       ]}
       getItemId={(record: any) => record.id}

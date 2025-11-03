@@ -144,26 +144,6 @@ export default function Activity() {
       ),
       sortable: true,
       sortType: 'string' as const
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      width: '10%',
-      render: (activity: any) => (
-        <Button 
-          size="sm" 
-          variant="ghost"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleActivityClick(activity);
-          }}
-          className="h-8 px-2 text-xs"
-        >
-          <Eye className="w-3 h-3 mr-1" />
-          Ver detalles
-        </Button>
-      ),
-      sortable: false
     }
   ];
 
@@ -186,6 +166,13 @@ export default function Activity() {
           <Table
             data={activities}
             columns={columns}
+            rowActions={(activity) => [
+              {
+                icon: Eye,
+                label: 'Ver detalles',
+                onClick: () => handleActivityClick(activity)
+              }
+            ]}
           />
         )}
       </div>

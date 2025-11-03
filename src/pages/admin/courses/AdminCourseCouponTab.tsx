@@ -1,11 +1,10 @@
 import { Button } from '@/components/ui/button'
-import { Tag, Plus, Search, Filter, Bell } from 'lucide-react'
+import { Tag, Plus, Search, Filter, Bell, Edit, Trash2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useQuery } from '@tanstack/react-query'
@@ -331,16 +330,6 @@ export default function AdminCourseCouponTab() {
             : 'Sin vencimiento'}
         </div>
       )
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      render: (coupon: Coupon) => (
-        <TableActionButtons
-          onEdit={() => handleEditCoupon(coupon)}
-          onDelete={() => handleDeleteCoupon(coupon.id)}
-        />
-      )
     }
   ];
 
@@ -351,6 +340,19 @@ export default function AdminCourseCouponTab() {
           data={filteredCoupons}
           columns={couponColumns}
           isLoading={couponsLoading}
+          rowActions={(coupon) => [
+            {
+              icon: Edit,
+              label: 'Editar',
+              onClick: () => handleEditCoupon(coupon)
+            },
+            {
+              icon: Trash2,
+              label: 'Eliminar',
+              onClick: () => handleDeleteCoupon(coupon.id),
+              variant: 'destructive' as const
+            }
+          ]}
           renderCard={(coupon) => (
             <AdminCourseCouponRow
               coupon={coupon}

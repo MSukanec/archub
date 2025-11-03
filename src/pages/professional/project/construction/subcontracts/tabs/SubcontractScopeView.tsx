@@ -91,32 +91,6 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
           {item.notes || '—'}
         </span>
       )
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      width: '10%',
-      className: 'w-[10%]',
-      render: (item: any) => (
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className=""
-            onClick={() => handleEditTask(item)}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className=" text-destructive hover:text-destructive"
-            onClick={() => handleDeleteTask(item)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )
     }
   ];
 
@@ -174,6 +148,19 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
           data={processedTasks}
           columns={columns}
           groupBy={groupBy === 'none' ? undefined : 'groupKey'}
+          rowActions={(item) => [
+            {
+              icon: Edit,
+              label: 'Editar',
+              onClick: () => handleEditTask(item)
+            },
+            {
+              icon: Trash2,
+              label: 'Eliminar',
+              onClick: () => handleDeleteTask(item),
+              variant: 'destructive' as const
+            }
+          ]}
           topBar={{
             tabs: groupOptions.map(opt => opt.label),
             activeTab: groupOptions.find(opt => opt.value === groupBy)?.label || 'Por Rubros',

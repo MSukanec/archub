@@ -14,7 +14,6 @@ import { useMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 import { useLocation } from 'wouter'
 import { TaskCostPopover } from '@/components/popovers/TaskCostPopover'
-import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons'
 
 export default function TaskList() {
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()
@@ -199,38 +198,6 @@ export default function TaskList() {
           <TaskCostPopover task={task} showCost={true} />
         </div>
       )
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      width: '12%',
-      render: (task: any) => {
-        // Solo las tareas de la organización pueden ser editadas y eliminadas
-        const canEdit = !task.is_system && task.organization_id === userData?.organization?.id;
-        
-        return (
-          <TableActionButtons
-            onEdit={canEdit ? () => handleEdit(task) : undefined}
-            onDuplicate={() => handleDuplicate(task)}
-            onDelete={canEdit ? () => handleDelete(task) : undefined}
-            editLabel="Editar"
-            duplicateLabel="Duplicar"
-            deleteLabel="Eliminar"
-            additionalButtons={[
-              <Button
-                key="view"
-                variant="default"
-                size="sm"
-                onClick={() => handleView(task.id)}
-                className="h-8 px-3 gap-2"
-              >
-                <Eye className="h-3.5 w-3.5" />
-                Ver Detalle
-              </Button>
-            ]}
-          />
-        );
-      }
     }
   ]
 
@@ -345,6 +312,33 @@ export default function TaskList() {
           onClick={() => openModal('analysis-task', { taskId: task.id })}
         />
       )}
+      rowActions={(task) => {
+        const canEdit = !task.is_system && task.organization_id === userData?.organization?.id;
+        
+        return [
+          {
+            icon: Eye,
+            label: 'Ver Detalle',
+            onClick: () => handleView(task.id)
+          },
+          ...(canEdit ? [{
+            icon: Edit,
+            label: 'Editar',
+            onClick: () => handleEdit(task)
+          }] : []),
+          {
+            icon: Copy,
+            label: 'Duplicar',
+            onClick: () => handleDuplicate(task)
+          },
+          ...(canEdit ? [{
+            icon: Trash2,
+            label: 'Eliminar',
+            onClick: () => handleDelete(task),
+            variant: 'destructive' as const
+          }] : [])
+        ];
+      }}
       topBar={{
         leftModeButtons: {
           options: [

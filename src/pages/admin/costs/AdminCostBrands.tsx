@@ -101,31 +101,6 @@ const AdminCostBrands = () => {
           <span className="font-medium text-sm">{brand.name}</span>
         </div>
       )
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      width: '10%',
-      render: (brand: Brand) => (
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEdit(brand)}
-            className="h-7 w-7 p-0"
-          >
-            <Edit className="h-3 w-3" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(brand)}
-            className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
-        </div>
-      )
     }
   ]
 
@@ -135,6 +110,19 @@ const AdminCostBrands = () => {
         data={sortedBrands}
         columns={columns}
         isLoading={isLoading}
+        rowActions={(brand: Brand) => [
+          {
+            icon: Edit,
+            label: 'Editar',
+            onClick: () => handleEdit(brand)
+          },
+          {
+            icon: Trash2,
+            label: 'Eliminar',
+            onClick: () => handleDelete(brand),
+            variant: 'destructive' as const
+          }
+        ]}
         renderCard={(brand) => (
           <AdminBrandRow
             brand={brand}

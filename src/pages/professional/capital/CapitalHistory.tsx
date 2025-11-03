@@ -175,31 +175,6 @@ export function CapitalHistory({
           </div>
         )
       }
-    },
-    {
-      key: "actions",
-      label: "Acciones",
-      width: "1fr",
-      render: (item: CapitalMovement) => (
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onEdit(item)}
-            className=""
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onDelete(item)}
-            className=" text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )
     }
   ]
 
@@ -211,6 +186,19 @@ export function CapitalHistory({
           columns={detailColumns}
           defaultSort={{ key: 'movement_date', direction: 'desc' }}
           getItemId={(item) => item.id || 'unknown'}
+          rowActions={(item) => [
+            {
+              icon: Edit,
+              label: 'Editar',
+              onClick: () => onEdit(item)
+            },
+            {
+              icon: Trash2,
+              label: 'Eliminar',
+              onClick: () => onDelete(item),
+              variant: 'destructive' as const
+            }
+          ]}
         />
       ) : (
         <EmptyState

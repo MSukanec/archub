@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Edit, FileText, Calculator, Plus, Package, DollarSign, TrendingUp } from 'lucide-react';
+import { Edit, FileText, Calculator, Plus, Package, DollarSign, TrendingUp, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
@@ -168,43 +168,6 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
           </span>
         );
       }
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      render: (item: any) => (
-        <div className="flex items-center gap-1">
-          {editingTaskId === item.id ? (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 text-xs"
-                onClick={() => handleSaveTask(item.id, item)}
-              >
-                Guardar
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 text-xs"
-                onClick={handleCancelEdit}
-              >
-                Cancelar
-              </Button>
-            </>
-          ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              className=""
-              onClick={() => handleEditTask(item.id)}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-      )
     }
   ];
 
@@ -415,6 +378,29 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
         columns={columns}
         searchKey="task_name"
         searchPlaceholder="Buscar tareas adjudicadas..."
+        rowActions={(item) => {
+          if (editingTaskId === item.id) {
+            return [
+              {
+                icon: Check,
+                label: 'Guardar',
+                onClick: () => handleSaveTask(item.id, item)
+              },
+              {
+                icon: X,
+                label: 'Cancelar',
+                onClick: handleCancelEdit
+              }
+            ];
+          }
+          return [
+            {
+              icon: Edit,
+              label: 'Editar',
+              onClick: () => handleEditTask(item.id)
+            }
+          ];
+        }}
       />
     </div>
   );

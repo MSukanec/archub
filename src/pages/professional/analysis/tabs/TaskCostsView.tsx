@@ -345,33 +345,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
           {formatCurrency(cost.total_price)}
         </div>
       )
-    },
-    // Solo mostrar acciones si el usuario es administrador
-    ...(isAdmin ? [{
-      key: 'actions',
-      label: 'Acciones',
-      sortable: false,
-      render: (cost: any) => (
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => handleEditCost(cost)}
-            className="h-8 w-8 p-0"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => handleDeleteCost(cost)}
-            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )
-    }] : [])
+    }
   ];
 
   return (
@@ -732,6 +706,19 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
           data={filteredCosts}
           columns={groupBy === 'tipo' ? columns.filter(col => col.key !== 'type') : columns}
           groupBy={groupBy === 'tipo' ? 'type' : undefined}
+          rowActions={isAdmin ? (cost) => [
+            {
+              icon: Edit,
+              label: 'Editar',
+              onClick: () => handleEditCost(cost)
+            },
+            {
+              icon: Trash2,
+              label: 'Eliminar',
+              onClick: () => handleDeleteCost(cost),
+              variant: 'destructive' as const
+            }
+          ] : undefined}
           renderGroupHeader={(groupKey: string, groupRows: any[]) => {
             // Calcular total del grupo
             const groupTotal = groupRows.reduce((sum, cost) => sum + (cost.total_price || 0), 0);

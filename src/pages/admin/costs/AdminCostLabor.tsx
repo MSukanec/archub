@@ -286,44 +286,6 @@ const AdminCostLabor = () => {
           {laborType.is_system ? 'Sistema' : 'Organización'}
         </Badge>
       )
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      width: '8%',
-      sortable: false,
-      render: (laborType: LaborType) => (
-        isAdmin ? (
-          <div className="flex gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleEdit(laborType)}
-              className="h-8 w-8 p-0"
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleDuplicate(laborType)}
-              className="h-8 w-8 p-0"
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleDelete(laborType)}
-              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        ) : (
-          <div className="text-xs text-muted-foreground">Solo admins</div>
-        )
-      )
     }
   ];
 
@@ -333,6 +295,24 @@ const AdminCostLabor = () => {
       data={processedLaborTypes}
       isLoading={isLoading}
       groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+      rowActions={isAdmin ? (laborType: LaborType) => [
+        {
+          icon: Edit,
+          label: 'Editar',
+          onClick: () => handleEdit(laborType)
+        },
+        {
+          icon: Copy,
+          label: 'Duplicar',
+          onClick: () => handleDuplicate(laborType)
+        },
+        {
+          icon: Trash2,
+          label: 'Eliminar',
+          onClick: () => handleDelete(laborType),
+          variant: 'destructive' as const
+        }
+      ] : undefined}
       topBar={{
         showSearch: true,
         searchValue: searchValue,

@@ -342,51 +342,6 @@ const AdminTaskList = () => {
           )}
         </div>
       )
-    },
-    { 
-      key: 'actions', 
-      label: 'Acciones', 
-      width: '8%',
-      render: (task: GeneratedTask) => (
-        <div className="flex items-center justify-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleView(task)}
-            className="h-8 w-8 p-0"
-            title="Ver detalles"
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEdit(task)}
-            className="h-8 w-8 p-0"
-            title="Editar tarea"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDuplicate(task)}
-            className="h-8 w-8 p-0"
-            title="Duplicar tarea"
-          >
-            <Copy className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(task)}
-            className="h-8 w-8 p-0"
-            title="Eliminar tarea"
-          >
-            <Trash2 className="h-4 w-4 text-red-500" />
-          </Button>
-        </div>
-      )
     }
   ]
 
@@ -427,6 +382,29 @@ const AdminTaskList = () => {
             columns={columns}
             isLoading={isLoading}
             groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+            rowActions={(task: GeneratedTask) => [
+              {
+                icon: Eye,
+                label: 'Ver detalles',
+                onClick: () => handleView(task)
+              },
+              {
+                icon: Edit,
+                label: 'Editar',
+                onClick: () => handleEdit(task)
+              },
+              {
+                icon: Copy,
+                label: 'Duplicar',
+                onClick: () => handleDuplicate(task)
+              },
+              {
+                icon: Trash2,
+                label: 'Eliminar',
+                onClick: () => handleDelete(task),
+                variant: 'destructive' as const
+              }
+            ]}
             topBar={{
               tabs: ['Sin Agrupar', 'Por Rubros'],
               activeTab: groupingType === 'none' ? 'Sin Agrupar' : 'Por Rubros',

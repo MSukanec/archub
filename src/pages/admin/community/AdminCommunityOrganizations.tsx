@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
-import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -414,17 +413,6 @@ const AdminCommunityOrganizations = () => {
         </span>
       ),
     },
-    {
-      key: 'actions',
-      label: '',
-      width: '8%',
-      render: (organization: Organization) => (
-        <TableActionButtons
-          onEdit={() => handleEdit(organization)}
-          onDelete={() => handleDelete(organization)}
-        />
-      ),
-    },
   ];
 
   return (
@@ -434,6 +422,19 @@ const AdminCommunityOrganizations = () => {
         columns={tableColumns}
         data={filteredOrganizations}
         isLoading={isLoading}
+        rowActions={(organization) => [
+          {
+            icon: Edit,
+            label: 'Editar',
+            onClick: () => handleEdit(organization)
+          },
+          {
+            icon: Trash2,
+            label: 'Eliminar',
+            onClick: () => handleDelete(organization),
+            variant: 'destructive' as const
+          }
+        ]}
         renderCard={(organization) => (
           <AdminOrganizationRow
             organization={organization}

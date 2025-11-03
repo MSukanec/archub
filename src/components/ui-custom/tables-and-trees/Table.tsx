@@ -11,7 +11,8 @@ import {
   Download,
   Group,
   FileText,
-  Upload
+  Upload,
+  MoreHorizontal
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui-custom/security/EmptyState";
@@ -193,6 +201,13 @@ interface TableProps<T = any> {
     rightActions?: React.ReactNode;
   };
   showDoubleHeader?: boolean;
+  // 🆕 SISTEMA DE ACCIONES CON MENÚ DE TRES PUNTOS
+  rowActions?: (item: T) => Array<{
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    onClick: () => void;
+    variant?: 'default' | 'destructive';
+  }>;
 }
 
 export { ProjectBadge };
@@ -223,6 +238,8 @@ export function Table<T = any>({
   // 🆕 DOBLE ENCABEZADO LEGACY
   headerActions,
   showDoubleHeader = false,
+  // 🆕 SISTEMA DE ACCIONES CON MENÚ DE TRES PUNTOS
+  rowActions,
 }: TableProps<T>) {
   // Estados internos para funcionalidad estándar
   const [sortKey, setSortKey] = useState<string | null>(
@@ -785,7 +802,12 @@ export function Table<T = any>({
       baseColumns = widths.join(" ");
     }
     
-    return selectable ? `40px ${baseColumns}` : baseColumns;
+    const hasActions = !!rowActions;
+    return [
+      selectable ? "40px" : "",
+      baseColumns,
+      hasActions ? "40px" : ""
+    ].filter(Boolean).join(" ");
   };
 
   // Function to get sort icon for column header
@@ -935,6 +957,7 @@ export function Table<T = any>({
               </button>
             );
           })}
+          {rowActions && <div></div>}
         </div>
 
         {/* Table Rows con agrupamiento */}
@@ -1032,6 +1055,54 @@ export function Table<T = any>({
                         </div>
                       );
                     })}
+                    {rowActions && (
+                      <div className="flex items-center justify-center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            {(() => {
+                              const actions = rowActions(item);
+                              const defaultActions = actions.filter(a => a.variant !== 'destructive');
+                              const destructiveActions = actions.filter(a => a.variant === 'destructive');
+                              
+                              return (
+                                <>
+                                  {defaultActions.map((action, idx) => (
+                                    <DropdownMenuItem
+                                      key={idx}
+                                      onClick={action.onClick}
+                                      className="flex items-center gap-2 text-xs cursor-pointer"
+                                    >
+                                      <action.icon className="h-3.5 w-3.5" />
+                                      {action.label}
+                                    </DropdownMenuItem>
+                                  ))}
+                                  {destructiveActions.length > 0 && <DropdownMenuSeparator />}
+                                  {destructiveActions.map((action, idx) => (
+                                    <DropdownMenuItem
+                                      key={idx}
+                                      onClick={action.onClick}
+                                      className="flex items-center gap-2 text-xs cursor-pointer text-destructive focus:text-destructive"
+                                    >
+                                      <action.icon className="h-3.5 w-3.5" />
+                                      {action.label}
+                                    </DropdownMenuItem>
+                                  ))}
+                                </>
+                              );
+                            })()}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    )}
                   </div>
                 ))}
               </Fragment>
@@ -1078,6 +1149,54 @@ export function Table<T = any>({
                     </div>
                   );
                 })}
+                {rowActions && (
+                  <div className="flex items-center justify-center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        {(() => {
+                          const actions = rowActions(item);
+                          const defaultActions = actions.filter(a => a.variant !== 'destructive');
+                          const destructiveActions = actions.filter(a => a.variant === 'destructive');
+                          
+                          return (
+                            <>
+                              {defaultActions.map((action, idx) => (
+                                <DropdownMenuItem
+                                  key={idx}
+                                  onClick={action.onClick}
+                                  className="flex items-center gap-2 text-xs cursor-pointer"
+                                >
+                                  <action.icon className="h-3.5 w-3.5" />
+                                  {action.label}
+                                </DropdownMenuItem>
+                              ))}
+                              {destructiveActions.length > 0 && <DropdownMenuSeparator />}
+                              {destructiveActions.map((action, idx) => (
+                                <DropdownMenuItem
+                                  key={idx}
+                                  onClick={action.onClick}
+                                  className="flex items-center gap-2 text-xs cursor-pointer text-destructive focus:text-destructive"
+                                >
+                                  <action.icon className="h-3.5 w-3.5" />
+                                  {action.label}
+                                </DropdownMenuItem>
+                              ))}
+                            </>
+                          );
+                        })()}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                )}
               </div>
             ))
           ) : null}
@@ -1139,11 +1258,59 @@ export function Table<T = any>({
             <div
               key={getItemId(item)}
               className={cn(
-                "p-3 border border-[var(--card-border)] rounded-lg mb-2 bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] transition-colors cursor-pointer",
+                "p-3 border border-[var(--card-border)] rounded-lg mb-2 bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] transition-colors cursor-pointer relative",
                 getRowClassName?.(item),
               )}
               onClick={() => onCardClick?.(item)}
             >
+              {rowActions && (
+                <div className="absolute top-2 right-2" onClick={(e) => e.stopPropagation()}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="h-6 w-6"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      {(() => {
+                        const actions = rowActions(item);
+                        const defaultActions = actions.filter(a => a.variant !== 'destructive');
+                        const destructiveActions = actions.filter(a => a.variant === 'destructive');
+                        
+                        return (
+                          <>
+                            {defaultActions.map((action, idx) => (
+                              <DropdownMenuItem
+                                key={idx}
+                                onClick={action.onClick}
+                                className="flex items-center gap-2 text-xs cursor-pointer"
+                              >
+                                <action.icon className="h-3.5 w-3.5" />
+                                {action.label}
+                              </DropdownMenuItem>
+                            ))}
+                            {destructiveActions.length > 0 && <DropdownMenuSeparator />}
+                            {destructiveActions.map((action, idx) => (
+                              <DropdownMenuItem
+                                key={idx}
+                                onClick={action.onClick}
+                                className="flex items-center gap-2 text-xs cursor-pointer text-destructive focus:text-destructive"
+                              >
+                                <action.icon className="h-3.5 w-3.5" />
+                                {action.label}
+                              </DropdownMenuItem>
+                            ))}
+                          </>
+                        );
+                      })()}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
               {selectable && (
                 <div className="flex items-center justify-between mb-2 pb-2 border-b">
                   <span className="text-xs font-medium text-muted-foreground">

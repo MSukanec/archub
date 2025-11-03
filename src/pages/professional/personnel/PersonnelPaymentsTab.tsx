@@ -420,24 +420,13 @@ export default function PersonnelPaymentsTab({
               </span>
             )
           }
-        },
+        }
+      ]}
+      rowActions={(record: any) => [
         {
-          key: "actions",
-          label: "Acciones",
-          width: "15%",
-          sortable: false,
-          render: (record: any) => (
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => openModal('personnelRates', { personnelRecord: record })}
-                data-testid={`button-rates-${record.id}`}
-              >
-                <DollarSign className="h-4 w-4" />
-              </Button>
-            </div>
-          )
+          label: 'Tarifas',
+          icon: DollarSign,
+          onClick: () => openModal('personnelRates', { personnelRecord: record })
         }
       ]}
       getItemId={(record: any) => record.id}

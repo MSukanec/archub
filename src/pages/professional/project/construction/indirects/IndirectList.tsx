@@ -226,38 +226,6 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
           </Badge>
         );
       }
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      render: (indirect: any) => (
-        <div className="flex gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleView(indirect.id)}
-            className=""
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEdit(indirect)}
-            className=""
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(indirect)}
-            className=" text-red-600 hover:text-red-700 hover:bg-red-50"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )
     }
   ];
 
@@ -446,6 +414,24 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
           data={filteredIndirects}
           columns={columns}
           getItemId={(record: any) => record.id}
+          rowActions={(indirect) => [
+            {
+              icon: Eye,
+              label: 'Ver',
+              onClick: () => handleView(indirect.id)
+            },
+            {
+              icon: Edit,
+              label: 'Editar',
+              onClick: () => handleEdit(indirect)
+            },
+            {
+              icon: Trash2,
+              label: 'Eliminar',
+              onClick: () => handleDelete(indirect),
+              variant: 'destructive' as const
+            }
+          ]}
         />
       )}
     </div>

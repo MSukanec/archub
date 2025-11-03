@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X, Pencil, Upload, Wallet, Home, Bell } from "lucide-react";
@@ -1146,121 +1146,79 @@ export default function MovementsList() {
         );
       },
     },
-    {
-      key: "actions",
-      label: "Acciones",
-      width: "8%",
-      sortable: false,
-      render: (item: Movement | ConversionGroup | TransferGroup) => {
-        if ('is_conversion_group' in item) {
-          // Actions for conversion groups
-          const isGroupFavorited = item.movements.some(m => m.is_favorite);
-          return (
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  // Toggle favorite for all movements in the group
-                  item.movements.forEach(movement => {
-                    handleToggleFavorite(movement);
-                  });
-                }}
-                className=" hover:bg-[var(--button-ghost-hover-bg)]"
-              >
-                <Heart className={`w-4 h-4 ${isGroupFavorited ? 'fill-current text-red-500' : ''}`} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleEditConversion(item)}
-                className=" hover:bg-[var(--button-ghost-hover-bg)]"
-              >
-                <Pencil className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleDeleteConversion(item)}
-                className=" hover:bg-[var(--button-ghost-hover-bg)]"
-              >
-                <Trash2 className="w-4 h-4 text-red-500" />
-              </Button>
-            </div>
-          );
-        }
-        
-        if ('is_transfer_group' in item) {
-          // Actions for transfer groups
-          const isGroupFavorited = item.movements.some(m => m.is_favorite);
-          return (
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  // Toggle favorite for all movements in the group
-                  item.movements.forEach(movement => {
-                    handleToggleFavorite(movement);
-                  });
-                }}
-                className=" hover:bg-[var(--button-ghost-hover-bg)]"
-              >
-                <Heart className={`w-4 h-4 ${isGroupFavorited ? 'fill-current text-red-500' : ''}`} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleEditTransfer(item)}
-                className=" hover:bg-[var(--button-ghost-hover-bg)]"
-              >
-                <Pencil className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleDeleteTransfer(item)}
-                className=" hover:bg-[var(--button-ghost-hover-bg)]"
-              >
-                <Trash2 className="w-4 h-4 text-red-500" />
-              </Button>
-            </div>
-          );
-        }
-        
-        // Actions for regular movements
-        return (
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleToggleFavorite(item)}
-              className=" hover:bg-[var(--button-ghost-hover-bg)]"
-            >
-              <Heart className={`w-4 h-4 ${item.is_favorite ? 'fill-current text-red-500' : ''}`} />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleEdit(item)}
-              className=" hover:bg-[var(--button-ghost-hover-bg)]"
-            >
-              <Pencil className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleDelete(item)}
-              className=" hover:bg-[var(--button-ghost-hover-bg)]"
-            >
-              <Trash2 className="w-4 h-4 text-red-500" />
-            </Button>
-          </div>
-        );
-      },
-    },
   ];
 }, [isGeneralMode, projectsMap, handleToggleFavorite, handleEditConversion, handleDeleteConversion, handleEditTransfer, handleDeleteTransfer, handleEdit, handleDelete, organizationCurrencies, organizationWallets, userData?.plan?.name]);
+
+  const getRowActions = useCallback((item: Movement | ConversionGroup | TransferGroup) => {
+    if ('is_conversion_group' in item) {
+      return [
+        {
+          label: 'Favorito',
+          icon: Heart,
+          onClick: () => {
+            item.movements.forEach(movement => {
+              handleToggleFavorite(movement);
+            });
+          }
+        },
+        {
+          label: 'Editar',
+          icon: Pencil,
+          onClick: () => handleEditConversion(item)
+        },
+        {
+          label: 'Eliminar',
+          icon: Trash2,
+          onClick: () => handleDeleteConversion(item),
+          variant: 'destructive' as const
+        }
+      ];
+    }
+    
+    if ('is_transfer_group' in item) {
+      return [
+        {
+          label: 'Favorito',
+          icon: Heart,
+          onClick: () => {
+            item.movements.forEach(movement => {
+              handleToggleFavorite(movement);
+            });
+          }
+        },
+        {
+          label: 'Editar',
+          icon: Pencil,
+          onClick: () => handleEditTransfer(item)
+        },
+        {
+          label: 'Eliminar',
+          icon: Trash2,
+          onClick: () => handleDeleteTransfer(item),
+          variant: 'destructive' as const
+        }
+      ];
+    }
+    
+    return [
+      {
+        label: 'Favorito',
+        icon: Heart,
+        onClick: () => handleToggleFavorite(item)
+      },
+      {
+        label: 'Editar',
+        icon: Pencil,
+        onClick: () => handleEdit(item)
+      },
+      {
+        label: 'Eliminar',
+        icon: Trash2,
+        onClick: () => handleDelete(item),
+        variant: 'destructive' as const
+      }
+    ];
+  }, [handleToggleFavorite, handleEditConversion, handleDeleteConversion, handleEditTransfer, handleDeleteTransfer, handleEdit, handleDelete]);
 
 
 
@@ -1316,6 +1274,7 @@ export default function MovementsList() {
             key: "movement_date",
             direction: "desc",
           }}
+          rowActions={getRowActions}
           topBar={{
             showSearch: true,
             searchValue: searchValue,

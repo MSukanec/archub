@@ -174,45 +174,6 @@ const AdminTaskParameters = () => {
         render: (value: TaskParameterOption) => (
           <div className="text-sm text-muted-foreground">{value.name}</div>
         )
-      },
-      {
-        key: 'actions',
-        label: 'Acciones',
-        render: (value: TaskParameterOption) => (
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => {
-                openModal('task-parameter-option', {
-                  parameterId: parameter.id,
-                  parameterLabel: parameter.label,
-                  option: value
-                });
-              }}
-            >
-              <Edit className="h-3 w-3" />
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-destructive hover:text-destructive"
-              onClick={() => {
-                openModal('delete-confirmation', {
-                  title: 'Eliminar Opción',
-                  description: '¿Estás seguro de que deseas eliminar esta opción?',
-                  itemName: value.label,
-                  onConfirm: () => {
-                    deleteOptionMutation.mutate(value.id);
-                  }
-                });
-              }}
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
-          </div>
-        ),
-        sortable: false
       }
     ];
 
@@ -234,6 +195,34 @@ const AdminTaskParameters = () => {
         <Table
           data={parameterValues}
           columns={columns}
+          rowActions={(value: TaskParameterOption) => [
+            {
+              icon: Edit,
+              label: 'Editar',
+              onClick: () => {
+                openModal('task-parameter-option', {
+                  parameterId: parameter.id,
+                  parameterLabel: parameter.label,
+                  option: value
+                });
+              }
+            },
+            {
+              icon: Trash2,
+              label: 'Eliminar',
+              onClick: () => {
+                openModal('delete-confirmation', {
+                  title: 'Eliminar Opción',
+                  description: '¿Estás seguro de que deseas eliminar esta opción?',
+                  itemName: value.label,
+                  onConfirm: () => {
+                    deleteOptionMutation.mutate(value.id);
+                  }
+                });
+              },
+              variant: 'destructive' as const
+            }
+          ]}
         />
       </div>
     );

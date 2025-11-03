@@ -1,12 +1,11 @@
 import { Button } from '@/components/ui/button'
-import { Plus, BookOpen } from 'lucide-react'
+import { Plus, BookOpen, Eye, Edit, Trash2 } from 'lucide-react'
 import { useAdminCourses } from '@/hooks/use-admin-courses'
 import { useToast } from '@/hooks/use-toast'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useLocation } from 'wouter'
@@ -118,27 +117,6 @@ export default function AdminCourseListTab() {
           {format(new Date(course.created_at), 'dd/MM/yyyy', { locale: es })}
         </div>
       )
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      render: (course: any) => (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => handleViewCourse(course.id)}
-            className="h-8 px-3 text-xs"
-            data-testid={`button-view-course-${course.id}`}
-          >
-            Editar
-          </Button>
-          <TableActionButtons
-            onEdit={() => handleEditCourse(course)}
-            onDelete={() => handleDeleteCourse(course)}
-          />
-        </div>
-      )
     }
   ];
 
@@ -149,6 +127,24 @@ export default function AdminCourseListTab() {
           data={courses}
           columns={courseColumns}
           isLoading={coursesLoading}
+          rowActions={(course) => [
+            {
+              icon: Eye,
+              label: 'Ver',
+              onClick: () => handleViewCourse(course.id)
+            },
+            {
+              icon: Edit,
+              label: 'Editar',
+              onClick: () => handleEditCourse(course)
+            },
+            {
+              icon: Trash2,
+              label: 'Eliminar',
+              onClick: () => handleDeleteCourse(course),
+              variant: 'destructive' as const
+            }
+          ]}
           emptyState={
             <EmptyState
               icon={<BookOpen className="w-12 h-12" />}

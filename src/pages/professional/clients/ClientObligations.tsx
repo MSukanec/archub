@@ -470,50 +470,6 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
           </div>
         )
       }
-    },
-    {
-      key: "actions",
-      label: "Acciones",
-      width: "14.29%",
-      render: (item: any) => {
-        return (
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              className=" hover:bg-[var(--button-ghost-hover-bg)]"
-              onClick={() => {
-                openModal('project-client', {
-                  projectId,
-                  organizationId,
-                  editingClient: item,
-                  isEditing: true
-                })
-              }}
-            >
-              <Edit2 className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className=" hover:bg-[var(--button-ghost-hover-bg)]"
-              onClick={() => {
-                openModal('delete-confirmation', {
-                  mode: 'dangerous',
-                  title: 'Eliminar Compromiso de Pago',
-                  description: `Esta acción eliminará permanentemente el compromiso de pago de ${item.contacts?.company_name || item.contacts?.full_name || 'este cliente'}. Esta acción no se puede deshacer.`,
-                  itemName: item.contacts?.company_name || item.contacts?.full_name || 'Sin nombre',
-                  itemType: 'compromiso',
-                  destructiveActionText: 'Eliminar Compromiso',
-                  onConfirm: () => deleteClientMutation.mutate(item.id)
-                })
-              }}
-            >
-              <Trash2 className="w-4 h-4 text-red-500" />
-            </Button>
-          </div>
-        )
-      }
     }
   ]
 
@@ -821,6 +777,36 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
             columns={contactSummaryColumns}
             defaultSort={{ key: 'unit', direction: 'asc' }}
             getItemId={(item) => item.id || 'unknown'}
+            rowActions={(item) => [
+              {
+                icon: Edit2,
+                label: 'Editar',
+                onClick: () => {
+                  openModal('project-client', {
+                    projectId,
+                    organizationId,
+                    editingClient: item,
+                    isEditing: true
+                  })
+                }
+              },
+              {
+                icon: Trash2,
+                label: 'Eliminar',
+                onClick: () => {
+                  openModal('delete-confirmation', {
+                    mode: 'dangerous',
+                    title: 'Eliminar Compromiso de Pago',
+                    description: `Esta acción eliminará permanentemente el compromiso de pago de ${item.contacts?.company_name || item.contacts?.full_name || 'este cliente'}. Esta acción no se puede deshacer.`,
+                    itemName: item.contacts?.company_name || item.contacts?.full_name || 'Sin nombre',
+                    itemType: 'compromiso',
+                    destructiveActionText: 'Eliminar Compromiso',
+                    onConfirm: () => deleteClientMutation.mutate(item.id)
+                  })
+                },
+                variant: 'destructive' as const
+              }
+            ]}
           />
         </div>
       )}

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
 import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
-import { Folder, Plus, Home, Search, Filter, Bell } from 'lucide-react'
+import { Folder, Plus, Home, Search, Filter, Bell, Eye, Play, ArrowRight, Edit, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -17,8 +17,6 @@ import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Eye, Play, ArrowRight } from 'lucide-react'
-import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons'
 import { usePlanFeatures } from '@/hooks/usePlanFeatures'
 
 export default function Projects() {
@@ -272,38 +270,30 @@ export default function Projects() {
           {project.created_at ? format(new Date(project.created_at), 'dd/MM/yyyy', { locale: es }) : 'Sin fecha'}
         </div>
       )
+    }
+  ]
+
+  const getProjectRowActions = (project: any) => [
+    {
+      label: 'Ir al proyecto',
+      icon: ArrowRight,
+      onClick: () => handleSelectProject(project.id)
     },
     {
-      key: 'actions',
-      label: 'Acciones',
-      render: (project: any) => (
-        <TableActionButtons
-          onEdit={() => handleEdit(project)}
-          onDelete={() => handleDeleteClick(project)}
-          additionalButtons={[
-            <Button
-              key="go-to-project"
-              variant="default"
-              size="sm"
-              onClick={() => handleSelectProject(project.id)}
-              className="h-8 gap-2"
-            >
-              <ArrowRight className="h-4 w-4" />
-              <span>Ir al proyecto</span>
-            </Button>,
-            <Button
-              key="view"
-              variant="default"
-              size="sm"
-              onClick={() => handleViewDetail(project.id)}
-              className="h-8 gap-2"
-            >
-              <Eye className="h-4 w-4" />
-              <span>Ver detalle</span>
-            </Button>
-          ]}
-        />
-      )
+      label: 'Ver detalle',
+      icon: Eye,
+      onClick: () => handleViewDetail(project.id)
+    },
+    {
+      label: 'Editar',
+      icon: Edit,
+      onClick: () => handleEdit(project)
+    },
+    {
+      label: 'Eliminar',
+      icon: Trash2,
+      onClick: () => handleDeleteClick(project),
+      variant: 'destructive' as const
     }
   ]
 
@@ -428,6 +418,7 @@ export default function Projects() {
                 data={sortedProjects}
                 columns={columns}
                 isLoading={projectsLoading}
+                rowActions={getProjectRowActions}
                 emptyState={
                   <EmptyState
                     icon={<Folder className="w-12 h-12" />}
