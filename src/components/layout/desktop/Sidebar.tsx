@@ -198,16 +198,18 @@ export function Sidebar() {
                 "flex flex-col gap-[2px]",
                 isExpanded ? "px-[9px]" : "items-center"
               )}>
-                {/* Logo */}
-                <div className="h-16 flex items-center justify-center mb-2">
-                  <img 
-                    src="/ArchubLogo.png" 
-                    alt="Archub Logo" 
-                    className={cn(
-                      "object-contain transition-all duration-150",
-                      isExpanded ? "h-12 w-auto" : "h-8 w-8"
-                    )}
-                  />
+                {/* Logo - siempre pequeño y centrado */}
+                <div className="h-12 flex items-center justify-center mb-2">
+                  <button
+                    onClick={() => navigate('/home')}
+                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                  >
+                    <img 
+                      src="/ArchubLogo.png" 
+                      alt="Archub Logo" 
+                      className="h-8 w-auto object-contain"
+                    />
+                  </button>
                 </div>
                 
                 {/* Botón Inicio */}
@@ -470,9 +472,8 @@ export function Sidebar() {
                 "flex flex-col gap-[2px]",
                 isExpanded ? "px-[9px]" : "items-center"
               )}>
-                {/* LOGO Y SELECTORES COMENTADOS PARA PRUEBA */}
-                {/* {/* Logo - presente en TODOS los sidebars */}
-                {/* <div className="h-16 flex items-center justify-center mb-2">
+                {/* Logo - presente en TODOS los sidebars, siempre lleva a /home */}
+                <div className="h-12 flex items-center justify-center mb-2">
                   <button
                     onClick={() => {
                       setSidebarLevel('general');
@@ -483,13 +484,10 @@ export function Sidebar() {
                     <img 
                       src="/ArchubLogo.png" 
                       alt="Archub Logo" 
-                      className={cn(
-                        "object-contain transition-all duration-150",
-                        isExpanded ? "h-12 w-auto" : "h-8 w-8"
-                      )}
+                      className="h-8 w-auto object-contain"
                     />
                   </button>
-                </div> */}
+                </div>
 
                 {/* {/* Selector de Organización - solo en sidebar de organización */}
                 {/* {sidebarLevel === 'organization' && (
