@@ -55,10 +55,12 @@ create table public.personnel_attendees (
   updated_at timestamp with time zone null default now(),
   project_id uuid null,
   personnel_id uuid null,
+  organization_id uuid null,
   constraint site_log_attendees_pkey primary key (id),
-  constraint attendees_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
   constraint attendees_personnel_id_fkey foreign KEY (personnel_id) references project_personnel (id) on delete set null,
   constraint attendees_project_id_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
+  constraint attendees_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
+  constraint personnel_attendees_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
   constraint attendees_site_log_id_fkey foreign KEY (site_log_id) references site_logs (id) on delete set null,
   constraint site_log_attendees_attendance_type_check check (
     (

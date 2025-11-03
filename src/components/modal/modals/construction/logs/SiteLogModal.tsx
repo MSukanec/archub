@@ -270,7 +270,8 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
           hours_worked: attendee.hours_worked || 8,
           description: attendee.description || attendee.notes || '',
           created_by: currentMember.id,
-          project_id: currentUser?.preferences?.last_project_id || ''
+          project_id: currentUser?.preferences?.last_project_id || '',
+          organization_id: currentUser?.organization?.id || ''
         }));
 
         const { error: attendeesError } = await supabase

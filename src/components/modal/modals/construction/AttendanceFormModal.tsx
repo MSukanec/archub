@@ -161,6 +161,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
           description: data.description,
           created_by: currentMember.id, // Usar el ID del organization member
           project_id: projectId,
+          organization_id: currentUser.organization.id, // Nueva columna requerida
           created_at: data.attendance_date.toISOString(),
           updated_at: new Date().toISOString()
         })

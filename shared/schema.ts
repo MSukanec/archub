@@ -455,7 +455,20 @@ export const project_personnel = pgTable("project_personnel", {
   created_at: timestamp("created_at").defaultNow(),
 });
 
-
+// Personnel Attendees Table
+export const personnel_attendees = pgTable("personnel_attendees", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  site_log_id: uuid("site_log_id"), // Nullable - puede ser null para asistencias sin log
+  personnel_id: uuid("personnel_id").notNull(), // FK to project_personnel
+  attendance_type: text("attendance_type").notNull(), // 'full' | 'half'
+  hours_worked: real("hours_worked").notNull(),
+  description: text("description"),
+  created_by: uuid("created_by"), // FK to organization_members
+  project_id: uuid("project_id").notNull(),
+  organization_id: uuid("organization_id").notNull(), // Nueva columna agregada
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
 
 export const insertTaskParameterPositionSchema = createInsertSchema(task_parameter_positions).omit({
   id: true,
@@ -515,7 +528,14 @@ export const insertProjectPersonnelSchema = createInsertSchema(project_personnel
   created_at: true,
 });
 
+export const insertPersonnelAttendeeSchema = createInsertSchema(personnel_attendees).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 
+export type PersonnelAttendee = typeof personnel_attendees.$inferSelect;
+export type InsertPersonnelAttendee = z.infer<typeof insertPersonnelAttendeeSchema>;
 
 export type InsertUserData = z.infer<typeof insertUserDataSchema>;
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
