@@ -171,10 +171,13 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
         .insert(personnelToInsert);
 
       if (error) throw error;
+      
+      // Retornar projectId para usar en onSuccess
+      return { projectId };
     },
-    onSuccess: async () => {
-      // Forzar refetch inmediato para actualizar la lista
-      await queryClient.refetchQueries({ queryKey: ['project-personnel'] });
+    onSuccess: async (data) => {
+      // Forzar refetch inmediato para actualizar la lista con el projectId correcto
+      await queryClient.refetchQueries({ queryKey: ['project-personnel', data.projectId] });
       toast({
         title: 'Personal agregado',
         description: 'El personal ha sido asignado al proyecto correctamente'

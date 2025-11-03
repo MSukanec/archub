@@ -125,10 +125,6 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
 
   const updatePersonnelMutation = useMutation({
     mutationFn: async (data: PersonnelDataForm) => {
-      console.log('💾 === INICIANDO MUTACIÓN ===')
-      console.log('📝 Datos del formulario:', data)
-      console.log('🆔 Personnel ID:', personnelRecord?.id)
-      
       if (!supabase) throw new Error('Supabase no inicializado')
       if (!personnelRecord?.id) throw new Error('No se encontró el registro de personal')
 
@@ -141,26 +137,21 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
         updated_at: new Date().toISOString()
       }
 
-      console.log('📤 Datos a actualizar en DB:', updateData)
-
-      const { data: result, error } = await supabase
+      const { error } = await supabase
         .from('project_personnel')
         .update(updateData)
         .eq('id', personnelRecord.id)
-        .select()
 
-      console.log('✅ Resultado de update:', result)
-      if (error) {
-        console.error('❌ Error en update:', error)
-        throw error
-      }
+      if (error) throw error
     },
-    onSuccess: () => {
-      // Invalidar con el mismo patrón de queryKey que usa PersonnelListTab
+    onSuccess: async () => {
+      // Refetch con el mismo patrón de queryKey que usa PersonnelListTab
       // Usar el project_id del personnelRecord para asegurar que coincida
       const invalidateProjectId = personnelRecord?.project_id || projectId
-      console.log('🔄 Invalidando cache para project:', invalidateProjectId)
-      queryClient.invalidateQueries({ queryKey: ['project-personnel', invalidateProjectId] })
+      
+      // ESPERAR a que los datos frescos se carguen antes de cerrar el modal
+      await queryClient.refetchQueries({ queryKey: ['project-personnel', invalidateProjectId] })
+      
       toast({
         title: 'Datos actualizados',
         description: 'La información del personal se ha actualizado correctamente'
@@ -178,7 +169,6 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
   })
 
   const handleSubmit = (data: PersonnelDataForm) => {
-    console.log('🚀 handleSubmit llamado con data:', data)
     updatePersonnelMutation.mutate(data)
   }
 
@@ -353,19 +343,12 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
     />
   )
 
-  const handleSaveClick = () => {
-    console.log('🔘 Botón Guardar presionado')
-    console.log('📋 Form errors:', form.formState.errors)
-    console.log('📋 Form values:', form.getValues())
-    form.handleSubmit(handleSubmit)()
-  }
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
       rightLabel="Guardar Cambios"
-      onRightClick={handleSaveClick}
+      onRightClick={form.handleSubmit(handleSubmit)}
       submitDisabled={isLoading}
       showLoadingSpinner={isLoading}
     />

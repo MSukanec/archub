@@ -104,8 +104,6 @@ export default function PersonnelListTab({
 
   const { data: personnelData = [], isLoading: isPersonnelLoading } = useQuery({
     queryKey: ['project-personnel', selectedProjectId],
-    staleTime: 0, // Forzar refetch para debugging
-    refetchOnMount: true,
     queryFn: async () => {
       if (!selectedProjectId) return []
       
@@ -131,13 +129,7 @@ export default function PersonnelListTab({
         `)
         .eq('project_id', selectedProjectId)
 
-      console.log('🔍 === RAW DATA FROM SUPABASE ===')
-      console.log('📦 Total records:', data?.length)
-      console.log('📄 First record:', JSON.stringify(data?.[0], null, 2))
-      if (error) {
-        console.error('❌ Supabase error:', error)
-        throw error
-      }
+      if (error) throw error
       
       // Helper para obtener nombre
       const getDisplayName = (contact: any) => {
@@ -193,15 +185,10 @@ export default function PersonnelListTab({
     // Tratar NULL como 'active' por defecto (para registros antiguos)
     const personStatus = person.status || 'active'
     
-    // DEBUG: Ver qué status tienen los registros
-    console.log(`👤 ${person.displayName}: status="${person.status}" → personStatus="${personStatus}"`)
-    
     if (statusFilter === 'active') return personStatus === 'active'
     if (statusFilter === 'inactive') return personStatus === 'inactive' || personStatus === 'absent'
     return true
   })
-  
-  console.log(`📊 Total personnel: ${personnelData.length}, Filtered (${statusFilter}): ${filteredPersonnelData.length}`)
 
   return (
     <Table
