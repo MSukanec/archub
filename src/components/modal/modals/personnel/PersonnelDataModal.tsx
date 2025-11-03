@@ -125,6 +125,10 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
 
   const updatePersonnelMutation = useMutation({
     mutationFn: async (data: PersonnelDataForm) => {
+      console.log('💾 === INICIANDO MUTACIÓN ===')
+      console.log('📝 Datos del formulario:', data)
+      console.log('🆔 Personnel ID:', personnelRecord?.id)
+      
       if (!supabase) throw new Error('Supabase no inicializado')
       if (!personnelRecord?.id) throw new Error('No se encontró el registro de personal')
 
@@ -137,12 +141,19 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
         updated_at: new Date().toISOString()
       }
 
-      const { error } = await supabase
+      console.log('📤 Datos a actualizar en DB:', updateData)
+
+      const { data: result, error } = await supabase
         .from('project_personnel')
         .update(updateData)
         .eq('id', personnelRecord.id)
+        .select()
 
-      if (error) throw error
+      console.log('✅ Resultado de update:', result)
+      if (error) {
+        console.error('❌ Error en update:', error)
+        throw error
+      }
     },
     onSuccess: () => {
       // Invalidar con el mismo patrón de queryKey que usa PersonnelListTab
@@ -167,6 +178,7 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
   })
 
   const handleSubmit = (data: PersonnelDataForm) => {
+    console.log('🚀 handleSubmit llamado con data:', data)
     updatePersonnelMutation.mutate(data)
   }
 
