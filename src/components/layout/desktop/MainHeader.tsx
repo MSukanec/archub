@@ -26,23 +26,23 @@ export function MainHeader({ icon, title }: MainHeaderProps) {
 
   return (
     <div 
-      className="w-full h-[50px] border-b flex items-center justify-between z-50 px-16"
+      className="w-full h-[50px] border-b flex items-center justify-between z-50 px-16 py-0"
       style={{ 
         backgroundColor: "var(--main-sidebar-bg)",
         borderBottomColor: "var(--main-sidebar-border)"
       }}
     >
-      <div className="w-full flex items-center justify-between h-full">
+      <div className="w-full flex items-center justify-between">
         {/* Left side: Icon + Title */}
-        <div className="flex items-center gap-3 h-full">
-          <PageIcon className="w-6 h-6 text-accent" />
-          <h1 className="text-xl font-semibold" style={{ color: "#ffffff" }}>
+        <div className="flex items-center gap-3">
+          <PageIcon className="w-6 h-6 main-header-icon" />
+          <h1 className="text-xl font-semibold main-header-title">
             {currentPageName}
           </h1>
         </div>
 
         {/* Right side: Selector */}
-        <div className="flex items-center h-full">
+        <div className="flex items-center">
           {selectorComponent}
         </div>
       </div>

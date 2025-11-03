@@ -717,3 +717,12 @@ input[type="number"] {
 }
 
 /* Remove scrollbar gutter to avoid white border when no scrollbar */
+
+/* Main Header - Force white text color */
+.main-header-title {
+  color: #ffffff !important;
+}
+
+.main-header-icon {
+  color: hsl(var(--accent-hsl)) !important;
+}
