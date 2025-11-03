@@ -146,9 +146,8 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
     mutationFn: async (data: AttendanceForm) => {
       if (!supabase) throw new Error('Supabase not initialized')
       
-      // Find current organization member ID
+      // Find current organization member ID (nullable, no es obligatorio)
       const currentMember = organizationMembers.find(m => m.user_id === currentUserId)
-      if (!currentMember) throw new Error('No se encontró el miembro de la organización')
       
       const { error } = await supabase
         .from('personnel_attendees')
@@ -158,7 +157,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
           attendance_type: data.attendance_type,
           hours_worked: data.hours_worked,
           description: data.description,
-          created_by: currentMember.id, // Usar el ID del organization member
+          created_by: currentMember?.id || null, // Nullable: usa el ID si existe, sino NULL
           project_id: projectId,
           created_at: data.attendance_date.toISOString(),
           updated_at: new Date().toISOString()
