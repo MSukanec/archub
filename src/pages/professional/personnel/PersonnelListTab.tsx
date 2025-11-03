@@ -254,11 +254,9 @@ export default function PersonnelListTab({
                     {displayName}
                   </p>
                   {record.labor_type?.name && (
-                    <div className="mt-1">
-                      <Badge className="text-[10px] px-1.5 py-0">
-                        {record.labor_type.name}
-                      </Badge>
-                    </div>
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">
+                      {record.labor_type.name}
+                    </p>
                   )}
                 </div>
               </div>
