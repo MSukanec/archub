@@ -74,14 +74,28 @@ export default function Home() {
             }
           }).then(res => res.ok ? res.json() : null),
           
-          // Cargar saludo
+          // Cargar saludo - necesitamos capturar el status code
           fetch('/api/ai/home_greeting', {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${session.access_token}`,
               'Content-Type': 'application/json'
             }
-          }).then(res => res.ok ? res.json() : null)
+          }).then(async (res) => {
+            if (res.ok) {
+              return { success: true, data: await res.json() };
+            } else if (res.status === 429) {
+              // Límite de prompts alcanzado
+              const errorData = await res.json();
+              return { 
+                success: false, 
+                is429: true, 
+                error: errorData.error || "Has alcanzado tu límite de prompts gratuitos según tu plan."
+              };
+            } else {
+              return { success: false, is429: false };
+            }
+          })
         ]);
 
         // Procesar historial
@@ -96,7 +110,27 @@ export default function Home() {
 
         // Procesar saludo
         if (greetingResult.status === 'fulfilled' && greetingResult.value) {
-          setGreetingData(greetingResult.value);
+          const result = greetingResult.value;
+          
+          if (result.success) {
+            // Saludo cargado correctamente
+            setGreetingData(result.data);
+            setError(null);
+          } else if (result.is429) {
+            // Límite de prompts alcanzado - mostrar mensaje sin el "(Modo offline)"
+            setGreetingData({
+              greeting: result.error,
+              suggestions: [
+                { label: "Ver planes", action: "/settings/billing" },
+                { label: "Explorar cursos", action: "/learning/courses" },
+                { label: "Ver proyectos", action: "/organization/projects" }
+              ]
+            });
+            setError(null);
+          } else {
+            // Otro tipo de error
+            setError("Error al cargar el saludo");
+          }
         } else {
           setError("Error al cargar el saludo");
         }
@@ -170,6 +204,8 @@ export default function Home() {
           // NO agregamos el mensaje al historial para evitar confusión
           // Resetear conversación activa para mostrar el CTA de actualización
           setHasActiveConversation(false);
+          // Limpiar el error para que no muestre "(Modo offline)"
+          setError(null);
           // Actualizar el área de saludo con el mensaje y CTA claro
           setGreetingData({
             greeting: errorData.error || "Has alcanzado tu límite de prompts gratuitos según tu plan. Actualiza a PRO para acceso ilimitado.",

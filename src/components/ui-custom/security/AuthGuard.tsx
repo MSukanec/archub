@@ -125,7 +125,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     
     // CASE 4: Redirect authenticated users away from public routes (only after onboarding check passes)
     if (isPublicRoute) {
-      navigate('/organization/dashboard');
+      navigate('/home');
       return;
     }
   }, [
