@@ -198,8 +198,8 @@ export function Sidebar() {
                 "flex flex-col gap-[2px]",
                 isExpanded ? "px-[9px]" : "items-center"
               )}>
-                {/* Logo - siempre pequeño y centrado */}
-                <div className="h-12 flex items-center justify-center mb-2">
+                {/* Logo - altura igual al MainHeader para alineación perfecta */}
+                <div className="h-[50px] flex items-center justify-center">
                   <button
                     onClick={() => navigate('/home')}
                     className="cursor-pointer hover:opacity-80 transition-opacity"
@@ -472,8 +472,8 @@ export function Sidebar() {
                 "flex flex-col gap-[2px]",
                 isExpanded ? "px-[9px]" : "items-center"
               )}>
-                {/* Logo - presente en TODOS los sidebars, siempre lleva a /home */}
-                <div className="h-12 flex items-center justify-center mb-2">
+                {/* Logo - altura igual al MainHeader para alineación perfecta */}
+                <div className="h-[50px] flex items-center justify-center">
                   <button
                     onClick={() => {
                       setSidebarLevel('general');
