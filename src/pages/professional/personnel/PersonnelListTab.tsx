@@ -163,14 +163,7 @@ export default function PersonnelListTab({
     )
   }
 
-  // Filtrar datos según el statusFilter
-  const filteredPersonnelData = personnelData.filter((person: any) => {
-    if (statusFilter === 'all') return true
-    if (statusFilter === 'active') return person.status === 'active'
-    if (statusFilter === 'inactive') return person.status === 'inactive' || person.status === 'absent'
-    return true
-  })
-
+  // Mostrar EmptyState si no hay personal en el proyecto
   if (personnelData.length === 0) {
     return (
       <EmptyState
@@ -185,6 +178,16 @@ export default function PersonnelListTab({
       />
     )
   }
+
+  // Filtrar datos según el statusFilter
+  const filteredPersonnelData = personnelData.filter((person: any) => {
+    if (statusFilter === 'all') return true
+    // Tratar NULL como 'active' por defecto (para registros antiguos)
+    const personStatus = person.status || 'active'
+    if (statusFilter === 'active') return personStatus === 'active'
+    if (statusFilter === 'inactive') return personStatus === 'inactive' || personStatus === 'absent'
+    return true
+  })
 
   return (
     <Table
