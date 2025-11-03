@@ -65,6 +65,7 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
           end_date,
           status,
           labor_type_id,
+          project_id,
           contact:contacts(
             id,
             first_name,
@@ -145,7 +146,10 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
     },
     onSuccess: () => {
       // Invalidar con el mismo patrón de queryKey que usa PersonnelListTab
-      queryClient.invalidateQueries({ queryKey: ['project-personnel', projectId] })
+      // Usar el project_id del personnelRecord para asegurar que coincida
+      const invalidateProjectId = personnelRecord?.project_id || projectId
+      console.log('🔄 Invalidando cache para project:', invalidateProjectId)
+      queryClient.invalidateQueries({ queryKey: ['project-personnel', invalidateProjectId] })
       toast({
         title: 'Datos actualizados',
         description: 'La información del personal se ha actualizado correctamente'
@@ -162,52 +166,11 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
     }
   })
 
-  const deletePersonnelMutation = useMutation({
-    mutationFn: async () => {
-      if (!supabase) throw new Error('Supabase no inicializado')
-      if (!personnelRecord?.id) throw new Error('No se encontró el registro de personal')
-
-      const { error } = await supabase
-        .from('project_personnel')
-        .delete()
-        .eq('id', personnelRecord.id)
-
-      if (error) throw error
-    },
-    onSuccess: () => {
-      // Invalidar con el mismo patrón de queryKey que usa PersonnelListTab
-      queryClient.invalidateQueries({ queryKey: ['project-personnel', projectId] })
-      toast({
-        title: 'Personal eliminado',
-        description: 'El personal ha sido removido del proyecto correctamente'
-      })
-      onClose()
-    },
-    onError: (error) => {
-      console.error('Error deleting personnel:', error)
-      toast({
-        title: 'Error',
-        description: 'No se pudo eliminar el personal del proyecto',
-        variant: 'destructive'
-      })
-    }
-  })
-
-  const handleDelete = () => {
-    const contactName = personnelRecord?.contact?.first_name || personnelRecord?.contact?.last_name
-      ? `${personnelRecord.contact.first_name || ''} ${personnelRecord.contact.last_name || ''}`.trim()
-      : personnelRecord?.contact?.full_name || 'este personal'
-
-    if (confirm(`¿Estás seguro de que quieres eliminar a ${contactName} del proyecto? Esta acción no se puede deshacer.`)) {
-      deletePersonnelMutation.mutate()
-    }
-  }
-
   const handleSubmit = (data: PersonnelDataForm) => {
     updatePersonnelMutation.mutate(data)
   }
 
-  const isLoading = updatePersonnelMutation.isPending || deletePersonnelMutation.isPending || personnelLoading
+  const isLoading = updatePersonnelMutation.isPending || personnelLoading
 
   // Get contact display name
   const contactDisplayName = personnelRecord?.contact?.first_name || personnelRecord?.contact?.last_name
@@ -382,10 +345,6 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      middleLabel="Eliminar del Proyecto"
-      onMiddleClick={handleDelete}
-      middleVariant="destructive"
-      middleDisabled={deletePersonnelMutation.isPending}
       rightLabel="Guardar Cambios"
       onRightClick={form.handleSubmit(handleSubmit)}
       submitDisabled={isLoading}
