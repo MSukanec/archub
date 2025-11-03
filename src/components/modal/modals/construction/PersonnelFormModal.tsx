@@ -2,8 +2,9 @@ import React, { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Users, Search } from 'lucide-react';
+import { Users, Search, UserPlus } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
 
 import { FormModalLayout } from '../../form/FormModalLayout';
 import { FormModalHeader } from '../../form/FormModalHeader';
@@ -13,6 +14,7 @@ import { useGlobalModalStore } from '../../form/useGlobalModalStore';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useContacts } from '@/hooks/use-contacts';
@@ -34,6 +36,7 @@ interface PersonnelFormModalProps {
 export function PersonnelFormModal({ data }: PersonnelFormModalProps) {
   const { toast } = useToast();
   const { closeModal } = useGlobalModalStore();
+  const [, setLocation] = useLocation();
   const { data: currentUser } = useCurrentUser();
   const { data: contacts = [] } = useContacts();
   const projectId = currentUser?.preferences?.last_project_id;
@@ -58,20 +61,27 @@ export function PersonnelFormModal({ data }: PersonnelFormModalProps) {
     enabled: !!projectId && !!supabase
   });
 
-  // Query para obtener todos los attachments de los contactos
+  // Query para obtener solo los attachments de contactos disponibles (optimización)
   const { data: contactAttachments = [] } = useQuery({
-    queryKey: ['contact-attachments-all'],
+    queryKey: ['contact-attachments-personnel', availableContacts.map((c: any) => c.id).join(',')],
     queryFn: async () => {
-      if (!supabase) return [];
+      if (!supabase || availableContacts.length === 0) return [];
+      
+      // Solo cargar attachments de contactos que tienen avatar_attachment_id
+      const contactsWithAvatars = availableContacts.filter((c: any) => c.avatar_attachment_id);
+      if (contactsWithAvatars.length === 0) return [];
+      
+      const avatarIds = contactsWithAvatars.map((c: any) => c.avatar_attachment_id);
       
       const { data, error } = await supabase
         .from('contact_attachments')
-        .select('*');
+        .select('*')
+        .in('id', avatarIds);
       
       if (error) throw error;
       return data || [];
     },
-    enabled: !!supabase
+    enabled: !!supabase && availableContacts.length > 0
   });
 
   // Helper para obtener nombre display
@@ -99,21 +109,37 @@ export function PersonnelFormModal({ data }: PersonnelFormModalProps) {
     return '?';
   };
 
-  // Filtrar contactos disponibles (no asignados)
+  // Filtrar contactos disponibles (no asignados) y ordenar alfabéticamente
   const availableContacts = useMemo(() => {
     const contactsArray = (contacts || []) as any[];
-    return contactsArray.filter((c: any) => !assignedPersonnel.includes(c.id));
+    const filtered = contactsArray.filter((c: any) => !assignedPersonnel.includes(c.id));
+    
+    // Ordenar alfabéticamente por nombre display
+    return filtered.sort((a: any, b: any) => {
+      const nameA = getDisplayName(a).toLowerCase();
+      const nameB = getDisplayName(b).toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
   }, [contacts, assignedPersonnel]);
 
-  // Filtrar por búsqueda
+  // Filtrar por búsqueda y ordenar alfabéticamente
   const filteredContacts = useMemo(() => {
-    if (!searchQuery.trim()) return availableContacts;
+    let result = availableContacts;
     
-    const query = searchQuery.toLowerCase();
-    return availableContacts.filter((contact: any) => {
-      const displayName = getDisplayName(contact).toLowerCase();
-      const email = contact.email?.toLowerCase() || '';
-      return displayName.includes(query) || email.includes(query);
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = availableContacts.filter((contact: any) => {
+        const displayName = getDisplayName(contact).toLowerCase();
+        const email = contact.email?.toLowerCase() || '';
+        return displayName.includes(query) || email.includes(query);
+      });
+    }
+    
+    // Ordenar alfabéticamente
+    return result.sort((a: any, b: any) => {
+      const nameA = getDisplayName(a).toLowerCase();
+      const nameB = getDisplayName(b).toLowerCase();
+      return nameA.localeCompare(nameB);
     });
   }, [availableContacts, searchQuery]);
 
@@ -196,11 +222,29 @@ export function PersonnelFormModal({ data }: PersonnelFormModalProps) {
 
                   {/* Lista de contactos */}
                   <div className="space-y-2">
-                    {availableContacts.length === 0 ? (
+                    {(contacts as any[]).length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground space-y-4">
+                        <UserPlus className="h-12 w-12 mx-auto opacity-50" />
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium">No hay contactos en tu organización</p>
+                          <p className="text-xs">Para asignar personal a un proyecto, primero necesitas crear contactos</p>
+                        </div>
+                        <Button 
+                          onClick={() => {
+                            closeModal();
+                            setLocation('/contacts');
+                          }}
+                          data-testid="button-create-contacts"
+                        >
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Ir a Contactos
+                        </Button>
+                      </div>
+                    ) : availableContacts.length === 0 ? (
                       <div className="text-center py-8 text-muted-foreground">
                         <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
                         <p className="text-sm">No hay contactos disponibles</p>
-                        <p className="text-xs">Todos los contactos ya están asignados o agrega más en la sección de Contactos</p>
+                        <p className="text-xs">Todos los contactos ya están asignados al proyecto</p>
                       </div>
                     ) : filteredContacts.length === 0 ? (
                       <div className="text-center py-8 text-muted-foreground">
