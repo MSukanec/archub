@@ -192,12 +192,12 @@ export function MainHeader() {
         borderBottomColor: "var(--main-sidebar-border)"
       }}
     >
-      <div className={`w-full flex items-center justify-between ${isDocked ? 'px-16' : 'px-16'}`}>
+      <div className="w-full flex items-center justify-between">
         {/* Left side: Logo + Icon + Title */}
-        <div className="flex items-center gap-4">
-          {/* Logo */}
+        <div className="flex items-center">
+          {/* Logo - Perfectamente alineado con botones del sidebar (h-12 = 48px) */}
           <Link href="/home">
-            <div className="shrink-0 w-8 h-8 flex items-center justify-center cursor-pointer">
+            <div className="h-12 w-12 flex items-center justify-center cursor-pointer shrink-0">
               <img 
                 src="/ArchubLogo.png" 
                 alt="Archub" 
@@ -206,17 +206,17 @@ export function MainHeader() {
             </div>
           </Link>
 
-          {/* Page Icon + Title */}
-          <div className="flex items-center gap-3">
+          {/* Page Icon + Title con padding dinámico */}
+          <div className="flex items-center gap-3 pl-4">
             <PageIcon className="w-6 h-6 text-[var(--accent)]" />
-            <h1 className="text-xl font-semibold text-[var(--foreground)]">
+            <h1 className="text-xl font-semibold text-white">
               {currentPageName}
             </h1>
           </div>
         </div>
 
         {/* Right side: Selector */}
-        <div className="flex items-center">
+        <div className="flex items-center pr-4">
           {selectorComponent}
         </div>
       </div>
