@@ -25,6 +25,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui-custom/security/EmptyState";
+import { Tabs } from "@/components/ui-custom/Tabs";
 
 type SortDirection = "asc" | "desc" | null;
 
@@ -173,7 +174,13 @@ interface TableProps<T = any> {
     isExporting?: boolean;
     renderExportContent?: () => ReactNode;
     customActions?: ReactNode;
-    // 🆕 BOTONES DE MODO A LA IZQUIERDA
+    // 🆕 NUEVA FORMA SIMPLIFICADA CON COMPONENTE TABS
+    tabsConfig?: {
+      tabs: { value: string; label: string; icon?: React.ReactNode }[];
+      value: string;
+      onValueChange: (value: string) => void;
+    };
+    // DEPRECADO: BOTONES DE MODO A LA IZQUIERDA (mantener por compatibilidad)
     leftModeButtons?: {
       options: { key: string; label: string }[];
       activeMode?: string;
@@ -410,10 +417,19 @@ export function Table<T = any>({
     return (
       <div className="hidden lg:block border-b border-[var(--card-border)] bg-[var(--card-bg)]">
         <div className="flex items-center justify-between px-4 py-3">
-          {/* Lado izquierdo - Botones de modo y Tabs */}
+          {/* Lado izquierdo - Tabs y Botones de modo */}
           <div className="flex items-center gap-3">
-            {/* Botones de modo */}
-            {topBar?.leftModeButtons && (
+            {/* Tabs usando el componente Tabs.tsx */}
+            {topBar?.tabsConfig && (
+              <Tabs
+                tabs={topBar.tabsConfig.tabs}
+                value={topBar.tabsConfig.value}
+                onValueChange={topBar.tabsConfig.onValueChange}
+              />
+            )}
+
+            {/* LEGACY: Botones de modo - mantener por compatibilidad */}
+            {!topBar?.tabsConfig && topBar?.leftModeButtons && (
               <div className="flex items-center gap-1">
                 {topBar.leftModeButtons.options.map((option) => (
                   <Button
@@ -434,8 +450,8 @@ export function Table<T = any>({
               </div>
             )}
             
-            {/* Tabs */}
-            {tabs.length > 0 && (
+            {/* LEGACY: Tabs antiguos - mantener por compatibilidad */}
+            {!topBar?.tabsConfig && tabs.length > 0 && (
               <div className="flex items-center gap-1">
                 {tabs.map((tab) => (
                   <Button
