@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Users, Check, Search } from 'lucide-react';
+import { Users, Search } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 
 import { FormModalLayout } from '../../form/FormModalLayout';
@@ -11,8 +11,6 @@ import { FormModalFooter } from '../../form/FormModalFooter';
 import { useGlobalModalStore } from '../../form/useGlobalModalStore';
 
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 
@@ -190,18 +188,14 @@ export function PersonnelFormModal({ data }: PersonnelFormModalProps) {
               <FormControl>
                 <div className="space-y-4">
                   {/* Buscador */}
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      placeholder="Buscar contactos..." 
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9"
-                    />
-                  </div>
+                  <Input 
+                    placeholder="Buscar contactos..." 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
 
                   {/* Lista de contactos */}
-                  <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                  <div className="space-y-2">
                     {availableContacts.length === 0 ? (
                       <div className="text-center py-8 text-muted-foreground">
                         <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
@@ -224,29 +218,29 @@ export function PersonnelFormModal({ data }: PersonnelFormModalProps) {
                         const displayName = getDisplayName(contact);
                         const initials = getInitials(contact);
 
+                        const isSelected = selectedContacts.includes(contact.id);
+                        
                         return (
-                          <div key={contact.id} className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
-                            <Checkbox
-                              checked={selectedContacts.includes(contact.id)}
-                              onCheckedChange={(checked) => handleContactToggle(contact.id, checked as boolean)}
-                            />
+                          <div 
+                            key={contact.id} 
+                            onClick={() => handleContactToggle(contact.id, !isSelected)}
+                            className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                              isSelected 
+                                ? 'bg-[var(--accent)] text-white border-[var(--accent)]' 
+                                : 'hover:bg-muted/50'
+                            }`}
+                          >
                             <Avatar className="h-8 w-8">
                               {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
-                              <AvatarFallback className="text-xs">
+                              <AvatarFallback className={`text-xs ${isSelected ? 'bg-white/20 text-white' : ''}`}>
                                 {initials}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">
+                              <p className={`text-sm font-medium truncate ${isSelected ? 'text-white' : ''}`}>
                                 {displayName}
                               </p>
-                              {contact.email && (
-                                <p className="text-xs text-muted-foreground truncate">{contact.email}</p>
-                              )}
                             </div>
-                            {selectedContacts.includes(contact.id) && (
-                              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                            )}
                           </div>
                         );
                       })
