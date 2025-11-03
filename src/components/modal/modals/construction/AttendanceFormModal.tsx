@@ -84,19 +84,14 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
     enabled: !!projectId
   })
 
-  // Get organization members - skip if no organizationId
-  const { data: organizationMembers = [] } = useOrganizationMembers(organizationId || '')
-
-  // Convert members to users format for UserSelector (siguiendo patrón de MovementFormModal)
-  const users = organizationMembers.map(member => ({
-    id: member.user_id, // Usar member.user_id como en MovementFormModal
-    full_name: member.full_name || member.email || 'Usuario',
-    email: member.email || '',
-    avatar_url: member.avatar_url || ''
-  }))
-
-  // Preseleccionar usuario actual (siguiendo patrón de MovementFormModal)
-  const currentUserId = currentUser?.user?.id
+  // Get organization members (siguiendo patrón de SiteLogModal)
+  const { data: members = [] } = useOrganizationMembers(organizationId)
+  
+  // Mantener referencia actualizada de members para evitar stale closures
+  const membersRef = React.useRef(members)
+  React.useEffect(() => {
+    membersRef.current = members
+  }, [members])
 
   const isEditing = modalData?.isEditing || (modalData?.mode === 'edit' && modalData?.attendance)
   const attendance = modalData?.attendance || modalData?.editingData?.existingRecord
@@ -145,9 +140,16 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
   const createAttendanceMutation = useMutation({
     mutationFn: async (data: AttendanceForm) => {
       if (!supabase) throw new Error('Supabase not initialized')
+      if (!currentUser?.organization?.id || !currentUser?.preferences?.last_project_id) {
+        throw new Error('No hay proyecto u organización seleccionada')
+      }
       
-      // Find current organization member ID (nullable, no es obligatorio)
-      const currentMember = organizationMembers.find(m => m.user_id === currentUserId)
+      // Obtener el organization_member.id del usuario actual (siguiendo patrón de SiteLogModal)
+      // Usar membersRef.current para obtener el valor más reciente
+      const currentMember = membersRef.current.find((m: any) => m.user_id === currentUser.user.id)
+      if (!currentMember) {
+        throw new Error('No se encontró el miembro de la organización para el usuario actual')
+      }
       
       const { error } = await supabase
         .from('personnel_attendees')
@@ -157,7 +159,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
           attendance_type: data.attendance_type,
           hours_worked: data.hours_worked,
           description: data.description,
-          created_by: currentMember?.id || null, // Nullable: usa el ID si existe, sino NULL
+          created_by: currentMember.id, // Usar el ID del organization member
           project_id: projectId,
           created_at: data.attendance_date.toISOString(),
           updated_at: new Date().toISOString()
