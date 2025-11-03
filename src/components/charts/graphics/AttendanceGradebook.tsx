@@ -387,9 +387,9 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
       {/* Main Content */}
       <div className="relative flex">
         {/* Fixed Personnel Names Column */}
-        <div className="flex-shrink-0 w-48 md:w-64 bg-[var(--table-header-bg)] border-r border-border overflow-hidden">
+        <div className="border-r border-border flex-shrink-0 overflow-hidden w-48 md:w-64 bg-[var(--table-header-bg)]">
           {/* Personnel List - grouped by contact type */}
-          <div>
+          <div className="overflow-x-hidden">
               {Object.entries(groupedWorkers).length > 0 ? (
                 Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
                   <div key={contactType}>
