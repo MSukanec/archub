@@ -32,7 +32,7 @@ export function Header({ title, tabs = [], actions = [], className }: HeaderProp
       "w-full bg-[var(--layout-bg)]",
       className
     )}>
-      <div className="px-6 border-b border-t" style={{ borderColor: 'hsl(210, 40%, 93%)' }}>
+      <div className="px-6 border-b" style={{ borderColor: 'hsl(210, 40%, 93%)' }}>
         {/* Fila Superior: Título a la izquierda, Acciones a la derecha */}
       <div className="h-12 flex items-center justify-between">
         {/* Left: Title */}
@@ -64,14 +64,14 @@ export function Header({ title, tabs = [], actions = [], className }: HeaderProp
 
         {/* Fila Inferior: Tabs a la izquierda */}
         {tabs.length > 0 && (
-          <div className="flex items-center">
+          <div className="flex items-center border-t" style={{ borderColor: 'hsl(210, 40%, 93%)' }}>
           <div className="flex items-center gap-1">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={tab.onClick}
                 className={cn(
-                  "relative py-4 px-3 text-sm font-medium transition-all duration-200 border-b-2",
+                  "relative py-5 px-3 text-sm font-medium transition-all duration-200 border-b-2",
                   tab.isActive
                     ? "text-[var(--accent)] border-[var(--accent)]"
                     : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] border-transparent"
