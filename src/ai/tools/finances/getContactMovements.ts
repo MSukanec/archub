@@ -164,11 +164,11 @@ export async function getContactMovements(
         response += `\n\nPeríodo: **${formatDateRange(dateRange.start, dateRange.end)}**`;
       }
       
-      // Agregar detalle de movimientos individuales (máximo 15)
+      // SIEMPRE mostrar detalle de movimientos individuales (últimos 15 si hay más)
+      // Esto previene alucinación de GPT al darle datos reales en todos los casos
       const maxDetails = 15;
-      const shouldShowDetails = filteredMovements.length <= maxDetails;
       
-      if (shouldShowDetails && filteredMovements.length > 0) {
+      if (filteredMovements.length > 0) {
         response += '\n\n**Detalle de movimientos:**\n';
         
         // Ordenar por fecha descendente (más recientes primero)
@@ -178,7 +178,10 @@ export async function getContactMovements(
           return dateB.getTime() - dateA.getTime();
         });
         
-        for (const mov of sortedMovements) {
+        // Tomar los últimos N movimientos (más recientes)
+        const movementsToShow = sortedMovements.slice(0, maxDetails);
+        
+        for (const mov of movementsToShow) {
           const date = mov.movement_date ? new Date(mov.movement_date).toLocaleDateString('es-AR') : 'Sin fecha';
           const amount = Number(mov.amount || 0);
           const fromRate = Number(mov.exchange_rate || 1);
@@ -190,8 +193,12 @@ export async function getContactMovements(
           
           response += `- **${date}**: ${sign}${amountFormatted} - ${description}\n`;
         }
-      } else if (filteredMovements.length > maxDetails) {
-        response += `\n\n(${filteredMovements.length} movimientos en total - mostrando solo resumen)`;
+        
+        // Si hay más movimientos, indicarlo
+        if (filteredMovements.length > maxDetails) {
+          const remaining = filteredMovements.length - maxDetails;
+          response += `\n(Mostrando los ${maxDetails} movimientos más recientes. Hay **${remaining}** ${remaining === 1 ? 'movimiento adicional' : 'movimientos adicionales'} anteriores)`;
+        }
       }
       
       return response;
@@ -263,11 +270,11 @@ export async function getContactMovements(
       response += `\n\nPeríodo: **${formatDateRange(dateRange.start, dateRange.end)}**`;
     }
     
-    // Agregar detalle de movimientos individuales (máximo 15 para evitar saturación)
+    // SIEMPRE mostrar detalle de movimientos individuales (últimos 15 si hay más)
+    // Esto previene alucinación de GPT al darle datos reales en todos los casos
     const maxDetails = 15;
-    const shouldShowDetails = filteredMovements.length <= maxDetails;
     
-    if (shouldShowDetails && filteredMovements.length > 0) {
+    if (filteredMovements.length > 0) {
       response += '\n\n**Detalle de movimientos:**\n';
       
       // Ordenar por fecha descendente (más recientes primero)
@@ -277,7 +284,10 @@ export async function getContactMovements(
         return dateB.getTime() - dateA.getTime();
       });
       
-      for (const mov of sortedMovements) {
+      // Tomar los últimos N movimientos (más recientes)
+      const movementsToShow = sortedMovements.slice(0, maxDetails);
+      
+      for (const mov of movementsToShow) {
         const date = mov.movement_date ? new Date(mov.movement_date).toLocaleDateString('es-AR') : 'Sin fecha';
         const amount = Number(mov.amount || 0);
         const movSymbol = mov.currency_symbol || '$';
@@ -289,8 +299,12 @@ export async function getContactMovements(
         
         response += `- **${date}**: ${sign}${amountFormatted} - ${description}\n`;
       }
-    } else if (filteredMovements.length > maxDetails) {
-      response += `\n\n(${filteredMovements.length} movimientos en total - mostrando solo resumen)`;
+      
+      // Si hay más movimientos, indicarlo
+      if (filteredMovements.length > maxDetails) {
+        const remaining = filteredMovements.length - maxDetails;
+        response += `\n(Mostrando los ${maxDetails} movimientos más recientes. Hay **${remaining}** ${remaining === 1 ? 'movimiento adicional' : 'movimientos adicionales'} anteriores)`;
+      }
     }
     
     return response;
