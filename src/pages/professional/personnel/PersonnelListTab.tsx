@@ -167,11 +167,16 @@ export default function PersonnelListTab({
   return (
     <Table
       data={personnelData}
+      defaultSort={{
+        key: "contact",
+        direction: "asc"
+      }}
       columns={[
         {
           key: "contact",
           label: "Nombre",
           width: "35%",
+          sortable: true,
           render: (record: any) => {
             const contact = record.contact
             if (!contact) {
@@ -252,7 +257,7 @@ export default function PersonnelListTab({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => openModal('contact', { isEditing: true, contact: record.contact })}
+                onClick={() => openModal('contact', { isEditing: true, editingContact: record.contact })}
               >
                 <Edit className="h-4 w-4" />
               </Button>
