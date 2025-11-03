@@ -11,6 +11,7 @@ import { InsuranceTab } from '@/components/personnel/insurance/InsuranceTab'
 import { useInsuranceList } from '@/hooks/useInsurances'
 import PersonnelListTab from './PersonnelListTab'
 import PersonnelAttendanceTab from './PersonnelAttendanceTab'
+import PersonnelDashboard from './PersonnelDashboard'
 
 export default function Personnel() {
   const { openModal } = useGlobalModalStore()
@@ -18,7 +19,7 @@ export default function Personnel() {
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
   const queryClient = useQueryClient()
   const { setSidebarContext } = useNavigationStore()
-  const [activeTab, setActiveTab] = useState('active')
+  const [activeTab, setActiveTab] = useState('dashboard')
 
   const handleDeletePersonnel = async (personnelId: string) => {
     try {
@@ -77,7 +78,7 @@ export default function Personnel() {
 
   useEffect(() => {
     if (!hasPersonnel && (activeTab === 'attendance' || activeTab === 'insurance')) {
-      setActiveTab('active')
+      setActiveTab('dashboard')
     }
   }, [hasPersonnel, activeTab])
 
@@ -89,6 +90,11 @@ export default function Personnel() {
       { name: "Personal", href: "/construction/personnel" }
     ],
     tabs: [
+      {
+        id: 'dashboard',
+        label: 'Dashboard',
+        isActive: activeTab === 'dashboard'
+      },
       {
         id: 'active',
         label: 'Listado de Personal',
@@ -136,6 +142,16 @@ export default function Personnel() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
+        {activeTab === 'dashboard' && (
+          <PersonnelDashboard
+            selectedProjectId={selectedProjectId}
+            currentOrganizationId={currentOrganizationId}
+            personnelData={personnelData}
+            insuranceData={insuranceData}
+            onTabChange={setActiveTab}
+          />
+        )}
+
         {activeTab === 'active' && (
           <PersonnelListTab
             openModal={openModal}
