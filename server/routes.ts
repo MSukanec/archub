@@ -13,6 +13,7 @@ import { registerPaymentRoutes } from './routes/payments';
 import { registerBankTransferRoutes } from './routes/bank-transfer';
 import { registerContactRoutes } from './routes/contacts';
 import { registerAIRoutes } from './routes/ai';
+import { registerPersonnelRoutes } from './routes/personnel';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get shared dependencies
@@ -44,6 +45,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register contact routes (professional contacts)
   registerContactRoutes(app, deps);
+
+  // Register personnel routes (personnel rates, payments, attendance)
+  registerPersonnelRoutes(app, deps);
 
   // Register AI routes (home greeting, suggestions)
   registerAIRoutes(app, deps);

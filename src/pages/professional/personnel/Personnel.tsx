@@ -169,6 +169,7 @@ export default function Personnel() {
           <PersonnelPaymentsTab
             openModal={openModal}
             selectedProjectId={selectedProjectId}
+            currentOrganizationId={currentOrganizationId}
           />
         )}
 

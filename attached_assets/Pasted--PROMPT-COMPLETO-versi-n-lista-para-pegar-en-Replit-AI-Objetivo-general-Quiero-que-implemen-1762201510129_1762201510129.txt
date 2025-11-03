@@ -1,0 +1,126 @@
+🟢 PROMPT COMPLETO (versión lista para pegar en Replit AI)
+
+💬 Objetivo general:
+Quiero que implementes en mi proyecto Archub la lógica de gestión de tarifas de mano de obra (personnel_rates).
+Ya tengo la tabla creada en Supabase con estos campos principales:
+organization_id, personnel_id, labor_type_id, rate_hour, rate_day, rate_month, pay_type, currency_id, valid_from, valid_to, is_active, created_at, updated_at.
+
+💻 1. Crear módulo personnelRates.ts en /src/lib/supabase/queries/
+
+Implementá las siguientes funciones (usando Supabase client ya configurado):
+
+A. getActiveRates(orgId: string)
+
+Devuelve todas las tarifas activas (is_active = true) de la organización.
+
+Incluye labor_type o personnel según corresponda.
+
+Ordena por valid_from desc.
+
+B. getRateHistory({ orgId, laborTypeId?, personnelId? })
+
+Devuelve todo el historial de tarifas para una persona o un tipo de labor.
+
+Si se pasa personnelId, ignora laborTypeId.
+
+Incluye rate_hour, rate_day, rate_month, valid_from, valid_to, currency_id.
+
+C. addOrUpdateRate({ orgId, laborTypeId?, personnelId?, payType, rateHour, rateDay, rateMonth, currencyId, validFrom })
+
+Antes de insertar una nueva tarifa:
+
+Busca si hay una tarifa activa para el mismo laborTypeId o personnelId.
+
+Si existe → actualiza esa fila (is_active = false, valid_to = validFrom - 1 día).
+
+Luego inserta la nueva fila con is_active = true y valid_from = validFrom.
+
+Si validFrom no se envía, usar new Date().toISOString().split('T')[0].
+
+D. getEffectiveRate({ orgId, personnelId, workDate })
+
+Busca primero tarifa por persona activa en la fecha (valid_from <= workDate <= valid_to).
+
+Si no hay, busca por labor_type_id asociado a esa persona.
+
+Devuelve { payType, rateHour, rateDay, rateMonth, currencyId }.
+
+E. calculateLaborCost({ rate, hoursWorked })
+
+Si rate.payType === 'hour' → return hoursWorked * rate.rateHour
+
+Si rate.payType === 'day' → return rate.rateDay * (hoursWorked / 8)
+
+Si rate.payType === 'month' → (rate.rateMonth / 160) * hoursWorked (suponiendo 160 h/mes).
+
+📦 2. Crear endpoint /api/labor/costs/[projectId].ts
+
+Endpoint que reciba:
+
+{ "dateFrom": "2025-11-01", "dateTo": "2025-11-30" }
+
+
+Obtiene todas las asistencias (personnel_attendees) del proyecto en ese rango.
+
+Para cada asistencia:
+
+Busca su personnel_id y work_date.
+
+Llama a getEffectiveRate(...).
+
+Calcula el costo con calculateLaborCost(...).
+
+Devuelve un JSON tipo:
+
+[
+  {
+    "personnel_id": "...",
+    "contact_name": "Juan Pérez",
+    "labor_type": "Oficial Albañil",
+    "hours_worked": 8,
+    "rate_hour": 1200,
+    "cost": 9600,
+    "currency": "ARS"
+  },
+  ...
+]
+
+🧩 3. Crear página React (opcional) /src/pages/finanzas/labor-rates.tsx
+
+Una interfaz simple con:
+
+Tabla editable de tarifas (por rol o persona).
+
+Botón “+ Nueva tarifa” que abre modal:
+
+Campos: laborType o persona, payType, valor, moneda, vigente desde.
+
+Al guardar: usa addOrUpdateRate() y refresca lista.
+
+💡 4. Buenas prácticas que quiero que sigas
+
+Todos los inserts deben agregar automáticamente organization_id desde el usuario logueado.
+
+Manejar try/catch en todas las llamadas Supabase.
+
+Los cálculos (como costo total) deben hacerse del lado del front, no en Supabase.
+
+No crear RPC ni funciones SQL nuevas.
+
+Todo lo que implique lectura o escritura se hace con el Supabase JS SDK.
+
+Los cálculos deben permitir pago por hora, día o mes, usando payType.
+
+✅ Resultado esperado
+
+Al final debo poder:
+
+Ver todas las tarifas activas por organización.
+
+Cargar una nueva tarifa y cerrar automáticamente la anterior.
+
+Consultar la tarifa vigente de cualquier persona según fecha.
+
+Calcular el costo total de mano de obra de un proyecto entre dos fechas.
+
+Todo eso funcionando solo con Supabase client y JS en Replit, sin RPC SQL.

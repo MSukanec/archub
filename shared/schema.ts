@@ -474,6 +474,25 @@ export const personnel_attendees = pgTable("personnel_attendees", {
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
+// Personnel Rates Table
+export const personnel_rates = pgTable("personnel_rates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organization_id: uuid("organization_id").notNull(),
+  personnel_id: uuid("personnel_id"), // FK to project_personnel, nullable (can be by labor_type instead)
+  labor_type_id: uuid("labor_type_id"), // FK to labor_types, nullable (can be by personnel instead)
+  rate_hour: numeric("rate_hour", { precision: 12, scale: 2 }),
+  rate_day: numeric("rate_day", { precision: 12, scale: 2 }),
+  rate_month: numeric("rate_month", { precision: 12, scale: 2 }),
+  pay_type: text("pay_type").notNull().default("hour"), // 'hour' | 'day' | 'month'
+  currency_id: uuid("currency_id").notNull(),
+  valid_from: text("valid_from").notNull(), // fecha en formato YYYY-MM-DD
+  valid_to: text("valid_to"), // nullable, fecha en formato YYYY-MM-DD
+  is_active: boolean("is_active").notNull().default(true),
+  created_by: uuid("created_by"),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
 export const insertTaskParameterPositionSchema = createInsertSchema(task_parameter_positions).omit({
   id: true,
   created_at: true,
@@ -533,6 +552,18 @@ export const insertProjectPersonnelSchema = createInsertSchema(project_personnel
   updated_at: true,
 });
 
+export const insertPersonnelAttendeesSchema = createInsertSchema(personnel_attendees).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export const insertPersonnelRatesSchema = createInsertSchema(personnel_rates).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
 export const insertPersonnelAttendeeSchema = createInsertSchema(personnel_attendees).omit({
   id: true,
   created_at: true,
@@ -576,6 +607,8 @@ export type InsertMovementClient = z.infer<typeof insertMovementClientSchema>;
 export type MovementGeneralCost = typeof movement_general_costs.$inferSelect;
 export type ProjectPersonnel = typeof project_personnel.$inferSelect;
 export type InsertProjectPersonnel = z.infer<typeof insertProjectPersonnelSchema>;
+export type PersonnelRate = typeof personnel_rates.$inferSelect;
+export type InsertPersonnelRate = z.infer<typeof insertPersonnelRatesSchema>;
 export type InsertMovementGeneralCost = z.infer<typeof insertMovementGeneralCostSchema>;
 export type ProjectInstallment = typeof project_installments.$inferSelect;
 export type InsertProjectInstallment = z.infer<typeof insertProjectInstallmentSchema>;

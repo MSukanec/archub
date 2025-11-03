@@ -11,6 +11,7 @@ import { convertCurrency } from '@/ai/utils/currencyConverter'
 interface PersonnelPaymentsTabProps {
   openModal: any
   selectedProjectId: string | null
+  currentOrganizationId: string | null
 }
 
 interface PaymentsByCurrency {
@@ -31,7 +32,8 @@ interface PaymentsByContact {
 
 export default function PersonnelPaymentsTab({ 
   openModal, 
-  selectedProjectId 
+  selectedProjectId,
+  currentOrganizationId
 }: PersonnelPaymentsTabProps) {
   const [statusFilter, setStatusFilter] = useState<'active' | 'inactive' | 'all'>('active')
 
@@ -98,6 +100,45 @@ export default function PersonnelPaymentsTab({
       return data || []
     },
     enabled: !!selectedProjectId
+  })
+
+  // Fetch active rates and pending payments for all personnel using batch endpoint
+  const { data: batchData, isLoading: isBatchLoading } = useQuery({
+    queryKey: ['personnel-batch-data', selectedProjectId, currentOrganizationId, personnelData.map((p: any) => p.id).join(',')],
+    queryFn: async () => {
+      if (!selectedProjectId || !currentOrganizationId || personnelData.length === 0) {
+        return { rates: {}, pending: {} }
+      }
+      
+      const personnelIds = personnelData.map((p: any) => p.id)
+      const params = new URLSearchParams({
+        organization_id: currentOrganizationId,
+        project_id: selectedProjectId,
+        date: new Date().toISOString().split('T')[0]
+      })
+      
+      // Add personnelIds as array params
+      personnelIds.forEach((id: string) => {
+        params.append('personnelIds', id)
+      })
+      
+      const url = `/api/personnel/batch?${params.toString()}`
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        },
+        credentials: 'include'
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch batch data: ${response.statusText}`)
+      }
+      
+      return await response.json()
+    },
+    enabled: !!selectedProjectId && !!currentOrganizationId && personnelData.length > 0
   })
 
   // Calcular la sumatoria de pagos por contact_id agrupados por moneda (para display)
@@ -181,7 +222,68 @@ export default function PersonnelPaymentsTab({
     return total
   }
 
-  if (isPersonnelLoading || isPaymentsLoading) {
+  // Helper para formatear tarifa activa
+  const formatActiveRate = (personnelId: string | undefined): string => {
+    if (!personnelId || !batchData?.rates) return '-'
+    
+    const rate = batchData.rates[personnelId]
+    if (!rate) return 'Sin tarifa'
+    
+    const currency = rate.currency?.code || rate.currency_code || rate.currency_name || 'ARS'
+    
+    let amount = 0
+    let label = ''
+    
+    if (rate.pay_type === 'hour' && rate.rate_hour) {
+      amount = parseFloat(rate.rate_hour)
+      label = '/h'
+    } else if (rate.pay_type === 'day' && rate.rate_day) {
+      amount = parseFloat(rate.rate_day)
+      label = '/día'
+    } else if (rate.pay_type === 'month' && rate.rate_month) {
+      amount = parseFloat(rate.rate_month)
+      label = '/mes'
+    }
+    
+    if (amount === 0) return 'Sin tarifa'
+    
+    const formatted = new Intl.NumberFormat('es-AR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount)
+    
+    return `$${formatted} ${currency}${label}`
+  }
+
+  // Helper para formatear pagos pendientes
+  const formatPendingPayment = (personnelId: string | undefined): string => {
+    if (!personnelId || !batchData?.pending) return '-'
+    
+    const pendingData = batchData.pending[personnelId]
+    if (!pendingData || !pendingData.pending_by_currency) {
+      return '$0.00'
+    }
+    
+    const pendingByCurrency = pendingData.pending_by_currency
+    const currencies = Object.keys(pendingByCurrency)
+    
+    if (currencies.length === 0) {
+      return '$0.00'
+    }
+    
+    const formattedAmounts = currencies.map((currency) => {
+      const amount = pendingByCurrency[currency] || 0
+      const formatted = new Intl.NumberFormat('es-AR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(amount)
+      return `$${formatted} ${currency}`
+    })
+    
+    return formattedAmounts.join(', ')
+  }
+
+  if (isPersonnelLoading || isPaymentsLoading || isBatchLoading) {
     return (
       <div className="flex items-center justify-center h-32">
         <div className="text-muted-foreground">Cargando pagos...</div>
@@ -227,7 +329,7 @@ export default function PersonnelPaymentsTab({
         {
           key: "displayName",
           label: "Nombre",
-          width: "40%",
+          width: "30%",
           sortable: true,
           sortType: "string",
           render: (record: any) => {
@@ -278,7 +380,7 @@ export default function PersonnelPaymentsTab({
         {
           key: "payment_total",
           label: "Pago a la fecha",
-          width: "25%",
+          width: "20%",
           sortable: true,
           sortType: "number",
           render: (record: any) => {
@@ -291,14 +393,30 @@ export default function PersonnelPaymentsTab({
           }
         },
         {
+          key: "active_rate",
+          label: "Tarifa vigente",
+          width: "18%",
+          sortable: false,
+          render: (record: any) => {
+            const rateDisplay = formatActiveRate(record.id)
+            return (
+              <span className="text-sm">
+                {rateDisplay}
+              </span>
+            )
+          }
+        },
+        {
           key: "pending_payment",
           label: "Pendiente de pago",
-          width: "20%",
+          width: "17%",
           sortable: false,
-          render: () => {
+          render: (record: any) => {
+            const pendingDisplay = formatPendingPayment(record.id)
+            const isPending = pendingDisplay !== '-' && pendingDisplay !== '$0.00'
             return (
-              <span className="text-sm text-muted-foreground">
-                -
+              <span className={`text-sm font-medium ${isPending ? 'text-orange-600 dark:text-orange-400' : 'text-muted-foreground'}`}>
+                {pendingDisplay}
               </span>
             )
           }
@@ -313,8 +431,8 @@ export default function PersonnelPaymentsTab({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => openModal('payment', { contactId: record.contact?.id })}
-                data-testid={`button-payment-${record.id}`}
+                onClick={() => openModal('personnelRates', { personnelRecord: record })}
+                data-testid={`button-rates-${record.id}`}
               >
                 <DollarSign className="h-4 w-4" />
               </Button>
