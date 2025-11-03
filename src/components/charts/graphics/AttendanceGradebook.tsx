@@ -251,30 +251,30 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
 
 
   return (
-    <div className="relative border border-border rounded-lg overflow-hidden bg-card">
+    <div className="relative border border-border rounded-lg overflow-hidden bg-card w-full">
       {/* Header with title and export */}
-      <div className="flex items-center justify-between p-4 border-b border-[var(--table-header-border)] bg-[var(--table-header-bg)]">
-        <div>
+      <div className="flex items-center justify-between p-4 border-b border-[var(--table-header-border)] bg-[var(--table-header-bg)] flex-wrap gap-2">
+        <div className="min-w-0">
           <h3 className="text-sm text-[var(--table-header-fg)]">Registro de Asistencia</h3>
           <p className="text-sm text-[var(--table-header-fg)]">
             {workers.length} trabajadores • {dateRange.length} días
           </p>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4 flex-wrap">
           {/* Legend */}
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 md:gap-4 text-xs md:text-sm flex-wrap">
+            <div className="flex items-center gap-1 md:gap-2">
               <div className="w-3 h-3 rounded-full bg-[var(--accent)]"></div>
-              <span className="text-[var(--table-header-fg)]">Jornada completa</span>
+              <span className="text-[var(--table-header-fg)] whitespace-nowrap">Completa</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 md:gap-2">
               <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-              <span className="text-[var(--table-header-fg)]">Media jornada</span>
+              <span className="text-[var(--table-header-fg)] whitespace-nowrap">Media</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 md:gap-2">
               <div className="w-3 h-3 rounded-full bg-gray-300"></div>
-              <span className="text-[var(--table-header-fg)]">Ausente</span>
+              <span className="text-[var(--table-header-fg)] whitespace-nowrap">Ausente</span>
             </div>
           </div>
 
@@ -288,10 +288,10 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
         </div>
       </div>
       {/* Unified Header Row - matching Gantt design */}
-      <div className="flex border-b border-[var(--table-header-border)] bg-[var(--table-header-bg)]">
+      <div className="flex border-b border-[var(--table-header-border)] bg-[var(--table-header-bg)] min-w-0">
         {/* Left Panel Header - Personnel */}
-        <div className="flex-shrink-0 w-64 border-r border-[var(--table-header-border)] h-14 flex bg-[var(--table-header-bg)]">
-          <div className="px-4 flex items-center font-medium text-xs text-[var(--table-header-fg)] uppercase tracking-wider">
+        <div className="flex-shrink-0 w-48 md:w-64 border-r border-[var(--table-header-border)] h-14 flex bg-[var(--table-header-bg)]">
+          <div className="px-2 md:px-4 flex items-center font-medium text-xs text-[var(--table-header-fg)] uppercase tracking-wider">
             Personal / Asistencia
           </div>
         </div>
@@ -357,17 +357,17 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
       </div>
 
       {/* Main Content */}
-      <div className="relative flex">
+      <div className="relative flex min-w-0">
         {/* Fixed Personnel Names Column */}
-        <div className="flex-shrink-0 w-64 bg-[var(--table-header-bg)] border-r border-border overflow-hidden">
+        <div className="flex-shrink-0 w-48 md:w-64 bg-[var(--table-header-bg)] border-r border-border overflow-hidden">
           {/* Personnel List - grouped by contact type */}
           <div>
               {Object.entries(groupedWorkers).length > 0 ? (
                 Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
                   <div key={contactType}>
                     {/* Contact Type Header */}
-                    <div className="h-12 px-4 bg-[var(--table-row-bg)] border-b border-[var(--table-row-border)] flex items-center">
-                      <span className="text-xs font-medium uppercase tracking-wider text-[var(--table-row-fg)]">
+                    <div className="h-12 px-2 md:px-4 bg-[var(--table-row-bg)] border-b border-[var(--table-row-border)] flex items-center">
+                      <span className="text-xs font-medium uppercase tracking-wider text-[var(--table-row-fg)] truncate">
                         {contactType} ({workersInGroup.length})
                       </span>
                     </div>
@@ -379,15 +379,15 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
                       const shouldShowBorder = !isLastWorkerInGroup || !isLastGroup
                       
                       return (
-                        <div key={worker.id} className={`h-12 px-4 bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors flex items-center ${shouldShowBorder ? 'border-b border-[var(--table-row-border)]' : ''}`}>
+                        <div key={worker.id} className={`h-12 px-2 md:px-4 bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors flex items-center ${shouldShowBorder ? 'border-b border-[var(--table-row-border)]' : ''}`}>
                           <Avatar className="h-8 w-8 flex-shrink-0">
                             <AvatarImage src={worker.avatar_url} alt={worker.name} />
                             <AvatarFallback className="text-xs font-medium">
                               {getInitials(worker.name)}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="ml-3">
-                            <div className="text-sm font-medium text-[var(--table-row-fg)]">{worker.name}</div>
+                          <div className="ml-2 md:ml-3 min-w-0 flex-1">
+                            <div className="text-xs md:text-sm font-medium text-[var(--table-row-fg)] truncate">{worker.name}</div>
                           </div>
                         </div>
                       );
