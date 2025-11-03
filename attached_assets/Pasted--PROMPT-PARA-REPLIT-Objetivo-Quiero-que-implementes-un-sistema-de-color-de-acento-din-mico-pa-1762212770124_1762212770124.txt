@@ -1,0 +1,132 @@
+🧠 PROMPT PARA REPLIT
+
+🧩 Objetivo:
+Quiero que implementes un sistema de color de acento dinámico para los proyectos dentro de mi app Archub.
+
+Cuando el usuario selecciona un proyecto, ese color debe convertirse automáticamente en el color de acento global del sistema (botones, badges, íconos, etc.), y debe adaptarse según si el tema está en modo light o dark.
+
+También quiero que modifiques el modal de creación de proyectos para que en lugar de un input libre de color, se muestre una paleta visual de colores predefinidos en forma de botones redondeados.
+
+🚀 1. Modificación del modal de creación de proyectos
+
+Archivo: src/components/modals/CreateProjectModal.tsx
+
+Remplazá el input actual del color por una paleta visual de selección.
+
+Mostrá los siguientes colores predefinidos en botones circulares (button o div con onClick):
+
+#007aff (Ocean)
+#34c759 (Grass)
+#ffcc00 (Amber)
+#ff3b30 (Coral)
+#af52de (Violet)
+#5e5ce6 (Slate)
+#00c7be (Mint)
+
+
+Cada color debe mostrarse como un círculo de 32×32px con borde si está seleccionado.
+
+Cuando el usuario hace clic en un color, se actualiza el valor accent_color del proyecto antes de guardar.
+
+Ejemplo visual (modo texto):
+
+Seleccioná un color:
+🟦 🟩 🟨 🟥 🟪 🟦 🟢
+
+
+Guardar el color seleccionado en el campo accent_color (string, ej: #007aff).
+
+🌈 2. Lógica de color dinámico global
+
+Objetivo:
+Cuando el usuario cambia de proyecto, la app debe actualizar las variables CSS globales para reflejar el color del proyecto.
+
+Implementar en el store global o hook (por ejemplo useProjectTheme() o dentro del projectStore):
+
+import chroma from "chroma-js";
+
+export function applyAccentColor(accentColor: string, mode: "light" | "dark") {
+  const color = chroma(accentColor);
+
+  const accent = color.hex();
+  const accentHover = mode === "dark"
+    ? color.brighten(0.6).hex()
+    : color.darken(0.4).hex();
+
+  const accentForeground = color.luminance() > 0.5 ? "#000000" : "#ffffff";
+
+  document.documentElement.style.setProperty("--accent", accent);
+  document.documentElement.style.setProperty("--accent-hover", accentHover);
+  document.documentElement.style.setProperty("--accent-foreground", accentForeground);
+}
+
+
+Esta función genera automáticamente el color base, su variante hover y el color del texto según contraste.
+
+Cada vez que el usuario cambia de proyecto, ejecutá applyAccentColor(project.accent_color, themeMode).
+
+⚙️ 3. Configuración CSS (variables globales)
+
+En tu archivo base (globals.css o theme.css), asegurate de tener estas variables:
+
+:root {
+  --accent: #00bfa6;
+  --accent-hover: #009f8c;
+  --accent-foreground: #ffffff;
+}
+
+[data-theme="dark"] {
+  --accent-hover: color-mix(in srgb, var(--accent), white 20%);
+}
+
+[data-theme="light"] {
+  --accent-hover: color-mix(in srgb, var(--accent), black 20%);
+}
+
+
+Y en el tailwind.config.js:
+
+extend: {
+  colors: {
+    accent: "var(--accent)",
+    "accent-hover": "var(--accent-hover)",
+    "accent-foreground": "var(--accent-foreground)",
+  },
+}
+
+🧩 4. Aplicación en UI
+
+Todos los botones, badges o íconos que usen el color de acento deben usar las variables, por ejemplo:
+
+<button className="bg-accent hover:bg-accent-hover text-accent-foreground">
+  Guardar
+</button>
+
+<Badge className="bg-accent text-accent-foreground">
+  Proyecto activo
+</Badge>
+
+
+De esta forma todo el sistema responde dinámicamente al color del proyecto activo.
+
+🎨 5. (Opcional) Feedback visual en el modal
+
+Al seleccionar un color, mostrale al usuario una vista previa (por ejemplo un botón o badge usando ese color).
+
+Ejemplo:
+
+<Badge style={{ backgroundColor: selectedColor, color: "#fff" }}>
+  Vista previa
+</Badge>
+
+✅ Resumen de lo que debe hacer Replit
+
+Modificar el modal CreateProjectModal.tsx para mostrar botones de color predefinidos en lugar de input libre.
+
+Guardar el color seleccionado en accent_color al crear el proyecto.
+
+Agregar una función applyAccentColor() para actualizar las variables CSS globales según el color del proyecto y el modo del tema.
+
+Usar las variables CSS en toda la UI (--accent, --accent-hover, --accent-foreground).
+
+Probar el cambio de color dinámico al cambiar de proyecto y verificar contraste correcto en modo dark/light.
