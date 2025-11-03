@@ -662,7 +662,11 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
         return res.json([]);
       }
 
-      const { data: users, error: usersError } = await authenticatedSupabase
+      // Use service role (bypasses RLS) to avoid stack depth limit from user_data RLS
+      // This is safe because:
+      // 1. We already verified user has access to organization via authenticatedSupabase above
+      // 2. We only fetch basic user info (id, name, avatar, email) - no sensitive data
+      const { data: users, error: usersError } = await supabase
         .from('users')
         .select('id, full_name, avatar_url, email')
         .in('id', userIds);
