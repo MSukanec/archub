@@ -27,7 +27,9 @@ interface AttendanceGradebookProps {
   attendance?: AttendanceRecord[]
   onExportAttendance?: () => void
   triggerTodayCenter?: boolean
-  onEditAttendance?: (workerId: string, date: Date, existingAttendance?: any) => void // New prop for editing attendance
+  onEditAttendance?: (workerId: string, date: Date, existingAttendance?: any) => void
+  filterStatus?: 'all' | 'active'
+  onFilterStatusChange?: (status: 'all' | 'active') => void
 }
 
 const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
@@ -35,7 +37,9 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
   attendance = [],
   onExportAttendance,
   triggerTodayCenter = false,
-  onEditAttendance
+  onEditAttendance,
+  filterStatus = 'active',
+  onFilterStatusChange
 }) => {
   // Calculate date range: show 3 days before today and 3 days after
   const { startDate, endDate } = React.useMemo(() => {
@@ -280,6 +284,34 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
               <span className="text-[var(--table-header-fg)] whitespace-nowrap">Ausente</span>
             </div>
           </div>
+
+          {/* Filter Tabs */}
+          {onFilterStatusChange && (
+            <div className="flex items-center gap-1 bg-muted p-1 rounded-md">
+              <button
+                onClick={() => onFilterStatusChange('active')}
+                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                  filterStatus === 'active'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                data-testid="filter-active"
+              >
+                Activo
+              </button>
+              <button
+                onClick={() => onFilterStatusChange('all')}
+                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                  filterStatus === 'all'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                data-testid="filter-all"
+              >
+                Todos
+              </button>
+            </div>
+          )}
 
           {/* Export Button */}
           {onExportAttendance && (

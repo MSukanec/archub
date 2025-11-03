@@ -5,7 +5,49 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { UserCheck } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { format } from 'date-fns'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+
+// Hook para obtener todo el personal del proyecto
+function useProjectPersonnel(projectId: string | undefined) {
+  return useQuery({
+    queryKey: ['project-personnel', projectId],
+    queryFn: async () => {
+      if (!supabase || !projectId) return []
+
+      const { data, error } = await supabase
+        .from('project_personnel')
+        .select(`
+          id,
+          notes,
+          status,
+          contact:contacts(
+            id,
+            first_name,
+            last_name,
+            full_name,
+            contact_type_links(
+              contact_type:contact_types(
+                id,
+                name
+              )
+            )
+          ),
+          labor_type:labor_types(
+            id,
+            name
+          )
+        `)
+        .eq('project_id', projectId)
+
+      if (error) {
+        return []
+      }
+
+      return data || []
+    },
+    enabled: !!supabase && !!projectId
+  })
+}
 
 function useAttendanceData(projectId: string | undefined, organizationId: string | undefined) {
   return useQuery({
@@ -24,13 +66,7 @@ function useAttendanceData(projectId: string | undefined, organizationId: string
               id,
               first_name,
               last_name,
-              organization_id,
-              contact_type_links(
-                contact_type:contact_types(
-                  id,
-                  name
-                )
-              )
+              organization_id
             )
           )
         `)
@@ -50,30 +86,37 @@ function useAttendanceData(projectId: string | undefined, organizationId: string
   })
 }
 
-function transformAttendanceData(attendanceData: any[]) {
-  if (!attendanceData || attendanceData.length === 0) return { workers: [], attendance: [] }
+function transformPersonnelAndAttendance(personnelData: any[], attendanceData: any[], filterStatus: 'all' | 'active') {
+  // Primero, crear la lista de workers desde TODO el personal del proyecto
+  const getDisplayName = (contact: any) => {
+    if (!contact) return 'Sin nombre'
+    if (contact.first_name || contact.last_name) {
+      return `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
+    }
+    return contact.full_name || 'Sin nombre'
+  }
 
-  const workersMap = new Map()
-  attendanceData.forEach(attendance => {
-    if (attendance.personnel?.contact) {
-      const contact = attendance.personnel.contact
-      const workerId = contact.id
-      const workerName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-      const contactTypeName = contact.contact_type_links?.[0]?.contact_type?.name || 'Sin tipo'
-      const contactTypeId = contact.contact_type_links?.[0]?.contact_type?.id
-      
-      workersMap.set(workerId, {
-        id: workerId,
-        name: workerName || 'Sin nombre',
-        contactType: contactTypeName,
-        contactTypeId: contactTypeId
-      })
+  let filteredPersonnel = personnelData
+  if (filterStatus === 'active') {
+    filteredPersonnel = personnelData.filter(p => p.status === 'active')
+  }
+
+  const workers = filteredPersonnel.map(personnel => {
+    const contact = personnel.contact
+    const contactTypeName = contact?.contact_type_links?.[0]?.contact_type?.name || 'Sin tipo'
+    const contactTypeId = contact?.contact_type_links?.[0]?.contact_type?.id
+    
+    return {
+      id: contact?.id || personnel.id,
+      name: getDisplayName(contact),
+      contactType: contactTypeName,
+      contactTypeId: contactTypeId,
+      status: personnel.status
     }
   })
 
-  const workers = Array.from(workersMap.values())
+  // Construir el array de attendance desde los registros
   const attendance: any[] = []
-
   attendanceData.forEach(attendanceRecord => {
     if (attendanceRecord.personnel?.contact) {
       const workerId = attendanceRecord.personnel.contact.id
@@ -107,14 +150,20 @@ export default function PersonnelAttendanceTab({
   selectedProjectId,
   currentOrganizationId 
 }: PersonnelAttendanceTabProps) {
-  const { data: attendanceData = [], isLoading } = useAttendanceData(
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active'>('active')
+
+  const { data: personnelData = [], isLoading: isPersonnelLoading } = useProjectPersonnel(
+    selectedProjectId || undefined
+  )
+
+  const { data: attendanceData = [], isLoading: isAttendanceLoading } = useAttendanceData(
     selectedProjectId || undefined,
     currentOrganizationId || undefined
   )
 
   const { workers, attendance } = useMemo(() => {
-    return transformAttendanceData(attendanceData)
-  }, [attendanceData])
+    return transformPersonnelAndAttendance(personnelData, attendanceData, filterStatus)
+  }, [personnelData, attendanceData, filterStatus])
 
   const handleEditAttendance = (workerId: string, date: Date, existingAttendance?: any) => {
     const worker = workers.find(w => w.id === workerId)
@@ -131,6 +180,8 @@ export default function PersonnelAttendanceTab({
     })
   }
 
+  const isLoading = isPersonnelLoading || isAttendanceLoading
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -143,8 +194,8 @@ export default function PersonnelAttendanceTab({
     return (
       <EmptyState
         icon={<UserCheck className="h-12 w-12" />}
-        title="Sin registros de asistencia"
-        description="No hay registros de asistencia para este proyecto. El personal aparecerá aquí cuando se registren entradas de bitácora con asistencia."
+        title="Sin personal"
+        description="No hay personal asignado a este proyecto. Agrega personal desde la pestaña de Listado de Personal."
         action={
           <Button onClick={() => openModal('attendance', {})}>
             Registrar Asistencia
@@ -159,6 +210,8 @@ export default function PersonnelAttendanceTab({
       workers={workers}
       attendance={attendance}
       onEditAttendance={handleEditAttendance}
+      filterStatus={filterStatus}
+      onFilterStatusChange={setFilterStatus}
     />
   )
 }
