@@ -44,46 +44,6 @@ export function PersonnelFormModal({ data }: PersonnelFormModalProps) {
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Query para obtener personal ya asignado al proyecto
-  const { data: assignedPersonnel = [] } = useQuery({
-    queryKey: ['project-personnel', projectId],
-    queryFn: async () => {
-      if (!projectId || !supabase) return [];
-      
-      const { data, error } = await supabase
-        .from('project_personnel')
-        .select('contact_id')
-        .eq('project_id', projectId);
-      
-      if (error) throw error;
-      return data?.map(p => p.contact_id) || [];
-    },
-    enabled: !!projectId && !!supabase
-  });
-
-  // Query para obtener solo los attachments de contactos disponibles (optimización)
-  const { data: contactAttachments = [] } = useQuery({
-    queryKey: ['contact-attachments-personnel', availableContacts.map((c: any) => c.id).join(',')],
-    queryFn: async () => {
-      if (!supabase || availableContacts.length === 0) return [];
-      
-      // Solo cargar attachments de contactos que tienen avatar_attachment_id
-      const contactsWithAvatars = availableContacts.filter((c: any) => c.avatar_attachment_id);
-      if (contactsWithAvatars.length === 0) return [];
-      
-      const avatarIds = contactsWithAvatars.map((c: any) => c.avatar_attachment_id);
-      
-      const { data, error } = await supabase
-        .from('contact_attachments')
-        .select('*')
-        .in('id', avatarIds);
-      
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!supabase && availableContacts.length > 0
-  });
-
   // Helper para obtener nombre display
   const getDisplayName = (contact: any): string => {
     if (contact.first_name || contact.last_name) {
@@ -109,6 +69,23 @@ export function PersonnelFormModal({ data }: PersonnelFormModalProps) {
     return '?';
   };
 
+  // Query para obtener personal ya asignado al proyecto
+  const { data: assignedPersonnel = [] } = useQuery({
+    queryKey: ['project-personnel', projectId],
+    queryFn: async () => {
+      if (!projectId || !supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('project_personnel')
+        .select('contact_id')
+        .eq('project_id', projectId);
+      
+      if (error) throw error;
+      return data?.map(p => p.contact_id) || [];
+    },
+    enabled: !!projectId && !!supabase
+  });
+
   // Filtrar contactos disponibles (no asignados) y ordenar alfabéticamente
   const availableContacts = useMemo(() => {
     const contactsArray = (contacts || []) as any[];
@@ -121,6 +98,29 @@ export function PersonnelFormModal({ data }: PersonnelFormModalProps) {
       return nameA.localeCompare(nameB);
     });
   }, [contacts, assignedPersonnel]);
+
+  // Query para obtener solo los attachments de contactos disponibles (optimización)
+  const { data: contactAttachments = [] } = useQuery({
+    queryKey: ['contact-attachments-personnel', availableContacts.map((c: any) => c.id).join(',')],
+    queryFn: async () => {
+      if (!supabase || availableContacts.length === 0) return [];
+      
+      // Solo cargar attachments de contactos que tienen avatar_attachment_id
+      const contactsWithAvatars = availableContacts.filter((c: any) => c.avatar_attachment_id);
+      if (contactsWithAvatars.length === 0) return [];
+      
+      const avatarIds = contactsWithAvatars.map((c: any) => c.avatar_attachment_id);
+      
+      const { data, error } = await supabase
+        .from('contact_attachments')
+        .select('*')
+        .in('id', avatarIds);
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!supabase && availableContacts.length > 0
+  });
 
   // Filtrar por búsqueda y ordenar alfabéticamente
   const filteredContacts = useMemo(() => {
