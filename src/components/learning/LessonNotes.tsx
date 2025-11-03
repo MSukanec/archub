@@ -52,15 +52,20 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
     },
     onSuccess: () => {
       setSaveStatus('saved');
-      // Invalidar el cache de notas del curso para que se actualice la TAB de apuntes
+      
+      // Invalidar TODAS las queries relacionadas con notas para asegurar que el tab de apuntes se actualice
+      // Esto invalida tanto las notas de esta lección como las de todos los cursos
       queryClient.invalidateQueries({ 
-        queryKey: [`/api/courses`],
         predicate: (query) => {
-          // Invalidar todas las queries que contengan "/notes" en su key
           const key = query.queryKey;
-          return Array.isArray(key) && key.some(k => 
-            typeof k === 'string' && k.includes('/notes')
-          );
+          if (!Array.isArray(key)) return false;
+          
+          // Convertir key a string para buscar patrones
+          const keyString = key.join('/');
+          
+          // Invalidar cualquier query que tenga "notes" en su path
+          // Esto cubre: /api/lessons/${lessonId}/notes, /api/courses/${courseId}/notes, etc.
+          return keyString.includes('/notes');
         }
       });
       

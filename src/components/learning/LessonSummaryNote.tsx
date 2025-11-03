@@ -35,7 +35,23 @@ export function LessonSummaryNote({ lessonId }: LessonSummaryNoteProps) {
     },
     onSuccess: () => {
       setSaveStatus('saved');
+      
+      // Invalidar la query específica de esta nota
       queryClient.invalidateQueries({ queryKey: [`/api/lessons/${lessonId}/summary-note`] });
+      
+      // Invalidar TODAS las queries relacionadas con notas para que el tab de apuntes se actualice
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey;
+          if (!Array.isArray(key)) return false;
+          
+          // Convertir key a string para buscar patrones
+          const keyString = key.join('/');
+          
+          // Invalidar cualquier query que tenga "notes" en su path
+          return keyString.includes('/notes');
+        }
+      });
       
       if (savedTimerRef.current) {
         clearTimeout(savedTimerRef.current);
