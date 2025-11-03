@@ -119,8 +119,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       }}
     >
       {/* Main Header for Desktop - Only shown on desktop */}
-      {/* HEADER COMENTADO TEMPORALMENTE PARA PRUEBAS */}
-      {/* {!isMobile && <MainHeader />} */}
+      {!isMobile && <MainHeader />}
       
       {/* Mobile View - Unchanged */}
       {isMobile ? (
