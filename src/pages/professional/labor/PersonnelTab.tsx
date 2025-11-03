@@ -1,0 +1,248 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
+import { EmptyState } from '@/components/ui-custom/security/EmptyState'
+import { Users } from 'lucide-react'
+import { format } from 'date-fns'
+import { Table } from "@/components/ui-custom/tables-and-trees/Table"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Edit, Trash2, ShieldCheck, ShieldAlert, ShieldX, Shield } from "lucide-react"
+
+interface InsuranceStatus {
+  status: 'sin_seguro' | 'vigente' | 'por_vencer' | 'vencido'
+  expiryDate: string | null
+  daysToExpiry: number | null
+}
+
+function getInsuranceStatus(contactId: string, insuranceData: any[]): InsuranceStatus {
+  const contactInsurances = insuranceData.filter(insurance => insurance.contact_id === contactId)
+  
+  if (contactInsurances.length === 0) {
+    return { status: 'sin_seguro', expiryDate: null, daysToExpiry: null }
+  }
+
+  let nearestExpiry: string | null = null
+  let soonestDays = Infinity
+
+  contactInsurances.forEach(insurance => {
+    if (insurance.coverage_end && insurance.days_to_expiry !== null) {
+      if (insurance.days_to_expiry < soonestDays) {
+        soonestDays = insurance.days_to_expiry
+        nearestExpiry = insurance.coverage_end
+      }
+    }
+  })
+
+  if (nearestExpiry === null) {
+    return { status: 'sin_seguro', expiryDate: null, daysToExpiry: null }
+  }
+
+  let status: 'vigente' | 'por_vencer' | 'vencido' = 'vigente'
+  if (soonestDays < 0) {
+    status = 'vencido'
+  } else if (soonestDays <= 30) {
+    status = 'por_vencer'
+  }
+
+  return {
+    status,
+    expiryDate: nearestExpiry,
+    daysToExpiry: soonestDays
+  }
+}
+
+function renderInsuranceStatusBadge(status: string, daysToExpiry: number | null) {
+  switch (status) {
+    case 'vigente':
+      return (
+        <Badge variant="default" className="bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
+          <ShieldCheck className="w-3 h-3 mr-1" />
+          Vigente
+        </Badge>
+      )
+    case 'por_vencer':
+      return (
+        <Badge variant="default" className="bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800">
+          <ShieldAlert className="w-3 h-3 mr-1" />
+          {daysToExpiry !== null && daysToExpiry >= 0 ? `${daysToExpiry} días` : 'Por vencer'}
+        </Badge>
+      )
+    case 'vencido':
+      return (
+        <Badge variant="destructive" className="bg-red-100 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800">
+          <ShieldX className="w-3 h-3 mr-1" />
+          Vencido
+        </Badge>
+      )
+    case 'sin_seguro':
+    default:
+      return (
+        <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700">
+          <Shield className="w-3 h-3 mr-1" />
+          Sin seguro
+        </Badge>
+      )
+  }
+}
+
+interface PersonnelTabProps {
+  openModal: any
+  handleDeletePersonnel: (personnelId: string) => Promise<void>
+  insuranceData: any[]
+  selectedProjectId: string | null
+}
+
+export default function PersonnelTab({ 
+  openModal, 
+  handleDeletePersonnel, 
+  insuranceData,
+  selectedProjectId 
+}: PersonnelTabProps) {
+  const { data: personnelData = [], isLoading: isPersonnelLoading } = useQuery({
+    queryKey: ['project-personnel', selectedProjectId],
+    queryFn: async () => {
+      if (!selectedProjectId) return []
+      
+      const { data, error } = await supabase
+        .from('project_personnel')
+        .select(`
+          id,
+          notes,
+          created_at,
+          contact:contacts(
+            id,
+            first_name,
+            last_name
+          )
+        `)
+        .eq('project_id', selectedProjectId)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      return data
+    },
+    enabled: !!selectedProjectId
+  })
+
+  if (isPersonnelLoading) {
+    return (
+      <div className="flex items-center justify-center h-32">
+        <div className="text-muted-foreground">Cargando personal...</div>
+      </div>
+    )
+  }
+
+  if (personnelData.length === 0) {
+    return (
+      <EmptyState
+        icon={<Users className="h-8 w-8" />}
+        title="Sin personal asignado"
+        description="Vincula contactos de tu organización como mano de obra del proyecto para gestionar asistencias y seguimiento de personal."
+        action={
+          <Button onClick={() => openModal('personnel')}>
+            Agregar Personal
+          </Button>
+        }
+      />
+    )
+  }
+
+  return (
+    <Table
+      data={personnelData}
+      columns={[
+        {
+          key: "contact",
+          label: "Personal",
+          width: "30%",
+          render: (record: any) => {
+            const contact = record.contact
+            if (!contact) {
+              return <span className="text-muted-foreground">Sin datos</span>
+            }
+            return (
+              <div className="flex items-center gap-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="text-xs">
+                    {contact.first_name?.charAt(0) || ''}{contact.last_name?.charAt(0) || ''}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium">
+                    {contact.first_name || ''} {contact.last_name || ''}
+                  </p>
+                </div>
+              </div>
+            )
+          }
+        },
+        {
+          key: "insurance_expiry",
+          label: "Vencimiento Seguro",
+          width: "15%",
+          render: (record: any) => {
+            const insuranceStatus = getInsuranceStatus(record.contact?.id, insuranceData)
+            if (!insuranceStatus.expiryDate) {
+              return <span className="text-sm text-muted-foreground">-</span>
+            }
+            return (
+              <span className="text-sm">
+                {format(new Date(insuranceStatus.expiryDate), 'dd/MM/yyyy')}
+              </span>
+            )
+          }
+        },
+        {
+          key: "insurance_status",
+          label: "Estado Seguro",
+          width: "15%",
+          render: (record: any) => {
+            const insuranceStatus = getInsuranceStatus(record.contact?.id, insuranceData)
+            return renderInsuranceStatusBadge(insuranceStatus.status, insuranceStatus.daysToExpiry)
+          }
+        },
+        {
+          key: "notes",
+          label: "Notas", 
+          width: "23%",
+          render: (record: any) => (
+            <span className="text-sm text-muted-foreground">
+              {record.notes || 'Sin notas'}
+            </span>
+          )
+        },
+        {
+          key: "actions",
+          label: "Acciones",
+          width: "17%",
+          sortable: false,
+          render: (record: any) => (
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => openModal('personnel', { personnel: record })}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => openModal('delete-confirmation', {
+                  title: 'Eliminar Personal',
+                  message: `¿Estás seguro de que deseas eliminar a ${record.contact?.first_name} ${record.contact?.last_name} del proyecto?`,
+                  onConfirm: () => handleDeletePersonnel(record.id)
+                })}
+                className=" text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          )
+        }
+      ]}
+      getItemId={(record: any) => record.id}
+    />
+  )
+}
