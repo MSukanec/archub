@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { format, subDays, subMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { useOrganizationMembers } from './use-organization-members'
 
 type TimePeriod = 'week' | 'month' | 'year'
 
@@ -17,10 +18,13 @@ interface UserActivity {
 }
 
 export function useUserActivity(organizationId: string | undefined, timePeriod: TimePeriod = 'week') {
+  // Use the hook to get organization members (which now uses API endpoint)
+  const { data: membersData } = useOrganizationMembers(organizationId)
+  
   return useQuery({
     queryKey: ['user-activity', organizationId, timePeriod],
     queryFn: async (): Promise<UserActivity[]> => {
-      if (!organizationId) return []
+      if (!organizationId || !membersData) return []
 
       try {
         // Calculate number of days/periods based on time period
@@ -40,18 +44,14 @@ export function useUserActivity(organizationId: string | undefined, timePeriod: 
             daysCount = 7
         }
 
-        // Get organization members first
-        const { data: allMembers } = await supabase
-          .from('organization_members')
-          .select(`
-            user_id,
-            users (
-              full_name,
-              avatar_url
-            )
-          `)
-          .eq('organization_id', organizationId)
-          .eq('is_active', true)
+        // Use members from the hook (already transformed)
+        const allMembers = membersData.map(m => ({
+          user_id: m.user_id,
+          users: {
+            full_name: m.full_name,
+            avatar_url: m.avatar_url
+          }
+        }))
 
         if (!allMembers || allMembers.length === 0) {
           // Return empty data if no members
@@ -197,6 +197,6 @@ export function useUserActivity(organizationId: string | undefined, timePeriod: 
         return []
       }
     },
-    enabled: !!organizationId
+    enabled: !!organizationId && !!membersData
   })
 }

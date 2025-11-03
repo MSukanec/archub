@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { subDays, format, startOfDay, endOfDay } from 'date-fns'
+import { useOrganizationMembers } from './use-organization-members'
 
 interface SiteLogActivity {
   date: string
@@ -16,10 +17,13 @@ interface SiteLogActivity {
 type TimePeriod = 'week' | 'month' | 'year'
 
 export function useSiteLogActivity(organizationId: string | undefined, projectId: string | undefined, timePeriod: TimePeriod = 'week') {
+  // Use the hook to get organization members (which now uses API endpoint)
+  const { data: membersData } = useOrganizationMembers(organizationId)
+  
   return useQuery({
     queryKey: ['sitelog-activity', organizationId, projectId, timePeriod],
     queryFn: async (): Promise<SiteLogActivity[]> => {
-      if (!supabase || !organizationId || !projectId) {
+      if (!supabase || !organizationId || !projectId || !membersData) {
         return []
       }
 
@@ -65,24 +69,14 @@ export function useSiteLogActivity(organizationId: string | undefined, projectId
 
         const allSiteLogs = siteLogs || []
 
-        // Get organization members for user data
-        const { data: members } = await supabase
-          .from('organization_members')
-          .select(`
-            user_id,
-            users!inner(
-              id,
-              full_name,
-              avatar_url
-            )
-          `)
-          .eq('organization_id', organizationId)
-
+        // Use members from the hook (already transformed)
         const memberMap = new Map()
-        members?.forEach(member => {
-          if (member.users) {
-            memberMap.set(member.user_id, member.users)
-          }
+        membersData.forEach(member => {
+          memberMap.set(member.user_id, {
+            id: member.user_id,
+            full_name: member.full_name,
+            avatar_url: member.avatar_url
+          })
         })
 
         // Process activity data by day
@@ -130,6 +124,6 @@ export function useSiteLogActivity(organizationId: string | undefined, projectId
         return []
       }
     },
-    enabled: !!organizationId && !!projectId
+    enabled: !!organizationId && !!projectId && !!membersData
   })
 }

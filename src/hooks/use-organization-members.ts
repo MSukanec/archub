@@ -11,41 +11,35 @@ export interface OrganizationMember {
 
 export function useOrganizationMembers(organizationId?: string) {
   return useQuery({
-    queryKey: ['organizationMembers', organizationId],
+    queryKey: [`/api/organization-members/${organizationId}`],
     queryFn: async () => {
       if (!organizationId) {
         throw new Error('Organization ID is required');
       }
 
-      const { data, error } = await supabase
-        .from('organization_members')
-        .select(`
-          id,
-          user_id,
-          users (
-            id,
-            full_name,
-            avatar_url,
-            email
-          )
-        `)
-        .eq('organization_id', organizationId)
-        .order('created_at', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching organization members:', error);
-        throw error;
+      // Get the current session token for authentication
+      const { data } = await supabase.auth.getSession();
+      const session = data?.session;
+      
+      const headers: Record<string, string> = {};
+      if (session?.access_token) {
+        headers["Authorization"] = `Bearer ${session.access_token}`;
       }
 
-      // Transform data to flatten the user information
-      const members = data?.map((member: any) => ({
-        id: member.id,
-        user_id: member.user_id,
-        full_name: member.users?.full_name || 'Usuario sin nombre',
-        avatar_url: member.users?.avatar_url || '',
-        email: member.users?.email || '',
-      })) || [];
+      // Use API endpoint instead of direct Supabase query
+      // This avoids stack depth limit from recursive JOINs in PostgREST
+      const response = await fetch(`/api/organization-members/${organizationId}`, {
+        credentials: "include",
+        headers,
+      });
+      
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Failed to fetch organization members' }));
+        console.error('Error fetching organization members:', error);
+        throw new Error(error.error || 'Failed to fetch organization members');
+      }
 
+      const members = await response.json();
       return members as OrganizationMember[];
     },
     enabled: !!organizationId,

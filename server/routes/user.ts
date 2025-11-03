@@ -620,4 +620,76 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
       res.status(500).json({ error: "Failed to get organization preferences" });
     }
   });
+
+  // Get organization members (avoiding stack depth limit from recursive JOINs)
+  app.get("/api/organization-members/:organizationId", async (req, res) => {
+    try {
+      const { organizationId } = req.params;
+
+      if (!organizationId) {
+        return res.status(400).json({ error: "Missing organizationId" });
+      }
+
+      // Get the authorization token and create authenticated client for RLS
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // Step 1: Get organization_members WITHOUT joining to users table
+      // This avoids the stack depth limit caused by recursive JOINs
+      const { data: members, error: membersError } = await authenticatedSupabase
+        .from('organization_members')
+        .select('id, user_id, created_at')
+        .eq('organization_id', organizationId)
+        .order('created_at', { ascending: true });
+
+      if (membersError) {
+        console.error("Error fetching organization members:", membersError);
+        return res.status(500).json({ error: "Failed to fetch organization members" });
+      }
+
+      if (!members || members.length === 0) {
+        return res.json([]);
+      }
+
+      // Step 2: Get user_ids and fetch user data separately
+      const userIds = members.map(m => m.user_id).filter(Boolean);
+      
+      if (userIds.length === 0) {
+        return res.json([]);
+      }
+
+      const { data: users, error: usersError } = await authenticatedSupabase
+        .from('users')
+        .select('id, full_name, avatar_url, email')
+        .in('id', userIds);
+
+      if (usersError) {
+        console.error("Error fetching users:", usersError);
+        return res.status(500).json({ error: "Failed to fetch user data" });
+      }
+
+      // Step 3: Combine the data in the backend
+      const usersMap = new Map(users?.map(u => [u.id, u]) || []);
+      
+      const result = members.map(member => {
+        const user = usersMap.get(member.user_id);
+        return {
+          id: member.id,
+          user_id: member.user_id,
+          full_name: user?.full_name || 'Usuario sin nombre',
+          avatar_url: user?.avatar_url || '',
+          email: user?.email || '',
+        };
+      });
+
+      res.json(result);
+    } catch (error) {
+      console.error("Error in /api/organization-members:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
 }
