@@ -154,12 +154,15 @@ export function PersonnelFormModal({ data }: PersonnelFormModalProps) {
   const addPersonnelMutation = useMutation({
     mutationFn: async (formData: PersonnelFormData) => {
       const projectId = currentUser?.preferences?.last_project_id;
+      const organizationId = currentUser?.organization?.id;
       if (!projectId || !supabase) throw new Error('No hay proyecto seleccionado');
 
       // Insertar cada contacto seleccionado en project_personnel
       const personnelToInsert = formData.contact_ids.map(contact_id => ({
         project_id: projectId,
         contact_id,
+        organization_id: organizationId,
+        status: 'active', // Por defecto, nuevo personal está activo
         notes: ''
       }));
 

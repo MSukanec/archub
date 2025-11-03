@@ -36,10 +36,24 @@ create table public.project_personnel (
   created_by uuid null,
   created_at timestamp with time zone null default now(),
   updated_at timestamp with time zone null default now(),
+  organization_id uuid null,
+  labor_type_id uuid null,
+  start_date date null,
+  end_date date null,
+  status text null,
   constraint project_personnel_pkey primary key (id),
-  constraint project_personnel_contact_id_fkey foreign KEY (contact_id) references contacts (id) on delete CASCADE,
   constraint project_personnel_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
-  constraint project_personnel_project_id_fkey foreign KEY (project_id) references projects (id) on delete CASCADE
+  constraint project_personnel_labor_type_id_fkey foreign KEY (labor_type_id) references labor_types (id) on delete set null,
+  constraint project_personnel_contact_id_fkey foreign KEY (contact_id) references contacts (id) on delete CASCADE,
+  constraint project_personnel_project_id_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
+  constraint project_personnel_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint project_personnel_status_check check (
+    (
+      status = any (
+        array['active'::text, 'absent'::text, 'inactive'::text]
+      )
+    )
+  )
 ) TABLESPACE pg_default;
 
 TABLA PERSONNEL_ATTENDEES (EX ATTENDEES):

@@ -450,9 +450,13 @@ export const project_personnel = pgTable("project_personnel", {
   contact_id: uuid("contact_id").notNull(),
   labor_type_id: uuid("labor_type_id"),
   notes: text("notes"),
-  start_date: text("start_date"), // Fecha de inicio del personal en el proyecto
-  end_date: text("end_date"), // Fecha de finalización del personal en el proyecto
+  start_date: text("start_date"), // Fecha de inicio del personal en el proyecto (date type)
+  end_date: text("end_date"), // Fecha de finalización del personal en el proyecto (date type)
+  status: text("status"), // 'active' | 'absent' | 'inactive'
+  created_by: uuid("created_by"), // FK to organization_members
+  organization_id: uuid("organization_id"),
   created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
 });
 
 // Personnel Attendees Table
@@ -526,6 +530,7 @@ export const insertProjectInstallmentSchema = createInsertSchema(project_install
 export const insertProjectPersonnelSchema = createInsertSchema(project_personnel).omit({
   id: true,
   created_at: true,
+  updated_at: true,
 });
 
 export const insertPersonnelAttendeeSchema = createInsertSchema(personnel_attendees).omit({

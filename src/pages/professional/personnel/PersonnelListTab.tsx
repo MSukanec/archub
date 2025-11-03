@@ -114,6 +114,7 @@ export default function PersonnelListTab({
           notes,
           start_date,
           end_date,
+          status,
           created_at,
           contact:contacts(
             id,
@@ -162,6 +163,14 @@ export default function PersonnelListTab({
     )
   }
 
+  // Filtrar datos según el statusFilter
+  const filteredPersonnelData = personnelData.filter((person: any) => {
+    if (statusFilter === 'all') return true
+    if (statusFilter === 'active') return person.status === 'active'
+    if (statusFilter === 'inactive') return person.status === 'inactive' || person.status === 'absent'
+    return true
+  })
+
   if (personnelData.length === 0) {
     return (
       <EmptyState
@@ -179,7 +188,7 @@ export default function PersonnelListTab({
 
   return (
     <Table
-      data={personnelData}
+      data={filteredPersonnelData}
       defaultSort={{
         key: "displayName",
         direction: "asc"
