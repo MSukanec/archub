@@ -92,7 +92,7 @@ export default function Personnel() {
     tabs: [
       {
         id: 'dashboard',
-        label: 'Dashboard',
+        label: 'Visión General',
         isActive: activeTab === 'dashboard'
       },
       {
