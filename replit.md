@@ -17,6 +17,7 @@ Preferred communication style: Simple, everyday language.
 - **Component Standardization**: Standardized `StatCard` and custom `LoadingSpinner` components.
 - **Checkout UX**: Replaced billing info Accordion with Switch control for improved user experience.
 - **Home Page UX Flow**: Minimalist AI copilot interface with session-based conversation state. The top area is "where the AI speaks" and shows either greeting OR last response (never both). Fresh load/navigation: Saludo (large text) → Input → Sugerencias. During active session: Última respuesta IA (smaller text) → Input → Toggle historial → (Sugerencias hidden). Returning from another page resets to greeting. "Ver historial completo" toggle reveals full message history (newest first) below input. Uses `hasActiveConversation` local state flag to distinguish active session messages from loaded history.
+- **AI Disclaimer**: Added user-friendly disclaimer "Archub puede cometer errores. Comprueba la información importante" to Home page for AI response transparency.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui, Tailwind CSS, Zustand, Wouter, TanStack Query.
@@ -59,6 +60,7 @@ Preferred communication style: Simple, everyday language.
 - **Performance Optimizations (Gacela Mode)**: Focused on sub-second page loads using database views, smart caching, pre-computed calculations, and optimized backend endpoints to replace slow client-side queries and direct Supabase view calls.
 - **Lesson Viewer Performance**: Refactored lesson notes and markers with backend API endpoints and React Query for sub-second load times and caching.
 - **Admin Enrollments Performance**: Optimized `/api/admin/enrollments` endpoint from 150+ cascading queries to 4 bulk queries with in-memory data combination.
+- **Labor Module Organization**: Reorganized from monolithic `ConstructionPersonnel.tsx` to modular structure in `src/pages/professional/labor/` with separated tab components (Labor.tsx, PersonnelTab.tsx, AttendanceTab.tsx) following established tab separation pattern for improved code maintainability.
 
 ## External Dependencies
 - **Supabase**: Authentication.
