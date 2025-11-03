@@ -62,7 +62,7 @@ export async function getRoleSpending(
         personnel: 'personal',
         partner: 'socios'
       };
-      return `No encontré gastos en ${roleNames[role]} en tu organización`;
+      return `No encontré gastos en **${roleNames[role]}** en tu organización`;
     }
 
     // Filtrar en JavaScript por proyecto si se especifica
@@ -79,7 +79,7 @@ export async function getRoleSpending(
           personnel: 'personal',
           partner: 'socios'
         };
-        return `No encontré gastos en ${roleNames[role]} en el proyecto "${projectName}"`;
+        return `No encontré gastos en **${roleNames[role]}** en el proyecto **"${projectName}"**`;
       }
     }
 
@@ -96,9 +96,9 @@ export async function getRoleSpending(
           personnel: 'personal',
           partner: 'socios'
         };
-        const periodText = `en el período ${formatDateRange(dateRange.start, dateRange.end)}`;
-        const projectText = projectName ? ` en el proyecto "${projectName}"` : '';
-        return `No encontré gastos en ${roleNames[role]}${projectText} ${periodText}`;
+        const periodText = `en el período **${formatDateRange(dateRange.start, dateRange.end)}**`;
+        const projectText = projectName ? ` en el proyecto **"${projectName}"**` : '';
+        return `No encontré gastos en **${roleNames[role]}**${projectText} ${periodText}`;
       }
     }
 
@@ -110,7 +110,7 @@ export async function getRoleSpending(
       );
       
       if (filteredMovements.length === 0) {
-        return `No encontré gastos en ${currencyUpper} para este filtro`;
+        return `No encontré gastos en **${currencyUpper}** para este filtro`;
       }
     }
 
@@ -123,7 +123,7 @@ export async function getRoleSpending(
 
     if (uniqueCurrencies.size > 1) {
       const currencyList = Array.from(uniqueCurrencies).join(', ');
-      return `Los movimientos están en múltiples monedas (${currencyList}). Por favor especifica la moneda`;
+      return `Los movimientos están en múltiples monedas (**${currencyList}**). Por favor especifica la moneda`;
     }
 
     // Calcular total
@@ -151,14 +151,14 @@ export async function getRoleSpending(
     };
     
     // Construir respuesta
-    let response = `Gastaste ${totalFormatted} en ${roleNames[role]}`;
+    let response = `Gastaste **${totalFormatted}** en **${roleNames[role]}**`;
     
     // Agregar contexto de período si existe
     if (dateRange) {
-      response += ` ${formatDateRange(dateRange.start, dateRange.end)}`;
+      response += ` **${formatDateRange(dateRange.start, dateRange.end)}**`;
     }
     
-    response += ` (${count} movimiento${count !== 1 ? 's' : ''})`;
+    response += ` (**${count}** movimiento${count !== 1 ? 's' : ''})`;
     
     // Agregar desglose por proyecto si hay múltiples proyectos
     if (projectsMap.size > 1) {
@@ -169,14 +169,14 @@ export async function getRoleSpending(
       response += sortedProjects
         .map(([project, amount]) => {
           const amountFormatted = formatCurrency(amount, symbol);
-          return `${project} (${amountFormatted})`;
+          return `**${project}** (**${amountFormatted}**)`;
         })
         .join(', ');
     } else if (projectsMap.size === 1 && !projectName) {
       // Si hay un solo proyecto y no se filtró por proyecto, mencionarlo
       const [project] = Array.from(projectsMap.keys());
       if (project !== 'Sin proyecto') {
-        response += `\nProyecto: ${project}`;
+        response += `\nProyecto: **${project}**`;
       }
     }
     

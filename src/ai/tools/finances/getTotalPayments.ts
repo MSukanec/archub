@@ -41,7 +41,7 @@ export async function getTotalPaymentsByContactAndProject(
     }
 
     if (!movements || movements.length === 0) {
-      return `No encontré movimientos en el proyecto "${projectName}".`;
+      return `No encontré movimientos en el proyecto **"${projectName}"**.`;
     }
 
     // Filtrar en JavaScript para evitar problemas con caracteres especiales (', ", %, &, comas, etc.)
@@ -67,7 +67,7 @@ export async function getTotalPaymentsByContactAndProject(
     });
 
     if (filteredMovements.length === 0) {
-      return `No encontré pagos a "${contactName}" en el proyecto "${projectName}". Puede que el nombre no coincida exactamente o que no haya movimientos registrados.`;
+      return `No encontré pagos a **"${contactName}"** en el proyecto **"${projectName}"**. Puede que el nombre no coincida exactamente o que no haya movimientos registrados.`;
     }
 
     // Verificar si hay múltiples monedas antes de sumar
@@ -79,7 +79,7 @@ export async function getTotalPaymentsByContactAndProject(
 
     if (uniqueCurrencies.size > 1) {
       const currencyList = Array.from(uniqueCurrencies).join(', ');
-      return `Ese contacto tiene pagos en múltiples monedas (${currencyList}). Por favor especifica la moneda.`;
+      return `Ese contacto tiene pagos en múltiples monedas (**${currencyList}**). Por favor especifica la moneda.`;
     }
 
     // Sumar todos los montos (ya validamos que son de la misma moneda)
@@ -107,7 +107,7 @@ export async function getTotalPaymentsByContactAndProject(
       maximumFractionDigits: 2 
     });
 
-    return `Le pagaste ${currency}${formattedTotal} a ${matchedName} en el proyecto "${actualProjectName}" (${filteredMovements.length} movimiento${filteredMovements.length > 1 ? 's' : ''})`;
+    return `Le pagaste **${currency}${formattedTotal}** a **${matchedName}** en el proyecto **"${actualProjectName}"** (**${filteredMovements.length}** movimiento${filteredMovements.length > 1 ? 's' : ''})`;
 
   } catch (err) {
     console.error('Unexpected error in getTotalPaymentsByContactAndProject:', err);

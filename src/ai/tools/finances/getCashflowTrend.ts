@@ -186,7 +186,7 @@ export async function getCashflowTrend(
 
     if (uniqueCurrencies.size > 1) {
       const currencyList = Array.from(uniqueCurrencies).join(', ');
-      return `Los movimientos tienen múltiples monedas (${currencyList}). Por favor especifica una moneda`;
+      return `Los movimientos tienen múltiples monedas (**${currencyList}**). Por favor especifica una moneda`;
     }
 
     const firstMovement = movements[0];
@@ -268,10 +268,10 @@ export async function getCashflowTrend(
     // Construir respuesta
     let response = 'Flujo de efectivo';
     if (scope === 'project' && projectName) {
-      response += ` - ${firstMovement.project_name || projectName}`;
+      response += ` - **${firstMovement.project_name || projectName}**`;
     }
     if (!dateRange) {
-      response += ' - Últimos 3 meses';
+      response += ' - **Últimos 3 meses**';
     }
     response += ':\n\n';
     
@@ -279,14 +279,14 @@ export async function getCashflowTrend(
     const periodsToShow = periodData.slice(-5);
     
     for (const period of periodsToShow) {
-      response += `${period.periodName}:\n`;
-      response += `  Ingresos: ${formatCurrency(period.ingresos, symbol, currencyCode)}\n`;
-      response += `  Egresos: ${formatCurrency(period.egresos, symbol, currencyCode)}\n`;
-      response += `  Flujo neto: ${period.flujoNeto >= 0 ? '+' : ''}${formatCurrency(period.flujoNeto, symbol, currencyCode)}\n`;
-      response += `  Balance acumulado: ${formatCurrency(period.balanceAcumulado, symbol, currencyCode)}\n\n`;
+      response += `**${period.periodName}**:\n`;
+      response += `  Ingresos: **${formatCurrency(period.ingresos, symbol, currencyCode)}**\n`;
+      response += `  Egresos: **${formatCurrency(period.egresos, symbol, currencyCode)}**\n`;
+      response += `  Flujo neto: **${period.flujoNeto >= 0 ? '+' : ''}${formatCurrency(period.flujoNeto, symbol, currencyCode)}**\n`;
+      response += `  Balance acumulado: **${formatCurrency(period.balanceAcumulado, symbol, currencyCode)}**\n\n`;
     }
     
-    response += `Tendencia: ${tendencia}\n`;
+    response += `Tendencia: **${tendencia}**\n`;
     
     const intervalLabel = {
       'daily': 'diario',
@@ -294,7 +294,7 @@ export async function getCashflowTrend(
       'monthly': 'mensual'
     }[interval];
     
-    response += `Promedio ${intervalLabel}: ${promedioFlujo >= 0 ? '+' : ''}${formatCurrency(promedioFlujo, symbol, currencyCode)}`;
+    response += `Promedio ${intervalLabel}: **${promedioFlujo >= 0 ? '+' : ''}${formatCurrency(promedioFlujo, symbol, currencyCode)}**`;
     
     return response;
 

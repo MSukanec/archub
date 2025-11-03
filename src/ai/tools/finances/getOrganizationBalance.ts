@@ -49,7 +49,7 @@ export async function getOrganizationBalance(
       );
       
       if (filteredMovements.length === 0) {
-        return `No encontré movimientos en ${currencyUpper} en tu organización`;
+        return `No encontré movimientos en **${currencyUpper}** en tu organización`;
       }
     }
 
@@ -63,7 +63,7 @@ export async function getOrganizationBalance(
       );
       
       if (!targetCurrencyMovement) {
-        return `No encontré movimientos en ${convertToUpper} para usar como referencia de conversión`;
+        return `No encontré movimientos en **${convertToUpper}** para usar como referencia de conversión`;
       }
       
       const targetRate = Number(targetCurrencyMovement.exchange_rate || 1);
@@ -92,9 +92,9 @@ export async function getOrganizationBalance(
       const balanceFormatted = formatCurrency(Math.abs(balance), symbol, convertToUpper);
       
       if (balance >= 0) {
-        return `Balance de tu organización (convertido a ${convertToUpper}):\n- Ingresos: ${ingresosFormatted}\n- Egresos: ${egresosFormatted}\n- Balance: ${balanceFormatted} (positivo)`;
+        return `Balance de tu organización (convertido a **${convertToUpper}**):\n- Ingresos: **${ingresosFormatted}**\n- Egresos: **${egresosFormatted}**\n- Balance: **${balanceFormatted}** (positivo)`;
       } else {
-        return `Balance de tu organización (convertido a ${convertToUpper}):\n- Ingresos: ${ingresosFormatted}\n- Egresos: ${egresosFormatted}\n- Balance: -${balanceFormatted} (negativo)`;
+        return `Balance de tu organización (convertido a **${convertToUpper}**):\n- Ingresos: **${ingresosFormatted}**\n- Egresos: **${egresosFormatted}**\n- Balance: **-${balanceFormatted}** (negativo)`;
       }
     }
 
@@ -107,7 +107,7 @@ export async function getOrganizationBalance(
 
     if (uniqueCurrencies.size > 1) {
       const currencyList = Array.from(uniqueCurrencies).join(', ');
-      return `Tu organización tiene movimientos en múltiples monedas (${currencyList}). Especifica la moneda o usa el parámetro de conversión`;
+      return `Tu organización tiene movimientos en múltiples monedas (**${currencyList}**). Especifica la moneda o usa el parámetro de conversión`;
     }
 
     // Separar por tipo y sumar
@@ -134,9 +134,9 @@ export async function getOrganizationBalance(
     const balanceFormatted = formatCurrency(Math.abs(balance), symbol, currencyCode);
     
     if (balance >= 0) {
-      return `Balance de tu organización:\n- Ingresos: ${ingresosFormatted}\n- Egresos: ${egresosFormatted}\n- Balance: ${balanceFormatted} (positivo)`;
+      return `Balance de tu organización:\n- Ingresos: **${ingresosFormatted}**\n- Egresos: **${egresosFormatted}**\n- Balance: **${balanceFormatted}** (positivo)`;
     } else {
-      return `Balance de tu organización:\n- Ingresos: ${ingresosFormatted}\n- Egresos: ${egresosFormatted}\n- Balance: -${balanceFormatted} (negativo)`;
+      return `Balance de tu organización:\n- Ingresos: **${ingresosFormatted}**\n- Egresos: **${egresosFormatted}**\n- Balance: **-${balanceFormatted}** (negativo)`;
     }
 
   } catch (err) {

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SmartChatInput } from "@/components/ui-custom/fields/SmartChatInput";
 import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
+import { MessageContent } from "@/components/ai/MessageContent";
 
 interface Suggestion {
   label: string;
@@ -258,13 +259,13 @@ export default function Home() {
                     
                     return lastAssistantMessage ? (
                       <div className="max-w-2xl mx-auto">
-                        <p className={cn(
-                          "text-lg md:text-xl font-medium leading-relaxed",
+                        <div className={cn(
+                          "text-lg md:text-xl leading-relaxed",
                           "text-foreground/90",
                           "px-4"
                         )}>
-                          {lastAssistantMessage.content}
-                        </p>
+                          <MessageContent content={lastAssistantMessage.content} />
+                        </div>
                       </div>
                     ) : null;
                   })()
@@ -351,9 +352,13 @@ export default function Home() {
                           : "bg-card border border-border text-card-foreground"
                       )}
                     >
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                        {msg.content}
-                      </p>
+                      <div className="text-sm leading-relaxed">
+                        {msg.role === 'user' ? (
+                          <p className="whitespace-pre-wrap">{msg.content}</p>
+                        ) : (
+                          <MessageContent content={msg.content} />
+                        )}
+                      </div>
                     </div>
                   </motion.div>
                 ))}

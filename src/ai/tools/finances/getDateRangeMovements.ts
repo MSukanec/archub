@@ -81,7 +81,7 @@ export async function getDateRangeMovements(
     }
 
     if (!movements || movements.length === 0) {
-      return `No encontré movimientos entre ${formatDateRange(dateRange.start, dateRange.end)}`;
+      return `No encontré movimientos entre **${formatDateRange(dateRange.start, dateRange.end)}**`;
     }
 
     // Aplicar filtros opcionales
@@ -132,7 +132,7 @@ export async function getDateRangeMovements(
     }
 
     if (filteredMovements.length === 0) {
-      return `No encontré movimientos que coincidan con los filtros especificados entre ${formatDateRange(dateRange.start, dateRange.end)}`;
+      return `No encontré movimientos que coincidan con los filtros especificados entre **${formatDateRange(dateRange.start, dateRange.end)}**`;
     }
 
     // Validar moneda única
@@ -144,7 +144,7 @@ export async function getDateRangeMovements(
 
     if (uniqueCurrencies.size > 1) {
       const currencyList = Array.from(uniqueCurrencies).join(', ');
-      return `Los movimientos filtrados tienen múltiples monedas (${currencyList}). Por favor especifica una moneda`;
+      return `Los movimientos filtrados tienen múltiples monedas (**${currencyList}**). Por favor especifica una moneda`;
     }
 
     const firstMovement = filteredMovements[0];
@@ -199,8 +199,8 @@ export async function getDateRangeMovements(
         .reduce((sum, m) => sum + Number(m.amount || 0), 0);
       
       // Construir respuesta
-      let response = `Movimientos del ${formatDateRange(dateRange.start, dateRange.end)}:\n`;
-      response += `Total: ${formatCurrency(totalGeneral, symbol, currencyCode)} (${formatMovementCount(filteredMovements.length)})\n\n`;
+      let response = `Movimientos del **${formatDateRange(dateRange.start, dateRange.end)}**:\n`;
+      response += `Total: **${formatCurrency(totalGeneral, symbol, currencyCode)}** (**${formatMovementCount(filteredMovements.length)}**)\n\n`;
       
       const groupByLabel = {
         'project': 'proyecto',
@@ -211,11 +211,11 @@ export async function getDateRangeMovements(
       
       response += `Desglose por ${groupByLabel}:\n`;
       groupSummaries.forEach((g, index) => {
-        response += `${index + 1}. ${g.groupName}: ${formatCurrency(g.total, symbol, currencyCode)} (${g.count} mov)\n`;
+        response += `**${index + 1}.** **${g.groupName}**: **${formatCurrency(g.total, symbol, currencyCode)}** (**${g.count}** mov)\n`;
       });
       
       if (totalIngresos > 0 || totalEgresos > 0) {
-        response += `\nTipos: Ingresos ${formatCurrency(totalIngresos, symbol, currencyCode)}, Egresos ${formatCurrency(totalEgresos, symbol, currencyCode)}`;
+        response += `\nTipos: Ingresos **${formatCurrency(totalIngresos, symbol, currencyCode)}**, Egresos **${formatCurrency(totalEgresos, symbol, currencyCode)}**`;
       }
       
       return response;
@@ -230,17 +230,17 @@ export async function getDateRangeMovements(
       .filter(m => (m.type_name ?? '').toLowerCase() === 'egreso')
       .reduce((sum, m) => sum + Number(m.amount || 0), 0);
     
-    let response = `Movimientos del ${formatDateRange(dateRange.start, dateRange.end)}:\n`;
-    response += `Total: ${formatCurrency(total, symbol, currencyCode)} (${formatMovementCount(filteredMovements.length)})\n\n`;
+    let response = `Movimientos del **${formatDateRange(dateRange.start, dateRange.end)}**:\n`;
+    response += `Total: **${formatCurrency(total, symbol, currencyCode)}** (**${formatMovementCount(filteredMovements.length)}**)\n\n`;
     
     if (totalIngresos > 0) {
       const countIngresos = filteredMovements.filter(m => (m.type_name ?? '').toLowerCase() === 'ingreso').length;
-      response += `- Ingresos: ${formatCurrency(totalIngresos, symbol, currencyCode)} (${formatMovementCount(countIngresos)})\n`;
+      response += `- Ingresos: **${formatCurrency(totalIngresos, symbol, currencyCode)}** (**${formatMovementCount(countIngresos)}**)\n`;
     }
     
     if (totalEgresos > 0) {
       const countEgresos = filteredMovements.filter(m => (m.type_name ?? '').toLowerCase() === 'egreso').length;
-      response += `- Egresos: ${formatCurrency(totalEgresos, symbol, currencyCode)} (${formatMovementCount(countEgresos)})`;
+      response += `- Egresos: **${formatCurrency(totalEgresos, symbol, currencyCode)}** (**${formatMovementCount(countEgresos)}**)`;
     }
     
     return response;

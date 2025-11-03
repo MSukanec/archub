@@ -72,7 +72,7 @@ export async function getContactMovements(
 
     if (!movements || movements.length === 0) {
       return projectName 
-        ? `No encontré movimientos en el proyecto "${projectName}"`
+        ? `No encontré movimientos en el proyecto **"${projectName}"**`
         : 'No encontré movimientos en tu organización';
     }
 
@@ -97,7 +97,7 @@ export async function getContactMovements(
     });
 
     if (filteredMovements.length === 0) {
-      return `No encontré movimientos de "${contactName}"${projectName ? ` en el proyecto "${projectName}"` : ''}`;
+      return `No encontré movimientos de **"${contactName}"**${projectName ? ` en el proyecto **"${projectName}"**` : ''}`;
     }
 
     // Si hay conversión, convertir todos los montos
@@ -110,7 +110,7 @@ export async function getContactMovements(
       );
       
       if (!targetCurrencyMovement) {
-        return `No encontré movimientos en ${convertToUpper} para usar como referencia de conversión`;
+        return `No encontré movimientos en **${convertToUpper}** para usar como referencia de conversión`;
       }
       
       const targetRate = Number(targetCurrencyMovement.exchange_rate || 1);
@@ -143,24 +143,24 @@ export async function getContactMovements(
       const balanceFormatted = formatCurrency(Math.abs(balance), symbol, convertToUpper);
       
       // Construir respuesta
-      let response = `Movimientos de ${contactName}`;
+      let response = `Movimientos de **${contactName}**`;
       if (projectName) {
-        response += ` en ${filteredMovements[0].project_name || projectName}`;
+        response += ` en **${filteredMovements[0].project_name || projectName}**`;
       }
-      response += ` (convertido a ${convertToUpper}):\n`;
+      response += ` (convertido a **${convertToUpper}**):\n`;
       
       if (countIngresos > 0) {
-        response += `- Ingresos: ${ingresosFormatted} (${formatMovementCount(countIngresos)})\n`;
+        response += `- Ingresos: **${ingresosFormatted}** (**${formatMovementCount(countIngresos)}**)\n`;
       }
       
       if (countEgresos > 0) {
-        response += `- Egresos: ${egresosFormatted} (${formatMovementCount(countEgresos)})\n`;
+        response += `- Egresos: **${egresosFormatted}** (**${formatMovementCount(countEgresos)}**)\n`;
       }
       
-      response += `- Balance neto: ${balance >= 0 ? '+' : '-'}${balanceFormatted}`;
+      response += `- Balance neto: **${balance >= 0 ? '+' : '-'}${balanceFormatted}**`;
       
       if (dateRange) {
-        response += `\n\nPeríodo: ${formatDateRange(dateRange.start, dateRange.end)}`;
+        response += `\n\nPeríodo: **${formatDateRange(dateRange.start, dateRange.end)}**`;
       }
       
       return response;
@@ -175,7 +175,7 @@ export async function getContactMovements(
 
     if (uniqueCurrencies.size > 1) {
       const currencyList = Array.from(uniqueCurrencies).join(', ');
-      return `Ese contacto tiene movimientos en múltiples monedas (${currencyList}). Por favor especifica una moneda o usa conversión`;
+      return `Ese contacto tiene movimientos en múltiples monedas (**${currencyList}**). Por favor especifica una moneda o usa conversión`;
     }
 
     // Separar por tipo y sumar
@@ -206,30 +206,30 @@ export async function getContactMovements(
     const balanceFormatted = formatCurrency(Math.abs(balance), symbol, currencyCode);
     
     // Construir respuesta
-    let response = `Movimientos de ${contactName}`;
+    let response = `Movimientos de **${contactName}**`;
     if (projectName) {
-      response += ` en ${firstMovement.project_name || projectName}`;
+      response += ` en **${firstMovement.project_name || projectName}**`;
     }
     response += ':\n';
     
     if (countIngresos > 0) {
-      response += `- Ingresos: ${ingresosFormatted} (${formatMovementCount(countIngresos)})\n`;
+      response += `- Ingresos: **${ingresosFormatted}** (**${formatMovementCount(countIngresos)}**)\n`;
     }
     
     if (countEgresos > 0) {
-      response += `- Egresos: ${egresosFormatted} (${formatMovementCount(countEgresos)})\n`;
+      response += `- Egresos: **${egresosFormatted}** (**${formatMovementCount(countEgresos)}**)\n`;
     }
     
     if (countIngresos === 0 && countEgresos > 0) {
-      response += `- Balance neto: -${balanceFormatted} (solo egresos)`;
+      response += `- Balance neto: **-${balanceFormatted}** (solo egresos)`;
     } else if (countEgresos === 0 && countIngresos > 0) {
-      response += `- Balance neto: +${balanceFormatted} (solo ingresos)`;
+      response += `- Balance neto: **+${balanceFormatted}** (solo ingresos)`;
     } else {
-      response += `- Balance neto: ${balance >= 0 ? '+' : '-'}${balanceFormatted}`;
+      response += `- Balance neto: **${balance >= 0 ? '+' : '-'}${balanceFormatted}**`;
     }
     
     if (dateRange) {
-      response += `\n\nPeríodo: ${formatDateRange(dateRange.start, dateRange.end)}`;
+      response += `\n\nPeríodo: **${formatDateRange(dateRange.start, dateRange.end)}**`;
     }
     
     return response;

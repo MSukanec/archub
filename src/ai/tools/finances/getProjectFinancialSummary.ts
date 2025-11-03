@@ -38,7 +38,7 @@ export async function getProjectFinancialSummary(
     }
 
     if (!movements || movements.length === 0) {
-      return `No encontré el proyecto "${projectName}" o no tiene movimientos registrados`;
+      return `No encontré el proyecto **"${projectName}"** o no tiene movimientos registrados`;
     }
 
     // Validar que todas las monedas sean iguales
@@ -50,7 +50,7 @@ export async function getProjectFinancialSummary(
 
     if (uniqueCurrencies.size > 1) {
       const currencyList = Array.from(uniqueCurrencies).join(', ');
-      return `El proyecto tiene movimientos en múltiples monedas (${currencyList}). Por favor especifica la moneda o convierte primero`;
+      return `El proyecto tiene movimientos en múltiples monedas (**${currencyList}**). Por favor especifica la moneda o convierte primero`;
     }
 
     // Calcular totales de ingresos y egresos
@@ -87,14 +87,14 @@ export async function getProjectFinancialSummary(
     const balanceFormatted = formatCurrency(Math.abs(balance), symbol);
     
     // Construir respuesta base
-    let response = `El proyecto "${actualProjectName}" tiene:\n`;
-    response += `- Ingresos: ${ingresosFormatted}\n`;
-    response += `- Egresos: ${egresosFormatted}\n`;
+    let response = `El proyecto **"${actualProjectName}"** tiene:\n`;
+    response += `- Ingresos: **${ingresosFormatted}**\n`;
+    response += `- Egresos: **${egresosFormatted}**\n`;
     
     if (balance >= 0) {
-      response += `- Balance: ${balanceFormatted}`;
+      response += `- Balance: **${balanceFormatted}**`;
     } else {
-      response += `- Balance: -${balanceFormatted} (negativo)`;
+      response += `- Balance: **-${balanceFormatted}** (negativo)`;
     }
     
     // Agregar breakdown si se solicita
@@ -107,7 +107,7 @@ export async function getProjectFinancialSummary(
       response += '\n\nPrincipales gastos:';
       sortedCategories.forEach(([category, amount], index) => {
         const categoryFormatted = formatCurrency(amount, symbol);
-        response += `\n${index + 1}. ${category}: ${categoryFormatted}`;
+        response += `\n**${index + 1}.** **${category}**: **${categoryFormatted}**`;
       });
     }
     
