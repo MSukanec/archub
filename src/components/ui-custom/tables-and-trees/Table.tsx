@@ -1079,20 +1079,22 @@ export function Table<T = any>({
                                     <DropdownMenuItem
                                       key={idx}
                                       onClick={action.onClick}
-                                      className="flex items-center gap-2 text-xs cursor-pointer"
+                                      className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent hover:text-black dark:hover:text-white transition-colors"
                                     >
-                                      <action.icon className="h-3.5 w-3.5" />
+                                      <action.icon className="h-4 w-4" />
                                       {action.label}
                                     </DropdownMenuItem>
                                   ))}
-                                  {destructiveActions.length > 0 && <DropdownMenuSeparator />}
+                                  {destructiveActions.length > 0 && (
+                                    <DropdownMenuSeparator className="bg-border" />
+                                  )}
                                   {destructiveActions.map((action, idx) => (
                                     <DropdownMenuItem
                                       key={idx}
                                       onClick={action.onClick}
-                                      className="flex items-center gap-2 text-xs cursor-pointer text-destructive focus:text-destructive"
+                                      className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent text-foreground hover:text-red-600 dark:hover:text-red-500 transition-colors"
                                     >
-                                      <action.icon className="h-3.5 w-3.5" />
+                                      <action.icon className="h-4 w-4" />
                                       {action.label}
                                     </DropdownMenuItem>
                                   ))}
@@ -1173,20 +1175,22 @@ export function Table<T = any>({
                                 <DropdownMenuItem
                                   key={idx}
                                   onClick={action.onClick}
-                                  className="flex items-center gap-2 text-xs cursor-pointer"
+                                  className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent hover:text-black dark:hover:text-white transition-colors"
                                 >
-                                  <action.icon className="h-3.5 w-3.5" />
+                                  <action.icon className="h-4 w-4" />
                                   {action.label}
                                 </DropdownMenuItem>
                               ))}
-                              {destructiveActions.length > 0 && <DropdownMenuSeparator />}
+                              {destructiveActions.length > 0 && (
+                                <DropdownMenuSeparator className="bg-border" />
+                              )}
                               {destructiveActions.map((action, idx) => (
                                 <DropdownMenuItem
                                   key={idx}
                                   onClick={action.onClick}
-                                  className="flex items-center gap-2 text-xs cursor-pointer text-destructive focus:text-destructive"
+                                  className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent text-foreground hover:text-red-600 dark:hover:text-red-500 transition-colors"
                                 >
-                                  <action.icon className="h-3.5 w-3.5" />
+                                  <action.icon className="h-4 w-4" />
                                   {action.label}
                                 </DropdownMenuItem>
                               ))}
@@ -1287,20 +1291,22 @@ export function Table<T = any>({
                               <DropdownMenuItem
                                 key={idx}
                                 onClick={action.onClick}
-                                className="flex items-center gap-2 text-xs cursor-pointer"
+                                className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent hover:text-black dark:hover:text-white transition-colors"
                               >
-                                <action.icon className="h-3.5 w-3.5" />
+                                <action.icon className="h-4 w-4" />
                                 {action.label}
                               </DropdownMenuItem>
                             ))}
-                            {destructiveActions.length > 0 && <DropdownMenuSeparator />}
+                            {destructiveActions.length > 0 && (
+                              <DropdownMenuSeparator className="bg-border" />
+                            )}
                             {destructiveActions.map((action, idx) => (
                               <DropdownMenuItem
                                 key={idx}
                                 onClick={action.onClick}
-                                className="flex items-center gap-2 text-xs cursor-pointer text-destructive focus:text-destructive"
+                                className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent text-foreground hover:text-red-600 dark:hover:text-red-500 transition-colors"
                               >
-                                <action.icon className="h-3.5 w-3.5" />
+                                <action.icon className="h-4 w-4" />
                                 {action.label}
                               </DropdownMenuItem>
                             ))}
