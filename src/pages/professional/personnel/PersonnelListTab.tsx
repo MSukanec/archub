@@ -121,19 +121,23 @@ export default function PersonnelListTab({
 
       if (error) throw error
       
-      // Ordenar alfabéticamente por nombre
-      const sorted = (data || []).sort((a: any, b: any) => {
-        const getDisplayName = (contact: any) => {
-          if (!contact) return 'Sin nombre'
-          if (contact.first_name || contact.last_name) {
-            return `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-          }
-          return contact.full_name || 'Sin nombre'
+      // Helper para obtener nombre
+      const getDisplayName = (contact: any) => {
+        if (!contact) return 'Sin nombre'
+        if (contact.first_name || contact.last_name) {
+          return `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
         }
-        
-        const nameA = getDisplayName(a.contact).toLowerCase()
-        const nameB = getDisplayName(b.contact).toLowerCase()
-        return nameA.localeCompare(nameB)
+        return contact.full_name || 'Sin nombre'
+      }
+      
+      // Agregar campo displayName y ordenar alfabéticamente
+      const withDisplayNames = (data || []).map((item: any) => ({
+        ...item,
+        displayName: getDisplayName(item.contact)
+      }))
+      
+      const sorted = withDisplayNames.sort((a: any, b: any) => {
+        return a.displayName.toLowerCase().localeCompare(b.displayName.toLowerCase())
       })
       
       return sorted
@@ -168,15 +172,16 @@ export default function PersonnelListTab({
     <Table
       data={personnelData}
       defaultSort={{
-        key: "contact",
+        key: "displayName",
         direction: "asc"
       }}
       columns={[
         {
-          key: "contact",
+          key: "displayName",
           label: "Nombre",
           width: "35%",
-          sortable: true,
+          sortable: false,
+          sortType: "string",
           render: (record: any) => {
             const contact = record.contact
             if (!contact) {
