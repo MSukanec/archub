@@ -101,11 +101,10 @@ export default function PersonnelListTab({
   selectedProjectId 
 }: PersonnelListTabProps) {
   const [statusFilter, setStatusFilter] = useState<'active' | 'inactive' | 'all'>('active')
+  const [refreshKey, setRefreshKey] = useState(0)
 
   const { data: personnelData = [], isLoading: isPersonnelLoading } = useQuery({
-    queryKey: ['project-personnel', selectedProjectId],
-    refetchOnMount: 'always',
-    staleTime: 0,
+    queryKey: ['project-personnel', selectedProjectId, refreshKey],
     queryFn: async () => {
       if (!selectedProjectId) return []
       
@@ -153,6 +152,7 @@ export default function PersonnelListTab({
         return a.displayName.toLowerCase().localeCompare(b.displayName.toLowerCase())
       })
       
+      console.log('✅ PROCESSED PERSONNEL DATA (after sort):', JSON.stringify(sorted, null, 2))
       return sorted
     },
     enabled: !!selectedProjectId
