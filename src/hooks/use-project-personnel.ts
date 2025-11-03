@@ -6,6 +6,8 @@ export interface ProjectPersonnel {
   project_id: string
   contact_id: string
   notes?: string
+  start_date?: string | null
+  end_date?: string | null
   contact: {
     id: string
     first_name: string
@@ -29,6 +31,8 @@ export function useProjectPersonnel(projectId?: string) {
           project_id,
           contact_id,
           notes,
+          start_date,
+          end_date,
           contact:contacts(
             id,
             first_name,

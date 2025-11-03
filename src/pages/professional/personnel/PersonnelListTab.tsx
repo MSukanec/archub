@@ -112,6 +112,8 @@ export default function PersonnelListTab({
         .select(`
           id,
           notes,
+          start_date,
+          end_date,
           created_at,
           contact:contacts(
             id,
@@ -197,7 +199,7 @@ export default function PersonnelListTab({
         {
           key: "displayName",
           label: "Nombre",
-          width: "35%",
+          width: "30%",
           sortable: true,
           sortType: "string",
           render: (record: any) => {
@@ -246,9 +248,26 @@ export default function PersonnelListTab({
           }
         },
         {
+          key: "start_date",
+          label: "Fecha de inicio",
+          width: "12%",
+          sortable: true,
+          sortType: "date",
+          render: (record: any) => {
+            if (!record.start_date) {
+              return <span className="text-sm text-muted-foreground">-</span>
+            }
+            return (
+              <span className="text-sm">
+                {format(new Date(record.start_date), 'dd/MM/yyyy')}
+              </span>
+            )
+          }
+        },
+        {
           key: "labor_type",
           label: "Tipo de Mano de Obra",
-          width: "15%",
+          width: "13%",
           sortable: true,
           sortType: "string",
           render: (record: any) => {
@@ -261,24 +280,6 @@ export default function PersonnelListTab({
               >
                 {record.labor_type.name}
               </Badge>
-            )
-          }
-        },
-        {
-          key: "insurance_expiry",
-          label: "Vencimiento Seguro",
-          width: "15%",
-          sortable: true,
-          sortType: "date",
-          render: (record: any) => {
-            const insuranceStatus = getInsuranceStatus(record.contact?.id, insuranceData)
-            if (!insuranceStatus.expiryDate) {
-              return <span className="text-sm text-muted-foreground">-</span>
-            }
-            return (
-              <span className="text-sm">
-                {format(new Date(insuranceStatus.expiryDate), 'dd/MM/yyyy')}
-              </span>
             )
           }
         },

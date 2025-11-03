@@ -443,6 +443,18 @@ export const project_installments = pgTable("project_installments", {
   created_at: timestamp("created_at").defaultNow(),
 });
 
+// Project Personnel Table
+export const project_personnel = pgTable("project_personnel", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  project_id: uuid("project_id").notNull(),
+  contact_id: uuid("contact_id").notNull(),
+  labor_type_id: uuid("labor_type_id"),
+  notes: text("notes"),
+  start_date: text("start_date"), // Fecha de inicio del personal en el proyecto
+  end_date: text("end_date"), // Fecha de finalización del personal en el proyecto
+  created_at: timestamp("created_at").defaultNow(),
+});
+
 
 
 export const insertTaskParameterPositionSchema = createInsertSchema(task_parameter_positions).omit({
@@ -498,6 +510,11 @@ export const insertProjectInstallmentSchema = createInsertSchema(project_install
   created_at: true,
 });
 
+export const insertProjectPersonnelSchema = createInsertSchema(project_personnel).omit({
+  id: true,
+  created_at: true,
+});
+
 
 
 export type InsertUserData = z.infer<typeof insertUserDataSchema>;
@@ -532,6 +549,8 @@ export type MovementClient = typeof movement_clients.$inferSelect;
 export type InsertMovementClient = z.infer<typeof insertMovementClientSchema>;
 
 export type MovementGeneralCost = typeof movement_general_costs.$inferSelect;
+export type ProjectPersonnel = typeof project_personnel.$inferSelect;
+export type InsertProjectPersonnel = z.infer<typeof insertProjectPersonnelSchema>;
 export type InsertMovementGeneralCost = z.infer<typeof insertMovementGeneralCostSchema>;
 export type ProjectInstallment = typeof project_installments.$inferSelect;
 export type InsertProjectInstallment = z.infer<typeof insertProjectInstallmentSchema>;
