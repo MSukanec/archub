@@ -48,6 +48,7 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
   const { data: currentUser } = useCurrentUser()
   const queryClient = useQueryClient()
   const personnelRecord = modalData?.personnelRecord
+  const projectId = currentUser?.preferences?.last_project_id
 
   // Query para obtener labor types
   const { data: laborTypes = [] } = useQuery({
@@ -99,7 +100,8 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project-personnel'] })
+      // Invalidar con el mismo patrón de queryKey que usa PersonnelListTab
+      queryClient.invalidateQueries({ queryKey: ['project-personnel', projectId] })
       toast({
         title: 'Datos actualizados',
         description: 'La información del personal se ha actualizado correctamente'
@@ -129,7 +131,8 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project-personnel'] })
+      // Invalidar con el mismo patrón de queryKey que usa PersonnelListTab
+      queryClient.invalidateQueries({ queryKey: ['project-personnel', projectId] })
       toast({
         title: 'Personal eliminado',
         description: 'El personal ha sido removido del proyecto correctamente'
