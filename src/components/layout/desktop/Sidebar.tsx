@@ -225,6 +225,9 @@ export function Sidebar() {
                   )}
                 </button>
                 
+                {/* Espacio después del logo */}
+                <div className="h-3"></div>
+                
                 {/* Botón Inicio */}
                 <button
                   onClick={() => {
@@ -266,13 +269,13 @@ export function Sidebar() {
                   )}
                 </button>
 
-                {/* Divisor "Secciones" */}
+                {/* Divisor "Profesionales" */}
                 <div className="my-3 h-[12px] flex items-center justify-center w-full">
                   {isExpanded ? (
                     <div className="flex items-center gap-2 w-full">
                       <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
                       <span className="text-[10px] font-medium text-[var(--main-sidebar-fg)] opacity-60 px-1 leading-none">
-                        Secciones
+                        Profesionales
                       </span>
                       <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
                     </div>
@@ -395,6 +398,21 @@ export function Sidebar() {
                   )}
                 </button>
 
+                {/* Divisor "Comunidad" */}
+                <div className="my-3 h-[12px] flex items-center justify-center w-full">
+                  {isExpanded ? (
+                    <div className="flex items-center gap-2 w-full">
+                      <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+                      <span className="text-[10px] font-medium text-[var(--main-sidebar-fg)] opacity-60 px-1 leading-none">
+                        Comunidad
+                      </span>
+                      <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+                    </div>
+                  ) : (
+                    <div className="w-8 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+                  )}
+                </div>
+
                 {/* Botón Capacitaciones */}
                 <button
                   onClick={() => {
@@ -431,6 +449,42 @@ export function Sidebar() {
                         "group-hover:text-white group-hover:opacity-100"
                       )}>
                         Cursos y formación
+                      </span>
+                    </div>
+                  )}
+                </button>
+
+                {/* Botón Comunidad Discord */}
+                <button
+                  onClick={() => {
+                    window.open('https://discord.com/channels/868615664070443008', '_blank');
+                  }}
+                  className={cn(
+                    "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
+                    isExpanded ? "w-full" : "w-8"
+                  )}
+                >
+                  <div className="flex items-center justify-center w-8 flex-shrink-0">
+                    <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+                      <MessageCircle className={cn(
+                        "h-4 w-4 transition-colors text-[var(--main-sidebar-fg)]",
+                        "group-hover:text-[var(--accent)]"
+                      )} />
+                    </div>
+                  </div>
+                  {isExpanded && (
+                    <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
+                      <span className={cn(
+                        "text-sm font-medium truncate text-left text-[var(--main-sidebar-fg)]",
+                        "group-hover:text-white"
+                      )}>
+                        Comunidad Discord
+                      </span>
+                      <span className={cn(
+                        "text-xs truncate text-left text-[var(--main-sidebar-fg)] opacity-60",
+                        "group-hover:text-white group-hover:opacity-100"
+                      )}>
+                        Únete a la conversación
                       </span>
                     </div>
                   )}
@@ -514,6 +568,9 @@ export function Sidebar() {
                     </div>
                   )}
                 </button>
+                
+                {/* Espacio después del logo */}
+                <div className="h-3"></div>
 
                 {/* {/* Selector de Organización - solo en sidebar de organización */}
                 {/* {sidebarLevel === 'organization' && (
