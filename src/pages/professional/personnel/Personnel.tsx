@@ -145,7 +145,7 @@ export default function Personnel() {
 
   return (
     <Layout headerProps={headerProps} wide>
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-full overflow-x-hidden">
         {activeTab === 'dashboard' && (
           <PersonnelDashboard
             selectedProjectId={selectedProjectId}
