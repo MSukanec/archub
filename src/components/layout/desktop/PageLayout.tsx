@@ -281,7 +281,7 @@ export function PageLayout({
       {/* Page Content - HEADER Y CONTENIDO juntos para que se muevan con scroll */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden">
         <div style={{ backgroundColor: "var(--layout-bg)" }}>
-          <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-3 ${
+          <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-0 ${
             isDocked ? 'px-16' : 'px-16'
           }`}>
           {/* FILA 1: Icono + Título + Descripción a la izquierda + Selector a la derecha */}
