@@ -12,6 +12,7 @@ import { useInsuranceList } from '@/hooks/useInsurances'
 import PersonnelListTab from './PersonnelListTab'
 import PersonnelAttendanceTab from './PersonnelAttendanceTab'
 import PersonnelDashboard from './PersonnelDashboard'
+import PersonnelPaymentsTab from './PersonnelPaymentsTab'
 
 export default function Personnel() {
   const { openModal } = useGlobalModalStore()
@@ -77,7 +78,7 @@ export default function Personnel() {
   }, [])
 
   useEffect(() => {
-    if (!hasPersonnel && (activeTab === 'attendance' || activeTab === 'insurance')) {
+    if (!hasPersonnel && (activeTab === 'attendance' || activeTab === 'insurance' || activeTab === 'payments')) {
       setActiveTab('dashboard')
     }
   }, [hasPersonnel, activeTab])
@@ -98,6 +99,12 @@ export default function Personnel() {
         isActive: activeTab === 'active'
       },
       {
+        id: 'payments',
+        label: 'Pagos',
+        isActive: activeTab === 'payments',
+        disabled: !hasPersonnel
+      },
+      {
         id: 'attendance',
         label: 'Asistencia',
         isActive: activeTab === 'attendance',
@@ -111,7 +118,7 @@ export default function Personnel() {
       }
     ],
     onTabChange: (tabId: string) => {
-      if (tabId === 'attendance' || tabId === 'insurance') {
+      if (tabId === 'attendance' || tabId === 'insurance' || tabId === 'payments') {
         if (!hasPersonnel) {
           return
         }
@@ -154,6 +161,13 @@ export default function Personnel() {
             openModal={openModal}
             handleDeletePersonnel={handleDeletePersonnel}
             insuranceData={insuranceData}
+            selectedProjectId={selectedProjectId}
+          />
+        )}
+
+        {activeTab === 'payments' && (
+          <PersonnelPaymentsTab
+            openModal={openModal}
             selectedProjectId={selectedProjectId}
           />
         )}
