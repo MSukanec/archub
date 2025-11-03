@@ -257,7 +257,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         // Primero eliminar attendees existentes si estamos actualizando
         if (siteLogId) {
           await supabase
-            .from('attendees')
+            .from('personnel_attendees')
             .delete()
             .eq('site_log_id', savedSiteLog.id);
         }
@@ -274,7 +274,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         }));
 
         const { error: attendeesError } = await supabase
-          .from('attendees')
+          .from('personnel_attendees')
           .insert(attendeesToInsert);
 
         if (attendeesError) {
@@ -676,7 +676,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
                 <div key={attendee.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
                   <div className="flex-1">
                     <p className="text-sm font-medium">
-                      {contacts.find((c: any) => c.id === attendee.contact_id)?.first_name} {contacts.find((c: any) => c.id === attendee.contact_id)?.last_name}
+                      {(contacts as any[]).find((c: any) => c.id === attendee.contact_id)?.first_name} {(contacts as any[]).find((c: any) => c.id === attendee.contact_id)?.last_name}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {attendee.arrival_time} - {attendee.departure_time}

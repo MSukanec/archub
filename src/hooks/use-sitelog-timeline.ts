@@ -92,7 +92,7 @@ export function useSiteLogTimeline(
         
         // Attendees
         supabase
-          .from('attendees')
+          .from('personnel_attendees')
           .select('site_log_id')
           .in('site_log_id', siteLogIds),
         

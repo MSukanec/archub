@@ -97,7 +97,7 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
 
       // Fetch attendees separately from ATTENDEES table
       const { data: attendeesData, error: attendeesError } = await supabase
-        .from('attendees')
+        .from('personnel_attendees')
         .select(`
           *,
           personnel:project_personnel(

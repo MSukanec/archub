@@ -14,7 +14,7 @@ function useAttendanceData(projectId: string | undefined, organizationId: string
       if (!supabase || !projectId || !organizationId) return []
 
       const { data: attendanceData, error } = await supabase
-        .from('attendees')
+        .from('personnel_attendees')
         .select(`
           *,
           personnel:project_personnel(

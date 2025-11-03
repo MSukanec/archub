@@ -18,7 +18,7 @@ import { Separator } from '@/components/ui/separator'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import DatePicker from '@/components/ui-custom/fields/DatePickerField'
+import DatePickerField from '@/components/ui-custom/fields/DatePickerField'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
@@ -121,7 +121,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
       const workerContactId = modalData?.editingData?.personnelId || attendance.workerId || attendance.personnel_id || ''
       
       // Find the project_personnel record that matches this contact_id
-      const matchingPersonnel = projectPersonnel.find(p => p.contact?.id === workerContactId)
+      const matchingPersonnel = projectPersonnel.find((p: any) => p.contact?.id === workerContactId)
       const actualPersonnelId = matchingPersonnel?.id || ''
       
       // Fix date handling - ensure we use the correct date
@@ -151,7 +151,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
       if (!currentMember) throw new Error('No se encontró el miembro de la organización')
       
       const { error } = await supabase
-        .from('attendees')
+        .from('personnel_attendees')
         .insert({
           site_log_id: null, // Como especificaste, esto es null
           personnel_id: data.personnel_id, // Ahora usa el ID de project_personnel
@@ -202,7 +202,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
       }
       
       const { error } = await supabase
-        .from('attendees')
+        .from('personnel_attendees')
         .update({
           personnel_id: data.personnel_id,
           attendance_type: data.attendance_type,
@@ -246,7 +246,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
       if (!personnelId || !attendanceDate) throw new Error('No se puede identificar la asistencia a eliminar')
       
       const { error } = await supabase
-        .from('attendees')
+        .from('personnel_attendees')
         .delete()
         .eq('personnel_id', personnelId)
         .eq('created_at', new Date(attendanceDate).toISOString().split('T')[0])
@@ -360,8 +360,8 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
                     </FormControl>
                     <SelectContent>
                       {projectPersonnel
-                        .filter(personnel => personnel.contact && !Array.isArray(personnel.contact))
-                        .map((personnel) => (
+                        .filter((personnel: any) => personnel.contact && !Array.isArray(personnel.contact))
+                        .map((personnel: any) => (
                         <SelectItem key={personnel.id} value={personnel.id}>
                           {personnel.contact.first_name || 'Sin nombre'} {personnel.contact.last_name || ''}
                         </SelectItem>
