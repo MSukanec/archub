@@ -138,7 +138,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           {/* Main Content Area - MainHeader + Page Content */}
           <div className="flex-1 flex flex-col min-h-0">
             {/* Main Header for Desktop */}
-            <MainHeader />
+            <MainHeader icon={headerProps?.icon} title={headerProps?.title} />
 
             {/* Page Content with rounded corners and framing effect */}
             <div className={`flex-1 flex min-h-0 relative ${isDocked ? 'gap-3' : ''}`}>
