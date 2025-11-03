@@ -250,33 +250,18 @@ export default function PersonnelListTab({
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">
+                  <p className="font-semibold text-sm truncate">
                     {displayName}
                   </p>
-                  {record.notes && (
-                    <p className="text-xs text-muted-foreground truncate">
-                      {record.notes}
-                    </p>
+                  {record.labor_type?.name && (
+                    <div className="mt-1">
+                      <Badge className="text-[10px] px-1.5 py-0">
+                        {record.labor_type.name}
+                      </Badge>
+                    </div>
                   )}
                 </div>
               </div>
-            )
-          }
-        },
-        {
-          key: "labor_type",
-          label: "Tipo",
-          width: "15%",
-          sortable: true,
-          sortType: "string",
-          render: (record: any) => {
-            if (!record.labor_type?.name) {
-              return <span className="text-sm text-muted-foreground">-</span>
-            }
-            return (
-              <Badge>
-                {record.labor_type.name}
-              </Badge>
             )
           }
         },
