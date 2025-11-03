@@ -142,7 +142,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
             {/* Page Content with rounded corners and framing effect */}
             <div className={`flex-1 flex min-h-0 relative ${isDocked ? 'gap-3' : ''}`}>
-              <div className={`flex-1 ${isCourseSidebarVisible ? '' : 'pr-3'} pt-3 pb-3 overflow-x-hidden`}>
+              <div className={`flex-1 ${isCourseSidebarVisible ? '' : 'pr-3'} pb-3 overflow-x-hidden`}>
                 <main
                   className={`h-full flex flex-col rounded-2xl overflow-hidden bg-gradient-to-b from-[hsl(0,0%,96%)] to-[hsl(76,40%,94%)] dark:from-[hsl(0,0%,20%)] dark:to-[hsl(76,30%,15%)] ${!isDocked ? 'w-full' : ''}`}
                 >
