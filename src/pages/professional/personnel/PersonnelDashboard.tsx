@@ -97,13 +97,13 @@ export default function PersonnelDashboard({
         onCardClick={() => onTabChange('active')}
         data-testid="stat-card-personal-activo"
       >
-        <StatCardTitle>
+        <StatCardTitle>Personal Activo</StatCardTitle>
+        <StatCardValue>
           <div className="flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            Personal Activo
+            <Users className="w-5 h-5 text-muted-foreground" />
+            {metrics.totalPersonnel}
           </div>
-        </StatCardTitle>
-        <StatCardValue>{metrics.totalPersonnel}</StatCardValue>
+        </StatCardValue>
         <StatCardMeta>
           {metrics.totalPersonnel === 0 
             ? 'Sin personal asignado' 
@@ -119,13 +119,13 @@ export default function PersonnelDashboard({
         onCardClick={() => onTabChange('attendance')}
         data-testid="stat-card-asistencia"
       >
-        <StatCardTitle>
+        <StatCardTitle>Asistencia Semanal</StatCardTitle>
+        <StatCardValue>
           <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
-            Asistencia Semanal
+            <Calendar className="w-5 h-5 text-muted-foreground" />
+            {metrics.weeklyAttendance}
           </div>
-        </StatCardTitle>
-        <StatCardValue>{metrics.weeklyAttendance}</StatCardValue>
+        </StatCardValue>
         <StatCardMeta>
           {metrics.weeklyAttendance === 0
             ? 'Sin registros esta semana'
@@ -141,13 +141,13 @@ export default function PersonnelDashboard({
         onCardClick={() => onTabChange('insurance')}
         data-testid="stat-card-seguros-activos"
       >
-        <StatCardTitle>
+        <StatCardTitle>Seguros Activos</StatCardTitle>
+        <StatCardValue>
           <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4" />
-            Seguros Activos
+            <Shield className="w-5 h-5 text-muted-foreground" />
+            {metrics.insuredCount}
           </div>
-        </StatCardTitle>
-        <StatCardValue>{metrics.insuredCount}</StatCardValue>
+        </StatCardValue>
         <StatCardMeta>
           {metrics.insuredCount === 0
             ? 'Ningún trabajador asegurado'
@@ -162,14 +162,12 @@ export default function PersonnelDashboard({
       <StatCard 
         data-testid="stat-card-tasa-asistencia"
       >
-        <StatCardTitle showArrow={false}>
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" />
-            Tasa de Asistencia
-          </div>
-        </StatCardTitle>
+        <StatCardTitle showArrow={false}>Tasa de Asistencia</StatCardTitle>
         <StatCardValue>
-          {metrics.attendanceRate > 0 ? `${metrics.attendanceRate}%` : '-'}
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-muted-foreground" />
+            {metrics.attendanceRate > 0 ? `${metrics.attendanceRate}%` : '-'}
+          </div>
         </StatCardValue>
         <StatCardMeta>
           {metrics.attendanceRate === 0
