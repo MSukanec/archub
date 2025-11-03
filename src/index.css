@@ -718,9 +718,9 @@ input[type="number"] {
 
 /* Remove scrollbar gutter to avoid white border when no scrollbar */
 
-/* Main Header - Force white text color */
+/* Main Header - Use same color as sidebar buttons in normal state */
 .main-header-title {
-  color: #ffffff !important;
+  color: var(--main-sidebar-fg) !important;
 }
 
 .main-header-icon {

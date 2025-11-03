@@ -285,8 +285,8 @@ export function PageLayout({
             isDocked ? 'px-16' : 'px-16'
           }`}>
           {/* FILA 1: Icono + Título + Descripción a la izquierda + Selector a la derecha */}
-          <div className={`min-h-[50px] flex items-center justify-between ${!showSecondRow ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
-          {/* Left: Icon + Title + Description */}
+          {/* COMENTADO - Ahora se muestra en MainHeader */}
+          {/* <div className={`min-h-[50px] flex items-center justify-between ${!showSecondRow ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
           <div className="flex items-center gap-4 py-2">
             {showBackButton && (
               <Button
@@ -300,14 +300,11 @@ export function PageLayout({
               </Button>
             )}
             
-            {/* Icon + Title + Description */}
             <div className="flex items-center gap-3">
-              {/* Icono de la página (usa prop icon o fallback a PAGE_CONFIG) */}
               {(() => {
                 const IconComponent = icon || PAGE_CONFIG[location]?.icon;
                 if (!IconComponent) return null;
                 
-                // Si icon es un ReactElement válido, renderizarlo directamente
                 if (React.isValidElement(IconComponent)) {
                   return (
                     <span className="text-[var(--accent)] flex-shrink-0">
@@ -316,7 +313,6 @@ export function PageLayout({
                   );
                 }
                 
-                // Si es un componente, renderizarlo con JSX
                 const Icon = IconComponent as React.ComponentType<any>;
                 return (
                   <span className="text-[var(--accent)] flex-shrink-0">
@@ -325,7 +321,6 @@ export function PageLayout({
                 );
               })()}
               
-              {/* Title + Description */}
               <div className="flex flex-col">
                 <h1 className="text-xl font-semibold text-[var(--foreground)]">
                   {PAGE_CONFIG[location]?.name || title || 'Página'}
@@ -339,13 +334,12 @@ export function PageLayout({
             </div>
           </div>
 
-          {/* Right: Selector */}
           {selector && (
             <div className="flex items-center">
               {selector}
             </div>
           )}
-        </div>
+        </div> */}
 
           {/* FILA 2: Tabs a la izquierda + Botones de acción a la derecha */}
           {showSecondRow && (
