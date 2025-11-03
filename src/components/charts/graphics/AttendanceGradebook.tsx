@@ -37,14 +37,15 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
   triggerTodayCenter = false,
   onEditAttendance
 }) => {
-  // Calculate date range automatically based on attendance data
+  // Calculate date range: show 3 days before today and 3 days after
   const { startDate, endDate } = React.useMemo(() => {
+    const today = new Date()
+    
     if (!attendance || attendance.length === 0) {
-      // Default range if no attendance data
-      const today = new Date()
+      // Default range: 3 days before and 3 days after today
       return {
-        startDate: subDays(today, 15),
-        endDate: addDays(today, 15)
+        startDate: subDays(today, 3),
+        endDate: addDays(today, 3)
       }
     }
 
@@ -52,10 +53,12 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
     const attendanceDates = attendance.map(record => new Date(record.day)).sort((a, b) => a.getTime() - b.getTime())
     const firstAttendanceDate = attendanceDates[0]
     
-    // Set start date as the first attendance date
-    const calculatedStartDate = firstAttendanceDate
-    // Set end date as exactly 1 year from the first attendance date
-    const calculatedEndDate = addDays(firstAttendanceDate, 365)
+    // Start from the earliest attendance date or 3 days before today (whichever is earlier)
+    const threesDaysAgo = subDays(today, 3)
+    const calculatedStartDate = firstAttendanceDate < threesDaysAgo ? firstAttendanceDate : threesDaysAgo
+    
+    // End at 3 days after today
+    const calculatedEndDate = addDays(today, 3)
 
     return {
       startDate: calculatedStartDate,
