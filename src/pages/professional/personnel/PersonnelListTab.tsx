@@ -313,7 +313,8 @@ export default function PersonnelListTab({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => openModal('contact', { isEditing: true, editingContact: record.contact })}
+                onClick={() => openModal('personnel-data', { personnelRecord: record })}
+                data-testid={`button-edit-personnel-${record.id}`}
               >
                 <Edit className="h-4 w-4" />
               </Button>
@@ -326,6 +327,7 @@ export default function PersonnelListTab({
                   onConfirm: () => handleDeletePersonnel(record.id)
                 })}
                 className=" text-destructive hover:text-destructive"
+                data-testid={`button-delete-personnel-${record.id}`}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

@@ -49,6 +49,7 @@ import { SiteLogModal } from '../modals/construction/logs/SiteLogModal';
 import { SiteLogModalView } from '../modals/construction/logs/SiteLogModalView';
 import { AttendanceFormModal } from '../modals/construction/AttendanceFormModal';
 import { PersonnelFormModal } from '../modals/construction/PersonnelFormModal';
+import { PersonnelDataModal } from '../modals/personnel/PersonnelDataModal';
 import { ParameterVisibilityConfigModal } from '../modals/admin/ParameterVisibilityConfigModal';
 import { AddParameterToCanvasModal } from '../modals/admin/AddParameterToCanvasModal';
 import { SubcontractFormModal } from '../modals/construction/SubcontractFormModal';
@@ -199,6 +200,8 @@ export function ModalFactory() {
       return <AttendanceFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'personnel':
       return <PersonnelFormModal data={data || {}} />;
+    case 'personnel-data':
+      return <PersonnelDataModal modalData={data || undefined} onClose={closeModal} />;
     case 'parameter-visibility-config':
       return <ParameterVisibilityConfigModal />;
     case 'add-parameter-to-canvas':
