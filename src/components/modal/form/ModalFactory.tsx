@@ -47,8 +47,8 @@ import { ProfileOrganizationFormModal } from '../modals/profile/ProfileOrganizat
 import { ChangelogFormModal } from '../modals/admin/ChangelogFormModal';
 import { SiteLogModal } from '../modals/construction/logs/SiteLogModal';
 import { SiteLogModalView } from '../modals/construction/logs/SiteLogModalView';
-import { AttendanceFormModal } from '../modals/construction/AttendanceFormModal';
-import { PersonnelFormModal } from '../modals/construction/PersonnelFormModal';
+import { PersonnelAttendanceModal } from '../modals/personnel/PersonnelAttendanceModal';
+import { PersonnelAddModal } from '../modals/personnel/PersonnelAddModal';
 import { PersonnelDataModal } from '../modals/personnel/PersonnelDataModal';
 import { ParameterVisibilityConfigModal } from '../modals/admin/ParameterVisibilityConfigModal';
 import { AddParameterToCanvasModal } from '../modals/admin/AddParameterToCanvasModal';
@@ -197,9 +197,9 @@ export function ModalFactory() {
     case 'site-log-view':
       return <SiteLogModalView modalData={data || {}} onClose={closeModal} />;
     case 'attendance':
-      return <AttendanceFormModal modalData={data || undefined} onClose={closeModal} />;
+      return <PersonnelAttendanceModal modalData={data || undefined} onClose={closeModal} />;
     case 'personnel':
-      return <PersonnelFormModal data={data || {}} />;
+      return <PersonnelAddModal data={data || {}} />;
     case 'personnel-data':
       return <PersonnelDataModal modalData={data || undefined} onClose={closeModal} />;
     case 'parameter-visibility-config':

@@ -36,7 +36,7 @@ const attendanceSchema = z.object({
 
 type AttendanceForm = z.infer<typeof attendanceSchema>
 
-interface AttendanceFormModalProps {
+interface PersonnelAttendanceModalProps {
   modalData?: {
     attendance?: any
     mode?: 'create' | 'edit'
@@ -51,7 +51,7 @@ interface AttendanceFormModalProps {
   onClose: () => void
 }
 
-export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalProps) {
+export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttendanceModalProps) {
   const { toast } = useToast()
   const { data: currentUser } = useCurrentUser()
   const organizationId = currentUser?.organization?.id

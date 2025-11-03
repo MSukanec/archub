@@ -29,11 +29,11 @@ const personnelFormSchema = z.object({
 
 type PersonnelFormData = z.infer<typeof personnelFormSchema>;
 
-interface PersonnelFormModalProps {
+interface PersonnelAddModalProps {
   data?: any;
 }
 
-export function PersonnelFormModal({ data }: PersonnelFormModalProps) {
+export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
   const { toast } = useToast();
   const { closeModal } = useGlobalModalStore();
   const [, setLocation] = useLocation();
