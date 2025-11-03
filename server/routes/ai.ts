@@ -907,6 +907,37 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
                 required: ["projectName"]
               }
             }
+          },
+          
+          // 10. getClientCommitments (CRÍTICA - evita alucinación)
+          {
+            type: "function" as const,
+            function: {
+              name: "getClientCommitments",
+              description: "CRÍTICA para consultar APORTES y COMPROMISOS DE CLIENTES. Obtiene el monto comprometido total por cada cliente, cuánto ha pagado realmente, cuánto falta pagar, y el % de avance del pago. EVITA que la IA invente datos financieros. Utilizar SIEMPRE para preguntas sobre 'cuánto aportó', 'cuánto pagó', 'cuánto falta' de clientes. Puede filtrar por cliente específico, proyecto, moneda, y convertir entre monedas.",
+              parameters: {
+                type: "object",
+                properties: {
+                  clientName: {
+                    type: "string",
+                    description: "Nombre del cliente (opcional, si se omite muestra todos los clientes)"
+                  },
+                  projectName: {
+                    type: "string",
+                    description: "Nombre del proyecto (opcional)"
+                  },
+                  currency: {
+                    type: "string",
+                    description: "Código de moneda para filtrar (ej: 'ARS', 'USD'). Opcional."
+                  },
+                  convertTo: {
+                    type: "string",
+                    description: "Código de moneda a la que convertir todos los montos. Opcional."
+                  }
+                },
+                required: []
+              }
+            }
           }
         ]
       });
@@ -1068,6 +1099,19 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
                 args.projectName,
                 organizationId,
                 authenticatedSupabase
+              );
+              break;
+            }
+            
+            case 'getClientCommitments': {
+              const { getClientCommitments } = await import('../../src/ai/tools/finances/getClientCommitments.js');
+              functionResult = await getClientCommitments(
+                organizationId,
+                authenticatedSupabase,
+                args.clientName,
+                args.projectName,
+                args.currency,
+                args.convertTo
               );
               break;
             }
