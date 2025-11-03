@@ -274,7 +274,7 @@ export default function PersonnelListTab({
               return <span className="text-sm text-muted-foreground">-</span>
             }
             return (
-              <Badge className="bg-[hsl(var(--accent))] text-white hover:bg-[hsl(var(--accent))] border-0">
+              <Badge>
                 {record.labor_type.name}
               </Badge>
             )

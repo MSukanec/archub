@@ -13,6 +13,7 @@ Preferred communication style: Simple, everyday language.
 - **Modals**: Responsive Dialog component (right-side panel on desktop, fullscreen on mobile).
 - **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub. Mobile menu mirrors desktop sidebar.
 - **Button Design**: Default button variant uses a yellow to green gradient matching logo colors.
+- **Badge Design**: Default Badge variant uses `bg-accent` and `text-accent-foreground` colors. **CRITICAL**: When user requests `--accent` color, ALWAYS use Tailwind classes `bg-accent` and `text-accent-foreground`, NEVER use `bg-[hsl(var(--accent))]` syntax.
 - **Onboarding Flow**: Streamlined onboarding sets users to 'professional' mode and navigates directly to /home.
 - **Component Standardization**: Standardized `StatCard` and custom `LoadingSpinner` components.
 - **Checkout UX**: Replaced billing info Accordion with Switch control for improved user experience.
