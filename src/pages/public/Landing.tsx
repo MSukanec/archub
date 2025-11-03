@@ -17,78 +17,118 @@ import {
   Calculator,
   ClipboardList,
   Folder,
-  PieChart
+  PieChart,
+  Sparkles,
+  GraduationCap,
+  Zap,
+  Package
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 
 const coreFeatures = [
   {
+    icon: Sparkles,
+    title: "Asistente IA Integrado",
+    description: "Copilot inteligente que analiza tus finanzas, responde consultas y te ayuda a tomar decisiones informadas sobre tus proyectos."
+  },
+  {
     icon: Building,
-    title: "Gestión de Proyectos",
-    description: "Administra proyectos de construcción con tareas parametrizadas, cronogramas y seguimiento de fases."
+    title: "Ciclo Completo de Proyectos",
+    description: "Gestiona diseño, planificación, ventas, marketing, construcción y entrega. Todo el ciclo en una sola plataforma."
   },
   {
     icon: DollarSign,
-    title: "Control Financiero",
-    description: "Presupuestos detallados, movimientos, conversiones de moneda y gestión de costos en tiempo real."
+    title: "Control Financiero Avanzado",
+    description: "Presupuestos detallados, análisis de flujo de caja, multi-moneda y reportes financieros con IA."
   },
   {
-    icon: Users,
-    title: "Gestión de Equipos",
-    description: "Organiza miembros, roles y asistencias. Múltiples organizaciones en una sola plataforma."
+    icon: GraduationCap,
+    title: "Capacitación Continua",
+    description: "Accede a cursos especializados, recursos técnicos y contenido educativo para profesionales de la construcción."
   },
   {
     icon: FileText,
     title: "Documentación Técnica",
-    description: "Centraliza planos, especificaciones y documentos con sistema de versioning y organización jerárquica."
+    description: "Centraliza planos, especificaciones, contratos y documentos con sistema de versioning profesional."
   },
   {
-    icon: Truck,
-    title: "Proveedores y Subcontratos",
-    description: "Gestiona proveedores, productos, subcontratistas y sus tareas específicas."
-  },
-  {
-    icon: BarChart3,
-    title: "Análisis y Reportes",
-    description: "Informes detallados de costos, rendimiento de tareas y análisis de productividad."
+    icon: Zap,
+    title: "Integraciones",
+    description: "Conecta con las herramientas que ya usas. Integraciones con software de diseño, contabilidad y más."
   }
 ];
 
 const capabilities = [
   {
-    category: "Planificación",
+    category: "Inteligencia Artificial",
     features: [
-      "Cronogramas interactivos tipo Gantt",
-      "Tareas parametrizadas y configurables", 
-      "Fases de construcción personalizables",
-      "Calendario de actividades"
+      "Análisis financiero automático",
+      "Consultas en lenguaje natural",
+      "Insights y recomendaciones",
+      "Predicciones de flujo de caja"
     ]
   },
   {
-    category: "Control Financiero",
+    category: "Diseño & Planificación",
     features: [
-      "Presupuestos detallados por partidas",
-      "Seguimiento de costos reales vs planificados",
-      "Conversiones automáticas de moneda",
-      "Gestión de obligaciones y pagos"
+      "Gestión de etapa de diseño",
+      "Cronogramas tipo Gantt",
+      "Presupuestos paramétricos",
+      "Biblioteca de documentos técnicos"
     ]
   },
   {
-    category: "Gestión Documental",
+    category: "Ventas & Marketing",
     features: [
-      "Biblioteca de documentos técnicos",
-      "Control de versiones",
-      "Galería de imágenes del proyecto",
-      "Exportación de reportes en PDF"
+      "CRM de clientes potenciales",
+      "Seguimiento de oportunidades",
+      "Cotizaciones profesionales",
+      "Pipeline de ventas"
+    ]
+  },
+  {
+    category: "Construcción",
+    features: [
+      "Control de obra en tiempo real",
+      "Gestión de subcontratistas",
+      "Asistencias de personal",
+      "Fotografías de avance"
+    ]
+  },
+  {
+    category: "Finanzas",
+    features: [
+      "Multi-moneda automática",
+      "Análisis de costos reales vs planificados",
+      "Gestión de pagos y cobranzas",
+      "Reportes financieros detallados"
+    ]
+  },
+  {
+    category: "Capacitación",
+    features: [
+      "Cursos especializados",
+      "Videos y lecciones interactivas",
+      "Certificados profesionales",
+      "Recursos descargables"
+    ]
+  },
+  {
+    category: "Integraciones",
+    features: [
+      "API abierta para desarrolladores",
+      "Conexión con software de diseño",
+      "Integración con contabilidad",
+      "Webhooks y automatizaciones"
     ]
   },
   {
     category: "Administración",
     features: [
-      "Base de datos de materiales y precios",
-      "Gestión de contactos y clientes",
+      "Multi-organización",
       "Roles y permisos granulares",
-      "Múltiples organizaciones"
+      "Base de datos centralizada",
+      "Respaldos automáticos"
     ]
   }
 ];
@@ -235,15 +275,16 @@ export default function Landing() {
       <section className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
         <div className="text-center max-w-5xl mx-auto">
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-8 leading-tight">
-            La plataforma completa para administrar{" "}
+            La plataforma integral para{" "}
             <span style={{ color: 'var(--accent)' }}>
-              proyectos de construcción
+              arquitectura y construcción
             </span>
           </h1>
           
           <p className="text-xl mb-12 max-w-4xl mx-auto leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-            Controla presupuestos, coordina equipos, gestiona documentos y supervisa el progreso 
-            de tus obras en tiempo real. Desde el planning hasta la entrega final.
+            Gestiona todo el ciclo de vida de tus proyectos: desde diseño y planificación, 
+            pasando por ventas y marketing, hasta construcción y entrega. Con IA integrada, 
+            capacitación continua y conexión con las herramientas que ya usas.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
@@ -295,10 +336,10 @@ export default function Landing() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl sm:text-5xl font-bold mb-6">
-              Funcionalidades principales
+              Herramientas de última generación
             </h2>
             <p className="text-xl max-w-3xl mx-auto" style={{ color: 'var(--text-muted)' }}>
-              Todo lo que necesitas para llevar tus proyectos del concepto a la realidad
+              IA, capacitación, integraciones y gestión completa del ciclo de vida de tus proyectos
             </p>
           </div>
           
@@ -335,10 +376,10 @@ export default function Landing() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl sm:text-5xl font-bold mb-6">
-              Capacidades detalladas
+              Potencia completa para profesionales
             </h2>
             <p className="text-xl max-w-3xl mx-auto" style={{ color: 'var(--text-muted)' }}>
-              Herramientas especializadas para cada aspecto de la gestión constructiva
+              Desde diseño hasta entrega, pasando por ventas y construcción. Todo en un solo lugar.
             </p>
           </div>
           
@@ -394,7 +435,7 @@ export default function Landing() {
               </div>
               <h3 className="text-xl font-semibold mb-4">1. Configura tu organización</h3>
               <p style={{ color: 'var(--text-muted)' }}>
-                Crea tu perfil, configura miembros del equipo y establece los parámetros básicos de tu empresa constructora.
+                Crea tu perfil, agrega miembros del equipo y configura tu espacio de trabajo en minutos.
               </p>
             </div>
             
@@ -403,20 +444,20 @@ export default function Landing() {
                    style={{ backgroundColor: 'var(--accent)' }}>
                 <Folder className="h-8 w-8" style={{ color: 'var(--accent-text)' }} />
               </div>
-              <h3 className="text-xl font-semibold mb-4">2. Crea y planifica proyectos</h3>
+              <h3 className="text-xl font-semibold mb-4">2. Gestiona todo el ciclo</h3>
               <p style={{ color: 'var(--text-muted)' }}>
-                Define proyectos con presupuestos detallados, cronogramas, tareas parametrizadas y documentación técnica.
+                Desde diseño y ventas, hasta construcción y entrega. Presupuestos, cronogramas, equipos y documentación técnica.
               </p>
             </div>
             
             <div className="text-center">
               <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center" 
                    style={{ backgroundColor: 'var(--accent)' }}>
-                <PieChart className="h-8 w-8" style={{ color: 'var(--accent-text)' }} />
+                <Sparkles className="h-8 w-8" style={{ color: 'var(--accent-text)' }} />
               </div>
-              <h3 className="text-xl font-semibold mb-4">3. Gestiona y supervisa</h3>
+              <h3 className="text-xl font-semibold mb-4">3. Potencia con IA</h3>
               <p style={{ color: 'var(--text-muted)' }}>
-                Monitorea el progreso en tiempo real, controla costos, gestiona equipos y genera reportes detallados.
+                Tu copilot inteligente analiza finanzas, responde consultas y te ayuda a tomar mejores decisiones.
               </p>
             </div>
           </div>
@@ -428,10 +469,10 @@ export default function Landing() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-4xl mx-auto">
             <h2 className="text-4xl sm:text-5xl font-bold mb-6">
-              Comienza a gestionar tus proyectos profesionalmente
+              Lleva tus proyectos al siguiente nivel
             </h2>
             <p className="text-xl mb-12" style={{ color: 'var(--text-muted)' }}>
-              Registra tu cuenta gratuita y configura tu primer proyecto en minutos
+              Únete a profesionales que ya transforman su forma de trabajar con IA, capacitación e integraciones
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/register">
@@ -461,11 +502,15 @@ export default function Landing() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Building className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+              <img 
+                src="/ArchubLogo.png" 
+                alt="Archub" 
+                className="h-8 w-8 object-contain"
+              />
               <span className="font-bold">Archub</span>
             </div>
             <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              © 2025 Archub. Plataforma de gestión para la construcción.
+              © 2025 Archub. Plataforma integral para arquitectura y construcción.
             </div>
           </div>
         </div>
