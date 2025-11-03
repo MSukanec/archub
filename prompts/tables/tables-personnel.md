@@ -157,6 +157,59 @@ create table public.contact_attachments (
   )
 ) TABLESPACE pg_default;
 
+TABLA PERSONNEL_RATES:
+
+create table public.personnel_rates (
+  id uuid not null default gen_random_uuid (),
+  organization_id uuid not null,
+  personnel_id uuid null,
+  labor_type_id uuid null,
+  rate_hour numeric(12, 2) null,
+  rate_day numeric(12, 2) null,
+  rate_month numeric(12, 2) null,
+  currency_id uuid not null,
+  valid_from date not null,
+  valid_to date null,
+  is_active boolean not null default true,
+  created_by uuid null,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  pay_type text not null default 'hour'::text,
+  constraint personnel_rates_pkey primary key (id),
+  constraint personnel_rates_currency_id_fkey foreign KEY (currency_id) references currencies (id),
+  constraint personnel_rates_labor_type_id_fkey foreign KEY (labor_type_id) references labor_types (id) on delete CASCADE,
+  constraint personnel_rates_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint personnel_rates_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
+  constraint personnel_rates_personnel_id_fkey foreign KEY (personnel_id) references project_personnel (id) on delete CASCADE,
+  constraint personnel_rates_owner_check check (
+    (
+      (
+        (personnel_id is not null)
+        and (labor_type_id is null)
+      )
+      or (
+        (personnel_id is null)
+        and (labor_type_id is not null)
+      )
+    )
+  ),
+  constraint personnel_rates_pay_type_check check (
+    (
+      pay_type = any (array['hour'::text, 'day'::text, 'month'::text])
+    )
+  )
+) TABLESPACE pg_default;
+
+create index IF not exists idx_personnel_rates_org on public.personnel_rates using btree (organization_id) TABLESPACE pg_default;
+
+create index IF not exists idx_personnel_rates_personnel on public.personnel_rates using btree (personnel_id) TABLESPACE pg_default;
+
+create index IF not exists idx_personnel_rates_labor_type on public.personnel_rates using btree (labor_type_id) TABLESPACE pg_default;
+
+create index IF not exists idx_personnel_rates_validity on public.personnel_rates using btree (valid_from, valid_to) TABLESPACE pg_default;
+
+create index IF not exists idx_personnel_rates_is_active on public.personnel_rates using btree (is_active) TABLESPACE pg_default;
+
 VISTA PERSONNEL_INSURANCE_VIEW:
 
 [
