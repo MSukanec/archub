@@ -38,7 +38,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
   onExportAttendance,
   triggerTodayCenter = false,
   onEditAttendance,
-  filterStatus = 'active',
+  filterStatus = 'all',
   onFilterStatusChange
 }) => {
   // Calculate date range: show 3 days before today and 3 days after
