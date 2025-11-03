@@ -285,10 +285,15 @@ export function PageLayout({
             
             {/* Icon + Title + Description */}
             <div className="flex items-center gap-3">
-              {/* Icono de la página actual (del sidebar) */}
-              {PAGE_CONFIG[location]?.icon && (
+              {/* Icono de la página (usa prop icon o fallback a PAGE_CONFIG) */}
+              {(icon || PAGE_CONFIG[location]?.icon) && (
                 <span className="text-[var(--accent)] flex-shrink-0">
-                  {React.createElement(PAGE_CONFIG[location].icon, { className: "w-6 h-6" })}
+                  {icon 
+                    ? (typeof icon === 'function' 
+                        ? React.createElement(icon, { className: "w-6 h-6" })
+                        : icon)
+                    : React.createElement(PAGE_CONFIG[location].icon, { className: "w-6 h-6" })
+                  }
                 </span>
               )}
               
