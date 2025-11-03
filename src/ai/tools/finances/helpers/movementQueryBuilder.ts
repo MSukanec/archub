@@ -5,11 +5,11 @@ export interface MovementRow {
   organization_id?: string;
   movement_date?: string;
   description?: string;
+  wallet_name?: string;
   project_name?: string;
   currency_symbol?: string;
   currency_code?: string;
   exchange_rate?: number;
-  wallet_name?: string;
   type_name?: string;
   category_name?: string;
   partner?: string;

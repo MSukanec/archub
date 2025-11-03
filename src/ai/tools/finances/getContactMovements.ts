@@ -28,11 +28,12 @@ export async function getContactMovements(
   
   try {
     // Usar query builder con campos específicos:
-    // Necesita: currencies (con exchange_rate), projects, type, description, TODOS los roles, movement_date
+    // Necesita: currencies (con exchange_rate), projects, type, description, wallet, TODOS los roles, movement_date
     let query = buildMovementQuery(supabase, {
       includeProject: true,
       includeCurrency: true,
       includeDescription: true,
+      includeWallet: true,
       includeConcepts: {
         type: true
       },
@@ -188,10 +189,11 @@ export async function getContactMovements(
           const convertedAmount = convertCurrency(amount, fromRate, targetRate);
           const amountFormatted = formatCurrency(convertedAmount, symbol, convertToUpper);
           const description = mov.description || 'Sin descripción';
+          const wallet = mov.wallet_name || 'Sin billetera';
           const type = mov.type_name || 'N/A';
           const sign = type.toLowerCase() === 'ingreso' ? '+' : '-';
           
-          response += `- **${date}**: ${sign}${amountFormatted} - ${description}\n`;
+          response += `- **${date}**: ${sign}${amountFormatted} - ${description} (${wallet})\n`;
         }
         
         // Si hay más movimientos, indicarlo
@@ -294,10 +296,11 @@ export async function getContactMovements(
         const movCurrency = mov.currency_code || '';
         const amountFormatted = formatCurrency(amount, movSymbol, movCurrency);
         const description = mov.description || 'Sin descripción';
+        const wallet = mov.wallet_name || 'Sin billetera';
         const type = mov.type_name || 'N/A';
         const sign = type.toLowerCase() === 'ingreso' ? '+' : '-';
         
-        response += `- **${date}**: ${sign}${amountFormatted} - ${description}\n`;
+        response += `- **${date}**: ${sign}${amountFormatted} - ${description} (${wallet})\n`;
       }
       
       // Si hay más movimientos, indicarlo

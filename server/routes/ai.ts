@@ -752,7 +752,7 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
             type: "function" as const,
             function: {
               name: "getContactMovements",
-              description: "Obtiene TODOS los movimientos (ingresos y egresos) de un contacto específico, con balance neto. Más completo que getTotalPaymentsByContactAndProject. Puede filtrar por proyecto, fechas, moneda o convertir. Útil para '¿Cuánto movimiento tuvo Juan en total?' o 'Balance de María en Casa Blanca'",
+              description: "Obtiene TODOS los movimientos (ingresos y egresos) de un contacto con DETALLE INDIVIDUAL de cada pago (fecha, monto, descripción, billetera). Devuelve los últimos 15 movimientos con datos reales. MÁS COMPLETO que getTotalPaymentsByContactAndProject. USAR SIEMPRE cuando el usuario pide 'detalle', 'desglose', 'listado' o 'qué pagos'. Útil para '¿Qué le pagué a Juan?' o 'Dame el detalle de pagos a María' o 'Balance de Pedro con detalles'",
               parameters: {
                 type: "object",
                 properties: {
