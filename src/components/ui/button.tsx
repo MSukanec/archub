@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-gradient-to-r from-[hsl(65,100%,40%)] to-[hsl(76,100%,40%)] text-white hover:opacity-90 rounded-lg px-3 py-1.5 md:py-1.5 py-3 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 gap-2 text-sm font-medium [&_svg]:size-4",
+          "bg-accent text-accent-foreground hover:bg-[var(--accent-hover)] rounded-lg px-3 py-1.5 md:py-1.5 py-3 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 gap-2 text-sm font-medium [&_svg]:size-4",
         destructive:
           "bg-destructive text-[var(--destructive-text)] hover:bg-destructive/80 rounded-lg px-3 py-1.5 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 gap-2 text-sm font-medium [&_svg]:size-4",
         outline:

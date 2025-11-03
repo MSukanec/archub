@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { useProjectContext } from '@/stores/projectContext';
 import { useNavigationStore } from '@/stores/navigationStore';
+import { useThemeStore } from '@/stores/themeStore';
 import { supabase } from '@/lib/supabase';
-import { hexToRgb, hexToHsl, formatHslForCss } from '@/utils/colorUtils';
+import { hexToRgb, hexToHsl, formatHslForCss, calculateHoverColor, calculateForegroundColor } from '@/utils/colorUtils';
 
 // Color por defecto (verde lima de Archub)
 const DEFAULT_ACCENT = {
@@ -23,12 +24,13 @@ const DEFAULT_ACCENT = {
 export function useProjectAccentColor() {
   const { selectedProjectId } = useProjectContext();
   const { sidebarLevel } = useNavigationStore();
+  const { isDark } = useThemeStore();
 
   useEffect(() => {
     const updateAccentColor = async () => {
       // Si no estamos en nivel de proyecto o no hay proyecto seleccionado, usar color por defecto
       if (sidebarLevel !== 'project' || !selectedProjectId) {
-        applyAccentColor(DEFAULT_ACCENT.hex, DEFAULT_ACCENT.hsl, DEFAULT_ACCENT.rgb);
+        applyAccentColor(DEFAULT_ACCENT.hex, DEFAULT_ACCENT.hsl, DEFAULT_ACCENT.rgb, isDark);
         return;
       }
 
@@ -42,7 +44,7 @@ export function useProjectAccentColor() {
 
         if (error || !project?.color) {
           // Si hay error o no hay color, usar el por defecto
-          applyAccentColor(DEFAULT_ACCENT.hex, DEFAULT_ACCENT.hsl, DEFAULT_ACCENT.rgb);
+          applyAccentColor(DEFAULT_ACCENT.hex, DEFAULT_ACCENT.hsl, DEFAULT_ACCENT.rgb, isDark);
           return;
         }
 
@@ -52,7 +54,7 @@ export function useProjectAccentColor() {
 
         if (!rgb || !hsl) {
           // Si la conversión falla, usar el por defecto
-          applyAccentColor(DEFAULT_ACCENT.hex, DEFAULT_ACCENT.hsl, DEFAULT_ACCENT.rgb);
+          applyAccentColor(DEFAULT_ACCENT.hex, DEFAULT_ACCENT.hsl, DEFAULT_ACCENT.rgb, isDark);
           return;
         }
 
@@ -61,29 +63,35 @@ export function useProjectAccentColor() {
         const rgbFormatted = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
 
         // Aplicar el color del proyecto
-        applyAccentColor(project.color, hslFormatted, rgbFormatted);
+        applyAccentColor(project.color, hslFormatted, rgbFormatted, isDark);
 
       } catch (err) {
         console.error('Error updating accent color:', err);
         // En caso de error, usar el color por defecto
-        applyAccentColor(DEFAULT_ACCENT.hex, DEFAULT_ACCENT.hsl, DEFAULT_ACCENT.rgb);
+        applyAccentColor(DEFAULT_ACCENT.hex, DEFAULT_ACCENT.hsl, DEFAULT_ACCENT.rgb, isDark);
       }
     };
 
     updateAccentColor();
-  }, [selectedProjectId, sidebarLevel]);
+  }, [selectedProjectId, sidebarLevel, isDark]);
 }
 
 /**
  * Aplica el color de acento a las variables CSS del documento
  */
-function applyAccentColor(hex: string, hsl: string, rgb: string) {
+function applyAccentColor(hex: string, hsl: string, rgb: string, isDark: boolean) {
   const root = document.documentElement;
+  
+  // Calcular variantes automáticamente usando chroma-js
+  const hoverColor = calculateHoverColor(hex, isDark);
+  const foregroundColor = calculateForegroundColor(hex);
   
   // Actualizar todas las variables CSS relacionadas con accent
   root.style.setProperty('--accent', `hsl(${hsl})`);
   root.style.setProperty('--accent-hsl', hsl);
   root.style.setProperty('--accent-rgb', rgb);
+  root.style.setProperty('--accent-hover', hoverColor);
+  root.style.setProperty('--accent-foreground', foregroundColor);
   
   // También actualizar accent-2 (versión alternativa) con una variación
   const hslParts = hsl.split(' ');

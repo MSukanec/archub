@@ -1,3 +1,5 @@
+import chroma from 'chroma-js';
+
 /**
  * Convierte un color hexadecimal a RGB
  * @param hex - Color en formato hex (#RRGGBB o #RGB)
@@ -87,4 +89,32 @@ export function hexToHsl(hex: string): { h: number; s: number; l: number } | nul
  */
 export function formatHslForCss(h: number, s: number, l: number): string {
   return `${h} ${s}% ${l}%`;
+}
+
+/**
+ * Calcula el color de hover basado en el color base y el modo del tema
+ * @param baseColor - Color en formato hex
+ * @param isDark - Si el tema está en modo oscuro
+ * @returns Color de hover en formato hex
+ */
+export function calculateHoverColor(baseColor: string, isDark: boolean): string {
+  const color = chroma(baseColor);
+  
+  // En modo oscuro: hacer el color más brillante
+  // En modo claro: hacer el color más oscuro
+  return isDark 
+    ? color.brighten(0.6).hex() 
+    : color.darken(0.4).hex();
+}
+
+/**
+ * Calcula el color del texto basado en la luminancia del color de fondo
+ * @param backgroundColor - Color de fondo en formato hex
+ * @returns Color de texto (#000000 o #ffffff) para máximo contraste
+ */
+export function calculateForegroundColor(backgroundColor: string): string {
+  const color = chroma(backgroundColor);
+  
+  // Si la luminancia es mayor a 0.5, usar texto negro; si no, usar blanco
+  return color.luminance() > 0.5 ? '#000000' : '#ffffff';
 }

@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { FolderPlus } from "lucide-react";
+import { FolderPlus, Check } from "lucide-react";
+import chroma from "chroma-js";
 
 import { FormModalLayout } from "../../form/FormModalLayout";
 import { FormModalHeader } from "../../form/FormModalHeader";
@@ -12,7 +13,7 @@ import { useModalPanelStore } from "../../form/modalPanelStore";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ColorField } from "@/components/ui-custom/fields/ColorField";
+import { Badge } from "@/components/ui/badge";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
@@ -23,6 +24,28 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from 'wouter';
+
+// Paleta de colores predefinidos
+const PRESET_COLORS = [
+  { hex: '#007aff', name: 'Ocean' },
+  { hex: '#34c759', name: 'Grass' },
+  { hex: '#ffcc00', name: 'Amber' },
+  { hex: '#ff3b30', name: 'Coral' },
+  { hex: '#af52de', name: 'Violet' },
+  { hex: '#5e5ce6', name: 'Slate' },
+  { hex: '#00c7be', name: 'Mint' },
+  { hex: '#84cc16', name: 'Lime' }, // Verde por defecto de Archub
+];
+
+// Helper para calcular color de texto basado en el fondo
+function getTextColor(backgroundColor: string): string {
+  try {
+    const color = chroma(backgroundColor);
+    return color.luminance() > 0.5 ? '#000000' : '#ffffff';
+  } catch {
+    return '#ffffff';
+  }
+}
 
 const createProjectSchema = z.object({
   name: z.string().min(1, "El nombre del proyecto es requerido"),
@@ -442,20 +465,49 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
             )}
           />
 
-          {/* Color */}
+          {/* Color - Paleta visual */}
           <FormField
             control={form.control}
             name="color"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Color</FormLabel>
-                <FormControl>
-                  <ColorField
-                    value={field.value || "#84cc16"}
-                    onChange={field.onChange}
-                    placeholder="Ej: #ff0000, red, cyan"
-                  />
-                </FormControl>
+                <FormLabel>Color del proyecto</FormLabel>
+                <div className="space-y-3">
+                  {/* Paleta de colores */}
+                  <div className="flex flex-wrap gap-2">
+                    {PRESET_COLORS.map((colorOption) => (
+                      <button
+                        key={colorOption.hex}
+                        type="button"
+                        onClick={() => field.onChange(colorOption.hex)}
+                        className="relative w-10 h-10 rounded-full transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+                        style={{ backgroundColor: colorOption.hex }}
+                        title={colorOption.name}
+                        data-testid={`color-option-${colorOption.name.toLowerCase()}`}
+                      >
+                        {field.value === colorOption.hex && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Check className="w-5 h-5 text-white drop-shadow-md" strokeWidth={3} />
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                  
+                  {/* Vista previa */}
+                  <div className="flex items-center gap-3 pt-2 border-t border-border">
+                    <span className="text-sm text-muted-foreground">Vista previa:</span>
+                    <Badge 
+                      style={{ 
+                        backgroundColor: field.value || '#84cc16',
+                        color: getTextColor(field.value || '#84cc16')
+                      }}
+                      data-testid="color-preview-badge"
+                    >
+                      {PRESET_COLORS.find(c => c.hex === field.value)?.name || 'Personalizado'}
+                    </Badge>
+                  </div>
+                </div>
                 <FormMessage />
               </FormItem>
             )}

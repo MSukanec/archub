@@ -104,6 +104,7 @@
   --accent: hsl(76, 100%, 40%);
   --accent-2: hsl(150, 40%, 40%);
   --accent-rgb: 132, 204, 22;
+  --accent-hover: hsl(76, 100%, 32%); /* Más oscuro para hover en modo claro */
   --accent-foreground-hsl: 0 0% 100%;
   --accent-foreground: hsl(0, 0%, 100%);
   --destructive: hsl(0, 84%, 60%);
@@ -315,6 +316,7 @@
   --accent-hsl: 76 100% 40%;
   --accent: hsl(76, 100%, 40%);
   --accent-rgb: 132, 204, 22;
+  --accent-hover: hsl(76, 100%, 48%); /* Más brillante para hover en modo oscuro */
   --accent-foreground-hsl: 0 0% 100%;
   --accent-text: hsl(0, 0%, 100%);
   --destructive: hsl(0, 84%, 65%);
