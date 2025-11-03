@@ -262,7 +262,7 @@ export function PageLayout({
   return (
     <div className="flex flex-col min-h-0">
       {/* Page Content - HEADER Y CONTENIDO juntos para que se muevan con scroll */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
         <div style={{ backgroundColor: "var(--layout-bg)" }}>
           <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-3 ${
             isDocked ? 'px-16' : 'px-16'
@@ -595,7 +595,7 @@ export function PageLayout({
         </div>
 
         {/* Page Content */}
-        <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-6 pb-6 min-h-0 ${
+        <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-6 pb-6 min-h-0 max-w-full overflow-x-hidden ${
           isDocked ? 'px-16' : 'px-16'
         }`}>
           {children}
