@@ -171,7 +171,7 @@ export default function PersonnelListTab({
         {
           key: "contact",
           label: "Nombre",
-          width: "30%",
+          width: "35%",
           render: (record: any) => {
             const contact = record.contact
             if (!contact) {
@@ -198,15 +198,20 @@ export default function PersonnelListTab({
             
             return (
               <div className="flex items-center gap-3">
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-8 w-8 flex-shrink-0">
                   <AvatarFallback className="text-xs">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
-                <div>
-                  <p className="font-medium">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate">
                     {displayName}
                   </p>
+                  {record.notes && (
+                    <p className="text-xs text-muted-foreground truncate">
+                      {record.notes}
+                    </p>
+                  )}
                 </div>
               </div>
             )
@@ -238,16 +243,6 @@ export default function PersonnelListTab({
           }
         },
         {
-          key: "notes",
-          label: "Notas", 
-          width: "23%",
-          render: (record: any) => (
-            <span className="text-sm text-muted-foreground">
-              {record.notes || 'Sin notas'}
-            </span>
-          )
-        },
-        {
           key: "actions",
           label: "Acciones",
           width: "17%",
@@ -257,7 +252,7 @@ export default function PersonnelListTab({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => openModal('personnel', { personnel: record })}
+                onClick={() => openModal('contact', { isEditing: true, contact: record.contact })}
               >
                 <Edit className="h-4 w-4" />
               </Button>
