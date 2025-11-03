@@ -446,7 +446,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
             }
           }}
         >
-          <div style={{ minWidth: '100%', width: `${dateRange.length * 65}px` }}>
+          <div style={{ width: `${dateRange.length * 65}px` }}>
             {/* Timeline Content - matching Gantt design */}
             {Object.entries(groupedWorkers).length > 0 ? (
               Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
