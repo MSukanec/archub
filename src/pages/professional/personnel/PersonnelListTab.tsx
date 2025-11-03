@@ -184,10 +184,16 @@ export default function PersonnelListTab({
     if (statusFilter === 'all') return true
     // Tratar NULL como 'active' por defecto (para registros antiguos)
     const personStatus = person.status || 'active'
+    
+    // DEBUG: Ver qué status tienen los registros
+    console.log(`👤 ${person.displayName}: status="${person.status}" → personStatus="${personStatus}"`)
+    
     if (statusFilter === 'active') return personStatus === 'active'
     if (statusFilter === 'inactive') return personStatus === 'inactive' || personStatus === 'absent'
     return true
   })
+  
+  console.log(`📊 Total personnel: ${personnelData.length}, Filtered (${statusFilter}): ${filteredPersonnelData.length}`)
 
   return (
     <Table
