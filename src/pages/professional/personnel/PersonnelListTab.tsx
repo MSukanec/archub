@@ -227,6 +227,7 @@ export default function PersonnelListTab({
           key: "insurance_expiry",
           label: "Vencimiento Seguro",
           width: "15%",
+          sortable: false,
           render: (record: any) => {
             const insuranceStatus = getInsuranceStatus(record.contact?.id, insuranceData)
             if (!insuranceStatus.expiryDate) {
@@ -243,6 +244,7 @@ export default function PersonnelListTab({
           key: "insurance_status",
           label: "Estado Seguro",
           width: "15%",
+          sortable: false,
           render: (record: any) => {
             const insuranceStatus = getInsuranceStatus(record.contact?.id, insuranceData)
             return renderInsuranceStatusBadge(insuranceStatus.status, insuranceStatus.daysToExpiry)
