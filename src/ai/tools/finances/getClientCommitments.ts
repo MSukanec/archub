@@ -135,9 +135,10 @@ export async function getClientCommitments(
       const commitmentExchangeRate = pc.exchange_rate || 1;
       const committedAmount = Number(pc.committed_amount || 0);
       
-      // Find all payments for this specific client in this specific project
+      // Find all payments for this specific project_client commitment
+      // FIX: Filter by project_client_id to avoid duplicating payments across multiple commitments
       const relevantPayments = (clientPayments || []).filter((payment: any) => 
-        payment.client_id === clientId && payment.project_id === projectId
+        payment.project_client_id === pc.id
       );
       
       // Calculate total paid (with currency conversion if needed)
@@ -149,20 +150,16 @@ export async function getClientCommitments(
         
         const paymentCurrencyCode = paymentCurrency?.code || 'USD';
         const commitmentCurrencyCode = commitmentCurrency?.code || 'USD';
-        const paymentExchangeRate = Number(payment.exchange_rate || 1);
         
         if (paymentCurrencyCode === commitmentCurrencyCode) {
           // Same currency - no conversion needed
           totalPaid += paymentAmount;
-        } else if (paymentCurrencyCode === 'USD' && commitmentCurrencyCode === 'ARS') {
-          // Payment in USD, commitment in ARS - multiply by exchange rate
-          totalPaid += paymentAmount * paymentExchangeRate;
-        } else if (paymentCurrencyCode === 'ARS' && commitmentCurrencyCode === 'USD') {
-          // Payment in ARS, commitment in USD - divide by exchange rate
-          totalPaid += paymentAmount / paymentExchangeRate;
         } else {
-          // Other currencies - use original amount as fallback
-          totalPaid += paymentAmount;
+          // FIX: Use convertCurrency helper for any currency pair conversion
+          const paymentRate = Number(payment.exchange_rate || 1);
+          const commitmentRate = Number(commitmentExchangeRate);
+          const convertedAmount = convertCurrency(paymentAmount, paymentRate, commitmentRate);
+          totalPaid += convertedAmount;
         }
       });
       
@@ -187,6 +184,7 @@ export async function getClientCommitments(
       const unit = pc.unit ? ` (${pc.unit})` : '';
       
       return {
+        projectClientId: pc.id,
         displayName,
         projectName,
         unit,
@@ -197,6 +195,7 @@ export async function getClientCommitments(
         remainingPercentage,
         currencySymbol,
         currencyCode,
+        exchangeRate: commitmentExchangeRate,
         paymentsCount: relevantPayments.length
       };
     });
@@ -221,8 +220,63 @@ export async function getClientCommitments(
         return `No encontré la moneda **${convertToUpper}** para convertir`;
       }
       
-      // For now, we'll note that conversion is requested but keep original values
-      // Full conversion logic would require exchange rates from movements
+      // FIX: Implement actual conversion using convertCurrency helper
+      // Find a reference exchange rate for the target currency from commitments or payments
+      let targetRate: number | null = null;
+      
+      // Try to find target rate from a commitment in that currency
+      const referenceCommitment = filteredClients.find((pc: any) => {
+        const pcCurrency = allCurrencies?.find((c: any) => c.id === pc.currency_id);
+        return pcCurrency?.code === convertToUpper;
+      });
+      
+      if (referenceCommitment) {
+        targetRate = Number(referenceCommitment.exchange_rate || 1);
+      } else {
+        // Try to find target rate from a payment in that currency
+        const referencePayment = (clientPayments || []).find((payment: any) => {
+          const paymentCurrency = allCurrencies?.find((c: any) => c.id === payment.currency_id);
+          return paymentCurrency?.code === convertToUpper;
+        });
+        
+        if (referencePayment) {
+          targetRate = Number(referencePayment.exchange_rate || 1);
+        }
+      }
+      
+      if (targetRate === null) {
+        return `No encontré datos en **${convertToUpper}** para usar como referencia de conversión`;
+      }
+      
+      // Convert all client commitment amounts to target currency
+      finalClients = finalClients.map(c => {
+        // Find the source exchange rate for this commitment using unique projectClientId
+        const sourceCommitment = filteredClients.find((pc: any) => pc.id === c.projectClientId);
+        
+        const sourceRate = Number(sourceCommitment?.exchange_rate || 1);
+        
+        // Convert all amounts
+        const convertedCommittedAmount = convertCurrency(c.committedAmount, sourceRate, targetRate);
+        const convertedTotalPaid = convertCurrency(c.totalPaid, sourceRate, targetRate);
+        const convertedRemainingBalance = convertedCommittedAmount - convertedTotalPaid;
+        
+        // Recalculate percentages based on converted amounts
+        const paymentPercentage = convertedCommittedAmount > 0 
+          ? (convertedTotalPaid / convertedCommittedAmount) * 100 
+          : 0;
+        const remainingPercentage = 100 - paymentPercentage;
+        
+        return {
+          ...c,
+          committedAmount: convertedCommittedAmount,
+          totalPaid: convertedTotalPaid,
+          remainingBalance: convertedRemainingBalance,
+          paymentPercentage,
+          remainingPercentage,
+          currencySymbol: targetCurrency.symbol || '$',
+          currencyCode: convertToUpper
+        };
+      });
     }
 
     // 7. Format response
