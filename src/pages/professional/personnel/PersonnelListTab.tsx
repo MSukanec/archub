@@ -104,6 +104,8 @@ export default function PersonnelListTab({
 
   const { data: personnelData = [], isLoading: isPersonnelLoading } = useQuery({
     queryKey: ['project-personnel', selectedProjectId],
+    staleTime: 0, // Forzar refetch para debugging
+    refetchOnMount: true,
     queryFn: async () => {
       if (!selectedProjectId) return []
       
