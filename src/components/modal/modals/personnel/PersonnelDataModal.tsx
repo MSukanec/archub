@@ -47,8 +47,39 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
   const { toast } = useToast()
   const { data: currentUser } = useCurrentUser()
   const queryClient = useQueryClient()
-  const personnelRecord = modalData?.personnelRecord
+  const personnelRecordId = modalData?.personnelRecord?.id
   const projectId = currentUser?.preferences?.last_project_id
+
+  // Query para obtener los datos FRESCOS del personnel desde la base de datos
+  const { data: personnelRecord, isLoading: personnelLoading } = useQuery({
+    queryKey: ['personnel-detail', personnelRecordId],
+    queryFn: async () => {
+      if (!supabase || !personnelRecordId) return null
+      
+      const { data, error } = await supabase
+        .from('project_personnel')
+        .select(`
+          id,
+          notes,
+          start_date,
+          end_date,
+          status,
+          labor_type_id,
+          contact:contacts(
+            id,
+            first_name,
+            last_name,
+            full_name
+          )
+        `)
+        .eq('id', personnelRecordId)
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    enabled: !!supabase && !!personnelRecordId
+  })
 
   // Query para obtener labor types
   const { data: laborTypes = [] } = useQuery({
@@ -70,13 +101,26 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
   const form = useForm<PersonnelDataForm>({
     resolver: zodResolver(personnelDataSchema),
     defaultValues: {
-      start_date: personnelRecord?.start_date ? new Date(personnelRecord.start_date) : null,
-      end_date: personnelRecord?.end_date ? new Date(personnelRecord.end_date) : null,
-      status: personnelRecord?.status || 'active',
-      labor_type_id: personnelRecord?.labor_type_id || null,
-      notes: personnelRecord?.notes || ''
+      start_date: null,
+      end_date: null,
+      status: 'active',
+      labor_type_id: null,
+      notes: ''
     }
   })
+
+  // Actualizar el formulario cuando los datos frescos se carguen
+  React.useEffect(() => {
+    if (personnelRecord) {
+      form.reset({
+        start_date: personnelRecord.start_date ? new Date(personnelRecord.start_date) : null,
+        end_date: personnelRecord.end_date ? new Date(personnelRecord.end_date) : null,
+        status: personnelRecord.status || 'active',
+        labor_type_id: personnelRecord.labor_type_id || null,
+        notes: personnelRecord.notes || ''
+      })
+    }
+  }, [personnelRecord, form])
 
   const updatePersonnelMutation = useMutation({
     mutationFn: async (data: PersonnelDataForm) => {
@@ -163,12 +207,36 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
     updatePersonnelMutation.mutate(data)
   }
 
-  const isLoading = updatePersonnelMutation.isPending || deletePersonnelMutation.isPending
+  const isLoading = updatePersonnelMutation.isPending || deletePersonnelMutation.isPending || personnelLoading
 
   // Get contact display name
   const contactDisplayName = personnelRecord?.contact?.first_name || personnelRecord?.contact?.last_name
     ? `${personnelRecord.contact.first_name || ''} ${personnelRecord.contact.last_name || ''}`.trim()
     : personnelRecord?.contact?.full_name || 'Sin nombre'
+
+  // Mostrar loading mientras se cargan los datos frescos
+  if (personnelLoading) {
+    return (
+      <FormModalLayout
+        columns={1}
+        editPanel={
+          <div className="flex items-center justify-center h-64">
+            <div className="text-muted-foreground">Cargando datos del personal...</div>
+          </div>
+        }
+        headerContent={
+          <FormModalHeader
+            title="Editar Datos de Personal"
+            description="Modifica la información del personal asignado al proyecto"
+            icon={UserCog}
+          />
+        }
+        footerContent={null}
+        onClose={onClose}
+        isEditing={true}
+      />
+    )
+  }
 
   const editPanel = (
     <Form {...form}>
