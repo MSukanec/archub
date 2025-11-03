@@ -126,7 +126,12 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       {isMobile ? (
         <HeaderMobile {...(headerProps ?? {})}>
           <main
-            className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-4 py-3 pb-12 pt-5 bg-gradient-to-b from-[hsl(0,0%,96%)] to-[hsl(76,40%,94%)] dark:from-[hsl(0,0%,20%)] dark:to-[hsl(76,30%,15%)] ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
+            className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-4 py-3 pb-12 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
+            style={{
+              background: isDark 
+                ? 'linear-gradient(to bottom, var(--gradient-from-dark), var(--gradient-to-dark))'
+                : 'linear-gradient(to bottom, var(--gradient-from-light), var(--gradient-to-light))'
+            }}
           >
             {children}
           </main>
@@ -148,7 +153,12 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
             <div className={`flex-1 flex min-h-0 relative ${isDocked ? 'gap-3' : ''}`}>
               <div className={`flex-1 ${isCourseSidebarVisible ? '' : 'pr-3'} pb-3 overflow-x-hidden`}>
                 <main
-                  className={`h-full flex flex-col rounded-2xl overflow-hidden bg-gradient-to-b from-[hsl(0,0%,96%)] to-[hsl(76,40%,94%)] dark:from-[hsl(0,0%,20%)] dark:to-[hsl(76,30%,15%)] ${!isDocked ? 'w-full' : ''}`}
+                  className={`h-full flex flex-col rounded-2xl overflow-hidden ${!isDocked ? 'w-full' : ''}`}
+                  style={{
+                    background: isDark 
+                      ? 'linear-gradient(to bottom, var(--gradient-from-dark), var(--gradient-to-dark))'
+                      : 'linear-gradient(to bottom, var(--gradient-from-light), var(--gradient-to-light))'
+                  }}
                 >
                 {headerProps ? (
                   <PageLayout

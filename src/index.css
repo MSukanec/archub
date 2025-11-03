@@ -107,6 +107,11 @@
   --accent-hover: hsl(76, 100%, 32%); /* Más oscuro para hover en modo claro */
   --accent-foreground-hsl: 0 0% 100%;
   --accent-foreground: hsl(0, 0%, 100%);
+  
+  /* Gradient colors - using accent for dynamic theming */
+  --gradient-from-light: hsl(0, 0%, 96%);
+  --gradient-to-light: hsl(76, 40%, 94%);
+  
   --destructive: hsl(0, 84%, 60%);
   --destructive-text: hsl(0, 0%, 100%);
   --success: hsl(76, 100%, 40%);
@@ -319,6 +324,11 @@
   --accent-hover: hsl(76, 100%, 48%); /* Más brillante para hover en modo oscuro */
   --accent-foreground-hsl: 0 0% 100%;
   --accent-text: hsl(0, 0%, 100%);
+  
+  /* Gradient colors - using accent for dynamic theming */
+  --gradient-from-dark: hsl(0, 0%, 20%);
+  --gradient-to-dark: hsl(76, 30%, 15%);
+  
   --destructive: hsl(0, 84%, 65%);
   --destructive-text: hsl(0, 0%, 100%);
   --success: hsl(76, 100%, 40%);

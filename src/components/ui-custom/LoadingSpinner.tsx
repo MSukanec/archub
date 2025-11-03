@@ -18,7 +18,7 @@ export function LoadingSpinner({ size = 'md', fullScreen = false }: LoadingSpinn
       <div 
         className={`${spinnerSize} rounded-full animate-spin`}
         style={{
-          background: 'conic-gradient(from 0deg, transparent 0deg, hsl(58, 77%, 51%) 30deg, hsl(76, 100%, 40%) 180deg, hsl(58, 77%, 51%) 270deg, transparent 300deg)',
+          background: 'conic-gradient(from 0deg, transparent 0deg, var(--accent) 30deg, var(--accent) 180deg, var(--accent) 270deg, transparent 300deg)',
           WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px))',
           mask: 'radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px))'
         }}

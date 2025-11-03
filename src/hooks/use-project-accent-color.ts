@@ -103,5 +103,14 @@ function applyAccentColor(hex: string, hsl: string, rgb: string, isDark: boolean
     // Crear una variación más oscura/saturada para accent-2
     const accent2Hsl = `${(h + 74) % 360} ${Math.min(s - 60, 100)}% ${Math.min(l, 40)}%`;
     root.style.setProperty('--accent-2', `hsl(${accent2Hsl})`);
+    
+    // Actualizar los colores del gradiente de fondo usando el color del proyecto
+    // Light mode: mantener from gris, cambiar to usando el tono del proyecto
+    const gradientToLight = `hsl(${h}, 40%, 94%)`;
+    root.style.setProperty('--gradient-to-light', gradientToLight);
+    
+    // Dark mode: mantener from gris oscuro, cambiar to usando el tono del proyecto
+    const gradientToDark = `hsl(${h}, 30%, 15%)`;
+    root.style.setProperty('--gradient-to-dark', gradientToDark);
   }
 }

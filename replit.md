@@ -10,12 +10,20 @@ Preferred communication style: Simple, everyday language.
 
 ### UI/UX Decisions
 - **Design System**: "new-york" style with a neutral color palette, dark mode, and reusable UI components, leveraging `shadcn/ui` and Tailwind CSS.
+- **Dynamic Color System**: Comprehensive project-based color theming using chroma-js for intelligent color calculations:
+  - **Accent Colors**: Primary accent color dynamically changes based on active project's color (default: lime green #84cc16)
+  - **Hover States**: Automatically calculated using luminance analysis (lighter in dark mode +0.6, darker in light mode +0.4)
+  - **Foreground Colors**: High-contrast text colors (black/white) calculated based on luminance threshold (>0.5)
+  - **Background Gradients**: Fully dynamic page background gradients that adapt to project color using CSS variables (--gradient-from-light/dark, --gradient-to-light/dark)
+  - **CSS Variables**: Complete dynamic accent system with variables for --accent, --accent-hover, --accent-foreground, --accent-hsl, --accent-rgb
+  - **Implementation**: `useProjectAccentColor` hook updates all color variables on project change, affecting buttons, badges, gradients, and LoadingSpinner
 - **Modals**: Responsive Dialog component (right-side panel on desktop, fullscreen on mobile).
 - **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub. Mobile menu mirrors desktop sidebar.
-- **Button Design**: Default button variant uses a yellow to green gradient matching logo colors.
+- **Button Design**: Default button variant uses solid dynamic color that changes with project context (replaces fixed gradient).
 - **Badge Design**: Default Badge variant uses `bg-accent` and `text-accent-foreground` colors. **CRITICAL**: When user requests `--accent` color, ALWAYS use Tailwind classes `bg-accent` and `text-accent-foreground`, NEVER use `bg-[hsl(var(--accent))]` syntax.
+- **Project Colors**: Visual color palette in ProjectModal with 8 predefined colors (Ocean, Grass, Amber, Coral, Violet, Slate, Mint, Lime) for easy selection.
 - **Onboarding Flow**: Streamlined onboarding sets users to 'professional' mode and navigates directly to /home.
-- **Component Standardization**: Standardized `StatCard` and custom `LoadingSpinner` components.
+- **Component Standardization**: Standardized `StatCard` and custom `LoadingSpinner` components (LoadingSpinner uses dynamic --accent color).
 - **Checkout UX**: Replaced billing info Accordion with Switch control for improved user experience.
 - **Home Page UX Flow**: Minimalist AI copilot interface with session-based conversation state. The top area is "where the AI speaks" and shows either greeting OR last response (never both). Fresh load/navigation: Saludo (large text) → Input → Sugerencias. During active session: Última respuesta IA (smaller text) → Input → Toggle historial → (Sugerencias hidden). Returning from another page resets to greeting. "Ver historial completo" toggle reveals full message history (newest first) below input. Uses `hasActiveConversation` local state flag to distinguish active session messages from loaded history.
 - **AI Disclaimer**: Added user-friendly disclaimer "Archub puede cometer errores. Comprueba la información importante" to Home page for AI response transparency.
