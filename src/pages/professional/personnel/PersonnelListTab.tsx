@@ -115,6 +115,10 @@ export default function PersonnelListTab({
             first_name,
             last_name,
             full_name
+          ),
+          labor_type:labor_types(
+            id,
+            name
           )
         `)
         .eq('project_id', selectedProjectId)
@@ -224,6 +228,25 @@ export default function PersonnelListTab({
                   )}
                 </div>
               </div>
+            )
+          }
+        },
+        {
+          key: "labor_type",
+          label: "Tipo de Mano de Obra",
+          width: "15%",
+          sortable: true,
+          sortType: "string",
+          render: (record: any) => {
+            if (!record.labor_type?.name) {
+              return <span className="text-sm text-muted-foreground">-</span>
+            }
+            return (
+              <Badge 
+                className="bg-[hsl(var(--accent))] text-white hover:bg-[hsl(var(--accent))] border-0"
+              >
+                {record.labor_type.name}
+              </Badge>
             )
           }
         },
