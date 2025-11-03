@@ -199,18 +199,31 @@ export function Sidebar() {
                 isExpanded ? "px-[9px]" : "items-center"
               )}>
                 {/* Logo - altura igual al MainHeader para alineación perfecta */}
-                <div className="h-[50px] flex items-center justify-center">
-                  <button
-                    onClick={() => navigate('/home')}
-                    className="cursor-pointer hover:opacity-80 transition-opacity"
-                  >
+                <button
+                  onClick={() => navigate('/home')}
+                  className={cn(
+                    "h-[50px] rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center group overflow-hidden",
+                    isExpanded ? "w-full" : "w-8"
+                  )}
+                >
+                  {/* Logo siempre en la misma posición */}
+                  <div className="flex items-center justify-center w-8 flex-shrink-0">
                     <img 
                       src="/ArchubLogo.png" 
                       alt="Archub Logo" 
                       className="h-8 w-auto object-contain"
                     />
-                  </button>
-                </div>
+                  </div>
+                  
+                  {/* Texto que aparece cuando se expande */}
+                  {isExpanded && (
+                    <div className="flex items-center overflow-hidden min-w-0 ml-3">
+                      <span className="text-lg font-normal text-[var(--main-sidebar-fg)] group-hover:text-white truncate">
+                        Archub
+                      </span>
+                    </div>
+                  )}
+                </button>
                 
                 {/* Botón Inicio */}
                 <button
@@ -473,21 +486,34 @@ export function Sidebar() {
                 isExpanded ? "px-[9px]" : "items-center"
               )}>
                 {/* Logo - altura igual al MainHeader para alineación perfecta */}
-                <div className="h-[50px] flex items-center justify-center">
-                  <button
-                    onClick={() => {
-                      setSidebarLevel('general');
-                      navigate('/home');
-                    }}
-                    className="cursor-pointer hover:opacity-80 transition-opacity"
-                  >
+                <button
+                  onClick={() => {
+                    setSidebarLevel('general');
+                    navigate('/home');
+                  }}
+                  className={cn(
+                    "h-[50px] rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center group overflow-hidden",
+                    isExpanded ? "w-full" : "w-8"
+                  )}
+                >
+                  {/* Logo siempre en la misma posición */}
+                  <div className="flex items-center justify-center w-8 flex-shrink-0">
                     <img 
                       src="/ArchubLogo.png" 
                       alt="Archub Logo" 
                       className="h-8 w-auto object-contain"
                     />
-                  </button>
-                </div>
+                  </div>
+                  
+                  {/* Texto que aparece cuando se expande */}
+                  {isExpanded && (
+                    <div className="flex items-center overflow-hidden min-w-0 ml-3">
+                      <span className="text-lg font-normal text-[var(--main-sidebar-fg)] group-hover:text-white truncate">
+                        Archub
+                      </span>
+                    </div>
+                  )}
+                </button>
 
                 {/* {/* Selector de Organización - solo en sidebar de organización */}
                 {/* {sidebarLevel === 'organization' && (
