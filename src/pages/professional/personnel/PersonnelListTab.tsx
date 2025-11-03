@@ -171,12 +171,16 @@ export default function PersonnelListTab({
   return (
     <Table
       data={personnelData}
+      defaultSort={{
+        key: "displayName",
+        direction: "asc"
+      }}
       columns={[
         {
           key: "displayName",
           label: "Nombre",
           width: "35%",
-          sortable: false,
+          sortable: true,
           sortType: "string",
           render: (record: any) => {
             const contact = record.contact
@@ -227,7 +231,8 @@ export default function PersonnelListTab({
           key: "insurance_expiry",
           label: "Vencimiento Seguro",
           width: "15%",
-          sortable: false,
+          sortable: true,
+          sortType: "date",
           render: (record: any) => {
             const insuranceStatus = getInsuranceStatus(record.contact?.id, insuranceData)
             if (!insuranceStatus.expiryDate) {
@@ -244,7 +249,8 @@ export default function PersonnelListTab({
           key: "insurance_status",
           label: "Estado Seguro",
           width: "15%",
-          sortable: false,
+          sortable: true,
+          sortType: "string",
           render: (record: any) => {
             const insuranceStatus = getInsuranceStatus(record.contact?.id, insuranceData)
             return renderInsuranceStatusBadge(insuranceStatus.status, insuranceStatus.daysToExpiry)
