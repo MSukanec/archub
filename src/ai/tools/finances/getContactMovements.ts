@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { formatCurrency, formatDateRange, formatMovementCount } from '../../utils/responseFormatter';
 import { convertCurrency } from '../../utils/currencyConverter';
+import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder';
 
 /**
  * Obtiene TODOS los movimientos (ingresos y egresos) de un contacto específico.
@@ -26,10 +27,22 @@ export async function getContactMovements(
 ): Promise<string> {
   
   try {
-    // Query base: obtener movimientos por organization_id
-    let query = supabase
-      .from('movements_view')
-      .select('amount, type_name, currency_symbol, currency_code, exchange_rate, movement_date, project_name, partner, subcontract, subcontract_contact, personnel, client, member');
+    // Usar query builder con campos específicos:
+    // Necesita: currencies (con exchange_rate), projects, type, TODOS los roles, movement_date
+    let query = buildMovementQuery(supabase, {
+      includeProject: true,
+      includeCurrency: true,
+      includeConcepts: {
+        type: true
+      },
+      includeRoles: {
+        partner: true,
+        subcontract: true,
+        personnel: true,
+        client: true,
+        member: true
+      }
+    });
 
     query = query.eq('organization_id', organizationId);
 
@@ -50,7 +63,7 @@ export async function getContactMovements(
       query = query.eq('currency_code', currencyUpper);
     }
 
-    const { data: movements, error } = await query;
+    const { data: movements, error } = (await query) as { data: MovementRow[] | null, error: any };
 
     if (error) {
       console.error('Error fetching movements:', error);

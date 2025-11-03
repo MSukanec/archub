@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder';
 
 /**
  * Calcula el total de pagos realizados a un contacto (en cualquier rol)
@@ -18,14 +19,21 @@ export async function getTotalPaymentsByContactAndProject(
 ): Promise<string> {
   
   try {
-    // Buscar en la vista movements_view que ya tiene todos los JOINs resueltos
-    // Primero obtenemos todos los movimientos del proyecto (sin filtrar por contacto)
-    // para evitar problemas con caracteres especiales en el nombre
-    const { data: movements, error } = await supabase
-      .from('movements_view')
-      .select('amount, currency_symbol, currency_code, project_name, partner, subcontract, subcontract_contact, personnel, client, member')
+    // Usar query builder con SOLO los campos necesarios:
+    // Necesita: currencies, projects, TODOS los roles (partner, subcontract+contact, personnel, client, member)
+    const { data: movements, error } = (await buildMovementQuery(supabase, {
+      includeProject: true,
+      includeCurrency: true,
+      includeRoles: {
+        partner: true,
+        subcontract: true,  // Incluye tanto subcontract como subcontract_contact
+        personnel: true,
+        client: true,
+        member: true
+      }
+    })
       .eq('organization_id', organizationId)
-      .ilike('project_name', `%${projectName}%`);
+      .ilike('project_name', `%${projectName}%`)) as { data: MovementRow[] | null, error: any };
 
     if (error) {
       console.error('Error fetching movements:', error);

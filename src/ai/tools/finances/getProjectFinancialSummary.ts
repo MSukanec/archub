@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { formatCurrency } from '../../utils/responseFormatter';
+import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder';
 
 /**
  * Resumen financiero completo de un proyecto (balance, ingresos, egresos)
@@ -18,12 +19,18 @@ export async function getProjectFinancialSummary(
 ): Promise<string> {
   
   try {
-    // Buscar movimientos del proyecto (fuzzy match con ilike)
-    const { data: movements, error } = await supabase
-      .from('movements_view')
-      .select('amount, type_name, currency_symbol, currency_code, project_name, category_name')
+    // Usar query builder con campos específicos:
+    // Necesita: currencies, projects, movement_concepts(type+category)
+    const { data: movements, error } = (await buildMovementQuery(supabase, {
+      includeProject: true,
+      includeCurrency: true,
+      includeConcepts: {
+        type: true,
+        category: true
+      }
+    })
       .eq('organization_id', organizationId)
-      .ilike('project_name', `%${projectName}%`);
+      .ilike('project_name', `%${projectName}%`)) as { data: MovementRow[] | null, error: any };
 
     if (error) {
       console.error('Error fetching project movements:', error);

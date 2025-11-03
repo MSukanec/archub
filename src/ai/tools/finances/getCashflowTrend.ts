@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { formatCurrency, formatDateRange } from '../../utils/responseFormatter';
+import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder';
 
 /**
  * Agrupa movimientos por intervalo temporal
@@ -141,10 +142,15 @@ export async function getCashflowTrend(
       start = threeMonthsAgo.toISOString().split('T')[0];
     }
 
-    // Query base
-    let query = supabase
-      .from('movements_view')
-      .select('amount, type_name, currency_symbol, currency_code, movement_date, project_name')
+    // Usar query builder con campos específicos:
+    // Necesita: currencies, projects (condicional), type, movement_date
+    let query = buildMovementQuery(supabase, {
+      includeProject: scope === 'project',
+      includeCurrency: true,
+      includeConcepts: {
+        type: true
+      }
+    })
       .eq('organization_id', organizationId)
       .gte('movement_date', start)
       .lte('movement_date', end);
@@ -160,7 +166,7 @@ export async function getCashflowTrend(
       query = query.eq('currency_code', currencyUpper);
     }
 
-    const { data: movements, error } = await query;
+    const { data: movements, error } = (await query) as { data: MovementRow[] | null, error: any };
 
     if (error) {
       console.error('Error fetching movements:', error);

@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { formatCurrency, formatDateRange } from '../../utils/responseFormatter';
+import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder';
 
 /**
  * Suma total de gastos por rol específico (subcontratistas, personal, socios)
@@ -22,11 +23,21 @@ export async function getRoleSpending(
 ): Promise<string> {
   
   try {
-    // Construir query base
-    let query = supabase
-      .from('movements_view')
-      .select('amount, currency_symbol, currency_code, project_name, movement_date, subcontract, personnel, partner')
-      .eq('organization_id', organizationId);
+    // Usar query builder con campos específicos según el rol:
+    // Necesita: currencies, projects, movement_date, rol específico (partner, subcontract+contact, o personnel)
+    const roles = {
+      partner: role === 'partner',
+      subcontract: role === 'subcontractor',
+      personnel: role === 'personnel',
+      client: false,
+      member: false
+    };
+
+    let query = buildMovementQuery(supabase, {
+      includeProject: true,
+      includeCurrency: true,
+      includeRoles: roles
+    }).eq('organization_id', organizationId);
 
     // Filtrar por rol (campo no null)
     if (role === 'subcontractor') {
@@ -38,7 +49,7 @@ export async function getRoleSpending(
     }
 
     // Ejecutar query
-    const { data: movements, error } = await query;
+    const { data: movements, error } = (await query) as { data: MovementRow[] | null, error: any };
 
     if (error) {
       console.error('Error fetching role spending:', error);

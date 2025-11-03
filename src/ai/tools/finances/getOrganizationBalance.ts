@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { formatCurrency } from '../../utils/responseFormatter';
 import { convertCurrency } from '../../utils/currencyConverter';
+import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder';
 
 /**
  * Calcula el balance general de la organización sumando todos los movimientos
@@ -20,11 +21,15 @@ export async function getOrganizationBalance(
 ): Promise<string> {
   
   try {
-    // Obtener todos los movimientos de la organización
-    const { data: movements, error } = await supabase
-      .from('movements_view')
-      .select('amount, type_name, currency_symbol, currency_code, exchange_rate')
-      .eq('organization_id', organizationId);
+    // Usar query builder con campos específicos:
+    // Necesita: currencies (con exchange_rate), movement_concepts(type)
+    const { data: movements, error } = (await buildMovementQuery(supabase, {
+      includeCurrency: true,
+      includeConcepts: {
+        type: true
+      }
+    })
+      .eq('organization_id', organizationId)) as { data: MovementRow[] | null, error: any };
 
     if (error) {
       console.error('Error fetching movements:', error);

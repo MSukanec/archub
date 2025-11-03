@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { formatCurrency, formatDateRange, formatMovementCount } from '../../utils/responseFormatter';
+import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder';
 
 export interface MovementFilters {
   projectNames?: string[];
@@ -42,10 +43,26 @@ export async function getDateRangeMovements(
       return 'El rango de fechas no es válido. La fecha de inicio debe ser anterior a la fecha de fin';
     }
 
-    // Query base
-    let query = supabase
-      .from('movements_view')
-      .select('amount, type_name, currency_symbol, currency_code, project_name, category_name, wallet_name, partner, subcontract, personnel, client, member, movement_date')
+    // Usar query builder con TODOS los campos (LA MÁS COMPLETA):
+    // Necesita: currencies, projects, type+category, wallets, TODOS los roles, indirects, general_costs
+    let query = buildMovementQuery(supabase, {
+      includeProject: true,
+      includeCurrency: true,
+      includeWallet: true,
+      includeConcepts: {
+        type: true,
+        category: true
+      },
+      includeRoles: {
+        partner: true,
+        subcontract: true,
+        personnel: true,
+        client: true,
+        member: true
+      },
+      includeIndirect: true,
+      includeGeneralCost: true
+    })
       .eq('organization_id', organizationId)
       .gte('movement_date', dateRange.start)
       .lte('movement_date', dateRange.end);
@@ -56,7 +73,7 @@ export async function getDateRangeMovements(
       query = query.eq('currency_code', currencyUpper);
     }
 
-    const { data: movements, error } = await query;
+    const { data: movements, error } = (await query) as { data: MovementRow[] | null, error: any };
 
     if (error) {
       console.error('Error fetching movements:', error);
