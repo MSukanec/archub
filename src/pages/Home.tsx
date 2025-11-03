@@ -209,7 +209,7 @@ export default function Home() {
   if (userLoading || isLoadingGreeting) {
     return (
       <Layout wide={true}>
-        <div className="flex items-center justify-center h-64">
+        <div className="flex items-center justify-center min-h-[calc(100vh-100px)]">
           <LoadingSpinner size="lg" />
         </div>
       </Layout>
@@ -309,10 +309,12 @@ export default function Home() {
 
               {/* Toggle para ver historial completo */}
               {chatMessages.length > 0 && (
-                <div className="text-center pt-1">
+                <div className="text-center pt-1 flex items-center justify-center gap-2 text-xs text-muted-foreground/70">
+                  <span>Archub puede cometer errores. Comprueba la información importante.</span>
+                  <span>-</span>
                   <button
                     onClick={() => setShowFullHistory(!showFullHistory)}
-                    className="text-xs text-muted-foreground/70 hover:text-muted-foreground transition-colors"
+                    className="hover:text-muted-foreground transition-colors"
                     data-testid="button-toggle-history"
                   >
                     {showFullHistory ? "Ocultar historial completo" : "Ver historial completo"}
