@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
@@ -32,6 +33,8 @@ export default function PersonnelPaymentsTab({
   openModal, 
   selectedProjectId 
 }: PersonnelPaymentsTabProps) {
+  const [statusFilter, setStatusFilter] = useState<'active' | 'inactive' | 'all'>('active')
+
   const { data: personnelData = [], isLoading: isPersonnelLoading } = useQuery({
     queryKey: ['project-personnel', selectedProjectId],
     queryFn: async () => {
@@ -208,6 +211,17 @@ export default function PersonnelPaymentsTab({
       defaultSort={{
         key: "displayName",
         direction: "asc"
+      }}
+      topBar={{
+        tabsConfig: {
+          tabs: [
+            { value: 'active', label: 'Activos' },
+            { value: 'inactive', label: 'Inactivos' },
+            { value: 'all', label: 'Todos' }
+          ],
+          value: statusFilter,
+          onValueChange: (value) => setStatusFilter(value as 'active' | 'inactive' | 'all')
+        }
       }}
       columns={[
         {
