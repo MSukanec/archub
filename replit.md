@@ -31,6 +31,7 @@ Preferred communication style: Simple, everyday language.
 ### Feature Specifications
 - **Core Modules**: Home page (AI-powered), Project Management, Financial Management, Document Management, Learning Module, and Notification System.
 - **Learning Module ("Capacitaciones")**: Course management, Vimeo integration, progress tracking, note-taking, and Mercado Pago integration.
+  - **UX Improvements** (Nov 2024): Reordered course tabs for better UX flow (Visión General, Reproductor, Contenido, Apuntes, Marcadores). Renamed "Lecciones" to "Reproductor" for clarity. Enhanced CourseContentTab with direct lesson navigation button (icon-only, left of "..." menu). Moved favorite functionality to popover menu for cleaner interface. Renamed CourseViewer component to CoursePlayerTab for consistency with tab naming convention.
 - **Admin Management**: Dedicated sections for Course Management and Payment Management.
 - **Coupon System**: Discount coupon system for courses.
 - **Payment Architecture**: Unified `payments` table supporting Mercado Pago (ARS), PayPal (USD), and bank transfers with admin approval.
