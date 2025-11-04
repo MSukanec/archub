@@ -786,25 +786,59 @@ input[type="number"] {
   }
 }
 
-/* Project page breathing background */
+/* Project page breathing background - Organic, soft gradients like mood slider */
 .project-breathing-bg {
   position: relative;
   isolation: isolate;
+  background: linear-gradient(
+    180deg,
+    rgba(var(--accent-rgb), 0.03) 0%,
+    rgba(var(--accent-rgb), 0.015) 50%,
+    transparent 100%
+  );
 }
 
+/* Multiple layered radial gradients for organic effect */
 .project-breathing-bg::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(
-    ellipse 800px 600px at 50% 0%,
-    rgba(var(--accent-rgb), 0.08),
-    transparent 50%
-  );
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120%;
+  height: 120%;
+  background: 
+    radial-gradient(
+      circle at 50% 20%,
+      rgba(var(--accent-rgb), 0.08) 0%,
+      rgba(var(--accent-rgb), 0.04) 25%,
+      rgba(var(--accent-rgb), 0.02) 40%,
+      rgba(var(--accent-rgb), 0.01) 60%,
+      transparent 80%
+    );
+  filter: blur(40px);
   animation: breathing 8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Secondary glow layer for depth */
+.project-breathing-bg::after {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 60%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(var(--accent-rgb), 0.05) 0%,
+    rgba(var(--accent-rgb), 0.02) 30%,
+    transparent 70%
+  );
+  filter: blur(60px);
+  animation: breathing 12s ease-in-out infinite reverse;
   pointer-events: none;
   z-index: -1;
 }
@@ -814,22 +848,26 @@ input[type="number"] {
   animation: breathing-glow 6s ease-in-out infinite;
 }
 
-/* Gradient background shift animation (optional - can be applied to project layouts) */
-@keyframes bgShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* Soft organic breathing animation */
+@keyframes organicBreathing {
+  0%, 100% { 
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1.05);
+  }
 }
 
+/* Alternative gradient background - softer approach */
 .project-gradient-bg {
+  position: relative;
   background: linear-gradient(
-    135deg,
-    var(--background),
-    rgba(var(--accent-rgb), 0.03),
-    var(--background)
+    180deg,
+    rgba(var(--accent-rgb), 0.025) 0%,
+    transparent 40%
   );
-  background-size: 200% 200%;
-  animation: bgShift 15s ease infinite;
 }
 
 /* Smooth fade-in for color changes */
@@ -873,11 +911,13 @@ input[type="number"] {
 }
 
 .card-accent-bg {
-  background: linear-gradient(
-    135deg,
-    var(--card-bg),
-    rgba(var(--accent-rgb), 0.02)
-  ) !important;
+  background: 
+    radial-gradient(
+      ellipse 120% 150% at 50% 0%,
+      rgba(var(--accent-rgb), 0.03),
+      transparent 60%
+    ),
+    var(--card-bg) !important;
 }
 
 /* Icon with accent color */
