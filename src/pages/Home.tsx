@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { Layout } from "@/components/layout/desktop/Layout";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -45,12 +45,15 @@ export default function Home() {
   // Controla si hay conversación ACTIVA en esta sesión (no cuenta historial cargado)
   const [hasActiveConversation, setHasActiveConversation] = useState(false);
 
+  // Flag para evitar múltiples cargas del saludo (previene consumo innecesario de créditos)
+  const hasLoadedDataRef = useRef(false);
+
   // Mantener el sidebar en modo general
   useEffect(() => {
     setSidebarLevel('general');
   }, [setSidebarLevel]);
 
-  // Cargar historial y saludo en paralelo al montar
+  // Cargar historial y saludo en paralelo al montar (solo UNA VEZ por sesión)
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -144,7 +147,10 @@ export default function Home() {
       }
     };
 
-    if (userData?.user?.id) {
+    // Solo cargar datos UNA VEZ cuando tengamos el userId
+    // Esto evita recargas innecesarias que consumirían créditos de IA
+    if (userData?.user?.id && !hasLoadedDataRef.current) {
+      hasLoadedDataRef.current = true;
       setIsLoadingGreeting(true);
       setIsLoadingHistory(true);
       loadData();
