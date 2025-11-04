@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useProjectContext } from '@/stores/projectContext';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useThemeStore } from '@/stores/themeStore';
@@ -26,6 +27,25 @@ export function useProjectAccentColor() {
   const { sidebarLevel } = useNavigationStore();
   const { isDark } = useThemeStore();
 
+  // Use React Query to fetch project color data (will auto-update when invalidated)
+  const { data: projectColor } = useQuery({
+    queryKey: ['project-color', selectedProjectId],
+    queryFn: async () => {
+      if (!selectedProjectId || !supabase) return null;
+
+      const { data, error } = await supabase
+        .from('projects')
+        .select('color, use_custom_color, custom_color_h, custom_color_hex')
+        .eq('id', selectedProjectId)
+        .single();
+
+      if (error) return null;
+      return data;
+    },
+    enabled: sidebarLevel === 'project' && !!selectedProjectId,
+    staleTime: 30000, // Consider data fresh for 30 seconds
+  });
+
   useEffect(() => {
     const updateAccentColor = async () => {
       // Si no estamos en nivel de proyecto o no hay proyecto seleccionado, usar color por defecto
@@ -34,36 +54,29 @@ export function useProjectAccentColor() {
         return;
       }
 
+      if (!projectColor) {
+        // Si no hay datos del proyecto, usar el por defecto
+        applyAccentColor(DEFAULT_ACCENT.hex, DEFAULT_ACCENT.hsl, DEFAULT_ACCENT.rgb, isDark);
+        return;
+      }
+
       try {
-        // Obtener el color del proyecto desde Supabase (incluir campos de color custom)
-        const { data: project, error } = await supabase
-          .from('projects')
-          .select('color, use_custom_color, custom_color_h, custom_color_hex')
-          .eq('id', selectedProjectId)
-          .single();
-
-        if (error) {
-          // Si hay error, usar el por defecto
-          applyAccentColor(DEFAULT_ACCENT.hex, DEFAULT_ACCENT.hsl, DEFAULT_ACCENT.rgb, isDark);
-          return;
-        }
-
         // Determinar qué color usar basado en use_custom_color
         let projectColorHex: string | null = null;
 
-        if (project.use_custom_color) {
+        if (projectColor.use_custom_color) {
           // Usar color personalizado
-          if (project.custom_color_hex) {
+          if (projectColor.custom_color_hex) {
             // Si hay hex guardado, usarlo
-            projectColorHex = project.custom_color_hex;
-          } else if (project.custom_color_h !== null && project.custom_color_h !== undefined) {
+            projectColorHex = projectColor.custom_color_hex;
+          } else if (projectColor.custom_color_h !== null && projectColor.custom_color_h !== undefined) {
             // Si solo hay hue, convertirlo a hex
             const { hslToHex } = await import('@/utils/colorUtils');
-            projectColorHex = hslToHex(project.custom_color_h);
+            projectColorHex = hslToHex(projectColor.custom_color_h);
           }
         } else {
           // Usar color de la paleta predefinida
-          projectColorHex = project.color;
+          projectColorHex = projectColor.color;
         }
 
         if (!projectColorHex) {
@@ -97,7 +110,7 @@ export function useProjectAccentColor() {
     };
 
     updateAccentColor();
-  }, [selectedProjectId, sidebarLevel, isDark]);
+  }, [selectedProjectId, sidebarLevel, isDark, projectColor]);
 }
 
 /**

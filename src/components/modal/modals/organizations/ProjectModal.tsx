@@ -299,6 +299,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       queryClient.invalidateQueries({ queryKey: ['user-data'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['current-user'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['project-color'], exact: false }); // Invalidate color to update accent
       
       toast({
         title: isEditing ? "Proyecto actualizado" : "Proyecto creado",

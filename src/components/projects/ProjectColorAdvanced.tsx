@@ -33,6 +33,7 @@ export default function ProjectColorAdvanced({
   // State
   const [enabled, setEnabled] = useState(initialEnabled && isPro);
   const [hue, setHue] = useState<number>(initialHue ?? 180); // Default to cyan
+  const [hasInteracted, setHasInteracted] = useState(false); // Track user interaction
 
   // Calculate hex color from hue
   const hex = useMemo(() => hslToHex(hue), [hue]);
@@ -78,25 +79,30 @@ export default function ProjectColorAdvanced({
     };
   }, [enabled, isPro, hex, isDark]);
 
-  // Notify parent of changes
+  // Notify parent of changes (only after user interaction)
   useEffect(() => {
+    // Don't notify on mount to avoid overwriting existing values for non-PRO users
+    if (!hasInteracted) return;
+
     const shouldUseCustom = enabled && isPro;
     onChange({
       useCustom: shouldUseCustom,
       hue: shouldUseCustom ? hue : null,
       hex: shouldUseCustom ? hex : null
     });
-  }, [enabled, hue, isPro, hex, onChange]);
+  }, [enabled, hue, isPro, hex, onChange, hasInteracted]);
 
   // Handle checkbox toggle
   const handleToggle = (checked: boolean) => {
     if (!isPro) return; // Prevent toggle if not PRO
+    setHasInteracted(true);
     setEnabled(checked);
   };
 
   // Handle slider change
   const handleHueChange = (value: number) => {
     if (!isPro || !enabled) return;
+    setHasInteracted(true);
     setHue(value);
   };
 
