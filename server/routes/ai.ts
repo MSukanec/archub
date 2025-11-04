@@ -3,6 +3,8 @@ import type { RouteDeps } from "./_base";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { getGreetingSystemPrompt, getChatSystemPrompt } from "../../src/ai/systemPrompt";
+import { runAIPipeline, enrichSystemPrompt, cacheAIResult, getPipelineMetrics } from "../../src/ai/orchestrator/pipeline";
+import type { AIContext } from "../../src/ai/orchestrator/types";
 
 interface Suggestion {
   label: string;
@@ -633,11 +635,64 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
       const tone = preferences?.tone || "amistoso";
       const language = preferences?.language || "es";
 
+      // Obtener organization_id para function calling
+      const { data: userPrefs } = await authenticatedSupabase
+        .from('user_preferences')
+        .select('last_organization_id')
+        .eq('user_id', userId)
+        .single();
+
+      const organizationId = userPrefs?.last_organization_id;
+
+      // ========================================
+      // ORCHESTRATOR: Ejecutar pipeline de razonamiento inteligente
+      // ========================================
+      const aiContext: AIContext = {
+        userId,
+        organizationId: organizationId || '',
+        language,
+        timezone: 'America/Argentina/Buenos_Aires'
+      };
+
+      const pipelineContext = await runAIPipeline(message, aiContext, authenticatedSupabase);
+
+      // Si el pipeline devolvió un resultado cacheado, devolverlo directamente
+      if (pipelineContext.metadata.cacheHit && pipelineContext.result) {
+        console.log('[AI Pipeline] Cache hit - returning cached response');
+        return res.status(200).json({
+          response: pipelineContext.result,
+          cached: true,
+          metrics: getPipelineMetrics(pipelineContext)
+        });
+      }
+
+      // Si hubo error en el pipeline, continuar con GPT pero sin enriquecer
+      if (pipelineContext.error) {
+        console.warn('[AI Pipeline] Error:', pipelineContext.error);
+      }
+
+      // Obtener base system prompt
+      const baseSystemPrompt = getChatSystemPrompt({ language, tone, displayName });
+
+      // Enriquecer con contexto del pipeline (si no hubo error)
+      const enrichedSystemPrompt = pipelineContext.error
+        ? baseSystemPrompt
+        : enrichSystemPrompt(baseSystemPrompt, pipelineContext);
+
+      // Log del pipeline para debugging
+      if (pipelineContext.intent) {
+        console.log('[AI Pipeline] Intent:', pipelineContext.intent.type, pipelineContext.intent.subtype);
+        console.log('[AI Pipeline] Entities:', pipelineContext.intent.entities.map(e => `${e.type}:${e.name}`));
+      }
+      if (pipelineContext.queryPlan) {
+        console.log('[AI Pipeline] Suggested tool:', pipelineContext.queryPlan.toolName);
+      }
+
       // Construir el historial de mensajes para GPT
       const messages = [
         {
           role: "system" as const,
-          content: getChatSystemPrompt({ language, tone, displayName })
+          content: enrichedSystemPrompt
         },
         // Agregar historial previo
         ...history.map((msg: any) => ({
@@ -650,15 +705,6 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
           content: message
         }
       ];
-
-      // Obtener organization_id para function calling
-      const { data: userPrefs } = await authenticatedSupabase
-        .from('user_preferences')
-        .select('last_organization_id')
-        .eq('user_id', userId)
-        .single();
-
-      const organizationId = userPrefs?.last_organization_id;
 
       // Llamar a GPT-4o
       const openai = new OpenAI({
@@ -1224,9 +1270,15 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
           if (error) console.error('Error logging usage:', error);
         });
 
+      // Cachear el resultado para futuras consultas idénticas
+      if (organizationId) {
+        cacheAIResult(message, organizationId, responseContent);
+      }
+
       // Devolver la respuesta
       return res.status(200).json({
-        response: responseContent
+        response: responseContent,
+        metrics: getPipelineMetrics(pipelineContext)
       });
 
     } catch (err: any) {
