@@ -96,11 +96,11 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
   const { editingProject, isEditing = false } = modalData || {};
   const { currentPanel, setPanel } = useModalPanelStore();
   const { data: userData } = useCurrentUser();
-  const organizationId = userData?.preferences?.last_organization_id;
+  const { currentOrganizationId, setSelectedProject } = useProjectContext();
+  const organizationId = currentOrganizationId || undefined;
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
   const { data: projectTypes = [] } = useProjectTypes();
   const { data: projectModalities = [] } = useProjectModalities();
-  const { setSelectedProject } = useProjectContext();
   const { setSidebarLevel } = useNavigationStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
