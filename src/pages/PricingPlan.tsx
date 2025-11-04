@@ -378,8 +378,10 @@ export default function PricingPlan() {
                       style={{ color: config.iconColor }}
                     />
                     <h3 
-                      className="text-2xl font-bold"
-                      style={{ color: isPopular ? '#ffffff' : 'var(--text-default)' }}
+                      className={cn(
+                        "text-2xl font-bold",
+                        isPopular && "pricing-plan-title-white"
+                      )}
                     >
                       {plan.name}
                     </h3>

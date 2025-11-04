@@ -531,6 +531,11 @@ h1, h2, h3, h4, h5, h6,
   font-weight: 500 !important;
 }
 
+/* Override for pricing plan Pro card title */
+.pricing-plan-title-white {
+  color: #ffffff !important;
+}
+
 /* Hide scrollbars while maintaining scroll functionality */
 .overflow-x-auto::-webkit-scrollbar {
   display: none;
