@@ -156,6 +156,10 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
 
   const createProjectMutation = useMutation({
     mutationFn: async (data: CreateProjectForm) => {
+      console.log('🔍 [ProjectModal] Creating project with organizationId:', organizationId);
+      console.log('🔍 [ProjectModal] currentOrganizationId:', currentOrganizationId);
+      console.log('🔍 [ProjectModal] currentUserMember:', currentUserMember);
+      
       if (!organizationId) {
         throw new Error('No hay una organización activa seleccionada');
       }
@@ -237,19 +241,32 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
 
         if (projectError) throw projectError;
 
+        console.log('✅ [ProjectModal] Project created successfully:', newProject.id);
+        console.log('📝 [ProjectModal] Creating project_data with:', {
+          project_id: newProject.id,
+          organization_id: organizationId,
+          project_type_id: data.project_type_id || null,
+          modality_id: data.modality_id || null,
+        });
+
         // ALWAYS create project_data with organization_id (required for RLS)
-        const { error: dataError } = await supabase
+        const { data: projectDataResult, error: dataError } = await supabase
           .from('project_data')
-          .upsert({
+          .insert({
             project_id: newProject.id,
             organization_id: organizationId,
             project_type_id: data.project_type_id || null,
             modality_id: data.modality_id || null,
-          }, {
-            onConflict: 'project_id'
-          });
+          })
+          .select()
+          .single();
 
-        if (dataError) throw dataError;
+        if (dataError) {
+          console.error('❌ [ProjectModal] Error creating project_data:', dataError);
+          throw dataError;
+        }
+
+        console.log('✅ [ProjectModal] project_data created successfully:', projectDataResult);
 
         return newProject;
       }
