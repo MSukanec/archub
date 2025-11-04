@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { formatCurrency, formatDateRange, formatMovementCount } from '../../utils/responseFormatter';
 import { convertCurrency } from '../../utils/currencyConverter';
 import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder';
+import { normalizeText, textIncludes } from '../../utils/textNormalizer';
 
 /**
  * Obtiene TODOS los movimientos (ingresos y egresos) de un contacto específico.
@@ -48,10 +49,7 @@ export async function getContactMovements(
 
     query = query.eq('organization_id', organizationId);
 
-    // Si hay proyecto, filtrar por nombre (ilike para partial match)
-    if (projectName) {
-      query = query.ilike('project_name', `%${projectName}%`);
-    }
+    // Filtro de proyecto se hace post-query para manejar acentos
 
     // Si hay rango de fechas, filtrar
     if (dateRange) {
@@ -78,23 +76,27 @@ export async function getContactMovements(
         : 'No encontré movimientos en tu organización';
     }
 
-    // Filtrar en JavaScript por contactName en CUALQUIER rol
-    const contactNameLower = contactName.toLowerCase();
-    const filteredMovements = movements.filter(m => {
-      const partner = (m.partner ?? '').toLowerCase();
-      const subcontract = (m.subcontract ?? '').toLowerCase(); // Nombre del subcontrato
-      const subcontractContact = (m.subcontract_contact ?? '').toLowerCase(); // Nombre del subcontratista
-      const personnel = (m.personnel ?? '').toLowerCase();
-      const client = (m.client ?? '').toLowerCase();
-      const member = (m.member ?? '').toLowerCase();
+    // Filtrar por proyecto primero (insensible a acentos)
+    let filteredByProject = movements;
+    if (projectName) {
+      filteredByProject = movements.filter(m => 
+        textIncludes(m.project_name ?? '', projectName)
+      );
       
+      if (filteredByProject.length === 0) {
+        return `No encontré el proyecto **"${projectName}"** o no tiene movimientos registrados. Es posible que el nombre del proyecto sea diferente o que aún no se hayan ingresado transacciones bajo ese nombre.`;
+      }
+    }
+
+    // Filtrar en JavaScript por contactName en CUALQUIER rol (insensible a acentos)
+    const filteredMovements = filteredByProject.filter(m => {
       return (
-        partner.includes(contactNameLower) ||
-        subcontract.includes(contactNameLower) ||
-        subcontractContact.includes(contactNameLower) ||
-        personnel.includes(contactNameLower) ||
-        client.includes(contactNameLower) ||
-        member.includes(contactNameLower)
+        textIncludes(m.partner ?? '', contactName) ||
+        textIncludes(m.subcontract ?? '', contactName) ||
+        textIncludes(m.subcontract_contact ?? '', contactName) ||
+        textIncludes(m.personnel ?? '', contactName) ||
+        textIncludes(m.client ?? '', contactName) ||
+        textIncludes(m.member ?? '', contactName)
       );
     });
 

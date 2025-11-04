@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { formatCurrency } from '../../utils/responseFormatter';
 import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder';
+import { textIncludes } from '../../utils/textNormalizer';
 
 /**
  * Resumen financiero completo de un proyecto (balance, ingresos, egresos)
@@ -21,7 +22,7 @@ export async function getProjectFinancialSummary(
   try {
     // Usar query builder con campos específicos:
     // Necesita: currencies, projects, movement_concepts(type+category)
-    const { data: movements, error } = (await buildMovementQuery(supabase, {
+    const { data: allMovements, error } = (await buildMovementQuery(supabase, {
       includeProject: true,
       includeCurrency: true,
       includeConcepts: {
@@ -29,16 +30,24 @@ export async function getProjectFinancialSummary(
         category: true
       }
     })
-      .eq('organization_id', organizationId)
-      .ilike('project_name', `%${projectName}%`)) as { data: MovementRow[] | null, error: any };
+      .eq('organization_id', organizationId)) as { data: MovementRow[] | null, error: any };
 
     if (error) {
       console.error('Error fetching project movements:', error);
       return `Error al buscar movimientos del proyecto: ${error.message}`;
     }
 
-    if (!movements || movements.length === 0) {
-      return `No encontré el proyecto **"${projectName}"** o no tiene movimientos registrados`;
+    if (!allMovements || allMovements.length === 0) {
+      return `No encontré movimientos en tu organización`;
+    }
+
+    // Filtrar por proyecto (insensible a acentos)
+    const movements = allMovements.filter(m => 
+      textIncludes(m.project_name ?? '', projectName)
+    );
+
+    if (movements.length === 0) {
+      return `No encontré el proyecto **"${projectName}"** o no tiene movimientos registrados. Es posible que el nombre del proyecto sea diferente o que aún no se hayan ingresado transacciones bajo ese nombre.`;
     }
 
     // Validar que todas las monedas sean iguales

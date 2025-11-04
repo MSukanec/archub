@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { formatCurrency, formatDateRange } from '../../utils/responseFormatter';
 import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder';
+import { textIncludes } from '../../utils/textNormalizer';
 
 /**
  * Suma total de gastos por rol específico (subcontratistas, personal, socios)
@@ -65,12 +66,11 @@ export async function getRoleSpending(
       return `No encontré gastos en **${roleNames[role]}** en tu organización`;
     }
 
-    // Filtrar en JavaScript por proyecto si se especifica
+    // Filtrar en JavaScript por proyecto si se especifica (insensible a acentos)
     let filteredMovements = movements;
     if (projectName) {
-      const projectNameLower = projectName.toLowerCase();
       filteredMovements = filteredMovements.filter(m => 
-        (m.project_name ?? '').toLowerCase().includes(projectNameLower)
+        textIncludes(m.project_name ?? '', projectName)
       );
       
       if (filteredMovements.length === 0) {

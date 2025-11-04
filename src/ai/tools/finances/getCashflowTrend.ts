@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { formatCurrency, formatDateRange } from '../../utils/responseFormatter';
 import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder';
+import { textIncludes } from '../../utils/textNormalizer';
 
 /**
  * Agrupa movimientos por intervalo temporal
@@ -155,10 +156,7 @@ export async function getCashflowTrend(
       .gte('movement_date', start)
       .lte('movement_date', end);
 
-    // Si es scope project, filtrar por nombre
-    if (scope === 'project' && projectName) {
-      query = query.ilike('project_name', `%${projectName}%`);
-    }
+    // Filtro de proyecto se hace post-query para manejar acentos
 
     // Si hay moneda específica, filtrar
     if (currency) {
@@ -166,15 +164,27 @@ export async function getCashflowTrend(
       query = query.eq('currency_code', currencyUpper);
     }
 
-    const { data: movements, error } = (await query) as { data: MovementRow[] | null, error: any };
+    const { data: allMovements, error } = (await query) as { data: MovementRow[] | null, error: any };
 
     if (error) {
       console.error('Error fetching movements:', error);
       return `Error al buscar movimientos: ${error.message}`;
     }
 
-    if (!movements || movements.length === 0) {
+    if (!allMovements || allMovements.length === 0) {
       return 'No hay movimientos en el período analizado';
+    }
+
+    // Filtrar por proyecto si es necesario (insensible a acentos)
+    let movements = allMovements;
+    if (scope === 'project' && projectName) {
+      movements = allMovements.filter(m => 
+        textIncludes(m.project_name ?? '', projectName)
+      );
+      
+      if (movements.length === 0) {
+        return `No encontré el proyecto **"${projectName}"** o no tiene movimientos en el período analizado. Es posible que el nombre del proyecto sea diferente.`;
+      }
     }
 
     // Validar moneda única

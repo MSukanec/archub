@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder';
+import { textIncludes } from '../../utils/textNormalizer';
 
 /**
  * Calcula el total de pagos realizados a un contacto (en cualquier rol)
@@ -21,7 +22,7 @@ export async function getTotalPaymentsByContactAndProject(
   try {
     // Usar query builder con SOLO los campos necesarios:
     // Necesita: currencies, projects, TODOS los roles (partner, subcontract+contact, personnel, client, member)
-    const { data: movements, error } = (await buildMovementQuery(supabase, {
+    const { data: allMovements, error } = (await buildMovementQuery(supabase, {
       includeProject: true,
       includeCurrency: true,
       includeRoles: {
@@ -32,37 +33,35 @@ export async function getTotalPaymentsByContactAndProject(
         member: true
       }
     })
-      .eq('organization_id', organizationId)
-      .ilike('project_name', `%${projectName}%`)) as { data: MovementRow[] | null, error: any };
+      .eq('organization_id', organizationId)) as { data: MovementRow[] | null, error: any };
 
     if (error) {
       console.error('Error fetching movements:', error);
       return `Error al buscar pagos: ${error.message}`;
     }
 
-    if (!movements || movements.length === 0) {
-      return `No encontré movimientos en el proyecto **"${projectName}"**.`;
+    if (!allMovements || allMovements.length === 0) {
+      return `No encontré movimientos en tu organización`;
     }
 
-    // Filtrar en JavaScript para evitar problemas con caracteres especiales (', ", %, &, comas, etc.)
-    // Buscamos el contacto en cualquiera de las columnas de roles
-    const contactNameLower = contactName.toLowerCase();
+    // Filtrar por proyecto primero (insensible a acentos)
+    const movements = allMovements.filter(m => 
+      textIncludes(m.project_name ?? '', projectName)
+    );
+
+    if (movements.length === 0) {
+      return `No encontré movimientos en el proyecto **"${projectName}"**. Es posible que el nombre del proyecto sea diferente o que aún no se hayan ingresado transacciones bajo ese nombre.`;
+    }
+
+    // Filtrar por contacto en cualquiera de las columnas de roles (insensible a acentos)
     const filteredMovements = movements.filter(m => {
-      // Normalizar cada valor a string vacío si es null/undefined antes de comparar
-      const partner = (m.partner ?? '').toLowerCase();
-      const subcontract = (m.subcontract ?? '').toLowerCase(); // Nombre del subcontrato
-      const subcontractContact = (m.subcontract_contact ?? '').toLowerCase(); // Nombre del subcontratista
-      const personnel = (m.personnel ?? '').toLowerCase();
-      const client = (m.client ?? '').toLowerCase();
-      const member = (m.member ?? '').toLowerCase();
-      
       return (
-        partner.includes(contactNameLower) ||
-        subcontract.includes(contactNameLower) ||
-        subcontractContact.includes(contactNameLower) ||
-        personnel.includes(contactNameLower) ||
-        client.includes(contactNameLower) ||
-        member.includes(contactNameLower)
+        textIncludes(m.partner ?? '', contactName) ||
+        textIncludes(m.subcontract ?? '', contactName) ||
+        textIncludes(m.subcontract_contact ?? '', contactName) ||
+        textIncludes(m.personnel ?? '', contactName) ||
+        textIncludes(m.client ?? '', contactName) ||
+        textIncludes(m.member ?? '', contactName)
       );
     });
 
@@ -93,12 +92,12 @@ export async function getTotalPaymentsByContactAndProject(
     // Determinar el nombre exacto del contacto (cuál columna matcheó)
     // Priorizar el nombre del contacto (subcontract_contact) sobre el nombre del subcontrato
     const matchedName = 
-      (firstMovement.partner ?? '').toLowerCase().includes(contactNameLower) ? firstMovement.partner :
-      (firstMovement.subcontract_contact ?? '').toLowerCase().includes(contactNameLower) ? firstMovement.subcontract_contact :
-      (firstMovement.subcontract ?? '').toLowerCase().includes(contactNameLower) ? firstMovement.subcontract :
-      (firstMovement.personnel ?? '').toLowerCase().includes(contactNameLower) ? firstMovement.personnel :
-      (firstMovement.client ?? '').toLowerCase().includes(contactNameLower) ? firstMovement.client :
-      (firstMovement.member ?? '').toLowerCase().includes(contactNameLower) ? firstMovement.member :
+      textIncludes(firstMovement.partner ?? '', contactName) ? firstMovement.partner :
+      textIncludes(firstMovement.subcontract_contact ?? '', contactName) ? firstMovement.subcontract_contact :
+      textIncludes(firstMovement.subcontract ?? '', contactName) ? firstMovement.subcontract :
+      textIncludes(firstMovement.personnel ?? '', contactName) ? firstMovement.personnel :
+      textIncludes(firstMovement.client ?? '', contactName) ? firstMovement.client :
+      textIncludes(firstMovement.member ?? '', contactName) ? firstMovement.member :
       contactName;
 
     // Formatear el total
