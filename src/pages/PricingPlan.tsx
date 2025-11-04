@@ -84,7 +84,7 @@ export default function PricingPlan() {
       cardHeader: string;
       description: string;
       features: string[];
-      limits: { icon: string; value: string }[];
+      limits: { iconComponent: any; value: string }[];
     }> = {
       'free': {
         icon: Folder,
@@ -101,10 +101,10 @@ export default function PricingPlan() {
           'Soporte por email'
         ],
         limits: [
-          { icon: '📁', value: '3 proyectos' },
-          { icon: '💾', value: '500 MB' },
-          { icon: '🤖', value: 'Solo resúmenes' },
-          { icon: '👥', value: '1 usuario' }
+          { iconComponent: Folder, value: '3 proyectos' },
+          { iconComponent: HardDrive, value: '500 MB' },
+          { iconComponent: Bot, value: 'Solo resúmenes' },
+          { iconComponent: Users, value: '1 usuario' }
         ]
       },
       'pro': {
@@ -125,10 +125,10 @@ export default function PricingPlan() {
           'Soporte prioritario'
         ],
         limits: [
-          { icon: '📁', value: '50 proyectos' },
-          { icon: '💾', value: '50 GB' },
-          { icon: '🤖', value: '10,000 tokens/mes' },
-          { icon: '👥', value: '1 usuario' }
+          { iconComponent: Folder, value: '50 proyectos' },
+          { iconComponent: HardDrive, value: '50 GB' },
+          { iconComponent: Bot, value: '10,000 tokens/mes' },
+          { iconComponent: Users, value: '1 usuario' }
         ]
       },
       'teams': {
@@ -149,10 +149,10 @@ export default function PricingPlan() {
           'Soporte 24/7'
         ],
         limits: [
-          { icon: '📁', value: 'Ilimitados' },
-          { icon: '💾', value: '500 GB' },
-          { icon: '🤖', value: 'Ilimitados' },
-          { icon: '👥', value: 'Ilimitados' }
+          { iconComponent: Folder, value: 'Ilimitados' },
+          { iconComponent: HardDrive, value: '500 GB' },
+          { iconComponent: Bot, value: 'Ilimitados' },
+          { iconComponent: Users, value: 'Ilimitados' }
         ]
       },
       'enterprise': {
@@ -450,17 +450,23 @@ export default function PricingPlan() {
                       Límites
                     </div>
                     <div className="space-y-2.5">
-                      {config.limits.map((limit, idx) => (
-                        <div key={idx} className="flex items-center gap-3">
-                          <span className="text-base opacity-70">{limit.icon}</span>
-                          <span className={cn(
-                            "text-sm",
-                            isPopular ? "text-gray-300" : "text-[var(--text-default)]"
-                          )}>
-                            {limit.value}
-                          </span>
-                        </div>
-                      ))}
+                      {config.limits.map((limit, idx) => {
+                        const LimitIcon = limit.iconComponent;
+                        return (
+                          <div key={idx} className="flex items-center gap-3">
+                            <LimitIcon 
+                              className="h-4 w-4" 
+                              style={{ color: config.iconColor }}
+                            />
+                            <span className={cn(
+                              "text-sm",
+                              isPopular ? "text-gray-300" : "text-[var(--text-default)]"
+                            )}>
+                              {limit.value}
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 
