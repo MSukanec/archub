@@ -1,8 +1,54 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600&display=swap');
+/* Import Inter Variable Font - all weights, modern and clean like SF Pro Display */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Global typography - consistent like mood slider reference */
+@layer base {
+  * {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: -0.011em; /* Optical spacing like Apple */
+  }
+  
+  /* Headings with proper weights */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.022em; /* Tighter for headings */
+    line-height: 1.2;
+  }
+  
+  h1 { font-size: 2.25rem; font-weight: 700; }
+  h2 { font-size: 1.875rem; font-weight: 700; }
+  h3 { font-size: 1.5rem; font-weight: 600; }
+  h4 { font-size: 1.25rem; font-weight: 600; }
+  h5 { font-size: 1.125rem; font-weight: 600; }
+  h6 { font-size: 1rem; font-weight: 600; }
+  
+  /* Button text - medium weight */
+  button {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.011em;
+  }
+  
+  /* Input text */
+  input, textarea, select {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    font-weight: 400;
+    letter-spacing: -0.011em;
+  }
+}
 
 :root {
   /* Layout */

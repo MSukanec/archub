@@ -10,8 +10,9 @@ Preferred communication style: Simple, everyday language.
 
 ### UI/UX Decisions
 - **Design System**: "new-york" style with a neutral color palette, dark mode, and reusable UI components, leveraging `shadcn/ui` and Tailwind CSS.
-- **Dynamic Color System**: Comprehensive project-based color theming using `chroma-js` for intelligent color calculations, including dynamic accent colors, hover states, foreground colors, and background gradients. Implemented with `useProjectAccentColor` hook and CSS variables.
-  - **Fase 3.1 - Visual Breathing System** (Nov 2024): All UI components automatically "breathe" the project color. Badge, Button, Input, Progress primitives use `var(--accent)` with smooth 700ms transitions. New utility classes: `card-accent-border`, `card-accent-bg`, `icon-accent` for Cards and icons. Inspired by mood slider UX where everything changes color based on selection.
+- **Typography System**: Unified **Inter Variable Font** (100-900 weights) with Apple-style optical letter-spacing (-0.011em body, -0.022em headings), antialiased rendering, and consistent font weights across all components. Optimized line-heights (1.2-1.5) for modern, clean appearance similar to SF Pro Display.
+- **Dynamic Color System**: Comprehensive project-based color theming using `chroma-js` for intelligent color calculations, including dynamic accent colors, hover states, foreground colors, and organic radial gradients. Implemented with `useProjectAccentColor` hook and CSS variables.
+  - **Fase 3.1 - Visual Breathing System** (Nov 2024): All UI components automatically "breathe" the project color. Badge, Button, Input, Progress primitives use `var(--accent)` with smooth transitions. Organic radial gradients with multiple color stops (5 levels), dual-layer blur effects (40px/60px), and breathing animations. Inspired by mood slider UX where everything changes color based on selection.
 - **Modals**: Responsive Dialog component (right-side panel on desktop, fullscreen on mobile).
 - **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub.
 - **Component Standardization**: Standardized `StatCard` and custom `LoadingSpinner` components that use dynamic accent colors.

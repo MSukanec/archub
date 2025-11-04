@@ -14,7 +14,27 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: [
+          'Inter',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'Roboto',
+          'Oxygen',
+          'Ubuntu',
+          'Cantarell',
+          'sans-serif'
+        ],
+      },
+      fontSize: {
+        'xs': ['0.75rem', { lineHeight: '1.5', letterSpacing: '-0.011em' }],
+        'sm': ['0.875rem', { lineHeight: '1.5', letterSpacing: '-0.011em' }],
+        'base': ['1rem', { lineHeight: '1.5', letterSpacing: '-0.011em' }],
+        'lg': ['1.125rem', { lineHeight: '1.5', letterSpacing: '-0.014em' }],
+        'xl': ['1.25rem', { lineHeight: '1.4', letterSpacing: '-0.017em' }],
+        '2xl': ['1.5rem', { lineHeight: '1.3', letterSpacing: '-0.019em' }],
+        '3xl': ['1.875rem', { lineHeight: '1.2', letterSpacing: '-0.021em' }],
+        '4xl': ['2.25rem', { lineHeight: '1.2', letterSpacing: '-0.022em' }],
       },
       borderRadius: {
         //lg: "var(--radius)",
