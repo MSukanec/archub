@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/lib/supabase";
-import { Check, X, Crown, CreditCard, Sparkles, Zap, Users, Briefcase } from "lucide-react";
+import { Check, X, Crown, CreditCard, Folder, HardDrive, Users, Briefcase, Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
 
@@ -87,7 +87,7 @@ export default function PricingPlan() {
       limits: { icon: string; value: string }[];
     }> = {
       'free': {
-        icon: Sparkles,
+        icon: Folder,
         iconColor: '#84cc16',
         bgColor: 'rgba(132, 204, 22, 0.08)',
         cardHeader: 'Perfecto para comenzar',
@@ -108,7 +108,7 @@ export default function PricingPlan() {
         ]
       },
       'pro': {
-        icon: Zap,
+        icon: Bot,
         iconColor: '#0047AB',
         bgColor: 'rgba(0, 71, 171, 0.08)',
         cardHeader: 'Para profesionales avanzados',
@@ -377,10 +377,10 @@ export default function PricingPlan() {
                       className="h-6 w-6" 
                       style={{ color: config.iconColor }}
                     />
-                    <h3 className={cn(
-                      "text-2xl font-bold",
-                      isPopular ? "text-white" : "text-[var(--text-default)]"
-                    )}>
+                    <h3 
+                      className="text-2xl font-bold"
+                      style={{ color: isPopular ? '#ffffff' : 'var(--text-default)' }}
+                    >
                       {plan.name}
                     </h3>
                   </div>
@@ -573,15 +573,15 @@ export default function PricingPlan() {
           <div className="max-w-6xl mx-auto overflow-x-auto">
             {/* Desktop: 4 columnas */}
             <div className="hidden md:block">
-              <div className="grid grid-cols-4 gap-0 border border-[var(--border-default)] rounded-lg overflow-hidden">
+              <div className="grid grid-cols-4 gap-4">
                 {/* Header con info de planes y botones */}
-                <div className="bg-background p-6">
+                <div className="p-6">
                   {/* Espacio vacío en esquina superior izquierda */}
                 </div>
                 
                 {/* Free Column Header */}
                 <div 
-                  className="p-6 space-y-4"
+                  className="p-6 space-y-4 rounded-lg border border-[var(--border-default)]"
                   style={{ backgroundColor: getPlanConfig('free').bgColor }}
                 >
                   <div>
@@ -591,9 +591,9 @@ export default function PricingPlan() {
                     </div>
                   </div>
                   <Button 
-                    variant="secondary" 
                     size="sm" 
-                    className="w-full text-xs"
+                    className="w-full text-xs text-white"
+                    style={{ backgroundColor: getPlanConfig('free').iconColor }}
                     data-testid="button-table-free"
                   >
                     Comenzar
@@ -602,7 +602,7 @@ export default function PricingPlan() {
 
                 {/* Pro Column Header */}
                 <div 
-                  className="p-6 space-y-4"
+                  className="p-6 space-y-4 rounded-lg border border-[var(--border-default)]"
                   style={{ backgroundColor: getPlanConfig('pro').bgColor }}
                 >
                   <div>
@@ -612,9 +612,9 @@ export default function PricingPlan() {
                     </div>
                   </div>
                   <Button 
-                    variant="default" 
                     size="sm" 
-                    className="w-full text-xs"
+                    className="w-full text-xs text-white"
+                    style={{ backgroundColor: getPlanConfig('pro').iconColor }}
                     data-testid="button-table-pro"
                   >
                     Ser Fundador
@@ -623,7 +623,7 @@ export default function PricingPlan() {
 
                 {/* Teams Column Header */}
                 <div 
-                  className="p-6 space-y-4"
+                  className="p-6 space-y-4 rounded-lg border border-[var(--border-default)]"
                   style={{ backgroundColor: getPlanConfig('teams').bgColor }}
                 >
                   <div>
@@ -633,9 +633,9 @@ export default function PricingPlan() {
                     </div>
                   </div>
                   <Button 
-                    variant="secondary" 
                     size="sm" 
-                    className="w-full text-xs"
+                    className="w-full text-xs text-white"
+                    style={{ backgroundColor: getPlanConfig('teams').iconColor }}
                     data-testid="button-table-teams"
                   >
                     Comenzar
@@ -646,44 +646,44 @@ export default function PricingPlan() {
                 {comparisonData.map((section, sectionIdx) => (
                   <div key={sectionIdx} className="col-span-4 contents">
                     {/* Category Header - Color continuo en columnas */}
-                    <div className="bg-background p-3 border-t border-[var(--border-default)]">
-                      <h3 className="text-xs font-bold text-[var(--text-default)] uppercase tracking-wider">
+                    <div className="p-3 pt-6">
+                      <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
                         {section.category}
                       </h3>
                     </div>
                     <div 
-                      className="p-3 border-t border-[var(--border-default)]"
+                      className="p-3 pt-6 rounded-t-lg"
                       style={{ backgroundColor: getPlanConfig('free').bgColor }}
                     />
                     <div 
-                      className="p-3 border-t border-[var(--border-default)]"
+                      className="p-3 pt-6 rounded-t-lg"
                       style={{ backgroundColor: getPlanConfig('pro').bgColor }}
                     />
                     <div 
-                      className="p-3 border-t border-[var(--border-default)]"
+                      className="p-3 pt-6 rounded-t-lg"
                       style={{ backgroundColor: getPlanConfig('teams').bgColor }}
                     />
                     
                     {/* Category Rows */}
                     {section.rows.map((row, rowIdx) => (
                       <div key={rowIdx} className="contents">
-                        <div className="bg-background p-4 text-sm font-medium text-[var(--text-default)] border-t border-[var(--border-default)]">
+                        <div className="p-4 text-sm font-medium text-[var(--text-default)]">
                           {row.label}
                         </div>
                         <div 
-                          className="p-4 flex justify-center items-center border-t border-[var(--border-default)]"
+                          className="p-4 flex justify-center items-center"
                           style={{ backgroundColor: getPlanConfig('free').bgColor }}
                         >
                           {renderValue(row.free, getPlanConfig('free').iconColor)}
                         </div>
                         <div 
-                          className="p-4 flex justify-center items-center border-t border-[var(--border-default)]"
+                          className="p-4 flex justify-center items-center"
                           style={{ backgroundColor: getPlanConfig('pro').bgColor }}
                         >
                           {renderValue(row.pro, getPlanConfig('pro').iconColor)}
                         </div>
                         <div 
-                          className="p-4 flex justify-center items-center border-t border-[var(--border-default)]"
+                          className="p-4 flex justify-center items-center"
                           style={{ backgroundColor: getPlanConfig('teams').bgColor }}
                         >
                           {renderValue(row.teams, getPlanConfig('teams').iconColor)}
