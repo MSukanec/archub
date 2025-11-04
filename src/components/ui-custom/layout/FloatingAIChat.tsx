@@ -34,6 +34,16 @@ export function FloatingAIChat() {
     }
   }, [chatMessages, isSendingMessage]);
 
+  // Auto-scroll al final cuando se abre el popover o termina de cargar
+  useEffect(() => {
+    if (isOpen && !isLoadingHistory && messagesEndRef.current && chatMessages.length > 0) {
+      // Usar setTimeout para asegurar que el DOM esté renderizado
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+      }, 100);
+    }
+  }, [isOpen, isLoadingHistory, chatMessages.length]);
+
   // Cargar historial de mensajes
   useEffect(() => {
     const loadHistory = async () => {
