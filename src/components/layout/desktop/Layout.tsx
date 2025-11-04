@@ -23,7 +23,6 @@ import { CourseSidebar } from "@/components/layout/CourseSidebar";
 import { ProjectSelectorButton } from "./ProjectSelectorButton";
 import { OrganizationSelectorButton } from "./OrganizationSelectorButton";
 import { useProjectAccentColor } from "@/hooks/use-project-accent-color";
-import { AIFloatingChat } from "@/components/ui-custom/layout/AIFloatingChat";
 
 interface Tab {
   id: string;
@@ -147,14 +146,14 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
           {/* Main Content Area - MainHeader + Page Content */}
           <div className="flex-1 flex flex-col min-h-0">
-            {/* Wrapper con padding común para MainHeader y contenido */}
-            <div className={`flex-1 flex flex-col ${isCourseSidebarVisible ? '' : 'pr-3'} pb-3 overflow-x-hidden`}>
-              {/* Main Header for Desktop - SIN padding propio, usa el del padre */}
-              <MainHeader icon={headerProps?.icon} title={headerProps?.title} />
-              
-              {/* Page Content with rounded corners and framing effect */}
-              <main
-                className={`flex-1 flex flex-col rounded-2xl overflow-hidden ${!isDocked ? 'w-full' : ''}`}
+            {/* Main Header for Desktop */}
+            <MainHeader icon={headerProps?.icon} title={headerProps?.title} />
+
+            {/* Page Content with rounded corners and framing effect */}
+            <div className={`flex-1 flex min-h-0 relative ${isDocked ? 'gap-3' : ''}`}>
+              <div className={`flex-1 ${isCourseSidebarVisible ? '' : 'pr-3'} pb-3 overflow-x-hidden`}>
+                <main
+                  className={`h-full flex flex-col rounded-2xl overflow-hidden ${!isDocked ? 'w-full' : ''}`}
                   style={{
                     background: isDark 
                       ? 'linear-gradient(to bottom, var(--gradient-from-dark), var(--gradient-to-dark))'
@@ -216,9 +215,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                 </div>
               </div>
             )}
-
-            {/* AI Floating Chat - Solo en desktop */}
-            <AIFloatingChat />
+          </div>
           </div>
         </div>
       )}
