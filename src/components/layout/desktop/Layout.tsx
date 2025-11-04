@@ -189,7 +189,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                     wide={wide}
                   >
                     <div
-                      className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-6 pb-6 min-h-0`}
+                      className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-16 pt-6 pb-6 min-h-0`}
                     >
                       {children}
                     </div>
