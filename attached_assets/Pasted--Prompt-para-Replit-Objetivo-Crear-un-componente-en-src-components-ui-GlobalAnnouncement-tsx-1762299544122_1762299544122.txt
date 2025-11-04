@@ -1,0 +1,86 @@
+🟢 Prompt para Replit:
+
+🧩 Objetivo:
+Crear un componente en src/components/ui/GlobalAnnouncement.tsx que muestre avisos globales dinámicos (por ejemplo promociones, migraciones, mantenimientos) conectados a la tabla global_announcements de Supabase.
+
+💡 Características clave:
+
+Debe consultar Supabase (global_announcements) y mostrar el último activo.
+
+Permitir hasta dos botones (primary_button y secondary_button).
+
+Soportar links inteligentes en el texto (mailto:, https://, tel:, wa.me/).
+
+Guardar en localStorage cuando el usuario cierre el banner.
+
+Animación de entrada suave (slide-down o fade).
+
+Fondo con degradado dinámico según tipo (info, warning, error, success).
+
+Diseño elegante con sombras suaves y bordes redondeados.
+
+Totalmente responsive (desktop y móvil).
+
+⚙️ Campos esperados de la tabla Supabase:
+
+id, message, type, link_text, link_url,
+primary_button_text, primary_button_url,
+secondary_button_text, secondary_button_url,
+audience, is_active, starts_at, ends_at.
+
+🖼️ Diseño sugerido:
+
+Fondo con gradiente sutil según tipo (azul, amarillo, rojo, verde).
+
+Ícono a la izquierda (info, alerta, check).
+
+Texto principal al centro.
+
+Botones a la derecha.
+
+Cierre con “X” en el extremo derecho.
+
+⚡ Comportamiento adicional:
+
+Si message contiene mailto: o wa.me, debe convertirlo en enlace clickeable.
+
+Si el banner tiene audience = 'pro', solo mostrarlo si el usuario actual tiene plan PRO (usa user.plan_id o user.plan_name).
+
+Si is_active es false o fecha fuera de rango, no mostrar nada.
+
+🎨 Modo oscuro/claro:
+
+En modo oscuro: degradados más intensos y texto blanco.
+
+En modo claro: degradados suaves y texto oscuro.
+
+📁 Ubicación:
+src/components/ui/GlobalAnnouncement.tsx
+
+🧰 Librerías:
+
+@supabase/supabase-js
+
+lucide-react (íconos)
+
+clsx (para clases condicionales)
+
+✨ Resultado esperado:
+El banner debe lucir moderno, similar al ejemplo que te muestro aquí:
+(color degradado, botones con glow sutil, texto con énfasis)
+
+⚙️ Integración en el layout:
+Colocar <GlobalAnnouncement /> dentro de tu AppLayout o Layout.tsx, justo debajo del header global.
+
+Luego de generar el componente, incluir este hook de ejemplo para su uso:
+
+import GlobalAnnouncement from "@/components/ui/GlobalAnnouncement";
+
+export default function Layout({ children }) {
+  return (
+    <>
+      <GlobalAnnouncement />
+      {children}
+    </>
+  );
+}
