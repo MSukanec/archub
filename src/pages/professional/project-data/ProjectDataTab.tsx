@@ -7,10 +7,12 @@ import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { ImageIcon, FileText, Users, MapPin } from 'lucide-react'
+import { ImageIcon, FileText, Users, MapPin, Palette } from 'lucide-react'
 import ImageUploadAndShowField from '@/components/ui-custom/fields/ImageUploadAndShowField'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
+import ProjectColorAdvanced from '@/components/projects/ProjectColorAdvanced'
+import ProjectColorPalette from '@/components/projects/ProjectColorPalette'
 
 interface ProjectDataTabProps {
   projectId?: string;
@@ -38,6 +40,12 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
   const [country, setCountry] = useState('')
   const [zipCode, setZipCode] = useState('')
   const [projectImageUrl, setProjectImageUrl] = useState<string | null>(null)
+  
+  // Color states
+  const [selectedColor, setSelectedColor] = useState<string>('#84cc16')
+  const [useCustomColor, setUseCustomColor] = useState(false)
+  const [customColorH, setCustomColorH] = useState<number | null>(null)
+  const [customColorHex, setCustomColorHex] = useState<string | null>(null)
 
   // Get project data for BasicData tab
   const { data: projectData } = useQuery({
@@ -81,6 +89,36 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       return data;
     },
     enabled: !!activeProjectId && !!supabase
+  });
+
+  // Mutation to save project color
+  const saveProjectColorMutation = useMutation({
+    mutationFn: async (colorData: { color?: string; use_custom_color?: boolean; custom_color_h?: number | null; custom_color_hex?: string | null }) => {
+      if (!activeProjectId || !supabase) return;
+
+      const { error } = await supabase
+        .from('projects')
+        .update(colorData)
+        .eq('id', activeProjectId);
+
+      if (error) {
+        console.error('Error updating project color:', error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project-info', activeProjectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['project-color', activeProjectId] });
+    },
+    onError: (error: any) => {
+      console.error('Error in saveProjectColorMutation:', error);
+      toast({
+        title: "Error al guardar",
+        description: "No se pudo guardar el color del proyecto",
+        variant: "destructive"
+      });
+    }
   });
 
   // Auto-save mutation for project data
@@ -164,6 +202,10 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
   useEffect(() => {
     if (projectInfo) {
       setProjectName(projectInfo.name || '');
+      setSelectedColor(projectInfo.color || '#84cc16');
+      setUseCustomColor(projectInfo.use_custom_color || false);
+      setCustomColorH(projectInfo.custom_color_h);
+      setCustomColorHex(projectInfo.custom_color_hex);
     }
   }, [projectInfo]);
 
@@ -182,6 +224,38 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       setProjectImageUrl(projectData.project_image_url || null);
     }
   }, [projectData]);
+
+  // Handlers for color changes
+  const handlePaletteColorChange = (color: string) => {
+    setSelectedColor(color);
+    setUseCustomColor(false);
+    setCustomColorH(null);
+    setCustomColorHex(null);
+    
+    saveProjectColorMutation.mutate({
+      color,
+      use_custom_color: false,
+      custom_color_h: null,
+      custom_color_hex: null
+    });
+  };
+
+  const handleCustomColorChange = (params: { useCustom: boolean; hue: number | null; hex: string | null }) => {
+    setUseCustomColor(params.useCustom);
+    setCustomColorH(params.hue);
+    setCustomColorHex(params.hex);
+    
+    if (params.useCustom && params.hex) {
+      setSelectedColor(params.hex);
+    }
+    
+    saveProjectColorMutation.mutate({
+      use_custom_color: params.useCustom,
+      custom_color_h: params.hue,
+      custom_color_hex: params.hex ?? undefined,
+      color: params.useCustom ? (params.hex ?? selectedColor) : selectedColor
+    });
+  };
 
   if (!activeProjectId) {
     return (
@@ -217,6 +291,40 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
               onImageUpdate={setProjectImageUrl}
             />
           )}
+        </div>
+      </div>
+
+      <hr className="border-t border-[var(--section-divider)] my-8" />
+
+      {/* Color Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column - Color del Proyecto */}
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <Palette className="h-5 w-5 text-[var(--accent)]" />
+            <h2 className="text-lg font-semibold">Color del Proyecto</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Define el color que identificará este proyecto en toda la plataforma. Puedes elegir entre nuestra paleta predefinida o crear un color personalizado con el plan PRO.
+          </p>
+        </div>
+
+        {/* Right Column - Color Content */}
+        <div className="space-y-4">
+          <div>
+            <Label className="text-sm font-medium mb-3 block">Paleta de colores</Label>
+            <ProjectColorPalette
+              selectedColor={selectedColor}
+              onColorChange={handlePaletteColorChange}
+              disabled={useCustomColor}
+            />
+          </div>
+          
+          <ProjectColorAdvanced
+            initialHue={customColorH}
+            initialEnabled={useCustomColor}
+            onChange={handleCustomColorChange}
+          />
         </div>
       </div>
 
