@@ -224,16 +224,16 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     if (sidebarLevel === 'organization') {
       if (item.id === 'dashboard') return { show: true, text: 'Gestión' };
       if (item.id === 'analysis') return { show: true, text: 'Finanzas' };
-      if (item.id === 'expenses') return { show: true, text: 'Organización' };
+      if (item.id === 'activity') return { show: true, text: 'Organización' };
     } else if (sidebarLevel === 'project') {
       if (item.id === 'dashboard') return { show: true, text: 'Planificación' };
       if (item.id === 'budgets') return { show: true, text: 'Recursos' };
       if (item.id === 'subcontracts') return { show: true, text: 'Ejecución' };
-      if (item.id === 'logs') return { show: true, text: 'Comercialización' };
+      if (item.id === 'clients') return { show: true, text: 'Comercialización' };
     } else if (sidebarLevel === 'learning') {
       if (item.id === 'dashboard') return { show: true, text: 'Capacitaciones' };
     } else if (sidebarLevel === 'admin') {
-      if (item.id === 'courses') return { show: true, text: 'Administración' };
+      if (item.id === 'community') return { show: true, text: 'Administración' };
     }
     return { show: false, text: '' };
   };
