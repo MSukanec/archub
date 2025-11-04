@@ -27,7 +27,7 @@ interface UserQuickAccessProps {
 }
 
 export function UserQuickAccess({ className }: UserQuickAccessProps) {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [orgSelectorOpen, setOrgSelectorOpen] = useState(false);
   const [projectSelectorOpen, setProjectSelectorOpen] = useState(false);
@@ -42,6 +42,17 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
 
   const currentOrg = organizations.find(o => o.id === currentOrganizationId);
   const currentProject = projectsLite.find(p => p.id === selectedProjectId);
+
+  // Determinar si se deben mostrar los selectores de organización y proyecto
+  // NO mostrar en páginas de capacitaciones ni perfil (en cualquier parte de la ruta)
+  const shouldShowSelectors = (() => {
+    // Ocultar si la ruta contiene '/learning' o '/profile' en cualquier parte
+    if (location.includes('/learning')) return false;
+    if (location.includes('/profile')) return false;
+    
+    // Mostrar en todas las demás rutas
+    return true;
+  })();
 
   // Mutation para cambiar organización activa
   const switchOrganization = useMutation({
@@ -178,132 +189,146 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
               </div>
             </div>
 
-            {/* Contenido del popover - columna vertical */}
-            <div className="p-2">
-              
-              {/* Selector de Organización - Acordeón inline */}
-              <div className="space-y-1">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOrgSelectorOpen(!orgSelectorOpen);
-                    setProjectSelectorOpen(false);
-                  }}
-                  className="w-full px-3 py-2 rounded-md hover:bg-accent/10 transition-colors flex items-center justify-between group"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Building2 className="h-4 w-4 text-accent" />
-                    <div className="flex flex-col items-start">
-                      <span className="text-xs text-muted-foreground font-medium">Organización</span>
-                      <span className="text-sm font-bold text-foreground group-hover:text-accent transition-colors truncate max-w-[180px]">
-                        {currentOrg?.name || 'Seleccionar'}
-                      </span>
-                    </div>
-                  </div>
-                  <ChevronDown className={cn(
-                    "h-4 w-4 text-muted-foreground transition-transform",
-                    orgSelectorOpen && "rotate-180"
-                  )} />
-                </button>
+            {/* Profile Button - SIEMPRE PRIMERO */}
+            <button
+              onClick={handleGoToProfile}
+              className="w-full px-4 py-3 flex items-center gap-2.5 hover:bg-accent/10 transition-colors border-t border-border group"
+              data-testid="button-view-profile"
+            >
+              <User className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors" />
+              <span className="text-sm text-foreground group-hover:text-accent transition-colors">
+                Ver Perfil
+              </span>
+            </button>
 
-                {/* Lista de organizaciones - inline */}
-                <AnimatePresence>
-                  {orgSelectorOpen && (
-                    <motion.div
-                      className="pl-9 pr-2 space-y-0.5 max-h-48 overflow-y-auto"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.2 }}
+            {/* Selectores - CONDICIONALES (no en /learning ni /profile) */}
+            {shouldShowSelectors && (
+              <div className="p-2 border-t border-border">
+                  
+                  {/* Selector de Organización - Acordeón inline */}
+                  <div className="space-y-1">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOrgSelectorOpen(!orgSelectorOpen);
+                        setProjectSelectorOpen(false);
+                      }}
+                      className="w-full px-3 py-2 rounded-md hover:bg-accent/10 transition-colors flex items-center justify-between group"
                     >
-                      {organizations.map((org) => (
-                        <button
-                          key={org.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOrgChange(org.id);
-                          }}
-                          className={cn(
-                            "w-full px-3 py-2 text-left text-sm rounded-md transition-colors",
-                            org.id === currentOrganizationId
-                              ? "bg-accent text-accent-foreground font-medium"
-                              : "hover:bg-accent/10"
-                          )}
-                        >
-                          {org.name}
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Selector de Proyecto - Acordeón inline */}
-              <div className="space-y-1">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setProjectSelectorOpen(!projectSelectorOpen);
-                    setOrgSelectorOpen(false);
-                  }}
-                  className="w-full px-3 py-2 rounded-md hover:bg-accent/10 transition-colors flex items-center justify-between group"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <FolderOpen className="h-4 w-4 text-accent" />
-                    <div className="flex flex-col items-start">
-                      <span className="text-xs text-muted-foreground font-medium">Proyecto activo</span>
-                      <span className="text-sm font-bold text-foreground group-hover:text-accent transition-colors truncate max-w-[180px]">
-                        {currentProject?.name || 'Seleccionar'}
-                      </span>
-                    </div>
-                  </div>
-                  <ChevronDown className={cn(
-                    "h-4 w-4 text-muted-foreground transition-transform",
-                    projectSelectorOpen && "rotate-180"
-                  )} />
-                </button>
-
-                {/* Lista de proyectos - inline */}
-                <AnimatePresence>
-                  {projectSelectorOpen && (
-                    <motion.div
-                      className="pl-9 pr-2 space-y-0.5 max-h-48 overflow-y-auto"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      {projectsLite.length === 0 ? (
-                        <div className="px-3 py-4 text-center">
-                          <p className="text-xs text-muted-foreground">No hay proyectos</p>
+                      <div className="flex items-center gap-2.5">
+                        <Building2 className="h-4 w-4 text-accent" />
+                        <div className="flex flex-col items-start">
+                          <span className="text-xs text-muted-foreground font-medium">Organización</span>
+                          <span className="text-sm font-bold text-foreground group-hover:text-accent transition-colors truncate max-w-[180px]">
+                            {currentOrg?.name || 'Seleccionar'}
+                          </span>
                         </div>
-                      ) : (
-                        projectsLite.map((project) => (
-                          <button
-                            key={project.id}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleProjectChange(project.id);
-                            }}
-                            className={cn(
-                              "w-full px-3 py-2 text-left text-sm rounded-md transition-colors",
-                              project.id === selectedProjectId
-                                ? "bg-accent text-accent-foreground font-medium"
-                                : "hover:bg-accent/10"
-                            )}
-                          >
-                            {project.name}
-                          </button>
-                        ))
+                      </div>
+                      <ChevronDown className={cn(
+                        "h-4 w-4 text-muted-foreground transition-transform",
+                        orgSelectorOpen && "rotate-180"
+                      )} />
+                    </button>
+
+                    {/* Lista de organizaciones - inline */}
+                    <AnimatePresence>
+                      {orgSelectorOpen && (
+                        <motion.div
+                          className="pl-9 pr-2 space-y-0.5 max-h-48 overflow-y-auto"
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {organizations.map((org) => (
+                            <button
+                              key={org.id}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOrgChange(org.id);
+                              }}
+                              className={cn(
+                                "w-full px-3 py-2 text-left text-sm rounded-md transition-colors",
+                                org.id === currentOrganizationId
+                                  ? "bg-accent text-accent-foreground font-medium"
+                                  : "hover:bg-accent/10"
+                              )}
+                            >
+                              {org.name}
+                            </button>
+                          ))}
+                        </motion.div>
                       )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Selector de Proyecto - Acordeón inline */}
+                  <div className="space-y-1">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setProjectSelectorOpen(!projectSelectorOpen);
+                        setOrgSelectorOpen(false);
+                      }}
+                      className="w-full px-3 py-2 rounded-md hover:bg-accent/10 transition-colors flex items-center justify-between group"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <FolderOpen className="h-4 w-4 text-accent" />
+                        <div className="flex flex-col items-start">
+                          <span className="text-xs text-muted-foreground font-medium">Proyecto activo</span>
+                          <span className="text-sm font-bold text-foreground group-hover:text-accent transition-colors truncate max-w-[180px]">
+                            {currentProject?.name || 'Seleccionar'}
+                          </span>
+                        </div>
+                      </div>
+                      <ChevronDown className={cn(
+                        "h-4 w-4 text-muted-foreground transition-transform",
+                        projectSelectorOpen && "rotate-180"
+                      )} />
+                    </button>
+
+                    {/* Lista de proyectos - inline */}
+                    <AnimatePresence>
+                      {projectSelectorOpen && (
+                        <motion.div
+                          className="pl-9 pr-2 space-y-0.5 max-h-48 overflow-y-auto"
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {projectsLite.length === 0 ? (
+                            <div className="px-3 py-4 text-center">
+                              <p className="text-xs text-muted-foreground">No hay proyectos</p>
+                            </div>
+                          ) : (
+                            projectsLite.map((project) => (
+                              <button
+                                key={project.id}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleProjectChange(project.id);
+                                }}
+                                className={cn(
+                                  "w-full px-3 py-2 text-left text-sm rounded-md transition-colors",
+                                  project.id === selectedProjectId
+                                    ? "bg-accent text-accent-foreground font-medium"
+                                    : "hover:bg-accent/10"
+                                )}
+                              >
+                                {project.name}
+                              </button>
+                            ))
+                          )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
               </div>
+            )}
 
-            </div>
-
-            {/* Separator + Plan Info + Profile + Logout */}
+            {/* Separator + Plan Info + Logout */}
             <div className="border-t border-border">
               {/* Plan Information */}
               <div className="px-4 py-3 flex items-center justify-between hover:bg-accent/5 transition-colors">
@@ -321,18 +346,6 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
                   <ArrowUpRight className="h-3 w-3 ml-1" />
                 </Button>
               </div>
-
-              {/* Profile Button */}
-              <button
-                onClick={handleGoToProfile}
-                className="w-full px-4 py-3 flex items-center gap-2.5 hover:bg-accent/10 transition-colors border-t border-border group"
-                data-testid="button-view-profile"
-              >
-                <User className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors" />
-                <span className="text-sm text-foreground group-hover:text-accent transition-colors">
-                  Ver Perfil
-                </span>
-              </button>
 
               {/* Logout Button */}
               <button
