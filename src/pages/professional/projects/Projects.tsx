@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { usePlanFeatures } from '@/hooks/usePlanFeatures'
+import ProjectItem from '@/components/ui-custom/general/ProjectItem'
 
 export default function Projects() {
   const { openModal } = useGlobalModalStore()
@@ -365,6 +366,23 @@ export default function Projects() {
         {/* Tab: Proyectos */}
         {activeTab === 'projects' && (
           <>
+            {/* Projects Grid - Card View */}
+            {sortedProjects.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                {sortedProjects.map((project) => (
+                  <ProjectItem
+                    key={project.id}
+                    project={project}
+                    onClick={() => handleSelectProject(project.id)}
+                    onEdit={() => handleEdit(project)}
+                    isActive={project.is_active}
+                    projectColor={project.use_custom_color && project.custom_color_hex 
+                      ? project.custom_color_hex 
+                      : project.color || 'var(--accent)'}
+                  />
+                ))}
+              </div>
+            )}
 
             {/* Projects Table */}
             {sortedProjects.length > 0 ? (

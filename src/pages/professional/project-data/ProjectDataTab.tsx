@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
@@ -226,7 +226,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
   }, [projectData]);
 
   // Handlers for color changes
-  const handlePaletteColorChange = (color: string) => {
+  const handlePaletteColorChange = useCallback((color: string) => {
     setSelectedColor(color);
     setUseCustomColor(false);
     setCustomColorH(null);
@@ -238,9 +238,9 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       custom_color_h: null,
       custom_color_hex: null
     });
-  };
+  }, [saveProjectColorMutation]);
 
-  const handleCustomColorChange = (params: { useCustom: boolean; hue: number | null; hex: string | null }) => {
+  const handleCustomColorChange = useCallback((params: { useCustom: boolean; hue: number | null; hex: string | null }) => {
     setUseCustomColor(params.useCustom);
     setCustomColorH(params.hue);
     setCustomColorHex(params.hex);
@@ -253,9 +253,9 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       use_custom_color: params.useCustom,
       custom_color_h: params.hue,
       custom_color_hex: params.hex ?? undefined,
-      color: params.useCustom ? (params.hex ?? selectedColor) : selectedColor
+      color: params.useCustom ? (params.hex ?? '#84cc16') : '#84cc16'
     });
-  };
+  }, [saveProjectColorMutation]);
 
   if (!activeProjectId) {
     return (
