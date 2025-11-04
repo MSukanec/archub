@@ -27,7 +27,7 @@ export default function ProjectColorAdvanced({
   const currentOrganization = userData?.organizations?.find(
     (org) => org.id === organizationId
   );
-  const planCode = currentOrganization?.plan || 'free';
+  const planCode = currentOrganization?.plan?.name || 'free';
   const isPro = isProOrTeams(planCode);
 
   // State

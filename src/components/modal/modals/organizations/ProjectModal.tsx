@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import ProjectColorAdvanced from "@/components/projects/ProjectColorAdvanced";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
@@ -53,6 +54,9 @@ const createProjectSchema = z.object({
   modality_id: z.string().optional(),
   status: z.enum(["active", "inactive", "completed", "paused"]).default("active"),
   color: z.string().optional(),
+  use_custom_color: z.boolean().default(false),
+  custom_color_h: z.number().min(0).max(360).nullable().optional(),
+  custom_color_hex: z.string().nullable().optional(),
 });
 
 type CreateProjectForm = z.infer<typeof createProjectSchema>;
@@ -65,6 +69,9 @@ interface Project {
   created_by: string;
   organization_id: string;
   color?: string;
+  use_custom_color?: boolean;
+  custom_color_h?: number | null;
+  custom_color_hex?: string | null;
   project_data?: {
     project_type_id?: string;
     modality_id?: string;
@@ -112,6 +119,9 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       modality_id: editingProject?.project_data?.modality_id || "",
       status: (editingProject?.status as "active" | "inactive" | "completed" | "paused") || "active",
       color: editingProject?.color || "#84cc16",
+      use_custom_color: editingProject?.use_custom_color || false,
+      custom_color_h: editingProject?.custom_color_h || null,
+      custom_color_hex: editingProject?.custom_color_hex || null,
     }
   });
 
@@ -124,6 +134,9 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
         modality_id: editingProject.project_data?.modality_id || "",
         status: editingProject.status as "active" | "inactive" | "completed" | "paused",
         color: editingProject.color || "#84cc16",
+        use_custom_color: editingProject.use_custom_color || false,
+        custom_color_h: editingProject.custom_color_h || null,
+        custom_color_hex: editingProject.custom_color_hex || null,
       });
     } else {
       form.reset({
@@ -132,6 +145,9 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
         modality_id: "",
         status: "active",
         color: "#84cc16",
+        use_custom_color: false,
+        custom_color_h: null,
+        custom_color_hex: null,
       });
     }
     // Siempre establecer en modo edit
@@ -156,6 +172,9 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
             name: data.name,
             status: data.status,
             color: data.color || "#84cc16",
+            use_custom_color: data.use_custom_color || false,
+            custom_color_h: data.custom_color_h || null,
+            custom_color_hex: data.custom_color_hex || null,
           })
           .eq('id', editingProject.id);
 
@@ -205,6 +224,9 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
             created_at: new Date().toISOString(), // Automático
             is_active: true,
             color: data.color || "#84cc16",
+            use_custom_color: data.use_custom_color || false,
+            custom_color_h: data.custom_color_h || null,
+            custom_color_hex: data.custom_color_hex || null,
           }, {
             onConflict: 'id'
           })
@@ -479,13 +501,19 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
                       <button
                         key={colorOption.hex}
                         type="button"
-                        onClick={() => field.onChange(colorOption.hex)}
+                        onClick={() => {
+                          field.onChange(colorOption.hex);
+                          // Deseleccionar custom color al elegir preset
+                          form.setValue('use_custom_color', false);
+                          form.setValue('custom_color_h', null);
+                          form.setValue('custom_color_hex', null);
+                        }}
                         className="relative w-10 h-10 rounded-full transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
                         style={{ backgroundColor: colorOption.hex }}
                         title={colorOption.name}
                         data-testid={`color-option-${colorOption.name.toLowerCase()}`}
                       >
-                        {field.value === colorOption.hex && (
+                        {field.value === colorOption.hex && !form.watch('use_custom_color') && (
                           <div className="absolute inset-0 flex items-center justify-center">
                             <Check className="w-5 h-5 text-white drop-shadow-md" strokeWidth={3} />
                           </div>
@@ -495,22 +523,40 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
                   </div>
                   
                   {/* Vista previa */}
-                  <div className="flex items-center gap-3 pt-2 border-t border-border">
-                    <span className="text-sm text-muted-foreground">Vista previa:</span>
-                    <Badge 
-                      style={{ 
-                        backgroundColor: field.value || '#84cc16',
-                        color: getTextColor(field.value || '#84cc16')
-                      }}
-                      data-testid="color-preview-badge"
-                    >
-                      {PRESET_COLORS.find(c => c.hex === field.value)?.name || 'Personalizado'}
-                    </Badge>
-                  </div>
+                  {!form.watch('use_custom_color') && (
+                    <div className="flex items-center gap-3 pt-2 border-t border-border">
+                      <span className="text-sm text-muted-foreground">Vista previa:</span>
+                      <Badge 
+                        style={{ 
+                          backgroundColor: field.value || '#84cc16',
+                          color: getTextColor(field.value || '#84cc16')
+                        }}
+                        data-testid="color-preview-badge"
+                      >
+                        {PRESET_COLORS.find(c => c.hex === field.value)?.name || 'Personalizado'}
+                      </Badge>
+                    </div>
+                  )}
                 </div>
                 <FormMessage />
               </FormItem>
             )}
+          />
+
+          {/* Color personalizado (PRO/TEAMS) */}
+          <ProjectColorAdvanced
+            initialHue={form.watch('custom_color_h') ?? undefined}
+            initialEnabled={form.watch('use_custom_color')}
+            onChange={({ useCustom, hue, hex }) => {
+              form.setValue('use_custom_color', useCustom);
+              form.setValue('custom_color_h', hue);
+              form.setValue('custom_color_hex', hex);
+              
+              // Si se activa custom, deseleccionar preset
+              if (useCustom) {
+                form.setValue('color', null);
+              }
+            }}
           />
         </div>
       </form>
