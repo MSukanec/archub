@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useProjectContext } from '@/stores/projectContext'
+import { useNavigationStore } from '@/stores/navigationStore'
 import { useLocation } from 'wouter'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
@@ -25,6 +26,7 @@ export default function ProjectList() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setSelectedProject } = useProjectContext()
+  const { setSidebarLevel } = useNavigationStore()
   const [, navigate] = useLocation()
 
   // Filter states
@@ -98,6 +100,7 @@ export default function ProjectList() {
     },
     onSuccess: (projectId) => {
       setSelectedProject(projectId, organizationId);
+      setSidebarLevel('project');
       
       queryClient.invalidateQueries({ 
         queryKey: ['user-organization-preferences', userData?.user?.id, organizationId] 

@@ -255,30 +255,9 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       }
     },
     onSuccess: async (newProject) => {
-      // Si estamos creando un nuevo proyecto (no editando), establecerlo como activo
+      // Si estamos creando un nuevo proyecto (no editando), solo marcamos el checklist
       if (!isEditing && newProject && userData?.user?.id && organizationId) {
         try {
-          // Usar upsert para crear o actualizar las preferencias de organización del usuario
-          const { error: preferencesError } = await supabase
-            .from('user_organization_preferences')
-            .upsert({
-              user_id: userData.user.id,
-              organization_id: organizationId,
-              last_project_id: newProject.id
-            }, {
-              onConflict: 'user_id,organization_id'
-            });
-          
-          if (preferencesError) {
-            console.error('Error setting project as active:', preferencesError);
-          } else {
-            // 2. Cambiar sidebar a estado proyecto
-            setSidebarLevel('project');
-            
-            // 3. Actualizar contexto de proyecto para que se actualice el sidebar
-            setSelectedProject(newProject.id, organizationId);
-          }
-
           // Marcar checklist de "crear primer proyecto" como completado
           const { error: checklistError } = await supabase.rpc('tick_home_checklist', {
             p_key: 'create_project',
@@ -289,7 +268,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
             console.error('Error updating home checklist:', checklistError);
           }
         } catch (error) {
-          console.error('Error updating user organization preferences:', error);
+          console.error('Error updating checklist:', error);
         }
       }
 
@@ -300,18 +279,15 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       queryClient.invalidateQueries({ queryKey: ['user-data'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['current-user'], exact: false });
-      queryClient.invalidateQueries({ queryKey: ['project-color'], exact: false }); // Invalidate color to update accent
       
       toast({
         title: isEditing ? "Proyecto actualizado" : "Proyecto creado",
         description: isEditing 
           ? "El proyecto ha sido actualizado exitosamente" 
-          : "El nuevo proyecto ha sido creado y establecido como activo",
+          : "El nuevo proyecto ha sido creado exitosamente",
       });
       
       handleClose();
-      
-      // Modified: Stay on the same page after creating a project instead of navigating
     },
     onError: (error: any) => {
       toast({
