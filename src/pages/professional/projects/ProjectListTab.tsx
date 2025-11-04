@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useProjectContext } from '@/stores/projectContext'
+import { useNavigationStore } from '@/stores/navigationStore'
 import { useLocation } from 'wouter'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
@@ -23,6 +24,7 @@ export default function ProjectList() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setSelectedProject } = useProjectContext()
+  const { setSidebarContext } = useNavigationStore()
   const [, navigate] = useLocation()
 
   // Filter states
@@ -102,6 +104,7 @@ export default function ProjectList() {
       });
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       
+      setSidebarContext('project');
       navigate('/project/dashboard');
       
       toast({
