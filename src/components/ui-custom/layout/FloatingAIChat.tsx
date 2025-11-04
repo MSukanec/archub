@@ -18,6 +18,7 @@ export function FloatingAIChat() {
   const userId = userData?.user?.id;
   const [isOpen, setIsOpen] = useState(false);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Estados del chat
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -25,6 +26,13 @@ export function FloatingAIChat() {
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const hasLoadedHistoryRef = useRef(false);
+
+  // Auto-scroll al final cuando cambian los mensajes
+  useEffect(() => {
+    if (messagesEndRef.current && chatMessages.length > 0) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chatMessages, isSendingMessage]);
 
   // Cargar historial de mensajes
   useEffect(() => {
@@ -155,8 +163,8 @@ export function FloatingAIChat() {
           "relative h-14 w-14 rounded-full",
           "bg-accent text-accent-foreground",
           "flex items-center justify-center",
-          "transition-all duration-300",
-          "hover:scale-110",
+          "transition-all duration-500",
+          "hover:scale-105",
           "animate-breathe",
           "shadow-glow"
         )}
@@ -165,7 +173,7 @@ export function FloatingAIChat() {
         <Sparkles className="h-6 w-6" />
         
         {/* Pulso de resplandor animado */}
-        <span className="absolute inset-0 rounded-full bg-accent opacity-75 animate-ping-slow" />
+        <span className="absolute inset-0 rounded-full bg-accent opacity-40 animate-ping-slow" />
       </button>
 
       {/* Popover de chat */}
@@ -208,8 +216,8 @@ export function FloatingAIChat() {
                 </div>
               ) : (
                 <>
-                  {/* Mostrar mensajes más recientes arriba */}
-                  {[...chatMessages].reverse().map((msg, index) => (
+                  {/* Mostrar mensajes en orden cronológico (más antiguos arriba, más recientes abajo) */}
+                  {chatMessages.map((msg, index) => (
                     <div
                       key={index}
                       className={cn(
@@ -235,20 +243,23 @@ export function FloatingAIChat() {
                       </div>
                     </div>
                   ))}
-                </>
-              )}
-
-              {/* Indicador de carga */}
-              {isSendingMessage && (
-                <div className="flex justify-start">
-                  <div className="bg-muted border border-border rounded-2xl px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                      <div className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                      <div className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  
+                  {/* Indicador de carga */}
+                  {isSendingMessage && (
+                    <div className="flex justify-start">
+                      <div className="bg-muted border border-border rounded-2xl px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                          <div className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                          <div className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  )}
+
+                  {/* Elemento invisible para hacer scroll */}
+                  <div ref={messagesEndRef} />
+                </>
               )}
             </div>
 
@@ -274,34 +285,34 @@ export function FloatingAIChat() {
         @keyframes breathe {
           0%, 100% {
             transform: scale(1);
-            box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.4), 
-                        0 0 40px rgba(var(--accent-rgb), 0.2);
+            box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.2), 
+                        0 0 25px rgba(var(--accent-rgb), 0.1);
           }
           50% {
-            transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.6), 
-                        0 0 60px rgba(var(--accent-rgb), 0.3);
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.3), 
+                        0 0 35px rgba(var(--accent-rgb), 0.15);
           }
         }
 
         @keyframes ping-slow {
           75%, 100% {
-            transform: scale(2);
+            transform: scale(1.8);
             opacity: 0;
           }
         }
 
         .animate-breathe {
-          animation: breathe 3s ease-in-out infinite;
+          animation: breathe 4.5s ease-in-out infinite;
         }
 
         .animate-ping-slow {
-          animation: ping-slow 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+          animation: ping-slow 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
 
         .shadow-glow {
-          box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.4), 
-                      0 0 40px rgba(var(--accent-rgb), 0.2);
+          box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.2), 
+                      0 0 25px rgba(var(--accent-rgb), 0.1);
         }
       `}</style>
     </div>
