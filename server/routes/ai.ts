@@ -124,12 +124,41 @@ async function checkAndIncrementUsageLimit(
 export function registerAIRoutes(app: Express, deps: RouteDeps) {
   const { supabase, createAuthenticatedClient, extractToken } = deps;
 
-  // Helper: Determinar period según hora actual (5-13: morning, 13-19: afternoon, 19-5: evening)
+  // Helper: Obtener fecha/hora en zona horaria de Argentina (GMT-3)
+  function getArgentinaDate(): Date {
+    // Crear fecha en UTC y ajustar a Argentina (GMT-3)
+    const now = new Date();
+    const argentinaOffset = -3 * 60; // -3 horas en minutos
+    const localOffset = now.getTimezoneOffset(); // offset del servidor en minutos
+    const totalOffset = argentinaOffset - localOffset;
+    return new Date(now.getTime() + totalOffset * 60 * 1000);
+  }
+
+  // Helper: Determinar period según hora actual en Argentina (5-13: morning, 13-19: afternoon, 19-5: evening)
   function getCurrentPeriod(): 'morning' | 'afternoon' | 'evening' {
-    const hour = new Date().getHours();
+    const argentinaDate = getArgentinaDate();
+    const hour = argentinaDate.getHours();
     if (hour >= 5 && hour < 13) return 'morning';
     if (hour >= 13 && hour < 19) return 'afternoon';
     return 'evening';
+  }
+
+  // Helper: Verificar si dos fechas son del mismo día en Argentina
+  function isSameDayInArgentina(date1: Date, date2: Date): boolean {
+    const d1 = new Date(date1.getTime());
+    const d2 = new Date(date2.getTime());
+    
+    // Convertir ambas a Argentina y comparar solo la fecha
+    const arg1 = getArgentinaDate();
+    arg1.setTime(d1.getTime());
+    const arg2 = getArgentinaDate();
+    arg2.setTime(d2.getTime());
+    
+    return (
+      arg1.getFullYear() === arg2.getFullYear() &&
+      arg1.getMonth() === arg2.getMonth() &&
+      arg1.getDate() === arg2.getDate()
+    );
   }
 
   // GET /api/ai/home_greeting - AI-powered home greeting with suggestions (cached by period)
@@ -171,8 +200,11 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
       // ========================================
       // 0. VERIFICAR CACHÉ DE SALUDO POR PERIOD
       // ========================================
+      // IMPORTANTE: Los saludos NO consumen créditos del usuario.
+      // Se cachean por periodo (morning/afternoon/evening) para un máximo de 3 saludos/día.
       
       const currentPeriod = getCurrentPeriod();
+      const nowArgentina = getArgentinaDate();
       
       const { data: cachedGreeting } = await authenticatedSupabase
         .from('ia_user_greetings')
@@ -181,25 +213,15 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
         .eq('period', currentPeriod)
         .maybeSingle();
       
-      // Verificar que el caché sea de hoy (comparar solo fecha, no hora)
+      // Verificar que el caché sea de hoy en Argentina (comparar solo fecha, no hora)
       const isCacheValid = cachedGreeting && 
-        new Date(cachedGreeting.created_at).toDateString() === new Date().toDateString();
+        isSameDayInArgentina(new Date(cachedGreeting.created_at), nowArgentina);
       
       let greetingText: string | null = isCacheValid ? cachedGreeting.greeting : null;
       let shouldGenerateWithGPT = !greetingText;
 
-      // Si NO hay caché, verificar límites de uso
-      if (shouldGenerateWithGPT) {
-        const limitCheck = await checkAndIncrementUsageLimit(userId, authenticatedSupabase);
-        
-        if (!limitCheck.allowed) {
-          return res.status(429).json({ 
-            error: limitCheck.message,
-            limitReached: true,
-            remainingPrompts: 0
-          });
-        }
-      }
+      // NOTA: Los saludos NO verifican límites de uso - tienen su propio sistema de caché
+      // Los límites solo aplican a los mensajes de chat del usuario
 
       // ========================================
       // 1. OBTENER DATOS DEL USUARIO
@@ -312,11 +334,14 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
       // 3. CONSTRUIR CONTEXTO PARA GPT
       // ========================================
       
-      const today = new Date().toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', {
+      // Usar fecha en zona horaria de Argentina para el contexto
+      const argentinaDate = getArgentinaDate();
+      const today = argentinaDate.toLocaleDateString(language === 'es' ? 'es-AR' : 'en-US', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
+        timeZone: 'America/Argentina/Buenos_Aires'
       });
 
       let contextString = `Hoy es ${today}. El usuario se llama ${displayName}.`;
