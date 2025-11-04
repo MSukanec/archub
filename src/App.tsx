@@ -90,6 +90,9 @@ import Notifications from "@/pages/Notifications";
 // Home
 import Home from "@/pages/Home";
 
+// Pricing
+import PricingPlan from "@/pages/PricingPlan";
+
 
 
 
@@ -126,6 +129,9 @@ function Router() {
 
         {/* Home - Main landing page after onboarding */}
         <Route path="/home" component={Home} />
+
+        {/* Pricing - Plans and pricing page */}
+        <Route path="/pricing" component={PricingPlan} />
 
         {/* Main Dashboard - Independent dashboard */}
         <Route path="/dashboard" component={OrganizationDashboard} />
