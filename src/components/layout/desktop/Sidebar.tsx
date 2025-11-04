@@ -860,18 +860,17 @@ export function Sidebar() {
               variant="secondary"
             />
 
-            {/* Notificaciones */}
-            <NotificationBell isExpanded={isExpanded} />
+            {/* Notificaciones - Ahora está en el header */}
+            {/* <NotificationBell isExpanded={isExpanded} /> */}
 
-            {/* Avatar del Usuario */}
-            <button
+            {/* Avatar del Usuario - Ahora está en el header */}
+            {/* <button
               className={cn(
                 "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
                 isExpanded ? "w-full" : "w-8"
               )}
               onClick={() => navigate('/profile')}
             >
-              {/* Avatar siempre centrado */}
               <div className="flex items-center justify-center w-8 flex-shrink-0">
                 <Avatar className="h-8 w-8 flex-shrink-0 ring-0 border-0">
                   <AvatarFallback className="bg-[var(--accent)] text-white text-sm font-semibold border-0">
@@ -880,7 +879,6 @@ export function Sidebar() {
                 </Avatar>
               </div>
               
-              {/* Texto que aparece cuando se expande */}
               {isExpanded && (
                 <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
                   <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
@@ -891,7 +889,7 @@ export function Sidebar() {
                   </span>
                 </div>
               )}
-            </button>
+            </button> */}
           </div>
 
         </aside>

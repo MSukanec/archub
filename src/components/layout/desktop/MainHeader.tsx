@@ -4,6 +4,7 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import { ProjectSelectorButton } from "./ProjectSelectorButton";
 import { OrganizationSelectorButton } from "./OrganizationSelectorButton";
 import { UserQuickAccess } from "@/components/ui-custom/layout/UserQuickAccess";
+import { NotificationBellHeader } from "@/components/notifications/NotificationBellHeader";
 
 interface MainHeaderProps {
   icon?: React.ComponentType<any>;
@@ -17,13 +18,13 @@ export function MainHeader({ icon, title }: MainHeaderProps) {
   const PageIcon = icon || Home;
   const currentPageName = title || 'Página';
   
-  // Determinar qué selector mostrar según el contexto
-  let selectorComponent: React.ReactNode = null;
+  // Determinar qué selector mostrar según el contexto - COMENTADO, ahora usamos UserQuickAccess
+  /* let selectorComponent: React.ReactNode = null;
   if (sidebarLevel === 'project') {
     selectorComponent = <ProjectSelectorButton />;
   } else if (sidebarLevel === 'organization') {
     selectorComponent = <OrganizationSelectorButton />;
-  }
+  } */
 
   return (
     <div 
@@ -42,9 +43,10 @@ export function MainHeader({ icon, title }: MainHeaderProps) {
           </h1>
         </div>
 
-        {/* Right side: Selector + User Quick Access */}
+        {/* Right side: Notifications + User Quick Access */}
         <div className="flex items-center gap-3">
-          {selectorComponent}
+          {/* {selectorComponent} */}
+          <NotificationBellHeader />
           <UserQuickAccess />
         </div>
       </div>

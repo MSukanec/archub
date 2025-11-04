@@ -63,8 +63,8 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
     >
       {/* Avatar - siempre visible */}
       <div className="cursor-pointer">
-        <Avatar className="h-8 w-8 hover:opacity-80 transition-opacity">
-          <AvatarFallback className="bg-accent text-accent-foreground text-sm font-bold">
+        <Avatar className="h-8 w-8 hover:opacity-80 transition-opacity ring-0 border-0">
+          <AvatarFallback className="bg-accent text-accent-foreground text-sm font-bold ring-0 border-0">
             {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
           </AvatarFallback>
         </Avatar>
