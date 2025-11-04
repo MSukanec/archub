@@ -24,6 +24,7 @@ import { ProjectSelectorButton } from "./ProjectSelectorButton";
 import { OrganizationSelectorButton } from "./OrganizationSelectorButton";
 import { useProjectAccentColor } from "@/hooks/use-project-accent-color";
 import { FloatingAIChat } from "@/components/ui-custom/layout/FloatingAIChat";
+import { useLocation } from "wouter";
 
 interface Tab {
   id: string;
@@ -85,9 +86,39 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { isDocked, isHovered } = useSidebarStore();
   const { sidebarLevel } = useNavigationStore();
   const { isVisible: isCourseSidebarVisible, modules, lessons, currentLessonId } = useCourseSidebarStore();
+  const [location] = useLocation();
 
   // Hook para color dinámico del accent basado en el proyecto activo
   useProjectAccentColor();
+  
+  // Determinar si debería mostrarse el FloatingAIChat
+  // SOLO en rutas de trabajo (organización/proyectos) - ALLOWLIST approach
+  const shouldShowAIChat = !isMobile && (() => {
+    // Rutas de trabajo donde SÍ debería aparecer (allowlist completo basado en App.tsx)
+    const workRoutes = [
+      '/dashboard',           // Organization Dashboard
+      '/organization',        // Organization routes
+      '/contacts',            // Contacts
+      '/notifications',       // Notifications
+      '/finances',            // Finances
+      '/calendar',            // Calendar
+      '/projects',            // Projects list
+      '/project',             // Project details/data
+      '/clients',             // Clients
+      '/media',               // Media
+      '/budgets',             // Budgets
+      '/professional',        // Professional routes
+      '/construction',        // Construction module
+      '/analysis',            // Analysis
+      '/movements',           // Movements
+      '/admin',               // Admin panel
+      '/providers',           // Providers (English)
+      '/proveedor'            // Providers (Spanish)
+    ];
+    
+    // Verificar si la ruta actual coincide con alguna ruta de trabajo
+    return workRoutes.some(route => location.startsWith(route));
+  })();
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
@@ -219,8 +250,8 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           </div>
           </div>
 
-          {/* Floating AI Chat - Solo en Desktop */}
-          <FloatingAIChat />
+          {/* Floating AI Chat - Solo en Desktop y rutas de trabajo */}
+          {shouldShowAIChat && <FloatingAIChat />}
         </div>
       )}
 
