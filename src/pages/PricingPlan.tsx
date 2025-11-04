@@ -18,10 +18,12 @@ interface Plan {
 }
 
 type BillingPeriod = 'monthly' | 'annual';
+type SelectedPlan = 'free' | 'pro' | 'teams';
 
 export default function PricingPlan() {
   const { setSidebarLevel } = useNavigationStore();
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('annual');
+  const [selectedPlanForComparison, setSelectedPlanForComparison] = useState<SelectedPlan>('pro');
   const [plans, setPlans] = useState<Plan[]>([]);
   const [enterprisePlan, setEnterprisePlan] = useState<Plan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -77,6 +79,7 @@ export default function PricingPlan() {
   const getPlanConfig = (planName: string) => {
     const configs: Record<string, { 
       iconColor: string;
+      bgColor: string;
       cardHeader: string;
       description: string;
       features: string[];
@@ -84,6 +87,7 @@ export default function PricingPlan() {
     }> = {
       'free': {
         iconColor: '#84cc16',
+        bgColor: 'rgba(132, 204, 22, 0.08)',
         cardHeader: 'Perfecto para comenzar',
         description: 'Para profesionales individuales y equipos pequeños',
         features: [
@@ -103,6 +107,7 @@ export default function PricingPlan() {
       },
       'pro': {
         iconColor: '#0047AB',
+        bgColor: 'rgba(0, 71, 171, 0.08)',
         cardHeader: 'Para profesionales avanzados',
         description: 'Para equipos que necesitan funciones avanzadas',
         features: [
@@ -125,6 +130,7 @@ export default function PricingPlan() {
       },
       'teams': {
         iconColor: '#8B5CF6',
+        bgColor: 'rgba(139, 92, 246, 0.08)',
         cardHeader: 'Para equipos colaborativos',
         description: 'Para organizaciones con múltiples usuarios',
         features: [
@@ -147,6 +153,7 @@ export default function PricingPlan() {
       },
       'enterprise': {
         iconColor: '#64748b',
+        bgColor: 'rgba(100, 116, 139, 0.08)',
         cardHeader: 'Solución personalizada',
         description: 'Para grandes organizaciones con necesidades específicas',
         features: [
@@ -180,11 +187,73 @@ export default function PricingPlan() {
     );
   }
 
+  const comparisonData = [
+    {
+      category: 'Gestión de Proyectos',
+      rows: [
+        { label: 'Número de proyectos', free: '3', pro: '50', teams: 'Ilimitados' },
+        { label: 'Dashboard de proyecto', free: true, pro: true, teams: true },
+        { label: 'Vistas Gantt y Kanban', free: 'Básicas', pro: 'Avanzadas', teams: 'Avanzadas' },
+        { label: 'Reportes de progreso', free: 'Básicos', pro: 'Avanzados', teams: 'Avanzados + IA' }
+      ]
+    },
+    {
+      category: 'Gestión Financiera',
+      rows: [
+        { label: 'Presupuestos', free: true, pro: true, teams: true },
+        { label: 'Multi-moneda (ARS, USD)', free: false, pro: true, teams: true },
+        { label: 'Control de gastos', free: 'Básico', pro: 'Avanzado', teams: 'Avanzado' },
+        { label: 'Análisis de rentabilidad', free: false, pro: true, teams: true },
+        { label: 'Integraciones de pago', free: false, pro: true, teams: true }
+      ]
+    },
+    {
+      category: 'Construcción',
+      rows: [
+        { label: 'Subcontratos', free: 'Básico', pro: 'Avanzado', teams: 'Avanzado' },
+        { label: 'Personal', free: 'Hasta 10', pro: 'Hasta 100', teams: 'Ilimitado' },
+        { label: 'Bitácora de obra', free: true, pro: true, teams: true }
+      ]
+    },
+    {
+      category: 'Almacenamiento',
+      rows: [
+        { label: 'Espacio de archivos', free: '500 MB', pro: '50 GB', teams: '500 GB' },
+        { label: 'PDFs personalizables', free: false, pro: true, teams: true },
+        { label: 'Backup automático', free: 'Semanal', pro: 'Diario', teams: 'Cada 6hs' }
+      ]
+    },
+    {
+      category: 'Inteligencia Artificial',
+      rows: [
+        { label: 'Tokens IA/mes', free: 'Resúmenes', pro: '10,000', teams: 'Ilimitados' },
+        { label: 'Asistente conversacional', free: false, pro: true, teams: true },
+        { label: 'Análisis financiero IA', free: false, pro: true, teams: true }
+      ]
+    },
+    {
+      category: 'Colaboración',
+      rows: [
+        { label: 'Usuarios', free: '1', pro: '1', teams: 'Ilimitados' },
+        { label: 'Roles y permisos', free: false, pro: false, teams: true },
+        { label: 'Colaboración en tiempo real', free: false, pro: false, teams: true }
+      ]
+    },
+    {
+      category: 'Soporte',
+      rows: [
+        { label: 'Email', free: true, pro: true, teams: true },
+        { label: 'Prioritario', free: false, pro: true, teams: true },
+        { label: '24/7', free: false, pro: false, teams: true }
+      ]
+    }
+  ];
+
   return (
     <Layout headerProps={headerProps}>
       <div className="max-w-7xl mx-auto space-y-16 py-12 px-4">
         
-        {/* Banner Fundador - Con lista completa */}
+        {/* Banner Fundador */}
         <Card className="border border-accent/20 bg-gradient-to-r from-background via-accent/[0.03] to-background">
           <div className="p-6 flex items-start gap-4">
             <div className="p-2.5 bg-accent/10 rounded-lg flex-shrink-0">
@@ -261,7 +330,7 @@ export default function PricingPlan() {
           </div>
         </div>
 
-        {/* Cards de Planes - EXACTAMENTE como referencia */}
+        {/* Cards de Planes */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {plans.map((plan) => {
             const config = getPlanConfig(plan.name);
@@ -275,7 +344,7 @@ export default function PricingPlan() {
                 className={cn(
                   "relative rounded-2xl overflow-hidden transition-all duration-300",
                   isPopular 
-                    ? "bg-[#1a1a1a] dark:bg-[#1a1a1a] text-white scale-105 shadow-2xl" 
+                    ? "bg-[#1a1a1a] dark:bg-[#1a1a1a] scale-105 shadow-2xl" 
                     : "bg-card border border-[var(--border-default)] hover:shadow-lg"
                 )}
               >
@@ -419,12 +488,11 @@ export default function PricingPlan() {
           })}
         </div>
 
-        {/* Enterprise Plan - Card horizontal completa */}
+        {/* Enterprise Plan */}
         {enterprisePlan && (
           <div className="max-w-6xl mx-auto">
             <Card className="border border-[var(--border-default)] overflow-hidden">
               <div className="p-8 flex flex-col md:flex-row items-center gap-8">
-                {/* Lado izquierdo */}
                 <div className="flex-1 space-y-4">
                   <div className="text-xs text-[var(--text-muted)]">
                     {getPlanConfig('enterprise').cardHeader}
@@ -451,7 +519,6 @@ export default function PricingPlan() {
                   </div>
                 </div>
                 
-                {/* Lado derecho */}
                 <div className="flex flex-col items-center gap-4 md:items-end">
                   <div className="text-center md:text-right">
                     <div className="text-3xl font-bold text-[var(--text-default)]">
@@ -474,119 +541,153 @@ export default function PricingPlan() {
           </div>
         )}
 
-        {/* Tabla de Comparación - Con bordes y backgrounds */}
+        {/* Tabla de Comparación - Estilo Referencia */}
         <div className="mt-20 px-4">
           <h2 className="text-3xl font-bold text-center mb-12 text-[var(--text-default)]">
             Comparación Detallada
           </h2>
           
-          <div className="max-w-5xl mx-auto bg-card border border-[var(--border-default)] rounded-xl overflow-hidden">
-            {/* Header */}
-            <div className="grid grid-cols-4 gap-0 bg-[var(--accent)]/5 border-b border-[var(--border-default)]">
-              <div className="p-4 text-sm font-bold text-[var(--text-default)] uppercase tracking-wide border-r border-[var(--border-default)]">
-                Característica
-              </div>
-              <div className="p-4 text-center text-sm font-bold text-[var(--text-default)] border-r border-[var(--border-default)]">
-                Free
-              </div>
-              <div className="p-4 text-center text-sm font-bold text-[var(--text-default)] border-r border-[var(--border-default)]">
-                Pro
-              </div>
-              <div className="p-4 text-center text-sm font-bold text-[var(--text-default)]">
-                Teams
+          {/* Selector Mobile */}
+          <div className="md:hidden mb-6 flex justify-center">
+            <div className="inline-flex bg-card rounded-lg p-1 border border-[var(--border-default)]">
+              {(['free', 'pro', 'teams'] as SelectedPlan[]).map((planKey) => (
+                <button
+                  key={planKey}
+                  onClick={() => setSelectedPlanForComparison(planKey)}
+                  className={cn(
+                    "px-6 py-2 rounded-md text-sm font-medium transition-all capitalize",
+                    selectedPlanForComparison === planKey
+                      ? "bg-accent text-accent-foreground"
+                      : "text-[var(--text-muted)]"
+                  )}
+                  data-testid={`tab-comparison-${planKey}`}
+                >
+                  {planKey}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="max-w-6xl mx-auto overflow-x-auto">
+            {/* Desktop: 4 columnas */}
+            <div className="hidden md:block">
+              <div className="grid grid-cols-4 gap-0">
+                {/* Header */}
+                <div className="bg-background p-4 border-b border-r border-[var(--border-default)]">
+                  <div className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wide">
+                    Característica
+                  </div>
+                </div>
+                <div 
+                  className="p-4 text-center border-b border-r border-[var(--border-default)]"
+                  style={{ backgroundColor: getPlanConfig('free').bgColor }}
+                >
+                  <div className="text-sm font-bold text-[var(--text-default)]">Free</div>
+                </div>
+                <div 
+                  className="p-4 text-center border-b border-r border-[var(--border-default)]"
+                  style={{ backgroundColor: getPlanConfig('pro').bgColor }}
+                >
+                  <div className="text-sm font-bold text-[var(--text-default)]">Pro</div>
+                </div>
+                <div 
+                  className="p-4 text-center border-b border-[var(--border-default)]"
+                  style={{ backgroundColor: getPlanConfig('teams').bgColor }}
+                >
+                  <div className="text-sm font-bold text-[var(--text-default)]">Teams</div>
+                </div>
+
+                {/* Rows */}
+                {comparisonData.map((section, sectionIdx) => (
+                  <div key={sectionIdx} className="col-span-4 contents">
+                    {/* Category Header */}
+                    <div className="col-span-4 bg-[var(--accent)]/5 p-3 border-b border-[var(--border-default)]">
+                      <h3 className="text-xs font-bold text-[var(--text-default)] uppercase tracking-wider">
+                        {section.category}
+                      </h3>
+                    </div>
+                    
+                    {/* Category Rows */}
+                    {section.rows.map((row, rowIdx) => (
+                      <div key={rowIdx} className="contents">
+                        <div className="bg-background p-4 text-sm font-medium text-[var(--text-default)] border-b border-r border-[var(--border-default)]">
+                          {row.label}
+                        </div>
+                        <div 
+                          className="p-4 flex justify-center items-center border-b border-r border-[var(--border-default)]"
+                          style={{ backgroundColor: getPlanConfig('free').bgColor }}
+                        >
+                          {renderValue(row.free)}
+                        </div>
+                        <div 
+                          className="p-4 flex justify-center items-center border-b border-r border-[var(--border-default)]"
+                          style={{ backgroundColor: getPlanConfig('pro').bgColor }}
+                        >
+                          {renderValue(row.pro)}
+                        </div>
+                        <div 
+                          className="p-4 flex justify-center items-center border-b border-[var(--border-default)]"
+                          style={{ backgroundColor: getPlanConfig('teams').bgColor }}
+                        >
+                          {renderValue(row.teams)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Gestión de Proyectos */}
-            <div className="bg-[var(--accent)]/5 border-b border-[var(--border-default)]">
-              <div className="px-4 py-3">
-                <h3 className="text-xs font-bold text-[var(--text-default)] uppercase tracking-wider">
-                  Gestión de Proyectos
-                </h3>
-              </div>
-            </div>
-            <TableRow label="Número de proyectos" values={['3', '50', 'Ilimitados']} />
-            <TableRow label="Dashboard de proyecto" values={[true, true, true]} />
-            <TableRow label="Vistas Gantt y Kanban" values={['Básicas', 'Avanzadas', 'Avanzadas']} />
-            <TableRow label="Reportes de progreso" values={['Básicos', 'Avanzados', 'Avanzados + IA']} />
+            {/* Mobile: 2 columnas */}
+            <div className="md:hidden">
+              <div className="grid grid-cols-2 gap-0 border border-[var(--border-default)] rounded-lg overflow-hidden">
+                {/* Header */}
+                <div className="bg-background p-3 border-b border-r border-[var(--border-default)]">
+                  <div className="text-xs font-bold text-[var(--text-muted)] uppercase">
+                    Característica
+                  </div>
+                </div>
+                <div 
+                  className="p-3 text-center border-b border-[var(--border-default)] capitalize"
+                  style={{ backgroundColor: getPlanConfig(selectedPlanForComparison).bgColor }}
+                >
+                  <div className="text-xs font-bold text-[var(--text-default)]">
+                    {selectedPlanForComparison}
+                  </div>
+                </div>
 
-            {/* Gestión Financiera */}
-            <div className="bg-[var(--accent)]/5 border-b border-[var(--border-default)]">
-              <div className="px-4 py-3">
-                <h3 className="text-xs font-bold text-[var(--text-default)] uppercase tracking-wider">
-                  Gestión Financiera
-                </h3>
+                {/* Rows */}
+                {comparisonData.map((section, sectionIdx) => (
+                  <div key={sectionIdx} className="col-span-2 contents">
+                    {/* Category Header */}
+                    <div className="col-span-2 bg-[var(--accent)]/5 p-2.5 border-b border-[var(--border-default)]">
+                      <h3 className="text-[10px] font-bold text-[var(--text-default)] uppercase tracking-wider">
+                        {section.category}
+                      </h3>
+                    </div>
+                    
+                    {/* Category Rows */}
+                    {section.rows.map((row, rowIdx) => (
+                      <div key={rowIdx} className="contents">
+                        <div className="bg-background p-3 text-xs font-medium text-[var(--text-default)] border-b border-r border-[var(--border-default)]">
+                          {row.label}
+                        </div>
+                        <div 
+                          className="p-3 flex justify-center items-center border-b border-[var(--border-default)]"
+                          style={{ backgroundColor: getPlanConfig(selectedPlanForComparison).bgColor }}
+                        >
+                          {renderValue(row[selectedPlanForComparison])}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ))}
               </div>
             </div>
-            <TableRow label="Presupuestos" values={[true, true, true]} />
-            <TableRow label="Multi-moneda (ARS, USD)" values={[false, true, true]} />
-            <TableRow label="Control de gastos" values={['Básico', 'Avanzado', 'Avanzado']} />
-            <TableRow label="Análisis de rentabilidad" values={[false, true, true]} />
-            <TableRow label="Integraciones de pago" values={[false, true, true]} />
-
-            {/* Construcción */}
-            <div className="bg-[var(--accent)]/5 border-b border-[var(--border-default)]">
-              <div className="px-4 py-3">
-                <h3 className="text-xs font-bold text-[var(--text-default)] uppercase tracking-wider">
-                  Construcción
-                </h3>
-              </div>
-            </div>
-            <TableRow label="Subcontratos" values={['Básico', 'Avanzado', 'Avanzado']} />
-            <TableRow label="Personal" values={['Hasta 10', 'Hasta 100', 'Ilimitado']} />
-            <TableRow label="Bitácora de obra" values={[true, true, true]} />
-
-            {/* Almacenamiento */}
-            <div className="bg-[var(--accent)]/5 border-b border-[var(--border-default)]">
-              <div className="px-4 py-3">
-                <h3 className="text-xs font-bold text-[var(--text-default)] uppercase tracking-wider">
-                  Almacenamiento
-                </h3>
-              </div>
-            </div>
-            <TableRow label="Espacio de archivos" values={['500 MB', '50 GB', '500 GB']} />
-            <TableRow label="PDFs personalizables" values={[false, true, true]} />
-            <TableRow label="Backup automático" values={['Semanal', 'Diario', 'Cada 6hs']} />
-
-            {/* IA */}
-            <div className="bg-[var(--accent)]/5 border-b border-[var(--border-default)]">
-              <div className="px-4 py-3">
-                <h3 className="text-xs font-bold text-[var(--text-default)] uppercase tracking-wider">
-                  Inteligencia Artificial
-                </h3>
-              </div>
-            </div>
-            <TableRow label="Tokens IA/mes" values={['Resúmenes', '10,000', 'Ilimitados']} />
-            <TableRow label="Asistente conversacional" values={[false, true, true]} />
-            <TableRow label="Análisis financiero IA" values={[false, true, true]} />
-
-            {/* Colaboración */}
-            <div className="bg-[var(--accent)]/5 border-b border-[var(--border-default)]">
-              <div className="px-4 py-3">
-                <h3 className="text-xs font-bold text-[var(--text-default)] uppercase tracking-wider">
-                  Colaboración
-                </h3>
-              </div>
-            </div>
-            <TableRow label="Usuarios" values={['1', '1', 'Ilimitados']} />
-            <TableRow label="Roles y permisos" values={[false, false, true]} />
-            <TableRow label="Colaboración en tiempo real" values={[false, false, true]} />
-
-            {/* Soporte */}
-            <div className="bg-[var(--accent)]/5 border-b border-[var(--border-default)]">
-              <div className="px-4 py-3">
-                <h3 className="text-xs font-bold text-[var(--text-default)] uppercase tracking-wider">
-                  Soporte
-                </h3>
-              </div>
-            </div>
-            <TableRow label="Email" values={[true, true, true]} />
-            <TableRow label="Prioritario" values={[false, true, true]} />
-            <TableRow label="24/7" values={[false, false, true]} last />
           </div>
         </div>
 
-        {/* FAQ - Mejorado */}
+        {/* FAQ */}
         <div className="mt-20 max-w-3xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-10 text-[var(--text-default)]">
             Preguntas Frecuentes
@@ -674,42 +775,13 @@ export default function PricingPlan() {
   );
 }
 
-function TableRow({ 
-  label, 
-  values,
-  last = false
-}: { 
-  label: string; 
-  values: (string | number | boolean)[];
-  last?: boolean;
-}) {
-  return (
-    <div className={cn(
-      "grid grid-cols-4 gap-0",
-      !last && "border-b border-[var(--border-default)]"
-    )}>
-      <div className="p-4 text-sm font-medium text-[var(--text-default)] border-r border-[var(--border-default)]">
-        {label}
-      </div>
-      {values.map((value, idx) => (
-        <div 
-          key={idx} 
-          className={cn(
-            "p-4 flex justify-center items-center",
-            idx < values.length - 1 && "border-r border-[var(--border-default)]"
-          )}
-        >
-          {typeof value === 'boolean' ? (
-            value ? (
-              <Check className="h-5 w-5 text-accent" />
-            ) : (
-              <X className="h-4 w-4 text-gray-300 dark:text-gray-700" />
-            )
-          ) : (
-            <span className="text-sm text-[var(--text-default)]">{value}</span>
-          )}
-        </div>
-      ))}
-    </div>
-  );
+function renderValue(value: string | boolean) {
+  if (typeof value === 'boolean') {
+    return value ? (
+      <Check className="h-5 w-5 text-accent" />
+    ) : (
+      <X className="h-4 w-4 text-gray-300 dark:text-gray-700" />
+    );
+  }
+  return <span className="text-sm text-[var(--text-default)]">{value}</span>;
 }
