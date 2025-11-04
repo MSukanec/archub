@@ -861,3 +861,35 @@ input[type="number"] {
 .accent-border-pulse {
   animation: borderPulse 3s ease-in-out infinite;
 }
+
+/* Card variants with accent colors */
+.card-accent-border {
+  border-color: rgba(var(--accent-rgb), 0.2) !important;
+}
+
+.card-accent-border:hover {
+  border-color: rgba(var(--accent-rgb), 0.4) !important;
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.1);
+}
+
+.card-accent-bg {
+  background: linear-gradient(
+    135deg,
+    var(--card-bg),
+    rgba(var(--accent-rgb), 0.02)
+  ) !important;
+}
+
+/* Icon with accent color */
+.icon-accent {
+  color: var(--accent);
+}
+
+/* Progress bars with accent */
+.progress-accent {
+  background-color: rgba(var(--accent-rgb), 0.1);
+}
+
+.progress-accent-fill {
+  background-color: var(--accent);
+}
