@@ -1,10 +1,10 @@
 /**
- * 👤 UserQuickAccess - Acceso rápido animado del usuario en el header
+ * 👤 UserQuickAccess - Popover de acceso rápido del usuario
  * 
- * Componente que muestra el avatar del usuario y se expande al hacer hover
- * para mostrar selectores de organización, proyecto y acceso al perfil.
+ * Componente que muestra el avatar del usuario y se despliega como popover
+ * hacia abajo (fuera del header) mostrando selectores y acceso al perfil.
  * 
- * Inspirado en el diseño de voice chat expandible con avatares.
+ * Inspirado en el diseño de voice chat expandible.
  */
 
 import { useState } from "react";
@@ -24,7 +24,7 @@ interface UserQuickAccessProps {
 
 export function UserQuickAccess({ className }: UserQuickAccessProps) {
   const [, navigate] = useLocation();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [orgSelectorOpen, setOrgSelectorOpen] = useState(false);
   const [projectSelectorOpen, setProjectSelectorOpen] = useState(false);
 
@@ -48,54 +48,66 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
 
   const handleGoToProfile = () => {
     navigate('/profile');
-    setIsExpanded(false);
+    setIsOpen(false);
   };
 
   return (
     <div 
-      className={cn("relative flex items-center", className)}
-      onMouseEnter={() => setIsExpanded(true)}
+      className={cn("relative", className)}
+      onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => {
-        setIsExpanded(false);
+        setIsOpen(false);
         setOrgSelectorOpen(false);
         setProjectSelectorOpen(false);
       }}
     >
-      {/* ESTADO COLAPSADO: Solo Avatar */}
-      <motion.div
-        className="flex items-center gap-2 bg-background/80 backdrop-blur-sm rounded-full border border-border/40 shadow-sm overflow-hidden cursor-pointer"
-        initial={{ width: 48, height: 48 }}
-        animate={{ 
-          width: isExpanded ? 320 : 48,
-          height: 48
-        }}
-        transition={{ 
-          type: "spring", 
-          stiffness: 300, 
-          damping: 30,
-          mass: 0.8
-        }}
-      >
-        {/* Avatar - siempre visible */}
-        <div className="flex-shrink-0 ml-1">
-          <Avatar className="h-10 w-10 ring-2 ring-accent/20">
-            <AvatarFallback className="bg-accent text-accent-foreground text-sm font-bold">
-              {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
-            </AvatarFallback>
-          </Avatar>
-        </div>
+      {/* Avatar - siempre visible */}
+      <div className="cursor-pointer">
+        <Avatar className="h-10 w-10 ring-2 ring-accent/20 hover:ring-accent/40 transition-all">
+          <AvatarFallback className="bg-accent text-accent-foreground text-sm font-bold">
+            {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+          </AvatarFallback>
+        </Avatar>
+      </div>
 
-        {/* ESTADO EXPANDIDO: Selectores y botones */}
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div
-              className="flex items-center gap-2 pr-3 overflow-hidden"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.2, delay: 0.1 }}
-            >
-              {/* Selector de Organización (dropdown inline) */}
+      {/* Popover que se despliega hacia abajo */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="absolute top-full right-0 mt-2 w-72 bg-popover/95 backdrop-blur-xl border border-border rounded-2xl shadow-2xl overflow-hidden z-50"
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ 
+              type: "spring",
+              stiffness: 400,
+              damping: 30,
+              mass: 0.8
+            }}
+          >
+            {/* Header del popover con nombre de usuario */}
+            <div className="px-4 py-3 border-b border-border/50 bg-accent/5">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-12 w-12 ring-2 ring-accent/20">
+                  <AvatarFallback className="bg-accent text-accent-foreground text-base font-bold">
+                    {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">
+                    {userData?.user?.full_name || 'Usuario'}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {userData?.user?.email || ''}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Contenido del popover - columna vertical */}
+            <div className="p-3 space-y-2">
+              
+              {/* Selector de Organización */}
               <div className="relative">
                 <button
                   onClick={(e) => {
@@ -103,14 +115,19 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
                     setOrgSelectorOpen(!orgSelectorOpen);
                     setProjectSelectorOpen(false);
                   }}
-                  className="h-8 px-2 rounded-md hover:bg-accent/10 transition-colors flex items-center gap-1.5 group"
+                  className="w-full px-3 py-2.5 rounded-lg hover:bg-accent/10 transition-colors flex items-center justify-between group border border-border/40"
                 >
-                  <Building2 className="h-3.5 w-3.5 text-accent" />
-                  <span className="text-xs font-medium text-foreground/80 group-hover:text-foreground max-w-[80px] truncate">
-                    {currentOrg?.name || 'Org'}
-                  </span>
+                  <div className="flex items-center gap-2.5">
+                    <Building2 className="h-4 w-4 text-accent" />
+                    <div className="flex flex-col items-start">
+                      <span className="text-xs text-muted-foreground font-medium">Organización</span>
+                      <span className="text-sm font-medium text-foreground group-hover:text-accent transition-colors truncate max-w-[180px]">
+                        {currentOrg?.name || 'Seleccionar'}
+                      </span>
+                    </div>
+                  </div>
                   <ChevronDown className={cn(
-                    "h-3 w-3 text-muted-foreground transition-transform",
+                    "h-4 w-4 text-muted-foreground transition-transform",
                     orgSelectorOpen && "rotate-180"
                   )} />
                 </button>
@@ -119,16 +136,13 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
                 <AnimatePresence>
                   {orgSelectorOpen && (
                     <motion.div
-                      className="absolute top-full left-0 mt-1 w-56 bg-popover border border-border rounded-lg shadow-lg p-2 z-50"
-                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg p-2 z-50"
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
                       transition={{ duration: 0.15 }}
                     >
-                      <div className="px-2 py-1.5">
-                        <p className="text-xs font-semibold text-muted-foreground">Organizaciones</p>
-                      </div>
-                      <div className="space-y-0.5 max-h-64 overflow-y-auto">
+                      <div className="space-y-0.5 max-h-48 overflow-y-auto">
                         {organizations.map((org) => (
                           <button
                             key={org.id}
@@ -137,7 +151,7 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
                               handleOrgChange(org.id);
                             }}
                             className={cn(
-                              "w-full px-2 py-2 text-left text-sm rounded-md transition-colors",
+                              "w-full px-3 py-2 text-left text-sm rounded-md transition-colors",
                               org.id === currentOrganizationId
                                 ? "bg-accent text-accent-foreground font-medium"
                                 : "hover:bg-accent/10"
@@ -152,10 +166,7 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
                 </AnimatePresence>
               </div>
 
-              {/* Divisor vertical */}
-              <div className="h-6 w-px bg-border/50" />
-
-              {/* Selector de Proyecto (dropdown inline) */}
+              {/* Selector de Proyecto */}
               <div className="relative">
                 <button
                   onClick={(e) => {
@@ -163,14 +174,19 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
                     setProjectSelectorOpen(!projectSelectorOpen);
                     setOrgSelectorOpen(false);
                   }}
-                  className="h-8 px-2 rounded-md hover:bg-accent/10 transition-colors flex items-center gap-1.5 group"
+                  className="w-full px-3 py-2.5 rounded-lg hover:bg-accent/10 transition-colors flex items-center justify-between group border border-border/40"
                 >
-                  <FolderOpen className="h-3.5 w-3.5 text-accent" />
-                  <span className="text-xs font-medium text-foreground/80 group-hover:text-foreground max-w-[80px] truncate">
-                    {currentProject?.name || 'Proyecto'}
-                  </span>
+                  <div className="flex items-center gap-2.5">
+                    <FolderOpen className="h-4 w-4 text-accent" />
+                    <div className="flex flex-col items-start">
+                      <span className="text-xs text-muted-foreground font-medium">Proyecto activo</span>
+                      <span className="text-sm font-medium text-foreground group-hover:text-accent transition-colors truncate max-w-[180px]">
+                        {currentProject?.name || 'Seleccionar'}
+                      </span>
+                    </div>
+                  </div>
                   <ChevronDown className={cn(
-                    "h-3 w-3 text-muted-foreground transition-transform",
+                    "h-4 w-4 text-muted-foreground transition-transform",
                     projectSelectorOpen && "rotate-180"
                   )} />
                 </button>
@@ -179,18 +195,15 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
                 <AnimatePresence>
                   {projectSelectorOpen && (
                     <motion.div
-                      className="absolute top-full left-0 mt-1 w-56 bg-popover border border-border rounded-lg shadow-lg p-2 z-50"
-                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg p-2 z-50"
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
                       transition={{ duration: 0.15 }}
                     >
-                      <div className="px-2 py-1.5">
-                        <p className="text-xs font-semibold text-muted-foreground">Proyectos</p>
-                      </div>
-                      <div className="space-y-0.5 max-h-64 overflow-y-auto">
+                      <div className="space-y-0.5 max-h-48 overflow-y-auto">
                         {projectsLite.length === 0 ? (
-                          <div className="px-2 py-4 text-center">
+                          <div className="px-3 py-4 text-center">
                             <p className="text-xs text-muted-foreground">No hay proyectos</p>
                           </div>
                         ) : (
@@ -202,7 +215,7 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
                                 handleProjectChange(project.id);
                               }}
                               className={cn(
-                                "w-full px-2 py-2 text-left text-sm rounded-md transition-colors",
+                                "w-full px-3 py-2 text-left text-sm rounded-md transition-colors",
                                 project.id === selectedProjectId
                                   ? "bg-accent text-accent-foreground font-medium"
                                   : "hover:bg-accent/10"
@@ -218,32 +231,23 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
                 </AnimatePresence>
               </div>
 
-              {/* Divisor vertical */}
-              <div className="h-6 w-px bg-border/50" />
+              {/* Divisor */}
+              <div className="h-px bg-border/50 my-2" />
 
-              {/* Botón Ir a Perfil */}
+              {/* Botón Ir a mi Perfil */}
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 px-2 text-xs gap-1.5 hover:bg-accent/10"
+                className="w-full justify-start gap-2.5 px-3 py-2.5 h-auto hover:bg-accent/10 hover:text-accent"
                 onClick={handleGoToProfile}
               >
-                <User className="h-3.5 w-3.5" />
-                <span className="font-medium">Perfil</span>
+                <User className="h-4 w-4" />
+                <span className="font-medium text-sm">Ir a mi perfil</span>
               </Button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-
-      {/* Tooltip cuando está colapsado */}
-      {!isExpanded && (
-        <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="bg-popover text-popover-foreground px-2 py-1 rounded text-xs shadow-md whitespace-nowrap">
-            {userData?.user?.full_name || 'Usuario'}
-          </div>
-        </div>
-      )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
