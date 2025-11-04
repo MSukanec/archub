@@ -51,7 +51,7 @@ export function useProjects(organizationId: string | undefined) {
               id,
               name
             ),
-            project_modalities!modality_id (
+            modalities!modality_id (
               id,
               name
             )
@@ -90,7 +90,7 @@ export function useProjects(organizationId: string | undefined) {
               modality_id: pd.modality_id,
               project_image_url: pd.project_image_url,
               project_type: pd.project_types,
-              modality: pd.project_modalities
+              modality: pd.modalities
             }
           }
         }
@@ -141,7 +141,7 @@ export function useProject(projectId: string | undefined) {
               id,
               name
             ),
-            project_modalities!modality_id (
+            modalities!modality_id (
               id,
               name
             )
@@ -177,7 +177,7 @@ export function useProject(projectId: string | undefined) {
             project_type_id: pd.project_type_id,
             modality_id: pd.modality_id,
             project_type: pd.project_types,
-            modality: pd.project_modalities
+            modality: pd.modalities
           }
         }
       }

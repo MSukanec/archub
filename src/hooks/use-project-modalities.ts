@@ -17,7 +17,7 @@ export function useProjectModalities() {
       }
 
       const { data, error } = await supabase
-        .from('project_modalities')
+        .from('modalities')
         .select('*')
         .order('name')
 
