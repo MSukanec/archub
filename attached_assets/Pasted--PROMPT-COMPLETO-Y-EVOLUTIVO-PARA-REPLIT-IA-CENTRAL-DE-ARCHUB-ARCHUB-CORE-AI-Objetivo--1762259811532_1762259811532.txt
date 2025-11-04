@@ -1,0 +1,216 @@
+🧠💥 PROMPT COMPLETO Y EVOLUTIVO PARA REPLIT — IA CENTRAL DE ARCHUB (“ARCHUB CORE AI”)
+
+🚀 Objetivo global:
+Quiero que construyas el sistema central de inteligencia de Archub, el cerebro que entiende todo el contexto de la organización, los proyectos, los usuarios, los movimientos, los presupuestos, y que puede razonar semánticamente con lenguaje natural.
+
+Esta IA no debe limitarse a responder preguntas. Debe:
+
+Comprender la intención detrás de lo que se pregunta.
+
+Entender quién pregunta, desde qué organización, y qué datos tiene permiso de ver.
+
+Resolver automáticamente si un término es un proyecto, contacto, proveedor, miembro o cualquier entidad conocida.
+
+Ser tolerante a errores humanos (acentos, mayúsculas, typos).
+
+Aprender de cada pregunta (historial contextual).
+
+Ser modular, auditable, segura y ultra rápida.
+
+En resumen: quiero una arquitectura que piense como Archub.
+
+⚙️ 1. Arquitectura del sistema
+
+Creá un módulo principal:
+
+src/ai-core/
+ ├── index.ts                  # entrypoint principal: ask(question, context)
+ ├── context/
+ │   ├── memory.ts             # contexto a corto y largo plazo (user/org/session)
+ │   ├── entityResolver.ts     # identifica entidades (personas, proyectos, etc.)
+ │   ├── synonyms.ts           # sinónimos, correcciones, alias
+ │   ├── normalization.ts      # limpia texto (acentos, casing, typos)
+ │   └── embeddings.ts         # genera representaciones vectoriales locales
+ ├── reasoning/
+ │   ├── intentClassifier.ts   # detecta qué se está preguntando
+ │   ├── queryPlanner.ts       # planifica cómo obtener la respuesta
+ │   ├── queryBuilder.ts       # genera queries Supabase optimizadas
+ │   ├── calculator.ts         # procesa totales, promedios, balances, etc.
+ │   ├── verifier.ts           # valida permisos y consistencia
+ │   └── fallback.ts           # maneja incertidumbre
+ ├── output/
+ │   ├── formatter.ts          # genera texto natural final
+ │   ├── explanations.ts       # opcional: “por qué te di esta respuesta”
+ │   └── summarizer.ts         # crea resúmenes de contexto
+ ├── adapters/
+ │   ├── supabase.ts           # acceso directo optimizado (con caching)
+ │   ├── cache.ts              # cache en memoria (Redis-like local)
+ │   └── hooks.ts              # funciones utilitarias para React
+ ├── security/
+ │   ├── policyGuard.ts        # valida permisos por organización/rol
+ │   └── sanitizer.ts          # limpia inputs y salidas
+ └── tests/
+     └── ai-core.test.ts       # tests de razonamiento
+
+
+Esta estructura te permite entrenar, escalar y depurar la IA por capas, sin rehacer nada.
+
+🧠 2. Pipeline de razonamiento completo
+
+Cuando un usuario pregunta algo, la IA debe seguir este flujo de 8 pasos, cada uno modular:
+
+1️⃣ Preprocesamiento y normalización
+2️⃣ Identificación de entidades
+3️⃣ Clasificación de intención
+4️⃣ Planificación de consulta
+5️⃣ Construcción de query optimizada
+6️⃣ Ejecución y agregación
+7️⃣ Verificación de permisos y coherencia
+8️⃣ Generación de respuesta natural
+
+
+Esto debe implementarse como un pipeline funcional, donde cada etapa devuelve un objeto enriquecido al siguiente:
+
+const result = await pipeline(question, context)
+  .use(normalizeInput)
+  .use(resolveEntities)
+  .use(classifyIntent)
+  .use(planQuery)
+  .use(executeQuery)
+  .use(verifyAccess)
+  .use(formatResponse)
+  .run();
+
+🔎 3. Inteligencia semántica real (Entity Resolver + Embeddings)
+
+Además de matching textual, integrá embeddings locales (sin depender de OpenAI):
+
+Usá librerías ligeras como bert-embeddings, onnxruntime, o transformers.js.
+
+Generá un vector por cada entidad (proyecto, contacto, proveedor).
+
+Guardá esos vectores en entities_index_view en Supabase o en cache local.
+
+Esto permite buscar “Machonico” ≈ “Machónico”, “Casa Sur” ≈ “Proyecto Casa Sur” con alta precisión.
+
+Ejemplo:
+
+const results = await vectorSearch("machonico", embeddingsCache);
+return bestMatch(results, threshold = 0.82);
+
+🧩 4. Autoaprendizaje y memoria contextual
+
+Cada usuario debe tener un historial de interacciones (user_ai_sessions, user_ai_messages).
+
+Si pregunta varias veces por “Machonico”, la IA aprende que en esta sesión ese término refiere a un proyecto.
+
+Guardar pares pregunta/respuesta, tipo de intención y precisión.
+
+Esto permite razonamiento secuencial (“y cuánto gasté el mes anterior?” → entiende a qué proyecto se refiere).
+
+🔐 5. Seguridad y consistencia
+
+Antes de ejecutar cualquier query, pasá por el policyGuard.ts:
+
+if (!hasPermission(user_id, organization_id, entity_id)) {
+  throw new Error("No autorizado para ver estos datos");
+}
+
+
+Además:
+
+Todas las queries deben tener organization_id explícito.
+
+Sanitizá inputs antes de interpolar texto SQL.
+
+En caso de duda, devolver respuesta neutra y registrarla como low_confidence.
+
+⚡ 6. Performance y caching
+
+Usá cache local (RAM o IndexedDB) para resultados recientes.
+
+Cachear embeddings y resoluciones de entidades (por nombre → id).
+
+Si una misma pregunta se repite en una hora, responder desde cache.
+
+if (cache.has(queryHash)) return cache.get(queryHash);
+
+
+Esto reduce tiempos de respuesta en un 90%.
+
+🧠 7. Inteligencia lingüística avanzada
+
+Implementar un Language Intelligence Layer:
+
+Normaliza acentos, mayúsculas, puntuación.
+
+Soporta variantes regionales (“plata”, “dinero”, “pesos”, “lucas”).
+
+Tolerancia semántica: “cuánto gasté” = “qué egresos tuve”.
+
+Ejemplo con normalizeText():
+
+normalizeText("¿Cuánto le pagué a Machonico este mes?")
+→ "cuanto le pague a machonico este mes"
+
+💬 8. Respuesta natural y auditable
+
+El formatter.ts debe entregar un texto como:
+
+“Gastaste USD 12.400 en el proyecto Machónico durante noviembre.
+(2 pagos a subcontratistas y 1 compra de materiales).”
+
+Y opcionalmente agregar metadatos:
+
+{
+  "confidence": 0.94,
+  "source": "movements_view",
+  "queryTime": "182ms"
+}
+
+🧾 9. Vista consolidada entities_index_view (SQL)
+
+Crea en Supabase una vista que unifique todas las entidades nombrables:
+
+create or replace view public.entities_index_view as
+select id, name, 'project' as entity_type, organization_id from public.projects
+union all
+select id, full_name as name, 'contact' as entity_type, organization_id from public.contacts
+union all
+select id, name, 'subcontractor' as entity_type, organization_id from public.subcontractors
+union all
+select id, full_name as name, 'member' as entity_type, organization_id from public.organization_members;
+
+
+Esto permite búsquedas globales unificadas y caching eficiente.
+
+🧱 10. Escalabilidad futura (v2 y v3)
+
+Diseñá todo esto con visión evolutiva:
+
+Versión	Meta
+v1	Entiende texto y responde datos reales.
+v2	Aprende del historial, mejora sugerencias.
+v3	Sugiere acciones: “¿Querés generar el PDF del resumen financiero del proyecto Machónico?”
+v4	Razonamiento multimodal (texto + planos + PDF).
+🧩 11. Integración con la UI
+
+En el front, tenés que:
+
+Mostrar el componente AIChatPanel (por ejemplo en /src/components/ai/AIChat.tsx).
+
+Cada mensaje se envía a /api/ai/ask → que llama a archubCoreAI.ask(question, context).
+
+Mostrar resultados en formato de chat con badges de confianza (Alta, Media, Baja).
+
+✅ En resumen
+
+El cerebro de Archub debe ser:
+
+Cualidad	Descripción
+Semántico	Entiende significados, no solo palabras.
+Contextual	Usa memoria de usuario, proyecto y sesión.
+Seguro	Valida permisos, evita filtrado cruzado.
+Escalable	Modular, con embeddings locales y cache.
+Auditado	Cada respuesta tiene trazabilidad.
+Conversacional	Responde con claridad, contexto y lenguaje natural.
