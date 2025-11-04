@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
 import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
-import { Folder, Plus, Home, Search, Filter, Bell, Eye, Play, ArrowRight, Edit, Trash2 } from 'lucide-react'
+import { Folder, Plus, Home, Search, Filter, Bell, Play, ArrowRight, Edit, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -138,47 +138,6 @@ export default function Projects() {
     selectProjectMutation.mutate(projectId)
   }
 
-  const handleViewDetail = async (projectId: string) => {
-    // Marcar como activo Y navegar a vista detallada
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.access_token || !userData?.user?.id || !organizationId) {
-      toast({
-        title: "Error",
-        description: "No se pudo activar el proyecto",
-        variant: "destructive"
-      })
-      return
-    }
-    
-    const { error } = await supabase
-      .from('user_organization_preferences')
-      .upsert({
-        user_id: userData.user.id,
-        organization_id: organizationId,
-        last_project_id: projectId,
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'user_id,organization_id'
-      })
-    
-    if (error) {
-      toast({
-        title: "Error",
-        description: "No se pudo activar el proyecto",
-        variant: "destructive"
-      })
-    } else {
-      setSelectedProject(projectId, organizationId);
-      queryClient.invalidateQueries({ 
-        queryKey: ['user-organization-preferences', userData?.user?.id, organizationId] 
-      });
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      
-      // Navegar a vista detallada
-      navigate(`/projects/${projectId}`)
-    }
-  }
-
 
   const handleEdit = (project: any) => {
     openModal('project', { editingProject: project, isEditing: true })
@@ -278,11 +237,6 @@ export default function Projects() {
       label: 'Ir al proyecto',
       icon: ArrowRight,
       onClick: () => handleSelectProject(project.id)
-    },
-    {
-      label: 'Ver detalle',
-      icon: Eye,
-      onClick: () => handleViewDetail(project.id)
     },
     {
       label: 'Editar',

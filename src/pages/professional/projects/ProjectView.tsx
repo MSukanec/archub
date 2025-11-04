@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import ProjectDataTab from './tabs/ProjectDataTab';
+import ProjectDataTab from '@/pages/professional/project-data/ProjectDataTab';
 
 export default function ProjectView() {
   const { id } = useParams<{ id: string }>();

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
-import { useProjectContext } from '@/stores/projectContext'
+import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
 import { supabase } from '@/lib/supabase'
 import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave'
 import { Label } from '@/components/ui/label'
@@ -10,30 +10,20 @@ import { Textarea } from '@/components/ui/textarea'
 import { ImageIcon, FileText, Users, MapPin } from 'lucide-react'
 import ImageUploadAndShowField from '@/components/ui-custom/fields/ImageUploadAndShowField'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useProjectContext } from '@/stores/projectContext'
 
-export default function ProjectDataTab() {
+interface ProjectDataTabProps {
+  projectId?: string;
+}
+
+export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
   const { selectedProjectId } = useProjectContext()
   const organizationId = userData?.organization?.id
-  const activeProjectId = selectedProjectId
-
-  // Show message if no project is selected
-  if (!selectedProjectId) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center py-8">
-          <h3 className="text-lg font-medium text-muted-foreground mb-2">
-            No hay proyecto activo seleccionado
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            Selecciona un proyecto desde la barra lateral para ver los datos básicos.
-          </p>
-        </div>
-      </div>
-    )
-  }
+  // Use projectId from props if provided, otherwise use selectedProjectId from context
+  const activeProjectId = projectId || selectedProjectId
 
   // Form states
   const [projectName, setProjectName] = useState('')
@@ -137,44 +127,40 @@ export default function ProjectDataTab() {
       queryClient.invalidateQueries({ queryKey: ['project-info', activeProjectId] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       toast({
-        title: "Datos guardados",
-        description: "Los datos del proyecto se han actualizado correctamente."
+        title: "Cambios guardados",
+        description: "Los datos del proyecto se han guardado automáticamente"
       });
     },
-    onError: (error) => {
-      console.error('Error saving project data:', error);
+    onError: (error: any) => {
+      console.error('Error in saveProjectDataMutation:', error);
       toast({
-        title: "Error",
-        description: "No se pudieron guardar los datos del proyecto.",
+        title: "Error al guardar",
+        description: "No se pudieron guardar los cambios del proyecto",
         variant: "destructive"
       });
     }
   });
 
   // Auto-save hook
-  const dataToSave = {
-    name: projectName,
-    description,
-    internal_notes: internalNotes,
-    client_name: clientName,
-    contact_phone: contactPhone,
-    email,
-    address,
-    city,
-    state,
-    country,
-    zip_code: zipCode,
-    image_url: projectImageUrl
-  };
-
   const { isSaving } = useDebouncedAutoSave({
-    data: dataToSave,
-    saveFn: saveProjectDataMutation.mutateAsync,
-    delay: 1000,
-    enabled: !!activeProjectId
+    data: {
+      name: projectName,
+      description: description,
+      internal_notes: internalNotes,
+      client_name: clientName,
+      contact_phone: contactPhone,
+      email: email,
+      address: address,
+      city: city,
+      state: state,
+      country: country,
+      zip_code: zipCode
+    },
+    saveFn: (data) => saveProjectDataMutation.mutateAsync(data),
+    delay: 1500
   });
 
-  // Populate form with existing data
+  // Load data when project changes or data is fetched
   useEffect(() => {
     if (projectInfo) {
       setProjectName(projectInfo.name || '');
@@ -193,207 +179,213 @@ export default function ProjectDataTab() {
       setState(projectData.state || '');
       setCountry(projectData.country || '');
       setZipCode(projectData.zip_code || '');
-      setProjectImageUrl(projectData.image_url || null);
+      setProjectImageUrl(projectData.project_image_url || null);
     }
   }, [projectData]);
 
+  if (!activeProjectId) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-muted-foreground">No hay proyecto activo seleccionado</p>
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-8">
-      {/* Project Information */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-2 pb-2 border-b border-border">
-          <FileText className="h-4 w-4" />
-          <h3 className="text-sm font-medium">Información del Proyecto</h3>
-          {isSaving && (
-            <span className="text-xs text-muted-foreground ml-auto">Guardando...</span>
+    <div className="space-y-6">
+      {/* Two Column Layout - Section descriptions left, content right */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column - Imagen Principal */}
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <ImageIcon className="h-5 w-5 text-[var(--accent)]" />
+            <h2 className="text-lg font-semibold">Imagen Principal</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Imagen que representa tu proyecto en tarjetas y vistas principales. Esta imagen aparecerá en el dashboard y listados de proyectos.
+            {isSaving && <span className="block text-[var(--accent)] mt-2">Guardando...</span>}
+          </p>
+        </div>
+
+        {/* Right Column - Imagen Principal Content */}
+        <div>
+          {activeProjectId && organizationId && (
+            <ImageUploadAndShowField
+              projectId={activeProjectId}
+              organizationId={organizationId}
+              currentImageUrl={projectImageUrl}
+              onImageUpdate={setProjectImageUrl}
+            />
           )}
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="project-name" className="text-xs font-medium">
-              Nombre del Proyecto *
-            </Label>
-            <Input
-              id="project-name"
-              value={projectName}
-              onChange={(e) => setProjectName(e.target.value)}
-              placeholder="Ingresa el nombre del proyecto"
-              data-testid="input-project-name"
-            />
+      <hr className="border-t border-[var(--section-divider)] my-8" />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column - Información Básica */}
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <FileText className="h-5 w-5 text-[var(--accent)]" />
+            <h2 className="text-lg font-semibold">Información Básica</h2>
           </div>
+          <p className="text-sm text-muted-foreground">
+            Datos fundamentales del proyecto que se usarán en todo el sistema. Estos campos son la base para presupuestos, documentos y comunicaciones.
+          </p>
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="project-image" className="text-xs font-medium">
-              Imagen del Proyecto
-            </Label>
-            {activeProjectId && organizationId ? (
-              <ImageUploadAndShowField
-                projectId={activeProjectId}
-                organizationId={organizationId}
-                currentImageUrl={projectImageUrl}
-                onImageUpdate={setProjectImageUrl}
+        {/* Right Column - Información Básica Content */}
+        <div>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="project-name">Nombre del Proyecto</Label>
+              <Input 
+                id="project-name"
+                placeholder="Ej: Casa Unifamiliar López"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
               />
-            ) : (
-              <div className="flex items-center justify-center h-20 border border-dashed border-border rounded-lg bg-muted/20">
-                <span className="text-xs text-muted-foreground">Selecciona un proyecto para subir imágenes</span>
-              </div>
-            )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Descripción</Label>
+              <Textarea 
+                id="description"
+                placeholder="Descripción general del proyecto..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="internal-notes">Notas Internas</Label>
+              <Textarea 
+                id="internal-notes"
+                placeholder="Notas internas para el equipo..."
+                value={internalNotes}
+                onChange={(e) => setInternalNotes(e.target.value)}
+                rows={2}
+              />
+            </div>
           </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="description" className="text-xs font-medium">
-            Descripción
-          </Label>
-          <Textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Descripción detallada del proyecto"
-            rows={3}
-            data-testid="textarea-project-description"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="internal-notes" className="text-xs font-medium">
-            Notas Internas
-          </Label>
-          <Textarea
-            id="internal-notes"
-            value={internalNotes}
-            onChange={(e) => setInternalNotes(e.target.value)}
-            placeholder="Notas para uso interno del equipo"
-            rows={3}
-            data-testid="textarea-internal-notes"
-          />
         </div>
       </div>
 
-      {/* Client Information */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-2 pb-2 border-b border-border">
-          <Users className="h-4 w-4" />
-          <h3 className="text-sm font-medium">Información del Cliente</h3>
-        </div>
+      <hr className="border-t border-[var(--section-divider)] my-8" />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="client-name" className="text-xs font-medium">
-              Nombre del Cliente
-            </Label>
-            <Input
-              id="client-name"
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-              placeholder="Nombre de la empresa o cliente"
-              data-testid="input-client-name"
-            />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column - Información del Cliente */}
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <Users className="h-5 w-5 text-[var(--accent)]" />
+            <h2 className="text-lg font-semibold">Información del Cliente</h2>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="contact-phone" className="text-xs font-medium">
-              Teléfono de Contacto
-            </Label>
-            <Input
-              id="contact-phone"
-              value={contactPhone}
-              onChange={(e) => setContactPhone(e.target.value)}
-              placeholder="Número de teléfono"
-              data-testid="input-contact-phone"
-            />
-          </div>
+          <p className="text-sm text-muted-foreground">
+            Datos de contacto del cliente responsable del proyecto. Esta información estará disponible para todo el equipo cuando necesiten comunicarse.
+          </p>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="email" className="text-xs font-medium">
-            Email de Contacto
-          </Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="correo@ejemplo.com"
-            data-testid="input-email"
-          />
-        </div>
-      </div>
+        {/* Right Column - Información del Cliente Content */}
+        <div>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="client-name">Nombre del Cliente</Label>
+              <Input 
+                id="client-name"
+                placeholder="Ej: Familia López"
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+              />
+            </div>
 
-      {/* Location Information */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-2 pb-2 border-b border-border">
-          <MapPin className="h-4 w-4" />
-          <h3 className="text-sm font-medium">Ubicación del Proyecto</h3>
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="contact-phone">Teléfono de Contacto</Label>
+              <Input 
+                id="contact-phone"
+                placeholder="Ej: +54 11 1234-5678"
+                value={contactPhone}
+                onChange={(e) => setContactPhone(e.target.value)}
+              />
+            </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="address" className="text-xs font-medium">
-            Dirección
-          </Label>
-          <Input
-            id="address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Dirección completa del proyecto"
-            data-testid="input-address"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="city" className="text-xs font-medium">
-              Ciudad
-            </Label>
-            <Input
-              id="city"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              placeholder="Ciudad"
-              data-testid="input-city"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="state" className="text-xs font-medium">
-              Provincia/Estado
-            </Label>
-            <Input
-              id="state"
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-              placeholder="Provincia o Estado"
-              data-testid="input-state"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="country" className="text-xs font-medium">
-              País
-            </Label>
-            <Input
-              id="country"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              placeholder="País"
-              data-testid="input-country"
-            />
+            <div className="space-y-2">
+              <Label htmlFor="email">Email de Contacto</Label>
+              <Input 
+                id="email"
+                type="email"
+                placeholder="Ej: contacto@cliente.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="zip-code" className="text-xs font-medium">
-            Código Postal
-          </Label>
-          <Input
-            id="zip-code"
-            value={zipCode}
-            onChange={(e) => setZipCode(e.target.value)}
-            placeholder="Código postal"
-            className="w-full md:w-48"
-            data-testid="input-zip-code"
-          />
+        {/* Left Column - Ubicación */}
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <MapPin className="h-5 w-5 text-[var(--accent)]" />
+            <h2 className="text-lg font-semibold">Ubicación del Proyecto</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Dirección completa donde se ejecutará la obra. Esta información se usa para logística, entregas y documentación oficial.
+          </p>
+        </div>
+
+        {/* Right Column - Ubicación Content */}
+        <div>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="address">Dirección</Label>
+              <Input 
+                id="address"
+                placeholder="Ej: Av. Corrientes 1234"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="city">Ciudad</Label>
+              <Input 
+                id="city"
+                placeholder="Ej: Buenos Aires"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="state">Provincia/Estado</Label>
+              <Input 
+                id="state"
+                placeholder="Ej: Buenos Aires"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="country">País</Label>
+              <Input 
+                id="country"
+                placeholder="Ej: Argentina"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="zip-code">Código Postal</Label>
+              <Input 
+                id="zip-code"
+                placeholder="Ej: C1043AAX"
+                value={zipCode}
+                onChange={(e) => setZipCode(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
