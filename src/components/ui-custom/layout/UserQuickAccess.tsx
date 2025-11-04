@@ -63,7 +63,7 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
     >
       {/* Avatar - siempre visible */}
       <div className="cursor-pointer">
-        <Avatar className="h-10 w-10 ring-2 ring-accent/20 hover:ring-accent/40 transition-all">
+        <Avatar className="h-8 w-8 hover:opacity-80 transition-opacity">
           <AvatarFallback className="bg-accent text-accent-foreground text-sm font-bold">
             {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
           </AvatarFallback>
@@ -74,7 +74,7 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="absolute top-full right-0 mt-2 w-72 bg-popover border border-border rounded-lg shadow-lg z-50"
+            className="absolute top-full right-0 mt-2 w-72 bg-background border border-border rounded-lg shadow-lg z-50"
             initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
