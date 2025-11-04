@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SmartChatInput } from '@/components/ui-custom/fields/SmartChatInput';
 import { MessageContent } from '@/components/ai/MessageContent';
@@ -7,6 +7,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { isProOrTeams } from '@/utils/planHelpers';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -26,6 +27,25 @@ export function FloatingAIChat() {
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const hasLoadedHistoryRef = useRef(false);
+  
+  // Get current organization plan
+  const organizationId = userData?.preferences?.last_organization_id;
+  const currentOrganization = userData?.organizations?.find(
+    (org) => org.id === organizationId
+  );
+  const planCode = currentOrganization?.plan?.name || 'free';
+  const isPro = isProOrTeams(planCode);
+  
+  // Mensajes de ejemplo para usuarios FREE
+  const exampleMessages: ChatMessage[] = [
+    { role: 'user', content: '¿Cuál es el presupuesto total del proyecto Samurai Rodriguez?' },
+    { role: 'assistant', content: 'El proyecto Samurai Rodriguez tiene un presupuesto total de $2,450,000 ARS. Actualmente se ha gastado el 68% del presupuesto ($1,666,000 ARS), quedando un saldo disponible de $784,000 ARS.' },
+    { role: 'user', content: '¿Cuánto le debo al proveedor Constructora del Sur?' },
+    { role: 'assistant', content: 'Según los registros, le debes $340,000 ARS a Constructora del Sur. Esta deuda corresponde a 3 facturas pendientes de pago del último mes.' }
+  ];
+  
+  // Mostrar mensajes de ejemplo si es FREE, sino mostrar el historial real
+  const displayMessages = isPro ? chatMessages : exampleMessages;
 
   // Auto-scroll al final cuando cambian los mensajes
   useEffect(() => {
@@ -210,12 +230,12 @@ export function FloatingAIChat() {
             </div>
 
             {/* Mensajes */}
-            <div className="h-96 overflow-y-auto p-4 space-y-3">
-              {isLoadingHistory ? (
+            <div className="relative h-96 overflow-y-auto p-4 space-y-3">
+              {isLoadingHistory && isPro ? (
                 <div className="flex items-center justify-center h-full">
                   <LoadingSpinner size="md" />
                 </div>
-              ) : chatMessages.length === 0 ? (
+              ) : displayMessages.length === 0 && isPro ? (
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center space-y-2">
                     <Sparkles className="h-8 w-8 text-muted-foreground/50 mx-auto" />
@@ -227,7 +247,7 @@ export function FloatingAIChat() {
               ) : (
                 <>
                   {/* Mostrar mensajes en orden cronológico (más antiguos arriba, más recientes abajo) */}
-                  {chatMessages.map((msg, index) => (
+                  {displayMessages.map((msg, index) => (
                     <div
                       key={index}
                       className={cn(
@@ -255,7 +275,7 @@ export function FloatingAIChat() {
                   ))}
                   
                   {/* Indicador de carga */}
-                  {isSendingMessage && (
+                  {isSendingMessage && isPro && (
                     <div className="flex justify-start">
                       <div className="bg-muted border border-border rounded-2xl px-4 py-3">
                         <div className="flex items-center gap-2">
@@ -271,6 +291,18 @@ export function FloatingAIChat() {
                   <div ref={messagesEndRef} />
                 </>
               )}
+              
+              {/* Overlay blur para usuarios FREE */}
+              {!isPro && (
+                <div className="absolute inset-0 bg-background/60 dark:bg-background/80 backdrop-blur-[2px] rounded-lg flex items-center justify-center z-10">
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-100 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800">
+                    <Lock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                    <span className="text-xs font-medium text-amber-700 dark:text-amber-300">
+                      Función disponible en planes Pro o Teams
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Input */}
@@ -279,8 +311,8 @@ export function FloatingAIChat() {
                 value={inputMessage}
                 onChange={setInputMessage}
                 onSubmit={handleSendMessage}
-                placeholder="Escribe un mensaje..."
-                disabled={isSendingMessage}
+                placeholder={isPro ? "Escribe un mensaje..." : "Disponible en Pro o Teams"}
+                disabled={isSendingMessage || !isPro}
                 className="text-xs"
               />
               <p className="text-[10px] text-muted-foreground/60 text-center mt-2">
