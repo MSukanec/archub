@@ -70,7 +70,7 @@ export default function AdminCommunityDashboard() {
         
         // Usuarios activos ahora (solo IDs únicos)
         supabase
-          .from('organization_online_users')
+          .from('user_presence')
           .select('user_id')
           .gte('last_seen_at', ninetySecondsAgo.toISOString())
       ])
@@ -99,7 +99,7 @@ export default function AdminCommunityDashboard() {
       if (!supabase) throw new Error('Supabase not available')
 
       const { data } = await supabase
-        .from('organization_online_users')
+        .from('user_presence')
         .select(`
           user_id,
           last_seen_at,
@@ -124,7 +124,7 @@ export default function AdminCommunityDashboard() {
       // ✅ OPTIMIZACIÓN: Un solo query con JOIN y GROUP BY
       // Obtener organizaciones con su última actividad en una sola consulta
       const { data } = await supabase
-        .from('organization_online_users')
+        .from('user_presence')
         .select(`
           org_id,
           last_seen_at,

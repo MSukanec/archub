@@ -163,7 +163,7 @@ function useAllOrganizations() {
               .select('id', { count: 'exact' })
               .eq('organization_id', org.id),
             supabase!
-              .from('organization_online_users')
+              .from('user_presence')
               .select('last_seen_at')
               .eq('org_id', org.id)
               .order('last_seen_at', { ascending: false })
