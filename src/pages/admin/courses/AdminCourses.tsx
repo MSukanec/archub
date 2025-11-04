@@ -1,13 +1,12 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
-import { BookOpen, Plus, Users, BarChart3, Tag } from 'lucide-react'
+import { BookOpen, Plus, Users, BarChart3 } from 'lucide-react'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import AdminCourseDashboardTab from './AdminCourseDashboardTab'
 import AdminCourseUsersTab from './AdminCourseUsersTab'
 import AdminCourseListTab from './AdminCourseListTab'
-import AdminCourseCouponTab from './AdminCourseCouponTab'
 
 export default function AdminCourses() {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -29,10 +28,6 @@ export default function AdminCourses() {
     openModal('course', {});
   };
 
-  const handleCreateCoupon = () => {
-    openModal('coupon', {});
-  };
-
   const headerProps = {
     title: "Administración de Cursos",
     icon: BookOpen,
@@ -51,11 +46,6 @@ export default function AdminCourses() {
         id: 'courses',
         label: 'Cursos',
         isActive: activeTab === 'courses'
-      },
-      {
-        id: 'coupons',
-        label: 'Cupones',
-        isActive: activeTab === 'coupons'
       },
     ],
     onTabChange: (tabId: string) => setActiveTab(tabId),
@@ -82,17 +72,6 @@ export default function AdminCourses() {
           Nuevo Curso
         </Button>
       ),
-      activeTab === 'coupons' && (
-        <Button
-          key="create-coupon"
-          onClick={handleCreateCoupon}
-          className="h-8 px-3 text-xs"
-          data-testid="button-create-coupon"
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Nuevo Cupón
-        </Button>
-      ),
     ].filter(Boolean)
   }
 
@@ -102,7 +81,6 @@ export default function AdminCourses() {
         {activeTab === 'dashboard' && <AdminCourseDashboardTab />}
         {activeTab === 'users' && <AdminCourseUsersTab />}
         {activeTab === 'courses' && <AdminCourseListTab />}
-        {activeTab === 'coupons' && <AdminCourseCouponTab />}
       </div>
     </Layout>
   )

@@ -31,7 +31,7 @@ interface Coupon {
   total_uses?: number;
 }
 
-export default function AdminCourseCouponTab() {
+export default function AdminPaymentCoupons() {
   const { toast } = useToast()
   const { openModal } = useGlobalModalStore()
   const isMobile = useMobile()
