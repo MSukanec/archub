@@ -11,7 +11,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Layout } from '@/components/layout/desktop/Layout';
 import CourseDashboardTab from './view/CourseDashboardTab';
 import CourseContentTab from './view/CourseContentTab';
-import CourseViewer from './view/CourseViewer';
+import CoursePlayerTab from './view/CoursePlayerTab';
 import CourseNotesTab from './view/CourseNotesTab';
 import CourseMarkersTab from './view/CourseMarkersTab';
 
@@ -233,7 +233,7 @@ export default function CourseView() {
     }
   ];
 
-  // State to hold CourseViewer navigation data
+  // State to hold CoursePlayerTab navigation data
   const [navigationState, setNavigationState] = useState<{
     hasPrev: boolean;
     hasNext: boolean;
@@ -355,7 +355,7 @@ export default function CourseView() {
         return <CourseContentTab courseId={course?.id} courseSlug={id} />;
       case 'Reproductor':
         return (
-          <CourseViewer 
+          <CoursePlayerTab 
             courseId={course?.id} 
             onNavigationStateChange={setNavigationState}
             initialLessonId={currentLessonId || lessonParam || undefined}
