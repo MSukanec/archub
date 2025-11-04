@@ -79,10 +79,23 @@ export async function updateProjectImageUrl(
   imageUrl: string | null
 ): Promise<void> {
   try {
+    // Get organization_id from the project
+    const { data: projectData, error: projectError } = await supabase
+      .from('projects')
+      .select('organization_id')
+      .eq('id', projectId)
+      .single();
+
+    if (projectError || !projectData) {
+      console.error('Error getting project organization:', projectError);
+      throw new Error(`Error al obtener organización del proyecto: ${projectError?.message || 'Proyecto no encontrado'}`);
+    }
+
     const { error } = await supabase
       .from('project_data')
       .upsert({
         project_id: projectId,
+        organization_id: projectData.organization_id,
         project_image_url: imageUrl
       }, {
         onConflict: 'project_id'

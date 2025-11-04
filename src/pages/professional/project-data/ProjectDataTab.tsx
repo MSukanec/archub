@@ -150,6 +150,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
         .from('project_data')
         .upsert({
           project_id: activeProjectId,
+          organization_id: organizationId,
           ...projectDataPayload
         }, {
           onConflict: 'project_id'

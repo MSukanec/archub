@@ -193,6 +193,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
             .update({
               project_type_id: data.project_type_id || null,
               modality_id: data.modality_id || null,
+              organization_id: organizationId,
             })
             .eq('project_id', editingProject.id);
 
@@ -202,6 +203,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
             .from('project_data')
             .upsert({
               project_id: editingProject.id,
+              organization_id: organizationId,
               project_type_id: data.project_type_id || null,
               modality_id: data.modality_id || null,
             }, {
@@ -241,6 +243,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
             .from('project_data')
             .upsert({
               project_id: newProject.id,
+              organization_id: organizationId,
               project_type_id: data.project_type_id || null,
               modality_id: data.modality_id || null,
             }, {
