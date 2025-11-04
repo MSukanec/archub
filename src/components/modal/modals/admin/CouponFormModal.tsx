@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { apiRequest } from '@/lib/queryClient';
 import { useEffect, useState } from 'react';
 import { Separator } from '@/components/ui/separator';
 import DatePickerField from '@/components/ui-custom/fields/DatePickerField';
@@ -174,60 +175,14 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
     onClose();
   };
 
-  const updateCouponCourses = async (couponId: string) => {
-    if (!supabase) return;
-
-    // Eliminar todas las asociaciones existentes
-    await supabase
-      .from('coupon_courses')
-      .delete()
-      .eq('coupon_id', couponId);
-
-    // Crear nuevas asociaciones si hay cursos seleccionados
-    if (selectedCourses.length > 0) {
-      const associations = selectedCourses.map(courseId => ({
-        coupon_id: couponId,
-        course_id: courseId
-      }));
-
-      await supabase
-        .from('coupon_courses')
-        .insert(associations);
-    }
-  };
-
   const createCouponMutation = useMutation({
     mutationFn: async (data: CouponFormData) => {
-      if (!supabase) throw new Error('Supabase not initialized');
+      const response = await apiRequest('POST', '/api/admin/coupons', {
+        couponData: data,
+        selectedCourses
+      });
       
-      const appliesToAll = selectedCourses.length === 0;
-      
-      const { data: newCoupon, error } = await supabase
-        .from('coupons')
-        .insert({
-          code: data.code.toUpperCase(),
-          type: data.type,
-          amount: data.amount,
-          is_active: data.is_active,
-          starts_at: data.starts_at || null,
-          expires_at: data.expires_at || null,
-          max_redemptions: data.max_redemptions || null,
-          per_user_limit: data.per_user_limit || 1,
-          min_order_total: data.min_order_total || null,
-          currency: data.currency || null,
-          applies_to_all: appliesToAll,
-        })
-        .select()
-        .single();
-      
-      if (error) throw error;
-      
-      // Actualizar cursos asociados
-      if (newCoupon) {
-        await updateCouponCourses(newCoupon.id);
-      }
-      
-      return newCoupon;
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['coupons'] });
@@ -249,31 +204,12 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
 
   const updateCouponMutation = useMutation({
     mutationFn: async (data: CouponFormData) => {
-      if (!supabase) throw new Error('Supabase not initialized');
+      const response = await apiRequest('PATCH', `/api/admin/coupons/${coupon!.id}`, {
+        couponData: data,
+        selectedCourses
+      });
       
-      const appliesToAll = selectedCourses.length === 0;
-      
-      const { error } = await supabase
-        .from('coupons')
-        .update({
-          code: data.code.toUpperCase(),
-          type: data.type,
-          amount: data.amount,
-          is_active: data.is_active,
-          starts_at: data.starts_at || null,
-          expires_at: data.expires_at || null,
-          max_redemptions: data.max_redemptions || null,
-          per_user_limit: data.per_user_limit || 1,
-          min_order_total: data.min_order_total || null,
-          currency: data.currency || null,
-          applies_to_all: appliesToAll,
-        })
-        .eq('id', coupon!.id);
-      
-      if (error) throw error;
-      
-      // Actualizar cursos asociados
-      await updateCouponCourses(coupon!.id);
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['coupons'] });
