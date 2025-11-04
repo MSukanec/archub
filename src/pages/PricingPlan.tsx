@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/lib/supabase";
-import { Check, X, Crown, CreditCard } from "lucide-react";
+import { Check, X, Crown, CreditCard, Sparkles, Zap, Users, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
 
@@ -78,6 +78,7 @@ export default function PricingPlan() {
 
   const getPlanConfig = (planName: string) => {
     const configs: Record<string, { 
+      icon: any;
       iconColor: string;
       bgColor: string;
       cardHeader: string;
@@ -86,6 +87,7 @@ export default function PricingPlan() {
       limits: { icon: string; value: string }[];
     }> = {
       'free': {
+        icon: Sparkles,
         iconColor: '#84cc16',
         bgColor: 'rgba(132, 204, 22, 0.08)',
         cardHeader: 'Perfecto para comenzar',
@@ -106,6 +108,7 @@ export default function PricingPlan() {
         ]
       },
       'pro': {
+        icon: Zap,
         iconColor: '#0047AB',
         bgColor: 'rgba(0, 71, 171, 0.08)',
         cardHeader: 'Para profesionales avanzados',
@@ -129,6 +132,7 @@ export default function PricingPlan() {
         ]
       },
       'teams': {
+        icon: Users,
         iconColor: '#8B5CF6',
         bgColor: 'rgba(139, 92, 246, 0.08)',
         cardHeader: 'Para equipos colaborativos',
@@ -152,6 +156,7 @@ export default function PricingPlan() {
         ]
       },
       'enterprise': {
+        icon: Briefcase,
         iconColor: '#64748b',
         bgColor: 'rgba(100, 116, 139, 0.08)',
         cardHeader: 'Solución personalizada',
@@ -334,6 +339,7 @@ export default function PricingPlan() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {plans.map((plan) => {
             const config = getPlanConfig(plan.name);
+            const Icon = config.icon;
             const monthlyPrice = getMonthlyEquivalent(plan.price);
             const totalPrice = getPlanPrice(plan.price);
             const isPopular = plan.name.toLowerCase() === 'pro';
@@ -367,10 +373,10 @@ export default function PricingPlan() {
 
                   {/* Icono + Nombre del Plan */}
                   <div className="flex items-center gap-3">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="10" fill={config.iconColor} opacity="0.2"/>
-                      <circle cx="12" cy="12" r="6" fill={config.iconColor}/>
-                    </svg>
+                    <Icon 
+                      className="h-6 w-6" 
+                      style={{ color: config.iconColor }}
+                    />
                     <h3 className={cn(
                       "text-2xl font-bold",
                       isPopular ? "text-white" : "text-[var(--text-default)]"
@@ -467,11 +473,10 @@ export default function PricingPlan() {
                     <ul className="space-y-2.5">
                       {config.features.map((feature, idx) => (
                         <li key={idx} className="flex items-start gap-3">
-                          <div className="mt-0.5 flex-shrink-0" style={{ color: config.iconColor }}>
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                              <path d="M13.3332 4L5.99984 11.3333L2.6665 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </div>
+                          <Check 
+                            className="h-4 w-4 mt-0.5 flex-shrink-0" 
+                            style={{ color: config.iconColor }}
+                          />
                           <span className={cn(
                             "text-sm leading-snug",
                             isPopular ? "text-gray-300" : "text-[var(--text-default)]"
@@ -498,10 +503,7 @@ export default function PricingPlan() {
                     {getPlanConfig('enterprise').cardHeader}
                   </div>
                   <div className="flex items-center gap-3">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <rect x="4" y="4" width="16" height="16" rx="2" fill="#64748b" opacity="0.2"/>
-                      <rect x="8" y="8" width="8" height="8" rx="1" fill="#64748b"/>
-                    </svg>
+                    <Briefcase className="h-6 w-6" style={{ color: getPlanConfig('enterprise').iconColor }} />
                     <h3 className="text-2xl font-bold text-[var(--text-default)]">
                       Enterprise
                     </h3>
@@ -541,7 +543,7 @@ export default function PricingPlan() {
           </div>
         )}
 
-        {/* Tabla de Comparación - Estilo Referencia */}
+        {/* Tabla de Comparación - IDÉNTICA a referencia */}
         <div className="mt-20 px-4">
           <h2 className="text-3xl font-bold text-center mb-12 text-[var(--text-default)]">
             Comparación Detallada
@@ -571,65 +573,120 @@ export default function PricingPlan() {
           <div className="max-w-6xl mx-auto overflow-x-auto">
             {/* Desktop: 4 columnas */}
             <div className="hidden md:block">
-              <div className="grid grid-cols-4 gap-0">
-                {/* Header */}
-                <div className="bg-background p-4 border-b border-r border-[var(--border-default)]">
-                  <div className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wide">
-                    Característica
-                  </div>
+              <div className="grid grid-cols-4 gap-0 border border-[var(--border-default)] rounded-lg overflow-hidden">
+                {/* Header con info de planes y botones */}
+                <div className="bg-background p-6">
+                  {/* Espacio vacío en esquina superior izquierda */}
                 </div>
+                
+                {/* Free Column Header */}
                 <div 
-                  className="p-4 text-center border-b border-r border-[var(--border-default)]"
+                  className="p-6 space-y-4"
                   style={{ backgroundColor: getPlanConfig('free').bgColor }}
                 >
-                  <div className="text-sm font-bold text-[var(--text-default)]">Free</div>
+                  <div>
+                    <div className="text-sm font-bold text-[var(--text-default)] mb-1">Free</div>
+                    <div className="text-xs text-[var(--text-muted)]">
+                      {getPlanConfig('free').description}
+                    </div>
+                  </div>
+                  <Button 
+                    variant="secondary" 
+                    size="sm" 
+                    className="w-full text-xs"
+                    data-testid="button-table-free"
+                  >
+                    Comenzar
+                  </Button>
                 </div>
+
+                {/* Pro Column Header */}
                 <div 
-                  className="p-4 text-center border-b border-r border-[var(--border-default)]"
+                  className="p-6 space-y-4"
                   style={{ backgroundColor: getPlanConfig('pro').bgColor }}
                 >
-                  <div className="text-sm font-bold text-[var(--text-default)]">Pro</div>
+                  <div>
+                    <div className="text-sm font-bold text-[var(--text-default)] mb-1">Pro</div>
+                    <div className="text-xs text-[var(--text-muted)]">
+                      {getPlanConfig('pro').description}
+                    </div>
+                  </div>
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="w-full text-xs"
+                    data-testid="button-table-pro"
+                  >
+                    Ser Fundador
+                  </Button>
                 </div>
+
+                {/* Teams Column Header */}
                 <div 
-                  className="p-4 text-center border-b border-[var(--border-default)]"
+                  className="p-6 space-y-4"
                   style={{ backgroundColor: getPlanConfig('teams').bgColor }}
                 >
-                  <div className="text-sm font-bold text-[var(--text-default)]">Teams</div>
+                  <div>
+                    <div className="text-sm font-bold text-[var(--text-default)] mb-1">Teams</div>
+                    <div className="text-xs text-[var(--text-muted)]">
+                      {getPlanConfig('teams').description}
+                    </div>
+                  </div>
+                  <Button 
+                    variant="secondary" 
+                    size="sm" 
+                    className="w-full text-xs"
+                    data-testid="button-table-teams"
+                  >
+                    Comenzar
+                  </Button>
                 </div>
 
                 {/* Rows */}
                 {comparisonData.map((section, sectionIdx) => (
                   <div key={sectionIdx} className="col-span-4 contents">
-                    {/* Category Header */}
-                    <div className="col-span-4 bg-[var(--accent)]/5 p-3 border-b border-[var(--border-default)]">
+                    {/* Category Header - Color continuo en columnas */}
+                    <div className="bg-background p-3 border-t border-[var(--border-default)]">
                       <h3 className="text-xs font-bold text-[var(--text-default)] uppercase tracking-wider">
                         {section.category}
                       </h3>
                     </div>
+                    <div 
+                      className="p-3 border-t border-[var(--border-default)]"
+                      style={{ backgroundColor: getPlanConfig('free').bgColor }}
+                    />
+                    <div 
+                      className="p-3 border-t border-[var(--border-default)]"
+                      style={{ backgroundColor: getPlanConfig('pro').bgColor }}
+                    />
+                    <div 
+                      className="p-3 border-t border-[var(--border-default)]"
+                      style={{ backgroundColor: getPlanConfig('teams').bgColor }}
+                    />
                     
                     {/* Category Rows */}
                     {section.rows.map((row, rowIdx) => (
                       <div key={rowIdx} className="contents">
-                        <div className="bg-background p-4 text-sm font-medium text-[var(--text-default)] border-b border-r border-[var(--border-default)]">
+                        <div className="bg-background p-4 text-sm font-medium text-[var(--text-default)] border-t border-[var(--border-default)]">
                           {row.label}
                         </div>
                         <div 
-                          className="p-4 flex justify-center items-center border-b border-r border-[var(--border-default)]"
+                          className="p-4 flex justify-center items-center border-t border-[var(--border-default)]"
                           style={{ backgroundColor: getPlanConfig('free').bgColor }}
                         >
-                          {renderValue(row.free)}
+                          {renderValue(row.free, getPlanConfig('free').iconColor)}
                         </div>
                         <div 
-                          className="p-4 flex justify-center items-center border-b border-r border-[var(--border-default)]"
+                          className="p-4 flex justify-center items-center border-t border-[var(--border-default)]"
                           style={{ backgroundColor: getPlanConfig('pro').bgColor }}
                         >
-                          {renderValue(row.pro)}
+                          {renderValue(row.pro, getPlanConfig('pro').iconColor)}
                         </div>
                         <div 
-                          className="p-4 flex justify-center items-center border-b border-[var(--border-default)]"
+                          className="p-4 flex justify-center items-center border-t border-[var(--border-default)]"
                           style={{ backgroundColor: getPlanConfig('teams').bgColor }}
                         >
-                          {renderValue(row.teams)}
+                          {renderValue(row.teams, getPlanConfig('teams').iconColor)}
                         </div>
                       </div>
                     ))}
@@ -641,26 +698,30 @@ export default function PricingPlan() {
             {/* Mobile: 2 columnas */}
             <div className="md:hidden">
               <div className="grid grid-cols-2 gap-0 border border-[var(--border-default)] rounded-lg overflow-hidden">
-                {/* Header */}
-                <div className="bg-background p-3 border-b border-r border-[var(--border-default)]">
-                  <div className="text-xs font-bold text-[var(--text-muted)] uppercase">
-                    Característica
+                {/* Header con botón */}
+                <div className="col-span-2 p-4" style={{ backgroundColor: getPlanConfig(selectedPlanForComparison).bgColor }}>
+                  <div className="mb-3">
+                    <div className="text-sm font-bold text-[var(--text-default)] mb-1 capitalize">
+                      {selectedPlanForComparison}
+                    </div>
+                    <div className="text-xs text-[var(--text-muted)]">
+                      {getPlanConfig(selectedPlanForComparison).description}
+                    </div>
                   </div>
-                </div>
-                <div 
-                  className="p-3 text-center border-b border-[var(--border-default)] capitalize"
-                  style={{ backgroundColor: getPlanConfig(selectedPlanForComparison).bgColor }}
-                >
-                  <div className="text-xs font-bold text-[var(--text-default)]">
-                    {selectedPlanForComparison}
-                  </div>
+                  <Button 
+                    variant={selectedPlanForComparison === 'pro' ? 'default' : 'secondary'}
+                    size="sm" 
+                    className="w-full text-xs"
+                  >
+                    {selectedPlanForComparison === 'pro' ? 'Ser Fundador' : 'Comenzar'}
+                  </Button>
                 </div>
 
                 {/* Rows */}
                 {comparisonData.map((section, sectionIdx) => (
                   <div key={sectionIdx} className="col-span-2 contents">
                     {/* Category Header */}
-                    <div className="col-span-2 bg-[var(--accent)]/5 p-2.5 border-b border-[var(--border-default)]">
+                    <div className="col-span-2 bg-[var(--accent)]/5 p-2.5 border-t border-[var(--border-default)]">
                       <h3 className="text-[10px] font-bold text-[var(--text-default)] uppercase tracking-wider">
                         {section.category}
                       </h3>
@@ -669,14 +730,14 @@ export default function PricingPlan() {
                     {/* Category Rows */}
                     {section.rows.map((row, rowIdx) => (
                       <div key={rowIdx} className="contents">
-                        <div className="bg-background p-3 text-xs font-medium text-[var(--text-default)] border-b border-r border-[var(--border-default)]">
+                        <div className="bg-background p-3 text-xs font-medium text-[var(--text-default)] border-t border-r border-[var(--border-default)]">
                           {row.label}
                         </div>
                         <div 
-                          className="p-3 flex justify-center items-center border-b border-[var(--border-default)]"
+                          className="p-3 flex justify-center items-center border-t border-[var(--border-default)]"
                           style={{ backgroundColor: getPlanConfig(selectedPlanForComparison).bgColor }}
                         >
-                          {renderValue(row[selectedPlanForComparison])}
+                          {renderValue(row[selectedPlanForComparison], getPlanConfig(selectedPlanForComparison).iconColor)}
                         </div>
                       </div>
                     ))}
@@ -775,10 +836,10 @@ export default function PricingPlan() {
   );
 }
 
-function renderValue(value: string | boolean) {
+function renderValue(value: string | boolean, iconColor: string) {
   if (typeof value === 'boolean') {
     return value ? (
-      <Check className="h-5 w-5 text-accent" />
+      <Check className="h-5 w-5" style={{ color: iconColor }} />
     ) : (
       <X className="h-4 w-4 text-gray-300 dark:text-gray-700" />
     );
