@@ -436,6 +436,7 @@ export default function PricingPlan() {
                         : ""
                     )}
                     variant={isPopular ? "default" : "secondary"}
+                    disabled={plan.name.toLowerCase() === 'pro' || plan.name.toLowerCase() === 'teams'}
                     data-testid={`button-select-plan-${plan.name.toLowerCase()}`}
                   >
                     {billingPeriod === 'annual' ? 'Ser Fundador' : 'Comenzar ahora'}
@@ -623,6 +624,7 @@ export default function PricingPlan() {
                     size="sm" 
                     className="w-full text-xs text-white"
                     style={{ backgroundColor: getPlanConfig('pro').iconColor }}
+                    disabled
                     data-testid="button-table-pro"
                   >
                     Ser Fundador
@@ -644,6 +646,7 @@ export default function PricingPlan() {
                     size="sm" 
                     className="w-full text-xs text-white"
                     style={{ backgroundColor: getPlanConfig('teams').iconColor }}
+                    disabled
                     data-testid="button-table-teams"
                   >
                     Comenzar
@@ -660,15 +663,15 @@ export default function PricingPlan() {
                       </h3>
                     </div>
                     <div 
-                      className="p-3 pt-6 rounded-t-lg"
+                      className="p-3 pt-6"
                       style={{ backgroundColor: getPlanConfig('free').bgColor }}
                     />
                     <div 
-                      className="p-3 pt-6 rounded-t-lg"
+                      className="p-3 pt-6"
                       style={{ backgroundColor: getPlanConfig('pro').bgColor }}
                     />
                     <div 
-                      className="p-3 pt-6 rounded-t-lg"
+                      className="p-3 pt-6"
                       style={{ backgroundColor: getPlanConfig('teams').bgColor }}
                     />
                     
@@ -720,6 +723,7 @@ export default function PricingPlan() {
                     variant={selectedPlanForComparison === 'pro' ? 'default' : 'secondary'}
                     size="sm" 
                     className="w-full text-xs"
+                    disabled={selectedPlanForComparison === 'pro' || selectedPlanForComparison === 'teams'}
                   >
                     {selectedPlanForComparison === 'pro' ? 'Ser Fundador' : 'Comenzar'}
                   </Button>
