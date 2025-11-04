@@ -147,14 +147,13 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
           {/* Main Content Area - MainHeader + Page Content */}
           <div className="flex-1 flex flex-col min-h-0">
-            {/* Main Header for Desktop */}
-            <MainHeader icon={headerProps?.icon} title={headerProps?.title} />
-
             {/* Page Content with rounded corners and framing effect */}
-            <div className={`flex-1 flex min-h-0 relative ${isDocked ? 'gap-3' : ''}`}>
-              <div className={`flex-1 ${isCourseSidebarVisible ? '' : 'pr-3'} pb-3 overflow-x-hidden`}>
+            <div className={`flex-1 flex flex-col min-h-0 relative`}>
+              <div className={`flex-1 flex flex-col ${isCourseSidebarVisible ? '' : 'pr-3'} pb-3 overflow-x-hidden`}>
+                {/* Main Header for Desktop */}
+                <MainHeader icon={headerProps?.icon} title={headerProps?.title} />
                 <main
-                  className={`h-full flex flex-col rounded-2xl overflow-hidden ${!isDocked ? 'w-full' : ''}`}
+                  className={`flex-1 flex flex-col rounded-2xl overflow-hidden ${!isDocked ? 'w-full' : ''}`}
                   style={{
                     background: isDark 
                       ? 'linear-gradient(to bottom, var(--gradient-from-dark), var(--gradient-to-dark))'
