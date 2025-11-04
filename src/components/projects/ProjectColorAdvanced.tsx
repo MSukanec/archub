@@ -164,7 +164,9 @@ export default function ProjectColorAdvanced({
               [&::-webkit-slider-track]:from-red-500
               [&::-webkit-slider-track]:via-green-500
               [&::-webkit-slider-track]:to-red-500
-              [&::-webkit-slider-track]:shadow-sm
+              [&::-webkit-slider-track]:border
+              [&::-webkit-slider-track]:border-gray-400/40
+              [&::-webkit-slider-track]:shadow-[0_1px_3px_rgba(0,0,0,0.2),inset_0_1px_2px_rgba(0,0,0,0.1)]
               [&::-webkit-slider-thumb]:appearance-none
               [&::-webkit-slider-thumb]:w-6
               [&::-webkit-slider-thumb]:h-6
@@ -180,7 +182,9 @@ export default function ProjectColorAdvanced({
               [&::-moz-range-track]:from-red-500
               [&::-moz-range-track]:via-green-500
               [&::-moz-range-track]:to-red-500
-              [&::-moz-range-track]:shadow-sm
+              [&::-moz-range-track]:border
+              [&::-moz-range-track]:border-gray-400/40
+              [&::-moz-range-track]:shadow-[0_1px_3px_rgba(0,0,0,0.2),inset_0_1px_2px_rgba(0,0,0,0.1)]
               [&::-moz-range-thumb]:w-6
               [&::-moz-range-thumb]:h-6
               [&::-moz-range-thumb]:rounded-full

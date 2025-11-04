@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { LucideIcon, ArrowLeft, Loader2, AlertCircle, CheckCircle, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ModalReadinessResult } from '../utils/modal-readiness';
+import { ModalReadinessState } from '../utils/modal-readiness';
 
 interface BreadcrumbItem {
   label: string;
@@ -34,7 +34,7 @@ interface FormModalHeaderProps {
   // NUEVAS PROPIEDADES AVANZADAS
   
   /** Estado de readiness del modal */
-  readinessState?: ModalReadinessResult;
+  readinessState?: ModalReadinessState;
   
   /** Breadcrumb para navegación jerárquica */
   breadcrumbs?: BreadcrumbItem[];
