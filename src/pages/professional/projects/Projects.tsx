@@ -6,8 +6,8 @@ import { useProjects } from '@/hooks/use-projects'
 import { Folder, Plus } from 'lucide-react'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
-import ProjectActives from './ProjectActives'
-import ProjectList from './ProjectList'
+import ProjectActivesTab from './ProjectActivesTab'
+import ProjectListTab from './ProjectListTab'
 
 export default function Projects() {
   const { openModal } = useGlobalModalStore()
@@ -68,8 +68,8 @@ export default function Projects() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {activeTab === 'actives' && <ProjectActives />}
-        {activeTab === 'list' && <ProjectList />}
+        {activeTab === 'actives' && <ProjectActivesTab />}
+        {activeTab === 'list' && <ProjectListTab />}
       </div>
     </Layout>
   )
