@@ -32,12 +32,12 @@ export default function AdminCommunityDashboard() {
 
       // ✅ OPTIMIZACIÓN: Ejecutar queries en paralelo con Promise.all
       const [
-        { count: totalOrganizations },
-        { count: activeOrganizations },
-        { count: totalUsers },
-        { count: newUsersThisMonth },
-        { count: newUsersLastMonth },
-        { data: activeUsers }
+        totalOrgsResult,
+        activeOrgsResult,
+        totalUsersResult,
+        newUsersThisMonthResult,
+        newUsersLastMonthResult,
+        activeUsersResult
       ] = await Promise.all([
         // Total organizaciones
         supabase
@@ -75,16 +75,16 @@ export default function AdminCommunityDashboard() {
           .gte('last_seen_at', ninetySecondsAgo.toISOString())
       ])
 
-      const uniqueActiveUsers = new Set(activeUsers?.map(u => u.user_id) || [])
+      const uniqueActiveUsers = new Set(activeUsersResult.data?.map(u => u.user_id) || [])
       const activeUsersNow = uniqueActiveUsers.size
 
       return {
-        totalOrganizations: totalOrganizations || 0,
-        activeOrganizations: activeOrganizations || 0,
-        totalUsers: totalUsers || 0,
+        totalOrganizations: totalOrgsResult.count || 0,
+        activeOrganizations: activeOrgsResult.count || 0,
+        totalUsers: totalUsersResult.count || 0,
         activeUsersNow,
-        newUsersThisMonth: newUsersThisMonth || 0,
-        newUsersLastMonth: newUsersLastMonth || 0
+        newUsersThisMonth: newUsersThisMonthResult.count || 0,
+        newUsersLastMonth: newUsersLastMonthResult.count || 0
       } as DashboardStats
     },
     enabled: !!supabase,
