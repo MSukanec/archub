@@ -20,7 +20,8 @@ export function AIFloatingChat() {
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Cargar historial al montar
   useEffect(() => {
@@ -55,12 +56,15 @@ export function AIFloatingChat() {
     loadHistory();
   }, []);
 
-  // Auto-scroll al final cuando hay nuevos mensajes
+  // Auto-scroll al final cuando hay nuevos mensajes O cuando se abre
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (messagesEndRef.current && isOpen) {
+      // Pequeño delay para asegurar que el DOM se haya renderizado
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
     }
-  }, [chatMessages]);
+  }, [chatMessages, isOpen]);
 
   const handleMouseEnter = () => {
     if (closeTimeoutRef.current) {
@@ -137,36 +141,36 @@ export function AIFloatingChat() {
     >
       {/* Botón flotante con efecto de respiración */}
       <motion.button
-        className="relative h-14 w-14 rounded-full bg-gradient-to-br from-accent to-accent/80 shadow-lg flex items-center justify-center group"
+        className="relative h-12 w-12 rounded-full bg-gradient-to-br from-accent to-accent/80 shadow-lg flex items-center justify-center group"
         animate={{
-          scale: [1, 1.05, 1],
+          scale: [1, 1.02, 1],
           boxShadow: [
-            "0 4px 20px rgba(var(--accent-rgb), 0.3)",
-            "0 8px 30px rgba(var(--accent-rgb), 0.5)",
-            "0 4px 20px rgba(var(--accent-rgb), 0.3)",
+            "0 4px 15px rgba(var(--accent-rgb), 0.2)",
+            "0 6px 20px rgba(var(--accent-rgb), 0.3)",
+            "0 4px 15px rgba(var(--accent-rgb), 0.2)",
           ],
         }}
         transition={{
-          duration: 3,
+          duration: 4.5,
           repeat: Infinity,
-          ease: "easeInOut",
+          ease: [0.4, 0, 0.6, 1],
         }}
-        whileHover={{ scale: 1.1 }}
+        whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
       >
-        <Sparkles className="h-6 w-6 text-accent-foreground" />
+        <Sparkles className="h-5 w-5 text-accent-foreground" />
         
         {/* Pulso exterior */}
         <motion.div
           className="absolute inset-0 rounded-full bg-accent"
           animate={{
-            scale: [1, 1.4, 1],
-            opacity: [0.5, 0, 0.5],
+            scale: [1, 1.3, 1],
+            opacity: [0.3, 0, 0.3],
           }}
           transition={{
-            duration: 3,
+            duration: 4.5,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: [0.4, 0, 0.6, 1],
           }}
         />
       </motion.button>
@@ -204,7 +208,7 @@ export function AIFloatingChat() {
 
             {/* Área de mensajes */}
             <div className="h-[400px] flex flex-col">
-              <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+              <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
                 {isLoadingHistory ? (
                   <div className="flex items-center justify-center h-full">
                     <div className="flex gap-1">
@@ -260,30 +264,22 @@ export function AIFloatingChat() {
                         </div>
                       </div>
                     )}
+                    
+                    {/* Elemento invisible para hacer scroll */}
+                    <div ref={messagesEndRef} />
                   </div>
                 )}
               </ScrollArea>
 
               {/* Input de mensaje */}
               <div className="p-3 border-t border-border bg-muted/30">
-                <div className="flex gap-2">
-                  <SmartChatInput
-                    value={inputMessage}
-                    onChange={setInputMessage}
-                    onSubmit={handleSendMessage}
-                    placeholder="Escribe tu mensaje..."
-                    disabled={isSendingMessage}
-                    className="flex-1"
-                  />
-                  <Button
-                    size="icon"
-                    onClick={handleSendMessage}
-                    disabled={!inputMessage.trim() || isSendingMessage}
-                    className="h-10 w-10"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
+                <SmartChatInput
+                  value={inputMessage}
+                  onChange={setInputMessage}
+                  onSubmit={handleSendMessage}
+                  placeholder="Escribe tu mensaje..."
+                  disabled={isSendingMessage}
+                />
               </div>
             </div>
 
