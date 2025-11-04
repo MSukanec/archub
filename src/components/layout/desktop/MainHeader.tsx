@@ -28,13 +28,13 @@ export function MainHeader({ icon, title }: MainHeaderProps) {
 
   return (
     <div 
-      className="w-full h-[50px] border-b flex items-center justify-center z-50 py-0"
+      className="w-full h-[50px] border-b flex items-center z-50 py-0"
       style={{ 
         backgroundColor: "var(--main-sidebar-bg)",
         borderBottomColor: "var(--main-sidebar-border)"
       }}
     >
-      <div className="max-w-[1440px] mx-auto px-16 w-full flex items-center justify-between">
+      <div className="max-w-[1440px] mx-auto px-16 w-full flex items-center justify-between flex-shrink-0">
         {/* Left side: Icon + Title */}
         <div className="flex items-center gap-3">
           <PageIcon className="w-6 h-6 main-header-icon" />
