@@ -18,7 +18,7 @@ interface DashboardStats {
 }
 
 export default function AdminCommunityDashboard() {
-  // Fetch dashboard statistics
+  // Fetch dashboard statistics - OPTIMIZADO
   const { data: stats, isLoading } = useQuery({
     queryKey: ['admin-community-dashboard'],
     queryFn: async () => {
@@ -30,53 +30,69 @@ export default function AdminCommunityDashboard() {
       const lastMonthEnd = endOfMonth(subMonths(now, 1))
       const ninetySecondsAgo = new Date(now.getTime() - 90000)
 
-      // Organizaciones
-      const { data: organizations } = await supabase
-        .from('organizations')
-        .select('id, is_active, plan_id, created_at')
-
-      const totalOrganizations = organizations?.length || 0
-      const activeOrganizations = organizations?.filter(o => o.is_active).length || 0
-
-      // Usuarios
-      const { data: users } = await supabase
-        .from('users')
-        .select('id, created_at')
-
-      const totalUsers = users?.length || 0
-
-      const newUsersThisMonth = users?.filter(u => {
-        const date = new Date(u.created_at)
-        return isAfter(date, thisMonthStart)
-      }).length || 0
-
-      const newUsersLastMonth = users?.filter(u => {
-        const date = new Date(u.created_at)
-        return isAfter(date, lastMonthStart) && isBefore(date, lastMonthEnd)
-      }).length || 0
-
-      // Usuarios activos ahora (últimos 90 segundos)
-      const { data: activeUsers } = await supabase
-        .from('organization_online_users')
-        .select('user_id')
-        .gte('last_seen_at', ninetySecondsAgo.toISOString())
+      // ✅ OPTIMIZACIÓN: Ejecutar queries en paralelo con Promise.all
+      const [
+        { count: totalOrganizations },
+        { count: activeOrganizations },
+        { count: totalUsers },
+        { count: newUsersThisMonth },
+        { count: newUsersLastMonth },
+        { data: activeUsers }
+      ] = await Promise.all([
+        // Total organizaciones
+        supabase
+          .from('organizations')
+          .select('*', { count: 'exact', head: true }),
+        
+        // Organizaciones activas
+        supabase
+          .from('organizations')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_active', true),
+        
+        // Total usuarios
+        supabase
+          .from('users')
+          .select('*', { count: 'exact', head: true }),
+        
+        // Nuevos usuarios este mes
+        supabase
+          .from('users')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', thisMonthStart.toISOString()),
+        
+        // Nuevos usuarios mes anterior
+        supabase
+          .from('users')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', lastMonthStart.toISOString())
+          .lte('created_at', lastMonthEnd.toISOString()),
+        
+        // Usuarios activos ahora (solo IDs únicos)
+        supabase
+          .from('organization_online_users')
+          .select('user_id')
+          .gte('last_seen_at', ninetySecondsAgo.toISOString())
+      ])
 
       const uniqueActiveUsers = new Set(activeUsers?.map(u => u.user_id) || [])
       const activeUsersNow = uniqueActiveUsers.size
 
       return {
-        totalOrganizations,
-        activeOrganizations,
-        totalUsers,
+        totalOrganizations: totalOrganizations || 0,
+        activeOrganizations: activeOrganizations || 0,
+        totalUsers: totalUsers || 0,
         activeUsersNow,
-        newUsersThisMonth,
-        newUsersLastMonth
+        newUsersThisMonth: newUsersThisMonth || 0,
+        newUsersLastMonth: newUsersLastMonth || 0
       } as DashboardStats
     },
-    enabled: !!supabase
+    enabled: !!supabase,
+    staleTime: 30000, // Cache 30 segundos
+    refetchInterval: 60000 // Auto-refresh cada minuto
   })
 
-  // Últimas conexiones de usuarios
+  // Últimas conexiones de usuarios - OPTIMIZADO
   const { data: recentActivity, isLoading: loadingActivity } = useQuery({
     queryKey: ['recent-user-activity'],
     queryFn: async () => {
@@ -94,48 +110,54 @@ export default function AdminCommunityDashboard() {
 
       return data
     },
-    enabled: !!supabase
+    enabled: !!supabase,
+    staleTime: 15000, // Cache 15 segundos (actividad cambia rápido)
+    refetchInterval: 30000 // Auto-refresh cada 30 segundos
   })
 
-  // Organizaciones más activas (por última actividad)
+  // Organizaciones más activas (por última actividad) - OPTIMIZADO
   const { data: activeOrganizations, isLoading: loadingOrgs } = useQuery({
     queryKey: ['most-active-organizations'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not available')
 
-      // Obtener todas las organizaciones
-      const { data: orgs } = await supabase
-        .from('organizations')
-        .select('id, name')
-        .eq('is_active', true)
+      // ✅ OPTIMIZACIÓN: Un solo query con JOIN y GROUP BY
+      // Obtener organizaciones con su última actividad en una sola consulta
+      const { data } = await supabase
+        .from('organization_online_users')
+        .select(`
+          org_id,
+          last_seen_at,
+          organizations!inner(id, name, is_active)
+        `)
+        .eq('organizations.is_active', true)
+        .order('last_seen_at', { ascending: false })
 
-      if (!orgs) return []
+      if (!data) return []
 
-      // Para cada organización, obtener su última actividad
-      const orgsWithActivity = await Promise.all(
-        orgs.map(async (org) => {
-          const { data: activity } = await supabase
-            .from('organization_online_users')
-            .select('last_seen_at')
-            .eq('org_id', org.id)
-            .order('last_seen_at', { ascending: false })
-            .limit(1)
-            .single()
+      // Agrupar por org_id y tomar solo la más reciente de cada una
+      const orgMap = new Map<string, any>()
+      
+      for (const item of data) {
+        const orgId = item.org_id
+        const org = item.organizations as any
+        if (!orgMap.has(orgId)) {
+          orgMap.set(orgId, {
+            id: org.id,
+            name: org.name,
+            last_seen_at: item.last_seen_at
+          })
+        }
+      }
 
-          return {
-            ...org,
-            last_seen_at: activity?.last_seen_at || null
-          }
-        })
-      )
-
-      // Ordenar por actividad más reciente y tomar las 5 primeras
-      return orgsWithActivity
-        .filter(o => o.last_seen_at)
-        .sort((a, b) => new Date(b.last_seen_at!).getTime() - new Date(a.last_seen_at!).getTime())
+      // Convertir a array, ordenar y tomar top 5
+      return Array.from(orgMap.values())
+        .sort((a, b) => new Date(b.last_seen_at).getTime() - new Date(a.last_seen_at).getTime())
         .slice(0, 5)
     },
-    enabled: !!supabase
+    enabled: !!supabase,
+    staleTime: 30000, // Cache 30 segundos
+    refetchInterval: 60000 // Auto-refresh cada minuto
   })
 
   const userGrowth = stats?.newUsersLastMonth 
