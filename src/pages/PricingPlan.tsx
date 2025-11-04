@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/lib/supabase";
-import { Check, X, Crown, Sparkles, Users, Briefcase, Zap } from "lucide-react";
+import { Check, X, Crown, Sparkles, Users, Briefcase, Zap, CreditCard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
 import {
@@ -75,8 +75,7 @@ export default function PricingPlan() {
   const getPlanConfig = (planName: string) => {
     const configs: Record<string, { 
       icon: any; 
-      color: string; 
-      bgColor: string;
+      color: string;
       description: string;
       features: string[];
       limits: { projects: string; storage: string; ai: string; users: string };
@@ -84,8 +83,7 @@ export default function PricingPlan() {
       'free': {
         icon: Sparkles,
         color: 'hsl(76, 100%, 40%)',
-        bgColor: 'var(--plan-free-bg)',
-        description: 'Perfecto para comenzar y explorar la plataforma',
+        description: 'Perfecto para comenzar',
         features: [
           'Gestión básica de proyectos',
           'Presupuestos y seguimiento',
@@ -97,24 +95,23 @@ export default function PricingPlan() {
         limits: {
           projects: '3 proyectos',
           storage: '500 MB',
-          ai: 'Solo resúmenes diarios',
+          ai: 'Solo resúmenes',
           users: '1 usuario'
         }
       },
       'pro': {
         icon: Zap,
         color: 'hsl(213, 100%, 33%)',
-        bgColor: 'var(--plan-pro-bg)',
-        description: 'Para profesionales que necesitan herramientas avanzadas',
+        description: 'Para profesionales avanzados',
         features: [
-          'Todo en Free, más:',
-          'Gestión multi-moneda (ARS, USD)',
-          'PDFs personalizables y reportes',
-          'Análisis financiero con IA (10k tokens/mes)',
+          'Todo en Free',
+          'Gestión multi-moneda',
+          'PDFs personalizables',
+          '10,000 tokens IA/mes',
           'Control de subcontratos',
-          'Gestión de personal y asistencias',
-          'Vistas Gantt y Kanban avanzadas',
-          'Integración con Mercado Pago y PayPal',
+          'Gestión de personal',
+          'Gantt y Kanban avanzados',
+          'Integraciones de pago',
           'Soporte prioritario'
         ],
         limits: {
@@ -127,18 +124,17 @@ export default function PricingPlan() {
       'teams': {
         icon: Users,
         color: 'hsl(271, 76%, 53%)',
-        bgColor: 'var(--plan-teams-bg)',
-        description: 'Diseñado para equipos que colaboran en múltiples proyectos',
+        description: 'Para equipos colaborativos',
         features: [
-          'Todo en Pro, más:',
-          'Usuarios ilimitados con roles y permisos',
-          'IA ilimitada para todo el equipo',
+          'Todo en Pro',
+          'Usuarios ilimitados',
+          'IA ilimitada',
           'Colaboración en tiempo real',
-          'Historial de cambios y auditoría',
-          'Panel de administración de equipo',
-          'Gestión de múltiples organizaciones',
+          'Historial de cambios',
+          'Admin de equipo',
+          'Múltiples organizaciones',
           'API de integración',
-          'Soporte dedicado 24/7'
+          'Soporte 24/7'
         ],
         limits: {
           projects: 'Ilimitados',
@@ -150,18 +146,17 @@ export default function PricingPlan() {
       'enterprise': {
         icon: Briefcase,
         color: 'hsl(240, 5%, 35%)',
-        bgColor: 'linear-gradient(135deg, hsl(240, 5%, 25%) 0%, hsl(240, 5%, 15%) 100%)',
-        description: 'Solución personalizada para grandes organizaciones',
+        description: 'Solución personalizada',
         features: [
-          'Todo en Teams, más:',
-          'Implementación on-premise disponible',
-          'SSO y autenticación personalizada',
-          'Cumplimiento de normativas específicas',
-          'Capacitación del equipo incluida',
-          'Gerente de cuenta dedicado',
-          'SLA garantizado del 99.9%',
-          'Desarrollo de funcionalidades a medida',
-          'Integración con sistemas existentes'
+          'Todo en Teams',
+          'Implementación on-premise',
+          'SSO personalizado',
+          'Cumplimiento normativo',
+          'Capacitación incluida',
+          'Gerente dedicado',
+          'SLA 99.9%',
+          'Desarrollo a medida',
+          'Integraciones custom'
         ],
         limits: {
           projects: 'Sin límites',
@@ -175,9 +170,15 @@ export default function PricingPlan() {
     return configs[planName.toLowerCase()] || configs['free'];
   };
 
+  const headerProps = {
+    icon: CreditCard,
+    title: "Planes y Precios",
+    description: "Elige el plan que mejor se adapte a tus necesidades"
+  };
+
   if (isLoading) {
     return (
-      <Layout>
+      <Layout headerProps={headerProps}>
         <div className="flex items-center justify-center h-96">
           <LoadingSpinner />
         </div>
@@ -186,91 +187,82 @@ export default function PricingPlan() {
   }
 
   return (
-    <Layout>
-      <div className="space-y-8 pb-12">
-        {/* Banner Fundador */}
-        <Card className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border-amber-200 dark:border-amber-800">
+    <Layout headerProps={headerProps}>
+      <div className="max-w-7xl mx-auto space-y-12 py-8">
+        
+        {/* Banner Fundador - Minimalista con --accent */}
+        <Card className="border-2 border-accent/20 bg-gradient-to-br from-background via-background to-accent/5">
           <div className="p-6 flex items-start gap-4">
-            <div className="p-3 bg-amber-500 rounded-lg">
-              <Crown className="h-6 w-6 text-white" />
+            <div className="p-2.5 bg-accent/10 rounded-lg">
+              <Crown className="h-5 w-5 text-accent" />
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className="text-lg font-semibold text-amber-900 dark:text-amber-100">
+              <div className="flex items-center gap-3 mb-2">
+                <h3 className="text-base font-semibold text-[var(--text-default)]">
                   Oferta de Lanzamiento: Conviértete en Fundador
                 </h3>
-                <Badge className="bg-amber-500 text-white hover:bg-amber-600">
-                  Tiempo Limitado
+                <Badge className="bg-accent text-accent-foreground text-xs">
+                  Limitado
                 </Badge>
               </div>
-              <p className="text-amber-800 dark:text-amber-200 mb-3">
-                Por ser parte de los primeros usuarios de Archub, cualquier suscripción <strong>ANUAL</strong> te otorga beneficios exclusivos de por vida:
+              <p className="text-sm text-[var(--text-muted)] mb-4">
+                Suscripción <strong>ANUAL</strong> incluye beneficios exclusivos de por vida:
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-amber-700 dark:text-amber-300">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-[var(--text-muted)]">
                 <div className="flex items-center gap-2">
-                  <Crown className="h-4 w-4 flex-shrink-0" />
-                  <span>Badge de "Fundador" visible en tu perfil</span>
+                  <Check className="h-3.5 w-3.5 text-accent flex-shrink-0" />
+                  <span>Badge de "Fundador" en tu perfil</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 flex-shrink-0" />
+                  <Check className="h-3.5 w-3.5 text-accent flex-shrink-0" />
                   <span>Acceso anticipado a nuevas funcionalidades</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 flex-shrink-0" />
-                  <span>Invitación al grupo privado de Fundadores</span>
+                  <Check className="h-3.5 w-3.5 text-accent flex-shrink-0" />
+                  <span>Grupo privado de Fundadores</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Zap className="h-4 w-4 flex-shrink-0" />
-                  <span>10% de descuento adicional en futuras renovaciones</span>
+                  <Check className="h-3.5 w-3.5 text-accent flex-shrink-0" />
+                  <span>10% descuento en renovaciones</span>
                 </div>
               </div>
             </div>
           </div>
         </Card>
 
-        {/* Header de Pricing */}
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-[var(--text-default)]">
-            Planes simples y transparentes
-          </h1>
-          <p className="text-lg text-[var(--text-muted)] max-w-2xl mx-auto">
-            Elige el plan que mejor se adapte a tus necesidades. Todos incluyen actualizaciones gratuitas y soporte.
-          </p>
-
-          {/* Toggle Mensual/Anual */}
-          <div className="flex items-center justify-center gap-4 mt-6">
-            <button
-              onClick={() => setBillingPeriod('monthly')}
-              className={cn(
-                "px-4 py-2 rounded-lg font-medium transition-colors",
-                billingPeriod === 'monthly'
-                  ? "bg-accent text-accent-foreground"
-                  : "bg-card text-card-fg hover:bg-card-hover"
-              )}
-              data-testid="button-billing-monthly"
-            >
-              Mensual
-            </button>
-            <button
-              onClick={() => setBillingPeriod('annual')}
-              className={cn(
-                "px-4 py-2 rounded-lg font-medium transition-colors relative",
-                billingPeriod === 'annual'
-                  ? "bg-accent text-accent-foreground"
-                  : "bg-card text-card-fg hover:bg-card-hover"
-              )}
-              data-testid="button-billing-annual"
-            >
-              Anual
-              <Badge className="ml-2 bg-green-500 text-white text-xs">
-                Ahorra 20%
-              </Badge>
-            </button>
-          </div>
+        {/* Toggle Mensual/Anual */}
+        <div className="flex items-center justify-center gap-3">
+          <button
+            onClick={() => setBillingPeriod('monthly')}
+            className={cn(
+              "px-6 py-2.5 rounded-lg font-medium transition-all text-sm",
+              billingPeriod === 'monthly'
+                ? "bg-accent text-accent-foreground shadow-sm"
+                : "bg-card text-[var(--text-muted)] hover:bg-card-hover"
+            )}
+            data-testid="button-billing-monthly"
+          >
+            Mensual
+          </button>
+          <button
+            onClick={() => setBillingPeriod('annual')}
+            className={cn(
+              "px-6 py-2.5 rounded-lg font-medium transition-all text-sm flex items-center gap-2",
+              billingPeriod === 'annual'
+                ? "bg-accent text-accent-foreground shadow-sm"
+                : "bg-card text-[var(--text-muted)] hover:bg-card-hover"
+            )}
+            data-testid="button-billing-annual"
+          >
+            Anual
+            <Badge variant="secondary" className="text-xs font-semibold">
+              -20%
+            </Badge>
+          </button>
         </div>
 
         {/* Cards de Planes */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
           {plans.map((plan) => {
             const config = getPlanConfig(plan.name);
             const Icon = config.icon;
@@ -282,105 +274,120 @@ export default function PricingPlan() {
               <Card
                 key={plan.id}
                 className={cn(
-                  "relative overflow-hidden transition-all hover:shadow-lg",
-                  isPopular && "ring-2 ring-accent shadow-xl scale-105"
+                  "relative overflow-hidden transition-all hover:shadow-md border",
+                  isPopular 
+                    ? "border-accent shadow-lg scale-[1.02]" 
+                    : "border-[var(--border-default)]"
                 )}
               >
                 {isPopular && (
-                  <div className="absolute top-0 right-0 bg-accent text-accent-foreground text-xs font-bold px-3 py-1 rounded-bl-lg">
+                  <div className="absolute -top-0 right-0 bg-accent text-accent-foreground text-[10px] font-bold px-3 py-1.5 rounded-bl-lg">
                     MÁS POPULAR
                   </div>
                 )}
                 
-                <div className="p-6 space-y-4">
-                  {/* Icono y nombre */}
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className="p-2 rounded-lg"
-                      style={{ backgroundColor: config.color + '20' }}
-                    >
-                      <Icon className="h-6 w-6" style={{ color: config.color }} />
+                <div className="p-6 space-y-6">
+                  {/* Header */}
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="p-2 rounded-lg"
+                        style={{ backgroundColor: config.color + '15' }}
+                      >
+                        <Icon className="h-5 w-5" style={{ color: config.color }} />
+                      </div>
+                      <h3 className="text-xl font-bold text-[var(--text-default)]">
+                        {plan.name}
+                      </h3>
                     </div>
-                    <h3 className="text-2xl font-bold text-[var(--text-default)]">
-                      {plan.name}
-                    </h3>
+                    <p className="text-xs text-[var(--text-muted)] min-h-[32px]">
+                      {config.description}
+                    </p>
                   </div>
 
-                  {/* Descripción */}
-                  <p className="text-sm text-[var(--text-muted)] min-h-[40px]">
-                    {config.description}
-                  </p>
-
                   {/* Precio */}
-                  <div className="py-4">
+                  <div className="py-2">
                     {plan.price === null ? (
                       <div>
                         <div className="text-3xl font-bold text-[var(--text-default)]">
                           Contactar
                         </div>
-                        <div className="text-sm text-[var(--text-muted)]">
+                        <div className="text-xs text-[var(--text-muted)] mt-1">
                           Precio personalizado
                         </div>
                       </div>
                     ) : (
                       <div>
                         <div className="flex items-baseline gap-1">
+                          <span className="text-xs text-[var(--text-muted)]">USD</span>
                           <span className="text-4xl font-bold text-[var(--text-default)]">
-                            ${monthlyPrice}
+                            {monthlyPrice}
                           </span>
-                          <span className="text-[var(--text-muted)]">/mes</span>
+                          <span className="text-sm text-[var(--text-muted)]">/mes</span>
                         </div>
                         {billingPeriod === 'annual' && (
-                          <div className="text-sm text-[var(--text-muted)] mt-1">
-                            ${totalPrice} facturado anualmente
+                          <div className="text-xs text-[var(--text-muted)] mt-1">
+                            USD {totalPrice} al año
                           </div>
                         )}
                         {plan.billing_type === 'per_user' && plan.name.toLowerCase() === 'teams' && (
-                          <div className="text-xs text-[var(--text-muted)] mt-1">
-                            Precio por usuario/asiento
+                          <div className="text-xs text-[var(--text-muted)] mt-0.5">
+                            Por usuario/asiento
                           </div>
                         )}
                       </div>
                     )}
                   </div>
 
-                  {/* Botón CTA */}
-                  <Button
-                    className="w-full"
-                    variant={isPopular ? "default" : "outline"}
-                    data-testid={`button-select-plan-${plan.name.toLowerCase()}`}
-                  >
-                    {plan.price === null ? 'Contactar ventas' : 
-                     billingPeriod === 'annual' ? 'Ser Fundador' : 'Comenzar ahora'}
-                  </Button>
-
                   {/* Límites */}
-                  <div className="space-y-2 pt-4 border-t border-[var(--border-default)]">
-                    <div className="text-xs font-semibold text-[var(--text-muted)] uppercase">
+                  <div className="space-y-2 pb-4 border-b border-[var(--border-default)]">
+                    <div className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wide">
                       Límites
                     </div>
-                    <div className="space-y-1 text-sm text-[var(--text-default)]">
-                      <div>📁 {config.limits.projects}</div>
-                      <div>💾 {config.limits.storage}</div>
-                      <div>🤖 {config.limits.ai}</div>
-                      <div>👥 {config.limits.users}</div>
+                    <div className="space-y-1.5 text-xs text-[var(--text-default)]">
+                      <div className="flex items-center gap-2">
+                        <span className="opacity-60">📁</span>
+                        <span>{config.limits.projects}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="opacity-60">💾</span>
+                        <span>{config.limits.storage}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="opacity-60">🤖</span>
+                        <span>{config.limits.ai}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="opacity-60">👥</span>
+                        <span>{config.limits.users}</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Features principales */}
-                  <div className="space-y-2 pt-4 border-t border-[var(--border-default)]">
-                    <div className="text-xs font-semibold text-[var(--text-muted)] uppercase">
+                  {/* Features */}
+                  <div className="space-y-2">
+                    <div className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wide">
                       Incluye
                     </div>
                     <ul className="space-y-2">
-                      {config.features.slice(0, 4).map((feature, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm">
-                          <Check className="h-4 w-4 mt-0.5 flex-shrink-0" style={{ color: config.color }} />
+                      {config.features.slice(0, 5).map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-xs">
+                          <Check className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" style={{ color: config.color }} />
                           <span className="text-[var(--text-default)]">{feature}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
+
+                  {/* Botón CTA */}
+                  <Button
+                    className="w-full"
+                    variant={isPopular ? "default" : "secondary"}
+                    data-testid={`button-select-plan-${plan.name.toLowerCase()}`}
+                  >
+                    {plan.price === null ? 'Contactar ventas' : 
+                     billingPeriod === 'annual' ? 'Ser Fundador' : 'Comenzar'}
+                  </Button>
                 </div>
               </Card>
             );
@@ -388,9 +395,9 @@ export default function PricingPlan() {
         </div>
 
         {/* Tabla de Comparación */}
-        <div className="mt-12">
+        <div className="mt-16 px-4">
           <h2 className="text-2xl font-bold text-center mb-8 text-[var(--text-default)]">
-            Comparación Detallada de Planes
+            Comparación Detallada
           </h2>
           
           <Card className="overflow-hidden">
@@ -398,11 +405,11 @@ export default function PricingPlan() {
               <table className="w-full">
                 <thead>
                   <tr className="bg-[var(--table-header-bg)] border-b border-[var(--table-header-border)]">
-                    <th className="text-left p-4 font-semibold text-[var(--table-header-fg)]">
+                    <th className="text-left p-4 font-semibold text-sm text-[var(--table-header-fg)]">
                       Característica
                     </th>
                     {plans.map((plan) => (
-                      <th key={plan.id} className="text-center p-4 font-semibold text-[var(--table-header-fg)]">
+                      <th key={plan.id} className="text-center p-4 font-semibold text-sm text-[var(--table-header-fg)]">
                         {plan.name}
                       </th>
                     ))}
@@ -411,7 +418,7 @@ export default function PricingPlan() {
                 <tbody className="divide-y divide-[var(--table-row-border)]">
                   {/* Proyectos */}
                   <tr className="bg-[var(--table-group-header-bg)]">
-                    <td colSpan={5} className="p-3 font-semibold text-sm text-[var(--table-group-header-fg)]">
+                    <td colSpan={5} className="p-3 font-semibold text-xs text-[var(--table-group-header-fg)]">
                       GESTIÓN DE PROYECTOS
                     </td>
                   </tr>
@@ -419,128 +426,70 @@ export default function PricingPlan() {
                   <TableRow label="Dashboard de proyecto" values={[true, true, true, true]} />
                   <TableRow label="Vistas Gantt y Kanban" values={['Básicas', 'Avanzadas', 'Avanzadas', 'Avanzadas']} />
                   <TableRow label="Gestión de tareas" values={[true, true, true, true]} />
-                  <TableRow label="Seguimiento de hitos" values={[true, true, true, true]} />
                   <TableRow label="Reportes de progreso" values={['Básicos', 'Avanzados', 'Avanzados + IA', 'Personalizados']} />
-                  <TableRow label="Plantillas de proyecto" values={['5 básicas', '20 avanzadas', 'Ilimitadas', 'Personalizadas']} />
 
                   {/* Financiero */}
                   <tr className="bg-[var(--table-group-header-bg)]">
-                    <td colSpan={5} className="p-3 font-semibold text-sm text-[var(--table-group-header-fg)]">
+                    <td colSpan={5} className="p-3 font-semibold text-xs text-[var(--table-group-header-fg)]">
                       GESTIÓN FINANCIERA
                     </td>
                   </tr>
-                  <TableRow label="Presupuestos y cotizaciones" values={[true, true, true, true]} />
-                  <TableRow label="Multi-moneda (ARS, USD, EUR)" values={[false, true, true, true]} />
-                  <TableRow label="Gestión de cotizaciones" values={[false, true, true, true]} />
+                  <TableRow label="Presupuestos" values={[true, true, true, true]} />
+                  <TableRow label="Multi-moneda" values={[false, true, true, true]} />
                   <TableRow label="Control de gastos" values={['Básico', 'Avanzado', 'Avanzado', 'Completo']} />
                   <TableRow label="Análisis de rentabilidad" values={[false, true, true, true]} />
-                  <TableRow label="Flujo de caja" values={[false, true, true, true]} />
-                  <TableRow label="Reportes financieros" values={['Básicos', 'Avanzados', 'Avanzados', 'Personalizados']} />
-                  <TableRow label="Integración Mercado Pago" values={[false, true, true, true]} />
-                  <TableRow label="Integración PayPal" values={[false, true, true, true]} />
-                  <TableRow label="Integración contable" values={[false, false, true, true]} />
+                  <TableRow label="Integración Mercado Pago/PayPal" values={[false, true, true, true]} />
 
                   {/* Construcción */}
                   <tr className="bg-[var(--table-group-header-bg)]">
-                    <td colSpan={5} className="p-3 font-semibold text-sm text-[var(--table-group-header-fg)]">
-                      GESTIÓN DE CONSTRUCCIÓN
+                    <td colSpan={5} className="p-3 font-semibold text-xs text-[var(--table-group-header-fg)]">
+                      CONSTRUCCIÓN
                     </td>
                   </tr>
                   <TableRow label="Control de subcontratos" values={['Básico', 'Avanzado', 'Avanzado', 'Completo']} />
                   <TableRow label="Gestión de personal" values={['Hasta 10', 'Hasta 100', 'Ilimitado', 'Ilimitado']} />
-                  <TableRow label="Control de asistencias" values={[true, true, true, true]} />
-                  <TableRow label="Planillas de avance" values={[true, true, true, true]} />
                   <TableRow label="Diario de obra" values={[true, true, true, true]} />
-                  <TableRow label="Gestión de proveedores" values={['Hasta 20', 'Hasta 200', 'Ilimitados', 'Ilimitados']} />
-                  <TableRow label="Control de materiales" values={[true, true, true, true]} />
-                  <TableRow label="Certificaciones de obra" values={[false, true, true, true]} />
 
-                  {/* Documentos y Almacenamiento */}
+                  {/* Almacenamiento */}
                   <tr className="bg-[var(--table-group-header-bg)]">
-                    <td colSpan={5} className="p-3 font-semibold text-sm text-[var(--table-group-header-fg)]">
-                      DOCUMENTOS Y ALMACENAMIENTO
+                    <td colSpan={5} className="p-3 font-semibold text-xs text-[var(--table-group-header-fg)]">
+                      ALMACENAMIENTO
                     </td>
                   </tr>
-                  <TableRow label="Almacenamiento de archivos" values={['500 MB', '50 GB', '500 GB', 'Personalizado']} />
-                  <TableRow label="Gestión documental" values={[true, true, true, true]} />
-                  <TableRow label="Versionado de archivos" values={[false, true, true, true]} />
-                  <TableRow label="Compartir documentos" values={['Básico', 'Avanzado', 'Avanzado', 'Avanzado']} />
+                  <TableRow label="Espacio de archivos" values={['500 MB', '50 GB', '500 GB', 'Personalizado']} />
                   <TableRow label="PDFs personalizables" values={[false, true, true, true]} />
-                  <TableRow label="Firmas electrónicas" values={[false, false, true, true]} />
                   <TableRow label="Backup automático" values={['Semanal', 'Diario', 'Cada 6hs', 'Continuo']} />
 
-                  {/* Inteligencia Artificial */}
+                  {/* IA */}
                   <tr className="bg-[var(--table-group-header-bg)]">
-                    <td colSpan={5} className="p-3 font-semibold text-sm text-[var(--table-group-header-fg)]">
+                    <td colSpan={5} className="p-3 font-semibold text-xs text-[var(--table-group-header-fg)]">
                       INTELIGENCIA ARTIFICIAL
                     </td>
                   </tr>
-                  <TableRow label="Tokens de IA por mes" values={['Solo resúmenes', '10,000', 'Ilimitados', 'Ilimitados']} />
-                  <TableRow label="Asistente IA conversacional" values={[false, true, true, true]} />
-                  <TableRow label="Análisis financiero con IA" values={[false, true, true, true]} />
-                  <TableRow label="Resúmenes de proyecto" values={[true, true, true, true]} />
-                  <TableRow label="Predicción de costos" values={[false, false, true, true]} />
-                  <TableRow label="Detección de anomalías" values={[false, false, true, true]} />
-                  <TableRow label="Recomendaciones inteligentes" values={[false, true, true, true]} />
+                  <TableRow label="Tokens IA/mes" values={['Resúmenes', '10,000', 'Ilimitados', 'Ilimitados']} />
+                  <TableRow label="Asistente conversacional" values={[false, true, true, true]} />
+                  <TableRow label="Análisis financiero IA" values={[false, true, true, true]} />
 
                   {/* Colaboración */}
                   <tr className="bg-[var(--table-group-header-bg)]">
-                    <td colSpan={5} className="p-3 font-semibold text-sm text-[var(--table-group-header-fg)]">
-                      COLABORACIÓN Y EQUIPOS
+                    <td colSpan={5} className="p-3 font-semibold text-xs text-[var(--table-group-header-fg)]">
+                      COLABORACIÓN
                     </td>
                   </tr>
                   <TableRow label="Usuarios" values={['1', '1', 'Ilimitados', 'Ilimitados']} />
                   <TableRow label="Roles y permisos" values={[false, false, true, true]} />
-                  <TableRow label="Colaboración en tiempo real" values={[false, false, true, true]} />
-                  <TableRow label="Comentarios y menciones" values={[false, true, true, true]} />
-                  <TableRow label="Historial de cambios" values={[false, false, true, true]} />
-                  <TableRow label="Notificaciones personalizables" values={['Básicas', 'Básicas', 'Avanzadas', 'Avanzadas']} />
-                  <TableRow label="Chat de equipo" values={[false, false, true, true]} />
-
-                  {/* Integraciones */}
-                  <tr className="bg-[var(--table-group-header-bg)]">
-                    <td colSpan={5} className="p-3 font-semibold text-sm text-[var(--table-group-header-fg)]">
-                      INTEGRACIONES
-                    </td>
-                  </tr>
-                  <TableRow label="API de integración" values={[false, false, true, true]} />
-                  <TableRow label="Webhooks" values={[false, false, true, true]} />
-                  <TableRow label="Zapier / Make" values={[false, false, true, true]} />
-                  <TableRow label="Google Drive" values={[false, true, true, true]} />
-                  <TableRow label="Dropbox" values={[false, true, true, true]} />
-                  <TableRow label="WhatsApp Business" values={[false, false, true, true]} />
-                  <TableRow label="Slack / Discord" values={[false, false, true, true]} />
-                  <TableRow label="Integraciones personalizadas" values={[false, false, false, true]} />
+                  <TableRow label="Tiempo real" values={[false, false, true, true]} />
 
                   {/* Soporte */}
                   <tr className="bg-[var(--table-group-header-bg)]">
-                    <td colSpan={5} className="p-3 font-semibold text-sm text-[var(--table-group-header-fg)]">
-                      SOPORTE Y CAPACITACIÓN
+                    <td colSpan={5} className="p-3 font-semibold text-xs text-[var(--table-group-header-fg)]">
+                      SOPORTE
                     </td>
                   </tr>
-                  <TableRow label="Soporte por email" values={[true, true, true, true]} />
-                  <TableRow label="Base de conocimientos" values={[true, true, true, true]} />
-                  <TableRow label="Videos tutoriales" values={[true, true, true, true]} />
-                  <TableRow label="Soporte prioritario" values={[false, true, true, true]} />
-                  <TableRow label="Soporte 24/7" values={[false, false, true, true]} />
-                  <TableRow label="Gerente de cuenta dedicado" values={[false, false, false, true]} />
-                  <TableRow label="Capacitación del equipo" values={[false, false, false, true]} />
-                  <TableRow label="Onboarding personalizado" values={[false, false, false, true]} />
-                  <TableRow label="SLA garantizado" values={[false, false, false, '99.9%']} />
-
-                  {/* Seguridad */}
-                  <tr className="bg-[var(--table-group-header-bg)]">
-                    <td colSpan={5} className="p-3 font-semibold text-sm text-[var(--table-group-header-fg)]">
-                      SEGURIDAD Y CUMPLIMIENTO
-                    </td>
-                  </tr>
-                  <TableRow label="Cifrado de datos" values={[true, true, true, true]} />
-                  <TableRow label="Autenticación de dos factores" values={[true, true, true, true]} />
-                  <TableRow label="SSO (Single Sign-On)" values={[false, false, false, true]} />
-                  <TableRow label="Auditoría de seguridad" values={[false, false, true, true]} />
-                  <TableRow label="Cumplimiento GDPR" values={[true, true, true, true]} />
-                  <TableRow label="Implementación on-premise" values={[false, false, false, true]} />
-                  <TableRow label="IP whitelisting" values={[false, false, false, true]} />
+                  <TableRow label="Email" values={[true, true, true, true]} />
+                  <TableRow label="Prioritario" values={[false, true, true, true]} />
+                  <TableRow label="24/7" values={[false, false, true, true]} />
+                  <TableRow label="Gerente dedicado" values={[false, false, false, true]} />
                 </tbody>
               </table>
             </div>
@@ -548,107 +497,86 @@ export default function PricingPlan() {
         </div>
 
         {/* FAQ */}
-        <div className="mt-12 max-w-3xl mx-auto">
+        <div className="mt-16 max-w-3xl mx-auto px-4">
           <h2 className="text-2xl font-bold text-center mb-8 text-[var(--text-default)]">
             Preguntas Frecuentes
           </h2>
           
-          <Accordion type="single" collapsible className="space-y-4">
+          <Accordion type="single" collapsible className="space-y-3">
             <AccordionItem value="item-1" className="bg-card border border-[var(--border-default)] rounded-lg px-6">
-              <AccordionTrigger className="text-left font-semibold hover:no-underline">
+              <AccordionTrigger className="text-left text-sm font-semibold hover:no-underline">
                 ¿Cómo funciona el periodo de prueba?
               </AccordionTrigger>
-              <AccordionContent className="text-[var(--text-muted)]">
-                Todos los planes pagos incluyen 14 días de prueba gratuita. No necesitas ingresar datos de tarjeta para comenzar. Puedes explorar todas las funcionalidades del plan durante este periodo.
+              <AccordionContent className="text-xs text-[var(--text-muted)]">
+                14 días de prueba gratuita en todos los planes pagos. Sin necesidad de tarjeta.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-2" className="bg-card border border-[var(--border-default)] rounded-lg px-6">
-              <AccordionTrigger className="text-left font-semibold hover:no-underline">
-                ¿Puedo cambiar de plan en cualquier momento?
+              <AccordionTrigger className="text-left text-sm font-semibold hover:no-underline">
+                ¿Puedo cambiar de plan?
               </AccordionTrigger>
-              <AccordionContent className="text-[var(--text-muted)]">
-                Sí, puedes actualizar o degradar tu plan en cualquier momento. Al actualizar, tendrás acceso inmediato a las nuevas funcionalidades. Al degradar, los cambios se aplicarán al final de tu periodo de facturación actual.
+              <AccordionContent className="text-xs text-[var(--text-muted)]">
+                Sí, puedes actualizar o degradar en cualquier momento. Los cambios se aplican inmediatamente.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-3" className="bg-card border border-[var(--border-default)] rounded-lg px-6">
-              <AccordionTrigger className="text-left font-semibold hover:no-underline">
+              <AccordionTrigger className="text-left text-sm font-semibold hover:no-underline">
                 ¿Qué son los tokens de IA?
               </AccordionTrigger>
-              <AccordionContent className="text-[var(--text-muted)]">
-                Los tokens de IA se consumen cuando utilizas el asistente conversacional para análisis financieros, predicciones, y consultas avanzadas. Un token equivale aproximadamente a 4 caracteres. El plan Pro incluye 10,000 tokens mensuales (suficiente para unas 200-300 consultas complejas), mientras que Teams tiene tokens ilimitados.
+              <AccordionContent className="text-xs text-[var(--text-muted)]">
+                Tokens para análisis financieros y consultas avanzadas. Pro incluye 10k mensuales, Teams tiene ilimitados.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-4" className="bg-card border border-[var(--border-default)] rounded-lg px-6">
-              <AccordionTrigger className="text-left font-semibold hover:no-underline">
-                ¿Cómo funciona el badge de "Fundador"?
+              <AccordionTrigger className="text-left text-sm font-semibold hover:no-underline">
+                ¿Cómo obtengo el badge de Fundador?
               </AccordionTrigger>
-              <AccordionContent className="text-[var(--text-muted)]">
-                Los primeros usuarios que adquieran cualquier suscripción anual recibirán el badge de "Fundador" de forma permanente. Este badge incluye acceso anticipado a nuevas funcionalidades, un grupo privado exclusivo, y un 10% de descuento adicional en todas las renovaciones futuras. Esta oferta es por tiempo limitado.
+              <AccordionContent className="text-xs text-[var(--text-muted)]">
+                Con cualquier suscripción anual obtienes el badge permanente, acceso anticipado, grupo privado y 10% de descuento futuro.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-5" className="bg-card border border-[var(--border-default)] rounded-lg px-6">
-              <AccordionTrigger className="text-left font-semibold hover:no-underline">
+              <AccordionTrigger className="text-left text-sm font-semibold hover:no-underline">
                 ¿Qué métodos de pago aceptan?
               </AccordionTrigger>
-              <AccordionContent className="text-[var(--text-muted)]">
-                Aceptamos tarjetas de crédito y débito (Visa, Mastercard, American Express), transferencias bancarias, Mercado Pago (para Argentina), y PayPal. Para planes Enterprise, también ofrecemos facturación personalizada.
+              <AccordionContent className="text-xs text-[var(--text-muted)]">
+                Tarjetas (Visa, Mastercard, Amex), Mercado Pago (ARG), PayPal, transferencias. Enterprise con facturación personalizada.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-6" className="bg-card border border-[var(--border-default)] rounded-lg px-6">
-              <AccordionTrigger className="text-left font-semibold hover:no-underline">
-                ¿Qué pasa con mis datos si cancelo mi suscripción?
+              <AccordionTrigger className="text-left text-sm font-semibold hover:no-underline">
+                ¿Qué pasa con mis datos si cancelo?
               </AccordionTrigger>
-              <AccordionContent className="text-[var(--text-muted)]">
-                Tu información permanece segura en nuestros servidores durante 90 días después de la cancelación. Durante este periodo, puedes reactivar tu cuenta sin perder datos. También puedes exportar toda tu información en cualquier momento antes de cancelar.
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="item-7" className="bg-card border border-[var(--border-default)] rounded-lg px-6">
-              <AccordionTrigger className="text-left font-semibold hover:no-underline">
-                ¿El plan Teams es por usuario o por organización?
-              </AccordionTrigger>
-              <AccordionContent className="text-[var(--text-muted)]">
-                El plan Teams se cobra por asiento/usuario activo. Puedes agregar o remover usuarios en cualquier momento, y solo pagarás por los usuarios activos en ese periodo. Todos los usuarios tienen acceso completo a las funcionalidades del plan.
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="item-8" className="bg-card border border-[var(--border-default)] rounded-lg px-6">
-              <AccordionTrigger className="text-left font-semibold hover:no-underline">
-                ¿Necesito conocimientos técnicos para usar Archub?
-              </AccordionTrigger>
-              <AccordionContent className="text-[var(--text-muted)]">
-                No. Archub está diseñado para ser intuitivo y fácil de usar, incluso para usuarios sin experiencia técnica. Incluimos videos tutoriales, documentación completa, y soporte para ayudarte en cada paso. Los planes superiores también incluyen capacitación personalizada.
+              <AccordionContent className="text-xs text-[var(--text-muted)]">
+                Tus datos permanecen 90 días. Puedes reactivar sin pérdida o exportar antes de cancelar.
               </AccordionContent>
             </AccordionItem>
           </Accordion>
         </div>
 
         {/* CTA Final */}
-        <Card className="mt-12 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-2)] text-white">
+        <Card className="mt-16 mx-4 bg-gradient-to-br from-accent/5 via-accent/10 to-accent/5 border-2 border-accent/20">
           <div className="p-8 text-center space-y-4">
-            <h3 className="text-2xl font-bold">
-              ¿Listo para transformar tu gestión de proyectos?
+            <h3 className="text-2xl font-bold text-[var(--text-default)]">
+              ¿Listo para transformar tu gestión?
             </h3>
-            <p className="text-lg opacity-90 max-w-2xl mx-auto">
-              Únete a cientos de profesionales que ya están optimizando sus proyectos con Archub.
-              Comienza tu prueba gratuita hoy mismo.
+            <p className="text-sm text-[var(--text-muted)] max-w-2xl mx-auto">
+              Únete a cientos de profesionales optimizando sus proyectos con Archub.
             </p>
-            <div className="flex gap-4 justify-center mt-6">
+            <div className="flex gap-3 justify-center mt-6">
               <Button 
-                variant="outline" 
-                className="bg-white text-accent hover:bg-white/90 border-white"
+                variant="default"
                 data-testid="button-cta-trial"
               >
                 Comenzar prueba gratuita
               </Button>
               <Button 
-                variant="outline" 
-                className="bg-transparent text-white hover:bg-white/10 border-white"
+                variant="secondary"
                 data-testid="button-cta-contact"
               >
                 Hablar con ventas
@@ -670,19 +598,19 @@ function TableRow({
 }) {
   return (
     <tr className="hover:bg-[var(--table-row-hover-bg)] transition-colors">
-      <td className="p-4 text-sm font-medium text-[var(--text-default)]">
+      <td className="p-3 text-xs font-medium text-[var(--text-default)]">
         {label}
       </td>
       {values.map((value, idx) => (
-        <td key={idx} className="p-4 text-center">
+        <td key={idx} className="p-3 text-center">
           {typeof value === 'boolean' ? (
             value ? (
-              <Check className="h-5 w-5 text-green-500 mx-auto" />
+              <Check className="h-4 w-4 text-green-500 mx-auto" />
             ) : (
-              <X className="h-5 w-5 text-gray-300 dark:text-gray-600 mx-auto" />
+              <X className="h-4 w-4 text-gray-300 dark:text-gray-600 mx-auto" />
             )
           ) : (
-            <span className="text-sm text-[var(--text-default)]">{value}</span>
+            <span className="text-xs text-[var(--text-default)]">{value}</span>
           )}
         </td>
       ))}
