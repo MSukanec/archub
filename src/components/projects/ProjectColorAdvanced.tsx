@@ -149,54 +149,45 @@ export default function ProjectColorAdvanced({
       <div className="space-y-3">
         {/* Slider */}
         <div className="flex items-center gap-4">
-          <div className="relative flex-1">
-            <input
-              type="range"
-              min={0}
-              max={360}
-              step={1}
-              value={hue}
-              onChange={(e) => handleHueChange(Number(e.target.value))}
-              disabled={!isPro || !enabled}
-              style={{
-                background: `linear-gradient(to right, 
-                  hsl(0, 100%, 50%), 
-                  hsl(60, 100%, 50%), 
-                  hsl(120, 100%, 50%), 
-                  hsl(180, 100%, 50%), 
-                  hsl(240, 100%, 50%), 
-                  hsl(300, 100%, 50%), 
-                  hsl(360, 100%, 50%))`
-              }}
-              className="w-full h-3 rounded-full appearance-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-50
-                bg-none
-                shadow-[inset_0_1px_3px_rgba(0,0,0,0.3),0_1px_1px_rgba(255,255,255,0.1)]
-                [&::-webkit-slider-runnable-track]:h-3
-                [&::-webkit-slider-runnable-track]:rounded-full
-                [&::-webkit-slider-runnable-track]:bg-transparent
-                [&::-webkit-slider-thumb]:appearance-none
-                [&::-webkit-slider-thumb]:w-[20px]
-                [&::-webkit-slider-thumb]:h-[20px]
-                [&::-webkit-slider-thumb]:rounded-full
-                [&::-webkit-slider-thumb]:bg-white
-                [&::-webkit-slider-thumb]:shadow-[0_2px_4px_rgba(0,0,0,0.3)]
-                [&::-webkit-slider-thumb]:cursor-pointer
-                [&::-webkit-slider-thumb]:mt-[-2px]
-                [&::-moz-range-track]:h-3
-                [&::-moz-range-track]:rounded-full
-                [&::-moz-range-track]:bg-transparent
-                [&::-moz-range-thumb]:w-[20px]
-                [&::-moz-range-thumb]:h-[20px]
-                [&::-moz-range-thumb]:rounded-full
-                [&::-moz-range-thumb]:bg-white
-                [&::-moz-range-thumb]:shadow-[0_2px_4px_rgba(0,0,0,0.3)]
-                [&::-moz-range-thumb]:cursor-pointer
-                [&::-moz-range-thumb]:border-none"
-              data-testid="hue-slider"
-            />
-            {/* Dark overlay for better visibility */}
-            <div className="absolute inset-0 rounded-full bg-black/20 pointer-events-none" />
-          </div>
+          <input
+            type="range"
+            min={0}
+            max={360}
+            step={1}
+            value={hue}
+            onChange={(e) => handleHueChange(Number(e.target.value))}
+            disabled={!isPro || !enabled}
+            className="flex-1 h-3 rounded-full appearance-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-50
+              [&::-webkit-slider-track]:h-3
+              [&::-webkit-slider-track]:rounded-full
+              [&::-webkit-slider-track]:bg-gradient-to-r
+              [&::-webkit-slider-track]:from-[hsl(0,100%,40%)]
+              [&::-webkit-slider-track]:via-[hsl(120,100%,35%)]
+              [&::-webkit-slider-track]:to-[hsl(0,100%,40%)]
+              [&::-webkit-slider-track]:shadow-[inset_0_1px_3px_rgba(0,0,0,0.4)]
+              [&::-webkit-slider-thumb]:appearance-none
+              [&::-webkit-slider-thumb]:w-[20px]
+              [&::-webkit-slider-thumb]:h-[20px]
+              [&::-webkit-slider-thumb]:rounded-full
+              [&::-webkit-slider-thumb]:bg-white
+              [&::-webkit-slider-thumb]:shadow-[0_2px_4px_rgba(0,0,0,0.25)]
+              [&::-webkit-slider-thumb]:cursor-pointer
+              [&::-moz-range-track]:h-3
+              [&::-moz-range-track]:rounded-full
+              [&::-moz-range-track]:bg-gradient-to-r
+              [&::-moz-range-track]:from-[hsl(0,100%,40%)]
+              [&::-moz-range-track]:via-[hsl(120,100%,35%)]
+              [&::-moz-range-track]:to-[hsl(0,100%,40%)]
+              [&::-moz-range-track]:shadow-[inset_0_1px_3px_rgba(0,0,0,0.4)]
+              [&::-moz-range-thumb]:w-[20px]
+              [&::-moz-range-thumb]:h-[20px]
+              [&::-moz-range-thumb]:rounded-full
+              [&::-moz-range-thumb]:bg-white
+              [&::-moz-range-thumb]:shadow-[0_2px_4px_rgba(0,0,0,0.25)]
+              [&::-moz-range-thumb]:cursor-pointer
+              [&::-moz-range-thumb]:border-none"
+            data-testid="hue-slider"
+          />
           
           {/* Color preview circle */}
           <div
