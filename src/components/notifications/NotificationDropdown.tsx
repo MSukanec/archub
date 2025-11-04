@@ -74,20 +74,8 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
   return (
     <div className="flex flex-col">
       <div className="p-4 pb-3">
-        <h3 className="font-semibold text-sm mb-3">Notificaciones</h3>
-        <div className="flex gap-2">
-          {unreadNotifications.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleMarkAllAsRead}
-              className="h-8 text-xs flex-1"
-              data-testid="button-mark-all-read"
-            >
-              <CheckCheck className="h-3 w-3 mr-1" />
-              Marcar todas
-            </Button>
-          )}
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-sm">Notificaciones</h3>
           <Button
             variant="default"
             size="sm"
@@ -95,15 +83,24 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
               navigate('/notifications');
               onClose();
             }}
-            className={cn(
-              "h-8 text-xs",
-              unreadNotifications.length > 0 ? "flex-1" : "w-full"
-            )}
+            className="h-7 text-xs px-3"
             data-testid="button-view-all"
           >
             Ver todas
           </Button>
         </div>
+        {unreadNotifications.length > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleMarkAllAsRead}
+            className="h-8 text-xs w-full"
+            data-testid="button-mark-all-read"
+          >
+            <CheckCheck className="h-3 w-3 mr-1" />
+            Marcar todas como leídas
+          </Button>
+        )}
       </div>
       
       <Separator />
