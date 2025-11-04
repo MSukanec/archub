@@ -130,12 +130,12 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
     // Update URL with deep link params (for browser navigation and refresh support)
     if (courseSlug) {
       const params = new URLSearchParams();
-      params.set('tab', 'Lecciones');
+      params.set('tab', 'Reproductor');
       params.set('lesson', lessonId);
       navigate(`/learning/courses/${courseSlug}?${params.toString()}`);
     }
     
-    // Use the store to navigate (this will switch to "Lecciones" tab)
+    // Use the store to navigate (this will switch to "Reproductor" tab)
     goToLesson(lessonId, null);
   };
 
@@ -247,10 +247,10 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
         description="Los apuntes que crees en las lecciones aparecerán aquí"
         action={
           <Button
-            onClick={() => navigate(`/learning/courses/${courseSlug}?tab=Lecciones`)}
+            onClick={() => navigate(`/learning/courses/${courseSlug}?tab=Reproductor`)}
             data-testid="button-go-to-lessons"
           >
-            Ir a Lecciones
+            Ir a Reproductor
           </Button>
         }
       />
@@ -292,10 +292,10 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
               description="Los apuntes que crees en las lecciones aparecerán aquí"
               action={
                 <Button
-                  onClick={() => navigate(`/learning/courses/${courseSlug}?tab=Lecciones`)}
+                  onClick={() => navigate(`/learning/courses/${courseSlug}?tab=Reproductor`)}
                   data-testid="button-go-to-lessons"
                 >
-                  Ir a Lecciones
+                  Ir a Reproductor
                 </Button>
               }
             />

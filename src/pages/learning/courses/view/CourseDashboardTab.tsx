@@ -534,12 +534,12 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigateToTab('Lecciones');
+                        navigateToTab('Reproductor');
                       }}
                       data-testid="button-go-to-lessons-notes"
                     >
                       <PlayCircle className="mr-2 h-4 w-4" />
-                      Ir a Lecciones
+                      Ir a Reproductor
                     </Button>
                   }
                   className="min-h-0 md:min-h-0"
@@ -612,12 +612,12 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigateToTab('Lecciones');
+                        navigateToTab('Reproductor');
                       }}
                       data-testid="button-go-to-lessons-markers"
                     >
                       <PlayCircle className="mr-2 h-4 w-4" />
-                      Ir a Lecciones
+                      Ir a Reproductor
                     </Button>
                   }
                   className="min-h-0 md:min-h-0"

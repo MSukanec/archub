@@ -137,7 +137,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
     // Update URL with deep link params (for browser navigation and refresh support)
     if (courseSlug) {
       const params = new URLSearchParams();
-      params.set('tab', 'Lecciones');
+      params.set('tab', 'Reproductor');
       params.set('lesson', lessonId);
       if (timeSec !== null) {
         params.set('seek', timeSec.toString());
@@ -145,7 +145,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       navigate(`/learning/courses/${courseSlug}?${params.toString()}`);
     }
     
-    // Use the store to navigate (this will switch to "Lecciones" tab and set pending seek)
+    // Use the store to navigate (this will switch to "Reproductor" tab and set pending seek)
     goToLesson(lessonId, timeSec);
   };
 
@@ -257,10 +257,10 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
         description="Los marcadores que crees en las lecciones aparecerán aquí"
         action={
           <Button
-            onClick={() => navigate(`/learning/courses/${courseSlug}?tab=Lecciones`)}
+            onClick={() => navigate(`/learning/courses/${courseSlug}?tab=Reproductor`)}
             data-testid="button-go-to-lessons"
           >
-            Ir a Lecciones
+            Ir a Reproductor
           </Button>
         }
       />
@@ -302,10 +302,10 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
               description="Los marcadores que crees en las lecciones aparecerán aquí"
               action={
                 <Button
-                  onClick={() => navigate(`/learning/courses/${courseSlug}?tab=Lecciones`)}
+                  onClick={() => navigate(`/learning/courses/${courseSlug}?tab=Reproductor`)}
                   data-testid="button-go-to-lessons"
                 >
-                  Ir a Lecciones
+                  Ir a Reproductor
                 </Button>
               }
             />

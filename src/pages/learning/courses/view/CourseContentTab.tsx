@@ -191,13 +191,13 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
     // Set the current lesson in the sidebar
     setCurrentLesson(lessonId);
     
-    // Use the store to navigate (this will switch to "Lecciones" tab and set the lesson)
+    // Use the store to navigate (this will switch to "Reproductor" tab and set the lesson)
     goToLesson(lessonId, null);
     
     // Update URL with deep link params (for browser navigation and refresh support)
     if (courseSlug) {
       const params = new URLSearchParams();
-      params.set('tab', 'Lecciones');
+      params.set('tab', 'Reproductor');
       params.set('lesson', lessonId);
       navigate(`/learning/courses/${courseSlug}?${params.toString()}`);
     }
@@ -207,7 +207,7 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
     {
       key: 'title',
       label: 'Nombre',
-      width: '30%',
+      width: '28%',
       render: (row: LessonRowData) => (
         <span className="font-medium">{row.title}</span>
       )
@@ -239,7 +239,7 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
     {
       key: 'is_completed',
       label: 'Completada',
-      width: '16%',
+      width: '14%',
       render: (row: LessonRowData) => (
         row.is_completed ? (
           <Badge variant="secondary" className="bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400">
@@ -252,6 +252,22 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
             Pendiente
           </Badge>
         )
+      )
+    },
+    {
+      key: 'go_to_lesson',
+      label: '',
+      width: '4%',
+      render: (row: LessonRowData) => (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => handleGoToLesson(row.id)}
+          data-testid={`button-go-to-lesson-${row.id}`}
+          className="h-8 w-8"
+        >
+          <ArrowRight className="h-4 w-4" />
+        </Button>
       )
     }
   ];
@@ -272,9 +288,20 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
         groupBy="groupKey"
         rowActions={(row: LessonRowData) => [
           {
-            icon: ArrowRight,
-            label: 'Ir a Lección',
-            onClick: () => handleGoToLesson(row.id)
+            icon: Star,
+            label: row.is_favorite ? 'Quitar de Favoritos' : 'Marcar como Favorito',
+            onClick: () => {
+              // Aquí se maneja el toggle de favoritos
+              // El FavoriteButton component ya maneja la lógica internamente
+            },
+            customRender: () => (
+              <FavoriteButton
+                lessonId={row.id}
+                courseId={courseId!}
+                isFavorite={row.is_favorite}
+                variant="button"
+              />
+            )
           }
         ]}
         renderGroupHeader={(groupKey: string, groupRows: LessonRowData[]) => {
