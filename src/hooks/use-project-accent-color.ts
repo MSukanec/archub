@@ -115,6 +115,7 @@ export function useProjectAccentColor() {
 
 /**
  * Aplica el color de acento a las variables CSS del documento
+ * Genera una paleta completa de colores derivados para identidad visual del proyecto
  */
 function applyAccentColor(hex: string, hsl: string, rgb: string, isDark: boolean) {
   const root = document.documentElement;
@@ -123,31 +124,47 @@ function applyAccentColor(hex: string, hsl: string, rgb: string, isDark: boolean
   const hoverColor = calculateHoverColor(hex, isDark);
   const foregroundColor = calculateForegroundColor(hex);
   
-  // Actualizar todas las variables CSS relacionadas con accent
+  // Actualizar variables CSS base
   root.style.setProperty('--accent', `hsl(${hsl})`);
   root.style.setProperty('--accent-hsl', hsl);
   root.style.setProperty('--accent-rgb', rgb);
   root.style.setProperty('--accent-hover', hoverColor);
   root.style.setProperty('--accent-foreground', foregroundColor);
   
-  // También actualizar accent-2 (versión alternativa) con una variación
+  // Parsear HSL para generar paleta completa
   const hslParts = hsl.split(' ');
   if (hslParts.length === 3) {
     const h = parseInt(hslParts[0]);
     const s = parseInt(hslParts[1]);
     const l = parseInt(hslParts[2]);
     
-    // Crear una variación más oscura/saturada para accent-2
+    // === PALETA DE IDENTIDAD VISUAL DEL PROYECTO ===
+    
+    // 1. Colores primarios/secundarios
     const accent2Hsl = `${(h + 74) % 360} ${Math.min(s - 60, 100)}% ${Math.min(l, 40)}%`;
     root.style.setProperty('--accent-2', `hsl(${accent2Hsl})`);
     
-    // Actualizar los colores del gradiente de fondo usando el color del proyecto
-    // Light mode: mantener from gris, cambiar to usando el tono del proyecto
+    // 2. Colores para Charts - Paleta armónica de 5 colores
+    // Basados en el color del proyecto usando rotación de matiz
+    root.style.setProperty('--chart-1', `hsl(${h} ${s}% ${l}%)`); // Color base del proyecto
+    root.style.setProperty('--chart-2', `hsl(${(h + 30) % 360} ${Math.max(s - 10, 50)}% ${Math.min(l + 5, 55)}%)`); // Análogo +30°
+    root.style.setProperty('--chart-3', `hsl(${(h + 60) % 360} ${Math.max(s - 15, 45)}% ${Math.min(l + 10, 60)}%)`); // Análogo +60°
+    root.style.setProperty('--chart-4', `hsl(${(h + 180) % 360} ${Math.max(s - 20, 40)}% ${l}%)`); // Complementario
+    root.style.setProperty('--chart-5', `hsl(${(h + 240) % 360} ${Math.max(s - 10, 50)}% ${Math.min(l + 5, 55)}%)`); // Triádico
+    
+    // 3. Variaciones de saturación/luminosidad para diferentes usos
+    root.style.setProperty('--accent-subtle', `hsl(${h} ${Math.max(s - 40, 20)}% ${Math.min(l + 30, 85)}%)`);
+    root.style.setProperty('--accent-muted', `hsl(${h} ${Math.max(s - 50, 15)}% ${Math.min(l + 35, 90)}%)`);
+    root.style.setProperty('--accent-intense', `hsl(${h} ${Math.min(s + 10, 100)}% ${Math.max(l - 10, 30)}%)`);
+    
+    // 4. Backgrounds con tinte del proyecto
     const gradientToLight = `hsl(${h}, 40%, 94%)`;
     root.style.setProperty('--gradient-to-light', gradientToLight);
     
-    // Dark mode: mantener from gris oscuro, cambiar to usando el tono del proyecto
     const gradientToDark = `hsl(${h}, 30%, 15%)`;
     root.style.setProperty('--gradient-to-dark', gradientToDark);
+    
+    // 5. Bordes con tinte del proyecto
+    root.style.setProperty('--border-accent', `hsl(${h} ${Math.max(s - 30, 20)}% ${Math.min(l + 25, 80)}%)`);
   }
 }
