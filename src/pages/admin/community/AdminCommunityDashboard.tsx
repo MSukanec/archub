@@ -103,7 +103,7 @@ export default function AdminCommunityDashboard() {
         .select(`
           user_id,
           last_seen_at,
-          users!inner(full_name, email)
+          users!inner(full_name)
         `)
         .order('last_seen_at', { ascending: false })
         .limit(10)
@@ -209,21 +209,23 @@ export default function AdminCommunityDashboard() {
         </StatCard>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Actividad Reciente */}
-        <Card className="p-6">
-          <h3 className="font-semibold mb-4 flex items-center gap-2">
-            <Clock className="h-5 w-5 text-primary" />
-            Actividad Reciente de Usuarios
-          </h3>
+        <StatCard data-testid="card-actividad-reciente">
+          <StatCardTitle showArrow={false}>
+            <span className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Actividad Reciente de Usuarios
+            </span>
+          </StatCardTitle>
           {loadingActivity ? (
-            <div className="space-y-3">
+            <div className="space-y-3 mt-4">
               {[...Array(5)].map((_, i) => (
                 <Skeleton key={i} className="h-16" />
               ))}
             </div>
           ) : recentActivity && recentActivity.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-3 mt-4">
               {recentActivity.map((activity: any) => {
                 const lastSeenTime = new Date(activity.last_seen_at).getTime()
                 const now = Date.now()
@@ -234,13 +236,12 @@ export default function AdminCommunityDashboard() {
                   <div key={activity.user_id} className="flex items-start justify-between p-3 rounded-lg border">
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{activity.users?.full_name}</p>
-                      <p className="text-sm text-muted-foreground truncate">{activity.users?.email}</p>
                       <p className="text-xs text-muted-foreground mt-1">
                         {format(new Date(activity.last_seen_at), "d 'de' MMMM, HH:mm:ss", { locale: es })}
                       </p>
                     </div>
                     {isActive && (
-                      <Badge variant="default" className="bg-green-600 text-white">
+                      <Badge className="bg-accent text-accent-foreground">
                         Activo
                       </Badge>
                     )}
@@ -253,22 +254,24 @@ export default function AdminCommunityDashboard() {
               No hay actividad reciente
             </p>
           )}
-        </Card>
+        </StatCard>
 
         {/* Organizaciones Más Activas */}
-        <Card className="p-6">
-          <h3 className="font-semibold mb-4 flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            Organizaciones Más Activas
-          </h3>
+        <StatCard data-testid="card-organizaciones-activas">
+          <StatCardTitle showArrow={false}>
+            <span className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Organizaciones Más Activas
+            </span>
+          </StatCardTitle>
           {loadingOrgs ? (
-            <div className="space-y-3">
+            <div className="space-y-3 mt-4">
               {[...Array(5)].map((_, i) => (
                 <Skeleton key={i} className="h-16" />
               ))}
             </div>
           ) : activeOrganizations && activeOrganizations.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-3 mt-4">
               {activeOrganizations.map((org: any, index: number) => (
                 <div key={org.id} className="flex items-start justify-between p-3 rounded-lg border">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -290,7 +293,7 @@ export default function AdminCommunityDashboard() {
               No hay datos de organizaciones activas
             </p>
           )}
-        </Card>
+        </StatCard>
       </div>
     </div>
   )
