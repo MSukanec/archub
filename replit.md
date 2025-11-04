@@ -18,7 +18,8 @@ Preferred communication style: Simple, everyday language.
 - **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub.
   - **UserQuickAccess Context-Aware Popover** (Nov 2024): Avatar popover in Main Header intelligently hides organization and project selectors on learning and profile pages to avoid mixing concepts for focused users. Uses route detection with `.includes()` to catch all variants (/learning, /admin/learning, /profile, etc.). Order: Ver Perfil button first, then conditional selectors, then plan info and logout. Clean separator management ensures consistent visual appearance whether selectors are shown or hidden.
 - **Component Standardization**: Standardized `StatCard` and custom `LoadingSpinner` components that use dynamic accent colors.
-- **Home Page UX Flow**: Minimalist AI welcome interface with dynamic greetings and action suggestions. Chat input, disclaimer, and history toggle commented out (Nov 2024) to avoid confusion with FloatingAIChat - the primary AI interaction interface. Home now serves as a dashboard with AI-generated greeting and quick action buttons.
+- **Home Page UX Flow**: Minimalist AI copilot interface with session-based conversation state, dynamic greetings, and a toggle for full history.
+- **AI Disclaimer**: User-friendly disclaimer "Archub puede cometer errores. Comprueba la información importante" on the Home page.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui, Tailwind CSS, Zustand, Wouter, TanStack Query.
