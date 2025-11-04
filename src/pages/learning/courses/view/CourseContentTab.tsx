@@ -104,13 +104,13 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
 
   // Get notes for this course using optimized backend API
   const { data: notesResponse } = useQuery<any[]>({
-    queryKey: ['/api/courses', courseId, 'notes'],
+    queryKey: [`/api/courses/${courseId}/notes`],
     enabled: !!courseId
   });
 
   // Get markers for this course using optimized backend API  
   const { data: markersResponse } = useQuery<any[]>({
-    queryKey: ['/api/courses', courseId, 'markers'],
+    queryKey: [`/api/courses/${courseId}/markers`],
     enabled: !!courseId
   });
 
