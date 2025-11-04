@@ -18,6 +18,9 @@ import { useProjectsLite } from "@/hooks/use-projects-lite";
 import { useAuthStore } from "@/stores/authStore";
 import { cn } from "@/lib/utils";
 import { Building2, FolderOpen, User, ChevronDown, LogOut, ArrowUpRight } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
 
 interface UserQuickAccessProps {
   className?: string;
@@ -34,13 +37,60 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
   const organizations = userData?.organizations || [];
   const { currentOrganizationId, setCurrentOrganization, selectedProjectId, setSelectedProject } = useProjectContext();
   const { data: projectsLite = [] } = useProjectsLite();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const currentOrg = organizations.find(o => o.id === currentOrganizationId);
   const currentProject = projectsLite.find(p => p.id === selectedProjectId);
 
+  // Mutation para cambiar organización activa
+  const switchOrganization = useMutation({
+    mutationFn: async (organizationId: string) => {
+      console.log('🔄 [UserQuickAccess] Switching to organization:', organizationId);
+      const { data, error } = await supabase
+        .from('user_preferences')
+        .update({ last_organization_id: organizationId })
+        .eq('user_id', userData?.user?.id)
+        .select();
+      
+      if (error) {
+        console.error('❌ [UserQuickAccess] Error switching organization:', error);
+        throw error;
+      }
+      console.log('✅ [UserQuickAccess] Organization switch successful:', data);
+      return data;
+    },
+    onSuccess: () => {
+      // Force refresh user data
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      queryClient.refetchQueries({ queryKey: ['current-user'] });
+      setSelectedProject(null, null); // Reset project when switching org
+      toast({
+        title: "Organización cambiada",
+        description: "La organización se ha cambiado exitosamente."
+      });
+      setOrgSelectorOpen(false);
+    },
+    onError: (error: any) => {
+      console.error('❌ [UserQuickAccess] Organization switch error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo cambiar la organización.",
+        variant: "destructive"
+      });
+    }
+  });
+
   const handleOrgChange = (orgId: string) => {
-    setCurrentOrganization(orgId);
-    setOrgSelectorOpen(false);
+    // No hacer nada si ya está seleccionada la misma organización
+    if (orgId === currentOrganizationId) {
+      console.log('🔄 [UserQuickAccess] Organization already selected:', orgId);
+      setOrgSelectorOpen(false);
+      return;
+    }
+    
+    console.log('🔄 [UserQuickAccess] Selecting organization:', orgId, 'Current:', currentOrganizationId);
+    switchOrganization.mutate(orgId);
   };
 
   const handleProjectChange = (projectId: string) => {
