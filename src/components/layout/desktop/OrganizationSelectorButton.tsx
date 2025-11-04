@@ -15,6 +15,14 @@ export function OrganizationSelectorButton() {
   const currentOrg = organizations.find(o => o.id === currentOrganizationId);
   const currentOrgName = currentOrg?.name || "Seleccionar organización";
 
+  // Ordenar organizaciones: activa primero, luego el resto alfabéticamente
+  const sortedOrganizations = currentOrganizationId
+    ? [
+        ...organizations.filter(o => o.id === currentOrganizationId),
+        ...organizations.filter(o => o.id !== currentOrganizationId).sort((a, b) => a.name.localeCompare(b.name))
+      ]
+    : organizations.sort((a, b) => a.name.localeCompare(b.name));
+
   const handleOrgChange = (orgId: string) => {
     setCurrentOrganization(orgId);
     setOpen(false);
@@ -43,7 +51,7 @@ export function OrganizationSelectorButton() {
               <p className="text-sm text-muted-foreground">No hay organizaciones disponibles</p>
             </div>
           ) : (
-            organizations.map((org) => (
+            sortedOrganizations.map((org) => (
               <button
                 key={org.id}
                 onClick={() => handleOrgChange(org.id)}

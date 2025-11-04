@@ -14,6 +14,14 @@ export function ProjectSelectorButton() {
   const currentProject = projectsLite.find(p => p.id === selectedProjectId);
   const currentProjectName = currentProject?.name || "Seleccionar proyecto";
 
+  // Ordenar proyectos: activo primero, luego el resto alfabéticamente
+  const sortedProjects = selectedProjectId
+    ? [
+        ...projectsLite.filter(p => p.id === selectedProjectId),
+        ...projectsLite.filter(p => p.id !== selectedProjectId).sort((a, b) => a.name.localeCompare(b.name))
+      ]
+    : projectsLite.sort((a, b) => a.name.localeCompare(b.name));
+
   const handleProjectChange = (projectId: string) => {
     setSelectedProject(projectId, currentOrganizationId);
     setOpen(false);
@@ -42,7 +50,7 @@ export function ProjectSelectorButton() {
               <p className="text-sm text-muted-foreground">No hay proyectos disponibles</p>
             </div>
           ) : (
-            projectsLite.map((project) => (
+            sortedProjects.map((project) => (
               <button
                 key={project.id}
                 onClick={() => handleProjectChange(project.id)}
