@@ -76,6 +76,7 @@ import { CouponFormModal } from '../modals/admin/CouponFormModal';
 import PaymentMethodModal from '../modals/PaymentMethodModal';
 import { NotificationFormModal } from '../modals/admin/NotificationFormModal';
 import BankTransferReceiptModal from '../modals/admin/BankTransferReceiptModal';
+import { AnnouncementFormModal } from '../modals/admin/AnnouncementFormModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -262,6 +263,8 @@ export function ModalFactory() {
         receiptUrl={data?.receiptUrl || null}
         paymentId={data?.paymentId || ''}
       />;
+    case 'announcement':
+      return <AnnouncementFormModal modalData={data || undefined} onClose={closeModal} />;
     default:
       return null;
   }
