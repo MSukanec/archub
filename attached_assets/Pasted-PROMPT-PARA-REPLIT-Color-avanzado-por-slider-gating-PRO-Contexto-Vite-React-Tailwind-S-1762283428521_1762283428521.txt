@@ -1,0 +1,283 @@
+PROMPT PARA REPLIT — “Color avanzado por slider (gating PRO)”
+
+Contexto: Vite + React + Tailwind + Supabase.
+Objetivo Fase 1: agregar slider de tono (H) que actualiza el color del proyecto en vivo; gated por plan PRO/TEAMS.
+Guardado: por ahora guardamos custom_color_h y un flag use_custom_color. (S y L quedan fijos y derivamos el hex en front).
+
+0) SQL: migración mínima en projects
+
+Crear campos para color avanzado, sin romper lo existente.
+
+-- 0.1) Columnas nuevas en projects
+alter table public.projects
+add column if not exists use_custom_color boolean not null default false,
+add column if not exists custom_color_h int check (custom_color_h between 0 and 360);
+
+-- (opcional) si querés persistir el hex ya calculado:
+alter table public.projects
+add column if not exists custom_color_hex text;
+
+
+(Opcional PRO/TEAMS enforcement en BD lo hacemos en otra fase para no trabar pruebas.)
+
+1) Types: extender Project
+
+Ajustá el tipo/DTO de proyecto para incluir los nuevos campos.
+
+Editá src/types/project.ts (o donde tengas tus tipos):
+
+export interface Project {
+  id: string;
+  name: string;
+  // ...
+  color?: string | null;           // tu paleta preexistente (p.ej. "coral" o hex)
+  use_custom_color: boolean;       // NUEVO
+  custom_color_h: number | null;   // NUEVO (0..360)
+  custom_color_hex?: string | null; // opcional
+  organization_id: string;
+}
+
+2) Helper de plan: isProOrTeams()
+
+Vamos a necesitar saber si la org actual es PRO/TEAMS.
+
+Crea src/utils/plan.ts:
+
+export type PlanCode = 'free' | 'pro' | 'teams';
+
+export function isProOrTeams(plan?: PlanCode | string | null) {
+  if (!plan) return false;
+  const p = String(plan).toLowerCase();
+  return p === 'pro' || p === 'teams';
+}
+
+
+Si en tu contexto de usuario ya tenés organization.plan_code o similar, úsalo. Si es plan_id, mapealo a code (temporalmente hardcode, después lo resolvemos bien).
+
+3) Store de tema (preview en vivo, sin re-render global)
+
+Crea src/store/themePreviewStore.ts:
+
+import { create } from 'zustand';
+
+interface ThemePreviewState {
+  projectAccentPreview?: string; // hex
+  setProjectAccentPreview: (hex?: string) => void;
+}
+
+export const useThemePreviewStore = create<ThemePreviewState>((set) => ({
+  projectAccentPreview: undefined,
+  setProjectAccentPreview: (hex) => set({ projectAccentPreview: hex }),
+}));
+
+
+Vamos a usar CSS variables para que la UI se pinte sin recalcular todo React.
+
+4) Utilidades de color (H → hex, paleta)
+
+Crea src/utils/color.ts:
+
+export function hslToHex(h: number, s = 0.78, l = 0.55) {
+  // s/l fijos para un look consistente tipo “Material You”
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c/2;
+  let r=0,g=0,b=0;
+
+  if (0 <= h && h < 60)   { r=c; g=x; b=0; }
+  else if (60 <= h && h < 120) { r=x; g=c; b=0; }
+  else if (120 <= h && h < 180){ r=0; g=c; b=x; }
+  else if (180 <= h && h < 240){ r=0; g=x; b=c; }
+  else if (240 <= h && h < 300){ r=x; g=0; b=c; }
+  else if (300 <= h && h <= 360){ r=c; g=0; b=x; }
+
+  const toHex = (v:number) => {
+    const h = Math.round((v + m) * 255).toString(16).padStart(2, '0');
+    return h;
+  };
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+5) Componente slider (con gating por plan)
+
+Crea src/components/projects/ProjectColorAdvanced.tsx:
+
+import { useEffect, useMemo, useState } from "react";
+import { hslToHex } from "@/utils/color";
+import { useThemePreviewStore } from "@/store/themePreviewStore";
+import { isProOrTeams } from "@/utils/plan";
+
+type Props = {
+  initialHue?: number | null;          // projects.custom_color_h
+  initialEnabled?: boolean;            // projects.use_custom_color
+  planCode?: string | null;            // 'free' | 'pro' | 'teams'
+  disabledReason?: string;             // texto de bloqueo si no es PRO
+  onChange: (p: { useCustom: boolean; hue: number | null; hex?: string }) => void;
+};
+
+export default function ProjectColorAdvanced({
+  initialHue = null,
+  initialEnabled = false,
+  planCode,
+  disabledReason = "Función disponible en planes PRO o TEAMS",
+  onChange
+}: Props) {
+  const isPro = isProOrTeams(planCode);
+  const [enabled, setEnabled] = useState(initialEnabled && isPro);
+  const [h, setH] = useState<number>(initialHue ?? 0);
+  const { setProjectAccentPreview } = useThemePreviewStore();
+
+  const hex = useMemo(() => hslToHex(h), [h]);
+
+  useEffect(() => {
+    if (enabled && isPro) setProjectAccentPreview(hex);
+    else setProjectAccentPreview(undefined);
+    return () => setProjectAccentPreview(undefined);
+  }, [enabled, isPro, hex, setProjectAccentPreview]);
+
+  useEffect(() => {
+    onChange({ useCustom: enabled && isPro, hue: enabled && isPro ? h : null, hex: enabled && isPro ? hex : undefined });
+  }, [enabled, h, isPro]);
+
+  return (
+    <div className="rounded-xl border p-3 mt-3 relative">
+      <div className="flex items-center justify-between mb-2">
+        <div className="font-medium">Color avanzado</div>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            className="accent-current"
+            checked={enabled && isPro}
+            onChange={(e) => setEnabled(e.target.checked)}
+            disabled={!isPro}
+          />
+          Usar slider
+        </label>
+      </div>
+
+      {!isPro && (
+        <div className="absolute inset-0 bg-black/5 backdrop-blur-[2px] rounded-xl flex items-center justify-center text-sm font-medium">
+          {disabledReason}
+        </div>
+      )}
+
+      <div className="flex items-center gap-4">
+        <input
+          type="range"
+          min={0}
+          max={360}
+          value={h}
+          onChange={(e) => setH(Number(e.target.value))}
+          className="w-full"
+          disabled={!isPro || !enabled}
+        />
+        <div
+          className="w-10 h-10 rounded-full ring-2 ring-black/10 shrink-0"
+          style={{ background: hex }}
+          title={hex}
+        />
+      </div>
+
+      <div className="mt-2 text-xs text-black/60">
+        Tono: {h}° · {hex}
+      </div>
+    </div>
+  );
+}
+
+6) Inyectar el preview en toda la página (CSS variables)
+
+Editá tu App.tsx o el layout que envuelve el contenido:
+
+import { useThemePreviewStore } from "@/store/themePreviewStore";
+
+export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const { projectAccentPreview } = useThemePreviewStore();
+
+  return (
+    <div
+      style={
+        projectAccentPreview
+          ? ({ 
+              // variables que tu UI ya podría usar
+              // por ejemplo en Tailwind con [var(--project-accent)]
+              ['--project-accent' as any]: projectAccentPreview,
+              ['--project-accent-weak' as any]: projectAccentPreview + '22',
+            } as React.CSSProperties)
+          : undefined
+      }
+      className="transition-colors duration-700"
+    >
+      {children}
+    </div>
+  );
+}
+
+
+Luego podés usar bg-[var(--project-accent-weak)] o text-[var(--project-accent)] en tus componentes.
+
+7) Integrar en Editar Proyecto
+
+Editá src/components/projects/EditProjectModal.tsx (o el archivo equivalente donde mostraste las bolitas de color):
+
+Importá el componente:
+
+import ProjectColorAdvanced from "@/components/projects/ProjectColorAdvanced";
+import { hslToHex } from "@/utils/color";
+import { useUserContextStore } from "@/stores/userContextStore"; // o donde tengas el planCode
+
+
+Obtené planCode de la organización activa (simplificá según tu store actual):
+
+const { currentOrganization } = useUserContextStore(); 
+const planCode = currentOrganization?.plan_code ?? 'free';
+
+
+En el formulario, debajo de las “paletas preexistentes”, agregá:
+
+<ProjectColorAdvanced
+  initialHue={project?.custom_color_h ?? null}
+  initialEnabled={!!project?.use_custom_color}
+  planCode={planCode}
+  onChange={({ useCustom, hue, hex }) => {
+    // setea en tu react-hook-form o estado local del modal
+    setValue('use_custom_color', useCustom);
+    setValue('custom_color_h', hue ?? null);
+    setValue('custom_color_hex', hex ?? null);
+
+    // si el usuario activa el slider, des-seleccioná la paleta preexistente
+    if (useCustom) setValue('color', null);
+  }}
+/>
+
+
+Al guardar:
+
+Si use_custom_color === true, enviá custom_color_h y opcional custom_color_hex = hslToHex(h).
+
+Si use_custom_color === false, ignorá esos campos y usá tu color preexistente.
+
+8) Regla de seguridad básica (front, fase 1)
+
+Durante pruebas, si la org no es PRO/TEAMS, forzá a use_custom_color = false antes del update:
+
+const payload = getValues(); // de react-hook-form
+if (!isProOrTeams(planCode)) {
+  payload.use_custom_color = false;
+  payload.custom_color_h = null;
+  payload.custom_color_hex = null;
+}
+await supabase.from('projects').update(payload).eq('id', project.id);
+
+
+En la Fase 2 te paso la protección en BD (función is_org_pro() + policy UPDATE que niegue use_custom_color=true si la org no es PRO/TEAMS).
+
+9) Mini-estilo para ver el cambio en toda la UI
+
+Aplicá el acento en un par de elementos (badge de “Vista previa”, botones secundarios del modal):
+
+<!-- ejemplo de clase en Tailwind -->
+<button className="px-3 py-1 rounded-md border"
+        style={{ borderColor: "var(--project-accent)", color: "var(--project-accent)" }}>
+  Vista previa
+</button>
