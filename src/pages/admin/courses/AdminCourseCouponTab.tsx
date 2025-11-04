@@ -224,14 +224,21 @@ export default function AdminCourseCouponTab() {
       description: 'Esta acción no se puede deshacer. El cupón será eliminado permanentemente.',
       onConfirm: async () => {
         try {
-          if (!supabase) throw new Error('Supabase not initialized');
+          const session = await supabase?.auth.getSession();
+          const token = session?.data.session?.access_token;
           
-          const { error } = await supabase
-            .from('coupons')
-            .delete()
-            .eq('id', couponId);
+          if (!token) throw new Error('No authorization token');
           
-          if (error) throw error;
+          const response = await fetch(`/api/admin/coupons/${couponId}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to delete coupon');
+          }
           
           toast({
             title: 'Cupón eliminado',
