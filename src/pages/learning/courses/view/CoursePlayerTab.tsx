@@ -14,7 +14,7 @@ import { LessonMarkers } from '@/components/learning/LessonMarkers'
 import { FavoriteButton } from '@/components/learning/FavoriteButton'
 import Player from '@vimeo/player'
 
-interface CourseViewerProps {
+interface CoursePlayerTabProps {
   courseId?: string;
   onNavigationStateChange?: (state: {
     hasPrev: boolean;
@@ -29,7 +29,7 @@ interface CourseViewerProps {
   initialSeekTime?: number;
 }
 
-export default function CourseViewer({ courseId, onNavigationStateChange, initialLessonId, initialSeekTime }: CourseViewerProps) {
+export default function CoursePlayerTab({ courseId, onNavigationStateChange, initialLessonId, initialSeekTime }: CoursePlayerTabProps) {
   const { setVisible, setData, setCurrentLesson, currentLessonId: sidebarLessonId } = useCourseSidebarStore();
   const storeLessonId = useCoursePlayerStore(s => s.currentLessonId);
   const goToLesson = useCoursePlayerStore(s => s.goToLesson);
