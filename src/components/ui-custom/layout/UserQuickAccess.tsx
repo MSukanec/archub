@@ -117,7 +117,7 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
             <div className="px-4 py-3 border-b border-border">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground truncate">
+                  <p className="text-sm font-bold text-foreground truncate">
                     {userData?.user?.full_name || 'Usuario'}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
@@ -153,7 +153,7 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
                     <Building2 className="h-4 w-4 text-accent" />
                     <div className="flex flex-col items-start">
                       <span className="text-xs text-muted-foreground font-medium">Organización</span>
-                      <span className="text-sm font-medium text-foreground group-hover:text-accent transition-colors truncate max-w-[180px]">
+                      <span className="text-sm font-bold text-foreground group-hover:text-accent transition-colors truncate max-w-[180px]">
                         {currentOrg?.name || 'Seleccionar'}
                       </span>
                     </div>
@@ -210,7 +210,7 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
                     <FolderOpen className="h-4 w-4 text-accent" />
                     <div className="flex flex-col items-start">
                       <span className="text-xs text-muted-foreground font-medium">Proyecto activo</span>
-                      <span className="text-sm font-medium text-foreground group-hover:text-accent transition-colors truncate max-w-[180px]">
+                      <span className="text-sm font-bold text-foreground group-hover:text-accent transition-colors truncate max-w-[180px]">
                         {currentProject?.name || 'Seleccionar'}
                       </span>
                     </div>
@@ -265,18 +265,13 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
             <div className="border-t border-border">
               {/* Plan Information */}
               <div className="px-4 py-3 flex items-center justify-between hover:bg-accent/5 transition-colors">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">
-                    {userData?.plan?.name || 'Free Plan'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {userData?.plan?.price ? `$${userData.plan.price}/mes` : '100 sends per month'}
-                  </p>
-                </div>
+                <p className="text-sm font-medium text-foreground">
+                  {userData?.plan?.name || 'Free Plan'}
+                </p>
                 <Button
                   variant="default"
                   size="sm"
-                  className="h-7 px-3 text-xs font-medium"
+                  className="h-7 px-3 text-xs font-medium flex-shrink-0"
                   onClick={handleGoToPricing}
                   data-testid="button-upgrade-plan"
                 >
