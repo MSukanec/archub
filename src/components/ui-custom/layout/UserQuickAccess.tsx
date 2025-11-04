@@ -15,8 +15,9 @@ import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from "@/stores/projectContext";
 import { useProjectsLite } from "@/hooks/use-projects-lite";
+import { useAuthStore } from "@/stores/authStore";
 import { cn } from "@/lib/utils";
-import { Building2, FolderOpen, User, ChevronDown } from "lucide-react";
+import { Building2, FolderOpen, User, ChevronDown, LogOut, ArrowUpRight } from "lucide-react";
 
 interface UserQuickAccessProps {
   className?: string;
@@ -49,6 +50,20 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
 
   const handleGoToProfile = () => {
     navigate('/profile');
+    setIsOpen(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await useAuthStore.getState().logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  const handleGoToPricing = () => {
+    navigate('/pricing');
     setIsOpen(false);
   };
 
@@ -244,6 +259,43 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
                 </AnimatePresence>
               </div>
 
+            </div>
+
+            {/* Separator + Plan Info + Logout */}
+            <div className="border-t border-border">
+              {/* Plan Information */}
+              <div className="px-4 py-3 flex items-center justify-between hover:bg-accent/5 transition-colors">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground">
+                    {userData?.plan?.name || 'Free Plan'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {userData?.plan?.price ? `$${userData.plan.price}/mes` : '100 sends per month'}
+                  </p>
+                </div>
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="h-7 px-3 text-xs font-medium"
+                  onClick={handleGoToPricing}
+                  data-testid="button-upgrade-plan"
+                >
+                  Upgrade
+                  <ArrowUpRight className="h-3 w-3 ml-1" />
+                </Button>
+              </div>
+
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="w-full px-4 py-3 flex items-center gap-2.5 hover:bg-accent/10 transition-colors border-t border-border group"
+                data-testid="button-logout"
+              >
+                <LogOut className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors" />
+                <span className="text-sm text-foreground group-hover:text-accent transition-colors">
+                  Logout
+                </span>
+              </button>
             </div>
           </motion.div>
         )}
