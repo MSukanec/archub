@@ -3,6 +3,7 @@ import { Home } from "lucide-react";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { ProjectSelectorButton } from "./ProjectSelectorButton";
 import { OrganizationSelectorButton } from "./OrganizationSelectorButton";
+import { UserQuickAccess } from "@/components/ui-custom/layout/UserQuickAccess";
 
 interface MainHeaderProps {
   icon?: React.ComponentType<any>;
@@ -41,9 +42,10 @@ export function MainHeader({ icon, title }: MainHeaderProps) {
           </h1>
         </div>
 
-        {/* Right side: Selector */}
-        <div className="flex items-center">
+        {/* Right side: Selector + User Quick Access */}
+        <div className="flex items-center gap-3">
           {selectorComponent}
+          <UserQuickAccess />
         </div>
       </div>
     </div>
