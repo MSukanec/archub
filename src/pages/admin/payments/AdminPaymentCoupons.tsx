@@ -54,7 +54,7 @@ export default function AdminPaymentCoupons() {
     if (isMobile && mobileSearchValue !== searchValue) {
       setSearchValue(mobileSearchValue)
     }
-  }, [mobileSearchValue, isMobile])
+  }, [mobileSearchValue, isMobile, searchValue])
   
   const { data: coupons = [], isLoading: couponsLoading, refetch } = useQuery({
     queryKey: ['coupons'],
