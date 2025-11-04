@@ -3,7 +3,7 @@ import { FileText } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useProjectContext } from '@/stores/projectContext';
-import ProjectActives from './ProjectActives';
+import ProjectDataTab from './ProjectDataTab';
 
 export default function ProjectData() {
   const [activeTab, setActiveTab] = useState('basic');
@@ -34,9 +34,9 @@ export default function ProjectData() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'basic':
-        return <ProjectActives />;
+        return <ProjectDataTab />;
       default:
-        return <ProjectActives />;
+        return <ProjectDataTab />;
     }
   };
 
