@@ -77,7 +77,7 @@ export function NotificationBellHeader() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="absolute top-full right-0 mt-2 w-80 bg-background border border-border rounded-lg shadow-lg z-50"
+            className="absolute top-full right-0 mt-2 w-[340px] max-w-[calc(100vw-2rem)] bg-background border border-border rounded-lg shadow-lg z-50 overflow-hidden"
             initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}

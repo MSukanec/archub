@@ -10,7 +10,7 @@
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from "@/stores/projectContext";
@@ -92,6 +92,7 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
       {/* Avatar - siempre visible */}
       <div className="cursor-pointer">
         <Avatar className="h-8 w-8 hover:opacity-80 transition-opacity ring-0 border-0">
+          <AvatarImage src={userData?.user?.avatar_url} />
           <AvatarFallback className="bg-accent text-accent-foreground text-sm font-bold ring-0 border-0">
             {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
           </AvatarFallback>

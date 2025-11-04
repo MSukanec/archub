@@ -76,18 +76,6 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
       <div className="p-4 pb-3">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold text-sm">Notificaciones</h3>
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => {
-              navigate('/notifications');
-              onClose();
-            }}
-            className="h-7 text-xs px-3"
-            data-testid="button-view-all"
-          >
-            Ver todas
-          </Button>
         </div>
         {unreadNotifications.length > 0 && (
           <Button
@@ -105,7 +93,7 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
       
       <Separator />
 
-      <div className={cn(!hasNotifications && "max-h-32", hasNotifications && "max-h-[320px]")}>
+      <div className={cn(!hasNotifications && "max-h-32", hasNotifications && "max-h-[280px]")}>
         {loading ? (
           <div className="p-8 text-center text-sm text-muted-foreground">
             Cargando notificaciones...
@@ -159,6 +147,25 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
           </ScrollArea>
         )}
       </div>
+
+      {/* Botón "Ver todas" al final */}
+      {hasNotifications && (
+        <>
+          <Separator />
+          <div className="p-3">
+            <button
+              onClick={() => {
+                navigate('/notifications');
+                onClose();
+              }}
+              className="w-full text-center text-sm font-medium text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors"
+              data-testid="button-view-all"
+            >
+              Ver todas
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
