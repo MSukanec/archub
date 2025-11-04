@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-type TabName = "Visión General" | "Contenido" | "Lecciones" | "Apuntes" | "Marcadores";
+type TabName = "Visión General" | "Contenido" | "Reproductor" | "Apuntes" | "Marcadores";
 
 type State = {
   activeTab: TabName;
@@ -23,7 +23,7 @@ export const useCoursePlayerStore = create<State>((set) => ({
   setActiveTab: (t) => set({ activeTab: t }),
   goToLesson: (lessonId, seek = null) => {
     set({
-      activeTab: "Lecciones",
+      activeTab: "Reproductor",
       currentLessonId: lessonId,
       pendingSeek: seek ?? null,
     });

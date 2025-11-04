@@ -212,14 +212,14 @@ export default function CourseView() {
       isActive: activeTab === 'Visión General'
     },
     {
+      id: 'Reproductor',
+      label: 'Reproductor',
+      isActive: activeTab === 'Reproductor'
+    },
+    {
       id: 'Contenido',
       label: 'Contenido',
       isActive: activeTab === 'Contenido'
-    },
-    {
-      id: 'Lecciones',
-      label: 'Lecciones',
-      isActive: activeTab === 'Lecciones'
     },
     {
       id: 'Apuntes',
@@ -264,7 +264,7 @@ export default function CourseView() {
             if (lastLesson) {
               goToLesson(lastLesson.lesson_id, lastLesson.last_position_sec);
             } else {
-              handleTabChange('Lecciones');
+              handleTabChange('Reproductor');
             }
           }}
           data-testid="button-continue-course"
@@ -273,7 +273,7 @@ export default function CourseView() {
         </Button>
       ]
     }),
-    ...(activeTab === 'Lecciones' && navigationState && {
+    ...(activeTab === 'Reproductor' && navigationState && {
       actions: [
         <Button
           key="previous"
@@ -353,7 +353,7 @@ export default function CourseView() {
         return <CourseDashboardTab courseId={course?.id} />;
       case 'Contenido':
         return <CourseContentTab courseId={course?.id} courseSlug={id} />;
-      case 'Lecciones':
+      case 'Reproductor':
         return (
           <CourseViewer 
             courseId={course?.id} 
