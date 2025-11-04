@@ -18,7 +18,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return (
       <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
         <p className="font-medium mb-2">{label}</p>
-        <p className="text-sm font-medium" style={{ color: '#92c900' }}>
+        <p className="text-sm font-medium" style={{ color: 'var(--accent)' }}>
           Actividad total: {payload[0]?.value || 0}
         </p>
       </div>
@@ -65,8 +65,8 @@ export function OrganizationActivityChart({ data, isLoading }: OrganizationActiv
             <AreaChart data={data} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#92c900" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#92c900" stopOpacity={0.1}/>
+                  <stop offset="5%" stopColor="hsl(var(--accent-hsl))" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="hsl(var(--accent-hsl))" stopOpacity={0.1}/>
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-text)" className="opacity-30" />
@@ -87,7 +87,7 @@ export function OrganizationActivityChart({ data, isLoading }: OrganizationActiv
               <Area
                 type="monotone"
                 dataKey="total"
-                stroke="#92c900"
+                stroke="var(--accent)"
                 fillOpacity={1}
                 fill="url(#colorTotal)"
                 strokeWidth={2}

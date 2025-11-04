@@ -31,7 +31,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return (
       <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg max-w-xs">
         <p className="font-medium mb-2">{label}</p>
-        <p className="text-sm font-medium mb-2" style={{ color: '#92c900' }}>
+        <p className="text-sm font-medium mb-2" style={{ color: 'var(--accent)' }}>
           Actividad total: {payload[0]?.value || 0}
         </p>
         {users.length > 0 && (
@@ -184,8 +184,8 @@ export function ActivityChart({ data, isLoading, timePeriod, onTimePeriodChange 
             <AreaChart data={data} margin={{ top: 30, right: 20, left: 0, bottom: 20 }}>
               <defs>
                 <linearGradient id="colorUserTotal" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#92c900" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#92c900" stopOpacity={0.1}/>
+                  <stop offset="5%" stopColor="hsl(var(--accent-hsl))" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="hsl(var(--accent-hsl))" stopOpacity={0.1}/>
                 </linearGradient>
               </defs>
               <XAxis 
@@ -204,11 +204,11 @@ export function ActivityChart({ data, isLoading, timePeriod, onTimePeriodChange 
               <Area
                 type="monotone"
                 dataKey="total"
-                stroke="#92c900"
+                stroke="var(--accent)"
                 fillOpacity={1}
                 fill="url(#colorUserTotal)"
                 dot={<CustomDot />}
-                activeDot={{ r: 6, stroke: '#92c900', strokeWidth: 2, fill: '#fff' }}
+                activeDot={{ r: 6, stroke: 'var(--accent)', strokeWidth: 2, fill: '#fff' }}
               />
             </AreaChart>
           </ResponsiveContainer>
