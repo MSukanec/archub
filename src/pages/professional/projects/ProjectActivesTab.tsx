@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
 import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
-import { Folder } from 'lucide-react'
+import { Folder, Plus } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useProjectContext } from '@/stores/projectContext'
@@ -11,6 +11,8 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import ProjectItem from '@/components/ui-custom/general/ProjectItem'
 import { supabase } from '@/lib/supabase'
+import { Button } from '@/components/ui/button'
+import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
 
 export default function ProjectActives() {
   const { openModal } = useGlobalModalStore()
@@ -120,6 +122,21 @@ export default function ProjectActives() {
           icon={<Folder className="w-12 h-12" />}
           title="No hay proyectos creados"
           description="Comienza creando tu primer proyecto para gestionar tu trabajo"
+          action={
+            <PlanRestricted 
+              feature="max_projects" 
+              current={projects.length}
+              functionName="Crear Proyecto"
+            >
+              <Button
+                onClick={() => openModal('project', {})}
+                data-testid="button-create-project-empty"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Crear Proyecto
+              </Button>
+            </PlanRestricted>
+          }
         />
       )}
     </div>
