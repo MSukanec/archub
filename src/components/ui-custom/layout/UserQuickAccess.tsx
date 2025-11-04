@@ -166,7 +166,7 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
           >
             {/* Header del popover con nombre de usuario */}
             <div className="px-4 py-3 border-b border-border">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-foreground truncate">
                     {userData?.user?.full_name || 'Usuario'}
@@ -175,15 +175,6 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
                     {userData?.user?.email || ''}
                   </p>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 hover:bg-accent/10 hover:text-accent flex-shrink-0"
-                  onClick={handleGoToProfile}
-                  title="Ir a mi perfil"
-                >
-                  <User className="h-4 w-4" />
-                </Button>
               </div>
             </div>
 
@@ -312,7 +303,7 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
 
             </div>
 
-            {/* Separator + Plan Info + Logout */}
+            {/* Separator + Plan Info + Profile + Logout */}
             <div className="border-t border-border">
               {/* Plan Information */}
               <div className="px-4 py-3 flex items-center justify-between hover:bg-accent/5 transition-colors">
@@ -330,6 +321,18 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
                   <ArrowUpRight className="h-3 w-3 ml-1" />
                 </Button>
               </div>
+
+              {/* Profile Button */}
+              <button
+                onClick={handleGoToProfile}
+                className="w-full px-4 py-3 flex items-center gap-2.5 hover:bg-accent/10 transition-colors border-t border-border group"
+                data-testid="button-view-profile"
+              >
+                <User className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors" />
+                <span className="text-sm text-foreground group-hover:text-accent transition-colors">
+                  Ver Perfil
+                </span>
+              </button>
 
               {/* Logout Button */}
               <button
