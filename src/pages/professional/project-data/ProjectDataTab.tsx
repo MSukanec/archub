@@ -226,7 +226,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
     }
   }, [projectData]);
 
-  // Handlers for color changes
+  // Handlers for color changes (NO usar saveProjectColorMutation como dependencia para evitar loops)
   const handlePaletteColorChange = useCallback((color: string) => {
     setSelectedColor(color);
     setUseCustomColor(false);
@@ -239,7 +239,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       custom_color_h: null,
       custom_color_hex: null
     });
-  }, [saveProjectColorMutation]);
+  }, []);
 
   const handleCustomColorChange = useCallback((params: { useCustom: boolean; hue: number | null; hex: string | null }) => {
     setUseCustomColor(params.useCustom);
@@ -256,7 +256,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       custom_color_hex: params.hex ?? undefined,
       color: params.useCustom ? (params.hex ?? '#84cc16') : '#84cc16'
     });
-  }, [saveProjectColorMutation]);
+  }, []);
 
   if (!activeProjectId) {
     return (
