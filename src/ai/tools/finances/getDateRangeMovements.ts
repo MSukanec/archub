@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { formatCurrency, formatDateRange, formatMovementCount } from '../../utils/responseFormatter';
 import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder';
+import { textIncludes } from '../../utils/textNormalizer';
 
 export interface MovementFilters {
   projectNames?: string[];
@@ -87,12 +88,12 @@ export async function getDateRangeMovements(
     // Aplicar filtros opcionales
     let filteredMovements = movements;
 
-    // Filtrar por projectNames (en JavaScript para evitar caracteres especiales)
+    // Filtrar por projectNames (insensible a acentos)
     if (filters?.projectNames && filters.projectNames.length > 0) {
-      const projectNamesLower = filters.projectNames.map(p => p.toLowerCase());
       filteredMovements = filteredMovements.filter(m => {
-        const projectName = (m.project_name ?? '').toLowerCase();
-        return projectNamesLower.some(p => projectName.includes(p));
+        return filters.projectNames!.some(p => 
+          textIncludes(m.project_name ?? '', p)
+        );
       });
     }
 

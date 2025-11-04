@@ -722,7 +722,7 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
             type: "function" as const,
             function: {
               name: "getProjectFinancialSummary",
-              description: "Obtiene un resumen financiero completo de un proyecto: balance, ingresos totales, egresos totales, y opcionalmente un desglose por categorías. Útil para '¿Cuál es el balance de Casa Blanca?' o 'Dame el resumen financiero del proyecto X'",
+              description: "Resumen financiero COMPLETO de un PROYECTO: balance total, ingresos totales, egresos totales de TODO EL TIEMPO. NO filtra por fechas. Usar para: 'Balance del proyecto X', 'Resumen financiero de Y', 'Cuánto llevo gastado en proyecto Z'",
               parameters: {
                 type: "object",
                 properties: {
@@ -781,7 +781,7 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
             type: "function" as const,
             function: {
               name: "getContactMovements",
-              description: "Obtiene TODOS los movimientos (ingresos y egresos) de un contacto con DETALLE INDIVIDUAL de cada pago (fecha, monto, descripción, billetera). Devuelve los últimos 15 movimientos con datos reales. MÁS COMPLETO que getTotalPaymentsByContactAndProject. USAR SIEMPRE cuando el usuario pide 'detalle', 'desglose', 'listado' o 'qué pagos'. Útil para '¿Qué le pagué a Juan?' o 'Dame el detalle de pagos a María' o 'Balance de Pedro con detalles'",
+              description: "Obtiene movimientos de una PERSONA o EMPRESA específica (contacto/proveedor/cliente, NO proyectos). Con detalle individual (fecha, monto, descripción). SOLO usar cuando se menciona el NOMBRE DE UNA PERSONA/EMPRESA. Ejemplos: '¿Qué le pagué a Juan?', 'Movimientos de empresa ABC', 'Balance de proveedor XYZ'. NO usar para consultas sobre proyectos.",
               parameters: {
                 type: "object",
                 properties: {
@@ -820,7 +820,7 @@ export function registerAIRoutes(app: Express, deps: RouteDeps) {
             type: "function" as const,
             function: {
               name: "getDateRangeMovements",
-              description: "Obtiene movimientos en un rango de fechas con filtros avanzados y capacidad de agrupar por proyecto, categoría, billetera o tipo. Útil para '¿Cuánto gasté en julio?' o 'Movimientos de agosto agrupados por proyecto'",
+              description: "Movimientos con FILTROS AVANZADOS: por fechas, proyecto, tipo (Ingreso/Egreso), categoría, billetera. USAR para consultas como: 'Egresos del proyecto X este año', 'Gastos en julio', 'Ingresos de proyecto Y en 2025', 'Cuánto gasté en obra Z este mes en ARS'. Permite filtrar por TIPO (Ingreso/Egreso) y PROYECTO simultáneamente.",
               parameters: {
                 type: "object",
                 properties: {
