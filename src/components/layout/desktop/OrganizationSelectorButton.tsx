@@ -9,19 +9,23 @@ import { cn } from "@/lib/utils";
 export function OrganizationSelectorButton() {
   const { data: userData } = useCurrentUser();
   const organizations = userData?.organizations || [];
+  const memberships = userData?.memberships || [];
   const { currentOrganizationId, setCurrentOrganization } = useProjectContext();
   const [open, setOpen] = useState(false);
 
   const currentOrg = organizations.find(o => o.id === currentOrganizationId);
   const currentOrgName = currentOrg?.name || "Seleccionar organización";
 
-  // Ordenar organizaciones: activa primero, luego el resto alfabéticamente
-  const sortedOrganizations = currentOrganizationId
-    ? [
-        ...organizations.filter(o => o.id === currentOrganizationId),
-        ...organizations.filter(o => o.id !== currentOrganizationId).sort((a, b) => a.name.localeCompare(b.name))
-      ]
-    : organizations.sort((a, b) => a.name.localeCompare(b.name));
+  // Ordenar organizaciones por última actividad (last_active_at de memberships)
+  const sortedOrganizations = [...organizations].sort((a, b) => {
+    const membershipA = memberships.find(m => m.organization_id === a.id);
+    const membershipB = memberships.find(m => m.organization_id === b.id);
+    
+    const dateA = membershipA?.last_active_at ? new Date(membershipA.last_active_at).getTime() : 0;
+    const dateB = membershipB?.last_active_at ? new Date(membershipB.last_active_at).getTime() : 0;
+    
+    return dateB - dateA; // Más reciente primero
+  });
 
   const handleOrgChange = (orgId: string) => {
     setCurrentOrganization(orgId);

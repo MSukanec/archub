@@ -14,13 +14,12 @@ export function ProjectSelectorButton() {
   const currentProject = projectsLite.find(p => p.id === selectedProjectId);
   const currentProjectName = currentProject?.name || "Seleccionar proyecto";
 
-  // Ordenar proyectos: activo primero, luego el resto alfabéticamente
-  const sortedProjects = selectedProjectId
-    ? [
-        ...projectsLite.filter(p => p.id === selectedProjectId),
-        ...projectsLite.filter(p => p.id !== selectedProjectId).sort((a, b) => a.name.localeCompare(b.name))
-      ]
-    : projectsLite.sort((a, b) => a.name.localeCompare(b.name));
+  // Ordenar proyectos por última actividad (updated_at descendente)
+  const sortedProjects = [...projectsLite].sort((a, b) => {
+    const dateA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+    const dateB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+    return dateB - dateA; // Más reciente primero
+  });
 
   const handleProjectChange = (projectId: string) => {
     setSelectedProject(projectId, currentOrganizationId);

@@ -7,6 +7,7 @@ export interface ProjectLite {
   name: string
   color: string | null
   status: string
+  updated_at: string
 }
 
 export function useProjectsLite(organizationId?: string | undefined) {
@@ -24,10 +25,10 @@ export function useProjectsLite(organizationId?: string | undefined) {
 
       const { data, error } = await supabase
         .from('projects')
-        .select('id, name, color, status')
+        .select('id, name, color, status, updated_at')
         .eq('organization_id', effectiveOrganizationId)
         .eq('is_active', true)
-        .order('name')
+        .order('updated_at', { ascending: false })
       
       if (error) {
         throw error
