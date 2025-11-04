@@ -237,21 +237,19 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
 
         if (projectError) throw projectError;
 
-        // Create project_data if type or modality is selected
-        if (data.project_type_id || data.modality_id) {
-          const { error: dataError } = await supabase
-            .from('project_data')
-            .upsert({
-              project_id: newProject.id,
-              organization_id: organizationId,
-              project_type_id: data.project_type_id || null,
-              modality_id: data.modality_id || null,
-            }, {
-              onConflict: 'project_id'
-            });
+        // ALWAYS create project_data with organization_id (required for RLS)
+        const { error: dataError } = await supabase
+          .from('project_data')
+          .upsert({
+            project_id: newProject.id,
+            organization_id: organizationId,
+            project_type_id: data.project_type_id || null,
+            modality_id: data.modality_id || null,
+          }, {
+            onConflict: 'project_id'
+          });
 
-          if (dataError) throw dataError;
-        }
+        if (dataError) throw dataError;
 
         return newProject;
       }
