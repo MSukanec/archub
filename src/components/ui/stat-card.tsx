@@ -48,6 +48,7 @@ const StatCard = forwardRef<HTMLDivElement, StatCardProps>(
         className={cn(
           statCardVariants({ variant }),
           isClickable && "relative group cursor-pointer hover:shadow-md transition-shadow",
+          "accent-transition", // Enhanced color transitions
           className
         )}
         onClick={isClickable ? handleClick : undefined}

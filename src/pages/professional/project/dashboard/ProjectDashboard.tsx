@@ -81,9 +81,9 @@ export default function ProjectDashboard() {
   const projectColor = currentProject.color || 'var(--accent)';
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 project-breathing-bg">
       {/* Welcome Section - Similar to Organization Dashboard */}
-      <div className="space-y-2 pb-6 border-b border-border">
+      <div className="space-y-2 pb-6 border-b border-border accent-transition">
         <div className="flex items-center gap-4">
           {/* Project Avatar */}
           <div className="flex-shrink-0">
@@ -91,18 +91,18 @@ export default function ProjectDashboard() {
               <img 
                 src={currentProject.project_data.project_image_url} 
                 alt={currentProject.name}
-                className="w-16 h-16 rounded-full object-cover border-2"
+                className="w-16 h-16 rounded-full object-cover border-2 accent-transition accent-glow"
                 style={{ borderColor: projectColor }}
               />
             ) : (
               <div 
-                className="w-16 h-16 rounded-full flex items-center justify-center border-2"
+                className="w-16 h-16 rounded-full flex items-center justify-center border-2 accent-transition accent-glow"
                 style={{ 
                   backgroundColor: `${projectColor}15`,
                   borderColor: projectColor
                 }}
               >
-                <Building2 className="w-8 h-8" style={{ color: projectColor }} />
+                <Building2 className="w-8 h-8 accent-transition" style={{ color: projectColor }} />
               </div>
             )}
           </div>
