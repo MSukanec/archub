@@ -44,6 +44,7 @@ Preferred communication style: Simple, everyday language.
   - **Shared Utilities Module**: Natural language date parser, currency converter, and consistent Spanish response formatters.
   - **Query Optimization System**: Optimized queries for all 7 AI finance functions, selecting only required fields from `movements_view`.
   - **Anti-Hallucination System**: `getContactMovements` always returns individual movement details for the latest 15 movements.
+  - **FloatingAIChat Visibility System** (Nov 2024): Route-based allowlist controls where AI assistant appears. Shows only on work routes (/dashboard, /projects, /movements, /construction, /admin, etc.), hidden on learning, profile, landing, and pricing pages. Desktop-only with FREE plan restrictions (blur preview). Implemented in Layout.tsx with comprehensive 18-route allowlist.
 
 ### System Design Choices
 - **Backend Modular Architecture**: Monolithic `server/routes.ts` modularized into domain-specific route modules.
