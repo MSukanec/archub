@@ -23,6 +23,7 @@ import { CourseSidebar } from "@/components/layout/CourseSidebar";
 import { ProjectSelectorButton } from "./ProjectSelectorButton";
 import { OrganizationSelectorButton } from "./OrganizationSelectorButton";
 import { useProjectAccentColor } from "@/hooks/use-project-accent-color";
+import { AIFloatingChat } from "@/components/ui-custom/layout/AIFloatingChat";
 
 interface Tab {
   id: string;
@@ -215,6 +216,9 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                 </div>
               </div>
             )}
+
+            {/* AI Floating Chat - Solo en desktop */}
+            <AIFloatingChat />
           </div>
           </div>
         </div>
