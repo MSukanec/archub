@@ -875,3 +875,31 @@ export type PaymentEvent = typeof payment_events.$inferSelect;
 export type InsertPaymentEvent = z.infer<typeof insertPaymentEventSchema>;
 export type BankTransferPayment = typeof bank_transfer_payments.$inferSelect;
 export type InsertBankTransferPayment = z.infer<typeof insertBankTransferPaymentSchema>;
+
+// Global Announcements Table
+export const global_announcements = pgTable("global_announcements", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  type: text("type").notNull(), // 'info', 'warning', 'error', 'success'
+  link_text: text("link_text"),
+  link_url: text("link_url"),
+  primary_button_text: text("primary_button_text"),
+  primary_button_url: text("primary_button_url"),
+  secondary_button_text: text("secondary_button_text"),
+  secondary_button_url: text("secondary_button_url"),
+  audience: text("audience").default("all"), // 'all', 'free', 'pro', 'teams'
+  is_active: boolean("is_active").default(true),
+  starts_at: timestamp("starts_at", { withTimezone: true }).defaultNow(),
+  ends_at: timestamp("ends_at", { withTimezone: true }),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  created_by: uuid("created_by"),
+});
+
+export const insertGlobalAnnouncementSchema = createInsertSchema(global_announcements).omit({
+  id: true,
+  created_at: true,
+});
+
+export type GlobalAnnouncement = typeof global_announcements.$inferSelect;
+export type InsertGlobalAnnouncement = z.infer<typeof insertGlobalAnnouncementSchema>;

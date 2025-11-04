@@ -158,3 +158,50 @@ create table public.countries (
 create unique INDEX IF not exists countries_name_lower_uniq on public.countries using btree (lower(name)) TABLESPACE pg_default;
 
 create unique INDEX IF not exists countries_alpha3_uniq on public.countries using btree (alpha_3) TABLESPACE pg_default;
+
+Tabla GLOBAL_ANNOUNCEMENTS:
+
+create table public.global_announcements (
+  id uuid not null default gen_random_uuid (),
+  title text not null,
+  message text not null,
+  type text not null,
+  link_text text null,
+  link_url text null,
+  audience text null default 'all'::text,
+  is_active boolean null default true,
+  starts_at timestamp with time zone null default now(),
+  ends_at timestamp with time zone null,
+  created_at timestamp with time zone null default now(),
+  created_by uuid null,
+  primary_button_text text null,
+  primary_button_url text null,
+  secondary_button_text text null,
+  secondary_button_url text null,
+  constraint global_announcements_pkey primary key (id),
+  constraint global_announcements_created_by_fkey foreign KEY (created_by) references users (id),
+  constraint global_announcements_audience_check check (
+    (
+      audience = any (
+        array[
+          'all'::text,
+          'free'::text,
+          'pro'::text,
+          'teams'::text
+        ]
+      )
+    )
+  ),
+  constraint global_announcements_type_check check (
+    (
+      type = any (
+        array[
+          'info'::text,
+          'warning'::text,
+          'error'::text,
+          'success'::text
+        ]
+      )
+    )
+  )
+) TABLESPACE pg_default;
