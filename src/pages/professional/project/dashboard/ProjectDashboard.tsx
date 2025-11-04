@@ -135,11 +135,11 @@ export default function ProjectDashboard() {
       </div>
 
       {/* Cómputo y Presupuesto Card */}
-      <Card>
+      <Card className="card-accent-border card-accent-bg">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Calculator className="w-5 h-5 text-accent" />
+              <Calculator className="w-5 h-5 icon-accent" />
               <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
                 Cómputo y Presupuesto
               </p>
@@ -219,7 +219,7 @@ export default function ProjectDashboard() {
         >
           <StatCardContent>
             <div className="flex items-center gap-2 mb-3">
-              <BookOpen className="w-5 h-5 text-accent" />
+              <BookOpen className="w-5 h-5 icon-accent" />
               <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
                 Bitácora de Obra
               </p>
@@ -252,7 +252,7 @@ export default function ProjectDashboard() {
         >
           <StatCardContent>
             <div className="flex items-center gap-2 mb-3">
-              <Users className="w-5 h-5 text-accent" />
+              <Users className="w-5 h-5 icon-accent" />
               <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
                 Clientes del Proyecto
               </p>
