@@ -6,7 +6,6 @@ import { Folder } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useProjectContext } from '@/stores/projectContext'
-import { useNavigationStore } from '@/stores/navigationStore'
 import { useLocation } from 'wouter'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
@@ -21,7 +20,6 @@ export default function ProjectActives() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setSelectedProject } = useProjectContext()
-  const { setSidebarContext } = useNavigationStore()
   const [, navigate] = useLocation()
 
   // Get active project
@@ -68,7 +66,6 @@ export default function ProjectActives() {
       });
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       
-      setSidebarContext('project');
       navigate('/project/dashboard');
       
       toast({
