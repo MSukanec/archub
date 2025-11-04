@@ -156,6 +156,7 @@ function Router() {
 
         {/* General Routes */}
         <Route path="/project/dashboard" component={Project} />
+        <Route path="/project" component={Project} />
         <Route path="/clients" component={Clients} />
         <Route path="/media">
           <Suspense fallback={<LazyLoadFallback />}>

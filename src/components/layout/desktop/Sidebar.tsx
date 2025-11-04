@@ -136,6 +136,7 @@ export function Sidebar() {
     } else if (sidebarLevel === 'project' && selectedProjectId) {
       return [
         { id: 'dashboard', label: 'Visión General', icon: Home, href: '/project/dashboard' },
+        { id: 'basic-data', label: 'Datos Básicos', icon: FileText, href: '/project' },
         { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets' },
         { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel', restricted: 'coming_soon' },
         { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials', restricted: 'coming_soon' },
@@ -778,9 +779,9 @@ export function Sidebar() {
                     if (item.id === 'activity') return { show: true, text: 'Organización' };
                   } else if (sidebarLevel === 'project') {
                     if (item.id === 'dashboard') return { show: true, text: 'Planificación' };
-                    if (item.id === 'budgets') return { show: true, text: 'Recursos' };
+                    if (item.id === 'basic-data') return { show: true, text: 'Recursos' };
                     if (item.id === 'subcontracts') return { show: true, text: 'Ejecución' };
-                    if (item.id === 'clients') return { show: true, text: 'Comercialización' };
+                    if (item.id === 'logs') return { show: true, text: 'Comercialización' };
                   } else if (sidebarLevel === 'learning') {
                     if (item.id === 'dashboard') return { show: true, text: 'Capacitaciones' };
                   } else if (sidebarLevel === 'admin') {
