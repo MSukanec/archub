@@ -35,22 +35,46 @@ export function useProjectAccentColor() {
       }
 
       try {
-        // Obtener el color del proyecto desde Supabase
+        // Obtener el color del proyecto desde Supabase (incluir campos de color custom)
         const { data: project, error } = await supabase
           .from('projects')
-          .select('color')
+          .select('color, use_custom_color, custom_color_h, custom_color_hex')
           .eq('id', selectedProjectId)
           .single();
 
-        if (error || !project?.color) {
-          // Si hay error o no hay color, usar el por defecto
+        if (error) {
+          // Si hay error, usar el por defecto
+          applyAccentColor(DEFAULT_ACCENT.hex, DEFAULT_ACCENT.hsl, DEFAULT_ACCENT.rgb, isDark);
+          return;
+        }
+
+        // Determinar qué color usar basado en use_custom_color
+        let projectColorHex: string | null = null;
+
+        if (project.use_custom_color) {
+          // Usar color personalizado
+          if (project.custom_color_hex) {
+            // Si hay hex guardado, usarlo
+            projectColorHex = project.custom_color_hex;
+          } else if (project.custom_color_h !== null && project.custom_color_h !== undefined) {
+            // Si solo hay hue, convertirlo a hex
+            const { hslToHex } = await import('@/utils/colorUtils');
+            projectColorHex = hslToHex(project.custom_color_h);
+          }
+        } else {
+          // Usar color de la paleta predefinida
+          projectColorHex = project.color;
+        }
+
+        if (!projectColorHex) {
+          // Si no hay color definido, usar el por defecto
           applyAccentColor(DEFAULT_ACCENT.hex, DEFAULT_ACCENT.hsl, DEFAULT_ACCENT.rgb, isDark);
           return;
         }
 
         // Convertir el color hex del proyecto a HSL y RGB
-        const rgb = hexToRgb(project.color);
-        const hsl = hexToHsl(project.color);
+        const rgb = hexToRgb(projectColorHex);
+        const hsl = hexToHsl(projectColorHex);
 
         if (!rgb || !hsl) {
           // Si la conversión falla, usar el por defecto
@@ -63,7 +87,7 @@ export function useProjectAccentColor() {
         const rgbFormatted = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
 
         // Aplicar el color del proyecto
-        applyAccentColor(project.color, hslFormatted, rgbFormatted, isDark);
+        applyAccentColor(projectColorHex, hslFormatted, rgbFormatted, isDark);
 
       } catch (err) {
         console.error('Error updating accent color:', err);

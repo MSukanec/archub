@@ -554,7 +554,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
               
               // Si se activa custom, deseleccionar preset
               if (useCustom) {
-                form.setValue('color', null);
+                form.setValue('color', undefined);
               }
             }}
           />
