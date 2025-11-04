@@ -835,35 +835,27 @@ input[type="number"] {
 /* Project page breathing background - Organic, soft gradients like mood slider */
 .project-breathing-bg {
   position: relative;
-  isolation: isolate;
-  background: linear-gradient(
-    180deg,
-    rgba(var(--accent-rgb), 0.03) 0%,
-    rgba(var(--accent-rgb), 0.015) 50%,
-    transparent 100%
-  );
 }
 
-/* Multiple layered radial gradients for organic effect */
+/* Multiple layered radial gradients for organic effect - NO background on container */
 .project-breathing-bg::before {
   content: '';
-  position: absolute;
-  top: -20%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120%;
-  height: 120%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: 
     radial-gradient(
-      circle at 50% 20%,
-      rgba(var(--accent-rgb), 0.08) 0%,
-      rgba(var(--accent-rgb), 0.04) 25%,
-      rgba(var(--accent-rgb), 0.02) 40%,
-      rgba(var(--accent-rgb), 0.01) 60%,
+      circle at 50% 15%,
+      rgba(var(--accent-rgb), 0.06) 0%,
+      rgba(var(--accent-rgb), 0.03) 25%,
+      rgba(var(--accent-rgb), 0.015) 40%,
+      rgba(var(--accent-rgb), 0.008) 60%,
       transparent 80%
     );
-  filter: blur(40px);
-  animation: breathing 8s ease-in-out infinite;
+  filter: blur(50px);
+  animation: breathing 10s ease-in-out infinite;
   pointer-events: none;
   z-index: -1;
 }
@@ -871,20 +863,19 @@ input[type="number"] {
 /* Secondary glow layer for depth */
 .project-breathing-bg::after {
   content: '';
-  position: absolute;
-  top: 10%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  height: 60%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: radial-gradient(
-    ellipse at center,
-    rgba(var(--accent-rgb), 0.05) 0%,
-    rgba(var(--accent-rgb), 0.02) 30%,
-    transparent 70%
+    ellipse 120% 100% at 50% 20%,
+    rgba(var(--accent-rgb), 0.04) 0%,
+    rgba(var(--accent-rgb), 0.015) 30%,
+    transparent 65%
   );
-  filter: blur(60px);
-  animation: breathing 12s ease-in-out infinite reverse;
+  filter: blur(80px);
+  animation: breathing 14s ease-in-out infinite reverse;
   pointer-events: none;
   z-index: -1;
 }
