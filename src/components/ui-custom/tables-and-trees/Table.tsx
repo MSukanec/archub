@@ -1062,7 +1062,7 @@ export function Table<T = any>({
                             <Button
                               variant="ghost"
                               size="icon-sm"
-                              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="h-6 w-6"
                             >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
@@ -1158,7 +1158,7 @@ export function Table<T = any>({
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="h-6 w-6"
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
