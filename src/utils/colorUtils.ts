@@ -118,3 +118,21 @@ export function calculateForegroundColor(backgroundColor: string): string {
   // Si la luminancia es mayor a 0.5, usar texto negro; si no, usar blanco
   return color.luminance() > 0.5 ? '#000000' : '#ffffff';
 }
+
+/**
+ * Convierte un valor de Hue (tono) a color hexadecimal con saturación y luminosidad fijas
+ * Usa valores S=78% y L=55% para obtener colores vibrantes y consistentes tipo "Material You"
+ * @param h - Hue (tono) en grados (0-360)
+ * @param s - Saturation (saturación) en decimal 0-1, por defecto 0.78
+ * @param l - Lightness (luminosidad) en decimal 0-1, por defecto 0.55
+ * @returns Color en formato hexadecimal (#RRGGBB)
+ */
+export function hslToHex(h: number, s = 0.78, l = 0.55): string {
+  // Normalizar h a rango 0-360
+  h = h % 360;
+  if (h < 0) h += 360;
+  
+  // Usar chroma-js para la conversión
+  const color = chroma.hsl(h, s, l);
+  return color.hex();
+}
