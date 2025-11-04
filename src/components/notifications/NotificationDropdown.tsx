@@ -68,9 +68,11 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
   };
 
   const unreadNotifications = notifications.filter(n => !n.read_at);
+  const displayNotifications = notifications.slice(0, 5);
+  const hasNotifications = notifications.length > 0;
 
   return (
-    <div className="flex flex-col h-[400px]">
+    <div className="flex flex-col">
       <div className="p-4 pb-3">
         <h3 className="font-semibold text-sm mb-3">Notificaciones</h3>
         <div className="flex gap-2">
@@ -106,7 +108,7 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
       
       <Separator />
 
-      <ScrollArea className="flex-1">
+      <div className={cn(!hasNotifications && "max-h-32", hasNotifications && "max-h-[320px]")}>
         {loading ? (
           <div className="p-8 text-center text-sm text-muted-foreground">
             Cargando notificaciones...
@@ -116,48 +118,50 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
             No tienes notificaciones
           </div>
         ) : (
-          <div className="divide-y">
-            {notifications.map((notification) => {
-              const isUnread = !notification.read_at;
-              const timeAgo = notification.notifications?.created_at
-                ? formatDistanceToNow(new Date(notification.notifications.created_at), {
-                    addSuffix: true,
-                    locale: es,
-                  })
-                : '';
+          <ScrollArea className="h-full">
+            <div className="divide-y">
+              {displayNotifications.map((notification) => {
+                const isUnread = !notification.read_at;
+                const timeAgo = notification.notifications?.created_at
+                  ? formatDistanceToNow(new Date(notification.notifications.created_at), {
+                      addSuffix: true,
+                      locale: es,
+                    })
+                  : '';
 
-              return (
-                <button
-                  key={notification.id}
-                  onClick={() => handleNotificationClick(notification)}
-                  className={cn(
-                    'w-full text-left p-3 hover:bg-accent transition-colors',
-                    isUnread && 'bg-primary/5'
-                  )}
-                  data-testid={`notification-${notification.id}`}
-                >
-                  <div className="flex items-start gap-2">
-                    {isUnread && (
-                      <div className="h-2 w-2 rounded-full bg-primary mt-1 flex-shrink-0" />
+                return (
+                  <button
+                    key={notification.id}
+                    onClick={() => handleNotificationClick(notification)}
+                    className={cn(
+                      'w-full text-left p-3 hover:bg-accent transition-colors',
+                      isUnread && 'bg-primary/5'
                     )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium line-clamp-1">
-                        {notification.notifications?.title}
-                      </p>
-                      {notification.notifications?.body && (
-                        <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
-                          {notification.notifications.body}
-                        </p>
+                    data-testid={`notification-${notification.id}`}
+                  >
+                    <div className="flex items-start gap-2">
+                      {isUnread && (
+                        <div className="h-2 w-2 rounded-full bg-primary mt-1 flex-shrink-0" />
                       )}
-                      <p className="text-xs text-muted-foreground mt-1">{timeAgo}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium line-clamp-1">
+                          {notification.notifications?.title}
+                        </p>
+                        {notification.notifications?.body && (
+                          <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+                            {notification.notifications.body}
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground mt-1">{timeAgo}</p>
+                      </div>
                     </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+                  </button>
+                );
+              })}
+            </div>
+          </ScrollArea>
         )}
-      </ScrollArea>
+      </div>
     </div>
   );
 }

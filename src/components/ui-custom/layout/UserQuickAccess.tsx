@@ -7,7 +7,7 @@
  * Inspirado en el diseño de voice chat expandible.
  */
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -27,6 +27,7 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [orgSelectorOpen, setOrgSelectorOpen] = useState(false);
   const [projectSelectorOpen, setProjectSelectorOpen] = useState(false);
+  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data: userData } = useCurrentUser();
   const organizations = userData?.organizations || [];
@@ -51,15 +52,27 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
     setIsOpen(false);
   };
 
+  const handleMouseEnter = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setIsOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    closeTimeoutRef.current = setTimeout(() => {
+      setIsOpen(false);
+      setOrgSelectorOpen(false);
+      setProjectSelectorOpen(false);
+    }, 100);
+  };
+
   return (
     <div 
       className={cn("relative", className)}
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => {
-        setIsOpen(false);
-        setOrgSelectorOpen(false);
-        setProjectSelectorOpen(false);
-      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {/* Avatar - siempre visible */}
       <div className="cursor-pointer">
