@@ -11,7 +11,7 @@ import { ImageIcon, FileText, Users, MapPin } from 'lucide-react'
 import ImageUploadAndShowField from '@/components/ui-custom/fields/ImageUploadAndShowField'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
-export default function ProjectBasicDataTab() {
+export default function ProjectDataTab() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()

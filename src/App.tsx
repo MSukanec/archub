@@ -30,6 +30,7 @@ import FinancesCapitalMovements from "@/pages/professional/capital/Capital";
 import OrganizationMovements from "@/pages/professional/movements/Movements";
 import { Clients } from "@/pages/professional/clients/Clients";
 import Project from "@/pages/professional/project/dashboard/Project";
+import ProjectData from "@/pages/professional/project-data/ProjectData";
 
 
 import Preferences from "@/pages/professional/preferences/Preferences";
@@ -156,7 +157,7 @@ function Router() {
 
         {/* General Routes */}
         <Route path="/project/dashboard" component={Project} />
-        <Route path="/project" component={Project} />
+        <Route path="/project" component={ProjectData} />
         <Route path="/clients" component={Clients} />
         <Route path="/media">
           <Suspense fallback={<LazyLoadFallback />}>
