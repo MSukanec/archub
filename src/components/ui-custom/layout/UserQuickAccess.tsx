@@ -192,7 +192,7 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
             {/* Profile Button - SIEMPRE PRIMERO */}
             <button
               onClick={handleGoToProfile}
-              className="w-full px-4 py-3 flex items-center gap-2.5 hover:bg-accent/10 transition-colors border-t border-border group"
+              className="w-full px-4 py-3 flex items-center gap-2.5 hover:bg-accent/10 transition-colors group"
               data-testid="button-view-profile"
             >
               <User className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors" />
