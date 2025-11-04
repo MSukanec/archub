@@ -96,6 +96,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const shouldShowAIChat = !isMobile && (() => {
     // Rutas de trabajo donde SÍ debería aparecer (allowlist completo basado en App.tsx)
     const workRoutes = [
+      '/home',                // Home page (AI assistant)
       '/dashboard',           // Organization Dashboard
       '/organization',        // Organization routes
       '/contacts',            // Contacts

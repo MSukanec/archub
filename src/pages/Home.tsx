@@ -333,8 +333,8 @@ export default function Home() {
             )}
           </div>
 
-          {/* Input de mensaje (siempre visible después del saludo/respuesta) */}
-          {!isLoadingGreeting && (
+          {/* Input de mensaje - COMENTADO: Ahora usamos FloatingAIChat */}
+          {/* {!isLoadingGreeting && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -349,7 +349,7 @@ export default function Home() {
                 disabled={isSendingMessage}
               />
 
-              {/* Toggle para ver historial completo */}
+              {/* Toggle para ver historial completo *\/}
               {chatMessages.length > 0 && (
                 <div className="text-center pt-1 flex items-center justify-center gap-2 text-xs text-muted-foreground/70">
                   <span>Archub puede cometer errores. Comprueba la información importante.</span>
@@ -364,10 +364,10 @@ export default function Home() {
                 </div>
               )}
             </motion.div>
-          )}
+          )} */}
 
-          {/* Historial completo (solo si showFullHistory es true) */}
-          {!isLoadingGreeting && showFullHistory && chatMessages.length > 0 && (
+          {/* Historial completo - COMENTADO: Ahora usamos FloatingAIChat */}
+          {/* {!isLoadingGreeting && showFullHistory && chatMessages.length > 0 && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -408,7 +408,7 @@ export default function Home() {
                 ))}
               </div>
             </motion.div>
-          )}
+          )} */}
 
           {/* Sugerencias de acción (solo si NO hay conversación activa) */}
           {!isLoadingGreeting && !hasActiveConversation && greetingData?.suggestions && greetingData.suggestions.length > 0 && (
