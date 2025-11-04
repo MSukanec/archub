@@ -74,7 +74,7 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="absolute top-full right-0 mt-2 w-72 bg-popover/95 backdrop-blur-xl border border-border rounded-2xl shadow-2xl overflow-hidden z-50"
+            className="absolute top-full right-0 mt-2 w-72 bg-popover/95 backdrop-blur-xl border border-border rounded-2xl shadow-2xl z-50"
             initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -87,12 +87,7 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
           >
             {/* Header del popover con nombre de usuario */}
             <div className="px-4 py-3 border-b border-border/50 bg-accent/5">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-12 w-12 ring-2 ring-accent/20">
-                  <AvatarFallback className="bg-accent text-accent-foreground text-base font-bold">
-                    {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
+              <div className="flex items-center justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-foreground truncate">
                     {userData?.user?.full_name || 'Usuario'}
@@ -101,6 +96,15 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
                     {userData?.user?.email || ''}
                   </p>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 hover:bg-accent/10 hover:text-accent flex-shrink-0"
+                  onClick={handleGoToProfile}
+                  title="Ir a mi perfil"
+                >
+                  <User className="h-4 w-4" />
+                </Button>
               </div>
             </div>
 
@@ -231,19 +235,6 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
                 </AnimatePresence>
               </div>
 
-              {/* Divisor */}
-              <div className="h-px bg-border/50 my-2" />
-
-              {/* Botón Ir a mi Perfil */}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start gap-2.5 px-3 py-2.5 h-auto hover:bg-accent/10 hover:text-accent"
-                onClick={handleGoToProfile}
-              >
-                <User className="h-4 w-4" />
-                <span className="font-medium text-sm">Ir a mi perfil</span>
-              </Button>
             </div>
           </motion.div>
         )}
