@@ -567,6 +567,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
   const headerContent = (
     <FormModalHeader
       title={isEditing ? "Editar Proyecto" : "Nuevo Proyecto"}
+      description={isEditing ? "Modifica los datos y configuración del proyecto" : "Crea un nuevo proyecto para tu organización"}
       icon={FolderPlus}
     />
   );

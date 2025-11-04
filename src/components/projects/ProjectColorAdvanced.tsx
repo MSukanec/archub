@@ -157,32 +157,39 @@ export default function ProjectColorAdvanced({
             value={hue}
             onChange={(e) => handleHueChange(Number(e.target.value))}
             disabled={!isPro || !enabled}
-            className="flex-1 h-2 rounded-lg appearance-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-50
+            className="flex-1 h-3 rounded-lg appearance-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-50
+              [&::-webkit-slider-track]:h-3
               [&::-webkit-slider-track]:rounded-lg 
               [&::-webkit-slider-track]:bg-gradient-to-r 
               [&::-webkit-slider-track]:from-red-500
               [&::-webkit-slider-track]:via-green-500
               [&::-webkit-slider-track]:to-red-500
+              [&::-webkit-slider-track]:shadow-sm
               [&::-webkit-slider-thumb]:appearance-none
-              [&::-webkit-slider-thumb]:w-5
-              [&::-webkit-slider-thumb]:h-5
+              [&::-webkit-slider-thumb]:w-6
+              [&::-webkit-slider-thumb]:h-6
               [&::-webkit-slider-thumb]:rounded-full
               [&::-webkit-slider-thumb]:bg-white
               [&::-webkit-slider-thumb]:border-2
               [&::-webkit-slider-thumb]:border-gray-400
-              [&::-webkit-slider-thumb]:shadow-md
+              [&::-webkit-slider-thumb]:shadow-lg
+              [&::-webkit-slider-thumb]:cursor-pointer
+              [&::-moz-range-track]:h-3
               [&::-moz-range-track]:rounded-lg
               [&::-moz-range-track]:bg-gradient-to-r
               [&::-moz-range-track]:from-red-500
               [&::-moz-range-track]:via-green-500
               [&::-moz-range-track]:to-red-500
-              [&::-moz-range-thumb]:w-5
-              [&::-moz-range-thumb]:h-5
+              [&::-moz-range-track]:shadow-sm
+              [&::-moz-range-thumb]:w-6
+              [&::-moz-range-thumb]:h-6
               [&::-moz-range-thumb]:rounded-full
               [&::-moz-range-thumb]:bg-white
               [&::-moz-range-thumb]:border-2
               [&::-moz-range-thumb]:border-gray-400
-              [&::-moz-range-thumb]:shadow-md"
+              [&::-moz-range-thumb]:shadow-lg
+              [&::-moz-range-thumb]:cursor-pointer
+              [&::-moz-range-thumb]:border-none"
             data-testid="hue-slider"
           />
           
@@ -212,7 +219,7 @@ export default function ProjectColorAdvanced({
             <Badge
               style={{
                 backgroundColor: hex,
-                color: calculateForegroundColor(hex)
+                color: 'white'
               }}
               className="transition-colors duration-150"
               data-testid="preview-badge"
