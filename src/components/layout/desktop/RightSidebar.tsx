@@ -10,7 +10,8 @@ import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { UserQuickAccess } from "@/components/ui-custom/layout/UserQuickAccess";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
-import { Bell } from "lucide-react";
+import { AIPanel } from "@/components/ai/AIPanel";
+import { Bell, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Moon, Sun, HelpCircle, PanelRightClose } from "lucide-react";
 import { useThemeStore } from "@/stores/themeStore";
@@ -22,9 +23,11 @@ export function RightSidebar() {
   const { isDark, toggleTheme } = useThemeStore();
   const { data: userData } = useCurrentUser();
   const userId = userData?.user?.id;
+  const userFirstName = userData?.user?.first_name || 'Usuario';
+  const userAvatarUrl = userData?.user?.avatar_url;
   
-  // Estado para expansión del sidebar
-  const [isExpanded, setIsExpanded] = useState(false);
+  // Estado para expansión del sidebar - separado para notificaciones y AI
+  const [activePanel, setActivePanel] = useState<'notifications' | 'ai' | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -60,19 +63,21 @@ export function RightSidebar() {
     };
   }, [userId]);
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter = (panel: 'notifications' | 'ai') => {
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
       closeTimeoutRef.current = null;
     }
-    setIsExpanded(true);
+    setActivePanel(panel);
   };
 
   const handleMouseLeave = () => {
     closeTimeoutRef.current = setTimeout(() => {
-      setIsExpanded(false);
+      setActivePanel(null);
     }, 100);
   };
+
+  const isExpanded = activePanel !== null;
 
   return (
     <div 
@@ -80,17 +85,29 @@ export function RightSidebar() {
       style={{
         width: isExpanded ? '400px' : '50px'
       }}
-      onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* PANEL DE NOTIFICACIONES - Aparece cuando está expandido */}
+      {/* PANEL EXPANDIBLE - Cambia según el panel activo */}
       {isExpanded && userId && (
-        <div className="w-[350px] border-r border-[var(--main-sidebar-border)] h-screen overflow-hidden px-3">
-          <NotificationDropdown
-            userId={userId}
-            onRefresh={fetchUnreadCount}
-            onClose={() => setIsExpanded(false)}
-          />
+        <div className="w-[350px] border-r border-[var(--main-sidebar-border)] h-screen overflow-hidden">
+          {activePanel === 'notifications' && (
+            <div className="px-3 h-full">
+              <NotificationDropdown
+                userId={userId}
+                onRefresh={fetchUnreadCount}
+                onClose={() => setActivePanel(null)}
+              />
+            </div>
+          )}
+          
+          {activePanel === 'ai' && (
+            <AIPanel
+              userId={userId}
+              userFirstName={userFirstName}
+              userAvatarUrl={userAvatarUrl}
+              onClose={() => setActivePanel(null)}
+            />
+          )}
         </div>
       )}
 
@@ -114,12 +131,12 @@ export function RightSidebar() {
                 className={cn(
                   "relative h-10 w-8 rounded-md flex items-center justify-center transition-colors",
                   "hover:bg-[var(--main-sidebar-button-hover-bg)]",
-                  "text-[var(--main-sidebar-fg)] hover:text-white"
+                  "text-[var(--main-sidebar-fg)] hover:text-white",
+                  activePanel === 'notifications' && "bg-[var(--main-sidebar-button-hover-bg)] text-white"
                 )}
                 title="Notificaciones"
                 data-testid="button-notifications"
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
+                onMouseEnter={() => handleMouseEnter('notifications')}
               >
                 <div className="h-8 w-8 flex items-center justify-center">
                   <Bell className="h-[18px] w-[18px]" />
@@ -134,7 +151,24 @@ export function RightSidebar() {
                 </div>
               </button>
 
-              {/* Ayuda/Soporte - h-10 - ABAJO de notificaciones */}
+              {/* Botón de IA - altura h-10 - CON HOVER - NUEVO */}
+              <button
+                className={cn(
+                  "relative h-10 w-8 rounded-md flex items-center justify-center transition-colors",
+                  "hover:bg-[var(--main-sidebar-button-hover-bg)]",
+                  "text-[var(--main-sidebar-fg)] hover:text-white",
+                  activePanel === 'ai' && "bg-[var(--main-sidebar-button-hover-bg)] text-white"
+                )}
+                title="Asistente IA"
+                data-testid="button-ai"
+                onMouseEnter={() => handleMouseEnter('ai')}
+              >
+                <div className="h-8 w-8 flex items-center justify-center">
+                  <Sparkles className="h-[18px] w-[18px]" />
+                </div>
+              </button>
+
+              {/* Ayuda/Soporte - h-10 - ABAJO de IA */}
               <button
                 className={cn(
                   "h-10 w-8 rounded-md flex items-center justify-center transition-colors",
