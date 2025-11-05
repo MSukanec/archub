@@ -288,20 +288,17 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
             </p>
 
             {/* Ideas pre-establecidas */}
-            <div className="w-full space-y-2">
-              <p className="text-xs text-muted-foreground mb-3">Comienza con una instrucción</p>
+            <div className="w-full space-y-3">
               {SUGGESTED_IDEAS.map((idea, index) => (
-                <Button
+                <button
                   key={index}
-                  variant="outline"
-                  size="sm"
                   onClick={() => handleIdeaClick(idea)}
                   disabled={isSending}
-                  className="w-full justify-start text-left h-auto py-2 px-3 text-xs hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white border-[var(--main-sidebar-fg)]/20"
+                  className="w-full text-left px-4 py-2 rounded-full border border-white !text-white text-xs leading-relaxed hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   data-testid={`button-ai-idea-${index}`}
                 >
                   {idea}
-                </Button>
+                </button>
               ))}
             </div>
           </div>
