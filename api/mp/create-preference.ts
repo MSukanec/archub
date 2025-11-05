@@ -209,7 +209,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ? fullNameParts.slice(1).join(" ") 
       : "Archub"; // Default si solo tiene un nombre
 
-    if (!MP_ACCESS_TOKEN || !MP_ACCESS_TOKEN.startsWith("APP_USR-")) {
+    // Validar que tengamos un token válido (producción o test)
+    const isValidToken = MP_ACCESS_TOKEN && 
+      (MP_ACCESS_TOKEN.startsWith("APP_USR-") || MP_ACCESS_TOKEN.startsWith("TEST-"));
+    
+    if (!isValidToken) {
       return res
         .setHeader("Access-Control-Allow-Origin", "*")
         .status(500)
