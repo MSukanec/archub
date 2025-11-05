@@ -247,15 +247,11 @@ export default function CheckoutPage() {
     }
   }, [courseSlug, navigate]);
 
-  // Preselección inteligente de método de pago cuando cambia el país
+  // Preselección automática de Transferencia Bancaria (incentiva 5% de descuento)
   useEffect(() => {
     if (!selectedMethod && country && countries.length > 0) {
-      const countryData = countries.find((c) => c.id === country);
-      const isLATAM = ["ARG", "BRA", "CHL", "COL", "MEX", "PER", "URY", "PRY"].includes(
-        countryData?.alpha_3 || ""
-      );
-      // Si es LATAM → MercadoPago, si no → PayPal
-      setSelectedMethod(isLATAM ? "mercadopago" : "paypal");
+      // Siempre preseleccionar transferencia para incentivar el descuento del 5%
+      setSelectedMethod("transfer");
     }
   }, [country, countries, selectedMethod]);
 
