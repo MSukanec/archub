@@ -1,0 +1,130 @@
+Perfecto. Acá separamos el problema en dos capas:
+
+Presencia (ya la tenemos): quién está online y en qué sección está.
+
+Analítica de Uso / Telemetría: cuánto tiempo pasan en cada parte, qué acciones realizan y cuándo abandonan.
+
+La presencia no te dice tiempo, solo estado actual.
+Para saber cuánto tiempo pasan en cada vista, necesitamos medir duración.
+
+1) Cómo medir tiempo por vista (el enfoque correcto y escalable)
+
+Cada vez que el usuario cambia de vista (cuando llamamos presence_set_view()), también hacemos:
+
+Registrar el inicio de sesión en esa vista → entered_at = now()
+
+Cuando cambia a otra vista, la vista anterior se cierra → exited_at = now()
+
+Guardar la duración = exited_at - entered_at en una tabla de analytics.
+
+Creamos la tabla:
+create table public.user_view_history (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.users(id),
+  organization_id uuid null references public.organizations(id),
+  view_name text not null,
+  entered_at timestamptz not null default now(),
+  exited_at timestamptz,
+  duration_seconds int,
+  created_at timestamptz default now()
+);
+
+Creamos una función para registrar entrada a una vista:
+create or replace function public.analytics_enter_view(p_view text)
+returns void
+language plpgsql
+security definer
+as $$
+declare
+  v_user_id uuid;
+  v_org_id uuid;
+begin
+  select u.id into v_user_id from users u where u.auth_id = auth.uid();
+  select last_organization_id into v_org_id from user_preferences where user_id = v_user_id;
+
+  insert into public.user_view_history(user_id, organization_id, view_name, entered_at)
+  values (v_user_id, v_org_id, p_view);
+end;
+$$;
+
+Creamos función para cerrar vista anterior:
+create or replace function public.analytics_exit_previous_view()
+returns void
+language plpgsql
+security definer
+as $$
+declare
+  v_user_id uuid;
+begin
+  select u.id into v_user_id from users u where u.auth_id = auth.uid();
+
+  update public.user_view_history
+  set exited_at = now(),
+      duration_seconds = extract(epoch from (now() - entered_at))
+  where user_id = v_user_id
+  and exited_at is null;
+end;
+$$;
+
+Ahora, cada vez que cambias current_view, ejecutás:
+
+analytics_exit_previous_view()
+
+analytics_enter_view(view)
+
+presence_set_view(view)
+
+Esto te deja un log completo y cuantificable de:
+
+Tiempo por sección
+
+Sesiones cortas vs largas
+
+Flujo de navegación
+
+Vistas más abandonadas
+
+Puntos de fricción
+
+2) Qué podés hacer con estos datos
+Métricas clave para SaaS (muy usadas en industria):
+Métrica	Qué te dice	Ejemplo
+Engagement por vista (min/día)	qué partes de Archub son más valiosas	“Presupuestos = 14m / día, Gantt = 2m / día”
+Drop-off points (vistas donde la sesión termina)	dónde la gente se frustra o no sabe qué hacer	“Muchos abandonan al crear tarea → necesitamos onboarding mejorado”
+Rutas de navegación más comunes (pathing)	cómo se usa realmente la app	“Dashboard → Proyectos → Presupuesto → Materiales → Precio”
+Top usuarios activos	quién usa más el sistema	Ideal para feedback directo
+Activación (primeros 5 minutos)	si un usuario nuevo entiende cómo usar la app	Clave para retención y recomendación
+3) Consejos estratégicos para convertir esto en ventaja competitiva
+a) Onboarding dinámico
+
+Si detectas que un usuario pasa 5 minutos en “Presupuesto vacío” → Mostrar sugerencias automáticas (plantillas, tareas comunes, etc.).
+
+b) Ayuda contextual inteligente
+
+Si el usuario pasa más de 30s sin hacer clic → Mostrar tip discreto:
+“¿Querés que te muestre cómo se arma un presupuesto base?”
+
+c) Prioridad de desarrollo basada en uso real
+
+No adivinas qué construir → lo ves en las métricas.
+
+d) Gamificación suave
+
+Top usuarios activos → insignias en Discord o dentro de Archub.
+
+e) Economía interna (tokenización del conocimiento)
+
+Si un usuario aporta precios o recetas y otros las usan → “Créditos Archub”.
+Esto estimula contribución y crea comunidad viva.
+
+4) Implementación práctica con lo que ya tenés
+
+La presencia ya existe.
+
+Ahora agregás dos RPC muy livianas.
+
+El frontend solo añade dos llamadas cuando cambia de vista.
+
+Se registra automáticamente tiempo y navegación.
+
+Te habilita una dashboard de analítica interna tipo Mixpanel, pero propio.
