@@ -302,7 +302,7 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
       )}
 
       {/* INPUT - Siempre al fondo */}
-      <div className="p-4 pt-3 border-t border-[var(--main-sidebar-fg)]/20">
+      <div className="p-4 pb-3 border-t border-[var(--main-sidebar-fg)]/20">
         <div className="relative flex items-end gap-2 rounded-lg bg-[var(--main-sidebar-button-hover-bg)] px-3 py-2">
           <textarea
             ref={textareaRef}
