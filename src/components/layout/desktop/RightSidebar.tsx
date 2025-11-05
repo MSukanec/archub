@@ -23,7 +23,7 @@ export function RightSidebar() {
   const { isDark, toggleTheme } = useThemeStore();
   const { data: userData } = useCurrentUser();
   const userId = userData?.user?.id;
-  const userFirstName = userData?.user?.first_name || 'Usuario';
+  const userFullName = userData?.user?.full_name || userData?.user?.first_name || 'Usuario';
   const userAvatarUrl = userData?.user?.avatar_url;
   
   // Estado para expansión del sidebar - separado para notificaciones y AI
@@ -103,7 +103,7 @@ export function RightSidebar() {
           {activePanel === 'ai' && (
             <AIPanel
               userId={userId}
-              userFirstName={userFirstName}
+              userFullName={userFullName}
               userAvatarUrl={userAvatarUrl}
               onClose={() => setActivePanel(null)}
             />

@@ -6,7 +6,7 @@
  * - Vista con conversación: Burbujas de chat + input
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -24,7 +24,7 @@ interface ChatMessage {
 
 interface AIPanelProps {
   userId: string;
-  userFirstName: string;
+  userFullName: string;
   userAvatarUrl?: string;
   onClose: () => void;
 }
@@ -35,16 +35,28 @@ const SUGGESTED_IDEAS = [
   "Qué cantidad de ladrillos tenemos comprados actualmente?"
 ];
 
-export function AIPanel({ userId, userFirstName, userAvatarUrl, onClose }: AIPanelProps) {
+export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const scrollEndRef = useRef<HTMLDivElement>(null);
+  
+  // Obtener primera letra del nombre para el avatar
+  const userInitial = userFullName?.charAt(0)?.toUpperCase() || 'U';
 
   // Cargar historial al montar
   useEffect(() => {
     loadHistory();
   }, []);
+
+  // Auto-scroll hacia abajo cuando cambian los mensajes
+  useEffect(() => {
+    if (scrollEndRef.current) {
+      scrollEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isSending]);
 
   const loadHistory = async () => {
     try {
@@ -165,8 +177,9 @@ export function AIPanel({ userId, userFirstName, userAvatarUrl, onClose }: AIPan
         </div>
       ) : hasMessages ? (
         // Vista con conversación
-        <ScrollArea className="flex-1 px-4">
+        <ScrollArea className="flex-1 px-4" ref={scrollAreaRef}>
           <div className="py-4 space-y-4">
+            {/* Mensajes normales: viejos arriba, nuevos abajo */}
             {messages.map((message, index) => (
               <div
                 key={index}
@@ -179,9 +192,9 @@ export function AIPanel({ userId, userFirstName, userAvatarUrl, onClose }: AIPan
                 <div className="flex-shrink-0">
                   {message.role === 'user' ? (
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={userAvatarUrl} alt={userFirstName} />
+                      <AvatarImage src={userAvatarUrl} alt={userFullName} />
                       <AvatarFallback className="bg-[var(--accent)] text-white text-xs">
-                        {userFirstName.charAt(0).toUpperCase()}
+                        {userInitial}
                       </AvatarFallback>
                     </Avatar>
                   ) : (
@@ -226,6 +239,9 @@ export function AIPanel({ userId, userFirstName, userAvatarUrl, onClose }: AIPan
                 </div>
               </div>
             )}
+            
+            {/* Elemento invisible para auto-scroll */}
+            <div ref={scrollEndRef} />
           </div>
         </ScrollArea>
       ) : (
@@ -239,7 +255,7 @@ export function AIPanel({ userId, userFirstName, userAvatarUrl, onClose }: AIPan
 
             {/* Saludo */}
             <h2 className="text-xl font-semibold !text-white mb-1">
-              Hola {userFirstName}
+              Hola {userFullName.split(' ')[0] || 'Usuario'}
             </h2>
             <p className="text-sm text-muted-foreground mb-6">
               ¿En qué puedo ayudarte?
@@ -274,7 +290,6 @@ export function AIPanel({ userId, userFirstName, userAvatarUrl, onClose }: AIPan
           onSubmit={() => handleSendMessage()}
           placeholder="Escribe tu mensaje..."
           disabled={isSending}
-          className="bg-[var(--main-sidebar-button-hover-bg)]"
         />
       </div>
     </div>
