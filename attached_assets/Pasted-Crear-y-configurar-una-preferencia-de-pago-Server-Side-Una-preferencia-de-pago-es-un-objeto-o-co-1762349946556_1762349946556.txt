@@ -1,0 +1,37 @@
+Crear y configurar una preferencia de pago
+Server-Side
+
+Una preferencia de pago es un objeto o conjunto de información que representa el producto o servicio por el que deseas cobrar. Dentro del ecosistema de Mercado Pago, este objeto se conoce como preference. Al crear una preferencia de pago, puedes definir detalles esenciales como el precio, la cantidad y los medios de pago, así como otras configuraciones relacionadas para el flujo de pago.
+
+Para crear una preferencia de pago, utiliza el método asociado a preference en el SDK de backend. Es necesario que crees una preferencia de pago para cada pedido o flujo de pago que quieras iniciar.
+
+A continuación, encontrarás ejemplos de cómo implementar esto en tu backend utilizando el SDK, que está disponible en diferentes lenguajes de programación. Completa los atributos con la información adecuada para reflejar los detalles de cada transacción y garantizar un flujo de pago preciso.
+
+Puedes adaptar la integración de Checkout Pro a tu modelo de negocio configurando los atributos de la preferencia de pago. Estos te permitirán definir cuotas, excluir un medio de pago, cambiar la fecha de vencimiento de un determinado pago, entre otras opciones. Para personalizar tu preferencia de pago, accede a la documentación en la sección de Configuraciones adicionales.
+const preference = new Preference(client);
+
+preference.create({
+  body: {
+    items: [
+      {
+        title: 'Mi producto',
+        quantity: 1,
+        unit_price: 2000
+      }
+    ],
+  }
+})
+.then(console.log)
+.catch(console.log);
+Obtener el identificador de la preferencia
+El identificador de la preferencia es un identificador de transacción único para una solicitud de pago específica. Para obtenerlo, deberas ejecutar tu aplicación.
+
+En la respuesta, obtendrás el identificador de la preferencia en la propiedad ID. Guarda este valor, ya que lo necesitarás en el próximo paso para tu integración en un sitio web o en una aplicación mobile.
+
+A continuación, te mostramos un ejemplo de cómo se ve el atributo ID con el identificador de preferencia en una respuesta.
+
+"id": "787997534-6dad21a1-6145-4f0d-ac21-66bf7a5e7a58"
+Elegir el tipo de integración
+Una vez que hayas obtenido tu ID de la preferencia, deberás avanzar a las configuraciones del frontend. Para eso, es necesario que elijas el tipo de integración que mejor se adapte a tus necesidades, ya sea para integrar un sitio web o para una aplicación móvil.
+
+Selecciona el tipo de integración que quieres hacer y sigue los pasos detallados para completar la integración de Checkout Pro.
