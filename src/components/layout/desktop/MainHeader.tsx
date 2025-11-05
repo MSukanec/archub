@@ -5,6 +5,7 @@ import { ProjectSelectorButton } from "./ProjectSelectorButton";
 import { OrganizationSelectorButton } from "./OrganizationSelectorButton";
 import { UserQuickAccess } from "@/components/ui-custom/layout/UserQuickAccess";
 import { NotificationBellHeader } from "@/components/notifications/NotificationBellHeader";
+import { OnlineUsersIndicator } from "@/components/presence/OnlineUsersIndicator";
 
 interface MainHeaderProps {
   icon?: React.ComponentType<any>;
@@ -42,9 +43,10 @@ export function MainHeader({ icon, title }: MainHeaderProps) {
         </h1>
       </div>
 
-      {/* Right side: Notifications + User Quick Access */}
+      {/* Right side: Online Users + Notifications + User Quick Access */}
       <div className="flex items-center gap-3 ml-auto">
         {/* {selectorComponent} */}
+        <OnlineUsersIndicator />
         <NotificationBellHeader />
         <UserQuickAccess />
       </div>
