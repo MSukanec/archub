@@ -103,6 +103,7 @@ import PricingPlan from "@/pages/PricingPlan";
 import NotFound from "@/pages/public/NotFound";
 import { ModalFactory } from "@/components/modal/form/ModalFactory";
 import { ProjectContextInitializer } from "@/components/navigation/ProjectContextInitializer";
+import { PresenceInitializer } from "@/components/navigation/PresenceInitializer";
 import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
 
 function LazyLoadFallback() {
@@ -346,6 +347,7 @@ function App() {
       <TooltipProvider>
         <ActionBarMobileProvider>
           <ProjectContextInitializer />
+          <PresenceInitializer />
           <Toaster />
           <Router />
           <ModalFactory />
