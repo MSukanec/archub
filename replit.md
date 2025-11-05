@@ -36,6 +36,7 @@ Preferred communication style: Simple, everyday language.
 - **Admin Management**: Dedicated sections for Course Management, Payment Management, and Global Announcements.
   - **Global Announcements System** (Nov 2024): Admin tab for creating platform-wide announcements with audience targeting (all, free, pro, teams), type-based gradients (info, warning, error, success), date range control, smart links (mailto:, https:, tel:, wa.me/), primary/secondary buttons, and localStorage-based dismissal tracking. Visual banner appears below MainHeader in Layout.
 - **Coupon System**: Discount coupon system for courses.
+  - **Mercado Pago Coupon Workaround** (Nov 2024): Temporary limitation where Mercado Pago is blocked when a coupon is applied. When user applies a coupon, MP option becomes disabled with informative message (orange banner with WhatsApp contact link). Payment methods reorder automatically: Transfer first, PayPal second, MP last (grayed out). Auto-deselects MP if already selected when coupon applied. Button blocked if MP+coupon selected. Implementation: `src/utils/paymentOrder.ts` (reorder logic), `src/pages/checkout/CheckoutPage.tsx` (UI blocking and messaging).
 - **Payment Architecture**: Unified `payments` table supporting Mercado Pago (ARS), PayPal (USD), and bank transfers with admin approval.
 - **Access Control**: `PlanRestricted` component system with admin bypass.
 - **Cost System**: Three-tier cost system (Archub Cost, Organization Cost, Independent Cost) for budget items.

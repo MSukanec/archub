@@ -252,6 +252,19 @@ export default function CheckoutPage() {
     }
   }, [country, countries, selectedMethod]);
 
+  // Deseleccionar MercadoPago cuando se aplica un cupón
+  useEffect(() => {
+    if (appliedCoupon && selectedMethod === "mercadopago") {
+      setSelectedMethod(null);
+      toast({
+        title: "Método de pago incompatible",
+        description: "Mercado Pago no está disponible con cupones. Por favor seleccioná otro método de pago.",
+        variant: "default",
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appliedCoupon]);
+
   // Limpiar cupón cuando cambia la moneda/método de pago
   // IMPORTANTE: El descuento debe recalcularse con el nuevo precio en la nueva moneda
   useEffect(() => {
@@ -1105,8 +1118,8 @@ Titular: DNI 32322767`;
   }, [countries, country]);
 
   const paymentMethodsOrder = useMemo(() => {
-    return orderedMethods(selectedCountryData?.alpha_3);
-  }, [selectedCountryData]);
+    return orderedMethods(selectedCountryData?.alpha_3, !!appliedCoupon);
+  }, [selectedCountryData, appliedCoupon]);
 
   // Texto del botón según método seleccionado
   const buttonText = getPaymentButtonText(selectedMethod);
@@ -1267,40 +1280,79 @@ Titular: DNI 32322767`;
                     >
                       {paymentMethodsOrder.map((method) => {
                         if (method === "mercadopago") {
+                          const isMPBlocked = !!appliedCoupon;
                           return (
                             <div
                               key="mercadopago"
                               className={cn(
-                                "relative flex items-start space-x-4 rounded-lg border-2 p-4 cursor-pointer transition-all hover:border-accent/50",
-                                selectedMethod === "mercadopago"
-                                  ? "border-accent bg-accent/5 shadow-sm"
-                                  : "border-border"
+                                "relative flex items-start space-x-4 rounded-lg border-2 p-4 transition-all",
+                                isMPBlocked 
+                                  ? "opacity-50 cursor-not-allowed bg-muted/20 border-border/50" 
+                                  : cn(
+                                      "cursor-pointer hover:border-accent/50",
+                                      selectedMethod === "mercadopago"
+                                        ? "border-accent bg-accent/5 shadow-sm"
+                                        : "border-border"
+                                    )
                               )}
-                              onClick={() => setSelectedMethod("mercadopago")}
+                              onClick={() => !isMPBlocked && setSelectedMethod("mercadopago")}
                               data-testid="payment-option-mercadopago"
                             >
-                              <RadioGroupItem value="mercadopago" id="mercadopago" className="mt-0.5" />
-                              <div className="flex-1 flex items-start justify-between gap-4">
-                                <div className="flex-1">
-                                  <Label
-                                    htmlFor="mercadopago"
-                                    className="flex items-center gap-2 cursor-pointer font-medium"
-                                  >
-                                    <CreditCard className="h-5 w-5 text-accent" />
-                                    Mercado Pago
-                                    <Badge variant="outline" className="text-xs font-normal bg-muted/60 border-border/50">
-                                      Pago en ARS
-                                    </Badge>
-                                  </Label>
-                                  <p className="text-sm text-muted-foreground mt-1">
-                                    Tarjeta de crédito o débito. Pago seguro con redirección.
-                                  </p>
+                              <RadioGroupItem 
+                                value="mercadopago" 
+                                id="mercadopago" 
+                                className="mt-0.5" 
+                                disabled={isMPBlocked ? true : undefined}
+                              />
+                              <div className="flex-1">
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="flex-1">
+                                    <Label
+                                      htmlFor="mercadopago"
+                                      className={cn(
+                                        "flex items-center gap-2 font-medium",
+                                        isMPBlocked ? "cursor-not-allowed" : "cursor-pointer"
+                                      )}
+                                    >
+                                      <CreditCard className="h-5 w-5 text-accent" />
+                                      Mercado Pago
+                                      <Badge variant="outline" className="text-xs font-normal bg-muted/60 border-border/50">
+                                        Pago en ARS
+                                      </Badge>
+                                    </Label>
+                                    {!isMPBlocked ? (
+                                      <p className="text-sm text-muted-foreground mt-1">
+                                        Tarjeta de crédito o débito. Pago seguro con redirección.
+                                      </p>
+                                    ) : (
+                                      <div className="mt-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-md">
+                                        <p className="text-sm text-amber-700 dark:text-amber-400 font-medium">
+                                          Temporalmente no disponible con cupones
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                          Usá transferencia bancaria o PayPal. Para consultas:{" "}
+                                          <a 
+                                            href="https://wa.me/5491132273000" 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="text-accent hover:underline font-medium inline-flex items-center gap-1"
+                                          >
+                                            <MessageCircle className="h-3 w-3" />
+                                            WhatsApp
+                                          </a>
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <img
+                                    src={mercadoPagoLogo}
+                                    alt="Mercado Pago"
+                                    className={cn(
+                                      "h-10 sm:h-12 object-contain flex-shrink-0",
+                                      isMPBlocked && "grayscale"
+                                    )}
+                                  />
                                 </div>
-                                <img
-                                  src={mercadoPagoLogo}
-                                  alt="Mercado Pago"
-                                  className="h-10 sm:h-12 object-contain flex-shrink-0"
-                                />
                               </div>
                             </div>
                           );
@@ -1980,7 +2032,14 @@ Titular: DNI 32322767`;
                     {/* Action Button */}
                     <Button
                       onClick={handleContinue}
-                      disabled={!selectedMethod || loading || priceLoading || !acceptTerms || !acceptCommunications}
+                      disabled={
+                        selectedMethod === null || 
+                        loading || 
+                        priceLoading || 
+                        !acceptTerms || 
+                        !acceptCommunications ||
+                        (!!appliedCoupon && selectedMethod === "mercadopago")
+                      }
                       className="w-full h-12 text-base font-medium mt-6"
                       data-testid="button-continue-payment"
                     >
@@ -1989,6 +2048,8 @@ Titular: DNI 32322767`;
                           <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                           Procesando...
                         </>
+                      ) : (appliedCoupon && selectedMethod === "mercadopago") ? (
+                        "Seleccioná otro método de pago"
                       ) : (
                         <>
                           {buttonText}

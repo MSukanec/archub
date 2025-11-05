@@ -6,8 +6,14 @@ const MP_COUNTRIES = new Set(['AR', 'BR', 'CL', 'CO', 'MX', 'PE', 'UY', 'PY']);
 /**
  * Ordena los métodos de pago según el país del usuario.
  * MercadoPago primero para países LATAM, PayPal primero para el resto.
+ * Si hay cupón aplicado, Transfer primero, PayPal segundo (MP bloqueado).
  */
-export function orderedMethods(countryAlpha3?: string): PaymentMethod[] {
+export function orderedMethods(countryAlpha3?: string, hasCoupon?: boolean): PaymentMethod[] {
+  // Si hay cupón aplicado, priorizar transferencia y PayPal (MP bloqueado temporalmente)
+  if (hasCoupon) {
+    return ['transfer', 'paypal', 'mercadopago'];
+  }
+
   if (!countryAlpha3) {
     // Sin país seleccionado, orden por defecto
     return ['mercadopago', 'paypal', 'transfer'];
