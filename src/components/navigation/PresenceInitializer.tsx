@@ -2,12 +2,13 @@ import { useEffect } from 'react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { usePresenceStore } from '@/stores/presenceStore';
 import { usePresenceTracker } from '@/hooks/use-presence-tracker';
+import { supabase } from '@/lib/supabase';
 
 /**
- * Componente que inicializa el sistema de presencia:
+ * Componente que inicializa el sistema de presencia y analítica:
  * 1. Suscribe a cambios en tiempo real de user_presence
- * 2. Trackea automáticamente cambios de vista
- * 3. Limpia suscripciones al desloguearse
+ * 2. Trackea automáticamente cambios de vista (con analytics)
+ * 3. Limpia suscripciones y cierra sesiones al desloguearse
  */
 export function PresenceInitializer() {
   const { data: userData } = useCurrentUser();
@@ -25,10 +26,16 @@ export function PresenceInitializer() {
       subscribeToPresenceChanges();
     }
 
-    // Cleanup: SIEMPRE desuscribirse al desmontar (incluso si el canal no llegó a SUBSCRIBED)
-    // Esto previene memory leaks de canales Supabase abiertos
+    // Cleanup: Cerrar sesión analytics y desuscribirse de presence
     return () => {
-      console.log('🔴 Limpiando suscripción de presencia...');
+      console.log('🔴 Limpiando presencia y cerrando sesión analytics...');
+      
+      // FASE 1: Cerrar vista actual en analytics (fire-and-forget)
+      supabase.rpc('analytics_exit_previous_view').catch(() => {
+        // Silenciar error, es cleanup no crítico
+      });
+      
+      // FASE 2: Desuscribirse de presence changes
       unsubscribe();
     };
   }, [userData?.user, isSubscribed, subscribeToPresenceChanges, unsubscribe]);
