@@ -103,11 +103,11 @@ export function FloatingCourseLessons({
 
   return (
     <>
-      {/* Botón flotante - IDÉNTICO a FloatingAIChat pero con ícono de libro - LADO DERECHO */}
+      {/* Botón flotante - LADO DERECHO, 80px arriba del FloatingAIChat (bottom-24 = 96px) */}
       <button
         onClick={() => setIsOpen(true)}
         className={cn(
-          "fixed bottom-6 right-6 z-40",
+          "fixed bottom-24 right-6 z-40",
           "relative h-14 w-14 rounded-full",
           "bg-accent text-accent-foreground",
           "flex items-center justify-center",
