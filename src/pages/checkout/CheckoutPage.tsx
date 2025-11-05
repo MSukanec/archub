@@ -118,13 +118,6 @@ export default function CheckoutPage() {
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
 
-  // Auto-select bank transfer when coupon is applied and MP is selected/blocked
-  useEffect(() => {
-    if (appliedCoupon && selectedMethod === "mercadopago") {
-      setSelectedMethod("transfer");
-    }
-  }, [appliedCoupon, selectedMethod]);
-
   // User data and countries
   const { data: userData } = useCurrentUser();
   const { data: countries = [] } = useCountries();
@@ -254,19 +247,6 @@ export default function CheckoutPage() {
       setSelectedMethod("transfer");
     }
   }, [country, countries, selectedMethod]);
-
-  // Deseleccionar MercadoPago cuando se aplica un cupón
-  useEffect(() => {
-    if (appliedCoupon && selectedMethod === "mercadopago") {
-      setSelectedMethod(null);
-      toast({
-        title: "Seleccioná otro método de pago",
-        description: "Mercado Pago no está disponible temporalmente con cupones de descuento.",
-        variant: "default",
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appliedCoupon]);
 
   // Limpiar cupón SOLO cuando cambia la moneda (NO cuando cambia el método)
   // IMPORTANTE: El descuento debe recalcularse con el nuevo precio en la nueva moneda
