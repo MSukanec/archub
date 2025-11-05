@@ -15,33 +15,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Mercado Pago puede enviar payment_id o collection_id
     const mpPaymentId = (payment_id || collection_id) as string | undefined;
-    const urlStatus = req.query.status as string | undefined;
     
-    // Si no hay payment_id pero hay status=pending desde back_url, mostrar mensaje de pendiente
     if (!mpPaymentId) {
-      if (urlStatus === 'pending') {
-        return res.status(200).send(`
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>Pago Pendiente - Archub</title>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            </head>
-            <body style="font-family: system-ui; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #f5f5f5;">
-              <div style="text-align: center; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                <h1 style="color: #f59e0b;">⏳ Pago en Proceso</h1>
-                <p>Tu pago está siendo verificado por tu banco.</p>
-                <p style="color: #6b7280;">Esto puede tomar unos momentos. Te notificaremos cuando se complete.</p>
-                <p style="margin-top: 1rem;">
-                  <a href="/learning/courses" style="color: #2563eb; text-decoration: none;">Volver a Capacitaciones</a>
-                </p>
-              </div>
-            </body>
-          </html>
-        `);
-      }
-      
       return res.status(200).send(`
         <!DOCTYPE html>
         <html>
