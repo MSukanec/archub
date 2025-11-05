@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { usePresenceStore } from '@/stores/presenceStore';
+import { supabase } from '@/lib/supabase';
 
 /**
  * Mapea rutas a nombres de vistas legibles
@@ -80,6 +81,10 @@ function mapRouteToView(path: string): string {
 /**
  * Hook para tracking automático de cambios de vista
  * Se ejecuta cada vez que el usuario navega a una nueva ruta
+ * 
+ * Incluye:
+ * - Analítica de tiempo por vista (user_view_history)
+ * - Presencia en tiempo real (user_presence)
  */
 export function usePresenceTracker() {
   const [location] = useLocation();
@@ -94,7 +99,28 @@ export function usePresenceTracker() {
     // Mapear ruta a nombre de vista
     const viewName = mapRouteToView(location);
     
-    // Actualizar vista actual
+    // FASE 1: Analytics - Cerrar vista anterior y abrir nueva (fire-and-forget)
+    // No bloqueamos la navegación, las llamadas se ejecutan en background
+    const trackViewChange = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) return; // Solo trackear usuarios autenticados
+
+        // Cerrar vista anterior (si existe)
+        await supabase.rpc('analytics_exit_previous_view');
+        
+        // Abrir nueva vista
+        await supabase.rpc('analytics_enter_view', { p_view: viewName });
+      } catch (error) {
+        // Silenciar errores de analytics (no afectan la UX)
+        console.debug('📊 Analytics tracking error (non-critical):', error);
+      }
+    };
+
+    // Ejecutar tracking en background (no esperamos respuesta)
+    trackViewChange();
+    
+    // FASE 2: Presencia - Actualizar estado en tiempo real
     setCurrentView(viewName);
     
     console.log(`📍 Vista actual: ${viewName} (${location})`);
