@@ -234,8 +234,8 @@ function LayoutContent({
 
           {/* Main Content Area - MainHeader + Page Content */}
           <div className="flex-1 flex flex-col min-h-0">
-            {/* Main Header for Desktop */}
-            <MainHeader icon={headerProps?.icon} title={headerProps?.title} />
+            {/* Main Header for Desktop - COMENTADO PARA TESTING */}
+            {/* <MainHeader icon={headerProps?.icon} title={headerProps?.title} /> */}
 
             {/* Page Content with rounded corners and framing effect */}
             <div className={`flex-1 flex min-h-0 relative ${isDocked ? 'gap-3' : ''}`}>
@@ -254,7 +254,7 @@ function LayoutContent({
                     title={headerProps.title}
                     description={headerProps.description}
                     selector={selectorComponent}
-                    tabs={headerProps.tabs?.map((tab: Tab) => ({
+                    tabs={headerProps.tabs?.map((tab) => ({
                       id: tab.id,
                       label: tab.label,
                       isActive: tab.isActive,
