@@ -1349,7 +1349,7 @@ Titular: DNI 32322767`;
                                       </Badge>
                                     </Label>
                                     <p className="text-sm text-muted-foreground mt-1">
-                                      Tarjeta de crédito o débito. Pago seguro con redirección.
+                                      Tarjeta de crédito y saldo de Mercado Pago. Pago seguro con redirección.
                                     </p>
                                   </div>
                                   <img
@@ -1412,7 +1412,7 @@ Titular: DNI 32322767`;
                                     </Badge>
                                   </Label>
                                   <p className="text-sm text-muted-foreground mt-1">
-                                    Pago internacional seguro. Acepta tarjetas y saldo PayPal.
+                                    Tarjeta de crédito y saldo de PayPal. Pago seguro con redirección.
                                   </p>
                                 </div>
                                 <img
@@ -1445,11 +1445,11 @@ Titular: DNI 32322767`;
                                 className="flex items-center gap-2 cursor-pointer font-medium"
                               >
                                 <Building2 className="h-5 w-5 text-accent" />
-                                Transferencia Bancaria
+                                Transferencia
                                 <Badge variant="outline" className="text-xs font-normal bg-muted/60 border-border/50">
                                   Pago en ARS
                                 </Badge>
-                                <Badge className="text-xs font-semibold bg-green-600 hover:bg-green-700 text-white border-0">
+                                <Badge className="text-xs font-semibold bg-accent hover:bg-accent/90 text-white border-0">
                                   💸 -5% Extra
                                 </Badge>
                               </Label>
