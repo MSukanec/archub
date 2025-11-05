@@ -152,28 +152,8 @@ export function RightSidebar() {
             </div>
           </div>
 
-          {/* SECCIÓN INFERIOR: Tema y Anclar */}
+          {/* SECCIÓN INFERIOR: Botón de Anclar */}
           <div className="pt-3 pb-3 flex flex-col gap-[2px] items-center">
-            {/* Toggle de Tema (Dark/Light Mode) - ARRIBA del anclar */}
-            <button
-              onClick={handleToggleTheme}
-              className={cn(
-                "h-10 w-8 rounded-md flex items-center justify-center transition-colors",
-                "hover:bg-[var(--main-sidebar-button-hover-bg)]",
-                "text-[var(--main-sidebar-fg)] hover:text-white"
-              )}
-              title={isDark ? "Modo claro" : "Modo oscuro"}
-              data-testid="button-theme-toggle"
-            >
-              <div className="h-8 w-8 flex items-center justify-center">
-                {isDark ? (
-                  <Sun className="h-[18px] w-[18px]" />
-                ) : (
-                  <Moon className="h-[18px] w-[18px]" />
-                )}
-              </div>
-            </button>
-
             {/* Botón de Anclar/Desanclar (sin función por ahora) */}
             <button
               className={cn(

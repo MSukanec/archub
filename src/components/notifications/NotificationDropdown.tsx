@@ -91,7 +91,7 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
         )}
       </div>
       
-      <Separator />
+      <Separator className="bg-[var(--main-sidebar-fg)] opacity-20" />
 
       <div className={cn(!hasNotifications && "max-h-32", hasNotifications && "max-h-[280px]")}>
         {loading ? (
@@ -104,7 +104,7 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
           </div>
         ) : (
           <ScrollArea className="h-full">
-            <div className="divide-y">
+            <div className="divide-y divide-[var(--main-sidebar-fg)]/20">
               {displayNotifications.map((notification) => {
                 const isUnread = !notification.read_at;
                 const timeAgo = notification.notifications?.created_at
@@ -152,7 +152,7 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
       {/* Botón "Ver todas" al final */}
       {hasNotifications && (
         <>
-          <Separator />
+          <Separator className="bg-[var(--main-sidebar-fg)] opacity-20" />
           <div className="p-3">
             <button
               onClick={() => {
