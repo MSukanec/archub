@@ -101,12 +101,14 @@ export function RightSidebar() {
           )}
           
           {activePanel === 'ai' && (
-            <AIPanel
-              userId={userId}
-              userFullName={userFullName}
-              userAvatarUrl={userAvatarUrl}
-              onClose={() => setActivePanel(null)}
-            />
+            <div className="px-3 h-full">
+              <AIPanel
+                userId={userId}
+                userFullName={userFullName}
+                userAvatarUrl={userAvatarUrl}
+                onClose={() => setActivePanel(null)}
+              />
+            </div>
           )}
         </div>
       )}
