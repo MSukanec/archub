@@ -298,8 +298,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const providerPaymentId = String(pay?.id ?? "");
       const status = String(pay?.status ?? "");
+      const statusDetail = String(pay?.status_detail ?? "");
       const amount = Number(pay?.transaction_amount ?? 0);
       const currency = String(pay?.currency_id ?? "ARS");
+
+      // Log detallado para pagos no aprobados
+      if (status !== "approved") {
+        console.log(`[MP webhook] ❌ Pago rechazado/pendiente:`);
+        console.log(`  - Payment ID: ${providerPaymentId}`);
+        console.log(`  - Status: ${status}`);
+        console.log(`  - Status Detail: ${statusDetail}`);
+        console.log(`  - Amount: ${amount} ${currency}`);
+        console.log(`  - User: ${resolvedUserId}`);
+        console.log(`  - Course: ${resolvedSlug}`);
+      }
 
       // 1. Insertar en payment_events
       await logPaymentEvent({

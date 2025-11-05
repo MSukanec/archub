@@ -277,7 +277,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         pending: `${returnBase}/learning/courses/${course.slug}?payment=pending`,
       },
       auto_return: "approved",
-      binary_mode: true,
+      // TEMPORAL: Desactivar binary_mode para debugging de cupones
+      // binary_mode fuerza aprobación/rechazo inmediato, pero puede causar problemas con 3DS
+      binary_mode: couponData ? false : true,
       statement_descriptor: "ARCHUB",
     };
 
