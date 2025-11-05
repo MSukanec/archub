@@ -116,35 +116,9 @@ function extractMetadata(obj: any): {
   };
 }
 
-/** Si external_reference es UUID, buscar payment_event. Si no, parsear formato antiguo */
-async function parseExtRef(ext?: string | null) {
+/** Si external_reference = "user|slug|months" lo parseamos */
+function parseExtRef(ext?: string | null) {
   if (!ext) return {};
-  
-  // Si es UUID, buscar en payment_events
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if (uuidRegex.test(ext)) {
-    const { data: event } = await supabase
-      .from("payment_events")
-      .select("raw_payload")
-      .eq("id", ext)
-      .single();
-    
-    if (event?.raw_payload) {
-      const payload = event.raw_payload as any;
-      return {
-        user_id: payload.user_id || null,
-        course_slug: payload.course_slug || null,
-        months: payload.months || null,
-        coupon_code: payload.coupon_code || null,
-        coupon_id: payload.coupon_id || null,
-        discount: payload.discount || null,
-        list_price: payload.list_price || null,
-        final_price: payload.final_price || null,
-      };
-    }
-  }
-  
-  // Formato antiguo: "user|slug|months"
   const [u, s, m] = String(ext).split("|");
   return {
     user_id: u || null,
@@ -313,7 +287,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (type === "payment" && finalId) {
       const pay = await mpGetPayment(String(finalId));
       const md = extractMetadata(pay);
-      const fromExt = await parseExtRef(md.external_reference);
+      const fromExt = parseExtRef(md.external_reference);
       const effectiveMonths = md.months ?? fromExt.months ?? 12;
       const resolvedUserId = md.user_id ?? fromExt.user_id ?? null;
       const resolvedSlug = md.course_slug ?? fromExt.course_slug ?? null;
@@ -369,7 +343,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (type === "merchant_order" && finalId) {
       const mo = await mpGetMerchantOrder(String(finalId));
       const md = extractMetadata(mo);
-      const fromExt = await parseExtRef(md.external_reference);
+      const fromExt = parseExtRef(md.external_reference);
       const effectiveMonths = md.months ?? fromExt.months ?? 12;
       const resolvedUserId = md.user_id ?? fromExt.user_id ?? null;
       const resolvedSlug =
