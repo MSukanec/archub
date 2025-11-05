@@ -106,7 +106,7 @@ export function CourseSidebar({ modules, lessons, currentLessonId }: CourseSideb
           isExpanded ? "px-4" : "px-0 flex items-center justify-center"
         )}>
           {isExpanded ? (
-            <h3 className="text-sm font-semibold text-white">
+            <h3 className="text-sm font-semibold text-white !text-white">
               Contenido del Curso
             </h3>
           ) : (
