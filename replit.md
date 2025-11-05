@@ -56,6 +56,7 @@ Preferred communication style: Simple, everyday language.
 - **Personnel Assignment Modal Optimization**: Enhanced with real-time search filtering and optimized loading.
 - **Database Table Updates**: Renamed `attendees` to `personnel_attendees` for consistency.
 - **Personnel List Alphabetical Sorting**: Guaranteed alphabetical order through query-level sorting.
+- **Mercado Pago Coupon Payment Issue** (Nov 2024): Critical unresolved issue where ALL payments with coupons fail in MP (tested 10%, 30%, 50% discounts). Payments without coupons work perfectly in both TEST and PRODUCTION. Workaround implemented: When coupon is applied in checkout, Mercado Pago is hidden and only PayPal is available. PayPal handles coupon payments correctly. Root cause under investigation - MP rejects payments before creating payment record (returns empty `Payments: []` array in merchant_order webhook with status `payment_required`).
 
 ## External Dependencies
 - **Supabase**: Authentication.
