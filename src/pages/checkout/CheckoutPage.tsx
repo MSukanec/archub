@@ -1285,9 +1285,9 @@ Titular: DNI 32322767`;
                             <div
                               key="mercadopago"
                               className={cn(
-                                "relative flex items-start space-x-4 rounded-lg border-2 p-4 transition-all",
+                                "relative rounded-lg border-2 overflow-hidden transition-all",
                                 isMPBlocked 
-                                  ? "opacity-50 cursor-not-allowed bg-muted/20 border-border/50" 
+                                  ? "cursor-not-allowed border-amber-500/30" 
                                   : cn(
                                       "cursor-pointer hover:border-accent/50",
                                       selectedMethod === "mercadopago"
@@ -1298,21 +1298,22 @@ Titular: DNI 32322767`;
                               onClick={() => !isMPBlocked && setSelectedMethod("mercadopago")}
                               data-testid="payment-option-mercadopago"
                             >
-                              <RadioGroupItem 
-                                value="mercadopago" 
-                                id="mercadopago" 
-                                className="mt-0.5" 
-                                disabled={isMPBlocked ? true : undefined}
-                              />
-                              <div className="flex-1">
-                                <div className="flex items-start justify-between gap-4">
+                              {/* Contenido original con blur cuando está bloqueado */}
+                              <div className={cn(
+                                "flex items-start space-x-4 p-4 transition-all",
+                                isMPBlocked && "blur-sm pointer-events-none"
+                              )}>
+                                <RadioGroupItem 
+                                  value="mercadopago" 
+                                  id="mercadopago" 
+                                  className="mt-0.5" 
+                                  disabled={isMPBlocked ? true : undefined}
+                                />
+                                <div className="flex-1 flex items-start justify-between gap-4">
                                   <div className="flex-1">
                                     <Label
                                       htmlFor="mercadopago"
-                                      className={cn(
-                                        "flex items-center gap-2 font-medium",
-                                        isMPBlocked ? "cursor-not-allowed" : "cursor-pointer"
-                                      )}
+                                      className="flex items-center gap-2 font-medium cursor-pointer"
                                     >
                                       <CreditCard className="h-5 w-5 text-accent" />
                                       Mercado Pago
@@ -1320,43 +1321,42 @@ Titular: DNI 32322767`;
                                         Pago en ARS
                                       </Badge>
                                     </Label>
-                                    {!isMPBlocked ? (
-                                      <p className="text-sm text-muted-foreground mt-1">
-                                        Tarjeta de crédito o débito. Pago seguro con redirección.
-                                      </p>
-                                    ) : (
-                                      <div className="mt-2 p-4 bg-amber-500/15 border-2 border-amber-500/40 rounded-lg">
-                                        <p className="text-base text-amber-800 dark:text-amber-300 font-semibold mb-2">
-                                          ⚠️ No disponible con cupones de descuento
-                                        </p>
-                                        <p className="text-sm text-muted-foreground mb-2">
-                                          Por favor usá <span className="font-semibold">Transferencia Bancaria</span> o <span className="font-semibold">PayPal</span> para completar tu compra con descuento.
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">
-                                          ¿Dudas? Contactanos:{" "}
-                                          <a 
-                                            href="https://wa.me/5491132273000" 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            className="text-accent hover:underline font-medium inline-flex items-center gap-1"
-                                          >
-                                            <MessageCircle className="h-3 w-3" />
-                                            +54 9 11 3227-3000
-                                          </a>
-                                        </p>
-                                      </div>
-                                    )}
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                      Tarjeta de crédito o débito. Pago seguro con redirección.
+                                    </p>
                                   </div>
                                   <img
                                     src={mercadoPagoLogo}
                                     alt="Mercado Pago"
-                                    className={cn(
-                                      "h-10 sm:h-12 object-contain flex-shrink-0",
-                                      isMPBlocked && "grayscale"
-                                    )}
+                                    className="h-10 sm:h-12 object-contain flex-shrink-0"
                                   />
                                 </div>
                               </div>
+
+                              {/* Overlay de bloqueo - SIN blur para que se lea perfecto */}
+                              {isMPBlocked && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
+                                  <div className="max-w-md mx-4 p-4 bg-amber-500/95 dark:bg-amber-600/95 border-2 border-amber-600 dark:border-amber-500 rounded-lg shadow-lg">
+                                    <p className="text-base text-white font-semibold mb-2 flex items-center gap-2">
+                                      <span className="text-xl">⚠️</span>
+                                      No disponible con cupones
+                                    </p>
+                                    <p className="text-sm text-white/90 mb-3">
+                                      Usá <span className="font-bold">Transferencia Bancaria</span> o <span className="font-bold">PayPal</span> para pagar con descuento.
+                                    </p>
+                                    <a 
+                                      href="https://wa.me/5491132273000" 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-2 text-sm text-white hover:text-white/80 font-medium underline"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <MessageCircle className="h-4 w-4" />
+                                      Contactanos por WhatsApp
+                                    </a>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           );
                         }
