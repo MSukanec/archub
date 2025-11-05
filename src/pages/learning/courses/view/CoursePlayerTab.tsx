@@ -178,10 +178,12 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
       }
       
       return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/courses', courseId, 'progress'] });
     }
+    // ❌ NO invalidar queries aquí - causa que el video retroceda
+    // El auto-save solo guarda en DB, no necesita re-fetch
+    // onSuccess: () => {
+    //   queryClient.invalidateQueries({ queryKey: ['/api/courses', courseId, 'progress'] });
+    // }
   });
 
   // Throttle progress saves to avoid too many requests
