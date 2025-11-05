@@ -48,12 +48,13 @@ export function RightSidebar() {
       
       {/* SIDEBAR DERECHO - Dimensiones idénticas al izquierdo */}
       <div 
-        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-l border-[var(--main-sidebar-border)] transition-all duration-150 z-10 overflow-hidden relative h-screen"
+        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-l border-[var(--main-sidebar-border)] transition-all duration-150 overflow-visible relative h-screen"
         style={{
-          width: '50px' // Ancho fijo igual al sidebar izquierdo colapsado
+          width: '50px', // Ancho fijo igual al sidebar izquierdo colapsado
+          zIndex: 1000 // Mucho más alto que todo el contenido
         }}
       >
-        <aside className="grid h-screen grid-rows-[1fr_auto] w-[50px]">
+        <aside className="grid h-screen grid-rows-[1fr_auto] w-[50px] relative" style={{ zIndex: 1000 }}>
           {/* SECCIÓN SUPERIOR: Botones principales */}
           <div className="px-0 overflow-y-auto">
             <div className="flex flex-col gap-[2px] items-center">
