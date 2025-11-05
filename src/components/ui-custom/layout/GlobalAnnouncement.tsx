@@ -210,7 +210,7 @@ export function GlobalAnnouncement() {
                     size="sm"
                     variant="outline"
                     onClick={() => window.open(normalizeUrl(activeAnnouncement.secondary_button_url!), '_blank')}
-                    className="h-7 text-xs bg-transparent hover:bg-white/10 text-white border-white"
+                    className="h-7 text-xs rounded-md bg-transparent hover:bg-white/10 text-white border border-white"
                   >
                     {activeAnnouncement.secondary_button_text}
                   </Button>
@@ -221,7 +221,7 @@ export function GlobalAnnouncement() {
                     size="sm"
                     variant="default"
                     onClick={() => window.open(normalizeUrl(activeAnnouncement.primary_button_url!), '_blank')}
-                    className="h-7 text-xs bg-white hover:bg-gray-100 text-black border-0"
+                    className="h-7 text-xs rounded-md bg-white hover:bg-gray-100 text-black border border-white"
                   >
                     {activeAnnouncement.primary_button_text}
                   </Button>
