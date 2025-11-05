@@ -8,6 +8,8 @@ import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { isProOrTeams } from '@/utils/planHelpers';
+import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
+import { useMobile } from '@/hooks/use-mobile';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -35,6 +37,13 @@ export function FloatingAIChat() {
   );
   const planCode = currentOrganization?.plan?.name || 'free';
   const isPro = isProOrTeams(planCode);
+  
+  // Detectar si ActionBarMobile está visible para ajustar posición del botón
+  const { showActionBar } = useActionBarMobile();
+  const isMobile = useMobile();
+  
+  // Ajustar posición del botón: bottom-20 si ActionBarMobile está visible, bottom-6 si no
+  const buttonBottomClass = isMobile && showActionBar ? 'bottom-20' : 'bottom-6';
   
   // Mensajes de ejemplo para usuarios FREE
   const exampleMessages: ChatMessage[] = [
@@ -183,7 +192,7 @@ export function FloatingAIChat() {
 
   return (
     <div 
-      className="fixed bottom-6 right-6 z-50"
+      className={cn("fixed right-6 z-50", buttonBottomClass)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >

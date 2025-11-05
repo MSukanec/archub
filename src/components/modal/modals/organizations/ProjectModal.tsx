@@ -23,6 +23,7 @@ import { useProjectModalities } from "@/hooks/use-project-modalities";
 import { useProjectContext } from "@/stores/projectContext";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { supabase } from "@/lib/supabase";
+import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from 'wouter';
 
@@ -165,92 +166,37 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       }
 
       if (isEditing && editingProject) {
-        // Update existing project
-        const { error: projectError } = await supabase
-          .from('projects')
-          .update({
-            name: data.name,
-            status: data.status,
-            color: data.color || "#84cc16",
-            use_custom_color: data.use_custom_color || false,
-            custom_color_h: data.custom_color_h || null,
-            custom_color_hex: data.custom_color_hex || null,
-          })
-          .eq('id', editingProject.id);
+        // Update existing project via API endpoint
+        const response = await apiRequest('PATCH', `/api/projects/${editingProject.id}`, {
+          name: data.name,
+          status: data.status,
+          color: data.color || "#84cc16",
+          use_custom_color: data.use_custom_color || false,
+          custom_color_h: data.custom_color_h || null,
+          custom_color_hex: data.custom_color_hex || null,
+          project_type_id: data.project_type_id || null,
+          modality_id: data.modality_id || null,
+          organization_id: organizationId,
+        });
 
-        if (projectError) throw projectError;
-
-        // Update project_data if it exists, create if it doesn't
-        const { data: existingProjectData } = await supabase
-          .from('project_data')
-          .select('id')
-          .eq('project_id', editingProject.id)
-          .single();
-
-        if (existingProjectData) {
-          const { error: dataError } = await supabase
-            .from('project_data')
-            .update({
-              project_type_id: data.project_type_id || null,
-              modality_id: data.modality_id || null,
-              organization_id: organizationId,
-            })
-            .eq('project_id', editingProject.id);
-
-          if (dataError) throw dataError;
-        } else if (data.project_type_id || data.modality_id) {
-          const { error: dataError } = await supabase
-            .from('project_data')
-            .upsert({
-              project_id: editingProject.id,
-              organization_id: organizationId,
-              project_type_id: data.project_type_id || null,
-              modality_id: data.modality_id || null,
-            }, {
-              onConflict: 'project_id'
-            });
-
-          if (dataError) throw dataError;
-        }
-
-        return editingProject;
+        const updatedProject = await response.json();
+        return updatedProject;
       } else {
-        // Create new project using current user and current date automatically
-        const { data: newProject, error: projectError } = await supabase
-          .from('projects')
-          .upsert({
-            organization_id: organizationId,
-            name: data.name,
-            status: data.status,
-            created_by: currentUserMember.id, // Automático
-            created_at: new Date().toISOString(), // Automático
-            is_active: true,
-            color: data.color || "#84cc16",
-            use_custom_color: data.use_custom_color || false,
-            custom_color_h: data.custom_color_h || null,
-            custom_color_hex: data.custom_color_hex || null,
-          }, {
-            onConflict: 'id'
-          })
-          .select()
-          .single();
+        // Create new project via API endpoint
+        const response = await apiRequest('POST', '/api/projects', {
+          organization_id: organizationId,
+          name: data.name,
+          status: data.status,
+          created_by: currentUserMember.id,
+          color: data.color || "#84cc16",
+          use_custom_color: data.use_custom_color || false,
+          custom_color_h: data.custom_color_h || null,
+          custom_color_hex: data.custom_color_hex || null,
+          project_type_id: data.project_type_id || null,
+          modality_id: data.modality_id || null,
+        });
 
-        if (projectError) throw projectError;
-
-        // ALWAYS create project_data with organization_id (required for RLS)
-        const { error: dataError } = await supabase
-          .from('project_data')
-          .insert({
-            project_id: newProject.id,
-            organization_id: organizationId,
-            project_type_id: data.project_type_id || null,
-            modality_id: data.modality_id || null,
-          })
-          .select()
-          .single();
-
-        if (dataError) throw dataError;
-
+        const newProject = await response.json();
         return newProject;
       }
     },

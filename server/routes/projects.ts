@@ -9,6 +9,184 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
 
   // ========== PROJECT ENDPOINTS ==========
 
+  // Create a new project
+  app.post("/api/projects", async (req, res) => {
+    try {
+      const projectData = req.body;
+
+      if (!projectData.organization_id || !projectData.name) {
+        return res.status(400).json({ 
+          error: "organization_id and name are required" 
+        });
+      }
+
+      // Get the authorization token from headers
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // Create new project using upsert
+      const { data: newProject, error: projectError } = await authenticatedSupabase
+        .from('projects')
+        .upsert({
+          organization_id: projectData.organization_id,
+          name: projectData.name,
+          status: projectData.status || 'active',
+          created_by: projectData.created_by,
+          created_at: new Date().toISOString(),
+          is_active: true,
+          color: projectData.color || "#84cc16",
+          use_custom_color: projectData.use_custom_color || false,
+          custom_color_h: projectData.custom_color_h || null,
+          custom_color_hex: projectData.custom_color_hex || null,
+        }, {
+          onConflict: 'id'
+        })
+        .select()
+        .single();
+
+      if (projectError) {
+        console.error("Error creating project:", projectError);
+        return res.status(500).json({ 
+          error: "Failed to create project",
+          details: projectError.message 
+        });
+      }
+
+      // ALWAYS create project_data with organization_id (required for RLS)
+      const { error: dataError } = await authenticatedSupabase
+        .from('project_data')
+        .insert({
+          project_id: newProject.id,
+          organization_id: projectData.organization_id,
+          project_type_id: projectData.project_type_id || null,
+          modality_id: projectData.modality_id || null,
+        });
+
+      if (dataError) {
+        console.error("Error creating project_data:", dataError);
+        // Rollback: delete the project we just created
+        await authenticatedSupabase.from('projects').delete().eq('id', newProject.id);
+        return res.status(500).json({ 
+          error: "Failed to create project data",
+          details: dataError.message 
+        });
+      }
+
+      res.json(newProject);
+    } catch (error) {
+      console.error("Error creating project:", error);
+      res.status(500).json({ error: "Failed to create project" });
+    }
+  });
+
+  // Update an existing project
+  app.patch("/api/projects/:id", async (req, res) => {
+    try {
+      const { id: projectId } = req.params;
+      const updateData = req.body;
+
+      // Get the authorization token from headers
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // Update main project
+      const { error: projectError } = await authenticatedSupabase
+        .from('projects')
+        .update({
+          name: updateData.name,
+          status: updateData.status,
+          color: updateData.color || "#84cc16",
+          use_custom_color: updateData.use_custom_color || false,
+          custom_color_h: updateData.custom_color_h || null,
+          custom_color_hex: updateData.custom_color_hex || null,
+        })
+        .eq('id', projectId);
+
+      if (projectError) {
+        console.error("Error updating project:", projectError);
+        return res.status(500).json({ 
+          error: "Failed to update project",
+          details: projectError.message 
+        });
+      }
+
+      // Update project_data if it exists, create if it doesn't
+      const { data: existingProjectData } = await authenticatedSupabase
+        .from('project_data')
+        .select('id')
+        .eq('project_id', projectId)
+        .single();
+
+      if (existingProjectData) {
+        const { error: dataError } = await authenticatedSupabase
+          .from('project_data')
+          .update({
+            project_type_id: updateData.project_type_id || null,
+            modality_id: updateData.modality_id || null,
+          })
+          .eq('project_id', projectId);
+
+        if (dataError) {
+          console.error("Error updating project_data:", dataError);
+          return res.status(500).json({ 
+            error: "Failed to update project data",
+            details: dataError.message 
+          });
+        }
+      } else if (updateData.project_type_id || updateData.modality_id) {
+        // Create project_data if doesn't exist and we have data to insert
+        const { error: dataError } = await authenticatedSupabase
+          .from('project_data')
+          .upsert({
+            project_id: projectId,
+            organization_id: updateData.organization_id,
+            project_type_id: updateData.project_type_id || null,
+            modality_id: updateData.modality_id || null,
+          }, {
+            onConflict: 'project_id'
+          });
+
+        if (dataError) {
+          console.error("Error creating project_data:", dataError);
+          return res.status(500).json({ 
+            error: "Failed to create project data",
+            details: dataError.message 
+          });
+        }
+      }
+
+      // Get updated project
+      const { data: updatedProject, error: fetchError } = await authenticatedSupabase
+        .from('projects')
+        .select('*')
+        .eq('id', projectId)
+        .single();
+
+      if (fetchError) {
+        console.error("Error fetching updated project:", fetchError);
+        return res.status(500).json({ 
+          error: "Project updated but failed to fetch result",
+          details: fetchError.message 
+        });
+      }
+
+      res.json(updatedProject);
+    } catch (error) {
+      console.error("Error updating project:", error);
+      res.status(500).json({ error: "Failed to update project" });
+    }
+  });
+
   // Delete project safely - server-side implementation
   app.delete("/api/projects/:projectId", async (req, res) => {
     try {
