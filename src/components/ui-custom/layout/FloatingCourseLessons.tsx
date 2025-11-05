@@ -103,21 +103,25 @@ export function FloatingCourseLessons({
 
   return (
     <>
-      {/* Botón flotante - Bottom left en mobile */}
+      {/* Botón flotante - IDÉNTICO a FloatingAIChat pero con ícono de libro */}
       <button
         onClick={() => setIsOpen(true)}
         className={cn(
           "fixed bottom-6 left-6 z-40",
-          "h-14 w-14 rounded-full",
+          "relative h-14 w-14 rounded-full",
           "bg-accent text-accent-foreground",
           "flex items-center justify-center",
-          "transition-all duration-300",
+          "transition-all duration-500",
           "hover:scale-105",
-          "shadow-lg"
+          "animate-breathe",
+          "shadow-glow"
         )}
         data-testid="button-floating-lessons"
       >
         <BookOpen className="h-6 w-6" />
+        
+        {/* Pulso de resplandor animado */}
+        <span className="absolute inset-0 rounded-full bg-accent opacity-40 animate-ping-slow" />
       </button>
 
       {/* Drawer Mobile - Fullscreen */}
@@ -259,6 +263,59 @@ export function FloatingCourseLessons({
           </motion.div>
         )}
       </AnimatePresence>
+
+      <style>{`
+        @keyframes breathe {
+          0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.2), 
+                        0 0 25px rgba(var(--accent-rgb), 0.1);
+          }
+          50% {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.3), 
+                        0 0 35px rgba(var(--accent-rgb), 0.15);
+          }
+        }
+
+        @keyframes ping-slow {
+          75%, 100% {
+            transform: scale(1.8);
+            opacity: 0;
+          }
+        }
+
+        .animate-breathe {
+          animation: breathe 4.5s ease-in-out infinite;
+        }
+
+        .animate-ping-slow {
+          animation: ping-slow 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .shadow-glow {
+          box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.2), 
+                      0 0 25px rgba(var(--accent-rgb), 0.1);
+        }
+
+        /* Scrollbar styling - sutil y similar al fondo */
+        .overflow-y-auto::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-track {
+          background: var(--main-sidebar-bg);
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.15);
+        }
+      `}</style>
     </>
   );
 }
