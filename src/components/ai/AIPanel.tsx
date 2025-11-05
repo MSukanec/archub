@@ -38,11 +38,24 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false); // No cargar historial al inicio
-  const [hasInteracted, setHasInteracted] = useState(false); // Track si el usuario ha interactuado
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const scrollEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  // Usar sessionStorage para persistir entre aperturas/cierres del panel
+  // pero resetear cuando el usuario recarga la página (F5)
+  const getSessionKey = () => `ai_has_interacted_${userId}`;
+  
+  const [hasInteracted, setHasInteracted] = useState(() => {
+    // Inicializar desde sessionStorage
+    try {
+      const stored = sessionStorage.getItem(getSessionKey());
+      return stored === 'true';
+    } catch {
+      return false;
+    }
+  });
   
   // Obtener primera letra del nombre para el avatar
   const userInitial = userFullName?.charAt(0)?.toUpperCase() || 'U';
@@ -116,6 +129,13 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
       setIsLoadingHistory(true);
       await loadHistory();
       setHasInteracted(true);
+      // Guardar en sessionStorage para persistir entre aperturas/cierres del panel
+      // pero resetear cuando se recarga la página
+      try {
+        sessionStorage.setItem(getSessionKey(), 'true');
+      } catch (error) {
+        console.error('Error saving to sessionStorage:', error);
+      }
       setIsLoadingHistory(false);
     }
 
