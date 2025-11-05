@@ -675,12 +675,11 @@ export default function CheckoutPage() {
   };
 
   const handleCopyBankInfo = async () => {
-    const bankInfo = `Banco Galicia - Caja de Ahorro en Pesos
-
+    const bankInfo = `Alias: MATIAS.SUKANEC
+Banco: Banco Galicia - Caja de Ahorro en Pesos
 Número de cuenta: 4026691-4 063-1
 CBU: 00700634 30004026691416
-Alias: MATIAS.SUKANEC
-Titular: DNI 32322767`;
+Titular: Matias Esteban Sukanec`;
 
     try {
       await navigator.clipboard.writeText(bankInfo);
@@ -1648,6 +1647,10 @@ Titular: DNI 32322767`;
                   {!receiptUploaded && (
                     <div className="space-y-4 bg-muted/30 p-4 rounded-lg font-mono text-sm">
                       <div>
+                        <p className="text-xs text-muted-foreground mb-1">Alias</p>
+                        <p className="font-medium">MATIAS.SUKANEC</p>
+                      </div>
+                      <div>
                         <p className="text-xs text-muted-foreground mb-1">Banco</p>
                         <p className="font-medium">Banco Galicia - Caja de Ahorro en Pesos</p>
                       </div>
@@ -1660,12 +1663,8 @@ Titular: DNI 32322767`;
                         <p className="font-medium">00700634 30004026691416</p>
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground mb-1">Alias</p>
-                        <p className="font-medium">MATIAS.SUKANEC</p>
-                      </div>
-                      <div>
                         <p className="text-xs text-muted-foreground mb-1">Titular</p>
-                        <p className="font-medium">DNI 32322767</p>
+                        <p className="font-medium">Matias Esteban Sukanec</p>
                       </div>
                       <Separator />
                       <div>
@@ -1675,7 +1674,7 @@ Titular: DNI 32322767`;
                             style: 'currency',
                             currency: currentCurrency,
                             minimumFractionDigits: 0,
-                          }).format(appliedCoupon ? appliedCoupon.final_price : (priceData?.amount || 0))}
+                          }).format(finalPrice)}
                         </p>
                       </div>
                     </div>
