@@ -139,10 +139,8 @@ export default function CheckoutPage() {
   // Billing data (optional)
   const [needsInvoice, setNeedsInvoice] = useState(false);
   const [isCompany, setIsCompany] = useState(false);
-  const [billingFullName, setBillingFullName] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [taxId, setTaxId] = useState("");
-  const [billingCountry, setBillingCountry] = useState("");
   const [billingAddress, setBillingAddress] = useState("");
   const [billingCity, setBillingCity] = useState("");
   const [billingPostcode, setBillingPostcode] = useState("");
@@ -181,19 +179,6 @@ export default function CheckoutPage() {
     }
   }, [userData]);
 
-  // Prefill billing data from main form
-  useEffect(() => {
-    if (firstName && lastName && !billingFullName) {
-      setBillingFullName(`${firstName} ${lastName}`.trim());
-    }
-  }, [firstName, lastName, billingFullName]);
-
-  useEffect(() => {
-    if (country && !billingCountry) {
-      setBillingCountry(country);
-    }
-  }, [country, billingCountry]);
-
   // Load billing profile when user enables invoice
   useEffect(() => {
     if (!needsInvoice || !userData?.user?.id) {
@@ -217,10 +202,8 @@ export default function CheckoutPage() {
           console.log('[billing_profiles] Loaded existing profile');
           // Only set fields that are empty (don't overwrite if user already started filling)
           if (!isCompany && data.is_company) setIsCompany(data.is_company);
-          if (!billingFullName && data.full_name) setBillingFullName(data.full_name);
           if (!companyName && data.company_name) setCompanyName(data.company_name);
           if (!taxId && data.tax_id) setTaxId(data.tax_id);
-          if (!billingCountry && data.country_id) setBillingCountry(data.country_id);
           if (!billingAddress && data.address_line1) setBillingAddress(data.address_line1);
           if (!billingCity && data.city) setBillingCity(data.city);
           if (!billingPostcode && data.postcode) setBillingPostcode(data.postcode);
@@ -866,12 +849,17 @@ Titular: Matias Esteban Sukanec`;
       return undefined;
     }
 
+    // Usar nombre y país de datos básicos
+    const fullName = isCompany 
+      ? undefined 
+      : `${firstName.trim()} ${lastName.trim()}`.trim() || undefined;
+
     return {
       is_company: isCompany,
-      full_name: billingFullName.trim() || undefined,
+      full_name: fullName,
       company_name: companyName.trim() || undefined,
       tax_id: taxId.trim() || undefined,
-      country_id: billingCountry || undefined,
+      country_id: country || undefined,
       address_line1: billingAddress.trim() || undefined,
       city: billingCity.trim() || undefined,
       postcode: billingPostcode.trim() || undefined,
@@ -1036,10 +1024,11 @@ Titular: Matias Esteban Sukanec`;
         });
         return;
       }
-      if (!billingCountry) {
+      // Solo validar país de factura si es empresa (individual usa el país de datos básicos)
+      if (isCompany && !country) {
         toast({
-          title: "País de facturación requerido",
-          description: "Por favor seleccioná el país para la factura",
+          title: "País requerido",
+          description: "Por favor seleccioná el país",
           variant: "destructive",
         });
         return;
@@ -1248,23 +1237,168 @@ Titular: Matias Esteban Sukanec`;
                         />
                       </div>
 
-                      {/* Save to Profile Checkbox */}
+                      {/* Save to Profile Switch */}
                       {userData?.user?.id && (
-                        <div className="flex items-start gap-3 pt-2">
-                          <Checkbox
+                        <div className="flex items-center justify-between pt-2 border-t mt-4">
+                          <Label htmlFor="save-to-profile" className="text-sm font-medium cursor-pointer">
+                            Guardar estos datos en mi perfil
+                          </Label>
+                          <Switch
                             id="save-to-profile"
                             checked={saveToProfile}
-                            onCheckedChange={(checked) => setSaveToProfile(checked === true)}
-                            data-testid="checkbox-save-to-profile"
+                            onCheckedChange={setSaveToProfile}
+                            data-testid="switch-save-to-profile"
                           />
-                          <label
-                            htmlFor="save-to-profile"
-                            className="text-sm leading-tight cursor-pointer text-muted-foreground"
-                          >
-                            Guardar estos datos en mi perfil
-                          </label>
                         </div>
                       )}
+
+                      {/* Invoice Section - Integrated */}
+                      <div className="space-y-4 pt-4 border-t">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Receipt className="h-5 w-5 text-accent" />
+                            <Label htmlFor="needs-invoice" className="text-sm font-medium cursor-pointer">
+                              Necesito factura (opcional)
+                            </Label>
+                          </div>
+                          <Switch
+                            id="needs-invoice"
+                            checked={needsInvoice}
+                            onCheckedChange={setNeedsInvoice}
+                            data-testid="switch-needs-invoice"
+                          />
+                        </div>
+
+                        {/* Show billing fields only when switch is ON */}
+                        {needsInvoice && (
+                          <div className="space-y-4 pt-4">
+                            {/* Company Toggle */}
+                            <div className="flex items-center justify-between">
+                              <Label htmlFor="is-company" className="text-sm font-medium">
+                                Factura a empresa
+                              </Label>
+                              <Switch
+                                id="is-company"
+                                checked={isCompany}
+                                onCheckedChange={setIsCompany}
+                                data-testid="switch-is-company"
+                              />
+                            </div>
+
+                            {isCompany ? (
+                              /* Company Fields */
+                              <div className="space-y-4">
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">
+                                    Nombre de empresa <span className="text-accent">*</span>
+                                  </Label>
+                                  <Input
+                                    value={companyName}
+                                    onChange={(e) => setCompanyName(e.target.value)}
+                                    placeholder="Empresa S.A."
+                                    data-testid="input-company-name"
+                                  />
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">
+                                    CUIT / VAT / GST / Tax ID <span className="text-accent">*</span>
+                                  </Label>
+                                  <Input
+                                    value={taxId}
+                                    onChange={(e) => setTaxId(e.target.value)}
+                                    placeholder="20-12345678-9 o GB123456789"
+                                    data-testid="input-tax-id"
+                                  />
+                                  <p className="text-xs text-muted-foreground">
+                                    Número de identificación fiscal
+                                  </p>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">Dirección (opcional)</Label>
+                                  <Input
+                                    value={billingAddress}
+                                    onChange={(e) => setBillingAddress(e.target.value)}
+                                    placeholder="Calle y número"
+                                    data-testid="input-billing-address"
+                                  />
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Ciudad (opcional)</Label>
+                                    <Input
+                                      value={billingCity}
+                                      onChange={(e) => setBillingCity(e.target.value)}
+                                      placeholder="Ciudad"
+                                      data-testid="input-billing-city"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Código Postal (opcional)</Label>
+                                    <Input
+                                      value={billingPostcode}
+                                      onChange={(e) => setBillingPostcode(e.target.value)}
+                                      placeholder="1234"
+                                      data-testid="input-billing-postcode"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              /* Individual Fields - Sin nombre ni país (ya están arriba) */
+                              <div className="space-y-4">
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">
+                                    CUIT / VAT / GST / Tax ID <span className="text-accent">*</span>
+                                  </Label>
+                                  <Input
+                                    value={taxId}
+                                    onChange={(e) => setTaxId(e.target.value)}
+                                    placeholder="20-12345678-9 o GB123456789"
+                                    data-testid="input-tax-id-individual"
+                                  />
+                                  <p className="text-xs text-muted-foreground">
+                                    Número de identificación fiscal
+                                  </p>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">Dirección (opcional)</Label>
+                                  <Input
+                                    value={billingAddress}
+                                    onChange={(e) => setBillingAddress(e.target.value)}
+                                    placeholder="Calle y número"
+                                    data-testid="input-billing-address-individual"
+                                  />
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Ciudad (opcional)</Label>
+                                    <Input
+                                      value={billingCity}
+                                      onChange={(e) => setBillingCity(e.target.value)}
+                                      placeholder="Ciudad"
+                                      data-testid="input-billing-city-individual"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Código Postal (opcional)</Label>
+                                    <Input
+                                      value={billingPostcode}
+                                      onChange={(e) => setBillingPostcode(e.target.value)}
+                                      placeholder="1234"
+                                      data-testid="input-billing-postcode-individual"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -1436,199 +1570,6 @@ Titular: Matias Esteban Sukanec`;
                         );
                       })}
                     </RadioGroup>
-                  </div>
-
-                  {/* Billing Section (Optional) */}
-                  <div className="bg-card border rounded-lg p-6">
-                    {/* Switch to toggle invoice */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <Receipt className="h-5 w-5 text-accent" />
-                        <h2 className="text-lg font-semibold">Necesito factura (opcional)</h2>
-                      </div>
-                      <Switch
-                        id="needs-invoice"
-                        checked={needsInvoice}
-                        onCheckedChange={setNeedsInvoice}
-                        data-testid="switch-needs-invoice"
-                      />
-                    </div>
-
-                    {/* Show billing fields only when switch is ON */}
-                    {needsInvoice && (
-                      <div className="space-y-4 pt-4 border-t">
-                        <div className="space-y-4">
-                            {/* Company Toggle */}
-                            <div className="flex items-center justify-between">
-                              <Label htmlFor="is-company" className="text-sm font-medium">
-                                Factura a empresa
-                              </Label>
-                              <Switch
-                                id="is-company"
-                                checked={isCompany}
-                                onCheckedChange={setIsCompany}
-                                data-testid="switch-is-company"
-                              />
-                            </div>
-
-                            {isCompany ? (
-                              /* Company Fields */
-                              <div className="space-y-4">
-                                <div className="space-y-2">
-                                  <Label className="text-sm font-medium">
-                                    Nombre de empresa <span className="text-accent">*</span>
-                                  </Label>
-                                  <Input
-                                    value={companyName}
-                                    onChange={(e) => setCompanyName(e.target.value)}
-                                    placeholder="Empresa S.A."
-                                    data-testid="input-company-name"
-                                  />
-                                </div>
-
-                                <div className="space-y-2">
-                                  <Label className="text-sm font-medium">
-                                    CUIT / VAT / GST / Tax ID <span className="text-accent">*</span>
-                                  </Label>
-                                  <Input
-                                    value={taxId}
-                                    onChange={(e) => setTaxId(e.target.value)}
-                                    placeholder="20-12345678-9 o GB123456789"
-                                    data-testid="input-tax-id"
-                                  />
-                                  <p className="text-xs text-muted-foreground">
-                                    Número de identificación fiscal
-                                  </p>
-                                </div>
-
-                                <div className="space-y-2">
-                                  <Label className="text-sm font-medium">
-                                    País <span className="text-accent">*</span>
-                                  </Label>
-                                  <Select value={billingCountry} onValueChange={setBillingCountry}>
-                                    <SelectTrigger data-testid="select-billing-country">
-                                      <SelectValue placeholder="Seleccioná el país" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {countries.map((c) => (
-                                        <SelectItem key={c.id} value={c.id}>
-                                          {c.name}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-
-                                <div className="space-y-2">
-                                  <Label className="text-sm font-medium">Dirección (opcional)</Label>
-                                  <Input
-                                    value={billingAddress}
-                                    onChange={(e) => setBillingAddress(e.target.value)}
-                                    placeholder="Calle y número"
-                                    data-testid="input-billing-address"
-                                  />
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  <div className="space-y-2">
-                                    <Label className="text-sm font-medium">Ciudad (opcional)</Label>
-                                    <Input
-                                      value={billingCity}
-                                      onChange={(e) => setBillingCity(e.target.value)}
-                                      placeholder="Ciudad"
-                                      data-testid="input-billing-city"
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label className="text-sm font-medium">Código Postal (opcional)</Label>
-                                    <Input
-                                      value={billingPostcode}
-                                      onChange={(e) => setBillingPostcode(e.target.value)}
-                                      placeholder="1234"
-                                      data-testid="input-billing-postcode"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            ) : (
-                              /* Individual Fields */
-                              <div className="space-y-4">
-                                <div className="space-y-2">
-                                  <Label className="text-sm font-medium">Nombre completo</Label>
-                                  <Input
-                                    value={billingFullName}
-                                    onChange={(e) => setBillingFullName(e.target.value)}
-                                    placeholder="Juan Pérez"
-                                    data-testid="input-billing-fullname"
-                                  />
-                                </div>
-
-                                <div className="space-y-2">
-                                  <Label className="text-sm font-medium">
-                                    CUIT / VAT / GST / Tax ID <span className="text-accent">*</span>
-                                  </Label>
-                                  <Input
-                                    value={taxId}
-                                    onChange={(e) => setTaxId(e.target.value)}
-                                    placeholder="20-12345678-9 o GB123456789"
-                                    data-testid="input-tax-id-individual"
-                                  />
-                                  <p className="text-xs text-muted-foreground">
-                                    Número de identificación fiscal
-                                  </p>
-                                </div>
-
-                                <div className="space-y-2">
-                                  <Label className="text-sm font-medium">País</Label>
-                                  <Select value={billingCountry} onValueChange={setBillingCountry}>
-                                    <SelectTrigger data-testid="select-billing-country-individual">
-                                      <SelectValue placeholder="Seleccioná el país" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {countries.map((c) => (
-                                        <SelectItem key={c.id} value={c.id}>
-                                          {c.name}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-
-                                <div className="space-y-2">
-                                  <Label className="text-sm font-medium">Dirección (opcional)</Label>
-                                  <Input
-                                    value={billingAddress}
-                                    onChange={(e) => setBillingAddress(e.target.value)}
-                                    placeholder="Calle y número"
-                                    data-testid="input-billing-address-individual"
-                                  />
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  <div className="space-y-2">
-                                    <Label className="text-sm font-medium">Ciudad (opcional)</Label>
-                                    <Input
-                                      value={billingCity}
-                                      onChange={(e) => setBillingCity(e.target.value)}
-                                      placeholder="Ciudad"
-                                      data-testid="input-billing-city-individual"
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label className="text-sm font-medium">Código Postal (opcional)</Label>
-                                    <Input
-                                      value={billingPostcode}
-                                      onChange={(e) => setBillingPostcode(e.target.value)}
-                                      placeholder="1234"
-                                      data-testid="input-billing-postcode-individual"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               ) : (
