@@ -224,7 +224,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .json({ ok: false, error: "MP_ACCESS_TOKEN no configurado correctamente" });
     }
 
-    // Usar custom_id en base64 (igual que PayPal)
+    // Crear un payment_event ANTES de enviar a MP
+    // Así el external_reference es solo un UUID limpio (sin info de precios/cupones)
     const customData: any = {
       user_id,
       course_slug: course.slug,
@@ -240,7 +241,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       customData.discount = couponData.discount;
     }
 
-    const custom_id = Buffer.from(JSON.stringify(customData)).toString('base64');
+    // Crear evento temporal para almacenar información del cupón
+    const { data: paymentEvent } = await supabase
+      .from("payment_events")
+      .insert({
+        provider: "mercadopago",
+        provider_event_type: "preference_created",
+        status: "pending",
+        raw_payload: customData,
+        user_hint: user_id,
+        course_hint: course.slug,
+        amount: unit_price.toString(),
+        currency,
+      })
+      .select("id")
+      .single();
+
+    if (!paymentEvent?.id) {
+      return res
+        .setHeader("Access-Control-Allow-Origin", "*")
+        .status(500)
+        .json({ ok: false, error: "Error al crear registro de pago" });
+    }
+
+    // Usar solo el UUID del evento (limpio, sin información de precios)
+    const custom_id = paymentEvent.id;
 
     // Construir la URL base desde el request (para que funcione en Replit y Vercel)
     const protocol = req.headers['x-forwarded-proto'] || 'https';
