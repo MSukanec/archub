@@ -129,13 +129,13 @@ export function GlobalAnnouncement() {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: 'auto' }}
+        exit={{ opacity: 0, height: 0 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="fixed top-0 left-0 right-0 w-full z-[9999]"
+        className="w-full"
         style={{
-          background: 'linear-gradient(to right, #e0da22, #71c932)'
+          background: 'linear-gradient(to right, #b8ad1a, #71c932)'
         }}
       >
         <div className="w-full px-4 sm:px-6 py-3">
@@ -150,7 +150,7 @@ export function GlobalAnnouncement() {
               <div className="flex flex-col gap-1.5">
                 {/* Title */}
                 {activeAnnouncement.title && (
-                  <h3 className="text-sm font-semibold text-white">
+                  <h3 className="text-sm font-semibold !text-white">
                     {activeAnnouncement.title}
                   </h3>
                 )}

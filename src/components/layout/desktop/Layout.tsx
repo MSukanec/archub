@@ -148,12 +148,12 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   }
 
   return (
-    <>
+    <div className="h-screen flex flex-col overflow-hidden">
       {/* Global Announcements Banner - Por encima de TODO */}
       <GlobalAnnouncement />
       
       <div
-        className="h-screen flex flex-col"
+        className="flex-1 flex flex-col min-h-0"
         style={{
           backgroundColor: isMobile
             ? "var(--layout-mobile-bg)"
@@ -254,7 +254,6 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
               </div>
             )}
           </div>
-          </div>
 
           {/* Floating AI Chat - Solo en Desktop y rutas de trabajo */}
           {shouldShowAIChat && <FloatingAIChat />}
@@ -263,7 +262,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
       {/* Mobile Action Bar - Only visible on mobile when enabled */}
       {isMobile && <ActionBarMobile />}
-      </div>
-    </>
+    </div>
+    </div>
   );
 }
