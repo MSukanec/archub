@@ -179,27 +179,27 @@ export default function AdminCommunityDashboard() {
   return (
     <div className="space-y-6">
       {/* Métricas principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="card-organizaciones">
           <StatCardTitle showArrow={false}>Organizaciones</StatCardTitle>
           <StatCardValue>{stats?.totalOrganizations || 0}</StatCardValue>
           <StatCardMeta>{stats?.activeOrganizations || 0} activas</StatCardMeta>
         </StatCard>
 
-        <StatCard data-testid="card-usuarios-totales">
-          <StatCardTitle showArrow={false}>Usuarios Totales</StatCardTitle>
+        <StatCard href="/admin/community" data-testid="card-usuarios-totales">
+          <StatCardTitle>Usuarios Totales</StatCardTitle>
           <StatCardValue>{stats?.totalUsers || 0}</StatCardValue>
           <StatCardMeta>en la plataforma</StatCardMeta>
         </StatCard>
 
-        <StatCard data-testid="card-activos-ahora">
-          <StatCardTitle showArrow={false}>Activos Ahora</StatCardTitle>
+        <StatCard href="/admin/community" data-testid="card-activos-ahora">
+          <StatCardTitle>Activos Ahora</StatCardTitle>
           <StatCardValue>{stats?.activeUsersNow || 0}</StatCardValue>
           <StatCardMeta>usuarios online</StatCardMeta>
         </StatCard>
 
-        <StatCard data-testid="card-nuevos-este-mes">
-          <StatCardTitle showArrow={false}>Nuevos Este Mes</StatCardTitle>
+        <StatCard href="/admin/community" data-testid="card-nuevos-este-mes">
+          <StatCardTitle>Nuevos Este Mes</StatCardTitle>
           <StatCardValue>{stats?.newUsersThisMonth || 0}</StatCardValue>
           {userGrowth !== 0 && (
             <StatCardMeta className={userGrowth > 0 ? 'text-green-600' : 'text-red-600'}>
@@ -211,67 +211,79 @@ export default function AdminCommunityDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Actividad Reciente */}
-        <StatCard data-testid="card-actividad-reciente">
-          <StatCardTitle showArrow={false}>
-            <span className="flex items-center gap-2">
-              <Clock className="h-4 w-4" />
+        <Card className="p-4" data-testid="card-actividad-reciente">
+          <div className="flex items-center gap-2 mb-4">
+            <Clock className="h-4 w-4" />
+            <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
               Actividad Reciente de Usuarios
-            </span>
-          </StatCardTitle>
+            </p>
+          </div>
           {loadingActivity ? (
-            <div className="space-y-3 mt-4">
+            <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
                 <Skeleton key={i} className="h-16" />
               ))}
             </div>
           ) : recentActivity && recentActivity.length > 0 ? (
-            <div className="space-y-3 mt-4">
-              {recentActivity.map((activity: any) => {
-                const lastSeenTime = new Date(activity.last_seen_at).getTime()
-                const now = Date.now()
-                const diffMs = now - lastSeenTime
-                const isActive = diffMs <= 90000
+            <>
+              <div className="space-y-2">
+                {recentActivity.map((activity: any) => {
+                  const lastSeenTime = new Date(activity.last_seen_at).getTime()
+                  const now = Date.now()
+                  const diffMs = now - lastSeenTime
+                  const isActive = diffMs <= 90000
 
-                return (
-                  <div key={activity.user_id} className="flex items-start justify-between p-3 rounded-lg border">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{activity.users?.full_name}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {format(new Date(activity.last_seen_at), "d 'de' MMMM, HH:mm:ss", { locale: es })}
-                      </p>
+                  return (
+                    <div key={activity.user_id} className="flex items-center justify-between p-2 rounded-lg border hover:bg-muted/30 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate text-sm">{activity.users?.full_name}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {isActive ? (
+                            <span className="text-[hsl(var(--accent))]">● Activo ahora</span>
+                          ) : (
+                            `Última conexión: ${format(new Date(activity.last_seen_at), "d 'de' MMM, HH:mm", { locale: es })}`
+                          )}
+                        </p>
+                      </div>
                     </div>
-                    {isActive && (
-                      <Badge className="bg-accent text-accent-foreground">
-                        Activo
-                      </Badge>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
+                  )
+                })}
+              </div>
+              <a 
+                href="/admin/community" 
+                onClick={(e) => {
+                  e.preventDefault()
+                  window.location.href = '/admin/community'
+                }}
+                className="block mt-4 pt-3 border-t text-center text-sm hover:underline transition-all"
+                style={{ color: 'hsl(var(--accent))' }}
+              >
+                Ver más usuarios
+              </a>
+            </>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-8">
               No hay actividad reciente
             </p>
           )}
-        </StatCard>
+        </Card>
 
         {/* Organizaciones Más Activas */}
-        <StatCard data-testid="card-organizaciones-activas">
-          <StatCardTitle showArrow={false}>
-            <span className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
+        <Card className="p-4" data-testid="card-organizaciones-activas">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="h-4 w-4" />
+            <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
               Organizaciones Más Activas
-            </span>
-          </StatCardTitle>
+            </p>
+          </div>
           {loadingOrgs ? (
-            <div className="space-y-3 mt-4">
+            <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
                 <Skeleton key={i} className="h-16" />
               ))}
             </div>
           ) : activeOrganizations && activeOrganizations.length > 0 ? (
-            <div className="space-y-3 mt-4">
+            <div className="space-y-3">
               {activeOrganizations.map((org: any, index: number) => (
                 <div key={org.id} className="flex items-start justify-between p-3 rounded-lg border">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -293,7 +305,7 @@ export default function AdminCommunityDashboard() {
               No hay datos de organizaciones activas
             </p>
           )}
-        </StatCard>
+        </Card>
       </div>
     </div>
   )
