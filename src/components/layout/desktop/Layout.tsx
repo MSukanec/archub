@@ -2,6 +2,7 @@ import { useEffect } from "react";
 // import { SecondarySidebar } from "./SecondarySidebar";
 import { MainHeader } from "./MainHeader";
 import { Sidebar } from "./Sidebar";
+import { RightSidebar } from "./RightSidebar";
 // Header removed - now handled by sidebar
 // import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
@@ -222,7 +223,7 @@ function LayoutContent({
           </main>
         </HeaderMobile>
       ) : (
-        /* Desktop View - Sidebar + MainHeader + Content */
+        /* Desktop View - Sidebar + MainHeader + Content + RightSidebar */
         <div className="flex-1 flex min-h-0">
           {/* Sidebar - Full height */}
           <div className="flex-shrink-0">
@@ -231,8 +232,8 @@ function LayoutContent({
 
           {/* Main Content Area - MainHeader + Page Content */}
           <div className="flex-1 flex flex-col min-h-0">
-            {/* Main Header for Desktop */}
-            <MainHeader icon={headerProps?.icon} title={headerProps?.title} />
+            {/* Main Header for Desktop - COMENTADO PARA TESTING */}
+            {/* <MainHeader icon={headerProps?.icon} title={headerProps?.title} /> */}
 
             {/* Page Content with rounded corners and framing effect */}
             <div className={`flex-1 flex min-h-0 relative ${isDocked ? 'gap-3' : ''}`}>
@@ -301,6 +302,11 @@ function LayoutContent({
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Right Sidebar - Fixed width, always visible */}
+          <div className="flex-shrink-0">
+            <RightSidebar />
           </div>
 
           {/* Floating AI Chat - Desktop y Mobile en rutas de trabajo */}
