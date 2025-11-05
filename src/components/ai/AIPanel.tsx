@@ -6,12 +6,11 @@
  * - Vista con conversación: Burbujas de chat + input
  */
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, type KeyboardEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Sparkles, User } from 'lucide-react';
-import { SmartChatInput } from '@/components/ui-custom/fields/SmartChatInput';
+import { Sparkles, ArrowUp } from 'lucide-react';
 import { MessageContent } from '@/components/ai/MessageContent';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
@@ -42,9 +41,20 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const scrollEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   // Obtener primera letra del nombre para el avatar
   const userInitial = userFullName?.charAt(0)?.toUpperCase() || 'U';
+
+  // Auto-resize del textarea
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = 'auto';
+    const newHeight = Math.min(textarea.scrollHeight, 120); // max 120px
+    textarea.style.height = `${newHeight}px`;
+  }, [inputValue]);
 
   // Cargar historial al montar
   useEffect(() => {
@@ -155,6 +165,15 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
 
   const handleIdeaClick = (idea: string) => {
     handleSendMessage(idea);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (inputValue.trim() && !isSending) {
+        handleSendMessage();
+      }
+    }
   };
 
   const hasMessages = messages.length > 0;
@@ -284,13 +303,45 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
 
       {/* INPUT - Siempre al fondo */}
       <div className="p-4 pt-3 border-t border-[var(--main-sidebar-fg)]/20">
-        <SmartChatInput
-          value={inputValue}
-          onChange={setInputValue}
-          onSubmit={() => handleSendMessage()}
-          placeholder="Escribe tu mensaje..."
-          disabled={isSending}
-        />
+        <div className="relative flex items-end gap-2 rounded-lg bg-[var(--main-sidebar-button-hover-bg)] px-3 py-2">
+          <textarea
+            ref={textareaRef}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Escribe tu mensaje..."
+            disabled={isSending}
+            rows={1}
+            className={cn(
+              "flex-1 resize-none bg-transparent",
+              "text-sm leading-5 text-white placeholder:text-muted-foreground",
+              "focus:outline-none",
+              "disabled:cursor-not-allowed disabled:opacity-50",
+              "max-h-[120px] overflow-y-auto"
+            )}
+            style={{
+              minHeight: '20px',
+              scrollbarWidth: 'thin'
+            }}
+            data-testid="input-ai-message"
+          />
+          
+          <button
+            type="button"
+            onClick={() => handleSendMessage()}
+            disabled={!inputValue.trim() || isSending}
+            className={cn(
+              "flex-shrink-0 p-1.5 rounded-full",
+              "bg-[var(--accent)] hover:opacity-90 transition-opacity",
+              "text-white",
+              "disabled:opacity-40 disabled:cursor-not-allowed"
+            )}
+            aria-label="Enviar mensaje"
+            data-testid="button-send-ai-message"
+          >
+            <ArrowUp className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   );
