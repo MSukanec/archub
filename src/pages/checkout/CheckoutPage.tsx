@@ -132,9 +132,6 @@ export default function CheckoutPage() {
   // Acceptance checkboxes
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptCommunications, setAcceptCommunications] = useState(false);
-  
-  // Save to profile checkbox
-  const [saveToProfile, setSaveToProfile] = useState(false);
 
   // Billing data (optional)
   const [needsInvoice, setNeedsInvoice] = useState(false);
@@ -1035,8 +1032,8 @@ Titular: Matias Esteban Sukanec`;
       }
     }
 
-    // Save to profile if checkbox is checked
-    if (saveToProfile && userData?.user?.id) {
+    // Guardar datos en el perfil automáticamente
+    if (userData?.user?.id) {
       try {
         const {
           data: { session },
@@ -1237,23 +1234,8 @@ Titular: Matias Esteban Sukanec`;
                         />
                       </div>
 
-                      {/* Save to Profile Switch */}
-                      {userData?.user?.id && (
-                        <div className="flex items-center justify-between pt-2 border-t mt-4">
-                          <Label htmlFor="save-to-profile" className="text-sm font-medium cursor-pointer">
-                            Guardar estos datos en mi perfil
-                          </Label>
-                          <Switch
-                            id="save-to-profile"
-                            checked={saveToProfile}
-                            onCheckedChange={setSaveToProfile}
-                            data-testid="switch-save-to-profile"
-                          />
-                        </div>
-                      )}
-
                       {/* Invoice Section - Integrated */}
-                      <div className="space-y-4 pt-4 border-t">
+                      <div className="space-y-4 pt-4 border-t mt-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Receipt className="h-5 w-5 text-accent" />
