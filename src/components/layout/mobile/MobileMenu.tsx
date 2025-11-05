@@ -37,8 +37,6 @@ import { useMobileMenuStore } from "./useMobileMenuStore";
 import { useProjects } from "@/hooks/use-projects";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 import { useProjectContext } from "@/stores/projectContext";
-import { useCourseSidebarStore } from "@/stores/sidebarStore";
-import { CourseSidebar } from "@/components/layout/CourseSidebar";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
@@ -91,9 +89,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     enabled: !!userData?.user?.id,
   });
   const unreadCount = Array.isArray(notifications) ? notifications.filter((n: any) => !n.read_at).length : 0;
-
-  // CourseSidebar state
-  const { isVisible: isCourseSidebarVisible, modules, lessons, currentLessonId } = useCourseSidebarStore();
 
   // Project selection mutation
   const projectMutation = useMutation({
@@ -511,16 +506,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           </div>
         </div>
 
-        {/* CourseSidebar - mostrar cuando isVisible === true */}
-        {isCourseSidebarVisible && (
-          <div className="w-[280px] border-l border-[var(--main-sidebar-border)]">
-            <CourseSidebar 
-              modules={modules}
-              lessons={lessons}
-              currentLessonId={currentLessonId}
-            />
-          </div>
-        )}
       </div>
     </div>
   );
