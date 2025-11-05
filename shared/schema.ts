@@ -905,3 +905,20 @@ export const insertGlobalAnnouncementSchema = createInsertSchema(global_announce
 
 export type GlobalAnnouncement = typeof global_announcements.$inferSelect;
 export type InsertGlobalAnnouncement = z.infer<typeof insertGlobalAnnouncementSchema>;
+
+// Support Messages Table
+export const support_messages = pgTable("support_messages", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  user_id: uuid("user_id").notNull(),
+  message: text("message").notNull(),
+  sender: text("sender").notNull(), // 'user' o 'admin'
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export const insertSupportMessageSchema = createInsertSchema(support_messages).omit({
+  id: true,
+  created_at: true,
+});
+
+export type SupportMessage = typeof support_messages.$inferSelect;
+export type InsertSupportMessage = z.infer<typeof insertSupportMessageSchema>;
