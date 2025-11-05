@@ -25,12 +25,11 @@ export function PresenceInitializer() {
       subscribeToPresenceChanges();
     }
 
-    // Cleanup: desuscribirse cuando el usuario se desloguee
+    // Cleanup: SIEMPRE desuscribirse al desmontar (incluso si el canal no llegó a SUBSCRIBED)
+    // Esto previene memory leaks de canales Supabase abiertos
     return () => {
-      if (isSubscribed) {
-        console.log('🔴 Limpiando suscripción de presencia...');
-        unsubscribe();
-      }
+      console.log('🔴 Limpiando suscripción de presencia...');
+      unsubscribe();
     };
   }, [userData?.user, isSubscribed, subscribeToPresenceChanges, unsubscribe]);
 
