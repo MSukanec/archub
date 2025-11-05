@@ -736,9 +736,14 @@ Titular: DNI 32322767`;
         return;
       }
 
-      const finalPrice = appliedCoupon
+      // Calcular precio con descuento de cupón
+      const priceWithCoupon = appliedCoupon
         ? appliedCoupon.final_price
         : priceData?.amount || 0;
+      
+      // Calcular descuento de transferencia (5%)
+      const transferDiscount = priceWithCoupon * (TRANSFER_DISCOUNT_PERCENT / 100);
+      const finalAmount = priceWithCoupon - transferDiscount;
 
       const orderId = crypto.randomUUID();
 
@@ -752,9 +757,11 @@ Titular: DNI 32322767`;
         body: JSON.stringify({
           order_id: orderId,
           course_slug: courseSlug,
-          amount: finalPrice,
+          amount: finalAmount,
           currency: currentCurrency,
           payer_name: `${firstName} ${lastName}`.trim() || undefined,
+          discount_percent: TRANSFER_DISCOUNT_PERCENT,
+          discount_amount: transferDiscount,
         }),
       });
 
@@ -1116,8 +1123,21 @@ Titular: DNI 32322767`;
     }
   };
 
-  const finalPrice = appliedCoupon ? appliedCoupon.final_price : priceData?.amount || 0;
-  const hasDiscount = appliedCoupon && appliedCoupon.discount > 0;
+  // Constante de descuento por transferencia bancaria
+  const TRANSFER_DISCOUNT_PERCENT = 5.0; // 5%
+  
+  // Calcular precio con descuento de cupón primero
+  const priceAfterCoupon = appliedCoupon ? appliedCoupon.final_price : priceData?.amount || 0;
+  
+  // Calcular descuento de transferencia si el método seleccionado es "transfer"
+  const transferDiscountAmount = selectedMethod === "transfer" 
+    ? priceAfterCoupon * (TRANSFER_DISCOUNT_PERCENT / 100)
+    : 0;
+  
+  // Precio final después de todos los descuentos
+  const finalPrice = priceAfterCoupon - transferDiscountAmount;
+  
+  const hasDiscount = (appliedCoupon && appliedCoupon.discount > 0) || transferDiscountAmount > 0;
 
   // Ordenar métodos de pago según el país seleccionado
   const selectedCountryData = useMemo(() => {
@@ -1428,6 +1448,9 @@ Titular: DNI 32322767`;
                                 Transferencia Bancaria
                                 <Badge variant="outline" className="text-xs font-normal bg-muted/60 border-border/50">
                                   Pago en ARS
+                                </Badge>
+                                <Badge className="text-xs font-semibold bg-green-600 hover:bg-green-700 text-white border-0">
+                                  💸 -5% Extra
                                 </Badge>
                               </Label>
                               <p className="text-sm text-muted-foreground mt-1">
@@ -1943,11 +1966,20 @@ Titular: DNI 32322767`;
                         </span>
                       </div>
 
-                      {hasDiscount && (
+                      {appliedCoupon && appliedCoupon.discount > 0 && (
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Descuento</span>
-                          <span className="font-medium text-accent">
+                          <span className="text-muted-foreground">Descuento cupón</span>
+                          <span className="font-medium text-green-600 dark:text-green-400">
                             - {currentCurrency} ${appliedCoupon.discount.toLocaleString("es-AR")}
+                          </span>
+                        </div>
+                      )}
+
+                      {transferDiscountAmount > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Descuento transferencia (5%)</span>
+                          <span className="font-medium text-green-600 dark:text-green-400">
+                            - {currentCurrency} ${transferDiscountAmount.toLocaleString("es-AR")}
                           </span>
                         </div>
                       )}
