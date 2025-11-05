@@ -38,7 +38,8 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false); // No cargar historial al inicio
+  const [hasInteracted, setHasInteracted] = useState(false); // Track si el usuario ha interactuado
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const scrollEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -56,17 +57,20 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
     textarea.style.height = `${newHeight}px`;
   }, [inputValue]);
 
-  // Cargar historial al montar
-  useEffect(() => {
-    loadHistory();
-  }, []);
+  // NO cargar historial automáticamente al montar
+  // Solo cargar cuando el usuario interactúa
 
-  // Auto-scroll hacia abajo cuando cambian los mensajes
+  const hasMessages = messages.length > 0;
+
+  // Auto-scroll hacia arriba (donde están los nuevos) cuando cambian los mensajes
   useEffect(() => {
-    if (scrollEndRef.current) {
-      scrollEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (scrollAreaRef.current && hasMessages) {
+      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = 0;
+      }
     }
-  }, [messages, isSending]);
+  }, [messages, hasMessages]);
 
   const loadHistory = async () => {
     try {
@@ -106,6 +110,14 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
     const textToSend = messageText || inputValue.trim();
     
     if (!textToSend || isSending) return;
+
+    // Si es la primera interacción, cargar historial primero
+    if (!hasInteracted) {
+      setIsLoadingHistory(true);
+      await loadHistory();
+      setHasInteracted(true);
+      setIsLoadingHistory(false);
+    }
 
     setIsSending(true);
     
@@ -176,8 +188,6 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
     }
   };
 
-  const hasMessages = messages.length > 0;
-
   return (
     <div className="flex flex-col h-screen">
       {/* HEADER */}
@@ -198,8 +208,24 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
         // Vista con conversación
         <ScrollArea className="flex-1 px-4" ref={scrollAreaRef}>
           <div className="py-4 space-y-4">
-            {/* Mensajes normales: viejos arriba, nuevos abajo */}
-            {messages.map((message, index) => (
+            {/* Indicador de carga - aparece arriba de todo (mensaje más nuevo) */}
+            {isSending && (
+              <div className="flex gap-3">
+                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
+                  <Sparkles className="h-4 w-4 text-white" />
+                </div>
+                <div className="rounded-lg px-4 py-2 bg-[var(--main-sidebar-button-hover-bg)] text-white">
+                  <div className="flex gap-1">
+                    <span className="animate-pulse">●</span>
+                    <span className="animate-pulse delay-150">●</span>
+                    <span className="animate-pulse delay-300">●</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Mensajes en orden inverso: más nuevos arriba, más viejos abajo */}
+            {[...messages].reverse().map((message, index) => (
               <div
                 key={index}
                 className={cn(
@@ -242,25 +268,6 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
                 </div>
               </div>
             ))}
-
-            {/* Indicador de carga */}
-            {isSending && (
-              <div className="flex gap-3">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
-                  <Sparkles className="h-4 w-4 text-white" />
-                </div>
-                <div className="rounded-lg px-4 py-2 bg-[var(--main-sidebar-button-hover-bg)] text-white">
-                  <div className="flex gap-1">
-                    <span className="animate-pulse">●</span>
-                    <span className="animate-pulse delay-150">●</span>
-                    <span className="animate-pulse delay-300">●</span>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Elemento invisible para auto-scroll */}
-            <div ref={scrollEndRef} />
           </div>
         </ScrollArea>
       ) : (
