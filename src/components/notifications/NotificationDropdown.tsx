@@ -75,7 +75,7 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
     <div className="flex flex-col">
       <div className="p-4 pb-3">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-sm" style={{ color: 'white' }}>Notificaciones</h3>
+          <h3 className="font-semibold text-sm !text-white">Notificaciones</h3>
         </div>
         {unreadNotifications.length > 0 && (
           <Button
