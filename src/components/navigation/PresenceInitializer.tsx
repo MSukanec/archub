@@ -30,10 +30,14 @@ export function PresenceInitializer() {
     return () => {
       console.log('🔴 Limpiando presencia y cerrando sesión analytics...');
       
-      // FASE 1: Cerrar vista actual en analytics (fire-and-forget)
-      supabase.rpc('analytics_exit_previous_view').catch(() => {
-        // Silenciar error, es cleanup no crítico
-      });
+      // FASE 1: Cerrar vista actual en analytics (fire-and-forget, async)
+      (async () => {
+        try {
+          await supabase.rpc('analytics_exit_previous_view');
+        } catch {
+          // Silenciar error, es cleanup no crítico
+        }
+      })();
       
       // FASE 2: Desuscribirse de presence changes
       unsubscribe();
