@@ -1,107 +1,164 @@
 # Detalle de las tablas de Supabase relacionadas a USUARIOS:
 
---------------- TABLA USUARIOS:
+--------------- TABLA USER_DATA:
 
-
-
---------------- TABLA IA_MESSAGES:
-
-create table public.ia_messages (
+create table public.user_data (
   id uuid not null default gen_random_uuid (),
-  user_id uuid null,
-  role text not null,
-  content text not null,
-  context_type text null,
-  created_at timestamp with time zone null default now(),
-  constraint ia_messages_pkey primary key (id),
-  constraint ia_messages_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
-) TABLESPACE pg_default;
-
-create index IF not exists idx_ia_messages_user_id on public.ia_messages using btree (user_id) TABLESPACE pg_default;
-
-create index IF not exists idx_ia_messages_context_type on public.ia_messages using btree (context_type) TABLESPACE pg_default;
-
---------------- TABLA IA_USAGE_LOGS:
-
-create table public.ia_usage_logs (
-  id uuid not null default gen_random_uuid (),
-  user_id uuid null,
-  provider text null default 'openai'::text,
-  model text null default 'gpt-4o'::text,
-  prompt_tokens integer null,
-  completion_tokens integer null,
-  total_tokens integer null,
-  cost_usd numeric(6, 4) null,
-  context_type text null,
-  created_at timestamp with time zone null default now(),
-  constraint ia_usage_logs_pkey primary key (id),
-  constraint ia_usage_logs_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
-) TABLESPACE pg_default;
-
-create index IF not exists idx_ia_usage_logs_user_id on public.ia_usage_logs using btree (user_id) TABLESPACE pg_default;
-
-create index IF not exists idx_ia_usage_logs_context_type on public.ia_usage_logs using btree (context_type) TABLESPACE pg_default;
-
---------------- TABLA IA_USER_PREFERENCES:
-
-create table public.ia_user_preferences (
   user_id uuid not null,
-  display_name text null,
-  tone text null default 'amistoso'::text,
-  language text null default 'es'::text,
-  personality text null,
+  country uuid null,
+  created_at timestamp with time zone null default now(),
+  birthdate date null,
   updated_at timestamp with time zone null default now(),
-  constraint ia_user_preferences_pkey primary key (user_id),
-  constraint ia_user_preferences_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+  first_name text null,
+  last_name text null,
+  phone_e164 text null,
+  constraint user_profile_data_pkey primary key (id),
+  constraint user_data_id_key unique (id),
+  constraint user_data_user_id_key unique (user_id),
+  constraint user_data_country_fkey foreign KEY (country) references countries (id) on delete set null,
+  constraint user_profile_data_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
 ) TABLESPACE pg_default;
 
-create index IF not exists idx_ia_user_preferences_language on public.ia_user_preferences using btree (language) TABLESPACE pg_default;
+create trigger set_updated_at BEFORE
+update on user_data for EACH row
+execute FUNCTION update_updated_at_column ();
 
-create trigger trg_set_updated_at_ia_user_preferences BEFORE
-update on ia_user_preferences for EACH row
-execute FUNCTION set_updated_at_ia_user_preferences ();
+create trigger trg_user_data_fill_user BEFORE INSERT on user_data for EACH row
+execute FUNCTION fill_user_data_user_id_from_auth ();
 
---------------- TABLA IA_USER_USAGE_LIMITS:
+--------------- TABLA USER_NOTIFICATIONS:
 
-create table public.ia_user_usage_limits (
-  user_id uuid not null,
-  plan text not null default 'free'::text,
-  daily_limit integer not null default 3,
-  prompts_used_today integer not null default 0,
-  last_prompt_at timestamp with time zone null,
-  last_reset_at date null default CURRENT_DATE,
-  constraint ia_user_usage_limits_pkey primary key (user_id),
-  constraint ia_user_usage_limits_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
-) TABLESPACE pg_default;
-
-create index IF not exists idx_ia_user_usage_limits_plan on public.ia_user_usage_limits using btree (plan) TABLESPACE pg_default;
-
-create index IF not exists idx_ia_user_usage_limits_last_reset on public.ia_user_usage_limits using btree (last_reset_at) TABLESPACE pg_default;
-
-create trigger trg_reset_prompt_limit BEFORE
-update on ia_user_usage_limits for EACH row
-execute FUNCTION reset_daily_prompt_limit_if_needed ();
-
---------------- TABLA IA_USER_GREETINGS:
-
-create table public.ia_user_greetings (
+create table public.user_notifications (
   id uuid not null default gen_random_uuid (),
-  user_id uuid null,
-  period text not null,
-  greeting text not null,
+  user_id uuid not null,
+  notification_id uuid not null,
+  delivered_at timestamp with time zone not null default now(),
+  read_at timestamp with time zone null,
+  clicked_at timestamp with time zone null,
+  constraint user_notifications_pkey primary key (id),
+  constraint user_notifications_user_id_notification_id_key unique (user_id, notification_id),
+  constraint user_notifications_notification_id_fkey foreign KEY (notification_id) references notifications (id) on delete CASCADE,
+  constraint user_notifications_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create index IF not exists user_notifications_user_idx on public.user_notifications using btree (user_id, read_at) TABLESPACE pg_default;
+
+--------------- TABLA USER_ORGANIZATION_PREFERENCES:
+
+create table public.user_organization_preferences (
+  id uuid not null default gen_random_uuid (),
+  user_id uuid not null,
+  organization_id uuid not null,
+  last_project_id uuid null,
   created_at timestamp with time zone null default now(),
-  constraint ia_user_greetings_pkey primary key (id),
-  constraint ia_user_greetings_unique unique (user_id, period),
-  constraint ia_user_greetings_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE,
-  constraint ia_user_greetings_period_check check (
+  updated_at timestamp with time zone null default now(),
+  constraint user_organization_preferences_pkey primary key (id),
+  constraint user_organization_preferences_user_id_organization_id_key unique (user_id, organization_id),
+  constraint user_organization_preferences_last_project_id_fkey foreign KEY (last_project_id) references projects (id) on delete set null,
+  constraint user_organization_preferences_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint user_organization_preferences_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+--------------- TABLA USER_PREFERENCES:
+
+create table public.user_preferences (
+  id uuid not null default gen_random_uuid (),
+  user_id uuid not null,
+  last_organization_id uuid null,
+  theme text null default 'light'::text,
+  onboarding_completed boolean null default false,
+  created_at timestamp with time zone null default now(),
+  sidebar_docked boolean null default false,
+  updated_at timestamp with time zone null default now(),
+  last_user_type public.user_type null,
+  home_checklist jsonb not null default '{"create_contact": false, "create_project": false, "create_movement": false}'::jsonb,
+  home_banner_dismissed boolean not null default false,
+  last_home_seen_at timestamp with time zone not null default now(),
+  constraint user_preferences_pkey primary key (id),
+  constraint user_preferences_user_id_key unique (user_id),
+  constraint user_preferences_last_organization_id_fkey foreign KEY (last_organization_id) references organizations (id) on delete set null,
+  constraint user_preferences_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE,
+  constraint user_preferences_theme_chk check (
+    (theme = any (array['light'::text, 'dark'::text]))
+  )
+) TABLESPACE pg_default;
+
+create trigger set_updated_at BEFORE
+update on user_preferences for EACH row
+execute FUNCTION update_updated_at_column ();
+
+--------------- TABLA USER_PRESENCE:
+
+create table public.user_presence (
+  user_id uuid not null,
+  org_id uuid not null,
+  last_seen_at timestamp with time zone not null default now(),
+  status text not null default 'online'::text,
+  user_agent text null,
+  locale text null,
+  updated_from text null,
+  current_view text null,
+  constraint user_presence_pkey primary key (user_id),
+  constraint user_presence_user_id_key unique (user_id),
+  constraint user_presence_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create index IF not exists user_presence_org_idx on public.user_presence using btree (org_id) TABLESPACE pg_default;
+
+--------------- TABLA USER_VIEW_HISTORY:
+
+create table public.user_view_history (
+  id uuid not null default gen_random_uuid (),
+  user_id uuid not null,
+  organization_id uuid null,
+  view_name text not null,
+  entered_at timestamp with time zone not null default now(),
+  exited_at timestamp with time zone null,
+  duration_seconds integer null,
+  created_at timestamp with time zone null default now(),
+  constraint user_view_history_pkey primary key (id),
+  constraint user_view_history_organization_id_fkey foreign KEY (organization_id) references organizations (id),
+  constraint user_view_history_user_id_fkey foreign KEY (user_id) references users (id)
+) TABLESPACE pg_default;
+
+--------------- TABLA USERS:
+
+create table public.users (
+  id uuid not null default gen_random_uuid (),
+  created_at timestamp with time zone not null default now(),
+  auth_id uuid not null,
+  email text not null,
+  avatar_url text null,
+  avatar_source public.avatar_source_t null default 'email'::avatar_source_t,
+  full_name text null,
+  role_id uuid not null default 'e6cc68d2-fc28-421b-8bd3-303326ef91b8'::uuid,
+  updated_at timestamp with time zone null default now(),
+  is_active boolean not null default true,
+  constraint users_pkey primary key (id),
+  constraint users_auth_id_key unique (auth_id),
+  constraint users_id_key unique (id),
+  constraint users_auth_id_fkey foreign KEY (auth_id) references auth.users (id) on delete CASCADE,
+  constraint users_role_id_fkey foreign KEY (role_id) references roles (id) on delete RESTRICT,
+  constraint users_email_format_chk check (
     (
-      period = any (
-        array[
-          'morning'::text,
-          'afternoon'::text,
-          'evening'::text
-        ]
-      )
+      email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'::text
     )
   )
 ) TABLESPACE pg_default;
+
+create unique INDEX IF not exists users_email_lower_uniq on public.users using btree (lower(email)) TABLESPACE pg_default;
+
+create index IF not exists idx_users_auth_id on public.users using btree (auth_id) TABLESPACE pg_default;
+
+create index IF not exists idx_users_role_id on public.users using btree (role_id) TABLESPACE pg_default;
+
+create index IF not exists idx_users_avatar_source on public.users using btree (avatar_source) TABLESPACE pg_default;
+
+create trigger set_updated_at BEFORE
+update on users for EACH row
+execute FUNCTION update_updated_at_column ();
+
+create trigger trg_users_normalize_email BEFORE INSERT
+or
+update on users for EACH row
+execute FUNCTION users_normalize_email ();
