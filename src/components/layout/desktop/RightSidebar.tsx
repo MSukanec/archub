@@ -14,7 +14,7 @@ import { AIPanel } from "@/components/ai/AIPanel";
 import { SupportPanel } from "@/components/support/SupportPanel";
 import { Bell, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Moon, Sun, HelpCircle, PanelRightClose } from "lucide-react";
+import { Moon, Sun, HelpCircle, PanelRightClose, MessageCircle } from "lucide-react";
 import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { getUnreadCount, subscribeUserNotifications } from '@/lib/notifications';
@@ -196,6 +196,24 @@ export function RightSidebar() {
               >
                 <div className="h-8 w-8 flex items-center justify-center">
                   <HelpCircle className="h-[18px] w-[18px]" />
+                </div>
+              </button>
+
+              {/* Comunidad Discord - h-10 - ABAJO de Ayuda */}
+              <button
+                className={cn(
+                  "h-10 w-8 rounded-md flex items-center justify-center transition-colors",
+                  "hover:bg-[var(--main-sidebar-button-hover-bg)]",
+                  "text-[var(--main-sidebar-fg)] hover:text-white"
+                )}
+                title="Comunidad Discord"
+                data-testid="button-discord"
+                onClick={() => {
+                  window.open('https://discord.com/channels/868615664070443008', '_blank');
+                }}
+              >
+                <div className="h-8 w-8 flex items-center justify-center">
+                  <MessageCircle className="h-[18px] w-[18px]" />
                 </div>
               </button>
 

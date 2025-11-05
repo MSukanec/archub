@@ -456,42 +456,6 @@ export function Sidebar() {
                   )}
                 </button>
 
-                {/* Botón Comunidad Discord */}
-                <button
-                  onClick={() => {
-                    window.open('https://discord.com/channels/868615664070443008', '_blank');
-                  }}
-                  className={cn(
-                    "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
-                    isExpanded ? "w-full" : "w-8"
-                  )}
-                >
-                  <div className="flex items-center justify-center w-8 flex-shrink-0">
-                    <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                      <MessageCircle className={cn(
-                        "h-4 w-4 transition-colors text-[var(--main-sidebar-fg)]",
-                        "group-hover:text-[var(--accent)]"
-                      )} />
-                    </div>
-                  </div>
-                  {isExpanded && (
-                    <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
-                      <span className={cn(
-                        "text-sm font-medium truncate text-left text-[var(--main-sidebar-fg)]",
-                        "group-hover:text-white"
-                      )}>
-                        Comunidad Discord
-                      </span>
-                      <span className={cn(
-                        "text-xs truncate text-left text-[var(--main-sidebar-fg)] opacity-60",
-                        "group-hover:text-white group-hover:opacity-100"
-                      )}>
-                        Únete a la conversación
-                      </span>
-                    </div>
-                  )}
-                </button>
-
                 {/* Botón Administración - solo si es admin */}
                 {isAdmin && (
                   <button
@@ -534,47 +498,6 @@ export function Sidebar() {
                     )}
                   </button>
                 )}
-
-                {/* Botón Planes y Precios */}
-                <button
-                  onClick={() => {
-                    navigate('/pricing');
-                  }}
-                  className={cn(
-                    "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
-                    isExpanded ? "w-full" : "w-8",
-                    location === '/pricing' && "bg-[var(--main-sidebar-button-active-bg)]"
-                  )}
-                  data-testid="button-sidebar-pricing"
-                >
-                  <div className="flex items-center justify-center w-8 flex-shrink-0">
-                    <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                      <CreditCard className={cn(
-                        "h-4 w-4 transition-colors",
-                        location === '/pricing' ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
-                        "group-hover:text-[var(--accent)]"
-                      )} />
-                    </div>
-                  </div>
-                  {isExpanded && (
-                    <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
-                      <span className={cn(
-                        "text-sm font-medium truncate text-left",
-                        location === '/pricing' ? "text-white" : "text-[var(--main-sidebar-fg)]",
-                        "group-hover:text-white"
-                      )}>
-                        Planes y Precios
-                      </span>
-                      <span className={cn(
-                        "text-xs truncate text-left",
-                        location === '/pricing' ? "text-white opacity-100" : "text-[var(--main-sidebar-fg)] opacity-60",
-                        "group-hover:text-white group-hover:opacity-100"
-                      )}>
-                        Ver opciones
-                      </span>
-                    </div>
-                  )}
-                </button>
               </div>
             ) : (
               /* SIDEBARS ESPECÍFICOS */
