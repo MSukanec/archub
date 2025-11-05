@@ -1,20 +1,32 @@
 /**
  * 🔧 RightSidebar - Sidebar derecho con controles del usuario
  * 
- * Dimensiones y estructura IDÉNTICAS al sidebar izquierdo.
- * Botones del MainHeader integrados en el sidebar derecho.
+ * Sidebar expandible estilo Firebase:
+ * - Hover sobre notificaciones expande el panel hacia la izquierda
+ * - Panel de notificaciones integrado en el sidebar
  */
 
+import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { UserQuickAccess } from "@/components/ui-custom/layout/UserQuickAccess";
-import { NotificationBellHeader } from "@/components/notifications/NotificationBellHeader";
+import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
+import { Bell } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Moon, Sun, HelpCircle, PanelRightClose } from "lucide-react";
 import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { getUnreadCount, subscribeUserNotifications } from '@/lib/notifications';
+import { useEffect } from 'react';
 
 export function RightSidebar() {
   const { isDark, toggleTheme } = useThemeStore();
   const { data: userData } = useCurrentUser();
+  const userId = userData?.user?.id;
+  
+  // Estado para expansión del sidebar
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleToggleTheme = async () => {
     const userId = userData?.user?.id;
@@ -22,16 +34,70 @@ export function RightSidebar() {
     await toggleTheme(userId, preferencesId);
   };
 
+  // Fetch unread count
+  const fetchUnreadCount = async () => {
+    if (!userId) return;
+    
+    try {
+      const count = await getUnreadCount(userId);
+      setUnreadCount(count);
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (!userId) return;
+
+    fetchUnreadCount();
+
+    const unsubscribe = subscribeUserNotifications(userId, () => {
+      fetchUnreadCount();
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [userId]);
+
+  const handleMouseEnter = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setIsExpanded(true);
+  };
+
+  const handleMouseLeave = () => {
+    closeTimeoutRef.current = setTimeout(() => {
+      setIsExpanded(false);
+    }, 100);
+  };
+
   return (
     <div className="flex flex-row h-screen">
-      {/* SIDEBAR DERECHO - Dimensiones idénticas al izquierdo */}
+      {/* SIDEBAR DERECHO EXPANDIBLE - Estilo Firebase */}
       <div 
-        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-l border-[var(--main-sidebar-border)] transition-all duration-150 overflow-hidden relative h-screen"
+        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-l border-[var(--main-sidebar-border)] transition-all duration-200 ease-in-out relative h-screen flex flex-row"
         style={{
-          width: '50px', // Ancho fijo igual al sidebar izquierdo colapsado
+          width: isExpanded ? '400px' : '50px',
           zIndex: 10
         }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
+        {/* PANEL DE NOTIFICACIONES - Aparece a la izquierda cuando está expandido */}
+        {isExpanded && userId && (
+          <div className="w-[350px] border-r border-[var(--main-sidebar-border)] h-screen overflow-hidden">
+            <NotificationDropdown
+              userId={userId}
+              onRefresh={fetchUnreadCount}
+              onClose={() => setIsExpanded(false)}
+            />
+          </div>
+        )}
+
+        {/* COLUMNA DE BOTONES - Siempre visible, 50px */}
         <aside className="grid h-screen grid-rows-[1fr_auto] w-[50px]">
           {/* SECCIÓN SUPERIOR: Botones principales */}
           <div className="px-0 overflow-y-auto">
@@ -45,10 +111,28 @@ export function RightSidebar() {
               {/* Espacio después del avatar - igual al logo */}
               <div className="h-3"></div>
 
-              {/* Notificaciones - altura h-10 como los botones del sidebar izquierdo */}
-              <div className="h-10 w-8 flex items-center justify-center">
-                <NotificationBellHeader />
-              </div>
+              {/* Botón de Notificaciones - altura h-10 */}
+              <button
+                className={cn(
+                  "relative h-10 w-8 rounded-md flex items-center justify-center transition-colors",
+                  "hover:bg-[var(--main-sidebar-button-hover-bg)]",
+                  "text-[var(--main-sidebar-fg)] hover:text-white"
+                )}
+                title="Notificaciones"
+                data-testid="button-notifications"
+              >
+                <div className="h-8 w-8 flex items-center justify-center">
+                  <Bell className="h-[18px] w-[18px]" />
+                  {unreadCount > 0 && (
+                    <Badge
+                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-[10px] flex items-center justify-center bg-accent text-accent-foreground border-0"
+                      data-testid="badge-unread-count"
+                    >
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </Badge>
+                  )}
+                </div>
+              </button>
 
               {/* Divisor visual - igual al sidebar izquierdo */}
               <div className="my-3 h-[12px] flex items-center justify-center w-full">
