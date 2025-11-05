@@ -87,7 +87,7 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
         return res.status(404).json({ error: "User profile not found" });
       }
 
-      const { order_id, course_slug, amount, currency, payer_name, payer_note } = req.body;
+      const { order_id, course_slug, amount, currency, payer_name, payer_note, discount_percent, discount_amount } = req.body;
 
       // Validate required fields
       if (!order_id || !course_slug || !amount || !currency) {
@@ -123,6 +123,8 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
           currency,
           payer_name: payer_name || null,
           payer_note: payer_note || null,
+          discount_percent: discount_percent ? String(discount_percent) : "5.0",
+          discount_amount: discount_amount ? String(discount_amount) : "0",
           status: 'pending',
         })
         .select()
