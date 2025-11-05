@@ -39,6 +39,10 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
   const [vimeoPlayer, setVimeoPlayer] = useState<Player | null>(null);
   const [targetSeekTime, setTargetSeekTime] = useState<number | undefined>(initialSeekTime);
   
+  // Track if video is currently playing to prevent auto-rewind
+  const isPlayingRef = useRef(false);
+  const currentLessonIdRef = useRef<string | null>(null);
+  
   // SINGLE SOURCE OF TRUTH: coursePlayerStore.currentLessonId has priority
   const activeLessonId = storeLessonId || sidebarLessonId || null;
   
@@ -178,12 +182,13 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
       }
       
       return response.json();
+    },
+    onSuccess: () => {
+      // Set flag that video is playing to prevent rewind
+      isPlayingRef.current = true;
+      // Still invalidate to keep cache fresh for lesson switching
+      queryClient.invalidateQueries({ queryKey: ['/api/courses', courseId, 'progress'] });
     }
-    // ❌ NO invalidar queries aquí - causa que el video retroceda
-    // El auto-save solo guarda en DB, no necesita re-fetch
-    // onSuccess: () => {
-    //   queryClient.invalidateQueries({ queryKey: ['/api/courses', courseId, 'progress'] });
-    // }
   });
 
   // Throttle progress saves to avoid too many requests
@@ -422,8 +427,19 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
   // Obtener progreso de la lección actual
   const currentProgress = activeLessonId ? progressMap.get(activeLessonId) : null;
   
+  // Detectar cambio de lección y resetear flag de reproducción
+  useEffect(() => {
+    if (activeLessonId !== currentLessonIdRef.current) {
+      currentLessonIdRef.current = activeLessonId;
+      isPlayingRef.current = false; // Reset flag on lesson change
+    }
+  }, [activeLessonId]);
+  
   // Determinar la posición inicial: si hay targetSeekTime (desde marcador), usar esa, si no, usar el progreso guardado
-  const initialPosition = targetSeekTime !== undefined ? targetSeekTime : (currentProgress?.last_position_sec || 0);
+  // IMPORTANTE: Si el video ya está reproduciéndose, NO actualizar initialPosition para evitar rewind
+  const initialPosition = targetSeekTime !== undefined 
+    ? targetSeekTime 
+    : (isPlayingRef.current ? 0 : (currentProgress?.last_position_sec || 0));
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
