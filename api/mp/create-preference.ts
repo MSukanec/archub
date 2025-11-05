@@ -246,12 +246,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       back_urls: {
         success: `${returnBase}/api/mp/success-handler?course_slug=${course.slug}`,
         failure: `${returnBase}/learning/courses/${course.slug}?payment=failed`,
-        pending: `${returnBase}/learning/courses/${course.slug}?payment=pending`,
+        pending: `${returnBase}/api/mp/success-handler?course_slug=${course.slug}&status=pending`,
       },
       auto_return: "approved",
-      binary_mode: true,
+      binary_mode: false,
+      payment_methods: {
+        excluded_payment_types: [],
+        installments: 1,
+        default_installments: 1,
+      },
+      additional_info: JSON.stringify(customData),
       metadata: customData,
       statement_descriptor: "ARCHUB",
+      purpose: "onboarding_credits",
     };
 
     console.log("[MP create-preference] Creando preferencia para:", { 
@@ -260,8 +267,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       unit_price, 
       currency,
       hasCoupon: !!couponData,
-      couponCode: couponData ? code.trim() : null
+      couponCode: couponData ? code.trim() : null,
+      email,
+      binary_mode: prefBody.binary_mode,
+      purpose: prefBody.purpose
     });
+
+    console.log("[MP create-preference] Preferencia completa:", JSON.stringify(prefBody, null, 2));
 
     const r = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",
@@ -281,14 +293,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (!r.ok || !pref?.init_point) {
-      console.error("[MP create-preference] Error de Mercado Pago:", pref);
+      console.error("[MP create-preference] Error de Mercado Pago:", {
+        status: r.status,
+        statusText: r.statusText,
+        response: pref
+      });
       return res
         .setHeader("Access-Control-Allow-Origin", "*")
         .status(r.status)
         .json({ ok: false, error: "Error al crear preferencia en Mercado Pago", body: pref });
     }
 
-    console.log("[MP create-preference] ✅ Preferencia creada:", pref.id);
+    console.log("[MP create-preference] ✅ Preferencia creada:", {
+      id: pref.id,
+      init_point: pref.init_point,
+      sandbox_init_point: pref.sandbox_init_point
+    });
 
     return res
       .setHeader("Access-Control-Allow-Origin", "*")
