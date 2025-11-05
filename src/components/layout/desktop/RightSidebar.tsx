@@ -75,36 +75,27 @@ export function RightSidebar() {
   };
 
   return (
-    <div className="relative h-screen" style={{ width: '50px' }}>
-      {/* PANEL DE NOTIFICACIONES - Aparece detrás, hacia la izquierda */}
+    <div 
+      className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-l border-[var(--main-sidebar-border)] transition-all duration-200 ease-in-out h-screen flex flex-row justify-end"
+      style={{
+        width: isExpanded ? '400px' : '50px'
+      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* PANEL DE NOTIFICACIONES - Aparece cuando está expandido */}
       {isExpanded && userId && (
-        <div 
-          className="absolute top-0 right-0 h-screen bg-[var(--main-sidebar-bg)] border-l border-[var(--main-sidebar-border)] overflow-hidden"
-          style={{
-            width: '400px',
-            zIndex: 9
-          }}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          <div className="w-[350px] h-screen">
-            <NotificationDropdown
-              userId={userId}
-              onRefresh={fetchUnreadCount}
-              onClose={() => setIsExpanded(false)}
-            />
-          </div>
+        <div className="w-[350px] border-r border-[var(--main-sidebar-border)] h-screen overflow-hidden">
+          <NotificationDropdown
+            userId={userId}
+            onRefresh={fetchUnreadCount}
+            onClose={() => setIsExpanded(false)}
+          />
         </div>
       )}
 
-      {/* SIDEBAR DERECHO - FIJO, nunca se mueve */}
-      <div 
-        className="absolute top-0 right-0 bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-l border-[var(--main-sidebar-border)] h-screen"
-        style={{
-          width: '50px',
-          zIndex: 10
-        }}
-      >
+      {/* COLUMNA DE BOTONES - Siempre visible, 50px, pegada a la derecha */}
+      <div className="w-[50px] h-screen flex-shrink-0">
         <aside className="grid h-screen grid-rows-[1fr_auto] w-[50px]">
           {/* SECCIÓN SUPERIOR: Botones principales */}
           <div className="px-0 overflow-y-auto">
