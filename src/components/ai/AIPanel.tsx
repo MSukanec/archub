@@ -302,8 +302,9 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
       )}
 
       {/* INPUT - Siempre al fondo */}
-      <div className="p-4 pb-3 border-t border-[var(--main-sidebar-fg)]/20">
-        <div className="relative flex items-end gap-2 rounded-lg bg-[var(--main-sidebar-button-hover-bg)] px-3 py-2">
+      <Separator className="bg-[var(--main-sidebar-fg)] opacity-20" />
+      <div className="p-4 pb-3">
+        <div className="relative flex items-center gap-2 rounded-lg bg-[var(--main-sidebar-button-hover-bg)] px-3 py-1.5">
           <textarea
             ref={textareaRef}
             value={inputValue}
@@ -320,7 +321,8 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
               "max-h-[120px] overflow-y-auto"
             )}
             style={{
-              minHeight: '20px',
+              minHeight: '24px',
+              height: '24px',
               scrollbarWidth: 'thin'
             }}
             data-testid="input-ai-message"
