@@ -234,17 +234,17 @@ export default function AdminCommunityDashboard() {
                   const isActive = diffMs <= 90000
 
                   return (
-                    <div key={activity.user_id} className="flex items-center justify-between p-2 rounded-lg border hover:bg-muted/30 transition-colors">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate text-sm">{activity.users?.full_name}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {isActive ? (
-                            <span className="text-[hsl(var(--accent))]">● Activo ahora</span>
-                          ) : (
-                            `Última conexión: ${format(new Date(activity.last_seen_at), "d 'de' MMM, HH:mm", { locale: es })}`
-                          )}
-                        </p>
-                      </div>
+                    <div key={activity.user_id} className="flex items-center justify-between gap-3 p-2 rounded-lg border hover:bg-muted/30 transition-colors">
+                      <p className="font-medium truncate text-sm flex-1 min-w-0">{activity.users?.full_name}</p>
+                      {isActive ? (
+                        <Badge className="bg-accent text-accent-foreground flex-shrink-0">
+                          Activo
+                        </Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground flex-shrink-0 whitespace-nowrap">
+                          {format(new Date(activity.last_seen_at), "d 'de' MMM, HH:mm", { locale: es })}
+                        </span>
+                      )}
                     </div>
                   )
                 })}
