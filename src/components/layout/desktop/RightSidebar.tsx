@@ -36,6 +36,7 @@ export function RightSidebar() {
           left: auto !important;
           margin-right: 8px !important;
           margin-left: 0 !important;
+          z-index: 9999 !important;
         }
         
         /* Alinear con la parte superior del botón */
