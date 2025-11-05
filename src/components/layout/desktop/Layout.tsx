@@ -239,21 +239,21 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                   </div>
                 )}
               </main>
-            </div>
-            </div>
-
-            {/* Course Sidebar - Right side, only visible when activated */}
-            {isCourseSidebarVisible && !isMobile && (
-              <div className="flex-shrink-0 pr-3 pb-3">
-                <div className="h-full rounded-2xl overflow-hidden">
-                  <CourseSidebar
-                    modules={modules}
-                    lessons={lessons}
-                    currentLessonId={currentLessonId}
-                  />
-                </div>
               </div>
-            )}
+
+              {/* Course Sidebar - Right side, only visible when activated */}
+              {isCourseSidebarVisible && !isMobile && (
+                <div className="flex-shrink-0 pr-3 pb-3">
+                  <div className="h-full rounded-2xl overflow-hidden">
+                    <CourseSidebar
+                      modules={modules}
+                      lessons={lessons}
+                      currentLessonId={currentLessonId}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Floating AI Chat - Solo en Desktop y rutas de trabajo */}
