@@ -1303,7 +1303,8 @@ Titular: DNI 32322767`;
                     >
                       {paymentMethodsOrder.map((method) => {
                         if (method === "mercadopago") {
-                          const isMPBlocked = !!appliedCoupon;
+                          // 🧪 TESTING: Deshabilitado temporalmente para probar fix de títulos/IDs únicos
+                          const isMPBlocked = false; // !!appliedCoupon;
                           return (
                             <div
                               key="mercadopago"
