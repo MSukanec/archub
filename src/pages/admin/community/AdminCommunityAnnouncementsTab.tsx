@@ -1,7 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { Edit, Trash2, Bell, AlertTriangle, Info, CheckCircle, XCircle } from 'lucide-react'
@@ -105,7 +104,7 @@ const AdminCommunityAnnouncementsTab = () => {
     }
   };
 
-  const getTypeVariant = (type: string): "default" | "secondary" | "destructive" | "outline" => {
+  const getTypeBadgeVariant = (type: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (type) {
       case 'info':
         return 'default';
@@ -137,58 +136,64 @@ const AdminCommunityAnnouncementsTab = () => {
 
   const columns = [
     {
-      header: 'Título',
-      accessorKey: 'title',
-      cell: ({ row }: any) => (
+      key: 'title',
+      label: 'Título',
+      width: '25%',
+      render: (announcement: AnnouncementWithCreator) => (
         <div className="flex flex-col gap-1">
-          <span className="font-medium text-sm">{row.original.title}</span>
-          <span className="text-xs text-muted-foreground line-clamp-2">{row.original.message}</span>
+          <span className="font-medium text-sm">{announcement.title}</span>
+          <span className="text-xs text-muted-foreground line-clamp-2">{announcement.message}</span>
         </div>
       )
     },
     {
-      header: 'Tipo',
-      accessorKey: 'type',
-      cell: ({ row }: any) => (
-        <Badge variant={getTypeVariant(row.original.type)} className="gap-1.5">
-          {getTypeIcon(row.original.type)}
-          {row.original.type}
+      key: 'type',
+      label: 'Tipo',
+      width: '12%',
+      render: (announcement: AnnouncementWithCreator) => (
+        <Badge variant={getTypeBadgeVariant(announcement.type)} className="gap-1.5">
+          {getTypeIcon(announcement.type)}
+          {announcement.type}
         </Badge>
       )
     },
     {
-      header: 'Audiencia',
-      accessorKey: 'audience',
-      cell: ({ row }: any) => (
+      key: 'audience',
+      label: 'Audiencia',
+      width: '10%',
+      render: (announcement: AnnouncementWithCreator) => (
         <Badge variant="outline">
-          {getAudienceLabel(row.original.audience)}
+          {getAudienceLabel(announcement.audience)}
         </Badge>
       )
     },
     {
-      header: 'Estado',
-      accessorKey: 'is_active',
-      cell: ({ row }: any) => (
-        <Badge variant={row.original.is_active ? 'secondary' : 'outline'}>
-          {row.original.is_active ? 'Activo' : 'Inactivo'}
+      key: 'is_active',
+      label: 'Estado',
+      width: '10%',
+      render: (announcement: AnnouncementWithCreator) => (
+        <Badge variant={announcement.is_active ? 'secondary' : 'outline'}>
+          {announcement.is_active ? 'Activo' : 'Inactivo'}
         </Badge>
       )
     },
     {
-      header: 'Fechas',
-      accessorKey: 'starts_at',
-      cell: ({ row }: any) => (
+      key: 'dates',
+      label: 'Fechas',
+      width: '15%',
+      render: (announcement: AnnouncementWithCreator) => (
         <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
-          <span>Inicio: {row.original.starts_at ? formatDateCompact(row.original.starts_at) : '-'}</span>
-          <span>Fin: {row.original.ends_at ? formatDateCompact(row.original.ends_at) : 'Sin límite'}</span>
+          <span>Inicio: {announcement.starts_at ? formatDateCompact(announcement.starts_at) : '-'}</span>
+          <span>Fin: {announcement.ends_at ? formatDateCompact(announcement.ends_at) : 'Sin límite'}</span>
         </div>
       )
     },
     {
-      header: 'Creador',
-      accessorKey: 'creator',
-      cell: ({ row }: any) => {
-        const creator = row.original.creator;
+      key: 'creator',
+      label: 'Creador',
+      width: '18%',
+      render: (announcement: AnnouncementWithCreator) => {
+        const creator = announcement.creator;
         return creator ? (
           <div className="flex flex-col gap-0.5">
             <span className="text-sm font-medium">{creator.full_name || 'Sin nombre'}</span>
@@ -198,48 +203,35 @@ const AdminCommunityAnnouncementsTab = () => {
           <span className="text-xs text-muted-foreground">Desconocido</span>
         );
       }
-    },
-    {
-      header: 'Acciones',
-      id: 'actions',
-      cell: ({ row }: any) => (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEdit(row.original)}
-            data-testid={`button-edit-announcement-${row.original.id}`}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(row.original)}
-            data-testid={`button-delete-announcement-${row.original.id}`}
-          >
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
-        </div>
-      )
     }
   ];
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Cargando anuncios...</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-4" data-testid="admin-announcements-tab">
+    <div className="space-y-6">
       <Table
         data={announcements}
         columns={columns}
-        searchPlaceholder="Buscar anuncios..."
-        emptyMessage="No hay anuncios globales configurados."
+        isLoading={isLoading}
+        rowActions={(announcement: AnnouncementWithCreator) => [
+          {
+            icon: Edit,
+            label: 'Editar',
+            onClick: () => handleEdit(announcement)
+          },
+          {
+            icon: Trash2,
+            label: 'Eliminar',
+            onClick: () => handleDelete(announcement),
+            variant: 'destructive' as const
+          }
+        ]}
+        emptyState={
+          <div className="text-center py-8 text-muted-foreground">
+            <Bell className="h-12 w-12 mx-auto mb-4 opacity-20" />
+            <p className="text-sm">No se encontraron anuncios</p>
+            <p className="text-xs">No hay anuncios globales creados.</p>
+          </div>
+        }
       />
     </div>
   );
