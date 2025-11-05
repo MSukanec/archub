@@ -1287,7 +1287,7 @@ Titular: DNI 32322767`;
                               className={cn(
                                 "relative rounded-lg border-2 overflow-hidden transition-all",
                                 isMPBlocked 
-                                  ? "cursor-not-allowed border-amber-500/30" 
+                                  ? "cursor-not-allowed border-border/50" 
                                   : cn(
                                       "cursor-pointer hover:border-accent/50",
                                       selectedMethod === "mercadopago"
@@ -1301,7 +1301,7 @@ Titular: DNI 32322767`;
                               {/* Contenido original con blur cuando está bloqueado */}
                               <div className={cn(
                                 "flex items-start space-x-4 p-4 transition-all",
-                                isMPBlocked && "blur-sm pointer-events-none"
+                                isMPBlocked && "blur-[3px] pointer-events-none select-none"
                               )}>
                                 <RadioGroupItem 
                                   value="mercadopago" 
@@ -1333,28 +1333,25 @@ Titular: DNI 32322767`;
                                 </div>
                               </div>
 
-                              {/* Overlay de bloqueo - SIN blur para que se lea perfecto */}
+                              {/* Badge sutil centrado */}
                               {isMPBlocked && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
-                                  <div className="max-w-md mx-4 p-4 bg-amber-500/95 dark:bg-amber-600/95 border-2 border-amber-600 dark:border-amber-500 rounded-lg shadow-lg">
-                                    <p className="text-base text-white font-semibold mb-2 flex items-center gap-2">
-                                      <span className="text-xl">⚠️</span>
+                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background/40 backdrop-blur-[1px] pointer-events-none">
+                                  <div className="px-4 py-2 bg-muted/90 dark:bg-muted/95 border border-border/80 rounded-full shadow-sm backdrop-blur-sm">
+                                    <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                      <span className="text-base">⚠️</span>
                                       No disponible con cupones
                                     </p>
-                                    <p className="text-sm text-white/90 mb-3">
-                                      Usá <span className="font-bold">Transferencia Bancaria</span> o <span className="font-bold">PayPal</span> para pagar con descuento.
-                                    </p>
-                                    <a 
-                                      href="https://wa.me/5491132273000" 
-                                      target="_blank" 
-                                      rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-2 text-sm text-white hover:text-white/80 font-medium underline"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      <MessageCircle className="h-4 w-4" />
-                                      Contactanos por WhatsApp
-                                    </a>
                                   </div>
+                                  <a 
+                                    href="https://wa.me/5491132273000" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="pointer-events-auto inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-accent transition-colors underline decoration-dotted"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <MessageCircle className="h-3.5 w-3.5" />
+                                    Dudas? WhatsApp
+                                  </a>
                                 </div>
                               )}
                             </div>
