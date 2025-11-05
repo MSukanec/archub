@@ -26,7 +26,8 @@ import { OrganizationSelectorButton } from "./OrganizationSelectorButton";
 import { useProjectAccentColor } from "@/hooks/use-project-accent-color";
 import { FloatingAIChat } from "@/components/ui-custom/layout/FloatingAIChat";
 import { FloatingCourseLessons } from "@/components/ui-custom/layout/FloatingCourseLessons";
-import { GlobalAnnouncement, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, AnnouncementProvider } from "@/components/ui-custom/layout/GlobalAnnouncement";
+// TEMPORALMENTE DESHABILITADO - GlobalAnnouncement no se usa por ahora
+// import { GlobalAnnouncement, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, AnnouncementProvider } from "@/components/ui-custom/layout/GlobalAnnouncement";
 import { useLocation } from "wouter";
 
 interface Tab {
@@ -150,23 +151,22 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   }
 
   return (
-    <AnnouncementProvider>
-      <LayoutContent 
-        children={children}
-        wide={wide}
-        headerProps={headerProps}
-        isMobile={isMobile}
-        isDark={isDark}
-        showActionBar={showActionBar}
-        isDocked={isDocked}
-        isCourseSidebarVisible={isCourseSidebarVisible}
-        modules={modules}
-        lessons={lessons}
-        currentLessonId={currentLessonId}
-        selectorComponent={selectorComponent}
-        shouldShowAIChat={shouldShowAIChat}
-      />
-    </AnnouncementProvider>
+    // TEMPORALMENTE DESHABILITADO - AnnouncementProvider wrapper
+    <LayoutContent 
+      children={children}
+      wide={wide}
+      headerProps={headerProps}
+      isMobile={isMobile}
+      isDark={isDark}
+      showActionBar={showActionBar}
+      isDocked={isDocked}
+      isCourseSidebarVisible={isCourseSidebarVisible}
+      modules={modules}
+      lessons={lessons}
+      currentLessonId={currentLessonId}
+      selectorComponent={selectorComponent}
+      shouldShowAIChat={shouldShowAIChat}
+    />
   );
 }
 
@@ -186,19 +186,21 @@ function LayoutContent({
   selectorComponent,
   shouldShowAIChat
 }: any) {
-  const { hasActiveAnnouncement } = useAnnouncementBanner();
+  // TEMPORALMENTE DESHABILITADO - GlobalAnnouncement
+  // const { hasActiveAnnouncement } = useAnnouncementBanner();
 
   return (
     <>
-      {/* Global Announcements Banner - Fixed position */}
-      <GlobalAnnouncement />
+      {/* TEMPORALMENTE DESHABILITADO - Global Announcements Banner */}
+      {/* <GlobalAnnouncement /> */}
       
       <div 
         className="h-screen flex flex-col overflow-hidden"
-        style={{
-          paddingTop: hasActiveAnnouncement ? `${ANNOUNCEMENT_HEIGHT}px` : '0',
-          transition: 'padding-top 0.2s ease-out'
-        }}
+        // TEMPORALMENTE DESHABILITADO - Padding dinámico del announcement
+        // style={{
+        //   paddingTop: hasActiveAnnouncement ? `${ANNOUNCEMENT_HEIGHT}px` : '0',
+        //   transition: 'padding-top 0.2s ease-out'
+        // }}
       >
         <div
           className="flex-1 flex flex-col min-h-0"
