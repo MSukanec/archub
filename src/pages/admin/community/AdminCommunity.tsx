@@ -8,6 +8,7 @@ import AdminCommunityUsers from './AdminCommunityUsers';
 import AdminCommunityAnnouncementsTab from './AdminCommunityAnnouncementsTab';
 import AdminCommunityNotifications from './AdminCommunityNotifications';
 import AdminCommunityChangelog from './AdminCommunityChangelog';
+import AdminCommunitySupportTab from './AdminCommunitySupportTab';
 
 const AdminCommunity = () => {
   const [activeTab, setActiveTab] = useState('resumen');
@@ -19,7 +20,8 @@ const AdminCommunity = () => {
     { id: 'usuarios', label: 'Usuarios', isActive: activeTab === 'usuarios' },
     { id: 'anuncios', label: 'Anuncios', isActive: activeTab === 'anuncios' },
     { id: 'notificaciones', label: 'Notificaciones', isActive: activeTab === 'notificaciones' },
-    { id: 'cambios', label: 'Cambios', isActive: activeTab === 'cambios' }
+    { id: 'cambios', label: 'Cambios', isActive: activeTab === 'cambios' },
+    { id: 'soporte', label: 'Soporte', isActive: activeTab === 'soporte' }
   ];
 
   const getActionButton = () => {
@@ -83,6 +85,8 @@ const AdminCommunity = () => {
         return <AdminCommunityNotifications />;
       case 'cambios':
         return <AdminCommunityChangelog />;
+      case 'soporte':
+        return <AdminCommunitySupportTab />;
       default:
         return <AdminCommunityDashboard />;
     }
