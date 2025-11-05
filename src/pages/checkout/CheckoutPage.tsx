@@ -118,6 +118,13 @@ export default function CheckoutPage() {
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
 
+  // Auto-select bank transfer when coupon is applied and MP is selected/blocked
+  useEffect(() => {
+    if (appliedCoupon && selectedMethod === "mercadopago") {
+      setSelectedMethod("transfer");
+    }
+  }, [appliedCoupon, selectedMethod]);
+
   // User data and countries
   const { data: userData } = useCurrentUser();
   const { data: countries = [] } = useCountries();
@@ -1333,25 +1340,25 @@ Titular: DNI 32322767`;
                                 </div>
                               </div>
 
-                              {/* Badge sutil centrado */}
+                              {/* Badge tipo popover centrado */}
                               {isMPBlocked && (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background/40 backdrop-blur-[1px] pointer-events-none">
-                                  <div className="px-4 py-2 bg-muted/90 dark:bg-muted/95 border border-border/80 rounded-full shadow-sm backdrop-blur-sm">
-                                    <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                <div className="absolute inset-0 flex items-center justify-center bg-background/40 backdrop-blur-[1px]">
+                                  <div className="px-4 py-3 bg-card border border-border shadow-md rounded-lg max-w-[280px]">
+                                    <p className="text-sm font-medium text-foreground flex items-center gap-2 mb-2">
                                       <span className="text-base">⚠️</span>
                                       No disponible con cupones
                                     </p>
+                                    <a 
+                                      href="https://wa.me/5491132273000" 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="pointer-events-auto inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-accent transition-colors"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <MessageCircle className="h-3.5 w-3.5" />
+                                      Dudas? WhatsApp
+                                    </a>
                                   </div>
-                                  <a 
-                                    href="https://wa.me/5491132273000" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="pointer-events-auto inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-accent transition-colors underline decoration-dotted"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <MessageCircle className="h-3.5 w-3.5" />
-                                    Dudas? WhatsApp
-                                  </a>
                                 </div>
                               )}
                             </div>

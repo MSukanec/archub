@@ -1,0 +1,139 @@
+🧾 **Objetivo general**
+Necesito que modifiques mi sistema de checkout en Archub para agregar una nueva opción de pago: **Transferencia bancaria con descuento automático**.
+
+Ya tengo funcionando:
+- Mercado Pago (para Argentina)
+- PayPal (para exterior)
+Ambos funcionan bien.
+
+El nuevo método de **transferencia bancaria** debe:
+1. Aplicar automáticamente un **5% de descuento** sobre el total (por evitar comisiones).
+2. Ser combinable con otros descuentos existentes (por ejemplo, descuento de estudiante o cupón promocional).
+3. Mostrarlo de forma clara en el frontend, en el resumen de pago y en la UI de selección de método.
+4. Generar un registro en la base de datos (`payments`) con `payment_method = 'transferencia'` y `status = 'pending_transfer'`.
+5. Mostrar un alias o CBU donde el usuario debe transferir y un texto tipo “Tu inscripción quedará activa cuando recibamos tu comprobante”.
+
+---
+
+🧱 **1. Lógica de descuentos combinables**
+
+Estructura base de cálculo (usa tu misma lógica de precios):
+
+```ts
+precio_final = precio_base
+  * (1 - student_discount)
+  * (1 - coupon_discount)
+  * (1 - bank_transfer_discount)
+```
+
+El `bank_transfer_discount` debe aplicarse **solo** si el método de pago elegido es “Transferencia bancaria”.
+
+Valor por defecto:  
+```js
+const bank_transfer_discount = 0.05; // 5%
+```
+
+---
+
+🎨 **2. Cambios en el frontend (componente de checkout)**
+
+Agregar un nuevo botón o card en la selección de métodos de pago:
+
+```
+Método de pago:
+[•] Tarjeta / Mercado Pago
+[•] PayPal (USD)
+[•] Transferencia bancaria 💸 -5% adicional
+```
+
+Cuando el usuario elige “Transferencia bancaria”:
+- Se recalcula el total aplicando el descuento del 5%.
+- Se actualiza el resumen del lado derecho mostrando:
+
+```
+Subtotal:                 $100.000
+Descuento estudiante:     -$10.000
+Descuento transferencia:  -$4.500
+TOTAL A PAGAR:            $85.500
+```
+
+- Y aparece un bloque de confirmación con la info de transferencia:
+
+```
+Alias: ARCHUB.PAGOS
+CBU: 0000003100088888888888
+Banco: Santander Río
+Titular: ARCHUB SRL
+
+📄 Tu inscripción quedará activa cuando confirmemos el pago.
+Por favor, enviá el comprobante a cursos@archub.com o súbilo desde tu perfil.
+```
+
+(Usá datos ficticios, los reemplazo luego.)
+
+---
+
+🧮 **3. Actualización de la base de datos (Supabase)**
+
+Agregar campos si aún no existen en la tabla `payments`:
+
+```sql
+ALTER TABLE payments
+ADD COLUMN IF NOT EXISTS payment_method text CHECK (payment_method IN ('mercadopago', 'paypal', 'transferencia')),
+ADD COLUMN IF NOT EXISTS discount_transfer numeric DEFAULT 0.05;
+```
+
+Cuando se genera el pago con transferencia:
+- Insertar fila en `payments` con:
+  ```js
+  {
+    user_id,
+    course_id,
+    payment_method: 'transferencia',
+    amount: precio_final,
+    discount_transfer: 0.05,
+    status: 'pending_transfer'
+  }
+  ```
+
+---
+
+🪄 **4. Lógica de confirmación**
+
+Después de confirmar el pago, el usuario debe ver una pantalla de éxito tipo:
+
+```
+✅ Pago por transferencia iniciado
+Te enviamos los datos para realizar la transferencia.
+Tu curso se activará automáticamente una vez validado el pago.
+```
+
+El backend no procesa nada con Mercado Pago ni PayPal en este caso, solo guarda el registro y muestra las instrucciones.
+
+---
+
+🎯 **5. Bonus (opcional)**
+Si el usuario tiene tanto descuento de estudiante como de transferencia, deben **sumarse de forma multiplicativa**, no acumulativa.
+
+Ejemplo:
+Curso $100.000  
+Estudiante 10 % → $90.000  
+Transferencia 5 % → $85.500
+
+---
+
+🔒 **6. Seguridad**
+El backend debe validar que solo usuarios autenticados puedan generar pagos por transferencia.
+El estado `pending_transfer` podrá actualizarse manualmente desde el panel administrativo cuando se confirme el pago.
+
+---
+
+✅ **Resumen final**
+- Agregar botón “Transferencia bancaria” al checkout.
+- Aplicar descuento automático del 5%.
+- Mostrarlo en resumen de totales.
+- Insertar registro `payments` con `payment_method='transferencia'` y `status='pending_transfer'`.
+- Mostrar datos bancarios e instrucciones.
+- Mantener PayPal y Mercado Pago sin cambios.
+
+Usá el mismo estilo visual que el resto del checkout (botones compactos, modo dark, etc.) y asegurate de que todo funcione correctamente también en mobile.
