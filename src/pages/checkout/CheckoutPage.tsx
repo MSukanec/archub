@@ -1105,16 +1105,8 @@ Titular: DNI 32322767`;
   }, [countries, country]);
 
   const paymentMethodsOrder = useMemo(() => {
-    const methods = orderedMethods(selectedCountryData?.alpha_3);
-    
-    // WORKAROUND: Ocultar Mercado Pago cuando hay cupón aplicado
-    // MP está rechazando pagos con cupones (investigación en curso)
-    if (appliedCoupon) {
-      return methods.filter(m => m !== "mercadopago");
-    }
-    
-    return methods;
-  }, [selectedCountryData, appliedCoupon]);
+    return orderedMethods(selectedCountryData?.alpha_3);
+  }, [selectedCountryData]);
 
   // Texto del botón según método seleccionado
   const buttonText = getPaymentButtonText(selectedMethod);
@@ -1267,16 +1259,6 @@ Titular: DNI 32322767`;
                       <CreditCard className="h-5 w-5 text-accent" />
                       <h2 className="text-lg font-semibold">Métodos de pago</h2>
                     </div>
-                    
-                    {/* Mensaje informativo cuando hay cupón aplicado */}
-                    {appliedCoupon && (
-                      <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                        <p className="text-sm text-blue-900 dark:text-blue-100">
-                          <strong>ℹ️ Con cupón aplicado:</strong> Por el momento, los pagos con descuento están disponibles únicamente vía PayPal. Estamos trabajando para habilitar Mercado Pago próximamente.
-                        </p>
-                      </div>
-                    )}
-                    
                     <RadioGroup
                       value={selectedMethod || ""}
                       onValueChange={(value) => setSelectedMethod(value as PaymentMethod)}
