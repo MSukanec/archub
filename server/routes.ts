@@ -13,6 +13,7 @@ import { registerPaymentRoutes } from './routes/payments';
 import { registerBankTransferRoutes } from './routes/bank-transfer';
 import { registerContactRoutes } from './routes/contacts';
 import { registerAIRoutes } from './routes/ai';
+import { registerSupportRoutes } from './routes/support';
 import { registerPersonnelRoutes } from './routes/personnel';
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -51,6 +52,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register AI routes (home greeting, suggestions)
   registerAIRoutes(app, deps);
+
+  // Register support routes (support messages)
+  registerSupportRoutes(app, deps);
 
   // ============================================
   // Mercado Pago Integration Routes (Proxies)
