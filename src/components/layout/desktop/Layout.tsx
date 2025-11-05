@@ -240,6 +240,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                 )}
               </main>
             </div>
+            </div>
 
             {/* Course Sidebar - Right side, only visible when activated */}
             {isCourseSidebarVisible && !isMobile && (
