@@ -24,6 +24,7 @@ import { ProjectSelectorButton } from "./ProjectSelectorButton";
 import { OrganizationSelectorButton } from "./OrganizationSelectorButton";
 import { useProjectAccentColor } from "@/hooks/use-project-accent-color";
 import { FloatingAIChat } from "@/components/ui-custom/layout/FloatingAIChat";
+import { FloatingCourseLessons } from "@/components/ui-custom/layout/FloatingCourseLessons";
 import { GlobalAnnouncement } from "@/components/ui-custom/layout/GlobalAnnouncement";
 import { useLocation } from "wouter";
 
@@ -263,6 +264,16 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
       {/* Mobile Action Bar - Only visible on mobile when enabled */}
       {isMobile && <ActionBarMobile />}
+      
+      {/* Floating Course Lessons - Solo en Mobile cuando hay curso activo */}
+      {isMobile && isCourseSidebarVisible && modules.length > 0 && (
+        <FloatingCourseLessons 
+          modules={modules}
+          lessons={lessons}
+          currentLessonId={currentLessonId}
+          courseId={modules[0]?.course_id}
+        />
+      )}
     </div>
     </div>
   );
