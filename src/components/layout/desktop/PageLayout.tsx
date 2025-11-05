@@ -616,7 +616,7 @@ export function PageLayout({
         </div>
 
         {/* Page Content */}
-        <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} ${wide ? "px-24" : "px-20"} pt-6 pb-6 min-h-0 max-w-full overflow-x-hidden`}>
+        <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} ${wide ? "px-24" : "px-20"} pt-6 pb-6 min-h-0 overflow-x-hidden`}>
           {children}
         </div>
       </div>
