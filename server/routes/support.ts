@@ -1,8 +1,6 @@
 import type { Express } from "express";
 import type { RouteDeps } from "./_base";
-import { db } from "../db";
-import { support_messages, insertSupportMessageSchema } from "../../shared/schema";
-import { eq, desc } from "drizzle-orm";
+import { insertSupportMessageSchema } from "../../shared/schema";
 
 export function registerSupportRoutes(app: Express, deps: RouteDeps) {
   const { createAuthenticatedClient, extractToken } = deps;
@@ -37,14 +35,19 @@ export function registerSupportRoutes(app: Express, deps: RouteDeps) {
 
       const userId = dbUser.id;
 
-      // Obtener mensajes de soporte del usuario
-      const messages = await db
-        .select()
-        .from(support_messages)
-        .where(eq(support_messages.user_id, userId))
-        .orderBy(desc(support_messages.created_at));
+      // Obtener mensajes de soporte del usuario usando Supabase (respeta RLS)
+      const { data: messages, error: messagesError } = await authenticatedSupabase
+        .from('support_messages')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
 
-      return res.status(200).json({ messages });
+      if (messagesError) {
+        console.error('Supabase error fetching messages:', messagesError);
+        return res.status(500).json({ error: "Error fetching messages from database" });
+      }
+
+      return res.status(200).json({ messages: messages || [] });
 
     } catch (err: any) {
       console.error('Error fetching support messages:', err);
@@ -91,7 +94,7 @@ export function registerSupportRoutes(app: Express, deps: RouteDeps) {
         return res.status(400).json({ error: "Message is required" });
       }
 
-      // Insertar el mensaje
+      // Validar datos con Zod
       const result = insertSupportMessageSchema.safeParse({
         user_id: userId,
         message,
@@ -99,20 +102,36 @@ export function registerSupportRoutes(app: Express, deps: RouteDeps) {
       });
 
       if (!result.success) {
+        console.error('Validation error:', result.error);
         return res.status(400).json({ error: "Invalid message data" });
       }
 
-      const [newMessage] = await db
-        .insert(support_messages)
-        .values(result.data)
-        .returning();
+      // Insertar mensaje usando Supabase (respeta RLS)
+      const { data: newMessage, error: insertError } = await authenticatedSupabase
+        .from('support_messages')
+        .insert({
+          user_id: userId,
+          message: message,
+          sender: 'user'
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('Supabase insert error:', insertError);
+        return res.status(500).json({ 
+          error: "Error inserting message into database",
+          details: insertError.message 
+        });
+      }
 
       return res.status(200).json({ message: newMessage });
 
     } catch (err: any) {
       console.error('Error sending support message:', err);
       return res.status(500).json({
-        error: "Error sending support message"
+        error: "Error sending support message",
+        details: err.message
       });
     }
   });
