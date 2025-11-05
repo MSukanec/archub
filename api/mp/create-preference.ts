@@ -282,20 +282,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       statement_descriptor: "ARCHUB",
     };
 
-    // SIEMPRE agregar metadata (con o sin cupón)
-    // Metadata básica sin mencionar descuentos
+    // SIEMPRE agregar metadata IDÉNTICA (con o sin cupón)
+    // NO mencionar descuentos para evitar detección de MP
     prefBody.metadata = {
       user_id,
       course_slug: course.slug,
       months: chosen.months || months,
     };
     
-    // Si hay cupón, guardar info adicional SOLO en metadata (no en external_reference)
-    if (couponMetadata) {
-      prefBody.metadata.has_discount = true;
-      prefBody.metadata.original_price = couponMetadata.list_price;
-      prefBody.metadata.coupon_id = couponMetadata.coupon_id;
-    }
+    // Info del cupón se guardará en external_reference (base64) solo para nuestro webhook
+    // MP no puede leerlo porque está encodeado
 
     console.log("[MP create-preference] Creando preferencia para:", { 
       user_id, 
