@@ -22,44 +22,52 @@ interface ActionButton {
 interface HeaderProps {
   icon?: React.ComponentType<any>;
   title?: string;
+  description?: string;
   tabs?: Tab[];
   actions?: ActionButton[];
   className?: string;
   selector?: React.ReactNode; // Nuevo: selector de proyecto/organización
 }
 
-export function Header({ icon, title, tabs = [], actions = [], className, selector }: HeaderProps) {
+export function Header({ icon, title, description, tabs = [], actions = [], className, selector }: HeaderProps) {
   return (
     <div className={cn(
       "w-full bg-[var(--layout-bg)]",
       className
     )}>
       <div className="px-6 border-b" style={{ borderColor: 'hsl(210, 40%, 93%)' }}>
-        {/* Fila Superior: Icono + Título a la izquierda, Selector a la derecha */}
-      <div className="h-12 flex items-center justify-between">
-        {/* Left: Icon + Title */}
-        <div className="flex items-center gap-3">
-          {icon && (
-            <span className="text-[var(--accent)] flex-shrink-0">
-              {(() => {
-                const Icon = icon;
-                return <Icon className="w-6 h-6" />;
-              })()}
-            </span>
-          )}
-          {title && (
-            <h1 className="text-lg font-semibold text-[var(--foreground)]">
-              {title}
-            </h1>
-          )}
-        </div>
-
-        {/* Right: Selector (Project/Organization) */}
-        {selector && (
-          <div className="flex items-center gap-2">
-            {selector}
+        {/* Fila Superior: Icono + Título + Descripción a la izquierda, Selector a la derecha - SIEMPRE VISIBLE */}
+        <div className="min-h-[50px] flex items-center justify-between py-2">
+          {/* Left: Icon + Title + Description */}
+          <div className="flex items-center gap-3">
+            {icon && (
+              <span className="text-[var(--accent)] flex-shrink-0">
+                {(() => {
+                  const Icon = icon;
+                  return <Icon className="w-6 h-6" />;
+                })()}
+              </span>
+            )}
+            <div className="flex flex-col">
+              {title && (
+                <h1 className="text-xl font-semibold text-[var(--foreground)]">
+                  {title}
+                </h1>
+              )}
+              {description && (
+                <p className="text-xs text-[var(--muted-foreground)]">
+                  {description}
+                </p>
+              )}
+            </div>
           </div>
-        )}
+
+          {/* Right: Selector (Project/Organization) */}
+          {selector && (
+            <div className="flex items-center gap-2">
+              {selector}
+            </div>
+          )}
         </div>
 
         {/* Fila Inferior: Tabs a la izquierda, Acciones a la derecha */}
