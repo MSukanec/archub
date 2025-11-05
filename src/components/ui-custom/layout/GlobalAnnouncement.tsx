@@ -102,6 +102,31 @@ export function GlobalAnnouncement() {
     }
   };
 
+  // Normalize URL: add https:// if needed, but preserve mailto: and wa.me links
+  const normalizeUrl = (url: string): string => {
+    if (!url) return url;
+    
+    const trimmedUrl = url.trim();
+    
+    // If it's already a valid protocol, return as-is
+    if (
+      trimmedUrl.startsWith('http://') ||
+      trimmedUrl.startsWith('https://') ||
+      trimmedUrl.startsWith('mailto:') ||
+      trimmedUrl.startsWith('tel:')
+    ) {
+      return trimmedUrl;
+    }
+    
+    // If it's a wa.me link without protocol, add https://
+    if (trimmedUrl.startsWith('wa.me/')) {
+      return `https://${trimmedUrl}`;
+    }
+    
+    // For any other URL, add https://
+    return `https://${trimmedUrl}`;
+  };
+
   const convertSmartLinks = (text: string) => {
     const urlRegex = /(https?:\/\/[^\s]+|mailto:[^\s]+|tel:[^\s]+|wa\.me\/[^\s]+)/g;
     const parts = text.split(urlRegex);
@@ -111,7 +136,7 @@ export function GlobalAnnouncement() {
         return (
           <a
             key={index}
-            href={part}
+            href={normalizeUrl(part)}
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:opacity-80 transition-opacity font-medium"
@@ -162,7 +187,7 @@ export function GlobalAnnouncement() {
                     <>
                       {' '}
                       <a
-                        href={activeAnnouncement.link_url}
+                        href={normalizeUrl(activeAnnouncement.link_url)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="underline hover:opacity-80 transition-opacity font-medium text-white"
@@ -180,7 +205,7 @@ export function GlobalAnnouncement() {
                       <Button
                         size="sm"
                         variant="default"
-                        onClick={() => window.open(activeAnnouncement.primary_button_url!, '_blank')}
+                        onClick={() => window.open(normalizeUrl(activeAnnouncement.primary_button_url!), '_blank')}
                         className="h-7 text-xs bg-white/20 hover:bg-white/30 text-white border-white/30"
                       >
                         {activeAnnouncement.primary_button_text}
@@ -190,7 +215,7 @@ export function GlobalAnnouncement() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => window.open(activeAnnouncement.secondary_button_url!, '_blank')}
+                        onClick={() => window.open(normalizeUrl(activeAnnouncement.secondary_button_url!), '_blank')}
                         className="h-7 text-xs bg-transparent hover:bg-white/10 text-white border-white/30"
                       >
                         {activeAnnouncement.secondary_button_text}

@@ -402,6 +402,9 @@ export function AnnouncementFormModal({ modalData, onClose }: AnnouncementFormMo
                   <FormControl>
                     <Input placeholder="https://ejemplo.com" {...field} />
                   </FormControl>
+                  <FormDescription className="text-xs">
+                    Ejemplos: <code className="text-xs bg-muted px-1 rounded">https://...</code>, <code className="text-xs bg-muted px-1 rounded">mailto:email@ejemplo.com</code>, <code className="text-xs bg-muted px-1 rounded">https://wa.me/5491112345678</code>
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -436,6 +439,9 @@ export function AnnouncementFormModal({ modalData, onClose }: AnnouncementFormMo
                   <FormControl>
                     <Input placeholder="https://ejemplo.com" {...field} />
                   </FormControl>
+                  <FormDescription className="text-xs">
+                    WhatsApp: <code className="text-xs bg-muted px-1 rounded">https://wa.me/5491112345678</code> | Email: <code className="text-xs bg-muted px-1 rounded">mailto:hola@ejemplo.com</code>
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -470,6 +476,9 @@ export function AnnouncementFormModal({ modalData, onClose }: AnnouncementFormMo
                   <FormControl>
                     <Input placeholder="https://ejemplo.com" {...field} />
                   </FormControl>
+                  <FormDescription className="text-xs">
+                    WhatsApp: <code className="text-xs bg-muted px-1 rounded">https://wa.me/5491112345678</code> | Email: <code className="text-xs bg-muted px-1 rounded">mailto:hola@ejemplo.com</code>
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
