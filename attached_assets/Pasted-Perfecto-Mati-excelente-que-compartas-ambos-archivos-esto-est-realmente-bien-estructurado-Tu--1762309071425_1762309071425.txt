@@ -1,0 +1,165 @@
+Perfecto Mati, excelente que compartas ambos archivos — esto está realmente bien estructurado 👏
+Tu backend para Mercado Pago está muy sólido.
+Ahora bien, el error que contás (“Algo salió mal… no pudimos procesar tu pago”) no está en tu código: el flujo de create-preference y success-handler está correcto, sino que el problema viene del lado de Mercado Pago (flujo de pago).
+
+Te explico cómo revisar y ajustar paso a paso para diagnosticar exactamente dónde falla el pago y no el código 👇
+
+🧠 1️⃣ Confirmar modo de entorno (test vs producción)
+
+Primero, verificá qué muestra tu log cuando haces el pago:
+
+[MP create-preference] Modo: 🧪 TEST
+
+
+o
+
+[MP create-preference] Modo: 💰 PRODUCCIÓN
+
+
+👉 Si estás en producción, Mercado Pago solo permite pagar con cuentas reales y medios válidos.
+Si estás en test, hay que pagar solo con tarjetas de prueba, no con cuentas sandbox reales.
+
+⚙️ 2️⃣ Chequeá los valores generados en la preferencia
+
+Desde tus logs (console.log("[MP create-preference] ✅ Preferencia creada:", pref.id);), copiá el pref.id o pref.init_point.
+
+Luego:
+
+Entrá al panel de desarrollador de MP → sección Pagos → Pruebas → Pagos realizados.
+
+Buscá ese preference_id.
+
+Vas a ver el detalle: si el pago fue rechazado, pendiente o ni siquiera se intentó.
+
+Ahí vas a ver mensajes como:
+
+❌ Card declined
+
+⚠️ Challenge required (3DS)
+
+⏳ Pending for authorization
+
+⚙️ Rejected for high risk
+
+🧩 3️⃣ Revisá el payer y binary_mode
+
+Tenés bien configurado esto:
+
+payer: { email, first_name, last_name },
+binary_mode: true,
+
+
+👉 El binary_mode: true fuerza aprobación/rechazo instantáneo.
+Sin embargo, en test mode, Mercado Pago puede no permitir binary_mode si el payer.email no es de dominio @testuser.com.
+
+🔧 Para sandbox, podés hacer:
+
+payer: {
+  email: "test_user_123456@testuser.com",
+  first_name: "Test",
+  last_name: "User"
+},
+binary_mode: false
+
+🧾 4️⃣ Revisá la llamada al endpoint
+
+Verificá qué responde el fetch a:
+
+https://api.mercadopago.com/checkout/preferences
+
+
+Tu código ya guarda responseText, así que revisá los logs del servidor cuando se crea la preferencia.
+Si ves algo como:
+
+{
+  "message": "Access denied",
+  "error": "forbidden",
+  "status": 403
+}
+
+
+→ Es credencial incorrecta.
+Si el init_point se crea correctamente pero falla después, el problema está en el flujo del checkout, no en tu backend.
+
+🚨 5️⃣ Problema típico: desafío 3DS (Challenge)
+
+En tu consola se ve:
+
+Challenge processing via step next
+[name:challenge-orchestrator]
+
+
+Eso es Mercado Pago pidiendo una autenticación adicional 3D Secure (challenge) al comprador.
+
+🧩 Causas posibles:
+
+El comprador usa tarjeta con 3DS obligatorio (por seguridad).
+
+El sandbox o el usuario de prueba no puede completar ese paso.
+
+MP no puede enviar el “challengeUrl” porque el test_user no tiene correo real.
+
+🔧 Solución:
+
+En sandbox, usá tarjetas de prueba sin challenge.
+
+En producción, asegurate de que el comprador esté con tarjeta real y que MP pueda mostrar el iframe o redirección.
+
+💡 6️⃣ Recomendación: mostrar error más claro al usuario
+
+Podés interceptar el error en el frontend (en la respuesta de create-preference) y mostrar algo más informativo, por ejemplo:
+
+if (!ok) {
+  alert("No pudimos procesar el pago. Verificá tu método o intentá más tarde.");
+}
+
+
+Y en el backend:
+
+if (!r.ok || !pref?.init_point) {
+  console.error("[MP create-preference] Error:", pref);
+  return res.status(r.status).json({
+    ok: false,
+    error: "Mercado Pago no aceptó la preferencia",
+    details: pref.message || pref.error || pref
+  });
+}
+
+🔍 7️⃣ Cómo depurarlo exactamente ahora
+
+Te recomiendo hacer esto:
+
+En consola del servidor, buscá el log:
+
+[MP create-preference] ✅ Preferencia creada: ...
+
+
+Copiá el ID.
+
+En el panel de desarrollador de MP → sección Pagos (Producción), pegá ese ID en el buscador.
+
+Vas a ver el detalle exacto del motivo de rechazo o error.
+Si dice cc_rejected_other_reason, cc_rejected_call_for_authorize, etc., te puedo decir qué significa cada uno.
+
+🚀 Solución rápida para probar pagos en test mode (sin errores)
+
+Modificá tu archivo .env para test:
+
+MP_MODE=test
+MP_ACCESS_TOKEN_TEST=TEST-XXXXXXXXX
+
+
+Y en create-preference forzá:
+
+binary_mode: false,
+
+
+Luego, en el checkout, usá tarjeta de prueba:
+
+4509 9535 6623 3704  (Visa)
+11/25
+123
+DNI: 12345678
+
+
+Vas a ver que el pago se completa y el success-handler se ejecuta correctamente.
