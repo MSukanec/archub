@@ -102,56 +102,6 @@ export function GlobalAnnouncement() {
     }
   };
 
-  const getTypeGradient = (type: string) => {
-    switch (type) {
-      case 'info':
-        return 'from-blue-500/10 via-blue-400/5 to-transparent dark:from-blue-600/20 dark:via-blue-500/10';
-      case 'warning':
-        return 'from-yellow-500/10 via-yellow-400/5 to-transparent dark:from-yellow-600/20 dark:via-yellow-500/10';
-      case 'error':
-        return 'from-red-500/10 via-red-400/5 to-transparent dark:from-red-600/20 dark:via-red-500/10';
-      case 'success':
-        return 'from-green-500/10 via-green-400/5 to-transparent dark:from-green-600/20 dark:via-green-500/10';
-      default:
-        return 'from-blue-500/10 via-blue-400/5 to-transparent dark:from-blue-600/20 dark:via-blue-500/10';
-    }
-  };
-
-  const getTypeColors = (type: string) => {
-    switch (type) {
-      case 'info':
-        return {
-          text: 'text-blue-700 dark:text-blue-300',
-          icon: 'text-blue-600 dark:text-blue-400',
-          border: 'border-blue-200 dark:border-blue-800'
-        };
-      case 'warning':
-        return {
-          text: 'text-yellow-700 dark:text-yellow-300',
-          icon: 'text-yellow-600 dark:text-yellow-400',
-          border: 'border-yellow-200 dark:border-yellow-800'
-        };
-      case 'error':
-        return {
-          text: 'text-red-700 dark:text-red-300',
-          icon: 'text-red-600 dark:text-red-400',
-          border: 'border-red-200 dark:border-red-800'
-        };
-      case 'success':
-        return {
-          text: 'text-green-700 dark:text-green-300',
-          icon: 'text-green-600 dark:text-green-400',
-          border: 'border-green-200 dark:border-green-800'
-        };
-      default:
-        return {
-          text: 'text-blue-700 dark:text-blue-300',
-          icon: 'text-blue-600 dark:text-blue-400',
-          border: 'border-blue-200 dark:border-blue-800'
-        };
-    }
-  };
-
   const convertSmartLinks = (text: string) => {
     const urlRegex = /(https?:\/\/[^\s]+|mailto:[^\s]+|tel:[^\s]+|wa\.me\/[^\s]+)/g;
     const parts = text.split(urlRegex);
@@ -176,8 +126,6 @@ export function GlobalAnnouncement() {
 
   if (!activeAnnouncement) return null;
 
-  const colors = getTypeColors(activeAnnouncement.type);
-
   return (
     <AnimatePresence>
       <motion.div
@@ -185,17 +133,15 @@ export function GlobalAnnouncement() {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className={cn(
-          'relative overflow-hidden border-b',
-          colors.border
-        )}
+        className="fixed top-0 left-0 right-0 w-full z-[9999]"
+        style={{
+          background: 'linear-gradient(to right, #e0da22, #71c932)'
+        }}
       >
-        <div className={cn('absolute inset-0 bg-gradient-to-r', getTypeGradient(activeAnnouncement.type))} />
-        
-        <div className="relative container mx-auto px-4 py-3">
-          <div className="flex items-start gap-3 md:gap-4">
+        <div className="w-full px-4 sm:px-6 py-3">
+          <div className="flex items-start gap-3 md:gap-4 max-w-screen-2xl mx-auto">
             {/* Icon */}
-            <div className={cn('flex-shrink-0 mt-0.5', colors.icon)}>
+            <div className="flex-shrink-0 mt-0.5 text-white">
               {getTypeIcon(activeAnnouncement.type)}
             </div>
 
@@ -204,13 +150,13 @@ export function GlobalAnnouncement() {
               <div className="flex flex-col gap-1.5">
                 {/* Title */}
                 {activeAnnouncement.title && (
-                  <h3 className={cn('text-sm font-semibold', colors.text)}>
+                  <h3 className="text-sm font-semibold text-white">
                     {activeAnnouncement.title}
                   </h3>
                 )}
 
                 {/* Message */}
-                <p className={cn('text-sm leading-relaxed', colors.text)}>
+                <p className="text-sm leading-relaxed text-gray-100">
                   {convertSmartLinks(activeAnnouncement.message)}
                   {activeAnnouncement.link_text && activeAnnouncement.link_url && (
                     <>
@@ -219,7 +165,7 @@ export function GlobalAnnouncement() {
                         href={activeAnnouncement.link_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="underline hover:opacity-80 transition-opacity font-medium"
+                        className="underline hover:opacity-80 transition-opacity font-medium text-white"
                       >
                         {activeAnnouncement.link_text}
                       </a>
@@ -235,7 +181,7 @@ export function GlobalAnnouncement() {
                         size="sm"
                         variant="default"
                         onClick={() => window.open(activeAnnouncement.primary_button_url!, '_blank')}
-                        className="h-7 text-xs"
+                        className="h-7 text-xs bg-white/20 hover:bg-white/30 text-white border-white/30"
                       >
                         {activeAnnouncement.primary_button_text}
                       </Button>
@@ -245,7 +191,7 @@ export function GlobalAnnouncement() {
                         size="sm"
                         variant="outline"
                         onClick={() => window.open(activeAnnouncement.secondary_button_url!, '_blank')}
-                        className="h-7 text-xs"
+                        className="h-7 text-xs bg-transparent hover:bg-white/10 text-white border-white/30"
                       >
                         {activeAnnouncement.secondary_button_text}
                       </Button>
@@ -258,10 +204,7 @@ export function GlobalAnnouncement() {
             {/* Close button */}
             <button
               onClick={() => handleDismiss(activeAnnouncement.id)}
-              className={cn(
-                'flex-shrink-0 p-1 rounded-md hover:bg-black/5 dark:hover:bg-white/5 transition-colors',
-                colors.text
-              )}
+              className="flex-shrink-0 p-1 rounded-md hover:bg-white/10 transition-colors text-white"
               aria-label="Cerrar anuncio"
               data-testid="button-close-announcement"
             >

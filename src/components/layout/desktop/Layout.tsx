@@ -148,16 +148,20 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   }
 
   return (
-    <div
-      className="h-screen flex flex-col"
-      style={{
-        backgroundColor: isMobile
-          ? "var(--layout-mobile-bg)"
-          : "var(--main-sidebar-bg)",
-      }}
-    >
-      {/* Mobile View - Unchanged */}
-      {isMobile ? (
+    <>
+      {/* Global Announcements Banner - Por encima de TODO */}
+      <GlobalAnnouncement />
+      
+      <div
+        className="h-screen flex flex-col"
+        style={{
+          backgroundColor: isMobile
+            ? "var(--layout-mobile-bg)"
+            : "var(--main-sidebar-bg)",
+        }}
+      >
+        {/* Mobile View - Unchanged */}
+        {isMobile ? (
         <HeaderMobile {...(headerProps ?? {})}>
           <main
             className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-4 py-3 pb-12 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
@@ -182,9 +186,6 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           <div className="flex-1 flex flex-col min-h-0">
             {/* Main Header for Desktop */}
             <MainHeader icon={headerProps?.icon} title={headerProps?.title} />
-            
-            {/* Global Announcements Banner */}
-            <GlobalAnnouncement />
 
             {/* Page Content with rounded corners and framing effect */}
             <div className={`flex-1 flex min-h-0 relative ${isDocked ? 'gap-3' : ''}`}>
@@ -262,6 +263,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
       {/* Mobile Action Bar - Only visible on mobile when enabled */}
       {isMobile && <ActionBarMobile />}
-    </div>
+      </div>
+    </>
   );
 }
