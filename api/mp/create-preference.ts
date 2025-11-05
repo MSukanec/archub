@@ -200,7 +200,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .eq("id", user_id)
       .maybeSingle();
 
-    const email = userRow?.email;
+    // En modo TEST, usar email de prueba para evitar problemas con 3DS
+    const email = isTestMode 
+      ? "test_user_123456@testuser.com" 
+      : userRow?.email;
+    
     const fullNameParts = userRow?.full_name?.trim().split(" ") ?? [];
     
     // Asegurar que siempre tengamos first_name y last_name (requerido por MP para mejor aprobación)
