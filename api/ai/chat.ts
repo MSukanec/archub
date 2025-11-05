@@ -39,11 +39,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 5. Obtener organizationId del usuario desde user_preferences
     const { data: preferences } = await supabase
       .from('user_preferences')
-      .select('organization_id')
+      .select('last_organization_id')
       .eq('user_id', userId)
       .single();
 
-    const organizationId = preferences?.organization_id || null;
+    const organizationId = preferences?.last_organization_id || null;
 
     // 6. Llamar handler compartido
     const result = await getChatHandler({
@@ -56,12 +56,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     // 7. Devolver respuesta según resultado del handler
-    if (result.success) {
-      return res.status(result.status).json(result.data);
-    } else {
-      // Si hay error, devolver con el status correcto
-      return res.status(result.status).json({ error: result.error });
+    if (!result.success) {
+      // Devolver error con toda la metadata del handler (incluye limitReached, remainingPrompts, etc.)
+      const errorResponse: any = { error: result.error };
+      if (result.data) {
+        Object.assign(errorResponse, result.data);
+      }
+      return res.status(result.status).json(errorResponse);
     }
+
+    // 8. Devolver respuesta exitosa
+    return res.status(result.status).json(result.data);
   } catch (err: any) {
     console.error('Error in chat handler:', err);
     return res.status(500).json({ error: "Internal server error" });
