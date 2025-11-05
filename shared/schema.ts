@@ -847,6 +847,8 @@ export const bank_transfer_payments = pgTable("bank_transfer_payments", {
   reviewed_by: uuid("reviewed_by"),
   reviewed_at: timestamp("reviewed_at", { withTimezone: true }),
   review_reason: text("review_reason"),
+  discount_percent: numeric("discount_percent", { precision: 5, scale: 2 }).default("5.0"),
+  discount_amount: numeric("discount_amount", { precision: 14, scale: 2 }).default("0"),
   created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
