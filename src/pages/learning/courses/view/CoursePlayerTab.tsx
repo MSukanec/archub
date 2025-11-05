@@ -51,7 +51,15 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
     if (storeLessonId && storeLessonId !== sidebarLessonId) {
       setCurrentLesson(storeLessonId);
     }
-  }, [storeLessonId, setCurrentLesson, sidebarLessonId])
+  }, [storeLessonId, setCurrentLesson, sidebarLessonId]);
+  
+  // Detectar cambio de lección y resetear flag de reproducción
+  useEffect(() => {
+    if (activeLessonId !== currentLessonIdRef.current) {
+      currentLessonIdRef.current = activeLessonId;
+      isPlayingRef.current = false; // Reset flag on lesson change
+    }
+  }, [activeLessonId]);
   
   // Get course modules and lessons
   const { data: modules = [], isLoading: modulesLoading } = useQuery({
@@ -426,14 +434,6 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
   
   // Obtener progreso de la lección actual
   const currentProgress = activeLessonId ? progressMap.get(activeLessonId) : null;
-  
-  // Detectar cambio de lección y resetear flag de reproducción
-  useEffect(() => {
-    if (activeLessonId !== currentLessonIdRef.current) {
-      currentLessonIdRef.current = activeLessonId;
-      isPlayingRef.current = false; // Reset flag on lesson change
-    }
-  }, [activeLessonId]);
   
   // Determinar la posición inicial: si hay targetSeekTime (desde marcador), usar esa, si no, usar el progreso guardado
   // IMPORTANTE: Si el video ya está reproduciéndose, NO actualizar initialPosition para evitar rewind
