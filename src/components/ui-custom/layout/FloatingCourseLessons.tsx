@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BookOpen, X, Play, CheckCircle2, Circle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -22,6 +22,43 @@ export function FloatingCourseLessons({
   const [isOpen, setIsOpen] = useState(false);
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   const goToLesson = useCoursePlayerStore(s => s.goToLesson);
+
+  // Auto-expandir el módulo que contiene la lección actual o el primer módulo
+  useEffect(() => {
+    if (currentLessonId && lessons.length > 0) {
+      const currentLesson = lessons.find(l => l.id === currentLessonId);
+      if (currentLesson) {
+        setExpandedModules(prev => {
+          // Solo actualizar si el módulo no está ya expandido
+          if (!prev.has(currentLesson.module_id)) {
+            return new Set([currentLesson.module_id]);
+          }
+          return prev;
+        });
+        return; // Salir temprano si encontramos la lección
+      }
+      // Si no encontramos la lección, continuar al fallback
+    }
+    
+    // Fallback: expandir el primer módulo si no hay ninguno expandido o si el módulo expandido ya no existe
+    if (modules.length > 0) {
+      setExpandedModules(prev => {
+        // Si no hay módulos expandidos, expandir el primero
+        if (prev.size === 0) {
+          return new Set([modules[0].id]);
+        }
+        
+        // Si el módulo expandido ya no existe en la lista actual, expandir el primero
+        const currentExpandedId = Array.from(prev)[0];
+        const moduleStillExists = modules.some(m => m.id === currentExpandedId);
+        if (!moduleStillExists) {
+          return new Set([modules[0].id]);
+        }
+        
+        return prev;
+      });
+    }
+  }, [currentLessonId, lessons, modules]);
 
   // Fetch progress for all lessons in the course
   const { data: progressData } = useQuery<any[]>({
