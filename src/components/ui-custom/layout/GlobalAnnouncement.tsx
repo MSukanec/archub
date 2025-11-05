@@ -56,13 +56,20 @@ export function GlobalAnnouncement() {
     refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
   });
 
+  // DEBUG: Log data
+  console.log('[GlobalAnnouncement] announcements:', announcements);
+  console.log('[GlobalAnnouncement] planCode:', planCode);
+
   // Filter announcements by audience and date range
   const activeAnnouncement = announcements?.find((announcement) => {
+    console.log('[GlobalAnnouncement] Checking announcement:', announcement.title, 'audience:', announcement.audience);
+    
     // DISABLED: Check if dismissed - functionality temporarily removed
     // if (dismissedIds.includes(announcement.id)) return false;
 
     // Check audience
     if (announcement.audience && announcement.audience !== 'all') {
+      console.log('[GlobalAnnouncement] Audience check:', announcement.audience, 'vs', planCode);
       if (announcement.audience !== planCode) return false;
     }
 
@@ -71,16 +78,21 @@ export function GlobalAnnouncement() {
     
     if (announcement.starts_at) {
       const startsAt = new Date(announcement.starts_at);
+      console.log('[GlobalAnnouncement] Start date check:', startsAt, 'now:', now);
       if (now < startsAt) return false;
     }
 
     if (announcement.ends_at) {
       const endsAt = new Date(announcement.ends_at);
+      console.log('[GlobalAnnouncement] End date check:', endsAt, 'now:', now);
       if (now > endsAt) return false;
     }
 
+    console.log('[GlobalAnnouncement] Announcement passed all checks!');
     return true;
   });
+
+  console.log('[GlobalAnnouncement] activeAnnouncement:', activeAnnouncement);
 
   // DISABLED: Dismissal functionality temporarily removed
   // const handleDismiss = (id: string) => {
