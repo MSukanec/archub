@@ -1,5 +1,5 @@
 // /api/paypal/webhook.ts
-import { NextResponse } from "next/server";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
 
 const cors = {
@@ -97,14 +97,22 @@ function parseInvoiceId(invoiceId: string) {
 }
 
 // ---- Handler ----
-export async function OPTIONS() {
-  return new NextResponse("ok", { status: 200, headers: cors });
-}
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Handle CORS preflight
+  if (req.method === "OPTIONS") {
+    return res.status(200).setHeader("Access-Control-Allow-Origin", "*")
+      .setHeader("Access-Control-Allow-Headers", cors["Access-Control-Allow-Headers"])
+      .setHeader("Access-Control-Allow-Methods", cors["Access-Control-Allow-Methods"])
+      .send("ok");
+  }
 
-export async function POST(req: Request) {
+  if (req.method !== "POST") {
+    return res.status(405).setHeader("Access-Control-Allow-Origin", "*")
+      .json({ ok: false, error: "Method not allowed" });
+  }
+
   try {
-    const raw = await req.text();
-    const json = raw ? JSON.parse(raw) : {};
+    const json = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
     const eventType = json?.event_type ?? "UNKNOWN";
 
     let order_id = extractOrderId(json);
@@ -143,12 +151,10 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json({ ok: true }, { status: 200, headers: cors });
+    return res.status(200).setHeader("Access-Control-Allow-Origin", "*").json({ ok: true });
   } catch (e: any) {
     console.error("[PayPal webhook] Error:", e);
-    return NextResponse.json(
-      { ok: true, warn: "handler_error", error: String(e) },
-      { status: 200, headers: cors },
-    );
+    return res.status(200).setHeader("Access-Control-Allow-Origin", "*")
+      .json({ ok: true, warn: "handler_error", error: String(e) });
   }
 }
