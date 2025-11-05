@@ -258,7 +258,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           </div>
 
           {/* Floating AI Chat - Desktop y Mobile en rutas de trabajo */}
-          {shouldShowAIChat && <FloatingAIChat hasCourseLessons={isCourseSidebarVisible && modules.length > 0} />}
+          {shouldShowAIChat && <FloatingAIChat />}
         </div>
       )}
 
