@@ -298,6 +298,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       couponCode: couponData ? code.trim() : null
     });
 
+    // Log completo del body para debugging
+    console.log("[MP create-preference] Body completo enviado a MP:", JSON.stringify(prefBody, null, 2));
+
     const r = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",
       headers: {
