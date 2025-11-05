@@ -364,6 +364,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         mo?.items?.[0]?.category_id ??
         null;
 
+      // Log detallado del merchant_order
+      console.log(`[MP webhook] 📦 Merchant Order recibida:`);
+      console.log(`  - Order ID: ${mo?.id}`);
+      console.log(`  - Total: ${mo?.total_amount}`);
+      console.log(`  - Order Status: ${mo?.order_status}`);
+      console.log(`  - Payments:`, JSON.stringify(mo?.payments, null, 2));
+
       // ¿Hay pago aprobado?
       const approved = Array.isArray(mo?.payments)
         ? mo.payments.some((p: any) => String(p?.status) === "approved")
