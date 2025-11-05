@@ -164,13 +164,14 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
       return [
-        { id: 'community', label: 'Comunidad', icon: Users, href: '/admin/community' },
+        { id: 'community', label: 'Comunidad', icon: Crown, href: '/admin/community' },
         { id: 'payments', label: 'Pagos', icon: Wallet, href: '/admin/payments' },
         { id: 'courses', label: 'Cursos', icon: BookOpen, href: '/admin/courses' },
+        { id: 'layout', label: 'Layout', icon: Layers, href: '/admin/layout' },
+        { id: 'general', label: 'General', icon: Settings, href: '/admin/general' },
         { id: 'tasks', label: 'Tareas', icon: ListTodo, href: '/admin/tasks' },
         { id: 'costs', label: 'Costos', icon: DollarSign, href: '/admin/costs' },
         { id: 'products', label: 'Productos', icon: Package, href: '/providers/products' },
-        { id: 'general', label: 'General', icon: Settings, href: '/admin/general' },
       ];
     } else if (sidebarLevel === 'learning') {
       return [
@@ -229,6 +230,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       if (item.id === 'dashboard') return { show: true, text: 'Capacitaciones' };
     } else if (sidebarLevel === 'admin') {
       if (item.id === 'community') return { show: true, text: 'Administración' };
+      if (item.id === 'general') return { show: true, text: 'Construcción' };
     }
     return { show: false, text: '' };
   };
@@ -246,26 +248,40 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
           <div className="flex items-center h-14 px-4 border-b border-[var(--main-sidebar-border)] bg-[var(--main-sidebar-bg)]">
-            {sidebarLevel !== 'general' && (
-              <button
-                onClick={() => {
-                  setSidebarLevel('general');
-                }}
-                className="p-2 -ml-2 hover:bg-[var(--main-sidebar-button-hover-bg)] rounded-lg transition-colors"
-                data-testid="button-mobile-back"
-              >
-                <ChevronLeft className="h-5 w-5 text-[var(--main-sidebar-fg)]" />
-              </button>
+            {sidebarLevel !== 'general' ? (
+              <>
+                <button
+                  onClick={() => {
+                    setSidebarLevel('general');
+                  }}
+                  className="flex items-center gap-2 flex-1 p-2 -ml-2 hover:bg-[var(--main-sidebar-button-hover-bg)] rounded-lg transition-colors"
+                  data-testid="button-mobile-back"
+                >
+                  <ChevronLeft className="h-5 w-5 text-[var(--main-sidebar-fg)]" />
+                  <h1 className="text-lg font-semibold !text-white">
+                    {getMenuTitle()}
+                  </h1>
+                </button>
+                <button
+                  onClick={handleCloseMenu}
+                  className="p-2 -mr-2 hover:bg-[var(--main-sidebar-button-hover-bg)] rounded-lg transition-colors"
+                >
+                  <X className="h-5 w-5 text-[var(--main-sidebar-fg)]" />
+                </button>
+              </>
+            ) : (
+              <>
+                <h1 className="text-lg font-semibold flex-1 !text-white">
+                  {getMenuTitle()}
+                </h1>
+                <button
+                  onClick={handleCloseMenu}
+                  className="p-2 -mr-2 hover:bg-[var(--main-sidebar-button-hover-bg)] rounded-lg transition-colors"
+                >
+                  <X className="h-5 w-5 text-[var(--main-sidebar-fg)]" />
+                </button>
+              </>
             )}
-            <h1 className="text-lg font-semibold flex-1 !text-white">
-              {getMenuTitle()}
-            </h1>
-            <button
-              onClick={handleCloseMenu}
-              className="p-2 -mr-2 hover:bg-[var(--main-sidebar-button-hover-bg)] rounded-lg transition-colors"
-            >
-              <X className="h-5 w-5 text-[var(--main-sidebar-fg)]" />
-            </button>
           </div>
 
           {/* Navigation Menu - Scrollable */}
