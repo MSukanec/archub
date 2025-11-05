@@ -189,8 +189,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .maybeSingle();
 
     const email = userRow?.email;
-    const [first_name, ...rest] = userRow?.full_name?.split(" ") ?? [];
-    const last_name = rest.join(" ");
+    const fullNameParts = userRow?.full_name?.trim().split(" ") ?? [];
+    
+    // Asegurar que siempre tengamos first_name y last_name (requerido por MP para mejor aprobación)
+    let first_name = fullNameParts[0] || "Usuario";
+    let last_name = fullNameParts.length > 1 
+      ? fullNameParts.slice(1).join(" ") 
+      : "Archub"; // Default si solo tiene un nombre
 
     if (!MP_ACCESS_TOKEN || !MP_ACCESS_TOKEN.startsWith("APP_USR-")) {
       return res
@@ -233,15 +238,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       items: [
         {
           id: course.slug,
+          category_id: "services", // Categoría de Mercado Pago para servicios/educación
           title: course.title,
-          description: course.short_description || "",
+          description: course.short_description || course.title,
           quantity: 1,
           unit_price,
           currency_id: currency,
         },
       ],
       external_reference: custom_id,
-      payer: { email, first_name, last_name },
+      payer: { 
+        email, 
+        first_name, 
+        last_name 
+      },
       notification_url: `${webhookBase}/api/mp/webhook?secret=${MP_WEBHOOK_SECRET}`,
       back_urls: {
         success: `${returnBase}/api/mp/success-handler?course_slug=${course.slug}`,
