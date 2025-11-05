@@ -257,31 +257,31 @@ export default function CheckoutPage() {
     if (appliedCoupon && selectedMethod === "mercadopago") {
       setSelectedMethod(null);
       toast({
-        title: "Método de pago incompatible",
-        description: "Mercado Pago no está disponible con cupones. Por favor seleccioná otro método de pago.",
+        title: "Seleccioná otro método de pago",
+        description: "Mercado Pago no está disponible temporalmente con cupones de descuento.",
         variant: "default",
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appliedCoupon]);
 
-  // Limpiar cupón cuando cambia la moneda/método de pago
+  // Limpiar cupón SOLO cuando cambia la moneda (NO cuando cambia el método)
   // IMPORTANTE: El descuento debe recalcularse con el nuevo precio en la nueva moneda
   useEffect(() => {
     if (appliedCoupon) {
-      // Remover el cupón cuando cambia el método de pago
+      // Remover el cupón cuando cambia la MONEDA
       setAppliedCoupon(null);
       setCouponError(null);
       
       // Mostrar un mensaje informativo al usuario
       toast({
         title: "Cupón removido",
-        description: "Cambiaste de método de pago. Aplicá el cupón nuevamente para recalcular el descuento.",
+        description: "Cambiaste de moneda. Aplicá el cupón nuevamente para recalcular el descuento.",
         variant: "default",
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedMethod, currentCurrency]);
+  }, [currentCurrency]);
 
   // Atajo de teclado: Enter dispara el CTA si todo está válido
   useEffect(() => {
@@ -1325,12 +1325,15 @@ Titular: DNI 32322767`;
                                         Tarjeta de crédito o débito. Pago seguro con redirección.
                                       </p>
                                     ) : (
-                                      <div className="mt-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-md">
-                                        <p className="text-sm text-amber-700 dark:text-amber-400 font-medium">
-                                          Temporalmente no disponible con cupones
+                                      <div className="mt-2 p-4 bg-amber-500/15 border-2 border-amber-500/40 rounded-lg">
+                                        <p className="text-base text-amber-800 dark:text-amber-300 font-semibold mb-2">
+                                          ⚠️ No disponible con cupones de descuento
                                         </p>
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                          Usá transferencia bancaria o PayPal. Para consultas:{" "}
+                                        <p className="text-sm text-muted-foreground mb-2">
+                                          Por favor usá <span className="font-semibold">Transferencia Bancaria</span> o <span className="font-semibold">PayPal</span> para completar tu compra con descuento.
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                          ¿Dudas? Contactanos:{" "}
                                           <a 
                                             href="https://wa.me/5491132273000" 
                                             target="_blank" 
@@ -1338,7 +1341,7 @@ Titular: DNI 32322767`;
                                             className="text-accent hover:underline font-medium inline-flex items-center gap-1"
                                           >
                                             <MessageCircle className="h-3 w-3" />
-                                            WhatsApp
+                                            +54 9 11 3227-3000
                                           </a>
                                         </p>
                                       </div>
@@ -2049,7 +2052,12 @@ Titular: DNI 32322767`;
                           Procesando...
                         </>
                       ) : (appliedCoupon && selectedMethod === "mercadopago") ? (
-                        "Seleccioná otro método de pago"
+                        <>
+                          <X className="h-5 w-5 mr-2" />
+                          Mercado Pago no disponible con cupones
+                        </>
+                      ) : !selectedMethod ? (
+                        "Seleccioná un método de pago"
                       ) : (
                         <>
                           {buttonText}
