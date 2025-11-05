@@ -24,6 +24,7 @@ import { ProjectSelectorButton } from "./ProjectSelectorButton";
 import { OrganizationSelectorButton } from "./OrganizationSelectorButton";
 import { useProjectAccentColor } from "@/hooks/use-project-accent-color";
 import { FloatingAIChat } from "@/components/ui-custom/layout/FloatingAIChat";
+import { GlobalAnnouncement } from "@/components/ui-custom/layout/GlobalAnnouncement";
 import { useLocation } from "wouter";
 
 interface Tab {
@@ -181,6 +182,9 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           <div className="flex-1 flex flex-col min-h-0">
             {/* Main Header for Desktop */}
             <MainHeader icon={headerProps?.icon} title={headerProps?.title} />
+            
+            {/* Global Announcements Banner */}
+            <GlobalAnnouncement />
 
             {/* Page Content with rounded corners and framing effect */}
             <div className={`flex-1 flex min-h-0 relative ${isDocked ? 'gap-3' : ''}`}>
