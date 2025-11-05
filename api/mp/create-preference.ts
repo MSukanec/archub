@@ -223,20 +223,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Usar custom_id en base64 (igual que PayPal)
+    // SIMPLIFICADO: No enviar info de cupón a MP para evitar rechazo
     const customData: any = {
       user_id,
       course_slug: course.slug,
       months: chosen.months || months,
-      list_price: chosen.amount,
-      final_price: unit_price,
     };
 
-    // Agregar info del cupón si se aplicó
-    if (couponData) {
-      customData.coupon_code = code.trim().toUpperCase();
-      customData.coupon_id = couponData.coupon_id;
-      customData.discount = couponData.discount;
-    }
+    // Guardar info del cupón SOLO en metadata (no en external_reference)
+    const couponMetadata = couponData ? {
+      coupon_code: code.trim().toUpperCase(),
+      coupon_id: couponData.coupon_id,
+      discount: couponData.discount,
+      list_price: chosen.amount,
+      final_price: unit_price,
+    } : null;
 
     const custom_id = Buffer.from(JSON.stringify(customData)).toString('base64');
 
@@ -277,16 +278,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         pending: `${returnBase}/learning/courses/${course.slug}?payment=pending`,
       },
       auto_return: "approved",
-      // TEMPORAL: Desactivar binary_mode para debugging de cupones
-      // binary_mode fuerza aprobación/rechazo inmediato, pero puede causar problemas con 3DS
-      binary_mode: couponData ? false : true,
+      binary_mode: true,
       statement_descriptor: "ARCHUB",
     };
 
-    // Solo agregar metadata si NO hay cupón
-    // MP puede interpretar el campo "discount" como fraude y activar validaciones 3DS
-    if (!couponData) {
-      prefBody.metadata = customData;
+    // SIEMPRE agregar metadata (con o sin cupón)
+    // Metadata básica sin mencionar descuentos
+    prefBody.metadata = {
+      user_id,
+      course_slug: course.slug,
+      months: chosen.months || months,
+    };
+    
+    // Si hay cupón, guardar info adicional SOLO en metadata (no en external_reference)
+    if (couponMetadata) {
+      prefBody.metadata.has_discount = true;
+      prefBody.metadata.original_price = couponMetadata.list_price;
+      prefBody.metadata.coupon_id = couponMetadata.coupon_id;
     }
 
     console.log("[MP create-preference] Creando preferencia para:", { 
