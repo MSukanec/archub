@@ -8,6 +8,7 @@
  */
 
 import { useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -32,6 +33,8 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
   const [orgSelectorOpen, setOrgSelectorOpen] = useState(false);
   const [projectSelectorOpen, setProjectSelectorOpen] = useState(false);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const avatarRef = useRef<HTMLDivElement | null>(null);
+  const [avatarRect, setAvatarRect] = useState<DOMRect | null>(null);
 
   const { data: userData } = useCurrentUser();
   const organizations = userData?.organizations || [];
@@ -133,6 +136,9 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
       clearTimeout(closeTimeoutRef.current);
       closeTimeoutRef.current = null;
     }
+    if (avatarRef.current) {
+      setAvatarRect(avatarRef.current.getBoundingClientRect());
+    }
     setIsOpen(true);
   };
 
@@ -151,7 +157,7 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
       onMouseLeave={handleMouseLeave}
     >
       {/* Avatar - siempre visible */}
-      <div className="cursor-pointer">
+      <div ref={avatarRef} className="cursor-pointer">
         <Avatar className="h-8 w-8 hover:opacity-80 transition-opacity ring-0 border-0">
           <AvatarImage src={userData?.user?.avatar_url} />
           <AvatarFallback className="bg-accent text-accent-foreground text-sm font-bold ring-0 border-0">
@@ -160,11 +166,16 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
         </Avatar>
       </div>
 
-      {/* Popover que se despliega hacia abajo */}
-      <AnimatePresence>
-        {isOpen && (
+      {/* Popover que se despliega hacia abajo - renderizado en portal */}
+      {isOpen && avatarRect && createPortal(
+        <AnimatePresence>
           <motion.div
-            className="absolute top-full right-0 mt-2 w-72 bg-background border border-border rounded-lg shadow-lg z-50"
+            className="fixed w-72 bg-background border border-border rounded-lg shadow-lg"
+            style={{
+              top: avatarRect.bottom + 8,
+              right: window.innerWidth - avatarRect.right,
+              zIndex: 9999
+            }}
             initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -174,6 +185,8 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
               damping: 30,
               mass: 0.8
             }}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
           >
             {/* Header del popover con nombre de usuario */}
             <div className="px-4 py-3 border-b border-border">
@@ -360,8 +373,9 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
               </button>
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }

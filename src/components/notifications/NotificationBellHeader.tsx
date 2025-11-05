@@ -1,6 +1,7 @@
 import { Bell } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { getUnreadCount, subscribeUserNotifications } from '@/lib/notifications';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { NotificationDropdown } from './NotificationDropdown';
@@ -12,6 +13,8 @@ export function NotificationBellHeader() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const [buttonRect, setButtonRect] = useState<DOMRect | null>(null);
 
   const fetchUnreadCount = async () => {
     if (!userId) return;
@@ -43,6 +46,9 @@ export function NotificationBellHeader() {
       clearTimeout(closeTimeoutRef.current);
       closeTimeoutRef.current = null;
     }
+    if (buttonRef.current) {
+      setButtonRect(buttonRef.current.getBoundingClientRect());
+    }
     setIsOpen(true);
   };
 
@@ -61,7 +67,10 @@ export function NotificationBellHeader() {
       onMouseLeave={handleMouseLeave}
     >
       {/* Botón de notificaciones */}
-      <button className="relative h-8 w-8 flex items-center justify-center hover:opacity-80 transition-opacity">
+      <button 
+        ref={buttonRef}
+        className="relative h-8 w-8 flex items-center justify-center hover:opacity-80 transition-opacity"
+      >
         <Bell className="h-[18px] w-[18px]" />
         {unreadCount > 0 && (
           <Badge
@@ -73,11 +82,16 @@ export function NotificationBellHeader() {
         )}
       </button>
 
-      {/* Popover de notificaciones */}
-      <AnimatePresence>
-        {isOpen && (
+      {/* Popover de notificaciones - renderizado en portal */}
+      {isOpen && buttonRect && createPortal(
+        <AnimatePresence>
           <motion.div
-            className="absolute top-full right-0 mt-2 w-[340px] max-w-[calc(100vw-2rem)] bg-background border border-border rounded-lg shadow-lg z-50 overflow-hidden"
+            className="fixed w-[340px] max-w-[calc(100vw-2rem)] bg-background border border-border rounded-lg shadow-lg overflow-hidden"
+            style={{
+              top: buttonRect.bottom + 8,
+              right: window.innerWidth - buttonRect.right,
+              zIndex: 9999
+            }}
             initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -87,6 +101,8 @@ export function NotificationBellHeader() {
               damping: 30,
               mass: 0.8
             }}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
           >
             <NotificationDropdown
               userId={userId}
@@ -94,8 +110,9 @@ export function NotificationBellHeader() {
               onClose={() => setIsOpen(false)}
             />
           </motion.div>
-        )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }

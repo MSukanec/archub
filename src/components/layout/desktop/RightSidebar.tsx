@@ -24,43 +24,21 @@ export function RightSidebar() {
 
   return (
     <div className="flex flex-row h-screen">
-      <style>{`
-        /* Ajustar popovers del sidebar derecho para que se abran a la izquierda */
-        .right-sidebar-popover-container {
-          position: relative;
-        }
-        
-        /* UserQuickAccess y NotificationBellHeader popovers */
-        .right-sidebar-popover-container .absolute {
-          right: 100% !important;
-          left: auto !important;
-          margin-right: 8px !important;
-          margin-left: 0 !important;
-          z-index: 9999 !important;
-        }
-        
-        /* Alinear con la parte superior del botón */
-        .right-sidebar-popover-container .absolute.top-full {
-          top: 0 !important;
-          margin-top: 0 !important;
-        }
-      `}</style>
-      
       {/* SIDEBAR DERECHO - Dimensiones idénticas al izquierdo */}
       <div 
-        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-l border-[var(--main-sidebar-border)] transition-all duration-150 overflow-visible relative h-screen"
+        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-l border-[var(--main-sidebar-border)] transition-all duration-150 overflow-hidden relative h-screen"
         style={{
           width: '50px', // Ancho fijo igual al sidebar izquierdo colapsado
-          zIndex: 1000 // Mucho más alto que todo el contenido
+          zIndex: 10
         }}
       >
-        <aside className="grid h-screen grid-rows-[1fr_auto] w-[50px] relative" style={{ zIndex: 1000 }}>
+        <aside className="grid h-screen grid-rows-[1fr_auto] w-[50px]">
           {/* SECCIÓN SUPERIOR: Botones principales */}
           <div className="px-0 overflow-y-auto">
             <div className="flex flex-col gap-[2px] items-center">
               
               {/* Avatar del Usuario - Altura igual al logo del sidebar izquierdo */}
-              <div className="h-[50px] w-8 flex items-center justify-center right-sidebar-popover-container">
+              <div className="h-[50px] w-8 flex items-center justify-center">
                 <UserQuickAccess />
               </div>
 
@@ -68,7 +46,7 @@ export function RightSidebar() {
               <div className="h-3"></div>
 
               {/* Notificaciones - altura h-10 como los botones del sidebar izquierdo */}
-              <div className="h-10 w-8 flex items-center justify-center right-sidebar-popover-container">
+              <div className="h-10 w-8 flex items-center justify-center">
                 <NotificationBellHeader />
               </div>
 
