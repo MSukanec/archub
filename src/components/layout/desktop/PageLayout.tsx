@@ -283,8 +283,7 @@ export function PageLayout({
         <div style={{ backgroundColor: "var(--layout-bg)" }}>
           <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} ${wide ? "px-24" : "px-20"} pt-0`}>
           {/* FILA 1: Icono + Título + Descripción a la izquierda + Selector a la derecha */}
-          {/* COMENTADO - Ahora se muestra en MainHeader */}
-          {/* <div className={`min-h-[50px] flex items-center justify-between ${!showSecondRow ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
+          <div className={`min-h-[50px] flex items-center justify-between ${!showSecondRow ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
           <div className="flex items-center gap-4 py-2">
             {showBackButton && (
               <Button
@@ -337,7 +336,7 @@ export function PageLayout({
               {selector}
             </div>
           )}
-        </div> */}
+        </div>
 
           {/* FILA 2: Tabs a la izquierda + Botones de acción a la derecha */}
           {showSecondRow && (
