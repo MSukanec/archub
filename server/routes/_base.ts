@@ -81,6 +81,38 @@ export function getRouteDeps(): RouteDeps {
 }
 
 /**
+ * Helper function to verify admin access
+ * Checks if the user exists in the admin_users table
+ */
+export async function verifyAdmin(authHeader: string) {
+  const token = authHeader.substring(7);
+  
+  const authSupabase = createClient(
+    supabaseUrl!,
+    supabaseServiceKey!,
+    { auth: { persistSession: false } }
+  );
+  
+  const { data: { user }, error } = await authSupabase.auth.getUser(token);
+  
+  if (error || !user) {
+    return { isAdmin: false, error: "Invalid or expired token" };
+  }
+  
+  const { data: adminCheck } = await authSupabase
+    .from('admin_users')
+    .select('auth_id')
+    .eq('auth_id', user.id)
+    .maybeSingle();
+  
+  if (!adminCheck) {
+    return { isAdmin: false, error: "Admin access required" };
+  }
+  
+  return { isAdmin: true, user };
+}
+
+/**
  * Type for route registration functions
  */
 export type RouteRegistrar = (app: Express, deps: RouteDeps) => void;

@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import type { RouteDeps } from "./_base";
+import { verifyAdmin } from "./_base";
 import { insertSupportMessageSchema } from "../../shared/schema";
 
 export function registerSupportRoutes(app: Express, deps: RouteDeps) {
@@ -139,29 +140,19 @@ export function registerSupportRoutes(app: Express, deps: RouteDeps) {
   // GET /api/admin/support/conversations - Get all support conversations (admin only)
   app.get("/api/admin/support/conversations", async (req, res) => {
     try {
-      const token = extractToken(req.headers.authorization);
-      if (!token) {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ error: "No authorization token provided" });
       }
 
-      const authenticatedSupabase = createAuthenticatedClient(token);
-
-      // Obtener el usuario autenticado
-      const { data: { user }, error: authError } = await authenticatedSupabase.auth.getUser();
-      if (authError || !user) {
-        return res.status(401).json({ error: "Unauthorized" });
+      // Verificar que sea admin usando la función compartida
+      const { isAdmin, error: adminError } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error: adminError });
       }
 
-      // Verificar que sea admin
-      const { data: dbUser } = await authenticatedSupabase
-        .from('users')
-        .select('id, role')
-        .eq('auth_id', user.id)
-        .single();
-
-      if (!dbUser || dbUser.role !== 'admin') {
-        return res.status(403).json({ error: "Forbidden - Admin access required" });
-      }
+      const token = extractToken(authHeader);
+      const authenticatedSupabase = createAuthenticatedClient(token!);
 
       // Obtener todos los mensajes de soporte con información del usuario
       const { data: messages, error: messagesError } = await authenticatedSupabase
@@ -229,29 +220,19 @@ export function registerSupportRoutes(app: Express, deps: RouteDeps) {
   // POST /api/admin/support/messages - Send admin reply to user
   app.post("/api/admin/support/messages", async (req, res) => {
     try {
-      const token = extractToken(req.headers.authorization);
-      if (!token) {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ error: "No authorization token provided" });
       }
 
-      const authenticatedSupabase = createAuthenticatedClient(token);
-
-      // Obtener el usuario autenticado
-      const { data: { user }, error: authError } = await authenticatedSupabase.auth.getUser();
-      if (authError || !user) {
-        return res.status(401).json({ error: "Unauthorized" });
+      // Verificar que sea admin usando la función compartida
+      const { isAdmin, error: adminError } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error: adminError });
       }
 
-      // Verificar que sea admin
-      const { data: dbUser } = await authenticatedSupabase
-        .from('users')
-        .select('id, role')
-        .eq('auth_id', user.id)
-        .single();
-
-      if (!dbUser || dbUser.role !== 'admin') {
-        return res.status(403).json({ error: "Forbidden - Admin access required" });
-      }
+      const token = extractToken(authHeader);
+      const authenticatedSupabase = createAuthenticatedClient(token!);
 
       // Validar datos de entrada
       const { user_id, message } = req.body;

@@ -65,8 +65,8 @@ const AdminCommunitySupportTab = () => {
 
       const data = await response.json();
       return data.conversations as Conversation[];
-    },
-    refetchInterval: 5000 // Auto-refresh cada 5 segundos
+    }
+    // Sin auto-refresh para evitar molestias - el usuario puede refrescar manualmente
   });
 
   // Send admin reply
