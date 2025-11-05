@@ -56,20 +56,13 @@ export function GlobalAnnouncement() {
     refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
   });
 
-  // DEBUG: Log data
-  console.log('[GlobalAnnouncement] announcements:', announcements);
-  console.log('[GlobalAnnouncement] planCode:', planCode);
-
   // Filter announcements by audience and date range
   const activeAnnouncement = announcements?.find((announcement) => {
-    console.log('[GlobalAnnouncement] Checking announcement:', announcement.title, 'audience:', announcement.audience);
-    
     // DISABLED: Check if dismissed - functionality temporarily removed
     // if (dismissedIds.includes(announcement.id)) return false;
 
     // Check audience
     if (announcement.audience && announcement.audience !== 'all') {
-      console.log('[GlobalAnnouncement] Audience check:', announcement.audience, 'vs', planCode);
       if (announcement.audience !== planCode) return false;
     }
 
@@ -78,21 +71,16 @@ export function GlobalAnnouncement() {
     
     if (announcement.starts_at) {
       const startsAt = new Date(announcement.starts_at);
-      console.log('[GlobalAnnouncement] Start date check:', startsAt, 'now:', now);
       if (now < startsAt) return false;
     }
 
     if (announcement.ends_at) {
       const endsAt = new Date(announcement.ends_at);
-      console.log('[GlobalAnnouncement] End date check:', endsAt, 'now:', now);
       if (now > endsAt) return false;
     }
 
-    console.log('[GlobalAnnouncement] Announcement passed all checks!');
     return true;
   });
-
-  console.log('[GlobalAnnouncement] activeAnnouncement:', activeAnnouncement);
 
   // DISABLED: Dismissal functionality temporarily removed
   // const handleDismiss = (id: string) => {
@@ -174,71 +162,72 @@ export function GlobalAnnouncement() {
         transition={{ duration: 0.3, ease: 'easeOut' }}
         className="w-full"
         style={{
-          background: 'linear-gradient(to right, #b8ad1a, #71c932)'
+          background: 'linear-gradient(to right, #b8ad1a, #71c932)',
+          maxHeight: '50px'
         }}
       >
-        <div className="w-full px-4 sm:px-6 py-3">
-          <div className="flex items-start gap-3 md:gap-4 max-w-screen-2xl mx-auto">
-            {/* Icon */}
-            <div className="flex-shrink-0 mt-0.5 text-white">
+        <div className="w-full px-4 sm:px-6 py-1.5">
+          <div className="flex items-center gap-3 max-w-screen-2xl mx-auto">
+            {/* Icon - Centrado verticalmente */}
+            <div className="flex-shrink-0 text-white">
               {getTypeIcon(activeAnnouncement.type)}
             </div>
 
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-col gap-1.5">
-                {/* Title */}
+            {/* Content - Una sola línea */}
+            <div className="flex-1 min-w-0 flex items-center gap-2">
+              <p className="text-sm text-white leading-tight line-clamp-1">
                 {activeAnnouncement.title && (
-                  <h3 className="text-sm font-semibold !text-white">
+                  <span className="font-semibold">
                     {activeAnnouncement.title}
-                  </h3>
+                  </span>
                 )}
+                {activeAnnouncement.title && ' '}
+                <span className="text-gray-100">
+                  {activeAnnouncement.message}
+                </span>
+                {activeAnnouncement.link_text && activeAnnouncement.link_url && (
+                  <>
+                    {' '}
+                    <a
+                      href={normalizeUrl(activeAnnouncement.link_url)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline hover:opacity-80 transition-opacity font-medium"
+                    >
+                      {activeAnnouncement.link_text}
+                    </a>
+                  </>
+                )}
+              </p>
+            </div>
 
-                {/* Message */}
-                <p className="text-sm leading-relaxed text-gray-100">
-                  {convertSmartLinks(activeAnnouncement.message)}
-                  {activeAnnouncement.link_text && activeAnnouncement.link_url && (
-                    <>
-                      {' '}
-                      <a
-                        href={normalizeUrl(activeAnnouncement.link_url)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline hover:opacity-80 transition-opacity font-medium text-white"
-                      >
-                        {activeAnnouncement.link_text}
-                      </a>
-                    </>
-                  )}
-                </p>
-
-                {/* Buttons */}
-                {(activeAnnouncement.primary_button_text || activeAnnouncement.secondary_button_text) && (
-                  <div className="flex items-center gap-2 mt-1">
-                    {activeAnnouncement.primary_button_text && activeAnnouncement.primary_button_url && (
-                      <Button
-                        size="sm"
-                        variant="default"
-                        onClick={() => window.open(normalizeUrl(activeAnnouncement.primary_button_url!), '_blank')}
-                        className="h-7 text-xs bg-white/20 hover:bg-white/30 text-white border-white/30"
-                      >
-                        {activeAnnouncement.primary_button_text}
-                      </Button>
-                    )}
-                    {activeAnnouncement.secondary_button_text && activeAnnouncement.secondary_button_url && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => window.open(normalizeUrl(activeAnnouncement.secondary_button_url!), '_blank')}
-                        className="h-7 text-xs bg-transparent hover:bg-white/10 text-white border-white/30"
-                      >
-                        {activeAnnouncement.secondary_button_text}
-                      </Button>
-                    )}
-                  </div>
+            {/* Buttons - Inline a la derecha */}
+            {(activeAnnouncement.primary_button_text || activeAnnouncement.secondary_button_text) && (
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {/* Secundario PRIMERO */}
+                {activeAnnouncement.secondary_button_text && activeAnnouncement.secondary_button_url && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => window.open(normalizeUrl(activeAnnouncement.secondary_button_url!), '_blank')}
+                    className="h-7 text-xs bg-transparent hover:bg-white/10 text-white border-white"
+                  >
+                    {activeAnnouncement.secondary_button_text}
+                  </Button>
+                )}
+                {/* Primario DESPUÉS */}
+                {activeAnnouncement.primary_button_text && activeAnnouncement.primary_button_url && (
+                  <Button
+                    size="sm"
+                    variant="default"
+                    onClick={() => window.open(normalizeUrl(activeAnnouncement.primary_button_url!), '_blank')}
+                    className="h-7 text-xs bg-white hover:bg-gray-100 text-black border-0"
+                  >
+                    {activeAnnouncement.primary_button_text}
+                  </Button>
                 )}
               </div>
-            </div>
+            )}
 
             {/* DISABLED: Close button - dismissal functionality temporarily removed */}
             {/* <button
