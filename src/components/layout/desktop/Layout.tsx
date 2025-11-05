@@ -94,8 +94,8 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   useProjectAccentColor();
   
   // Determinar si debería mostrarse el FloatingAIChat
-  // SOLO en rutas de trabajo (organización/proyectos) - ALLOWLIST approach
-  const shouldShowAIChat = !isMobile && (() => {
+  // ALLOWLIST approach - funciona en DESKTOP y MOBILE
+  const shouldShowAIChat = (() => {
     // Rutas de trabajo donde SÍ debería aparecer (allowlist completo basado en App.tsx)
     const workRoutes = [
       '/home',                // Home page (AI assistant)
@@ -257,15 +257,15 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
             </div>
           </div>
 
-          {/* Floating AI Chat - Solo en Desktop y rutas de trabajo */}
-          {shouldShowAIChat && <FloatingAIChat />}
+          {/* Floating AI Chat - Desktop y Mobile en rutas de trabajo */}
+          {shouldShowAIChat && <FloatingAIChat hasCourseLessons={isCourseSidebarVisible && modules.length > 0} />}
         </div>
       )}
 
       {/* Mobile Action Bar - Only visible on mobile when enabled */}
       {isMobile && <ActionBarMobile />}
       
-      {/* Floating Course Lessons - Solo en Mobile cuando hay curso activo */}
+      {/* Floating Course Lessons - Mobile cuando hay curso activo */}
       {isMobile && isCourseSidebarVisible && modules.length > 0 && (
         <FloatingCourseLessons 
           modules={modules}
