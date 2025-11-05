@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { UserQuickAccess } from "@/components/ui-custom/layout/UserQuickAccess";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { AIPanel } from "@/components/ai/AIPanel";
+import { SupportPanel } from "@/components/support/SupportPanel";
 import { Bell, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Moon, Sun, HelpCircle, PanelRightClose } from "lucide-react";
@@ -26,8 +27,8 @@ export function RightSidebar() {
   const userFullName = userData?.user?.full_name || userData?.user?.first_name || 'Usuario';
   const userAvatarUrl = userData?.user?.avatar_url;
   
-  // Estado para expansión del sidebar - separado para notificaciones y AI
-  const [activePanel, setActivePanel] = useState<'notifications' | 'ai' | null>(null);
+  // Estado para expansión del sidebar - separado para notificaciones, AI y soporte
+  const [activePanel, setActivePanel] = useState<'notifications' | 'ai' | 'support' | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -63,7 +64,7 @@ export function RightSidebar() {
     };
   }, [userId]);
 
-  const handleMouseEnter = (panel: 'notifications' | 'ai') => {
+  const handleMouseEnter = (panel: 'notifications' | 'ai' | 'support') => {
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
       closeTimeoutRef.current = null;
@@ -103,6 +104,17 @@ export function RightSidebar() {
           {activePanel === 'ai' && (
             <div className="px-3 h-full">
               <AIPanel
+                userId={userId}
+                userFullName={userFullName}
+                userAvatarUrl={userAvatarUrl}
+                onClose={() => setActivePanel(null)}
+              />
+            </div>
+          )}
+          
+          {activePanel === 'support' && (
+            <div className="px-3 h-full">
+              <SupportPanel
                 userId={userId}
                 userFullName={userFullName}
                 userAvatarUrl={userAvatarUrl}
@@ -170,15 +182,17 @@ export function RightSidebar() {
                 </div>
               </button>
 
-              {/* Ayuda/Soporte - h-10 - ABAJO de IA */}
+              {/* Ayuda/Soporte - h-10 - ABAJO de IA - CON HOVER */}
               <button
                 className={cn(
                   "h-10 w-8 rounded-md flex items-center justify-center transition-colors",
                   "hover:bg-[var(--main-sidebar-button-hover-bg)]",
-                  "text-[var(--main-sidebar-fg)] hover:text-white"
+                  "text-[var(--main-sidebar-fg)] hover:text-white",
+                  activePanel === 'support' && "bg-[var(--main-sidebar-button-hover-bg)] text-white"
                 )}
                 title="Ayuda y soporte"
                 data-testid="button-help"
+                onMouseEnter={() => handleMouseEnter('support')}
               >
                 <div className="h-8 w-8 flex items-center justify-center">
                   <HelpCircle className="h-[18px] w-[18px]" />
