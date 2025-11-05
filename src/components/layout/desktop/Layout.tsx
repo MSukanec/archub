@@ -280,7 +280,7 @@ function LayoutContent({
                   </PageLayout>
                 ) : (
                   <div
-                    className={`${wide ? "" : "max-w-[1440px] mx-auto"} ${wide ? "px-6" : "px-10"} pt-3 pb-6 min-h-0`}
+                    className={`${wide ? "" : "max-w-[1440px] mx-auto"} ${wide ? "px-24" : "px-20"} pt-3 pb-6 min-h-0`}
                   >
                     {children}
                   </div>
