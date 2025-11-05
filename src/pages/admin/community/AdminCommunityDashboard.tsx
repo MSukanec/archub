@@ -11,10 +11,15 @@ import { Skeleton } from '@/components/ui/skeleton'
 interface DashboardStats {
   totalOrganizations: number
   activeOrganizations: number
+  newOrganizationsThisMonth: number
+  newOrganizationsLastMonth: number
   totalUsers: number
   activeUsersNow: number
   newUsersThisMonth: number
   newUsersLastMonth: number
+  totalProjects: number
+  newProjectsThisMonth: number
+  newProjectsLastMonth: number
 }
 
 export default function AdminCommunityDashboard() {
@@ -34,10 +39,15 @@ export default function AdminCommunityDashboard() {
       const [
         totalOrgsResult,
         activeOrgsResult,
+        newOrgsThisMonthResult,
+        newOrgsLastMonthResult,
         totalUsersResult,
         newUsersThisMonthResult,
         newUsersLastMonthResult,
-        activeUsersResult
+        activeUsersResult,
+        totalProjectsResult,
+        newProjectsThisMonthResult,
+        newProjectsLastMonthResult
       ] = await Promise.all([
         // Total organizaciones
         supabase
@@ -49,6 +59,19 @@ export default function AdminCommunityDashboard() {
           .from('organizations')
           .select('*', { count: 'exact', head: true })
           .eq('is_active', true),
+        
+        // Nuevas organizaciones este mes
+        supabase
+          .from('organizations')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', thisMonthStart.toISOString()),
+        
+        // Nuevas organizaciones mes anterior
+        supabase
+          .from('organizations')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', lastMonthStart.toISOString())
+          .lte('created_at', lastMonthEnd.toISOString()),
         
         // Total usuarios
         supabase
@@ -72,7 +95,25 @@ export default function AdminCommunityDashboard() {
         supabase
           .from('user_presence')
           .select('user_id')
-          .gte('last_seen_at', ninetySecondsAgo.toISOString())
+          .gte('last_seen_at', ninetySecondsAgo.toISOString()),
+        
+        // Total proyectos
+        supabase
+          .from('projects')
+          .select('*', { count: 'exact', head: true }),
+        
+        // Nuevos proyectos este mes
+        supabase
+          .from('projects')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', thisMonthStart.toISOString()),
+        
+        // Nuevos proyectos mes anterior
+        supabase
+          .from('projects')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', lastMonthStart.toISOString())
+          .lte('created_at', lastMonthEnd.toISOString())
       ])
 
       const uniqueActiveUsers = new Set(activeUsersResult.data?.map(u => u.user_id) || [])
@@ -81,10 +122,15 @@ export default function AdminCommunityDashboard() {
       return {
         totalOrganizations: totalOrgsResult.count || 0,
         activeOrganizations: activeOrgsResult.count || 0,
+        newOrganizationsThisMonth: newOrgsThisMonthResult.count || 0,
+        newOrganizationsLastMonth: newOrgsLastMonthResult.count || 0,
         totalUsers: totalUsersResult.count || 0,
         activeUsersNow,
         newUsersThisMonth: newUsersThisMonthResult.count || 0,
-        newUsersLastMonth: newUsersLastMonthResult.count || 0
+        newUsersLastMonth: newUsersLastMonthResult.count || 0,
+        totalProjects: totalProjectsResult.count || 0,
+        newProjectsThisMonth: newProjectsThisMonthResult.count || 0,
+        newProjectsLastMonth: newProjectsLastMonthResult.count || 0
       } as DashboardStats
     },
     enabled: !!supabase,
@@ -163,6 +209,14 @@ export default function AdminCommunityDashboard() {
   const userGrowth = stats?.newUsersLastMonth 
     ? ((stats.newUsersThisMonth - stats.newUsersLastMonth) / stats.newUsersLastMonth) * 100
     : 0
+  
+  const orgGrowth = stats?.newOrganizationsLastMonth 
+    ? ((stats.newOrganizationsThisMonth - stats.newOrganizationsLastMonth) / stats.newOrganizationsLastMonth) * 100
+    : 0
+
+  const projectGrowth = stats?.newProjectsLastMonth 
+    ? ((stats.newProjectsThisMonth - stats.newProjectsLastMonth) / stats.newProjectsLastMonth) * 100
+    : 0
 
   if (isLoading) {
     return (
@@ -178,32 +232,68 @@ export default function AdminCommunityDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Métricas principales */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard data-testid="card-organizaciones">
-          <StatCardTitle showArrow={false}>Organizaciones</StatCardTitle>
+      {/* KPI Grande de Usuarios */}
+      <Card className="p-6" data-testid="card-users-overview">
+        <div className="flex items-center gap-2 mb-6">
+          <Clock className="h-5 w-5 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold">Usuarios de la Plataforma</h3>
+        </div>
+        
+        {/* Métricas principales en fila */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+          <div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Total</p>
+            <p className="text-4xl font-bold">{stats?.totalUsers || 0}</p>
+          </div>
+          
+          <div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Activos Ahora</p>
+            <p className="text-4xl font-bold text-[var(--accent)]">{stats?.activeUsersNow || 0}</p>
+          </div>
+          
+          <div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Nuevos Este Mes</p>
+            <p className="text-4xl font-bold">{stats?.newUsersThisMonth || 0}</p>
+          </div>
+          
+          <div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Crecimiento</p>
+            <p className={`text-4xl font-bold ${userGrowth > 0 ? 'text-green-600' : userGrowth < 0 ? 'text-red-600' : 'text-muted-foreground'}`}>
+              {userGrowth > 0 ? '+' : ''}{userGrowth.toFixed(1)}%
+            </p>
+          </div>
+        </div>
+
+        {/* Barra visual de tendencia (opcional) */}
+        <div className="h-2 bg-muted rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-[var(--accent)] transition-all duration-500"
+            style={{ width: `${Math.min(100, Math.max(0, (stats?.newUsersThisMonth || 0) / (stats?.totalUsers || 1) * 100))}%` }}
+          />
+        </div>
+        <p className="text-xs text-muted-foreground mt-2">
+          {stats?.newUsersThisMonth || 0} nuevos de {stats?.totalUsers || 0} totales este mes
+        </p>
+      </Card>
+
+      {/* Segunda fila: Organizaciones y Proyectos */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <StatCard href="/admin/community" data-testid="card-organizaciones">
+          <StatCardTitle>Organizaciones</StatCardTitle>
           <StatCardValue>{stats?.totalOrganizations || 0}</StatCardValue>
-          <StatCardMeta>{stats?.activeOrganizations || 0} activas</StatCardMeta>
+          {orgGrowth !== 0 && (
+            <StatCardMeta className={orgGrowth > 0 ? 'text-green-600' : 'text-red-600'}>
+              {orgGrowth > 0 ? '+' : ''}{orgGrowth.toFixed(1)}% vs mes anterior
+            </StatCardMeta>
+          )}
         </StatCard>
 
-        <StatCard href="/admin/community" data-testid="card-usuarios-totales">
-          <StatCardTitle>Usuarios Totales</StatCardTitle>
-          <StatCardValue>{stats?.totalUsers || 0}</StatCardValue>
-          <StatCardMeta>en la plataforma</StatCardMeta>
-        </StatCard>
-
-        <StatCard href="/admin/community" data-testid="card-activos-ahora">
-          <StatCardTitle>Activos Ahora</StatCardTitle>
-          <StatCardValue>{stats?.activeUsersNow || 0}</StatCardValue>
-          <StatCardMeta>usuarios online</StatCardMeta>
-        </StatCard>
-
-        <StatCard href="/admin/community" data-testid="card-nuevos-este-mes">
-          <StatCardTitle>Nuevos Este Mes</StatCardTitle>
-          <StatCardValue>{stats?.newUsersThisMonth || 0}</StatCardValue>
-          {userGrowth !== 0 && (
-            <StatCardMeta className={userGrowth > 0 ? 'text-green-600' : 'text-red-600'}>
-              {userGrowth > 0 ? '+' : ''}{userGrowth.toFixed(1)}% vs mes anterior
+        <StatCard href="/admin/community" data-testid="card-proyectos">
+          <StatCardTitle>Proyectos</StatCardTitle>
+          <StatCardValue>{stats?.totalProjects || 0}</StatCardValue>
+          {projectGrowth !== 0 && (
+            <StatCardMeta className={projectGrowth > 0 ? 'text-green-600' : 'text-red-600'}>
+              {projectGrowth > 0 ? '+' : ''}{projectGrowth.toFixed(1)}% vs mes anterior
             </StatCardMeta>
           )}
         </StatCard>
