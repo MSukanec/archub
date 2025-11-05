@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Info, AlertTriangle, XCircle, CheckCircle } from 'lucide-react';
@@ -9,8 +9,26 @@ import { cn } from '@/lib/utils';
 import type { GlobalAnnouncement as AnnouncementType } from '@shared/schema';
 
 const STORAGE_KEY = 'dismissed-announcements';
+const ANNOUNCEMENT_HEIGHT = 44;
 
-export function GlobalAnnouncement() {
+// Context type
+interface AnnouncementContextType {
+  hasActiveAnnouncement: boolean;
+  activeAnnouncement: AnnouncementType | null;
+  handleDismiss: (id: string) => void;
+}
+
+// Context to share announcement state
+const AnnouncementContext = createContext<AnnouncementContextType>({ 
+  hasActiveAnnouncement: false,
+  activeAnnouncement: null,
+  handleDismiss: () => {},
+});
+
+export const useAnnouncementBanner = () => useContext(AnnouncementContext);
+
+// Provider component that manages ALL announcement logic
+export function AnnouncementProvider({ children }: { children: React.ReactNode }) {
   const { data: userData } = useCurrentUser();
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
 
@@ -87,6 +105,23 @@ export function GlobalAnnouncement() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newDismissedIds));
   };
 
+  const hasActiveAnnouncement = !!activeAnnouncement;
+
+  return (
+    <AnnouncementContext.Provider value={{ 
+      hasActiveAnnouncement, 
+      activeAnnouncement: activeAnnouncement || null,
+      handleDismiss 
+    }}>
+      {children}
+    </AnnouncementContext.Provider>
+  );
+}
+
+// Banner component that ONLY renders (reads from context)
+export function GlobalAnnouncement() {
+  const { activeAnnouncement, handleDismiss } = useAnnouncementBanner();
+
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'info':
@@ -127,41 +162,18 @@ export function GlobalAnnouncement() {
     return `https://${trimmedUrl}`;
   };
 
-  const convertSmartLinks = (text: string) => {
-    const urlRegex = /(https?:\/\/[^\s]+|mailto:[^\s]+|tel:[^\s]+|wa\.me\/[^\s]+)/g;
-    const parts = text.split(urlRegex);
-    
-    return parts.map((part, index) => {
-      if (part.match(urlRegex)) {
-        return (
-          <a
-            key={index}
-            href={normalizeUrl(part)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:opacity-80 transition-opacity font-medium"
-          >
-            {part}
-          </a>
-        );
-      }
-      return <span key={index}>{part}</span>;
-    });
-  };
-
   if (!activeAnnouncement) return null;
 
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: 'auto' }}
+        animate={{ opacity: 1 }}
         exit={{ opacity: 0, height: 0 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="w-full"
+        transition={{ duration: 0.2, ease: 'easeOut' }}
+        className="fixed top-0 left-0 right-0 w-full z-[100]"
         style={{
           background: 'linear-gradient(to right, #b8ad1a, #71c932)',
-          maxHeight: '50px'
+          height: '44px'
         }}
       >
         <div className="w-full px-4 sm:px-6 py-1.5">
@@ -242,3 +254,6 @@ export function GlobalAnnouncement() {
     </AnimatePresence>
   );
 }
+
+// Export height constant for layout compensation
+export { ANNOUNCEMENT_HEIGHT };

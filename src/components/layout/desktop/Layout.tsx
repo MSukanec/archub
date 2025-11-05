@@ -25,7 +25,7 @@ import { OrganizationSelectorButton } from "./OrganizationSelectorButton";
 import { useProjectAccentColor } from "@/hooks/use-project-accent-color";
 import { FloatingAIChat } from "@/components/ui-custom/layout/FloatingAIChat";
 import { FloatingCourseLessons } from "@/components/ui-custom/layout/FloatingCourseLessons";
-import { GlobalAnnouncement } from "@/components/ui-custom/layout/GlobalAnnouncement";
+import { GlobalAnnouncement, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, AnnouncementProvider } from "@/components/ui-custom/layout/GlobalAnnouncement";
 import { useLocation } from "wouter";
 
 interface Tab {
@@ -149,18 +149,64 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      {/* Global Announcements Banner - Por encima de TODO */}
+    <AnnouncementProvider>
+      <LayoutContent 
+        children={children}
+        wide={wide}
+        headerProps={headerProps}
+        isMobile={isMobile}
+        isDark={isDark}
+        showActionBar={showActionBar}
+        isDocked={isDocked}
+        isCourseSidebarVisible={isCourseSidebarVisible}
+        modules={modules}
+        lessons={lessons}
+        currentLessonId={currentLessonId}
+        selectorComponent={selectorComponent}
+        shouldShowAIChat={shouldShowAIChat}
+      />
+    </AnnouncementProvider>
+  );
+}
+
+// Componente interno que lee el contexto
+function LayoutContent({ 
+  children, 
+  wide, 
+  headerProps, 
+  isMobile, 
+  isDark, 
+  showActionBar,
+  isDocked,
+  isCourseSidebarVisible,
+  modules,
+  lessons,
+  currentLessonId,
+  selectorComponent,
+  shouldShowAIChat
+}: any) {
+  const { hasActiveAnnouncement } = useAnnouncementBanner();
+
+  return (
+    <>
+      {/* Global Announcements Banner - Fixed position */}
       <GlobalAnnouncement />
       
-      <div
-        className="flex-1 flex flex-col min-h-0"
+      <div 
+        className="h-screen flex flex-col overflow-hidden"
         style={{
-          backgroundColor: isMobile
-            ? "var(--layout-mobile-bg)"
-            : "var(--main-sidebar-bg)",
+          paddingTop: hasActiveAnnouncement ? `${ANNOUNCEMENT_HEIGHT}px` : '0',
+          transition: 'padding-top 0.2s ease-out'
         }}
       >
+        <div
+          className="flex-1 flex flex-col min-h-0"
+          style={{
+            backgroundColor: isMobile
+              ? "var(--layout-mobile-bg)"
+              : "var(--main-sidebar-bg)",
+          }}
+        >
         {/* Mobile View - Unchanged */}
         {isMobile ? (
         <HeaderMobile {...(headerProps ?? {})}>
@@ -274,7 +320,8 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           courseId={modules[0]?.course_id}
         />
       )}
-    </div>
-    </div>
+        </div>
+      </div>
+    </>
   );
 }
