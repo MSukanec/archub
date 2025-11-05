@@ -483,6 +483,7 @@ export function AnnouncementFormModal({ modalData, onClose }: AnnouncementFormMo
   const headerContent = (
     <FormModalHeader 
       title={announcement ? 'Editar Anuncio' : 'Nuevo Anuncio'}
+      description={announcement ? 'Actualiza la información del anuncio global' : 'Crea un nuevo anuncio que aparecerá en todo el sistema'}
       icon={Bell}
     />
   );
