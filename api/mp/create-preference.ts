@@ -254,7 +254,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // (porque el webhook debe ir al servidor público accesible desde MP)
     const webhookBase = process.env.CHECKOUT_RETURN_URL_BASE || requestOrigin;
     
-    const prefBody = {
+    const prefBody: any = {
       items: [
         {
           id: course.slug,
@@ -280,9 +280,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
       auto_return: "approved",
       binary_mode: true,
-      metadata: customData,
       statement_descriptor: "ARCHUB",
     };
+
+    // Solo agregar metadata si NO hay cupón
+    // MP puede interpretar el campo "discount" como fraude y activar validaciones 3DS
+    if (!couponData) {
+      prefBody.metadata = customData;
+    }
 
     console.log("[MP create-preference] Creando preferencia para:", { 
       user_id, 
