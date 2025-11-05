@@ -3,8 +3,20 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN!;
-const MP_WEBHOOK_SECRET = process.env.MP_WEBHOOK_SECRET || "";
+
+// Detectar modo test/producción
+const MP_MODE = process.env.MP_MODE || "production";
+const isTestMode = MP_MODE === "test";
+
+// Usar credenciales según el modo
+const MP_ACCESS_TOKEN = isTestMode 
+  ? process.env.MP_ACCESS_TOKEN_TEST! 
+  : process.env.MP_ACCESS_TOKEN!;
+const MP_WEBHOOK_SECRET = isTestMode
+  ? (process.env.MP_WEBHOOK_SECRET_TEST || "")
+  : (process.env.MP_WEBHOOK_SECRET || "");
+
+console.log(`[MP create-preference] Modo: ${isTestMode ? '🧪 TEST' : '💰 PRODUCCIÓN'}`);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
