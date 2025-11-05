@@ -85,7 +85,7 @@ export function RightSidebar() {
     >
       {/* PANEL DE NOTIFICACIONES - Aparece cuando está expandido */}
       {isExpanded && userId && (
-        <div className="w-[350px] border-r border-[var(--main-sidebar-border)] h-screen overflow-hidden">
+        <div className="w-[350px] border-r border-[var(--main-sidebar-border)] h-screen overflow-hidden px-3">
           <NotificationDropdown
             userId={userId}
             onRefresh={fetchUnreadCount}
@@ -134,32 +134,7 @@ export function RightSidebar() {
                 </div>
               </button>
 
-              {/* Divisor visual - igual al sidebar izquierdo */}
-              <div className="my-3 h-[12px] flex items-center justify-center w-full">
-                <div className="w-8 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-              </div>
-
-              {/* Toggle de Tema (Dark/Light Mode) - h-10 como los demás botones */}
-              <button
-                onClick={handleToggleTheme}
-                className={cn(
-                  "h-10 w-8 rounded-md flex items-center justify-center transition-colors",
-                  "hover:bg-[var(--main-sidebar-button-hover-bg)]",
-                  "text-[var(--main-sidebar-fg)] hover:text-white"
-                )}
-                title={isDark ? "Modo claro" : "Modo oscuro"}
-                data-testid="button-theme-toggle"
-              >
-                <div className="h-8 w-8 flex items-center justify-center">
-                  {isDark ? (
-                    <Sun className="h-[18px] w-[18px]" />
-                  ) : (
-                    <Moon className="h-[18px] w-[18px]" />
-                  )}
-                </div>
-              </button>
-
-              {/* Ayuda/Soporte - h-10 */}
+              {/* Ayuda/Soporte - h-10 - ABAJO de notificaciones */}
               <button
                 className={cn(
                   "h-10 w-8 rounded-md flex items-center justify-center transition-colors",
@@ -177,8 +152,28 @@ export function RightSidebar() {
             </div>
           </div>
 
-          {/* SECCIÓN INFERIOR: Botón de Anclar - idéntico al sidebar izquierdo */}
+          {/* SECCIÓN INFERIOR: Tema y Anclar */}
           <div className="pt-3 pb-3 flex flex-col gap-[2px] items-center">
+            {/* Toggle de Tema (Dark/Light Mode) - ARRIBA del anclar */}
+            <button
+              onClick={handleToggleTheme}
+              className={cn(
+                "h-10 w-8 rounded-md flex items-center justify-center transition-colors",
+                "hover:bg-[var(--main-sidebar-button-hover-bg)]",
+                "text-[var(--main-sidebar-fg)] hover:text-white"
+              )}
+              title={isDark ? "Modo claro" : "Modo oscuro"}
+              data-testid="button-theme-toggle"
+            >
+              <div className="h-8 w-8 flex items-center justify-center">
+                {isDark ? (
+                  <Sun className="h-[18px] w-[18px]" />
+                ) : (
+                  <Moon className="h-[18px] w-[18px]" />
+                )}
+              </div>
+            </button>
+
             {/* Botón de Anclar/Desanclar (sin función por ahora) */}
             <button
               className={cn(

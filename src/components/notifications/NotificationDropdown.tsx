@@ -75,7 +75,7 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
     <div className="flex flex-col">
       <div className="p-4 pb-3">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-sm">Notificaciones</h3>
+          <h3 className="font-semibold text-sm" style={{ color: 'white' }}>Notificaciones</h3>
         </div>
         {unreadNotifications.length > 0 && (
           <Button
@@ -119,8 +119,9 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
                     className={cn(
-                      'w-full text-left p-3 hover:bg-accent transition-colors',
-                      isUnread && 'bg-primary/5'
+                      'w-full text-left p-3 transition-colors',
+                      isUnread && 'bg-primary/5',
+                      'hover:text-white'
                     )}
                     data-testid={`notification-${notification.id}`}
                   >
