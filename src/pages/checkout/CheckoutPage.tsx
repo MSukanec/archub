@@ -118,12 +118,13 @@ export default function CheckoutPage() {
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
 
+  // 🧪 TESTING: Deshabilitado temporalmente para probar fix de títulos/IDs únicos
   // Auto-select bank transfer when coupon is applied and MP is selected/blocked
-  useEffect(() => {
-    if (appliedCoupon && selectedMethod === "mercadopago") {
-      setSelectedMethod("transfer");
-    }
-  }, [appliedCoupon, selectedMethod]);
+  // useEffect(() => {
+  //   if (appliedCoupon && selectedMethod === "mercadopago") {
+  //     setSelectedMethod("transfer");
+  //   }
+  // }, [appliedCoupon, selectedMethod]);
 
   // User data and countries
   const { data: userData } = useCurrentUser();
@@ -255,18 +256,19 @@ export default function CheckoutPage() {
     }
   }, [country, countries, selectedMethod]);
 
+  // 🧪 TESTING: Deshabilitado temporalmente para probar fix de títulos/IDs únicos
   // Deseleccionar MercadoPago cuando se aplica un cupón
-  useEffect(() => {
-    if (appliedCoupon && selectedMethod === "mercadopago") {
-      setSelectedMethod(null);
-      toast({
-        title: "Seleccioná otro método de pago",
-        description: "Mercado Pago no está disponible temporalmente con cupones de descuento.",
-        variant: "default",
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appliedCoupon]);
+  // useEffect(() => {
+  //   if (appliedCoupon && selectedMethod === "mercadopago") {
+  //     setSelectedMethod(null);
+  //     toast({
+  //       title: "Seleccioná otro método de pago",
+  //       description: "Mercado Pago no está disponible temporalmente con cupones de descuento.",
+  //       variant: "default",
+  //     });
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [appliedCoupon]);
 
   // Limpiar cupón SOLO cuando cambia la moneda (NO cuando cambia el método)
   // IMPORTANTE: El descuento debe recalcularse con el nuevo precio en la nueva moneda
@@ -2073,8 +2075,9 @@ Titular: DNI 32322767`;
                         loading || 
                         priceLoading || 
                         !acceptTerms || 
-                        !acceptCommunications ||
-                        (!!appliedCoupon && selectedMethod === "mercadopago")
+                        !acceptCommunications
+                        // 🧪 TESTING: Deshabilitado temporalmente para probar fix de títulos/IDs únicos
+                        // || (!!appliedCoupon && selectedMethod === "mercadopago")
                       }
                       className="w-full h-12 text-base font-medium mt-6"
                       data-testid="button-continue-payment"
@@ -2083,11 +2086,6 @@ Titular: DNI 32322767`;
                         <>
                           <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                           Procesando...
-                        </>
-                      ) : (appliedCoupon && selectedMethod === "mercadopago") ? (
-                        <>
-                          <X className="h-5 w-5 mr-2" />
-                          Mercado Pago no disponible con cupones
                         </>
                       ) : !selectedMethod ? (
                         "Seleccioná un método de pago"
