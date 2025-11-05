@@ -275,11 +275,8 @@ function LayoutContent({
                     isViewMode={headerProps.isViewMode}
                     wide={wide}
                   >
-                    <div
-                      className={`${wide ? "" : "max-w-[1440px] mx-auto"} ${wide ? "px-0" : "px-6"} pt-3 pb-6 min-h-0`}
-                    >
-                      {children}
-                    </div>
+                    {/* PageLayout maneja el padding internamente, no aplicar padding aquí */}
+                    {children}
                   </PageLayout>
                 ) : (
                   <div

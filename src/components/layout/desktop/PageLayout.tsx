@@ -281,9 +281,7 @@ export function PageLayout({
       {/* Page Content - HEADER Y CONTENIDO juntos para que se muevan con scroll */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden">
         <div style={{ backgroundColor: "var(--layout-bg)" }}>
-          <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-0 ${
-            isDocked ? 'px-16' : 'px-16'
-          }`}>
+          <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} ${wide ? "px-0" : "px-6"} pt-0`}>
           {/* FILA 1: Icono + Título + Descripción a la izquierda + Selector a la derecha */}
           {/* COMENTADO - Ahora se muestra en MainHeader */}
           {/* <div className={`min-h-[50px] flex items-center justify-between ${!showSecondRow ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
@@ -618,9 +616,7 @@ export function PageLayout({
         </div>
 
         {/* Page Content */}
-        <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-6 pb-6 min-h-0 max-w-full overflow-x-hidden ${
-          isDocked ? 'px-16' : 'px-16'
-        }`}>
+        <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} ${wide ? "px-0" : "px-6"} pt-6 pb-6 min-h-0 max-w-full overflow-x-hidden`}>
           {children}
         </div>
       </div>
