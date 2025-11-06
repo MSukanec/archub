@@ -71,6 +71,7 @@ const PAGE_CONFIG: Record<string, { name: string; icon: any }> = {
   '/clients': { name: 'Clientes', icon: Users },
   
   // Admin
+  '/admin/dashboard': { name: 'Analytics Dashboard', icon: Activity },
   '/admin/administration': { name: 'Administración', icon: Users },
   '/admin/support': { name: 'Soporte', icon: Users },
   '/admin/payments': { name: 'Pagos', icon: Wallet },
@@ -100,7 +101,7 @@ const SECTION_DASHBOARDS: Record<string, string> = {
   'organization': '/organization/dashboard',
   'project': '/project/dashboard',
   'learning': '/learning/dashboard',
-  'admin': '/admin/administration',
+  'admin': '/admin/dashboard',
 };
 
 interface Tab {

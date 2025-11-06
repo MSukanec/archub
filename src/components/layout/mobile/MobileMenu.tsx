@@ -23,6 +23,7 @@ import {
   Wallet,
   ChevronLeft,
   Headphones,
+  BarChart3,
 } from "lucide-react";
 import { MobileMenuButton } from "./MobileMenuButton";
 import { Button } from "@/components/ui/button";
@@ -355,16 +356,31 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                   />
 
                   {isAdmin && (
-                    <MobileMenuButton
-                      icon={Crown}
-                      label="Administración"
-                      onClick={() => {
-                        setSidebarLevel('admin');
-                      }}
-                      isActive={location.startsWith('/admin')}
-                      showChevron={true}
-                      testId="button-mobile-admin"
-                    />
+                    <>
+                      <MobileMenuButton
+                        icon={BarChart3}
+                        label="Analytics"
+                        onClick={() => {
+                          setSidebarLevel('admin');
+                          navigate('/admin/dashboard');
+                          handleCloseMenu();
+                        }}
+                        isActive={location === '/admin/dashboard'}
+                        showChevron={false}
+                        testId="button-mobile-analytics"
+                      />
+                      
+                      <MobileMenuButton
+                        icon={Settings}
+                        label="Administración"
+                        onClick={() => {
+                          setSidebarLevel('admin');
+                        }}
+                        isActive={location.startsWith('/admin') && location !== '/admin/dashboard'}
+                        showChevron={true}
+                        testId="button-mobile-admin"
+                      />
+                    </>
                   )}
                 </>
               ) : (
