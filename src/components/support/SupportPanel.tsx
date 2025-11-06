@@ -14,6 +14,7 @@ import { ArrowUp, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { queryClient } from '@/lib/queryClient';
 
 interface SupportMessage {
   sender: 'user' | 'admin';
@@ -89,6 +90,8 @@ export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: S
         const data = await response.json();
         if (data?.messages) {
           setMessages(data.messages);
+          // Invalidar el contador de mensajes sin leer después de cargar (ya se marcaron como leídos en el backend)
+          queryClient.invalidateQueries({ queryKey: ['unread-user-support-messages-count'] });
         }
       }
     } catch (error) {

@@ -36,6 +36,14 @@ export function registerSupportRoutes(app: Express, deps: RouteDeps) {
 
       const userId = dbUser.id;
 
+      // Marcar todos los mensajes del admin como leídos por el usuario
+      await authenticatedSupabase
+        .from('support_messages')
+        .update({ read_by_user: true })
+        .eq('user_id', userId)
+        .eq('sender', 'admin')
+        .eq('read_by_user', false);
+
       // Obtener mensajes de soporte del usuario usando Supabase (respeta RLS)
       const { data: messages, error: messagesError } = await authenticatedSupabase
         .from('support_messages')

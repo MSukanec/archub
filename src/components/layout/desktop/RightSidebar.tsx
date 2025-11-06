@@ -20,6 +20,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { getUnreadCount, subscribeUserNotifications } from '@/lib/notifications';
 import { useUnreadSupportMessages } from '@/hooks/use-unread-support-messages';
+import { useUnreadUserSupportMessages } from '@/hooks/use-unread-user-support-messages';
 import { useEffect } from 'react';
 
 export function RightSidebar() {
@@ -35,8 +36,14 @@ export function RightSidebar() {
   const [unreadCount, setUnreadCount] = useState(0);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Contador de mensajes sin leer (solo para admins)
-  const { data: unreadSupportCount = 0 } = useUnreadSupportMessages();
+  // Contador de mensajes sin leer
+  // Para admins: cuenta mensajes de usuarios sin leer
+  const { data: unreadSupportCountAdmin = 0 } = useUnreadSupportMessages();
+  // Para usuarios: cuenta mensajes de admin sin leer
+  const { data: unreadSupportCountUser = 0 } = useUnreadUserSupportMessages(userId);
+  
+  // Usar el contador apropiado según el rol
+  const unreadSupportCount = isAdmin ? unreadSupportCountAdmin : unreadSupportCountUser;
 
   const handleToggleTheme = async () => {
     const userId = userData?.user?.id;
@@ -208,7 +215,7 @@ export function RightSidebar() {
             >
               <div className="h-8 w-8 flex items-center justify-center relative">
                 <Headphones className="h-[18px] w-[18px]" />
-                {isAdmin && unreadSupportCount > 0 && (
+                {unreadSupportCount > 0 && (
                   <span 
                     className="absolute top-0 right-0 h-4 min-w-[16px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold text-white border-0"
                     style={{ backgroundColor: 'var(--accent)', transform: 'translate(25%, -25%)' }}
