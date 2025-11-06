@@ -53,7 +53,9 @@ export function useProjects(organizationId: string | undefined) {
           project_data (
             project_type_id,
             modality_id,
-            project_image_url
+            project_image_url,
+            project_type:project_types(id, name),
+            modality:modalities(id, name)
           )
         `)
         .eq('organization_id', organizationId)
@@ -77,7 +79,9 @@ export function useProjects(organizationId: string | undefined) {
             projectData = {
               project_type_id: pd.project_type_id,
               modality_id: pd.modality_id,
-              project_image_url: pd.project_image_url
+              project_image_url: pd.project_image_url,
+              project_type: pd.project_type,
+              modality: pd.modality
             }
           }
         }
@@ -90,6 +94,7 @@ export function useProjects(organizationId: string | undefined) {
         return transformedProject
       })
 
+      console.log('Transformed projects with types:', transformedData);
       return transformedData
     },
     enabled: !!organizationId && !!supabase,
@@ -113,7 +118,9 @@ export function useProject(projectId: string | undefined) {
           project_data (
             project_type_id,
             modality_id,
-            project_image_url
+            project_image_url,
+            project_type:project_types(id, name),
+            modality:modalities(id, name)
           )
         `)
         .eq('id', projectId)
@@ -132,7 +139,9 @@ export function useProject(projectId: string | undefined) {
           projectData = {
             project_type_id: pd.project_type_id,
             modality_id: pd.modality_id,
-            project_image_url: pd.project_image_url
+            project_image_url: pd.project_image_url,
+            project_type: pd.project_type,
+            modality: pd.modality
           }
         }
       }
