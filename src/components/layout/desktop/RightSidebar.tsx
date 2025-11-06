@@ -83,6 +83,8 @@ export function RightSidebar() {
   useEffect(() => {
     if (!supabase || !userId) return;
 
+    let channel: any = null;
+
     const setupRealtimeSubscription = async () => {
       // Obtener el user_id de la tabla users
       const { data: userData } = await supabase
@@ -98,7 +100,7 @@ export function RightSidebar() {
       // Crear canal único para este usuario/admin
       const channelName = isAdmin ? 'admin_support_badge' : `user_support_badge_${dbUserId}`;
       
-      const channel = supabase
+      channel = supabase
         .channel(channelName)
         .on(
           'postgres_changes',
@@ -123,16 +125,14 @@ export function RightSidebar() {
           }
         )
         .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
     };
 
-    const cleanupPromise = setupRealtimeSubscription();
+    setupRealtimeSubscription();
 
     return () => {
-      cleanupPromise.then(cleanup => cleanup?.());
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
   }, [userId, isAdmin]);
 
