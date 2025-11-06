@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { queryClient } from '@/lib/queryClient';
+import { useQuery, useMutation } from '@tanstack/react-query';
 
 interface SupportMessage {
   sender: 'user' | 'admin';
@@ -32,10 +33,7 @@ interface SupportPanelProps {
 const DISCORD_LINK = 'https://discord.com/channels/868615664070443008';
 
 export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: SupportPanelProps) {
-  const [messages, setMessages] = useState<SupportMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
-  const [isSending, setIsSending] = useState(false);
-  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
@@ -52,10 +50,36 @@ export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: S
     textarea.style.height = `${newHeight}px`;
   }, [inputValue]);
 
-  // Cargar historial al montar
-  useEffect(() => {
-    loadHistory();
-  }, []);
+  // Cargar mensajes con React Query (auto-refresh cada 2 segundos)
+  const { data: messages = [], isLoading: isLoadingHistory } = useQuery({
+    queryKey: ['support-messages', userId],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        return [];
+      }
+
+      const response = await fetch('/api/support/messages', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Invalidar el contador de mensajes sin leer después de cargar
+        queryClient.invalidateQueries({ queryKey: ['unread-user-support-messages-count'] });
+        return data.messages || [];
+      }
+      
+      return [];
+    },
+    refetchInterval: 2000, // Auto-refresh cada 2 segundos para chat en tiempo real
+    refetchOnWindowFocus: true,
+  });
 
   const hasMessages = messages.length > 0;
 
@@ -69,56 +93,9 @@ export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: S
     }
   }, [messages, hasMessages]);
 
-  const loadHistory = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session?.access_token) {
-        setIsLoadingHistory(false);
-        return;
-      }
-
-      const response = await fetch('/api/support/messages', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data?.messages) {
-          setMessages(data.messages);
-          // Invalidar el contador de mensajes sin leer después de cargar (ya se marcaron como leídos en el backend)
-          queryClient.invalidateQueries({ queryKey: ['unread-user-support-messages-count'] });
-        }
-      }
-    } catch (error) {
-      console.error('Error loading support history:', error);
-    } finally {
-      setIsLoadingHistory(false);
-    }
-  };
-
-  const handleSendMessage = async (messageText?: string) => {
-    const textToSend = messageText || inputValue.trim();
-    
-    if (!textToSend || isSending) return;
-
-    setIsSending(true);
-    
-    // Agregar mensaje del usuario localmente
-    const userMessage: SupportMessage = {
-      sender: 'user',
-      message: textToSend,
-      created_at: new Date().toISOString()
-    };
-    
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue("");
-
-    try {
+  // Mutation para enviar mensajes
+  const sendMessageMutation = useMutation({
+    mutationFn: async (message: string) => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session?.access_token) {
@@ -131,7 +108,7 @@ export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: S
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ message: textToSend })
+        body: JSON.stringify({ message })
       });
 
       if (!response.ok) {
@@ -139,26 +116,25 @@ export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: S
         throw new Error(errorData.error || 'Error al enviar mensaje');
       }
 
-      // Recargar historial para obtener el mensaje guardado con ID
-      await loadHistory();
-    } catch (error: any) {
-      console.error('Error sending message:', error);
-      
-      // Remover mensaje local si falló
-      setMessages(prev => prev.filter(msg => msg !== userMessage));
-      
-      alert(`Error: ${error.message || 'No se pudo enviar el mensaje'}`);
-    } finally {
-      setIsSending(false);
-    }
+      return response.json();
+    },
+    onSuccess: () => {
+      // Refrescar inmediatamente la lista de mensajes
+      queryClient.invalidateQueries({ queryKey: ['support-messages', userId] });
+      setInputValue("");
+    },
+  });
+
+  const handleSendMessage = () => {
+    const textToSend = inputValue.trim();
+    if (!textToSend || sendMessageMutation.isPending) return;
+    sendMessageMutation.mutate(textToSend);
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      if (inputValue.trim() && !isSending) {
-        handleSendMessage();
-      }
+      handleSendMessage();
     }
   };
 
@@ -274,7 +250,7 @@ export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: S
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Escribe tu mensaje..."
-            disabled={isSending}
+            disabled={sendMessageMutation.isPending}
             rows={1}
             className={cn(
               "flex-1 resize-none bg-transparent",
@@ -294,7 +270,7 @@ export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: S
           <button
             type="button"
             onClick={() => handleSendMessage()}
-            disabled={!inputValue.trim() || isSending}
+            disabled={!inputValue.trim() || sendMessageMutation.isPending}
             className={cn(
               "flex-shrink-0 p-1.5 rounded-full",
               "bg-[var(--accent)] hover:opacity-90 transition-opacity",

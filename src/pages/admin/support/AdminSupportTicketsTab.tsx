@@ -82,7 +82,7 @@ const AdminSupportTicketsTab = () => {
     markAsReadMutation.mutate(userId);
   };
 
-  // Fetch all conversations
+  // Fetch all conversations con auto-refresh cada 3 segundos
   const { data: conversations = [], isLoading } = useQuery({
     queryKey: ['admin-support-conversations'],
     queryFn: async () => {
@@ -106,8 +106,9 @@ const AdminSupportTicketsTab = () => {
 
       const data = await response.json();
       return data.conversations as Conversation[];
-    }
-    // Sin auto-refresh para evitar molestias - el usuario puede refrescar manualmente
+    },
+    refetchInterval: 3000, // Auto-refresh cada 3 segundos
+    refetchOnWindowFocus: true, // Refresh al volver a la ventana
   });
 
   // Send admin reply
