@@ -10,16 +10,11 @@ Preferred communication style: Simple, everyday language.
 
 ### UI/UX Decisions
 - **Design System**: "new-york" style with a neutral color palette, dark mode, and reusable UI components, leveraging `shadcn/ui` and Tailwind CSS.
-- **Typography System**: Unified **Inter Variable Font** (100-900 weights) with Apple-style optical letter-spacing (-0.011em body, -0.022em headings), antialiased rendering, and consistent font weights across all components. Optimized line-heights (1.2-1.5) for modern, clean appearance similar to SF Pro Display.
-- **Dynamic Color System**: Comprehensive project-based color theming using `chroma-js` for intelligent color calculations, including dynamic accent colors, hover states, foreground colors, and organic radial gradients. Implemented with `useProjectAccentColor` hook and CSS variables.
-  - **Fase 3.1 - Visual Breathing System** (Nov 2024): All UI components automatically "breathe" the project color. Badge, Button, Input, Progress primitives use `var(--accent)` with smooth transitions. Organic radial gradients with multiple color stops (5 levels), dual-layer blur effects (40px/60px), and breathing animations. Inspired by mood slider UX where everything changes color based on selection.
-  - **Fase 3.3 - Project Visual Identity System** (Nov 2024): Complete dynamic color palette generation for each project. The `useProjectAccentColor` hook generates harmonic color schemes (--chart-1 through --chart-5, --accent-subtle/muted/intense, --border-accent) using analogous, complementary, and triadic color relationships. All values clamped to valid CSS ranges (0-100%) to prevent rendering errors with desaturated colors. Charts (ActivityChart, OrganizationActivityChart, ProjectActivityChart) updated to use dynamic variables, creating unified project branding across all visualizations.
-- **Modals**: Responsive Dialog component (right-side panel on desktop, fullscreen on mobile).
-  - **Modal Development Pattern** (Nov 2024): Standardized pattern documented in `prompts/Modals.md`. ALWAYS use `FormModalLayout`, `FormModalHeader` (with title, description, and icon), `FormModalFooter`, React Hook Form with Zod validation, and `useMutation` from React Query. Never use async/await directly in onSubmit. All modals must have descriptions to provide context. Reference modals: NotificationFormModal, ChangelogFormModal, AnnouncementFormModal.
-- **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub.
-  - **UserQuickAccess Context-Aware Popover** (Nov 2024): Avatar popover in Main Header intelligently hides organization and project selectors on learning and profile pages to avoid mixing concepts for focused users. Uses route detection with `.includes()` to catch all variants (/learning, /admin/learning, /profile, etc.). Order: Ver Perfil button first, then conditional selectors, then plan info and logout. Clean separator management ensures consistent visual appearance whether selectors are shown or hidden.
-- **Component Standardization**: Standardized `StatCard` and custom `LoadingSpinner` components that use dynamic accent colors.
-- **Home Page UX Flow**: Minimalist AI welcome interface with dynamic greetings and action suggestions. Chat input, disclaimer, and history toggle commented out (Nov 2024) - users interact with AI via FloatingAIChat. Home serves as a dashboard with AI-generated greeting and quick action buttons.
+- **Typography System**: Unified Inter Variable Font with Apple-style optical letter-spacing, antialiased rendering, and consistent font weights.
+- **Dynamic Color System**: Project-based color theming using `chroma-js` for intelligent color calculations, including dynamic accent colors, hover states, foreground colors, and organic radial gradients. All UI components automatically "breathe" the project color.
+- **Modals**: Responsive Dialog component (right-side panel on desktop, fullscreen on mobile) with a standardized development pattern using `FormModalLayout`, React Hook Form with Zod validation, and `useMutation` from React Query.
+- **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub. UserQuickAccess Popover is context-aware, hiding irrelevant selectors on specific pages.
+- **Home Page UX Flow**: Minimalist AI welcome interface with dynamic greetings and quick action buttons.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui, Tailwind CSS, Zustand, Wouter, TanStack Query.
@@ -27,45 +22,25 @@ Preferred communication style: Simple, everyday language.
 - **Database**: PostgreSQL with Drizzle ORM.
 - **Authentication**: Supabase Auth (Email/password, Google OAuth).
 - **Data Flow**: React Query for server state, Express.js for REST APIs, Drizzle ORM for database operations with cache invalidation.
-- **Database Views**: Extensive use of optimized database views (e.g., `course_progress_view`) for efficient data fetching.
+- **Database Views**: Extensive use of optimized database views for efficient data fetching.
 
 ### Feature Specifications
 - **Core Modules**: Home page (AI-powered), Project Management, Financial Management, Document Management, Learning Module, and Notification System.
-- **Learning Module ("Capacitaciones")**: Course management, Vimeo integration, progress tracking, note-taking, and Mercado Pago integration.
-  - **UX Improvements** (Nov 2024): Reordered course tabs for better UX flow (Visión General, Reproductor, Contenido, Apuntes, Marcadores). Renamed "Lecciones" to "Reproductor" for clarity. Enhanced CourseContentTab with direct lesson navigation button (icon-only, left of "..." menu). Moved favorite functionality to popover menu for cleaner interface. Renamed CourseViewer component to CoursePlayerTab for consistency with tab naming convention.
-  - **FloatingCourseLessons Mobile Navigation** (Nov 2024): Dedicated mobile-only floating button (bottom-left) for course lesson navigation. Features fullscreen drawer with slide-in animation, identical styling to FloatingAIChat (breathing effect, glow, ping animation), auto-expand of active lesson's module with fallback to first module, subtle scrollbar styling matching sidebar background, and click-to-navigate with automatic drawer close. Implemented in `src/components/ui-custom/layout/FloatingCourseLessons.tsx` and integrated in Layout.tsx for mobile-only visibility.
-- **Admin Management**: Reorganized admin section split into two focused pages for better UX and separation of concerns.
-  - **Admin Reorganization** (Nov 2024): Split single AdminCommunity page into two dedicated pages: AdminAdmin (`/admin/administration`) with 3 tabs (Resumen, Organizaciones, Usuarios) for core platform management, and AdminSupport (`/admin/support`) with 4 tabs (Anuncios, Notificaciones, Cambios, Soporte) for user-facing communication. All navigation (sidebar, mobile menu), routing, breadcrumbs, presence tracking, and query keys updated for consistency.
-  - **Global Announcements System** (Nov 2024): Admin tab for creating platform-wide announcements with audience targeting (all, free, pro, teams), type-based gradients (info, warning, error, success), date range control, smart links (mailto:, https:, tel:, wa.me/), primary/secondary buttons, and localStorage-based dismissal tracking. Visual banner appears below MainHeader in Layout.
-- **Coupon System**: Discount coupon system for courses.
-  - **Mercado Pago Coupon Workaround** (Nov 2024): Temporary limitation where Mercado Pago is blocked when a coupon is applied. When user applies a coupon, MP option becomes disabled with informative message (orange banner with WhatsApp contact link). Payment methods reorder automatically: Transfer first, PayPal second, MP last (grayed out). Auto-deselects MP if already selected when coupon applied. Button blocked if MP+coupon selected. Implementation: `src/utils/paymentOrder.ts` (reorder logic), `src/pages/checkout/CheckoutPage.tsx` (UI blocking and messaging).
-- **Payment Architecture**: Unified `payments` table supporting Mercado Pago (ARS), PayPal (USD), and bank transfers with admin approval.
-  - **Bank Transfer Discount System** (Nov 2024): Automatic 5% discount for users who choose bank transfer payment method to incentivize direct payments and reduce payment gateway fees. Discount is multiplicative (applies AFTER coupon discounts), visible in checkout summary, and persisted in database. Implementation includes: `bank_transfer_payments` table with `discount_percent` and `discount_amount` columns, frontend calculation in `CheckoutPage.tsx`, backend persistence in `server/routes/bank-transfer.ts`. Visual badge "💸 -5% Extra" highlights the promotion in payment method selection.
+- **Learning Module ("Capacitaciones")**: Course management, Vimeo integration, progress tracking, note-taking, and Mercado Pago integration. Includes improved UX for course navigation and mobile-specific floating lesson navigation.
+- **Admin Management**: Reorganized admin section with a comprehensive analytics dashboard for user presence and behavior metrics, and dedicated pages for administration and support. Global announcement system with audience targeting and dismissal tracking.
+- **Coupon System**: Discount coupon system for courses, with a workaround for Mercado Pago limitations when coupons are applied.
+- **Payment Architecture**: Unified `payments` table supporting Mercado Pago, PayPal, and bank transfers with an automatic 5% discount for bank transfers.
 - **Access Control**: `PlanRestricted` component system with admin bypass.
 - **Cost System**: Three-tier cost system (Archub Cost, Organization Cost, Independent Cost) for budget items.
-- **AI Integration**: GPT-4o-powered intelligent assistant with comprehensive financial analysis capabilities, dynamic greetings, and conversational chat with persistent history.
-  - **System Prompts**: Centralized AI directives for greetings and chat.
-  - **Greeting Cache System**: `ia_user_greetings` table caches greetings to reduce GPT calls, independent of user prompt quota.
-  - **AI Financial Analysis System**: 7 specialized function-calling tools for financial queries (e.g., `getTotalPaymentsByContactAndProject`, `getOrganizationBalance`, `getProjectFinancialSummary`). Includes detailed breakdown for `getContactMovements` to prevent GPT hallucination.
-  - **Shared Utilities Module**: Natural language date parser, currency converter, and consistent Spanish response formatters.
-  - **Query Optimization System**: Optimized queries for all 7 AI finance functions, selecting only required fields from `movements_view`.
-  - **Anti-Hallucination System**: `getContactMovements` always returns individual movement details for the latest 15 movements.
-  - **FloatingAIChat Visibility System** (Nov 2024): Route-based allowlist controls where AI assistant appears. Shows on work routes (/home, /dashboard, /projects, /movements, /construction, /admin, etc.), hidden on learning, profile, landing, and pricing pages. Desktop-only with FREE plan restrictions (blur preview). Implemented in Layout.tsx with comprehensive 19-route allowlist including Home.
-- **User Presence & Analytics System** (Nov 2024): Dual-layer tracking system for real-time presence and usage analytics.
-  - **Real-Time Presence** (`user_presence` table): Shows who is online now and what section they're viewing. Updates every heartbeat (30s), visible in OnlineUsersIndicator header component. Managed by `presenceStore` (Zustand) with Supabase Realtime subscriptions for live updates.
-  - **Usage Analytics** (`user_view_history` table): Historical tracking of time spent per view for business intelligence. Records `entered_at`, `exited_at`, and `duration_seconds` for each navigation. Fire-and-forget RPC calls (`analytics_enter_view`, `analytics_exit_previous_view`) prevent UI blocking. Automatic cleanup on logout via PresenceInitializer.
-  - **Architecture**: Extends existing heartbeat system without duplication. `use-presence-tracker` hook handles both layers: analytics (duration tracking) + presence (real-time state). Route mapping converts URLs to readable view names (e.g., `/admin/administration` → `admin_administration`, `/admin/support` → `admin_support`).
-  - **Cleanup Strategy**: Abandoned sessions (user closes app without logout) closed automatically via optional cronjob (`analytics_cleanup_abandoned_sessions` RPC). Documentation in `prompts/analytics/analytics-cleanup.md`.
-  - **Business Value**: Enables Mixpanel-style metrics (engagement per view, drop-off points, navigation flows, top active users, activation time) without third-party dependencies. Foundation for future features like dynamic onboarding, contextual help, and gamification.
+- **AI Integration**: GPT-4o-powered intelligent assistant with comprehensive financial analysis capabilities using 7 specialized function-calling tools, dynamic greetings, and conversational chat with persistent history. Includes a greeting cache system and anti-hallucination measures. FloatingAIChat visibility is route-based and restricted by plan.
+- **User Presence & Analytics System**: Dual-layer tracking for real-time user presence (`user_presence` table) and historical usage analytics (`user_view_history` table) for business intelligence, including time spent per view.
 
 ### System Design Choices
-- **Backend Modular Architecture**: Monolithic `server/routes.ts` modularized into domain-specific route modules.
-- **Frontend Performance Optimizations**: Code-splitting and lazy loading for Admin, Learning, and Media pages.
+- **Backend Modular Architecture**: Modularized domain-specific route modules.
+- **Frontend Performance Optimizations**: Code-splitting and lazy loading.
 - **Performance Optimizations (Gacela Mode)**: Sub-second page loads using database views, smart caching, and optimized backend endpoints.
-- **Personnel Module Organization**: Reorganized into modular components for improved maintainability.
+- **Personnel Module Organization**: Reorganized into modular components.
 - **Personnel Assignment Modal Optimization**: Enhanced with real-time search filtering and optimized loading.
-- **Database Table Updates**: Renamed `attendees` to `personnel_attendees` for consistency.
-- **Personnel List Alphabetical Sorting**: Guaranteed alphabetical order through query-level sorting.
 
 ## External Dependencies
 - **Supabase**: Authentication.
