@@ -28,7 +28,7 @@ interface Notification {
   read_count?: number;
 }
 
-const AdminCommunityNotifications = () => {
+const AdminSupportNotificationsTab = () => {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { openModal } = useGlobalModalStore()
@@ -258,4 +258,4 @@ const AdminCommunityNotifications = () => {
   )
 }
 
-export default AdminCommunityNotifications
+export default AdminSupportNotificationsTab

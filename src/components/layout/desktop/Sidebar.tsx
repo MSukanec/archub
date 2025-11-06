@@ -39,7 +39,8 @@ import {
   ArrowLeft,
   MessageCircle,
   Wallet,
-  CreditCard
+  CreditCard,
+  Headphones
 } from "lucide-react";
 import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -147,7 +148,8 @@ export function Sidebar() {
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
       return [
-        { id: 'community', label: 'Comunidad', icon: Users, href: '/admin/community' },
+        { id: 'administration', label: 'Administración', icon: Settings, href: '/admin/administration' },
+        { id: 'support', label: 'Soporte', icon: Headphones, href: '/admin/support' },
         { id: 'payments', label: 'Pagos', icon: Wallet, href: '/admin/payments' },
         { id: 'courses', label: 'Cursos', icon: BookOpen, href: '/admin/courses' },
         { id: 'layout', label: 'Layout', icon: Layers, href: '/admin/layout' },
@@ -461,7 +463,7 @@ export function Sidebar() {
                   <button
                     onClick={() => {
                       setSidebarLevel('admin');
-                      navigate('/admin/community');
+                      navigate('/admin/administration');
                     }}
                     className={cn(
                       "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",

@@ -22,6 +22,7 @@ import {
   MessageCircle,
   Wallet,
   ChevronLeft,
+  Headphones,
 } from "lucide-react";
 import { MobileMenuButton } from "./MobileMenuButton";
 import { Button } from "@/components/ui/button";
@@ -164,7 +165,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
       return [
-        { id: 'community', label: 'Comunidad', icon: Crown, href: '/admin/community' },
+        { id: 'administration', label: 'Administración', icon: Settings, href: '/admin/administration' },
+        { id: 'support', label: 'Soporte', icon: Headphones, href: '/admin/support' },
         { id: 'payments', label: 'Pagos', icon: Wallet, href: '/admin/payments' },
         { id: 'courses', label: 'Cursos', icon: BookOpen, href: '/admin/courses' },
         { id: 'layout', label: 'Layout', icon: Layers, href: '/admin/layout' },

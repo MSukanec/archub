@@ -33,7 +33,7 @@ interface Conversation {
   unread_count: number;
 }
 
-const AdminCommunitySupportTab = () => {
+const AdminSupportTicketsTab = () => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState('');
   const { toast } = useToast();
@@ -357,4 +357,4 @@ const AdminCommunitySupportTab = () => {
   );
 };
 
-export default AdminCommunitySupportTab;
+export default AdminSupportTicketsTab;

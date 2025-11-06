@@ -27,7 +27,7 @@ interface ChangelogEntry {
   } | null;
 }
 
-const AdminCommunityChangelog = () => {
+const AdminSupportChangelogTab = () => {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { openModal } = useGlobalModalStore()
@@ -210,4 +210,4 @@ const AdminCommunityChangelog = () => {
   )
 }
 
-export default AdminCommunityChangelog
+export default AdminSupportChangelogTab

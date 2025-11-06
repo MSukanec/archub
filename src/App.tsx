@@ -59,7 +59,8 @@ import SelectMode from "@/pages/public/SelectMode";
 import Activity from "@/pages/professional/organization/Activity";
 
 // Admin Pages (Lazy Loaded - solo admins las usan)
-const AdminCommunity = lazy(() => import("@/pages/admin/community/AdminCommunity"));
+const AdminAdmin = lazy(() => import("@/pages/admin/administration/AdminAdmin"));
+const AdminSupport = lazy(() => import("@/pages/admin/support/AdminSupport"));
 const AdminPayments = lazy(() => import("@/pages/admin/payments/AdminPayments"));
 const AdminCosts = lazy(() => import("@/pages/admin/costs/AdminCosts"));
 const AdminTasks = lazy(() => import("@/pages/admin/tasks/AdminTasks"));
@@ -234,10 +235,17 @@ function Router() {
 
 
         {/* Admin Routes - Lazy Loaded (solo se cargan cuando un admin accede) */}
-        <Route path="/admin/community">
+        <Route path="/admin/administration">
           <Suspense fallback={<LazyLoadFallback />}>
             <AuthAdmin>
-              <AdminCommunity />
+              <AdminAdmin />
+            </AuthAdmin>
+          </Suspense>
+        </Route>
+        <Route path="/admin/support">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <AuthAdmin>
+              <AdminSupport />
             </AuthAdmin>
           </Suspense>
         </Route>

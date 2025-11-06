@@ -17,7 +17,7 @@ interface AnnouncementWithCreator extends GlobalAnnouncement {
   } | null;
 }
 
-const AdminCommunityAnnouncementsTab = () => {
+const AdminSupportAnnouncementsTab = () => {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { openModal } = useGlobalModalStore()
@@ -237,4 +237,4 @@ const AdminCommunityAnnouncementsTab = () => {
   );
 };
 
-export default AdminCommunityAnnouncementsTab;
+export default AdminSupportAnnouncementsTab;

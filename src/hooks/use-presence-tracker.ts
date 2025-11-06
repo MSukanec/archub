@@ -40,7 +40,8 @@ function mapRouteToView(path: string): string {
   if (path.startsWith('/learning')) return 'learning';
   
   // Admin
-  if (path.startsWith('/admin/community')) return 'admin_community';
+  if (path.startsWith('/admin/administration')) return 'admin_administration';
+  if (path.startsWith('/admin/support')) return 'admin_support';
   if (path.startsWith('/admin/payments')) return 'admin_payments';
   if (path.startsWith('/admin/courses')) return 'admin_courses';
   if (path.startsWith('/admin/costs')) return 'admin_costs';

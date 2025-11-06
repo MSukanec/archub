@@ -94,7 +94,7 @@ function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
   );
 }
 
-const AdminCommunityUsers = () => {
+const AdminAdminUsers = () => {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -312,4 +312,4 @@ const AdminCommunityUsers = () => {
   )
 }
 
-export default AdminCommunityUsers;
+export default AdminAdminUsers;

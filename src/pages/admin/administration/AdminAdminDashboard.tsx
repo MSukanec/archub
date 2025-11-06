@@ -22,7 +22,7 @@ interface DashboardStats {
   newProjectsLastMonth: number
 }
 
-export default function AdminCommunityDashboard() {
+export default function AdminAdminDashboard() {
   // Fetch dashboard statistics - OPTIMIZADO
   const { data: stats, isLoading } = useQuery({
     queryKey: ['admin-community-dashboard'],
