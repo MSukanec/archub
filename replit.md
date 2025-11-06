@@ -27,7 +27,7 @@ Preferred communication style: Simple, everyday language.
 ### Feature Specifications
 - **Core Modules**: Home page (AI-powered), Project Management, Financial Management, Document Management, Learning Module, and Notification System.
 - **Learning Module ("Capacitaciones")**: Course management, Vimeo integration, progress tracking, note-taking, and Mercado Pago integration. Includes improved UX for course navigation and mobile-specific floating lesson navigation.
-- **Admin Management**: Reorganized admin section with a comprehensive analytics dashboard for user presence and behavior metrics, and dedicated pages for administration and support. Global announcement system with audience targeting and dismissal tracking.
+- **Admin Management**: Reorganized admin section with comprehensive analytics dashboard (`/admin/dashboard`) showing 5 KPI sections: real-time active users, engagement by view with horizontal bar chart, top active users table with current/last visited page below username, drop-off analysis, and hourly activity line chart. Includes date range filtering (Today/7days/30days) and dedicated pages for administration and support. Global announcement system with audience targeting and dismissal tracking. Top Active Users table shows live status (📍 online / ⏸️ offline) with fallback to last visited page from history.
 - **Coupon System**: Discount coupon system for courses, with a workaround for Mercado Pago limitations when coupons are applied.
 - **Payment Architecture**: Unified `payments` table supporting Mercado Pago, PayPal, and bank transfers with an automatic 5% discount for bank transfers.
 - **Access Control**: `PlanRestricted` component system with admin bypass.
