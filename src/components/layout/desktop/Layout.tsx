@@ -34,6 +34,7 @@ interface Tab {
   id: string;
   label: string;
   isActive: boolean;
+  badgeCount?: number; // Opcional: contador para mostrar en la tab
 }
 
 interface LayoutProps {

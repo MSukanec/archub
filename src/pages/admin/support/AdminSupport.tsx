@@ -6,16 +6,41 @@ import AdminSupportAnnouncementsTab from './AdminSupportAnnouncementsTab';
 import AdminSupportNotificationsTab from './AdminSupportNotificationsTab';
 import AdminSupportChangelogTab from './AdminSupportChangelogTab';
 import AdminSupportTicketsTab from './AdminSupportTicketsTab';
+import { useUnreadSupportMessages } from '@/hooks/use-unread-support-messages';
 
 const AdminSupport = () => {
   const [activeTab, setActiveTab] = useState('soporte');
   const { openModal } = useGlobalModalStore();
 
+  // Obtener badges para cada tab
+  const { data: unreadSupportCount = 0 } = useUnreadSupportMessages();
+  // TODO: Agregar hooks para anuncios, notificaciones y cambios según sea necesario
+
   const tabs = [
-    { id: 'soporte', label: 'Soporte', isActive: activeTab === 'soporte' },
-    { id: 'anuncios', label: 'Anuncios', isActive: activeTab === 'anuncios' },
-    { id: 'notificaciones', label: 'Notificaciones', isActive: activeTab === 'notificaciones' },
-    { id: 'cambios', label: 'Cambios', isActive: activeTab === 'cambios' }
+    { 
+      id: 'soporte', 
+      label: 'Soporte', 
+      isActive: activeTab === 'soporte',
+      badgeCount: unreadSupportCount
+    },
+    { 
+      id: 'anuncios', 
+      label: 'Anuncios', 
+      isActive: activeTab === 'anuncios',
+      // badgeCount: unreadAnnouncementsCount // Agregar cuando se implemente
+    },
+    { 
+      id: 'notificaciones', 
+      label: 'Notificaciones', 
+      isActive: activeTab === 'notificaciones',
+      // badgeCount: unreadNotificationsCount // Agregar cuando se implemente
+    },
+    { 
+      id: 'cambios', 
+      label: 'Cambios', 
+      isActive: activeTab === 'cambios',
+      // badgeCount: unreadChangelogsCount // Agregar cuando se implemente
+    }
   ];
 
   const getActionButton = () => {

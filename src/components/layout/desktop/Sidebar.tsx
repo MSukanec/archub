@@ -478,7 +478,7 @@ export function Sidebar() {
                     )}
                     data-testid="sidebar-button-administration"
                   >
-                    <div className="flex items-center justify-center w-8 flex-shrink-0">
+                    <div className="flex items-center justify-center w-8 flex-shrink-0 relative">
                       <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
                         <Crown className={cn(
                           "h-4 w-4 transition-colors",
@@ -486,6 +486,16 @@ export function Sidebar() {
                           "group-hover:text-[var(--accent)]"
                         )} />
                       </div>
+                      {/* Badge con total de notificaciones de admin */}
+                      {unreadCount > 0 && (
+                        <span 
+                          className="absolute -top-1 -right-1 h-4 min-w-[16px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold text-white border-0"
+                          style={{ backgroundColor: 'var(--accent)' }}
+                          data-testid="badge-admin-total"
+                        >
+                          {unreadCount > 99 ? '99+' : unreadCount}
+                        </span>
+                      )}
                     </div>
                     {isExpanded && (
                       <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">

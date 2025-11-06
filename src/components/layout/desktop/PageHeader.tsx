@@ -8,6 +8,7 @@ interface Tab {
   isActive?: boolean;
   onClick?: () => void;
   href?: string;
+  badgeCount?: number; // Opcional: contador para mostrar en la tab
 }
 
 interface ActionButton {
@@ -86,7 +87,17 @@ export function Header({ icon, title, description, tabs = [], actions = [], clas
                     : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] border-transparent"
                 )}
               >
-                {tab.label}
+                <span className="flex items-center gap-2">
+                  {tab.label}
+                  {tab.badgeCount !== undefined && tab.badgeCount > 0 && (
+                    <span 
+                      className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full text-[10px] font-bold text-white"
+                      style={{ backgroundColor: 'var(--accent)' }}
+                    >
+                      {tab.badgeCount > 99 ? '99+' : tab.badgeCount}
+                    </span>
+                  )}
+                </span>
               </button>
             ))}
           </div>
