@@ -152,15 +152,16 @@ export function RightSidebar() {
                 data-testid="button-notifications"
                 onMouseEnter={() => handleMouseEnter('notifications')}
               >
-                <div className="h-8 w-8 flex items-center justify-center">
+                <div className="h-8 w-8 flex items-center justify-center relative">
                   <Bell className="h-[18px] w-[18px]" />
                   {unreadCount > 0 && (
-                    <Badge
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-[10px] flex items-center justify-center bg-accent text-accent-foreground border-0"
+                    <span 
+                      className="absolute top-0 right-0 h-4 min-w-[16px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold text-white border-0"
+                      style={{ backgroundColor: 'var(--accent)', transform: 'translate(25%, -25%)' }}
                       data-testid="badge-unread-count"
                     >
                       {unreadCount > 99 ? '99+' : unreadCount}
-                    </Badge>
+                    </span>
                   )}
                 </div>
               </button>
@@ -182,46 +183,46 @@ export function RightSidebar() {
                 </div>
               </button>
 
-              {/* Ayuda/Soporte - h-10 - ABAJO de IA - CON HOVER */}
-              <button
-                className={cn(
-                  "h-10 w-8 rounded-md flex items-center justify-center transition-colors",
-                  "hover:bg-[var(--main-sidebar-button-hover-bg)]",
-                  "text-[var(--main-sidebar-fg)] hover:text-white",
-                  activePanel === 'support' && "bg-[var(--main-sidebar-button-hover-bg)] text-white"
-                )}
-                title="Ayuda y soporte"
-                data-testid="button-help"
-                onMouseEnter={() => handleMouseEnter('support')}
-              >
-                <div className="h-8 w-8 flex items-center justify-center">
-                  <HelpCircle className="h-[18px] w-[18px]" />
-                </div>
-              </button>
-
-              {/* Comunidad Discord - h-10 - ABAJO de Ayuda */}
-              <button
-                className={cn(
-                  "h-10 w-8 rounded-md flex items-center justify-center transition-colors",
-                  "hover:bg-[var(--main-sidebar-button-hover-bg)]",
-                  "text-[var(--main-sidebar-fg)] hover:text-white"
-                )}
-                title="Comunidad Discord"
-                data-testid="button-discord"
-                onClick={() => {
-                  window.open('https://discord.com/channels/868615664070443008', '_blank');
-                }}
-              >
-                <div className="h-8 w-8 flex items-center justify-center">
-                  <MessageCircle className="h-[18px] w-[18px]" />
-                </div>
-              </button>
-
             </div>
           </div>
 
-          {/* SECCIÓN INFERIOR: Botón de Anclar */}
+          {/* SECCIÓN INFERIOR: Botones de Ayuda, Discord y Anclar */}
           <div className="pt-3 pb-3 flex flex-col gap-[2px] items-center">
+            {/* Ayuda/Soporte - CON HOVER */}
+            <button
+              className={cn(
+                "h-10 w-8 rounded-md flex items-center justify-center transition-colors",
+                "hover:bg-[var(--main-sidebar-button-hover-bg)]",
+                "text-[var(--main-sidebar-fg)] hover:text-white",
+                activePanel === 'support' && "bg-[var(--main-sidebar-button-hover-bg)] text-white"
+              )}
+              title="Ayuda y soporte"
+              data-testid="button-help"
+              onMouseEnter={() => handleMouseEnter('support')}
+            >
+              <div className="h-8 w-8 flex items-center justify-center">
+                <HelpCircle className="h-[18px] w-[18px]" />
+              </div>
+            </button>
+
+            {/* Comunidad Discord */}
+            <button
+              className={cn(
+                "h-10 w-8 rounded-md flex items-center justify-center transition-colors",
+                "hover:bg-[var(--main-sidebar-button-hover-bg)]",
+                "text-[var(--main-sidebar-fg)] hover:text-white"
+              )}
+              title="Comunidad Discord"
+              data-testid="button-discord"
+              onClick={() => {
+                window.open('https://discord.com/channels/868615664070443008', '_blank');
+              }}
+            >
+              <div className="h-8 w-8 flex items-center justify-center">
+                <MessageCircle className="h-[18px] w-[18px]" />
+              </div>
+            </button>
+
             {/* Botón de Anclar/Desanclar (sin función por ahora) */}
             <button
               className={cn(
