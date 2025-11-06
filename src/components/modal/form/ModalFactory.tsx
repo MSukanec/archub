@@ -78,6 +78,7 @@ import { NotificationFormModal } from '../modals/admin/NotificationFormModal';
 import BankTransferReceiptModal from '../modals/admin/BankTransferReceiptModal';
 import { AnnouncementFormModal } from '../modals/admin/AnnouncementFormModal';
 import { PaymentFormModal } from '../modals/admin/PaymentFormModal';
+import { SupportConversationStartModal } from '../modals/admin/SupportConversationStartModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -268,6 +269,8 @@ export function ModalFactory() {
       return <AnnouncementFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'payment':
       return <PaymentFormModal modalData={data || undefined} onClose={closeModal} />;
+    case 'support-conversation-start':
+      return <SupportConversationStartModal modalData={data || undefined} onClose={closeModal} />;
     default:
       return null;
   }

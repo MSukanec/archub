@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { MessageCircle, ArrowUp, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -169,51 +170,53 @@ const AdminSupportTicketsTab = () => {
           </h3>
         </div>
         
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1 p-4">
           {conversations.length === 0 ? (
-            <div className="p-4 text-center text-sm text-muted-foreground">
+            <div className="text-center text-sm text-muted-foreground">
               No hay conversaciones activas
             </div>
           ) : (
-            <div className="divide-y">
+            <div className="space-y-3">
               {conversations.map((conversation) => (
-                <button
+                <Card
                   key={conversation.user_id}
-                  onClick={() => setSelectedUserId(conversation.user_id)}
                   className={cn(
-                    "w-full p-4 text-left hover:bg-muted/50 transition-colors",
-                    selectedUserId === conversation.user_id && "bg-muted"
+                    "cursor-pointer hover:border-[var(--accent)] transition-colors",
+                    selectedUserId === conversation.user_id && "border-[var(--accent)] bg-muted/50"
                   )}
+                  onClick={() => setSelectedUserId(conversation.user_id)}
                   data-testid={`conversation-${conversation.user_id}`}
                 >
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={conversation.user.avatar_url} alt={conversation.user.full_name} />
-                      <AvatarFallback className="bg-[var(--accent)] text-white">
-                        {conversation.user.full_name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2 mb-1">
-                        <span className="font-medium text-sm truncate">
-                          {conversation.user.full_name}
-                        </span>
-                        {conversation.unread_count > 0 && (
-                          <Badge variant="default" className="bg-[var(--accent)] text-white text-xs">
-                            {conversation.unread_count}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="text-xs text-muted-foreground truncate">
-                        {conversation.user.email}
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {formatDateCompact(conversation.last_message_at)}
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={conversation.user.avatar_url} alt={conversation.user.full_name} />
+                        <AvatarFallback className="bg-[var(--accent)] text-white">
+                          {conversation.user.full_name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <span className="font-medium text-sm truncate">
+                            {conversation.user.full_name}
+                          </span>
+                          {conversation.unread_count > 0 && (
+                            <Badge variant="default" className="bg-[var(--accent)] text-white text-xs">
+                              {conversation.unread_count}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {conversation.user.email}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {formatDateCompact(conversation.last_message_at)}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </button>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}

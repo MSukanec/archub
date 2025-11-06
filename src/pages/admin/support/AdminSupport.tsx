@@ -38,6 +38,12 @@ const AdminSupport = () => {
           icon: Plus,
           onClick: () => openModal('changelog-entry', { isEditing: false })
         };
+      case 'soporte':
+        return {
+          label: "Iniciar Conversación",
+          icon: Plus,
+          onClick: () => openModal('support-conversation-start', {})
+        };
       default:
         return undefined;
     }
