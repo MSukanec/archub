@@ -166,6 +166,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
       return [
+        { id: 'dashboard', label: 'Analytics', icon: BarChart3, href: '/admin/dashboard' },
         { id: 'administration', label: 'Administración', icon: Settings, href: '/admin/administration' },
         { id: 'support', label: 'Soporte', icon: Headphones, href: '/admin/support' },
         { id: 'payments', label: 'Pagos', icon: Wallet, href: '/admin/payments' },
