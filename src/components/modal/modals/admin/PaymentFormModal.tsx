@@ -56,7 +56,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
 
       const { data, error } = await supabase
         .from('users')
-        .select('id, full_name, email')
+        .select('auth_id, full_name, email')
         .order('full_name');
 
       if (error) throw error;
@@ -227,7 +227,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
                 </FormControl>
                 <SelectContent>
                   {users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
+                    <SelectItem key={user.auth_id} value={user.auth_id}>
                       {user.full_name || user.email}
                     </SelectItem>
                   ))}

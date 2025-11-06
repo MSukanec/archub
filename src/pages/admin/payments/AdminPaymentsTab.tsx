@@ -28,7 +28,7 @@ interface Payment {
   organization_id: string | null;
   metadata: any;
   users: {
-    id: string;
+    auth_id: string;
     full_name: string | null;
     email: string;
   };
@@ -70,7 +70,7 @@ const AdminPaymentsTab = () => {
         .from('payments')
         .select(`
           *,
-          users(id, full_name, email),
+          users!user_id(auth_id, full_name, email),
           courses(id, title, slug)
         `)
         .eq('status', 'completed')
