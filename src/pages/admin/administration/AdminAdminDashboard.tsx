@@ -278,7 +278,7 @@ export default function AdminAdminDashboard() {
 
       {/* Segunda fila: Organizaciones y Proyectos */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <StatCard href="/admin/community" data-testid="card-organizaciones">
+        <StatCard href="/admin/administration" data-testid="card-organizaciones">
           <StatCardTitle>Organizaciones</StatCardTitle>
           <StatCardValue>{stats?.totalOrganizations || 0}</StatCardValue>
           {orgGrowth !== 0 && (
@@ -288,7 +288,7 @@ export default function AdminAdminDashboard() {
           )}
         </StatCard>
 
-        <StatCard href="/admin/community" data-testid="card-proyectos">
+        <StatCard href="/admin/administration" data-testid="card-proyectos">
           <StatCardTitle>Proyectos</StatCardTitle>
           <StatCardValue>{stats?.totalProjects || 0}</StatCardValue>
           {projectGrowth !== 0 && (
@@ -340,10 +340,10 @@ export default function AdminAdminDashboard() {
                 })}
               </div>
               <a 
-                href="/admin/community" 
+                href="/admin/administration" 
                 onClick={(e) => {
                   e.preventDefault()
-                  window.location.href = '/admin/community'
+                  window.location.href = '/admin/administration'
                 }}
                 className="block mt-4 pt-3 border-t text-center text-sm hover:underline transition-all"
                 style={{ color: 'hsl(var(--accent))' }}

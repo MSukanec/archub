@@ -124,7 +124,7 @@ const AdminLayoutTab = () => {
           </StatCard>
 
           {/* StatCard con link */}
-          <StatCard href="/admin/community" data-testid="statcard-active-users">
+          <StatCard href="/admin/administration" data-testid="statcard-active-users">
             <StatCardTitle data-testid="title-active-users">Usuarios Activos</StatCardTitle>
             <StatCardValue data-testid="value-active-users">856</StatCardValue>
             <StatCardMeta className="text-accent" data-testid="meta-active-users">Clickeable - Ver más</StatCardMeta>
