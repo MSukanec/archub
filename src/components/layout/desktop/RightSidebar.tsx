@@ -190,27 +190,21 @@ export function RightSidebar() {
                 </div>
               </button>
 
-              {/* Botón de IA - altura h-10 - CON CLICK - NUEVO - CON EFECTO RESPIRACIÓN */}
+              {/* Botón de IA - altura h-10 - CON CLICK - CON ICONO BRILLANTE */}
               <button
                 className={cn(
                   "relative h-10 w-8 rounded-md flex items-center justify-center transition-all duration-300",
                   "hover:bg-[var(--main-sidebar-button-hover-bg)]",
-                  "text-[var(--main-sidebar-fg)] hover:text-white hover:scale-110",
-                  activePanel === 'ai' && "bg-[var(--main-sidebar-button-hover-bg)] text-white",
-                  "ai-button-glow"
+                  activePanel === 'ai' && "bg-[var(--main-sidebar-button-hover-bg)]"
                 )}
                 title="Asistente IA"
                 data-testid="button-ai"
                 onClick={() => handlePanelClick('ai')}
               >
-                <div className="h-8 w-8 flex items-center justify-center relative">
-                  <Sparkles className="h-[18px] w-[18px] relative z-10" />
-                  {/* Efecto de brillo de fondo */}
-                  <div 
-                    className="absolute inset-0 rounded-full ai-button-pulse"
-                    style={{ backgroundColor: 'var(--accent)' }}
-                  />
-                </div>
+                <Sparkles 
+                  className="h-[18px] w-[18px] ai-icon-sparkle"
+                  style={{ color: 'var(--accent)' }}
+                />
               </button>
 
             </div>

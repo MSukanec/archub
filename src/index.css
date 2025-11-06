@@ -972,43 +972,52 @@ input[type="number"] {
 }
 
 /* ========================================
-   🤖 AI BUTTON SPECTACULAR EFFECTS
+   ✨ AI ICON SPECTACULAR EFFECTS
    ======================================== */
 
-/* Animación de respiración para el botón de IA */
-@keyframes ai-breathe {
+/* Animación de respiración para el icono de IA */
+@keyframes ai-icon-breathe {
   0%, 100% {
-    opacity: 0.15;
-    transform: scale(0.85);
+    filter: 
+      drop-shadow(0 0 4px currentColor)
+      drop-shadow(0 0 8px currentColor)
+      brightness(1);
+    transform: scale(1);
   }
   50% {
-    opacity: 0.3;
-    transform: scale(1.1);
+    filter: 
+      drop-shadow(0 0 6px currentColor)
+      drop-shadow(0 0 12px currentColor)
+      drop-shadow(0 0 16px currentColor)
+      brightness(1.3);
+    transform: scale(1.05);
   }
 }
 
-/* Animación de brillo pulsante */
-@keyframes ai-glow-pulse {
+/* Animación de partículas sutiles (opacity pulse) */
+@keyframes ai-particle-pulse {
   0%, 100% {
-    box-shadow: 
-      0 0 8px rgba(var(--accent-rgb), 0.3),
-      0 0 12px rgba(var(--accent-rgb), 0.2),
-      0 0 16px rgba(var(--accent-rgb), 0.1);
+    opacity: 0.7;
   }
   50% {
-    box-shadow: 
-      0 0 16px rgba(var(--accent-rgb), 0.5),
-      0 0 24px rgba(var(--accent-rgb), 0.3),
-      0 0 32px rgba(var(--accent-rgb), 0.2);
+    opacity: 1;
   }
 }
 
-/* Clase para el efecto de respiración del fondo */
-.ai-button-pulse {
-  animation: ai-breathe 3s ease-in-out infinite;
+/* Clase para el icono brillante */
+.ai-icon-sparkle {
+  animation: 
+    ai-icon-breathe 3s ease-in-out infinite,
+    ai-particle-pulse 1.5s ease-in-out infinite;
+  transition: all 0.3s ease;
 }
 
-/* Clase para el brillo exterior del botón */
-.ai-button-glow {
-  animation: ai-glow-pulse 3s ease-in-out infinite;
+/* Efecto hover más intenso */
+.ai-icon-sparkle:hover {
+  filter: 
+    drop-shadow(0 0 8px currentColor)
+    drop-shadow(0 0 16px currentColor)
+    drop-shadow(0 0 24px currentColor)
+    brightness(1.5) !important;
+  transform: scale(1.1) !important;
 }
