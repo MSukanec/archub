@@ -149,6 +149,7 @@ export default function AdminAdminDashboard() {
         .select(`
           user_id,
           last_seen_at,
+          current_view,
           users!inner(full_name)
         `)
         .order('last_seen_at', { ascending: false })
@@ -324,17 +325,26 @@ export default function AdminAdminDashboard() {
                   const isActive = diffMs <= 90000
 
                   return (
-                    <div key={activity.user_id} className="flex items-center justify-between gap-3 p-2 rounded-lg border hover:bg-muted/30 transition-colors">
-                      <p className="font-medium truncate text-sm flex-1 min-w-0">{activity.users?.full_name}</p>
-                      {isActive ? (
-                        <Badge className="bg-accent text-accent-foreground flex-shrink-0">
-                          Activo
-                        </Badge>
-                      ) : (
-                        <span className="text-xs text-muted-foreground flex-shrink-0 whitespace-nowrap">
-                          {format(new Date(activity.last_seen_at), "d 'de' MMM, HH:mm", { locale: es })}
-                        </span>
-                      )}
+                    <div key={activity.user_id} className="flex items-start justify-between gap-3 p-2 rounded-lg border hover:bg-muted/30 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold truncate text-sm">{activity.users?.full_name}</p>
+                        {activity.current_view && (
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">
+                            {activity.current_view}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex-shrink-0">
+                        {isActive ? (
+                          <Badge className="bg-accent text-accent-foreground">
+                            Activo
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">
+                            {format(new Date(activity.last_seen_at), "d 'de' MMM, HH:mm", { locale: es })}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   )
                 })}
