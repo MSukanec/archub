@@ -260,6 +260,7 @@ function LayoutContent({
                       label: tab.label,
                       isActive: tab.isActive,
                       onClick: () => headerProps.onTabChange?.(tab.id),
+                      badgeCount: tab.badgeCount, // ✅ Agregar badge count a las tabs
                     }))}
                     onTabChange={headerProps.onTabChange}
                     showHeaderSearch={headerProps.showHeaderSearch}
