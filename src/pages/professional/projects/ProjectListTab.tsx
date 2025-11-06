@@ -303,6 +303,8 @@ export default function ProjectList() {
           columns={columns}
           isLoading={projectsLoading}
           rowActions={getProjectRowActions}
+          getIsInactive={(project) => project.status === 'completed'}
+          inactiveSeparatorLabel="Proyectos Completados"
           emptyState={
             <EmptyState
               icon={<Folder className="w-12 h-12" />}

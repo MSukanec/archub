@@ -208,6 +208,10 @@ interface TableProps<T = any> {
     onClick: () => void;
     variant?: 'default' | 'destructive';
   }>;
+  // 🆕 SOPORTE PARA ELEMENTOS INACTIVOS CON SEPARACIÓN VISUAL
+  getIsInactive?: (item: T) => boolean;
+  inactiveSeparatorLabel?: string;
+  showInactiveSeparator?: boolean;
 }
 
 export { ProjectBadge };
@@ -240,6 +244,10 @@ export function Table<T = any>({
   showDoubleHeader = false,
   // 🆕 SISTEMA DE ACCIONES CON MENÚ DE TRES PUNTOS
   rowActions,
+  // 🆕 SOPORTE PARA ELEMENTOS INACTIVOS
+  getIsInactive,
+  inactiveSeparatorLabel = "Completados",
+  showInactiveSeparator = true,
 }: TableProps<T>) {
   // Estados internos para funcionalidad estándar
   const [sortKey, setSortKey] = useState<string | null>(
@@ -667,12 +675,13 @@ export function Table<T = any>({
     }
   };
 
-  // 🆕 AGRUPAMIENTO DE DATOS
+  // 🆕 AGRUPAMIENTO DE DATOS CON SOPORTE PARA ELEMENTOS INACTIVOS
   const groupedData = useMemo(() => {
-    const sortedData = (() => {
-      if (!sortKey || !sortDirection) return filteredData;
+    // Helper: Función para ordenar un array de datos
+    const sortData = (dataToSort: T[]) => {
+      if (!sortKey || !sortDirection) return dataToSort;
 
-      return [...data].sort((a, b) => {
+      return [...dataToSort].sort((a, b) => {
         const column = columns.find((col) => col.key === sortKey);
         const sortType = column?.sortType || "string";
 
@@ -711,7 +720,24 @@ export function Table<T = any>({
 
         return sortDirection === "asc" ? comparison : -comparison;
       });
-    })();
+    };
+
+    // 🆕 Si hay función getIsInactive, separar activos e inactivos
+    let sortedData: T[];
+    if (getIsInactive) {
+      const activeItems = filteredData.filter(item => !getIsInactive(item));
+      const inactiveItems = filteredData.filter(item => getIsInactive(item));
+      
+      // Ordenar cada grupo por separado
+      const sortedActive = sortData(activeItems);
+      const sortedInactive = sortData(inactiveItems);
+      
+      // Combinar: activos primero, luego inactivos
+      sortedData = [...sortedActive, ...sortedInactive];
+    } else {
+      // Comportamiento normal si no hay separación de inactivos
+      sortedData = sortData(filteredData);
+    }
 
     // Si no hay agrupamiento, devolver los datos como un solo grupo
     if (!groupBy) {
@@ -729,7 +755,7 @@ export function Table<T = any>({
     }, {} as Record<string, T[]>);
 
     return grouped;
-  }, [data, sortKey, sortDirection, columns, groupBy]);
+  }, [filteredData, sortKey, sortDirection, columns, groupBy, getIsInactive]);
 
   // Aplanar datos agrupados para paginación
   const flattenedData = useMemo(() => {
@@ -1111,18 +1137,36 @@ export function Table<T = any>({
             ))
           ) : hasFilteredData ? (
             // Renderizado sin agrupamiento (comportamiento original)
-            paginatedData.map((item, index) => (
-              <div
-                key={getItemId(item)}
-                className={cn(
-                  "group relative grid gap-2 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
-                  index < paginatedData.length - 1
-                    ? "border-b border-[var(--table-row-border)]"
-                    : "",
-                  getRowClassName?.(item),
-                )}
-                style={{ gridTemplateColumns: getGridTemplateColumns() }}
-              >
+            paginatedData.map((item, index) => {
+              const isInactive = getIsInactive ? getIsInactive(item) : false;
+              const prevItem = index > 0 ? paginatedData[index - 1] : null;
+              const prevIsInactive = prevItem && getIsInactive ? getIsInactive(prevItem) : false;
+              const showSeparator = getIsInactive && showInactiveSeparator && !prevIsInactive && isInactive;
+
+              return (
+                <Fragment key={getItemId(item)}>
+                  {/* Separador visual entre activos e inactivos */}
+                  {showSeparator && (
+                    <div className="grid gap-2 px-4 py-2 bg-[var(--table-header-bg)] border-t border-b border-[var(--table-row-border)]" style={{ gridTemplateColumns: getGridTemplateColumns() }}>
+                      <div className="col-span-full text-xs font-medium text-muted-foreground flex items-center gap-2">
+                        <div className="h-px flex-1 bg-border" />
+                        <span>{inactiveSeparatorLabel}</span>
+                        <div className="h-px flex-1 bg-border" />
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div
+                    className={cn(
+                      "group relative grid gap-2 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
+                      index < paginatedData.length - 1
+                        ? "border-b border-[var(--table-row-border)]"
+                        : "",
+                      isInactive && "opacity-50",
+                      getRowClassName?.(item),
+                    )}
+                    style={{ gridTemplateColumns: getGridTemplateColumns() }}
+                  >
                 {selectable && (
                   <div className="flex items-center justify-center">
                     <Checkbox
@@ -1202,7 +1246,9 @@ export function Table<T = any>({
                   </div>
                 )}
               </div>
-            ))
+            </Fragment>
+              );
+            })
           ) : null}
           
           {/* 🆕 FILA DE TOTALES */}
