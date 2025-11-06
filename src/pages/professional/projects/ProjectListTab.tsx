@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
 import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
-import { Folder, ArrowRight, Edit, Trash2, Plus } from 'lucide-react'
+import { Folder, ArrowRight, Edit, Trash2, Plus, CheckCircle2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -147,7 +147,7 @@ export default function ProjectList() {
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       'active': { color: 'var(--accent)', text: 'Activo' },
-      'completed': { color: '#22c55e', text: 'Completado' },
+      'completed': { color: 'var(--main-sidebar-bg)', text: 'Completado' },
       'paused': { color: '#f59e0b', text: 'Pausado' },
       'cancelled': { color: '#ef4444', text: 'Cancelado' },
       'planning': { color: '#3b82f6', text: 'Planificación' }
@@ -171,17 +171,17 @@ export default function ProjectList() {
       key: 'name',
       label: 'Proyecto',
       render: (project: any) => (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <div className="font-medium text-sm">{project.name}</div>
           {project.is_active && (
             <div 
-              className="w-2 h-2 rounded-full" 
+              className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
               style={{ backgroundColor: 'var(--accent)' }}
               title="Proyecto activo"
-            />
+            >
+              <CheckCircle2 className="h-3.5 w-3.5 text-white" />
+            </div>
           )}
-          <div>
-            <div className="font-medium text-sm">{project.name}</div>
-          </div>
         </div>
       )
     },
