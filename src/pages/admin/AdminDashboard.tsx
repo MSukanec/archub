@@ -497,7 +497,7 @@ export default function AdminDashboard() {
                     />
                     <Bar dataKey="avgMinutes" radius={[0, 4, 4, 0]}>
                       {engagementData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill="hsl(var(--accent))" />
+                        <Cell key={`cell-${index}`} fill="var(--accent)" />
                       ))}
                     </Bar>
                   </BarChart>
@@ -542,9 +542,9 @@ export default function AdminDashboard() {
                     <Line 
                       type="monotone" 
                       dataKey="sessions" 
-                      stroke="hsl(var(--accent))" 
+                      stroke="var(--accent)" 
                       strokeWidth={2}
-                      dot={{ fill: 'hsl(var(--accent))' }}
+                      dot={{ fill: 'var(--accent)' }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
