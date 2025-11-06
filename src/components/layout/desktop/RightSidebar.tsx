@@ -193,7 +193,7 @@ export function RightSidebar() {
               {/* Botón de IA - altura h-10 - CON CLICK - CON ICONO BRILLANTE */}
               <button
                 className={cn(
-                  "relative h-10 w-8 rounded-md flex items-center justify-center transition-all duration-300",
+                  "relative h-10 w-8 rounded-md flex items-center justify-center transition-all duration-600",
                   "hover:bg-[var(--main-sidebar-button-hover-bg)]",
                   activePanel === 'ai' && "bg-[var(--main-sidebar-button-hover-bg)]"
                 )}
