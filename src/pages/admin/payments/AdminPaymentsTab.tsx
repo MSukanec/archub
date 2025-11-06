@@ -70,7 +70,7 @@ const AdminPaymentsTab = () => {
         .from('payments')
         .select(`
           *,
-          users!inner(id, full_name, email),
+          users(id, full_name, email),
           courses(id, title, slug)
         `)
         .eq('status', 'completed')
@@ -133,12 +133,6 @@ const AdminPaymentsTab = () => {
   useEffect(() => {
     if (isMobile) {
       setActions({
-        create: {
-          id: 'create',
-          icon: Plus,
-          label: 'Crear Pago',
-          onClick: () => openModal('payment', {}),
-        },
         search: {
           id: 'search',
           icon: Search,
@@ -160,7 +154,7 @@ const AdminPaymentsTab = () => {
         clearActions();
       }
     };
-  }, [isMobile, setActions, setShowActionBar, clearActions, openModal]);
+  }, [isMobile, setActions, setShowActionBar, clearActions]);
 
   // Filter configuration
   useEffect(() => {
@@ -299,20 +293,6 @@ const AdminPaymentsTab = () => {
           <StatCardMeta>{stats.paymentsThisMonth} pagos</StatCardMeta>
         </StatCard>
       </div>
-
-      {/* Botón de crear pago manual (solo desktop) */}
-      {!isMobile && (
-        <div className="flex justify-end">
-          <Button
-            onClick={() => openModal('payment', {})}
-            className="h-9"
-            data-testid="button-create-payment"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Crear Pago Manual
-          </Button>
-        </div>
-      )}
 
       {/* Tabla */}
       <Table

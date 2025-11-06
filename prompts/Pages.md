@@ -185,7 +185,8 @@ interface HeaderProps {
   showFilters?: boolean;            // Mostrar filtros (default: false)
   tabs?: Tab[];                     // Tabs en el header (opcional)
   onTabChange?: (tabId: string) => void;  // Handler de cambio de tab
-  actionButton?: {                  // Botón de acción (opcional)
+  actions?: React.ReactElement[];   // Botones de acción en el header (opcional)
+  actionButton?: {                  // Botón de acción (DEPRECATED - usar actions)
     label: string;
     icon: React.ComponentType<any>;
     onClick: () => void;
@@ -195,7 +196,111 @@ interface HeaderProps {
 
 ---
 
-## 6. Importaciones Comunes
+## 6. Botones de Acción en el Header
+
+### ✅ CORRECTO: Usar la prop `actions` en headerProps
+
+Los botones de acción (crear, agregar, etc.) **SIEMPRE** deben ir en el header usando la prop `actions`, NO en el contenido de la página.
+
+```typescript
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+
+export default function MyPage() {
+  const [activeTab, setActiveTab] = useState('tab1');
+  const { openModal } = useGlobalModalStore();
+
+  const handleCreateItem = () => {
+    openModal('my-modal', {});
+  };
+
+  const headerProps = {
+    title: "Título",
+    icon: IconComponent,
+    tabs: [
+      { id: 'tab1', label: 'Tab 1', isActive: activeTab === 'tab1' },
+      { id: 'tab2', label: 'Tab 2', isActive: activeTab === 'tab2' },
+    ],
+    onTabChange: setActiveTab,
+    actions: [
+      // Botón condicional según tab activa
+      activeTab === 'tab1' && (
+        <Button
+          key="create-item"
+          onClick={handleCreateItem}
+          className="h-8 px-3 text-xs"
+          data-testid="button-create-item"
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          Crear Elemento
+        </Button>
+      ),
+      // Puedes agregar más botones
+      activeTab === 'tab2' && (
+        <Button
+          key="another-action"
+          onClick={() => console.log('Another action')}
+          className="h-8 px-3 text-xs"
+        >
+          Otra Acción
+        </Button>
+      ),
+    ].filter(Boolean) // Filtrar los elementos false/undefined
+  };
+
+  return (
+    <Layout wide headerProps={headerProps}>
+      {/* Contenido de la página */}
+      {activeTab === 'tab1' && <Tab1Content />}
+      {activeTab === 'tab2' && <Tab2Content />}
+    </Layout>
+  );
+}
+```
+
+### ❌ INCORRECTO: Poner botones en el contenido de la página
+
+```typescript
+// ❌ NO HACER ESTO
+export default function MyPage() {
+  return (
+    <Layout wide headerProps={headerProps}>
+      <div className="space-y-6">
+        {/* ❌ MAL: Botón en el contenido */}
+        <div className="flex justify-end">
+          <Button onClick={handleCreate}>
+            <Plus className="w-4 h-4 mr-2" />
+            Crear Elemento
+          </Button>
+        </div>
+        
+        {/* Contenido */}
+      </div>
+    </Layout>
+  );
+}
+```
+
+### Ejemplos de Referencia:
+
+- **AdminPayments.tsx** - Botones condicionales según tab (Crear Pago Manual, Nuevo Cupón)
+- **AdminCourseView.tsx** - Múltiples botones (Agregar Módulo, Agregar Lección)
+- **Projects.tsx** - Botón con PlanRestricted (Nuevo Proyecto)
+
+### Reglas importantes:
+
+1. ✅ **SIEMPRE** usa `actions` en headerProps para botones de acción
+2. ✅ Usa condicionales para mostrar botones según el tab activo
+3. ✅ Usa `.filter(Boolean)` para limpiar elementos undefined/false del array
+4. ✅ Cada botón debe tener una `key` única
+5. ✅ Usa `className="h-8 px-3 text-xs"` para el tamaño estándar de botones del header
+6. ✅ Agrega `data-testid` a cada botón para testing
+7. ❌ **NUNCA** pongas botones de acción dentro del contenido de la página/tab
+
+---
+
+## 7. Importaciones Comunes
 
 ```typescript
 // Layout principal
@@ -222,7 +327,7 @@ import { useState } from 'react';
 
 ---
 
-## 7. Checklist de Creación de Página
+## 8. Checklist de Creación de Página
 
 Antes de crear una página, verifica:
 
@@ -236,7 +341,7 @@ Antes de crear una página, verifica:
 
 ---
 
-## 8. Patrones de Diseño
+## 9. Patrones de Diseño
 
 ### Grid Responsive
 ```typescript
@@ -263,7 +368,7 @@ Antes de crear una página, verifica:
 
 ---
 
-## 9. ERRORES COMUNES A EVITAR
+## 10. ERRORES COMUNES A EVITAR
 
 ### ❌ ERROR 1: Usar PageLayout directamente
 ```typescript
@@ -298,12 +403,32 @@ return <Layout wide headerProps={...}>...</Layout>
 <Layout wide headerProps={{ title: "...", icon: ... }}>...</Layout>
 ```
 
-### ❌ ERROR 4: No seguir el patrón de páginas existentes
+### ❌ ERROR 4: Poner botones de acción en el contenido de la página
+```typescript
+// ❌ MAL - Botón en el contenido
+<Layout wide headerProps={headerProps}>
+  <div className="flex justify-end">
+    <Button onClick={...}>Crear</Button>
+  </div>
+</Layout>
+```
+
+```typescript
+// ✅ BIEN - Botón en headerProps.actions
+const headerProps = {
+  // ...
+  actions: [
+    <Button key="create" onClick={...}>Crear</Button>
+  ]
+};
+```
+
+### ❌ ERROR 5: No seguir el patrón de páginas existentes
 **SIEMPRE mira páginas similares existentes antes de crear una nueva**
 
 ---
 
-## 10. Proceso de Creación Recomendado
+## 11. Proceso de Creación Recomendado
 
 1. **Buscar página similar existente** para usarla como referencia
 2. **Copiar estructura base** de esa página
@@ -317,7 +442,7 @@ return <Layout wide headerProps={...}>...</Layout>
 
 ---
 
-## 11. Referencias Rápidas
+## 12. Referencias Rápidas
 
 | Componente | Uso | Ubicación |
 |------------|-----|-----------|
@@ -329,7 +454,7 @@ return <Layout wide headerProps={...}>...</Layout>
 
 ---
 
-## 12. Navegación Admin
+## 13. Navegación Admin
 
 ### Estructura de navegación de admin
 
@@ -362,9 +487,11 @@ return <Layout wide headerProps={...}>...</Layout>
 - ❌ Usar Button genérico para tabs/filtros
 - ❌ Crear página sin Layout correcto
 - ❌ Agregar "Analytics" en el sidebar principal
+- ❌ Poner botones de acción en el contenido de la página
 
 **SIEMPRE:**
 - ✅ Usar Layout con headerProps
 - ✅ Usar Tabs de ui-custom para filtros
 - ✅ Seguir patrones de páginas existentes
 - ✅ Analytics solo en sidebar específico de admin
+- ✅ Botones de acción en `headerProps.actions`, NO en el contenido

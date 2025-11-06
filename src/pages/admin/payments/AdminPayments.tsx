@@ -24,6 +24,10 @@ const AdminPayments = () => {
     openModal('coupon', {});
   };
 
+  const handleCreatePayment = () => {
+    openModal('payment', {});
+  };
+
   const headerProps = {
     title: "Pagos",
     icon: Wallet,
@@ -46,6 +50,17 @@ const AdminPayments = () => {
     ],
     onTabChange: (tabId: string) => setActiveTab(tabId),
     actions: [
+      activeTab === 'payments' && (
+        <Button
+          key="create-payment"
+          onClick={handleCreatePayment}
+          className="h-8 px-3 text-xs"
+          data-testid="button-create-payment"
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          Crear Pago Manual
+        </Button>
+      ),
       activeTab === 'coupons' && (
         <Button
           key="create-coupon"
