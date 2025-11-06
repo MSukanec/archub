@@ -119,11 +119,13 @@ export default function ProjectItemCard({
             }}
           />
         ) : (
-          // Degradado suave para activos - casi sin opacidad
+          // Degradado suave para activos - con color del proyecto abajo
           <div 
             className="absolute inset-0" 
             style={{ 
-              background: `linear-gradient(to top, var(--main-sidebar-bg) 0%, var(--main-sidebar-bg) 10%, rgba(0,0,0,0.3) 30%, transparent 60%)`
+              background: projectColor.includes('var(')
+                ? `linear-gradient(to top, var(--accent) 0%, rgba(0,0,0,0.4) 10%, rgba(0,0,0,0.2) 30%, transparent 60%)`
+                : `linear-gradient(to top, ${projectColor} 0%, rgba(0,0,0,0.4) 10%, rgba(0,0,0,0.2) 30%, transparent 60%)`
             }}
           />
         )}
