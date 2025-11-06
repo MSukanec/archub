@@ -273,6 +273,7 @@ export default function OrganizationDashboard() {
                   <ProjectItemCard
                     key={project.id}
                     project={project}
+                    onClick={() => handleSelectProject(project.id)}
                     onNavigateToProject={() => handleSelectProject(project.id)}
                     onEdit={() => handleEditProject(project)}
                     isActive={project.id === activeProjectId}
