@@ -38,6 +38,7 @@ interface Project {
 interface ProjectItemCardProps {
   project: Project;
   onClick?: () => void;
+  onNavigateToProject?: () => void; // Nuevo: para el botón "Ir al Proyecto"
   onEdit?: () => void;
   selected?: boolean;
   className?: string;
@@ -59,6 +60,7 @@ const getStatusText = (status: string): string => {
 export default function ProjectItemCard({ 
   project, 
   onClick, 
+  onNavigateToProject,
   onEdit,
   selected, 
   className,
@@ -190,7 +192,7 @@ export default function ProjectItemCard({
               style={{ backgroundColor: projectColor }}
               onClick={(e) => {
                 e.stopPropagation();
-                onClick?.();
+                onNavigateToProject?.();
               }}
             >
               Ir al Proyecto

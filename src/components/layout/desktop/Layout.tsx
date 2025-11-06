@@ -242,7 +242,7 @@ function LayoutContent({
                     icon={headerProps.icon}
                     title={headerProps.title}
                     description={headerProps.description}
-                    tabs={headerProps.tabs?.map((tab) => ({
+                    tabs={headerProps.tabs?.map((tab: Tab) => ({
                       id: tab.id,
                       label: tab.label,
                       isActive: tab.isActive,

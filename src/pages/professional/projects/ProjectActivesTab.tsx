@@ -93,6 +93,61 @@ export default function ProjectActives() {
     selectProjectMutation.mutate(projectId)
   }
 
+  // Nueva función: Activar Y navegar al proyecto
+  const handleNavigateToProject = async (projectId: string) => {
+    if (!supabase || !userData?.user?.id || !organizationId) {
+      toast({
+        title: "Error",
+        description: "Datos de usuario no disponibles",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Activar el proyecto si no está activo
+      if (projectId !== activeProjectId) {
+        const { error } = await supabase
+          .from('user_organization_preferences')
+          .upsert({
+            user_id: userData.user.id,
+            organization_id: organizationId,
+            last_project_id: projectId,
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id,organization_id'
+          });
+        
+        if (error) throw error;
+      }
+
+      // Actualizar contextos
+      setSelectedProject(projectId, organizationId);
+      setSidebarLevel('project');
+      
+      // Invalidar queries
+      queryClient.invalidateQueries({ 
+        queryKey: ['user-organization-preferences', userData?.user?.id, organizationId] 
+      });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      queryClient.invalidateQueries({ queryKey: ['projects', organizationId] });
+      
+      // Navegar al dashboard del proyecto
+      navigate('/project/dashboard');
+      
+      toast({
+        title: "Proyecto abierto",
+        description: "Accediendo al proyecto..."
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo acceder al proyecto",
+        variant: "destructive"
+      });
+    }
+  }
+
   const handleEdit = (project: any) => {
     openModal('project', { editingProject: project, isEditing: true })
   }
@@ -114,6 +169,7 @@ export default function ProjectActives() {
               key={project.id}
               project={project}
               onClick={() => handleSelectProject(project.id)}
+              onNavigateToProject={() => handleNavigateToProject(project.id)}
               onEdit={() => handleEdit(project)}
               isActive={project.is_active}
               projectColor={(project as any).use_custom_color && (project as any).custom_color_hex 
