@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Pencil } from 'lucide-react';
 import chroma from 'chroma-js';
 
 interface Project {
@@ -184,8 +184,21 @@ export default function ProjectItemCard({
             </Badge>
           </div>
 
-          {/* Botón "Ir al Proyecto" - abajo a la derecha - SOLO EN HOVER */}
-          <div className="flex justify-end">
+          {/* Botones - abajo - SOLO EN HOVER */}
+          <div className="flex justify-end gap-2">
+            <Button 
+              variant="secondary"
+              size="sm"
+              className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit?.();
+              }}
+              data-testid="button-edit-project"
+            >
+              <Pencil />
+              Editar
+            </Button>
             <Button 
               size="sm"
               className="text-white border-0 text-sm font-medium shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -194,6 +207,7 @@ export default function ProjectItemCard({
                 e.stopPropagation();
                 onNavigateToProject?.();
               }}
+              data-testid="button-navigate-project"
             >
               Ir al Proyecto
             </Button>
