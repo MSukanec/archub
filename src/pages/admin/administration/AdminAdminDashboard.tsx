@@ -8,6 +8,43 @@ import { es } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 
+function formatViewName(view: string | null): string {
+  if (!view) return 'Sin ubicación';
+  
+  const viewMap: Record<string, string> = {
+    'home': 'Inicio',
+    'organization_dashboard': 'Dashboard Organización',
+    'organization_projects': 'Proyectos',
+    'organization_preferences': 'Preferencias',
+    'organization_activity': 'Actividad',
+    'organization': 'Organización',
+    'project_dashboard': 'Dashboard Proyecto',
+    'project_data': 'Datos del Proyecto',
+    'budgets': 'Presupuestos',
+    'construction': 'Construcción',
+    'contacts': 'Contactos',
+    'movements': 'Movimientos',
+    'capital': 'Capital',
+    'general_costs': 'Gastos Generales',
+    'analysis': 'Análisis',
+    'learning_dashboard': 'Dashboard Capacitaciones',
+    'learning_courses': 'Cursos',
+    'learning': 'Capacitaciones',
+    'admin_dashboard': 'Admin - Analytics',
+    'admin_administration': 'Admin - Administración',
+    'admin_support': 'Admin - Soporte',
+    'admin_payments': 'Admin - Pagos',
+    'admin_courses': 'Admin - Cursos',
+    'admin_costs': 'Admin - Costos',
+    'admin_tasks': 'Admin - Tareas',
+    'admin_general': 'Admin - General',
+    'admin_layout': 'Admin - Layout',
+    'admin': 'Administración',
+  };
+  
+  return viewMap[view] || view;
+}
+
 interface DashboardStats {
   totalOrganizations: number
   activeOrganizations: number
@@ -328,11 +365,9 @@ export default function AdminAdminDashboard() {
                     <div key={activity.user_id} className="flex items-start justify-between gap-3 p-2 rounded-lg border hover:bg-muted/30 transition-colors">
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold truncate text-sm">{activity.users?.full_name}</p>
-                        {activity.current_view && (
-                          <p className="text-xs text-muted-foreground truncate mt-0.5">
-                            {activity.current_view}
-                          </p>
-                        )}
+                        <p className="text-xs text-muted-foreground truncate mt-0.5">
+                          {formatViewName(activity.current_view)}
+                        </p>
                       </div>
                       <div className="flex-shrink-0">
                         {isActive ? (
