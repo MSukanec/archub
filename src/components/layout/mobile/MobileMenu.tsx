@@ -42,6 +42,7 @@ import { useProjectContext } from "@/stores/projectContext";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
+import { useUnreadSupportMessages } from "@/hooks/use-unread-support-messages";
 
 interface MobileMenuProps {
   onClose: () => void;
@@ -91,6 +92,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     enabled: !!userData?.user?.id,
   });
   const unreadCount = Array.isArray(notifications) ? notifications.filter((n: any) => !n.read_at).length : 0;
+
+  // Contador de mensajes sin leer (solo para admins)
+  const { data: unreadSupportCount = 0 } = useUnreadSupportMessages();
 
   // Project selection mutation
   const projectMutation = useMutation({
@@ -392,6 +396,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                         isActive={isActive}
                         showChevron={false}
                         testId={`button-mobile-${item.id}`}
+                        badgeCount={item.id === 'support' && isAdmin ? unreadSupportCount : undefined}
                       />
                     );
                     

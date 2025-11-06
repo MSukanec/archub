@@ -18,6 +18,7 @@ interface SidebarButtonProps {
   isHeaderButton?: boolean;
   projectColor?: string;
   disableHover?: boolean;
+  badgeCount?: number;
 }
 
 export default function SidebarButton({ 
@@ -34,7 +35,8 @@ export default function SidebarButton({
   variant = 'main',
   isHeaderButton = false,
   projectColor,
-  disableHover = false
+  disableHover = false,
+  badgeCount
 }: SidebarButtonProps) {
   const [, navigate] = useLocation();
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
@@ -80,7 +82,7 @@ export default function SidebarButton({
         }}
       >
         {/* Icono centrado */}
-        <span className="flex-shrink-0 w-8 flex items-center justify-center transition-colors duration-200">
+        <span className="flex-shrink-0 w-8 flex items-center justify-center transition-colors duration-200 relative">
           {!isChild && !(isHeaderButton && icon === null) && (
             <>
               {avatarUrl ? (
@@ -115,6 +117,16 @@ export default function SidebarButton({
                 </span>
               )}
             </>
+          )}
+          
+          {/* Badge de notificaciones */}
+          {badgeCount !== undefined && badgeCount > 0 && (
+            <span 
+              className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full text-[10px] font-bold text-white"
+              style={{ backgroundColor: 'var(--accent)' }}
+            >
+              {badgeCount > 99 ? '99+' : badgeCount}
+            </span>
           )}
         </span>
         

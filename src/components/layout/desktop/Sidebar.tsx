@@ -12,6 +12,7 @@ import { supabase } from '@/lib/supabase';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { useUnreadSupportMessages } from '@/hooks/use-unread-support-messages';
 import ButtonSidebar from "./ButtonSidebar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { 
@@ -65,6 +66,9 @@ export function Sidebar() {
   const { sidebarLevel, setSidebarLevel } = useNavigationStore();
   const { isDocked, isHovered, setHovered, setDocked } = useSidebarStore();
   const { toast } = useToast();
+  
+  // Contador de mensajes sin leer (solo para admins)
+  const { data: unreadCount = 0 } = useUnreadSupportMessages();
   
   // Estados simples
   const isExpanded = isDocked || isHovered;
@@ -738,6 +742,7 @@ export function Sidebar() {
                     }}
                     href={item.href}
                     variant="secondary"
+                    badgeCount={item.id === 'support' && isAdmin ? unreadCount : undefined}
                   />
                 );
                 
