@@ -19,6 +19,7 @@ export default function Projects() {
 
   const headerProps = {
     title: "Gestión de Proyectos",
+    description: "Administra todos los proyectos de tu organización desde un solo lugar",
     icon: Folder,
     breadcrumb: [
       { name: "Perfil", href: "/profile/data" },

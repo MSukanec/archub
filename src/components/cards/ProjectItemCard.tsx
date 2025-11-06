@@ -88,6 +88,7 @@ export default function ProjectItemCard({
         transition-all duration-300 ease-in-out
         hover:shadow-lg hover:-translate-y-1
         overflow-hidden
+        relative
         ${selected ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
         ${className || ''}
       `}
@@ -99,7 +100,7 @@ export default function ProjectItemCard({
     >
       {/* Imagen de fondo - altura dinámica según estado */}
       <div 
-        className="relative transition-all duration-300"
+        className="absolute inset-0 transition-all duration-300"
         style={{ 
           height: isActive ? '100%' : '240px'
         }}
@@ -126,83 +127,26 @@ export default function ProjectItemCard({
             }}
           />
         )}
-
-        {/* Contenido sobre la imagen - solo cuando activo */}
-        {isActive && (
-          <div className="relative z-10 p-4 h-full flex flex-col justify-end">
-            <div className="space-y-4">
-              {/* Nombre del proyecto + Badge activo */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-lg leading-tight project-card-title">
-                    {project.name}
-                  </h3>
-                  <Badge 
-                    className="bg-white/20 backdrop-blur-sm text-white border-0 text-xs flex items-center gap-1"
-                  >
-                    <CheckCircle2 className="h-3 w-3" />
-                    Activo
-                  </Badge>
-                </div>
-              </div>
-
-              {/* Descripción */}
-              {project.description && (
-                <p className="text-gray-300 text-sm line-clamp-2">
-                  {project.description}
-                </p>
-              )}
-
-              {/* 3 Badges inline: Tipo, Modalidad, Estado */}
-              <div className="flex flex-wrap gap-2">
-                {project.project_data?.project_type?.name && (
-                  <Badge className="bg-white/15 backdrop-blur-sm text-white border-0 text-xs">
-                    {project.project_data.project_type.name}
-                  </Badge>
-                )}
-                {project.project_data?.modality?.name && (
-                  <Badge className="bg-white/15 backdrop-blur-sm text-white border-0 text-xs">
-                    {project.project_data.modality.name}
-                  </Badge>
-                )}
-                <Badge 
-                  className="border-0 text-xs"
-                  style={{ 
-                    backgroundColor: getSoftAccentColor(),
-                    color: 'white'
-                  }}
-                >
-                  {statusText}
-                </Badge>
-              </div>
-
-              {/* Botón "Ir al Proyecto" - abajo a la derecha */}
-              <div className="flex justify-end">
-                <Button 
-                  size="sm"
-                  className="text-white border-0 text-sm font-medium shadow-md"
-                  style={{ backgroundColor: projectColor }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onClick?.();
-                  }}
-                >
-                  Ir al Proyecto
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Sección inferior - contenido unificado cuando NO está activo */}
-      {!isActive && (
-        <div className="p-4 space-y-4">
-          {/* Nombre del proyecto */}
+      {/* Contenido - SIEMPRE en el mismo lugar (parte inferior) */}
+      <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+        <div className="space-y-4">
+          {/* Nombre del proyecto + Badge activo (si aplica) */}
           <div className="space-y-2">
-            <h3 className="font-semibold text-lg leading-tight project-card-title">
-              {project.name}
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-lg leading-tight project-card-title">
+                {project.name}
+              </h3>
+              {isActive && (
+                <Badge 
+                  className="bg-white/20 backdrop-blur-sm text-white border-0 text-xs flex items-center gap-1"
+                >
+                  <CheckCircle2 className="h-3 w-3" />
+                  Activo
+                </Badge>
+              )}
+            </div>
           </div>
 
           {/* Descripción */}
@@ -250,7 +194,7 @@ export default function ProjectItemCard({
             </Button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
