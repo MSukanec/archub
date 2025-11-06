@@ -4,11 +4,12 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { Button } from '@/components/ui/button';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import AdminPaymentsTab from './AdminPaymentsTab';
 import AdminPaymentsTransfersTab from './AdminPaymentsTransfersTab';
 import AdminPaymentCoupons from './AdminPaymentCoupons';
 
 const AdminPayments = () => {
-  const [activeTab, setActiveTab] = useState('transfers');
+  const [activeTab, setActiveTab] = useState('payments');
   const { setSidebarLevel, sidebarLevel } = useNavigationStore();
   const { openModal } = useGlobalModalStore();
 
@@ -27,6 +28,11 @@ const AdminPayments = () => {
     title: "Pagos",
     icon: Wallet,
     tabs: [
+      {
+        id: 'payments',
+        label: 'Todos los Pagos',
+        isActive: activeTab === 'payments'
+      },
       {
         id: 'transfers',
         label: 'Transferencias',
@@ -57,6 +63,7 @@ const AdminPayments = () => {
   return (
     <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
+        {activeTab === 'payments' && <AdminPaymentsTab />}
         {activeTab === 'transfers' && <AdminPaymentsTransfersTab />}
         {activeTab === 'coupons' && <AdminPaymentCoupons />}
       </div>
