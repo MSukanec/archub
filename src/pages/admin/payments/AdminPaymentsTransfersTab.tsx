@@ -1,12 +1,12 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle2, XCircle, Eye, AlertCircle, Inbox, Clock, TrendingUp, Search, Filter, Bell } from 'lucide-react';
+import { CheckCircle2, XCircle, Eye, AlertCircle, Inbox, Clock, TrendingUp, Search, Filter, Bell, Trash2 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
@@ -47,6 +47,7 @@ const AdminPaymentsTransfersTab = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
   const { toast } = useToast();
   const { openModal } = useGlobalModalStore();
+  const queryClient = useQueryClient();
   const isMobile = useMobile();
   
   const { 
@@ -121,6 +122,47 @@ const AdminPaymentsTransfersTab = () => {
     openModal('bank-transfer-receipt', {
       receiptUrl: payment.receipt_url,
       paymentId: payment.id,
+    });
+  };
+
+  // Mutation para eliminar transferencia
+  const deleteMutation = useMutation({
+    mutationFn: async (paymentId: string) => {
+      if (!supabase) throw new Error('Supabase not available');
+
+      const { error } = await supabase
+        .from('bank_transfer_payments')
+        .delete()
+        .eq('id', paymentId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/payments'] });
+      toast({
+        title: 'Transferencia eliminada',
+        description: 'El pago por transferencia se eliminó correctamente.',
+      });
+    },
+    onError: (error) => {
+      console.error('Error deleting transfer:', error);
+      toast({
+        title: 'Error al eliminar',
+        description: 'No se pudo eliminar la transferencia. Por favor intenta nuevamente.',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const handleDeleteTransfer = (payment: BankTransferPayment) => {
+    openModal('delete-confirmation', {
+      title: 'Eliminar transferencia',
+      description: `¿Estás seguro que deseas eliminar esta transferencia de ${payment.users?.full_name || payment.users?.email}?`,
+      itemName: `Transferencia de ${new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: payment.currency,
+      }).format(payment.amount)}`,
+      onConfirm: () => deleteMutation.mutate(payment.id),
     });
   };
 
@@ -351,6 +393,12 @@ const AdminPaymentsTransfersTab = () => {
             icon: Eye,
             label: 'Ver',
             onClick: () => handleViewReceipt(payment)
+          },
+          {
+            icon: Trash2,
+            label: 'Eliminar',
+            onClick: () => handleDeleteTransfer(payment),
+            variant: 'destructive'
           }
         ]}
         renderCard={(payment) => (
