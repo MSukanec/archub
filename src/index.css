@@ -970,3 +970,45 @@ input[type="number"] {
 .progress-accent-fill {
   background-color: var(--accent);
 }
+
+/* ========================================
+   🤖 AI BUTTON SPECTACULAR EFFECTS
+   ======================================== */
+
+/* Animación de respiración para el botón de IA */
+@keyframes ai-breathe {
+  0%, 100% {
+    opacity: 0.15;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(1.1);
+  }
+}
+
+/* Animación de brillo pulsante */
+@keyframes ai-glow-pulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 8px rgba(var(--accent-rgb), 0.3),
+      0 0 12px rgba(var(--accent-rgb), 0.2),
+      0 0 16px rgba(var(--accent-rgb), 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 0 16px rgba(var(--accent-rgb), 0.5),
+      0 0 24px rgba(var(--accent-rgb), 0.3),
+      0 0 32px rgba(var(--accent-rgb), 0.2);
+  }
+}
+
+/* Clase para el efecto de respiración del fondo */
+.ai-button-pulse {
+  animation: ai-breathe 3s ease-in-out infinite;
+}
+
+/* Clase para el brillo exterior del botón */
+.ai-button-glow {
+  animation: ai-glow-pulse 3s ease-in-out infinite;
+}
