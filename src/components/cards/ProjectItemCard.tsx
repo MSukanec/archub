@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Pencil } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import chroma from 'chroma-js';
 
 interface Project {
@@ -190,13 +190,16 @@ export default function ProjectItemCard({
               variant="secondary"
               size="sm"
               className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              style={{ 
+                borderColor: projectColor,
+                color: projectColor
+              }}
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit?.();
               }}
               data-testid="button-edit-project"
             >
-              <Pencil />
               Editar
             </Button>
             <Button 
