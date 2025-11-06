@@ -66,22 +66,44 @@ const AdminPaymentsTab = () => {
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not available');
 
-      const { data, error } = await supabase
+      // Fetch payments
+      const { data: paymentsData, error: paymentsError } = await supabase
         .from('payments')
-        .select(`
-          *,
-          users!user_id(auth_id, full_name, email),
-          courses(id, title, slug)
-        `)
+        .select('*')
         .eq('status', 'completed')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      
-      return (data || []).map((payment: any) => ({
+      if (paymentsError) throw paymentsError;
+      if (!paymentsData || paymentsData.length === 0) return [];
+
+      // Get unique user IDs and course IDs
+      const userIds = [...new Set(paymentsData.map(p => p.user_id))];
+      const courseIds = [...new Set(paymentsData.map(p => p.course_id).filter(Boolean))];
+
+      // Fetch users by auth_id
+      const { data: usersData, error: usersError } = await supabase
+        .from('users')
+        .select('auth_id, full_name, email')
+        .in('auth_id', userIds);
+
+      if (usersError) throw usersError;
+
+      // Fetch courses
+      const { data: coursesData, error: coursesError } = await supabase
+        .from('courses')
+        .select('id, title, slug')
+        .in('id', courseIds);
+
+      if (coursesError) throw coursesError;
+
+      // Map users and courses to payments
+      const usersMap = new Map(usersData?.map(u => [u.auth_id, u]) || []);
+      const coursesMap = new Map(coursesData?.map(c => [c.id, c]) || []);
+
+      return paymentsData.map((payment: any) => ({
         ...payment,
-        users: Array.isArray(payment.users) ? payment.users[0] : payment.users,
-        courses: Array.isArray(payment.courses) ? payment.courses[0] : payment.courses
+        users: usersMap.get(payment.user_id) || { auth_id: payment.user_id, full_name: null, email: 'Unknown' },
+        courses: payment.course_id ? (coursesMap.get(payment.course_id) || null) : null
       })) as Payment[];
     },
   });
