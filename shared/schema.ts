@@ -922,3 +922,31 @@ export const insertSupportMessageSchema = createInsertSchema(support_messages).o
 
 export type SupportMessage = typeof support_messages.$inferSelect;
 export type InsertSupportMessage = z.infer<typeof insertSupportMessageSchema>;
+
+// User Presence Tracking Table
+// Tracks real-time user presence and current location
+export const user_presence = pgTable("user_presence", {
+  user_id: uuid("user_id").primaryKey().notNull(),
+  status: text("status").default("online"), // 'online', 'offline', 'away'
+  current_view: text("current_view"), // Current page/view the user is on
+  user_agent: text("user_agent"),
+  locale: text("locale"),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  organization_id: uuid("organization_id"),
+});
+
+export type UserPresence = typeof user_presence.$inferSelect;
+
+// User View History Table  
+// Tracks historical analytics of user page views and time spent
+export const user_view_history = pgTable("user_view_history", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  user_id: uuid("user_id").notNull(),
+  view_name: text("view_name").notNull(),
+  entered_at: timestamp("entered_at", { withTimezone: true }).notNull(),
+  exited_at: timestamp("exited_at", { withTimezone: true }),
+  duration_seconds: integer("duration_seconds"),
+  organization_id: uuid("organization_id"),
+});
+
+export type UserViewHistory = typeof user_view_history.$inferSelect;
