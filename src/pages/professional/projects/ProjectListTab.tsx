@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
 import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
-import { Folder, ArrowRight, Edit, Trash2, Plus, CheckCircle2 } from 'lucide-react'
+import { Folder, Edit, Trash2, Plus, CheckCircle2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -221,11 +221,6 @@ export default function ProjectList() {
 
   const getProjectRowActions = (project: any) => [
     {
-      label: 'Ir al proyecto',
-      icon: ArrowRight,
-      onClick: () => handleSelectProject(project.id)
-    },
-    {
       label: 'Editar',
       icon: Edit,
       onClick: () => handleEdit(project)
@@ -237,6 +232,11 @@ export default function ProjectList() {
       variant: 'destructive' as const
     }
   ]
+
+  const getPrimaryRowAction = (project: any) => ({
+    label: 'Ir al Proyecto',
+    onClick: () => handleSelectProject(project.id)
+  })
 
   // Delete project mutation
   const deleteProjectMutation = useMutation({
@@ -303,6 +303,7 @@ export default function ProjectList() {
           columns={columns}
           isLoading={projectsLoading}
           rowActions={getProjectRowActions}
+          primaryRowAction={getPrimaryRowAction}
           getIsInactive={(project) => project.status === 'completed'}
           inactiveSeparatorLabel="Proyectos Completados"
           emptyState={
