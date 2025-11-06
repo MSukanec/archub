@@ -460,50 +460,6 @@ export function Sidebar() {
                   )}
                 </button>
 
-                {/* Botón Analytics - solo si es admin */}
-                {isAdmin && (
-                  <button
-                    onClick={() => {
-                      setSidebarLevel('admin');
-                      navigate('/admin/dashboard');
-                    }}
-                    className={cn(
-                      "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
-                      isExpanded ? "w-full" : "w-8",
-                      location === '/admin/dashboard' && "bg-[var(--main-sidebar-button-active-bg)]"
-                    )}
-                    data-testid="sidebar-button-analytics"
-                  >
-                    <div className="flex items-center justify-center w-8 flex-shrink-0">
-                      <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                        <BarChart3 className={cn(
-                          "h-4 w-4 transition-colors",
-                          location === '/admin/dashboard' ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
-                          "group-hover:text-[var(--accent)]"
-                        )} />
-                      </div>
-                    </div>
-                    {isExpanded && (
-                      <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
-                        <span className={cn(
-                          "text-sm font-medium truncate text-left",
-                          location === '/admin/dashboard' ? "text-white" : "text-[var(--main-sidebar-fg)]",
-                          "group-hover:text-white"
-                        )}>
-                          Analytics
-                        </span>
-                        <span className={cn(
-                          "text-xs truncate text-left",
-                          location === '/admin/dashboard' ? "text-white opacity-100" : "text-[var(--main-sidebar-fg)] opacity-60",
-                          "group-hover:text-white group-hover:opacity-100"
-                        )}>
-                          Métricas y análisis
-                        </span>
-                      </div>
-                    )}
-                  </button>
-                )}
-
                 {/* Botón Administración - solo si es admin */}
                 {isAdmin && (
                   <button
@@ -514,15 +470,15 @@ export function Sidebar() {
                     className={cn(
                       "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
                       isExpanded ? "w-full" : "w-8",
-                      location.startsWith('/admin') && location !== '/admin/dashboard' && "bg-[var(--main-sidebar-button-active-bg)]"
+                      location.startsWith('/admin') && "bg-[var(--main-sidebar-button-active-bg)]"
                     )}
                     data-testid="sidebar-button-administration"
                   >
                     <div className="flex items-center justify-center w-8 flex-shrink-0">
                       <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                        <Settings className={cn(
+                        <Crown className={cn(
                           "h-4 w-4 transition-colors",
-                          (location.startsWith('/admin') && location !== '/admin/dashboard') ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
+                          location.startsWith('/admin') ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
                           "group-hover:text-[var(--accent)]"
                         )} />
                       </div>
@@ -531,14 +487,14 @@ export function Sidebar() {
                       <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
                         <span className={cn(
                           "text-sm font-medium truncate text-left",
-                          (location.startsWith('/admin') && location !== '/admin/dashboard') ? "text-white" : "text-[var(--main-sidebar-fg)]",
+                          location.startsWith('/admin') ? "text-white" : "text-[var(--main-sidebar-fg)]",
                           "group-hover:text-white"
                         )}>
                           Administración
                         </span>
                         <span className={cn(
                           "text-xs truncate text-left",
-                          (location.startsWith('/admin') && location !== '/admin/dashboard') ? "text-white opacity-100" : "text-[var(--main-sidebar-fg)] opacity-60",
+                          location.startsWith('/admin') ? "text-white opacity-100" : "text-[var(--main-sidebar-fg)] opacity-60",
                           "group-hover:text-white group-hover:opacity-100"
                         )}>
                           Panel de control

@@ -357,31 +357,16 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                   />
 
                   {isAdmin && (
-                    <>
-                      <MobileMenuButton
-                        icon={BarChart3}
-                        label="Analytics"
-                        onClick={() => {
-                          setSidebarLevel('admin');
-                          navigate('/admin/dashboard');
-                          handleCloseMenu();
-                        }}
-                        isActive={location === '/admin/dashboard'}
-                        showChevron={false}
-                        testId="button-mobile-analytics"
-                      />
-                      
-                      <MobileMenuButton
-                        icon={Settings}
-                        label="Administración"
-                        onClick={() => {
-                          setSidebarLevel('admin');
-                        }}
-                        isActive={location.startsWith('/admin') && location !== '/admin/dashboard'}
-                        showChevron={true}
-                        testId="button-mobile-admin"
-                      />
-                    </>
+                    <MobileMenuButton
+                      icon={Crown}
+                      label="Administración"
+                      onClick={() => {
+                        setSidebarLevel('admin');
+                      }}
+                      isActive={location.startsWith('/admin')}
+                      showChevron={true}
+                      testId="button-mobile-admin"
+                    />
                   )}
                 </>
               ) : (

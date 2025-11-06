@@ -329,6 +329,30 @@ return <Layout wide headerProps={...}>...</Layout>
 
 ---
 
+## 12. Navegación Admin
+
+### Estructura de navegación de admin
+
+**Sidebar Principal:**
+- Home
+- Organización
+- Proyecto
+- Capacitaciones
+- **Administración** ← Solo este botón en sidebar principal (si es admin)
+
+**Sidebar Específico de Admin** (cuando haces click en "Administración"):
+- **Analytics** ← Primer botón del sidebar específico
+- Administración
+- Soporte
+
+### Reglas importantes:
+- ❌ NO agregar "Analytics" en el sidebar principal
+- ✅ "Analytics" solo aparece en el sidebar específico de admin
+- ✅ En el sidebar principal solo va "Administración" (con icono Crown)
+- ✅ Cuando entras a admin level, aparecen Analytics, Administración, Soporte
+
+---
+
 ## Resumen
 
 **REGLA DE ORO:** Siempre mira una página similar existente antes de crear una nueva. Si es admin, usa AdminAdmin, AdminSupport o AdminDashboard como referencia. Usa `Layout` con `headerProps` y el componente `Tabs` personalizado.
@@ -337,8 +361,10 @@ return <Layout wide headerProps={...}>...</Layout>
 - ❌ Usar PageLayout directamente
 - ❌ Usar Button genérico para tabs/filtros
 - ❌ Crear página sin Layout correcto
+- ❌ Agregar "Analytics" en el sidebar principal
 
 **SIEMPRE:**
 - ✅ Usar Layout con headerProps
 - ✅ Usar Tabs de ui-custom para filtros
 - ✅ Seguir patrones de páginas existentes
+- ✅ Analytics solo en sidebar específico de admin
