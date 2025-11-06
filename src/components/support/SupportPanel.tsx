@@ -51,7 +51,7 @@ export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: S
   }, [inputValue]);
 
   // Cargar mensajes con React Query (auto-refresh cada 2 segundos)
-  const { data: messages = [], isLoading: isLoadingHistory } = useQuery({
+  const { data: messages = [], isLoading: isLoadingHistory, isFetching } = useQuery({
     queryKey: ['support-messages', userId],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -72,28 +72,34 @@ export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: S
         const data = await response.json();
         // Invalidar el contador de mensajes sin leer después de cargar
         queryClient.invalidateQueries({ queryKey: ['unread-user-support-messages-count'] });
-        return data.messages || [];
+        // Ordenar del más viejo al más nuevo (orden cronológico normal)
+        const sorted = (data.messages || []).sort((a: any, b: any) => 
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+        return sorted;
       }
       
       return [];
     },
     refetchInterval: 2000, // Auto-refresh cada 2 segundos para chat en tiempo real
     refetchOnWindowFocus: true,
+    staleTime: 1000, // Considera los datos "frescos" por 1 segundo para evitar "Cargando..." en cada render
   });
 
   const hasMessages = messages.length > 0;
 
-  // Auto-scroll hacia arriba (donde están los nuevos) cuando cambian los mensajes
+  // Auto-scroll hacia abajo (donde están los mensajes nuevos) cuando cambian los mensajes
   useEffect(() => {
     if (scrollAreaRef.current && hasMessages) {
       const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
       if (scrollContainer) {
-        scrollContainer.scrollTop = 0;
+        // Scroll suave al final
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
       }
     }
-  }, [messages, hasMessages]);
+  }, [messages.length]); // Solo cuando cambia la cantidad de mensajes, no en cada refetch
 
-  // Mutation para enviar mensajes
+  // Mutation para enviar mensajes con optimistic updates
   const sendMessageMutation = useMutation({
     mutationFn: async (message: string) => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -118,16 +124,45 @@ export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: S
 
       return response.json();
     },
-    onSuccess: () => {
-      // Refrescar inmediatamente la lista de mensajes
-      queryClient.invalidateQueries({ queryKey: ['support-messages', userId] });
+    onMutate: async (newMessage) => {
+      // Cancelar refetch en progreso
+      await queryClient.cancelQueries({ queryKey: ['support-messages', userId] });
+      
+      // Obtener data actual
+      const previousMessages = queryClient.getQueryData(['support-messages', userId]);
+      
+      // Optimistic update: agregar el mensaje inmediatamente
+      queryClient.setQueryData(['support-messages', userId], (old: any[] = []) => [
+        ...old,
+        {
+          sender: 'user',
+          message: newMessage,
+          created_at: new Date().toISOString(),
+          id: 'temp-' + Date.now() // ID temporal
+        }
+      ]);
+      
+      // Limpiar input inmediatamente
       setInputValue("");
+      
+      return { previousMessages };
+    },
+    onError: (err, newMessage, context) => {
+      // Revertir si hay error
+      if (context?.previousMessages) {
+        queryClient.setQueryData(['support-messages', userId], context.previousMessages);
+      }
+    },
+    onSettled: () => {
+      // Refrescar para obtener el mensaje real del servidor
+      queryClient.invalidateQueries({ queryKey: ['support-messages', userId] });
     },
   });
 
   const handleSendMessage = () => {
     const textToSend = inputValue.trim();
     if (!textToSend || sendMessageMutation.isPending) return;
+    // El optimistic update limpiará el input automáticamente en onMutate
     sendMessageMutation.mutate(textToSend);
   };
 
@@ -175,8 +210,8 @@ export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: S
         // Vista con conversación
         <ScrollArea className="flex-1 px-4" ref={scrollAreaRef}>
           <div className="py-4 space-y-4">
-            {/* Mensajes en orden inverso: más nuevos arriba, más viejos abajo */}
-            {[...messages].reverse().map((message, index) => (
+            {/* Mensajes en orden cronológico: más viejos arriba, más nuevos abajo (como WhatsApp) */}
+            {messages.map((message: any, index: number) => (
               <div
                 key={index}
                 className={cn(
