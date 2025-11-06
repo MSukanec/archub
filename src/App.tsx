@@ -60,6 +60,7 @@ import Activity from "@/pages/professional/organization/Activity";
 
 // Admin Pages (Lazy Loaded - solo admins las usan)
 const AdminAdmin = lazy(() => import("@/pages/admin/administration/AdminAdmin"));
+const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
 const AdminSupport = lazy(() => import("@/pages/admin/support/AdminSupport"));
 const AdminPayments = lazy(() => import("@/pages/admin/payments/AdminPayments"));
 const AdminCosts = lazy(() => import("@/pages/admin/costs/AdminCosts"));
@@ -235,6 +236,13 @@ function Router() {
 
 
         {/* Admin Routes - Lazy Loaded (solo se cargan cuando un admin accede) */}
+        <Route path="/admin/dashboard">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <AuthAdmin>
+              <AdminDashboard />
+            </AuthAdmin>
+          </Suspense>
+        </Route>
         <Route path="/admin/administration">
           <Suspense fallback={<LazyLoadFallback />}>
             <AuthAdmin>

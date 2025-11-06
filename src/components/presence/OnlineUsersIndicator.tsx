@@ -30,6 +30,7 @@ function formatViewName(view: string | null): string {
     'learning_dashboard': 'Dashboard Capacitaciones',
     'learning_courses': 'Cursos',
     'learning': 'Capacitaciones',
+    'admin_dashboard': 'Admin - Analytics',
     'admin_administration': 'Admin - Administración',
     'admin_support': 'Admin - Soporte',
     'admin_payments': 'Admin - Pagos',
