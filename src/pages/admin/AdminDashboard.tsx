@@ -93,6 +93,11 @@ function formatDurationHHMM(seconds: number): string {
 export default function AdminDashboard() {
   const [dateRange, setDateRange] = useState<DateRange>('7days');
   
+  // Obtener el color del accent dinámico
+  const accentColor = typeof window !== 'undefined' 
+    ? getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()
+    : '#8b5cf6';
+  
   // Calcular fechas según el rango seleccionado
   const getStartDate = (range: DateRange): Date => {
     const now = new Date();
@@ -495,11 +500,7 @@ export default function AdminDashboard() {
                         borderRadius: '6px'
                       }}
                     />
-                    <Bar dataKey="avgMinutes" radius={[0, 4, 4, 0]}>
-                      {engagementData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill="var(--accent)" />
-                      ))}
-                    </Bar>
+                    <Bar dataKey="avgMinutes" radius={[0, 4, 4, 0]} fill={accentColor} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -542,9 +543,9 @@ export default function AdminDashboard() {
                     <Line 
                       type="monotone" 
                       dataKey="sessions" 
-                      stroke="var(--accent)" 
+                      stroke={accentColor} 
                       strokeWidth={2}
-                      dot={{ fill: 'var(--accent)' }}
+                      dot={{ fill: accentColor }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
