@@ -191,8 +191,8 @@ export default function ProjectItemCard({
               size="sm"
               className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               style={{ 
-                borderColor: projectColor,
-                color: projectColor
+                borderColor: isActive ? 'white' : projectColor,
+                color: isActive ? 'white' : projectColor
               }}
               onClick={(e) => {
                 e.stopPropagation();
