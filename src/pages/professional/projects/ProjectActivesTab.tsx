@@ -41,7 +41,7 @@ export default function ProjectActives() {
     ...projectsWithActive.filter(project => project.id !== activeProjectId)
   ] : projectsWithActive
 
-  // Select project mutation
+  // Select project mutation - AHORA SIN NAVEGACIÓN
   const selectProjectMutation = useMutation({
     mutationFn: async (projectId: string) => {
       if (!supabase || !userData?.user?.id || !organizationId) {
@@ -70,24 +70,26 @@ export default function ProjectActives() {
         queryKey: ['user-organization-preferences', userData?.user?.id, organizationId] 
       });
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      queryClient.invalidateQueries({ queryKey: ['projects', organizationId] });
       
-      navigate('/project/dashboard');
-      
+      // NO navegamos, solo mostramos toast
       toast({
-        title: "Proyecto seleccionado",
-        description: "El proyecto se ha seleccionado correctamente"
+        title: "Proyecto activado",
+        description: "El proyecto ahora está activo"
       })
     },
     onError: () => {
       toast({
         title: "Error",
-        description: "No se pudo seleccionar el proyecto",
+        description: "No se pudo activar el proyecto",
         variant: "destructive"
       })
     }
   })
 
   const handleSelectProject = (projectId: string) => {
+    // Si ya está activo, no hacer nada
+    if (projectId === activeProjectId) return;
     selectProjectMutation.mutate(projectId)
   }
 

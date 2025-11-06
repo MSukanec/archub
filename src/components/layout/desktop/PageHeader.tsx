@@ -63,12 +63,6 @@ export function Header({ icon, title, description, tabs = [], actions = [], clas
             </div>
           </div>
 
-          {/* Right: Selector (Project/Organization) */}
-          {selector && (
-            <div className="flex items-center gap-2">
-              {selector}
-            </div>
-          )}
         </div>
 
         {/* Fila Inferior: Tabs a la izquierda, Acciones a la derecha */}

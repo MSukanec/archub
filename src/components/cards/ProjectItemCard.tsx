@@ -85,7 +85,7 @@ export default function ProjectItemCard({
     <div
       className={`
         rounded-2xl shadow-sm cursor-pointer
-        transition-all duration-300 ease-in-out
+        transition-all duration-500 ease-in-out
         hover:shadow-lg hover:-translate-y-1
         overflow-hidden
         relative
@@ -119,13 +119,13 @@ export default function ProjectItemCard({
             }}
           />
         ) : (
-          // Degradado suave para activos - con color del proyecto abajo
+          // Degradado suave para activos - con color del proyecto más leve y que sube más
           <div 
             className="absolute inset-0" 
             style={{ 
               background: projectColor.includes('var(')
-                ? `linear-gradient(to top, var(--accent) 0%, rgba(0,0,0,0.4) 10%, rgba(0,0,0,0.2) 30%, transparent 60%)`
-                : `linear-gradient(to top, ${projectColor} 0%, rgba(0,0,0,0.4) 10%, rgba(0,0,0,0.2) 30%, transparent 60%)`
+                ? `linear-gradient(to top, var(--accent) 0%, rgba(139, 92, 246, 0.3) 20%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.1) 60%, transparent 100%)`
+                : `linear-gradient(to top, ${chroma(projectColor).alpha(1).css()} 0%, ${chroma(projectColor).alpha(0.3).css()} 20%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.1) 60%, transparent 100%)`
             }}
           />
         )}
