@@ -25,7 +25,7 @@ interface DashboardStats {
 export default function AdminAdminDashboard() {
   // Fetch dashboard statistics - OPTIMIZADO
   const { data: stats, isLoading } = useQuery({
-    queryKey: ['admin-community-dashboard'],
+    queryKey: ['admin-administration-dashboard'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not available')
 
