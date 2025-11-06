@@ -10,7 +10,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { useLocation } from 'wouter'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
-import ProjectItem from '@/components/ui-custom/general/ProjectItem'
+import ProjectItemCard from '@/components/cards/ProjectItemCard'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
@@ -108,7 +108,7 @@ export default function ProjectActives() {
       {sortedProjects.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {sortedProjects.map((project) => (
-            <ProjectItem
+            <ProjectItemCard
               key={project.id}
               project={project}
               onClick={() => handleSelectProject(project.id)}
