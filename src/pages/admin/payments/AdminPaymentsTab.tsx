@@ -80,6 +80,8 @@ const AdminPaymentsTab = () => {
       const userIds = [...new Set(paymentsData.map(p => p.user_id))];
       const courseIds = [...new Set(paymentsData.map(p => p.course_id).filter(Boolean))];
 
+      console.log('🔍 Payment user_ids:', userIds);
+
       // Fetch users by auth_id
       const { data: usersData, error: usersError } = await supabase
         .from('users')
@@ -87,6 +89,8 @@ const AdminPaymentsTab = () => {
         .in('auth_id', userIds);
 
       if (usersError) throw usersError;
+
+      console.log('👥 Users found:', usersData);
 
       // Fetch courses
       const { data: coursesData, error: coursesError } = await supabase
@@ -100,11 +104,17 @@ const AdminPaymentsTab = () => {
       const usersMap = new Map(usersData?.map(u => [u.auth_id, u]) || []);
       const coursesMap = new Map(coursesData?.map(c => [c.id, c]) || []);
 
-      return paymentsData.map((payment: any) => ({
+      console.log('🗺️ Users map:', usersMap);
+
+      const mappedPayments = paymentsData.map((payment: any) => ({
         ...payment,
         users: usersMap.get(payment.user_id) || { auth_id: payment.user_id, full_name: null, email: 'Unknown' },
         courses: payment.course_id ? (coursesMap.get(payment.course_id) || null) : null
-      })) as Payment[];
+      }));
+
+      console.log('💰 Mapped payments:', mappedPayments);
+
+      return mappedPayments as Payment[];
     },
   });
 
