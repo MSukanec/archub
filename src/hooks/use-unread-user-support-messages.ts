@@ -36,6 +36,6 @@ export function useUnreadUserSupportMessages(userId: string | undefined) {
       return count || 0;
     },
     enabled: !!userId,
-    refetchInterval: 30000, // Refrescar cada 30 segundos
+    refetchInterval: 5000, // Refrescar cada 5 segundos (antes 30s)
   });
 }

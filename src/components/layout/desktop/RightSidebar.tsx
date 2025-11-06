@@ -22,6 +22,7 @@ import { getUnreadCount, subscribeUserNotifications } from '@/lib/notifications'
 import { useUnreadSupportMessages } from '@/hooks/use-unread-support-messages';
 import { useUnreadUserSupportMessages } from '@/hooks/use-unread-user-support-messages';
 import { useEffect } from 'react';
+import { queryClient } from '@/lib/queryClient';
 
 export function RightSidebar() {
   const { isDark, toggleTheme } = useThemeStore();
@@ -84,6 +85,13 @@ export function RightSidebar() {
     }
     // Toggle: si ya está abierto, lo cierra; si está cerrado, lo abre
     setActivePanel(activePanel === panel ? null : panel);
+    
+    // Si se abre el panel de soporte, invalidar inmediatamente el contador
+    if (panel === 'support' && activePanel !== 'support') {
+      // Forzar actualización inmediata del contador de mensajes no leídos
+      queryClient.invalidateQueries({ queryKey: ['unread-user-support-messages-count', userId] });
+      queryClient.invalidateQueries({ queryKey: ['unread-support-messages-count'] });
+    }
   };
 
   const handleMouseLeave = () => {
