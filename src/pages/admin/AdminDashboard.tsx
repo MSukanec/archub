@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
@@ -92,11 +92,17 @@ function formatDurationHHMM(seconds: number): string {
 
 export default function AdminDashboard() {
   const [dateRange, setDateRange] = useState<DateRange>('7days');
+  const [accentColor, setAccentColor] = useState<string>('#8b5cf6');
   
   // Obtener el color del accent dinámico
-  const accentColor = typeof window !== 'undefined' 
-    ? getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()
-    : '#8b5cf6';
+  useEffect(() => {
+    const computedColor = getComputedStyle(document.documentElement)
+      .getPropertyValue('--accent')
+      .trim();
+    if (computedColor) {
+      setAccentColor(computedColor);
+    }
+  }, []);
   
   // Calcular fechas según el rango seleccionado
   const getStartDate = (range: DateRange): Date => {

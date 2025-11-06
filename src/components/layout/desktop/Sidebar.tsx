@@ -469,7 +469,7 @@ export function Sidebar() {
                   <button
                     onClick={() => {
                       setSidebarLevel('admin');
-                      navigate('/admin/administration');
+                      navigate('/admin/dashboard');
                     }}
                     className={cn(
                       "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
