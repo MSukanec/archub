@@ -17,12 +17,15 @@ import { Badge } from "@/components/ui/badge";
 import { Moon, Sun, Headphones, PanelRightClose, MessageCircle } from "lucide-react";
 import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { getUnreadCount, subscribeUserNotifications } from '@/lib/notifications';
+import { useUnreadSupportMessages } from '@/hooks/use-unread-support-messages';
 import { useEffect } from 'react';
 
 export function RightSidebar() {
   const { isDark, toggleTheme } = useThemeStore();
   const { data: userData } = useCurrentUser();
+  const isAdmin = useIsAdmin();
   const userId = userData?.user?.id;
   const userFullName = userData?.user?.full_name || userData?.user?.first_name || 'Usuario';
   const userAvatarUrl = userData?.user?.avatar_url;
@@ -31,6 +34,9 @@ export function RightSidebar() {
   const [activePanel, setActivePanel] = useState<'notifications' | 'ai' | 'support' | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Contador de mensajes sin leer (solo para admins)
+  const { data: unreadSupportCount = 0 } = useUnreadSupportMessages();
 
   const handleToggleTheme = async () => {
     const userId = userData?.user?.id;
@@ -200,8 +206,17 @@ export function RightSidebar() {
               data-testid="button-help"
               onMouseEnter={() => handleMouseEnter('support')}
             >
-              <div className="h-8 w-8 flex items-center justify-center">
+              <div className="h-8 w-8 flex items-center justify-center relative">
                 <Headphones className="h-[18px] w-[18px]" />
+                {isAdmin && unreadSupportCount > 0 && (
+                  <span 
+                    className="absolute top-0 right-0 h-4 min-w-[16px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold text-white border-0"
+                    style={{ backgroundColor: 'var(--accent)', transform: 'translate(25%, -25%)' }}
+                    data-testid="badge-unread-support"
+                  >
+                    {unreadSupportCount > 99 ? '99+' : unreadSupportCount}
+                  </span>
+                )}
               </div>
             </button>
 

@@ -162,6 +162,7 @@ export function registerSupportRoutes(app: Express, deps: RouteDeps) {
           user_id,
           message,
           sender,
+          read_by_admin,
           created_at
         `)
         .order('created_at', { ascending: false });
@@ -195,7 +196,8 @@ export function registerSupportRoutes(app: Express, deps: RouteDeps) {
           user: userData,
           messages: userMessages,
           last_message_at: lastMessage?.created_at,
-          unread_count: userMessages.filter(m => m.sender === 'user').length // Simplificación: contar mensajes de usuario
+          // Contar solo mensajes de usuario que NO han sido leídos por el admin
+          unread_count: userMessages.filter(m => m.sender === 'user' && m.read_by_admin === false).length
         };
       });
 
@@ -212,6 +214,57 @@ export function registerSupportRoutes(app: Express, deps: RouteDeps) {
       console.error('Error fetching support conversations:', err);
       return res.status(500).json({
         error: "Error fetching support conversations",
+        details: err.message
+      });
+    }
+  });
+
+  // POST /api/admin/support/mark-read - Mark user messages as read
+  app.post("/api/admin/support/mark-read", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      // Verificar que sea admin usando la función compartida
+      const { isAdmin, error: adminError } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error: adminError });
+      }
+
+      const token = extractToken(authHeader);
+      const authenticatedSupabase = createAuthenticatedClient(token!);
+
+      // Validar datos de entrada
+      const { user_id } = req.body;
+
+      if (!user_id) {
+        return res.status(400).json({ error: "user_id is required" });
+      }
+
+      // Marcar todos los mensajes del usuario como leídos
+      const { error: updateError } = await authenticatedSupabase
+        .from('support_messages')
+        .update({ read_by_admin: true })
+        .eq('user_id', user_id)
+        .eq('sender', 'user')
+        .eq('read_by_admin', false);
+
+      if (updateError) {
+        console.error('Supabase update error:', updateError);
+        return res.status(500).json({ 
+          error: "Error marking messages as read",
+          details: updateError.message 
+        });
+      }
+
+      return res.status(200).json({ success: true });
+
+    } catch (err: any) {
+      console.error('Error marking messages as read:', err);
+      return res.status(500).json({
+        error: "Error marking messages as read",
         details: err.message
       });
     }
@@ -240,6 +293,14 @@ export function registerSupportRoutes(app: Express, deps: RouteDeps) {
       if (!user_id || !message || typeof message !== 'string') {
         return res.status(400).json({ error: "user_id and message are required" });
       }
+
+      // Marcar todos los mensajes previos del usuario como leídos
+      await authenticatedSupabase
+        .from('support_messages')
+        .update({ read_by_admin: true })
+        .eq('user_id', user_id)
+        .eq('sender', 'user')
+        .eq('read_by_admin', false);
 
       // Insertar respuesta del admin
       const { data: newMessage, error: insertError } = await authenticatedSupabase

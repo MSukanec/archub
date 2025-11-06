@@ -42,6 +42,42 @@ const AdminSupportTicketsTab = () => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Marcar mensajes como leídos cuando se selecciona una conversación
+  const markAsReadMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        throw new Error("No session");
+      }
+
+      const response = await fetch('/api/admin/support/mark-read', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ user_id: userId })
+      });
+
+      if (!response.ok) {
+        throw new Error('Error marking messages as read');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-support-conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['unread-support-messages-count'] });
+    }
+  });
+
+  // Marcar como leído cuando se selecciona una conversación
+  const handleSelectConversation = (userId: string) => {
+    setSelectedUserId(userId);
+    markAsReadMutation.mutate(userId);
+  };
+
   // Fetch all conversations
   const { data: conversations = [], isLoading } = useQuery({
     queryKey: ['admin-support-conversations'],
@@ -184,25 +220,25 @@ const AdminSupportTicketsTab = () => {
                     "cursor-pointer hover:border-[var(--accent)] transition-colors",
                     selectedUserId === conversation.user_id && "border-[var(--accent)] bg-muted/50"
                   )}
-                  onClick={() => setSelectedUserId(conversation.user_id)}
+                  onClick={() => handleSelectConversation(conversation.user_id)}
                   data-testid={`conversation-${conversation.user_id}`}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <Avatar className="h-10 w-10">
+                  <CardContent className="p-3">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-9 w-9">
                         <AvatarImage src={conversation.user.avatar_url} alt={conversation.user.full_name} />
-                        <AvatarFallback className="bg-[var(--accent)] text-white">
+                        <AvatarFallback className="bg-[var(--accent)] text-white text-xs">
                           {conversation.user.full_name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2 mb-1">
+                        <div className="flex items-center justify-between gap-2">
                           <span className="font-medium text-sm truncate">
                             {conversation.user.full_name}
                           </span>
                           {conversation.unread_count > 0 && (
-                            <Badge variant="default" className="bg-[var(--accent)] text-white text-xs">
+                            <Badge variant="default" className="bg-[var(--accent)] text-white text-xs h-5 min-w-5 px-1.5">
                               {conversation.unread_count}
                             </Badge>
                           )}
@@ -210,7 +246,7 @@ const AdminSupportTicketsTab = () => {
                         <div className="text-xs text-muted-foreground truncate">
                           {conversation.user.email}
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1">
+                        <div className="text-xs text-muted-foreground mt-0.5">
                           {formatDateCompact(conversation.last_message_at)}
                         </div>
                       </div>
