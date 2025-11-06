@@ -84,6 +84,7 @@ export default function ProjectItemCard({
   return (
     <div
       className={`
+        group
         rounded-2xl shadow-sm cursor-pointer
         transition-all duration-500 ease-in-out
         hover:shadow-lg hover:-translate-y-1
@@ -181,11 +182,11 @@ export default function ProjectItemCard({
             </Badge>
           </div>
 
-          {/* Botón "Ir al Proyecto" - abajo a la derecha */}
+          {/* Botón "Ir al Proyecto" - abajo a la derecha - SOLO EN HOVER */}
           <div className="flex justify-end">
             <Button 
               size="sm"
-              className="text-white border-0 text-sm font-medium shadow-md"
+              className="text-white border-0 text-sm font-medium shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               style={{ backgroundColor: projectColor }}
               onClick={(e) => {
                 e.stopPropagation();
