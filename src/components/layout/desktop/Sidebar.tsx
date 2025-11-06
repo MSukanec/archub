@@ -201,7 +201,7 @@ export function Sidebar() {
           )}
         >
           {/* SECCIÓN SUPERIOR: Navegación principal con scroll */}
-          <div className="px-0 overflow-y-auto">
+          <div className="px-0 pt-8 overflow-y-auto">
             {sidebarLevel === 'general' ? (
               /* SIDEBAR GENERAL - HUB CENTRAL */
               <div className={cn(
@@ -791,7 +791,7 @@ export function Sidebar() {
 
           {/* SECCIÓN INFERIOR: Controles y Avatar (siempre pegados al fondo) */}
           <div className={cn(
-            "pt-3 pb-3 flex flex-col gap-[2px]",
+            "pt-8 pb-8 flex flex-col gap-[2px]",
             isExpanded ? "px-[9px]" : "items-center"
           )}>
             {/* Botón de Anclar */}

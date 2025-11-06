@@ -153,7 +153,7 @@ export function RightSidebar() {
       <div className="w-[50px] h-screen flex-shrink-0">
         <aside className="grid h-screen grid-rows-[1fr_auto] w-[50px]">
           {/* SECCIÓN SUPERIOR: Botones principales */}
-          <div className="px-0 overflow-y-auto">
+          <div className="px-0 pt-8 overflow-y-auto">
             <div className="flex flex-col gap-[2px] items-center">
               
               {/* Avatar del Usuario - Altura igual al logo del sidebar izquierdo */}
@@ -211,7 +211,7 @@ export function RightSidebar() {
           </div>
 
           {/* SECCIÓN INFERIOR: Botones de Ayuda, Discord y Anclar */}
-          <div className="pt-3 pb-3 flex flex-col gap-[2px] items-center">
+          <div className="pt-8 pb-8 flex flex-col gap-[2px] items-center">
             {/* Ayuda/Soporte - CON CLICK */}
             <button
               className={cn(
