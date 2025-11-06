@@ -912,6 +912,8 @@ export const support_messages = pgTable("support_messages", {
   user_id: uuid("user_id").notNull(),
   message: text("message").notNull(),
   sender: text("sender").notNull(), // 'user' o 'admin'
+  read_by_admin: boolean("read_by_admin").default(false).notNull(),
+  read_by_user: boolean("read_by_user").default(false).notNull(),
   created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
