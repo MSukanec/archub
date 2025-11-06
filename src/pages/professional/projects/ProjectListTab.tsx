@@ -146,7 +146,7 @@ export default function ProjectList() {
   // Format status badge
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      'active': { color: 'var(--accent)', text: 'Activo' },
+      'active': { color: 'var(--accent)', text: 'En proceso' },
       'completed': { color: 'var(--main-sidebar-bg)', text: 'Completado' },
       'paused': { color: '#f59e0b', text: 'Pausado' },
       'cancelled': { color: '#ef4444', text: 'Cancelado' },
