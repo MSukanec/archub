@@ -155,7 +155,6 @@ export function Sidebar() {
       return [
         { id: 'dashboard', label: 'Analytics', icon: BarChart3, href: '/admin/dashboard' },
         { id: 'administration', label: 'Administración', icon: Settings, href: '/admin/administration' },
-        { id: 'support', label: 'Soporte', icon: Headphones, href: '/admin/support' },
         { id: 'payments', label: 'Pagos', icon: Wallet, href: '/admin/payments' },
         { id: 'courses', label: 'Cursos', icon: BookOpen, href: '/admin/courses' },
         { id: 'layout', label: 'Layout', icon: Layers, href: '/admin/layout' },
@@ -168,7 +167,6 @@ export function Sidebar() {
       return [
         { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/learning/dashboard' },
         { id: 'courses', label: 'Cursos', icon: GraduationCap, href: '/learning/courses' },
-        { id: 'community', label: 'Comunidad Discord', icon: MessageCircle, href: 'https://discord.com/channels/868615664070443008' },
       ];
     }
     
@@ -784,6 +782,29 @@ export function Sidebar() {
             "pt-3 pb-3 flex flex-col gap-[2px]",
             isExpanded ? "px-[9px]" : "items-center"
           )}>
+            {/* Botón de Soporte - Solo visible para admins */}
+            {isAdmin && (
+              <ButtonSidebar
+                icon={<Headphones className="w-[18px] h-[18px]" />}
+                label="Soporte"
+                isActive={location === '/admin/support'}
+                isExpanded={isExpanded}
+                onClick={() => navigate('/admin/support')}
+                variant="secondary"
+                badgeCount={unreadCount}
+              />
+            )}
+
+            {/* Botón de Comunidad Discord - Siempre visible */}
+            <ButtonSidebar
+              icon={<MessageCircle className="w-[18px] h-[18px]" />}
+              label="Comunidad Discord"
+              isActive={false}
+              isExpanded={isExpanded}
+              onClick={() => window.open('https://discord.com/channels/868615664070443008', '_blank', 'noopener,noreferrer')}
+              variant="secondary"
+            />
+
             {/* Botón de Anclar */}
             <ButtonSidebar
               icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
