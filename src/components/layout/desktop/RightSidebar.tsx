@@ -77,18 +77,28 @@ export function RightSidebar() {
     };
   }, [userId]);
 
-  const handleMouseEnter = (panel: 'notifications' | 'ai' | 'support') => {
+  const handlePanelClick = (panel: 'notifications' | 'ai' | 'support') => {
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
       closeTimeoutRef.current = null;
     }
-    setActivePanel(panel);
+    // Toggle: si ya está abierto, lo cierra; si está cerrado, lo abre
+    setActivePanel(activePanel === panel ? null : panel);
   };
 
   const handleMouseLeave = () => {
+    // Cerrar después de un pequeño delay al quitar el hover
     closeTimeoutRef.current = setTimeout(() => {
       setActivePanel(null);
     }, 100);
+  };
+
+  const handleMouseEnter = () => {
+    // Cancelar el cierre si vuelves a entrar
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
   };
 
   const isExpanded = activePanel !== null;
@@ -99,6 +109,7 @@ export function RightSidebar() {
       style={{
         width: isExpanded ? '400px' : '50px'
       }}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       {/* PANEL EXPANDIBLE - Cambia según el panel activo */}
@@ -153,7 +164,7 @@ export function RightSidebar() {
               {/* Espacio después del avatar - igual al logo */}
               <div className="h-3"></div>
 
-              {/* Botón de Notificaciones - altura h-10 - CON HOVER */}
+              {/* Botón de Notificaciones - altura h-10 - CON CLICK */}
               <button
                 className={cn(
                   "relative h-10 w-8 rounded-md flex items-center justify-center transition-colors",
@@ -163,7 +174,7 @@ export function RightSidebar() {
                 )}
                 title="Notificaciones"
                 data-testid="button-notifications"
-                onMouseEnter={() => handleMouseEnter('notifications')}
+                onClick={() => handlePanelClick('notifications')}
               >
                 <div className="h-8 w-8 flex items-center justify-center relative">
                   <Bell className="h-[18px] w-[18px]" />
@@ -179,7 +190,7 @@ export function RightSidebar() {
                 </div>
               </button>
 
-              {/* Botón de IA - altura h-10 - CON HOVER - NUEVO */}
+              {/* Botón de IA - altura h-10 - CON CLICK - NUEVO */}
               <button
                 className={cn(
                   "relative h-10 w-8 rounded-md flex items-center justify-center transition-colors",
@@ -189,7 +200,7 @@ export function RightSidebar() {
                 )}
                 title="Asistente IA"
                 data-testid="button-ai"
-                onMouseEnter={() => handleMouseEnter('ai')}
+                onClick={() => handlePanelClick('ai')}
               >
                 <div className="h-8 w-8 flex items-center justify-center">
                   <Sparkles className="h-[18px] w-[18px]" />
@@ -201,7 +212,7 @@ export function RightSidebar() {
 
           {/* SECCIÓN INFERIOR: Botones de Ayuda, Discord y Anclar */}
           <div className="pt-3 pb-3 flex flex-col gap-[2px] items-center">
-            {/* Ayuda/Soporte - CON HOVER */}
+            {/* Ayuda/Soporte - CON CLICK */}
             <button
               className={cn(
                 "h-10 w-8 rounded-md flex items-center justify-center transition-colors",
@@ -211,7 +222,7 @@ export function RightSidebar() {
               )}
               title="Ayuda y soporte"
               data-testid="button-help"
-              onMouseEnter={() => handleMouseEnter('support')}
+              onClick={() => handlePanelClick('support')}
             >
               <div className="h-8 w-8 flex items-center justify-center relative">
                 <Headphones className="h-[18px] w-[18px]" />
