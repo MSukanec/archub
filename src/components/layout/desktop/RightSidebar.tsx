@@ -211,7 +211,7 @@ export function RightSidebar() {
           </div>
 
           {/* SECCIÓN INFERIOR: Botones de Ayuda, Discord y Anclar */}
-          <div className="pt-8 pb-8 flex flex-col gap-[2px] items-center">
+          <div className="pt-20 pb-6 flex flex-col gap-[2px] items-center">
             {/* Ayuda/Soporte - CON CLICK */}
             <button
               className={cn(
