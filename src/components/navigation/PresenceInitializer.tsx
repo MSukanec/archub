@@ -20,9 +20,6 @@ export function PresenceInitializer() {
   useEffect(() => {
     // Solo inicializar si el usuario está autenticado
     if (userData?.user && !isSubscribed) {
-      console.log('🟢 Inicializando sistema de presencia...');
-      
-      // Suscribirse a cambios en tiempo real
       subscribeToPresenceChanges();
     }
 
@@ -31,8 +28,6 @@ export function PresenceInitializer() {
     return () => {
       // Solo hacer cleanup si hay un usuario (evitar cleanup en mount inicial)
       if (userData?.user) {
-        console.log('🔴 Limpiando presencia y cerrando sesión analytics...');
-        
         // FASE 1: Cerrar vista actual en analytics (fire-and-forget, async)
         (async () => {
           try {

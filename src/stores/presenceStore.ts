@@ -50,15 +50,9 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
       set({ currentView: view })
 
       // Llamar a la función RPC para actualizar en la BD
-      const { error } = await supabase.rpc('presence_set_view', { 
+      await supabase.rpc('presence_set_view', { 
         p_view: view 
       })
-
-      if (error) {
-        console.error('❌ Error actualizando current_view:', error)
-      } else {
-        console.log('✅ Current view actualizada:', view)
-      }
     } catch (err) {
       console.error('❌ Error en setCurrentView:', err)
     }
@@ -87,10 +81,7 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
         .gte('last_seen_at', ninetySecondsAgo)
         .order('last_seen_at', { ascending: false })
 
-      if (error) {
-        console.error('❌ Error fetching online users:', error)
-        return
-      }
+      if (error) return
 
       // Transformar datos al formato esperado
       const onlineUsers: OnlineUser[] = (data || []).map((item: any) => ({
@@ -103,7 +94,6 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
       }))
 
       set({ onlineUsers })
-      console.log(`✅ ${onlineUsers.length} usuarios online`)
     } catch (err) {
       console.error('❌ Error en fetchOnlineUsers:', err)
     }
@@ -117,10 +107,7 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
     const { presenceChannel, isSubscribed } = get()
 
     // Evitar múltiples suscripciones
-    if (isSubscribed || presenceChannel) {
-      console.warn('⚠️ Ya estamos suscritos a presence changes')
-      return
-    }
+    if (isSubscribed || presenceChannel) return
 
     // Crear canal de suscripción
     const channel = supabase
@@ -132,15 +119,13 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
           schema: 'public',
           table: 'user_presence'
         },
-        (payload) => {
-          console.log('🔔 Cambio en user_presence:', payload)
+        () => {
           // Re-fetch usuarios online cuando hay cambios
           get().fetchOnlineUsers()
         }
       )
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
-          console.log('✅ Suscrito a cambios de presencia en tiempo real')
           set({ isSubscribed: true })
         }
       })
@@ -164,7 +149,6 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
         isSubscribed: false,
         onlineUsers: []
       })
-      console.log('🔌 Desuscrito de presence changes')
     }
   }
 }))

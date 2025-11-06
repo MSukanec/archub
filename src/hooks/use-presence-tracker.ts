@@ -106,23 +106,15 @@ export function usePresenceTracker() {
     const trackViewChange = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) {
-          console.log('⚠️ No hay sesión activa, saltando analytics');
-          return; // Solo trackear usuarios autenticados
-        }
+        if (!session?.user) return; // Solo trackear usuarios autenticados
 
-        console.log('📊 Ejecutando analytics tracking...');
-        
         // Cerrar vista anterior (si existe)
-        const exitResult = await supabase.rpc('analytics_exit_previous_view');
-        console.log('📊 analytics_exit_previous_view resultado:', exitResult);
+        await supabase.rpc('analytics_exit_previous_view');
         
         // Abrir nueva vista
-        const enterResult = await supabase.rpc('analytics_enter_view', { p_view: viewName });
-        console.log('📊 analytics_enter_view resultado:', enterResult);
+        await supabase.rpc('analytics_enter_view', { p_view: viewName });
       } catch (error) {
-        // Mostrar errores de analytics temporalmente para debug
-        console.error('📊 Analytics tracking error:', error);
+        // Silenciar errores de analytics (no afectan la UX)
       }
     };
 
@@ -131,7 +123,5 @@ export function usePresenceTracker() {
     
     // FASE 2: Presencia - Actualizar estado en tiempo real
     setCurrentView(viewName);
-    
-    console.log(`📍 Vista actual: ${viewName} (${location})`);
   }, [location, setCurrentView]);
 }
