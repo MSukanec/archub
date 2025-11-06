@@ -13,10 +13,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import ProjectItem from '@/components/ui-custom/general/ProjectItem';
+import ProjectItemCard from '@/components/cards/ProjectItemCard';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui-custom/stat-card';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects } from '@/hooks/use-projects';
@@ -260,11 +260,9 @@ export default function OrganizationDashboard() {
         </div>
 
         {/* Projects Section - Estilo minimalista */}
-        <Card>
-          <CardHeader className="pb-4">
-            <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">Tus Proyectos</p>
-          </CardHeader>
-          <CardContent className="pt-0">
+        <StatCard href="/projects">
+          <StatCardTitle>Tus Proyectos</StatCardTitle>
+          <StatCardContent>
             {isLoading || projectsLoading ? (
               <div className="flex items-center justify-center h-64">
                 <div className="text-muted-foreground">Cargando proyectos...</div>
@@ -272,14 +270,13 @@ export default function OrganizationDashboard() {
             ) : sortedProjects.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {sortedProjects.map((project) => (
-                  <ProjectItem
+                  <ProjectItemCard
                     key={project.id}
                     project={project}
-                    onClick={() => handleSelectProject(project.id)}
+                    onNavigateToProject={() => handleSelectProject(project.id)}
                     onEdit={() => handleEditProject(project)}
                     isActive={project.id === activeProjectId}
                     projectColor={project.color || 'var(--accent)'}
-                    data-testid={`project-item-${project.id}`}
                   />
                 ))}
               </div>
@@ -300,8 +297,8 @@ export default function OrganizationDashboard() {
                 }
               />
             )}
-          </CardContent>
-        </Card>
+          </StatCardContent>
+        </StatCard>
       </div>
     </Layout>
   );
