@@ -195,7 +195,7 @@ function LayoutContent({
       {/* <GlobalAnnouncement /> */}
       
       <div 
-        className="h-screen flex flex-col overflow-hidden"
+        className={isMobile ? "min-h-screen flex flex-col" : "h-screen flex flex-col overflow-hidden"}
         // TEMPORALMENTE DESHABILITADO - Padding dinámico del announcement
         // style={{
         //   paddingTop: hasActiveAnnouncement ? `${ANNOUNCEMENT_HEIGHT}px` : '0',
@@ -203,7 +203,7 @@ function LayoutContent({
         // }}
       >
         <div
-          className="flex-1 flex flex-col min-h-0"
+          className={isMobile ? "flex flex-col" : "flex-1 flex flex-col min-h-0"}
           style={{
             backgroundColor: isMobile
               ? "var(--layout-mobile-bg)"
@@ -214,7 +214,7 @@ function LayoutContent({
         {isMobile ? (
         <HeaderMobile {...(headerProps ?? {})}>
           <main
-            className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-4 py-3 pb-12 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
+            className={`transition-all duration-300 ease-in-out px-4 py-3 pb-12 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
             style={{
               background: isDark 
                 ? 'linear-gradient(to bottom, var(--gradient-from-dark), var(--gradient-to-dark))'
