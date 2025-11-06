@@ -1,8 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { CheckCircle2 } from 'lucide-react';
-import { getProjectInitials } from '@/utils/initials';
 import chroma from 'chroma-js';
 
 interface Project {
@@ -68,7 +66,6 @@ export default function ProjectItemCard({
   projectColor = 'var(--accent)'
 }: ProjectItemCardProps) {
   const imageUrl = project.project_data?.project_image_url;
-  const initials = getProjectInitials(project.name);
   const statusText = getStatusText(project.status);
   
   // Crear color suave para el badge de estado
@@ -100,11 +97,11 @@ export default function ProjectItemCard({
       }}
       onClick={onClick}
     >
-      {/* Imagen de fondo - altura total cuando está activo */}
+      {/* Imagen de fondo - altura dinámica según estado */}
       <div 
         className="relative transition-all duration-300"
         style={{ 
-          height: isActive ? '100%' : '180px'
+          height: isActive ? '100%' : '240px'
         }}
       >
         {/* Imagen de fondo del proyecto */}
@@ -116,10 +113,12 @@ export default function ProjectItemCard({
           }}
         />
         
-        {/* Overlay base */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+        {/* Overlay base - solo si NO está activo */}
+        {!isActive && (
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+        )}
         
-        {/* Overlay difuminado abajo cuando está activo */}
+        {/* Overlay difuminado - solo cuando está activo */}
         {isActive && (
           <div className="absolute inset-0 bg-gradient-to-t from-[var(--main-sidebar-bg)] via-[var(--main-sidebar-bg)]/80 to-transparent" 
             style={{ 
@@ -128,22 +127,9 @@ export default function ProjectItemCard({
           />
         )}
 
-        {/* Contenido sobre la imagen */}
-        <div className="relative z-10 p-4 h-full flex flex-col justify-between">
-          {/* Header con avatar */}
-          <div className="flex items-start justify-between">
-            <Avatar className="h-11 w-11 shadow-md">
-              <AvatarFallback 
-                className="text-white font-semibold text-sm"
-                style={{ backgroundColor: projectColor }}
-              >
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-
-          {/* Contenido inferior - siempre visible cuando activo */}
-          {isActive && (
+        {/* Contenido sobre la imagen - solo cuando activo */}
+        {isActive && (
+          <div className="relative z-10 p-4 h-full flex flex-col justify-end">
             <div className="space-y-4">
               {/* Nombre del proyecto + Badge activo */}
               <div className="space-y-2">
@@ -205,23 +191,23 @@ export default function ProjectItemCard({
                 </Button>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Sección inferior - solo visible cuando NO está activo */}
+      {/* Sección inferior - contenido unificado cuando NO está activo */}
       {!isActive && (
-        <div className="p-4 space-y-3">
+        <div className="p-4 space-y-4">
           {/* Nombre del proyecto */}
-          <div>
-            <h3 className="font-semibold text-base leading-tight project-card-title">
+          <div className="space-y-2">
+            <h3 className="font-semibold text-lg leading-tight project-card-title">
               {project.name}
             </h3>
           </div>
 
           {/* Descripción */}
           {project.description && (
-            <p className="text-gray-400 text-xs line-clamp-2">
+            <p className="text-gray-300 text-sm line-clamp-2">
               {project.description}
             </p>
           )}
@@ -250,10 +236,10 @@ export default function ProjectItemCard({
           </div>
 
           {/* Botón "Ir al Proyecto" - abajo a la derecha */}
-          <div className="flex justify-end pt-2">
+          <div className="flex justify-end">
             <Button 
               size="sm"
-              className="text-white border-0 text-xs font-medium h-7 px-3"
+              className="text-white border-0 text-sm font-medium shadow-md"
               style={{ backgroundColor: projectColor }}
               onClick={(e) => {
                 e.stopPropagation();
