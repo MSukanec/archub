@@ -7,10 +7,10 @@ import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/componen
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { BarChart3, Users, Clock, TrendingUp, Activity, Eye } from 'lucide-react'
-import { PageLayout } from '@/components/layout/desktop/PageLayout'
+import { Layout } from '@/components/layout/desktop/Layout'
+import { Tabs } from '@/components/ui-custom/Tabs'
 import { startOfDay, subDays } from 'date-fns'
 
 type DateRange = 'today' | '7days' | '30days'
@@ -337,39 +337,30 @@ export default function AdminDashboard() {
     enabled: !!supabase
   });
 
+  const headerProps = {
+    title: "Analytics Dashboard",
+    icon: BarChart3,
+    description: "Métricas de uso y comportamiento de usuarios",
+    showSearch: false,
+    showFilters: false,
+  };
+
+  const dateRangeTabs = [
+    { value: 'today', label: 'Hoy' },
+    { value: '7days', label: '7 días' },
+    { value: '30days', label: '30 días' },
+  ];
+
   return (
-    <PageLayout
-      title="Analytics Dashboard"
-      icon={BarChart3}
-      description="Métricas de uso y comportamiento de usuarios"
-    >
+    <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Filtros de fecha */}
-        <div className="flex gap-2" data-testid="date-range-filters">
-          <Button 
-            variant={dateRange === 'today' ? 'default' : 'outline'} 
-            onClick={() => setDateRange('today')}
-            size="sm"
-            data-testid="button-filter-today"
-          >
-            Hoy
-          </Button>
-          <Button 
-            variant={dateRange === '7days' ? 'default' : 'outline'} 
-            onClick={() => setDateRange('7days')}
-            size="sm"
-            data-testid="button-filter-7days"
-          >
-            7 días
-          </Button>
-          <Button 
-            variant={dateRange === '30days' ? 'default' : 'outline'} 
-            onClick={() => setDateRange('30days')}
-            size="sm"
-            data-testid="button-filter-30days"
-          >
-            30 días
-          </Button>
+        {/* Filtros de fecha usando Tabs */}
+        <div data-testid="date-range-filters">
+          <Tabs 
+            tabs={dateRangeTabs}
+            value={dateRange}
+            onValueChange={(value) => setDateRange(value as DateRange)}
+          />
         </div>
 
         {/* KPI Cards grid */}
@@ -632,6 +623,6 @@ export default function AdminDashboard() {
           </Card>
         </div>
       </div>
-    </PageLayout>
+    </Layout>
   );
 }
