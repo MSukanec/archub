@@ -978,19 +978,10 @@ input[type="number"] {
 /* Animación de respiración suave para el icono de IA */
 @keyframes ai-icon-breathe {
   0%, 100% {
-    filter: 
-      drop-shadow(0 0 2px currentColor)
-      drop-shadow(0 0 4px currentColor)
-      brightness(1);
     transform: scale(1);
   }
   50% {
-    filter: 
-      drop-shadow(0 0 3px currentColor)
-      drop-shadow(0 0 6px currentColor)
-      drop-shadow(0 0 8px currentColor)
-      brightness(1.15);
-    transform: scale(1.02);
+    transform: scale(1.05);
   }
 }
 
@@ -1014,10 +1005,5 @@ input[type="number"] {
 
 /* Efecto hover suave */
 .ai-icon-sparkle:hover {
-  filter: 
-    drop-shadow(0 0 4px currentColor)
-    drop-shadow(0 0 8px currentColor)
-    drop-shadow(0 0 12px currentColor)
-    brightness(1.25) !important;
-  transform: scale(1.08) !important;
+  transform: scale(1.15) !important;
 }
