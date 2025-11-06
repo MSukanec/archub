@@ -21,8 +21,6 @@ import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileCo
 import { useMobile } from "@/hooks/use-mobile";
 import { HeaderMobile } from "@/components/layout/mobile/HeaderMobile";
 import { CourseSidebar } from "@/components/layout/CourseSidebar";
-import { ProjectSelectorButton } from "./ProjectSelectorButton";
-import { OrganizationSelectorButton } from "./OrganizationSelectorButton";
 import { useProjectAccentColor } from "@/hooks/use-project-accent-color";
 import { FloatingAIChat } from "@/components/ui-custom/layout/FloatingAIChat";
 import { FloatingCourseLessons } from "@/components/ui-custom/layout/FloatingCourseLessons";
@@ -143,14 +141,6 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
     }
   }, [data?.preferences?.theme]);
 
-  // Determinar qué selector mostrar según el contexto
-  let selectorComponent: React.ReactNode = null;
-  if (sidebarLevel === 'project') {
-    selectorComponent = <ProjectSelectorButton />;
-  } else if (sidebarLevel === 'organization') {
-    selectorComponent = <OrganizationSelectorButton />;
-  }
-
   return (
     // TEMPORALMENTE DESHABILITADO - AnnouncementProvider wrapper
     <LayoutContent 
@@ -165,7 +155,6 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       modules={modules}
       lessons={lessons}
       currentLessonId={currentLessonId}
-      selectorComponent={selectorComponent}
       shouldShowAIChat={shouldShowAIChat}
     />
   );
@@ -184,7 +173,6 @@ function LayoutContent({
   modules,
   lessons,
   currentLessonId,
-  selectorComponent,
   shouldShowAIChat
 }: any) {
   // TEMPORALMENTE DESHABILITADO - GlobalAnnouncement
@@ -254,7 +242,6 @@ function LayoutContent({
                     icon={headerProps.icon}
                     title={headerProps.title}
                     description={headerProps.description}
-                    selector={selectorComponent}
                     tabs={headerProps.tabs?.map((tab) => ({
                       id: tab.id,
                       label: tab.label,
