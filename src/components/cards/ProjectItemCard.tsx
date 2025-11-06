@@ -1,8 +1,9 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Edit, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { getProjectInitials } from '@/utils/initials';
+import chroma from 'chroma-js';
 
 interface Project {
   id: string;
@@ -69,6 +70,19 @@ export default function ProjectItemCard({
   const imageUrl = project.project_data?.project_image_url;
   const initials = getProjectInitials(project.name);
   const statusText = getStatusText(project.status);
+  
+  // Crear color suave para el badge de estado
+  const getSoftAccentColor = () => {
+    try {
+      // Si el color es una variable CSS, usar un color por defecto
+      if (projectColor.includes('var(')) {
+        return 'rgba(139, 92, 246, 0.15)'; // violeta suave por defecto
+      }
+      return chroma(projectColor).alpha(0.15).css();
+    } catch {
+      return 'rgba(139, 92, 246, 0.15)';
+    }
+  };
 
   return (
     <div
@@ -77,13 +91,12 @@ export default function ProjectItemCard({
         transition-all duration-300 ease-in-out
         hover:shadow-lg hover:-translate-y-1
         overflow-hidden
-        ${isActive ? 'ring-2 ring-[var(--accent)] ring-offset-2' : ''}
         ${selected ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
         ${className || ''}
       `}
       style={{ 
         backgroundColor: 'var(--main-sidebar-bg)',
-        height: isActive ? '480px' : '320px'
+        height: '480px'
       }}
       onClick={onClick}
     >
@@ -117,7 +130,7 @@ export default function ProjectItemCard({
 
         {/* Contenido sobre la imagen */}
         <div className="relative z-10 p-4 h-full flex flex-col justify-between">
-          {/* Header con avatar y botón editar */}
+          {/* Header con avatar */}
           <div className="flex items-start justify-between">
             <Avatar className="h-11 w-11 shadow-md">
               <AvatarFallback 
@@ -127,18 +140,6 @@ export default function ProjectItemCard({
                 {initials}
               </AvatarFallback>
             </Avatar>
-
-            <Button 
-              variant="ghost" 
-              size="icon-sm"
-              className="bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit?.();
-              }}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
           </div>
 
           {/* Contenido inferior - siempre visible cuando activo */}
@@ -147,7 +148,7 @@ export default function ProjectItemCard({
               {/* Nombre del proyecto + Badge activo */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-lg text-white leading-tight">
+                  <h3 className="font-semibold text-lg leading-tight project-card-title">
                     {project.name}
                   </h3>
                   <Badge 
@@ -157,31 +158,33 @@ export default function ProjectItemCard({
                     Activo
                   </Badge>
                 </div>
-                
-                {/* Badges de tipo y modalidad */}
-                <div className="flex gap-2">
-                  {project.project_data?.project_type?.name && (
-                    <Badge className="bg-white/15 backdrop-blur-sm text-white border-0 text-xs">
-                      {project.project_data.project_type.name}
-                    </Badge>
-                  )}
-                  {project.project_data?.modality?.name && (
-                    <Badge className="bg-white/15 backdrop-blur-sm text-white border-0 text-xs">
-                      {project.project_data.modality.name}
-                    </Badge>
-                  )}
-                </div>
               </div>
 
               {/* Descripción */}
-              <p className="text-gray-300 text-sm line-clamp-2">
-                {project.description || "Sin descripción"}
-              </p>
+              {project.description && (
+                <p className="text-gray-300 text-sm line-clamp-2">
+                  {project.description}
+                </p>
+              )}
 
-              {/* Badge de status */}
-              <div>
+              {/* 3 Badges inline: Tipo, Modalidad, Estado */}
+              <div className="flex flex-wrap gap-2">
+                {project.project_data?.project_type?.name && (
+                  <Badge className="bg-white/15 backdrop-blur-sm text-white border-0 text-xs">
+                    {project.project_data.project_type.name}
+                  </Badge>
+                )}
+                {project.project_data?.modality?.name && (
+                  <Badge className="bg-white/15 backdrop-blur-sm text-white border-0 text-xs">
+                    {project.project_data.modality.name}
+                  </Badge>
+                )}
                 <Badge 
-                  className="bg-white/15 backdrop-blur-sm text-white border-0 text-xs"
+                  className="border-0 text-xs"
+                  style={{ 
+                    backgroundColor: getSoftAccentColor(),
+                    color: 'white'
+                  }}
                 >
                   {statusText}
                 </Badge>
@@ -211,38 +214,43 @@ export default function ProjectItemCard({
         <div className="p-4 space-y-3">
           {/* Nombre del proyecto */}
           <div>
-            <h3 className="font-semibold text-base text-white leading-tight">
+            <h3 className="font-semibold text-base leading-tight project-card-title">
               {project.name}
             </h3>
-            
-            {/* Badges de tipo y modalidad */}
-            <div className="flex gap-2 mt-2">
-              {project.project_data?.project_type?.name && (
-                <Badge className="text-xs" style={{ backgroundColor: projectColor, color: 'white' }}>
-                  {project.project_data.project_type.name}
-                </Badge>
-              )}
-              {project.project_data?.modality?.name && (
-                <Badge className="text-xs" style={{ backgroundColor: projectColor, color: 'white' }}>
-                  {project.project_data.modality.name}
-                </Badge>
-              )}
-            </div>
           </div>
 
           {/* Descripción */}
-          <p className="text-gray-400 text-xs line-clamp-2">
-            {project.description || "Sin descripción"}
-          </p>
+          {project.description && (
+            <p className="text-gray-400 text-xs line-clamp-2">
+              {project.description}
+            </p>
+          )}
 
-          {/* Footer con status y botón */}
-          <div className="flex justify-between items-center pt-1">
+          {/* 3 Badges inline: Tipo, Modalidad, Estado */}
+          <div className="flex flex-wrap gap-2">
+            {project.project_data?.project_type?.name && (
+              <Badge className="bg-white/15 backdrop-blur-sm text-white border-0 text-xs">
+                {project.project_data.project_type.name}
+              </Badge>
+            )}
+            {project.project_data?.modality?.name && (
+              <Badge className="bg-white/15 backdrop-blur-sm text-white border-0 text-xs">
+                {project.project_data.modality.name}
+              </Badge>
+            )}
             <Badge 
-              className="text-xs bg-white/10 text-gray-300 border-0"
+              className="border-0 text-xs"
+              style={{ 
+                backgroundColor: getSoftAccentColor(),
+                color: 'white'
+              }}
             >
               {statusText}
             </Badge>
-            
+          </div>
+
+          {/* Botón "Ir al Proyecto" - abajo a la derecha */}
+          <div className="flex justify-end pt-2">
             <Button 
               size="sm"
               className="text-white border-0 text-xs font-medium h-7 px-3"

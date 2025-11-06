@@ -1007,3 +1007,13 @@ input[type="number"] {
 .ai-icon-sparkle:hover {
   transform: scale(1.15) !important;
 }
+
+/* ========================================
+   🎴 PROJECT CARD STYLES
+   ======================================== */
+
+/* Forzar color blanco en títulos de proyectos */
+[class*="ProjectItemCard"] h3,
+.project-card-title {
+  color: white !important;
+}
