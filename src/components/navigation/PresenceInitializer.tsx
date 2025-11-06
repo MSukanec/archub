@@ -26,23 +26,29 @@ export function PresenceInitializer() {
       subscribeToPresenceChanges();
     }
 
-    // Cleanup: Cerrar sesión analytics y desuscribirse de presence
+    // Cleanup: SOLO se ejecuta al desmontar o cuando userData.user cambia (login/logout)
+    // NO incluimos isSubscribed en deps para evitar cleanup prematuro cuando el canal se conecta
     return () => {
-      console.log('🔴 Limpiando presencia y cerrando sesión analytics...');
-      
-      // FASE 1: Cerrar vista actual en analytics (fire-and-forget, async)
-      (async () => {
-        try {
-          await supabase.rpc('analytics_exit_previous_view');
-        } catch {
-          // Silenciar error, es cleanup no crítico
-        }
-      })();
-      
-      // FASE 2: Desuscribirse de presence changes
-      unsubscribe();
+      // Solo hacer cleanup si hay un usuario (evitar cleanup en mount inicial)
+      if (userData?.user) {
+        console.log('🔴 Limpiando presencia y cerrando sesión analytics...');
+        
+        // FASE 1: Cerrar vista actual en analytics (fire-and-forget, async)
+        (async () => {
+          try {
+            await supabase.rpc('analytics_exit_previous_view');
+          } catch {
+            // Silenciar error, es cleanup no crítico
+          }
+        })();
+        
+        // FASE 2: Desuscribirse de presence changes
+        unsubscribe();
+      }
     };
-  }, [userData?.user, isSubscribed, subscribeToPresenceChanges, unsubscribe]);
+    // ⚠️ IMPORTANTE: NO incluir isSubscribed en dependencies para evitar cleanup prematuro
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userData?.user]);
 
   // Este componente no renderiza nada
   return null;

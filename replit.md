@@ -50,6 +50,12 @@ Preferred communication style: Simple, everyday language.
   - **Query Optimization System**: Optimized queries for all 7 AI finance functions, selecting only required fields from `movements_view`.
   - **Anti-Hallucination System**: `getContactMovements` always returns individual movement details for the latest 15 movements.
   - **FloatingAIChat Visibility System** (Nov 2024): Route-based allowlist controls where AI assistant appears. Shows on work routes (/home, /dashboard, /projects, /movements, /construction, /admin, etc.), hidden on learning, profile, landing, and pricing pages. Desktop-only with FREE plan restrictions (blur preview). Implemented in Layout.tsx with comprehensive 19-route allowlist including Home.
+- **User Presence & Analytics System** (Nov 2024): Dual-layer tracking system for real-time presence and usage analytics.
+  - **Real-Time Presence** (`user_presence` table): Shows who is online now and what section they're viewing. Updates every heartbeat (30s), visible in OnlineUsersIndicator header component. Managed by `presenceStore` (Zustand) with Supabase Realtime subscriptions for live updates.
+  - **Usage Analytics** (`user_view_history` table): Historical tracking of time spent per view for business intelligence. Records `entered_at`, `exited_at`, and `duration_seconds` for each navigation. Fire-and-forget RPC calls (`analytics_enter_view`, `analytics_exit_previous_view`) prevent UI blocking. Automatic cleanup on logout via PresenceInitializer.
+  - **Architecture**: Extends existing heartbeat system without duplication. `use-presence-tracker` hook handles both layers: analytics (duration tracking) + presence (real-time state). Route mapping converts URLs to readable view names (e.g., `/admin/community` → `admin_community`).
+  - **Cleanup Strategy**: Abandoned sessions (user closes app without logout) closed automatically via optional cronjob (`analytics_cleanup_abandoned_sessions` RPC). Documentation in `prompts/analytics/analytics-cleanup.md`.
+  - **Business Value**: Enables Mixpanel-style metrics (engagement per view, drop-off points, navigation flows, top active users, activation time) without third-party dependencies. Foundation for future features like dynamic onboarding, contextual help, and gamification.
 
 ### System Design Choices
 - **Backend Modular Architecture**: Monolithic `server/routes.ts` modularized into domain-specific route modules.
