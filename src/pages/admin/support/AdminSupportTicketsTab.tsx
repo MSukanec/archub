@@ -66,9 +66,13 @@ const AdminSupportTicketsTab = () => {
 
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-support-conversations'] });
-      queryClient.invalidateQueries({ queryKey: ['unread-support-messages-count'] });
+    onSuccess: async () => {
+      // Invalidar y refrescar inmediatamente las queries
+      await queryClient.invalidateQueries({ queryKey: ['admin-support-conversations'] });
+      await queryClient.invalidateQueries({ queryKey: ['unread-support-messages-count'] });
+      // Forzar refetch inmediato
+      await queryClient.refetchQueries({ queryKey: ['admin-support-conversations'] });
+      await queryClient.refetchQueries({ queryKey: ['unread-support-messages-count'] });
     }
   });
 

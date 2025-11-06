@@ -8,14 +8,14 @@ import AdminSupportChangelogTab from './AdminSupportChangelogTab';
 import AdminSupportTicketsTab from './AdminSupportTicketsTab';
 
 const AdminSupport = () => {
-  const [activeTab, setActiveTab] = useState('anuncios');
+  const [activeTab, setActiveTab] = useState('soporte');
   const { openModal } = useGlobalModalStore();
 
   const tabs = [
+    { id: 'soporte', label: 'Soporte', isActive: activeTab === 'soporte' },
     { id: 'anuncios', label: 'Anuncios', isActive: activeTab === 'anuncios' },
     { id: 'notificaciones', label: 'Notificaciones', isActive: activeTab === 'notificaciones' },
-    { id: 'cambios', label: 'Cambios', isActive: activeTab === 'cambios' },
-    { id: 'soporte', label: 'Soporte', isActive: activeTab === 'soporte' }
+    { id: 'cambios', label: 'Cambios', isActive: activeTab === 'cambios' }
   ];
 
   const getActionButton = () => {
