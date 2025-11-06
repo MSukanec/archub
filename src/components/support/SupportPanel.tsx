@@ -50,7 +50,7 @@ export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: S
     textarea.style.height = `${newHeight}px`;
   }, [inputValue]);
 
-  // Cargar mensajes con React Query (auto-refresh cada 2 segundos)
+  // Cargar mensajes con React Query (carga inicial, luego Realtime lo actualiza)
   const { data: messages = [], isLoading: isLoadingHistory, isFetching } = useQuery({
     queryKey: ['support-messages', userId],
     queryFn: async () => {
@@ -81,10 +81,65 @@ export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: S
       
       return [];
     },
-    refetchInterval: 2000, // Auto-refresh cada 2 segundos para chat en tiempo real
+    // Ya NO usamos polling - Supabase Realtime lo reemplaza
     refetchOnWindowFocus: true,
-    staleTime: 1000, // Considera los datos "frescos" por 1 segundo para evitar "Cargando..." en cada render
+    // Permitir refetch al montar para capturar mensajes que llegaron mientras estaba cerrado
+    staleTime: 0,
   });
+
+  // 🔥 SUPABASE REALTIME - Escuchar cambios en tiempo real
+  useEffect(() => {
+    if (!supabase || !userId) return;
+
+    // Obtener el user_id de la tabla users (necesario para el filtro)
+    const setupRealtimeSubscription = async () => {
+      const { data: userData } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', userId)
+        .single();
+
+      if (!userData) return;
+
+      const dbUserId = userData.id;
+
+      // Crear canal de Realtime para support_messages
+      const channel = supabase
+        .channel(`support_messages:${dbUserId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*', // Escuchar INSERT, UPDATE, DELETE
+            schema: 'public',
+            table: 'support_messages',
+            filter: `user_id=eq.${dbUserId}` // Solo mensajes de este usuario
+          },
+          (payload) => {
+            console.log('🔥 Realtime change:', payload);
+            
+            // Invalidar query para refrescar los mensajes
+            queryClient.invalidateQueries({ queryKey: ['support-messages', userId] });
+            
+            // Si es un nuevo mensaje del admin, invalidar contador
+            if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+              queryClient.invalidateQueries({ queryKey: ['unread-user-support-messages-count', userId] });
+            }
+          }
+        )
+        .subscribe();
+
+      // Cleanup al desmontar
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    };
+
+    const cleanupPromise = setupRealtimeSubscription();
+
+    return () => {
+      cleanupPromise.then(cleanup => cleanup?.());
+    };
+  }, [userId]);
 
   const hasMessages = messages.length > 0;
 

@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 /**
  * Hook para contar mensajes de soporte sin leer para el usuario normal
  * Cuenta mensajes del admin que el usuario no ha leído
+ * 🔥 CON SUPABASE REALTIME - El componente padre debe suscribirse
  */
 export function useUnreadUserSupportMessages(userId: string | undefined) {
   return useQuery({
@@ -36,6 +37,8 @@ export function useUnreadUserSupportMessages(userId: string | undefined) {
       return count || 0;
     },
     enabled: !!userId,
-    refetchInterval: 5000, // Refrescar cada 5 segundos (antes 30s)
+    // Ya NO necesitamos polling - Realtime lo maneja desde el componente
+    // Pero permitimos refetch al montar
+    staleTime: 30000, // 30 segundos
   });
 }

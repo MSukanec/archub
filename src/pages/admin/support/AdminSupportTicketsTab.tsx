@@ -82,7 +82,35 @@ const AdminSupportTicketsTab = () => {
     markAsReadMutation.mutate(userId);
   };
 
-  // Fetch all conversations con auto-refresh cada 3 segundos
+  // 🔥 SUPABASE REALTIME - Escuchar cambios en tiempo real para conversaciones
+  useEffect(() => {
+    if (!supabase) return;
+
+    // Suscribirse a cambios en support_messages
+    const channel = supabase
+      .channel('admin_support_conversations')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'support_messages'
+        },
+        (payload) => {
+          console.log('🔥 Admin conversations Realtime update:', payload);
+          // Invalidar conversaciones y contador
+          queryClient.invalidateQueries({ queryKey: ['admin-support-conversations'] });
+          queryClient.invalidateQueries({ queryKey: ['unread-support-messages-count'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Fetch all conversations - YA NO USA POLLING, Realtime lo actualiza
   const { data: conversations = [], isLoading } = useQuery({
     queryKey: ['admin-support-conversations'],
     queryFn: async () => {
@@ -107,8 +135,10 @@ const AdminSupportTicketsTab = () => {
       const data = await response.json();
       return data.conversations as Conversation[];
     },
-    refetchInterval: 3000, // Auto-refresh cada 3 segundos
-    refetchOnWindowFocus: true, // Refresh al volver a la ventana
+    // Ya NO usamos polling - Realtime lo reemplaza
+    refetchOnWindowFocus: true,
+    // Permitir refetch al montar para capturar cambios que llegaron mientras estaba cerrado
+    staleTime: 0,
   });
 
   // Send admin reply

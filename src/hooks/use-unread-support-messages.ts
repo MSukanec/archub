@@ -1,6 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
+/**
+ * Hook para contar mensajes sin leer para ADMIN
+ * Cuenta mensajes de usuarios que el admin no ha leído
+ * 🔥 CON SUPABASE REALTIME - El componente padre debe suscribirse
+ */
 export function useUnreadSupportMessages() {
   return useQuery({
     queryKey: ['unread-support-messages-count'],
@@ -21,6 +26,8 @@ export function useUnreadSupportMessages() {
 
       return count || 0;
     },
-    refetchInterval: 30000, // Refrescar cada 30 segundos
+    // Ya NO necesitamos polling - Realtime lo maneja desde el componente
+    // Pero permitimos refetch al montar
+    staleTime: 30000, // 30 segundos
   });
 }
