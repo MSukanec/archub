@@ -212,20 +212,23 @@ export default function AdminDashboard() {
       
       const startDate = getStartDate(dateRange);
       
+      // Get view history data with entered_at for sorting
       const { data, error } = await supabase
         .from('user_view_history')
         .select(`
           user_id,
           view_name,
           duration_seconds,
+          entered_at,
           users!inner(full_name, avatar_url)
         `)
         .gte('entered_at', startDate.toISOString())
-        .not('duration_seconds', 'is', null);
+        .not('duration_seconds', 'is', null)
+        .order('entered_at', { ascending: false }); // Most recent first
       
       if (error) throw error;
       
-      // Agrupar por usuario
+      // Agrupar por usuario y calcular última vista del historial
       const userMap = new Map<string, any>();
       
       (data || []).forEach((row: any) => {
@@ -237,13 +240,43 @@ export default function AdminDashboard() {
             full_name: row.users?.full_name || 'Usuario',
             avatar_url: row.users?.avatar_url,
             total_seconds: 0,
-            views_visited: new Set()
+            views_visited: new Set(),
+            last_view_from_history: row.view_name // Primera iteración = más reciente
           });
         }
         
         const user = userMap.get(userId)!;
         user.total_seconds += row.duration_seconds || 0;
         user.views_visited.add(row.view_name);
+      });
+      
+      // Get user IDs to filter presence query
+      const userIds = Array.from(userMap.keys());
+      
+      if (userIds.length === 0) {
+        return [];
+      }
+      
+      // Get current presence data ONLY for users in our result set
+      const { data: presenceData, error: presenceError } = await supabase
+        .from('user_presence')
+        .select('user_id, current_view, status')
+        .in('user_id', userIds);
+      
+      if (presenceError) {
+        console.error('Error fetching presence data:', presenceError);
+        // Continue without presence data - use fallback to last_view_from_history
+      }
+      
+      const presenceMap = new Map(
+        (presenceData || []).map(p => [p.user_id, { current_view: p.current_view, status: p.status }])
+      );
+      
+      // Enrich users with presence data
+      userMap.forEach((user, userId) => {
+        const presence = presenceMap.get(userId);
+        user.current_view = presence?.current_view;
+        user.status = presence?.status || 'offline';
       });
       
       // Convertir a array y ordenar
@@ -561,7 +594,13 @@ export default function AdminDashboard() {
                                 {user.full_name?.charAt(0) || 'U'}
                               </AvatarFallback>
                             </Avatar>
-                            <span className="font-medium">{user.full_name}</span>
+                            <div className="flex flex-col">
+                              <span className="font-medium">{user.full_name}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {user.status === 'online' ? '📍 ' : '⏸️ '}
+                                {formatViewName(user.current_view ?? user.last_view_from_history ?? null)}
+                              </span>
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell className="text-right font-mono">
