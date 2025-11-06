@@ -114,16 +114,21 @@ export default function ProjectItemCard({
           }}
         />
         
-        {/* Overlay base - solo si NO está activo */}
-        {!isActive && (
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
-        )}
-        
-        {/* Overlay difuminado - solo cuando está activo */}
-        {isActive && (
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--main-sidebar-bg)] via-[var(--main-sidebar-bg)]/80 to-transparent" 
+        {/* Overlay degradado - diferente según estado */}
+        {!isActive ? (
+          // Degradado intenso para inactivos - imagen visible solo al 60% de altura
+          <div 
+            className="absolute inset-0" 
             style={{ 
-              background: `linear-gradient(to top, var(--main-sidebar-bg) 0%, var(--main-sidebar-bg) 15%, rgba(0,0,0,0.4) 50%, transparent 100%)`
+              background: `linear-gradient(to top, var(--main-sidebar-bg) 0%, var(--main-sidebar-bg) 25%, rgba(var(--main-sidebar-bg-rgb, 31, 31, 31), 0.9) 40%, rgba(var(--main-sidebar-bg-rgb, 31, 31, 31), 0.6) 60%, transparent 100%)`
+            }}
+          />
+        ) : (
+          // Degradado suave para activos - casi sin opacidad
+          <div 
+            className="absolute inset-0" 
+            style={{ 
+              background: `linear-gradient(to top, var(--main-sidebar-bg) 0%, var(--main-sidebar-bg) 10%, rgba(0,0,0,0.3) 30%, transparent 60%)`
             }}
           />
         )}
@@ -139,12 +144,12 @@ export default function ProjectItemCard({
                 {project.name}
               </h3>
               {isActive && (
-                <Badge 
-                  className="bg-white/20 backdrop-blur-sm text-white border-0 text-xs flex items-center gap-1"
+                <div 
+                  className="w-5 h-5 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: projectColor }}
                 >
-                  <CheckCircle2 className="h-3 w-3" />
-                  Activo
-                </Badge>
+                  <CheckCircle2 className="h-3.5 w-3.5 text-white" />
+                </div>
               )}
             </div>
           </div>
