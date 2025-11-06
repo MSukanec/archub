@@ -98,13 +98,8 @@ export default function ProjectItemCard({
       }}
       onClick={onClick}
     >
-      {/* Imagen de fondo - altura dinámica según estado */}
-      <div 
-        className="absolute inset-0 transition-all duration-300"
-        style={{ 
-          height: isActive ? '100%' : '240px'
-        }}
-      >
+      {/* Imagen de fondo - SIEMPRE 100% de altura */}
+      <div className="absolute inset-0">
         {/* Imagen de fondo del proyecto */}
         <div 
           className="absolute inset-0 bg-cover bg-center"
@@ -116,11 +111,11 @@ export default function ProjectItemCard({
         
         {/* Overlay degradado - diferente según estado */}
         {!isActive ? (
-          // Degradado intenso para inactivos - imagen visible solo al 60% de altura
+          // Degradado intenso para inactivos - comienza más abajo
           <div 
             className="absolute inset-0" 
             style={{ 
-              background: `linear-gradient(to top, var(--main-sidebar-bg) 0%, var(--main-sidebar-bg) 25%, rgba(var(--main-sidebar-bg-rgb, 31, 31, 31), 0.9) 40%, rgba(var(--main-sidebar-bg-rgb, 31, 31, 31), 0.6) 60%, transparent 100%)`
+              background: `linear-gradient(to top, var(--main-sidebar-bg) 0%, var(--main-sidebar-bg) 20%, rgba(var(--main-sidebar-bg-rgb, 31, 31, 31), 0.85) 35%, rgba(var(--main-sidebar-bg-rgb, 31, 31, 31), 0.5) 50%, rgba(var(--main-sidebar-bg-rgb, 31, 31, 31), 0.2) 70%, transparent 100%)`
             }}
           />
         ) : (
