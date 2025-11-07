@@ -257,10 +257,17 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
         }
       }
 
-      // Invalidate contacts query with correct organization ID
-      queryClient.invalidateQueries({ queryKey: ['contacts', userData?.organization?.id] });
-      // Also invalidate broader contacts queries that might exist
-      queryClient.invalidateQueries({ queryKey: ['contacts'] });
+      // Invalidate contacts query - using the query key pattern from useContacts hook
+      queryClient.invalidateQueries({ 
+        queryKey: [`/api/contacts?organization_id=${userData?.organization?.id}`] 
+      });
+      // Also invalidate any other contact-related queries
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0];
+          return typeof key === 'string' && key.includes('/api/contacts');
+        }
+      });
       // Invalidate current-user to refresh checklist status
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       
