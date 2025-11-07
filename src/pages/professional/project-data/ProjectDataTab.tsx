@@ -278,7 +278,6 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
           </div>
           <p className="text-sm text-muted-foreground">
             Imagen que representa tu proyecto en tarjetas y vistas principales. Esta imagen aparecerá en el dashboard y listados de proyectos.
-            {isSaving && <span className="block text-[var(--accent)] mt-2">Guardando...</span>}
           </p>
         </div>
 

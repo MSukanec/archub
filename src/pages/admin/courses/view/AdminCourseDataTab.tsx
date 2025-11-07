@@ -260,7 +260,6 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
           </div>
           <p className="text-sm text-muted-foreground">
             Datos fundamentales del curso que se mostrarán a los estudiantes. Estos campos son la base para la visualización y búsqueda del curso.
-            {isSaving && <span className="block text-[var(--accent)] mt-2">Guardando...</span>}
           </p>
         </div>
 
