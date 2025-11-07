@@ -17,6 +17,7 @@ import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
 import ContactList from './ContactList'
 
 export default function Contacts() {
+  const [activeTab, setActiveTab] = useState('contacts')
   const [searchValue, setSearchValue] = useState("")
   const [filterByType, setFilterByType] = useState('all')
   const [showSearch, setShowSearch] = useState(false)
@@ -226,6 +227,14 @@ export default function Contacts() {
           description: "Gestiona los contactos de tu organización",
           organizationId,
           showMembers: true,
+          tabs: [
+            {
+              id: 'contacts',
+              label: 'Lista de Contactos',
+              isActive: activeTab === 'contacts'
+            }
+          ],
+          onTabChange: (tabId: string) => setActiveTab(tabId),
           actionButton: {
             label: 'Crear Contacto',
             icon: UserPlus,
@@ -262,6 +271,14 @@ export default function Contacts() {
           { name: "Organización", href: "/organization/dashboard" },
           { name: "Contactos", href: "/contacts" }
         ],
+        tabs: [
+          {
+            id: 'contacts',
+            label: 'Lista de Contactos',
+            isActive: activeTab === 'contacts'
+          }
+        ],
+        onTabChange: (tabId: string) => setActiveTab(tabId),
         showFilters: true,
         onClearFilters: () => {
           setSearchValue("");
