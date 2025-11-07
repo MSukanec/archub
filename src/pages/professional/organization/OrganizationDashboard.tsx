@@ -17,7 +17,6 @@ import ProjectItemCard from '@/components/cards/ProjectItemCard';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui-custom/stat-card';
-import { ExpandableAvatarGroup } from '@/components/ui-custom/ExpandableAvatarGroup';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects } from '@/hooks/use-projects';
@@ -162,7 +161,9 @@ export default function OrganizationDashboard() {
 
   const headerProps = {
     icon: Home,
-    title: "Resumen de la Organización"
+    title: "Resumen de la Organización",
+    organizationId: organizationId,
+    showMembers: true
   };
 
   return (
@@ -262,10 +263,7 @@ export default function OrganizationDashboard() {
 
         {/* Projects Section - Estilo minimalista */}
         <StatCard href="/projects">
-          <div className="flex items-center justify-between mb-4">
-            <StatCardTitle>Tus Proyectos</StatCardTitle>
-            <ExpandableAvatarGroup organizationId={organizationId} />
-          </div>
+          <StatCardTitle>Tus Proyectos</StatCardTitle>
           <StatCardContent>
             {isLoading || projectsLoading ? (
               <div className="flex items-center justify-center h-64">

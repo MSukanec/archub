@@ -39,6 +39,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
+import { ExpandableAvatarGroup } from "@/components/ui-custom/ExpandableAvatarGroup";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
@@ -124,6 +125,10 @@ interface PageLayoutProps {
   // Selector de proyecto/organización
   selector?: React.ReactNode;
   
+  // Members display
+  organizationId?: string;
+  showMembers?: boolean;
+  
   // Sistema de tabs
   tabs?: Tab[];
   onTabChange?: (tabId: string) => void;
@@ -181,6 +186,8 @@ export function PageLayout({
   title,
   description,
   selector,
+  organizationId,
+  showMembers = true,
   tabs = [],
   onTabChange,
   showHeaderSearch = false,
@@ -333,11 +340,14 @@ export function PageLayout({
             </div>
           </div>
 
-          {selector && (
-            <div className="flex items-center">
-              {selector}
-            </div>
-          )}
+          {/* Right side: Members or Selector */}
+          <div className="flex items-center">
+            {showMembers && organizationId ? (
+              <ExpandableAvatarGroup organizationId={organizationId} />
+            ) : selector ? (
+              selector
+            ) : null}
+          </div>
         </div>
 
           {/* FILA 2: Tabs a la izquierda + Botones de acción a la derecha */}

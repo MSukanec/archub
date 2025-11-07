@@ -56,6 +56,9 @@ interface LayoutProps {
     showHeaderSearch?: boolean;
     headerSearchValue?: string;
     onHeaderSearchChange?: (value: string) => void;
+    // Members display
+    organizationId?: string;
+    showMembers?: boolean;
     action?: {
       icon?: React.ComponentType<any>;
       label: string;
@@ -241,6 +244,8 @@ function LayoutContent({
                     icon={headerProps.icon}
                     title={headerProps.title}
                     description={headerProps.description}
+                    organizationId={headerProps.organizationId}
+                    showMembers={headerProps.showMembers}
                     tabs={headerProps.tabs?.map((tab: Tab) => ({
                       id: tab.id,
                       label: tab.label,
