@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,7 +26,7 @@ import { useContactTypes } from "@/hooks/use-contact-types";
 import { useSearchUsers } from "@/hooks/use-search-users";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { PhoneField } from "@/components/ui-custom/fields/PhoneField";
 
 
@@ -107,6 +107,85 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
       notes: editingContact?.notes || '',
       linked_user_id: editingContact?.linked_user_id || '',
     }
+  });
+
+  const organizationId = userData?.preferences?.last_organization_id;
+  const linkedUserId = editingContact?.linked_user_id || form.watch('linked_user_id');
+
+  // Query para obtener roles disponibles
+  const { data: roles = [] } = useQuery({
+    queryKey: ['roles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('roles')
+        .select('id, name, type')
+        .eq('type', 'organization')
+        .order('name');
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  // Query para verificar si el usuario vinculado ya es miembro de la organización
+  const { data: isMemberData } = useQuery({
+    queryKey: ['is-member', linkedUserId, organizationId],
+    queryFn: async () => {
+      if (!linkedUserId || !organizationId) return { isMember: false };
+      
+      const { data, error } = await supabase
+        .from('organization_members')
+        .select('id')
+        .eq('user_id', linkedUserId)
+        .eq('organization_id', organizationId)
+        .eq('is_active', true)
+        .single();
+
+      return { isMember: !!data };
+    },
+    enabled: !!linkedUserId && !!organizationId,
+  });
+
+  const isAlreadyMember = isMemberData?.isMember || false;
+
+  // Mutation para invitar al usuario a la organización
+  const inviteMemberMutation = useMutation({
+    mutationFn: async () => {
+      if (!organizationId || !editingContact?.linked_user?.email) {
+        throw new Error('Faltan datos para invitar al usuario');
+      }
+
+      // Obtener el primer rol que no sea admin como predeterminado
+      const defaultRole = roles.find(r => !r.name.toLowerCase().includes('admin'));
+      if (!defaultRole) {
+        throw new Error('No se encontró un rol válido');
+      }
+
+      const response = await apiRequest('POST', '/api/invite-member', {
+        email: editingContact.linked_user.email,
+        roleId: defaultRole.id,
+        organizationId: organizationId,
+      });
+
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['organization-members'] });
+      queryClient.invalidateQueries({ queryKey: ['is-member', linkedUserId, organizationId] });
+      toast({
+        title: 'Usuario invitado',
+        description: data.isNewUser 
+          ? 'La invitación ha sido enviada por email' 
+          : 'El usuario ha sido agregado a la organización',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error al invitar usuario',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
   });
 
   // Watch email value for automatic user detection
@@ -388,16 +467,6 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     createContactMutation.mutate(data);
   };
 
-  const handleUnlinkUser = () => {
-    form.setValue("linked_user_id", "");
-    setFoundUser(null);
-    
-    // Limpiar campos cuando se desvincula el usuario
-    form.setValue("first_name", "");
-    form.setValue("last_name", "");
-    form.setValue("email", "");
-  };
-
   const viewPanel = (
     <>
       <div>
@@ -444,14 +513,18 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
               </p>
             </div>
           </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={handleUnlinkUser}
-          >
-            <Unlink className="h-4 w-4" />
-          </Button>
+          {!isAlreadyMember && editingContact?.linked_user && (
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              onClick={() => inviteMemberMutation.mutate()}
+              disabled={inviteMemberMutation.isPending}
+              data-testid="button-invite-to-organization"
+            >
+              {inviteMemberMutation.isPending ? 'Invitando...' : 'Invitar a la organización'}
+            </Button>
+          )}
         </div>
       )}
 
