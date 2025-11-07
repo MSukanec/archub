@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2 } from 'lucide-react';
 import chroma from 'chroma-js';
+import { getProjectImageUrl, getProjectImageSrcSet, getProjectImagePlaceholder } from '@/lib/storage/projectImages';
 
 interface Project {
   id: string;
@@ -103,14 +104,36 @@ export default function ProjectItemCard({
     >
       {/* Imagen de fondo - SIEMPRE 100% de altura */}
       <div className="absolute inset-0">
-        {/* Imagen de fondo del proyecto */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
-            backgroundColor: imageUrl ? 'transparent' : 'var(--muted)'
-          }}
-        />
+        {/* Imagen de fondo del proyecto con optimización y lazy loading */}
+        {imageUrl ? (
+          <>
+            {/* Placeholder borroso para progressive loading - solo si existe */}
+            {getProjectImagePlaceholder(imageUrl) && (
+              <div 
+                className="absolute inset-0 bg-cover bg-center"
+                style={{
+                  backgroundImage: `url(${getProjectImagePlaceholder(imageUrl)})`,
+                  filter: 'blur(10px)',
+                  transform: 'scale(1.1)'
+                }}
+              />
+            )}
+            {/* Imagen optimizada principal */}
+            <img
+              src={getProjectImageUrl(imageUrl, 'card') || imageUrl}
+              srcSet={getProjectImageSrcSet(imageUrl, 'card')}
+              alt={project.name}
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          </>
+        ) : (
+          <div 
+            className="absolute inset-0"
+            style={{ backgroundColor: 'var(--muted)' }}
+          />
+        )}
         
         {/* Overlay degradado - diferente según estado */}
         {!isActive ? (

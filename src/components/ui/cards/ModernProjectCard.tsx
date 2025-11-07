@@ -14,6 +14,7 @@ import {
 import SwipeableCard from '@/components/layout/mobile/SwipeableCard';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { getProjectInitials } from '@/utils/initials';
+import { getProjectImageUrl, getProjectImageSrcSet } from '@/lib/storage/projectImages';
 
 // Project status configurations
 const projectStatuses = {
@@ -66,8 +67,11 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
           {/* Background Image */}
           {project.project_data?.project_image_url ? (
             <img 
-              src={project.project_data.project_image_url} 
+              src={getProjectImageUrl(project.project_data.project_image_url, 'card') || project.project_data.project_image_url} 
+              srcSet={getProjectImageSrcSet(project.project_data.project_image_url, 'card')}
               alt={project.name}
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-cover"
               key={project.project_data.project_image_url}
             />
