@@ -183,9 +183,18 @@ export default function ContactList({
       key: "actions" as const,
       label: "",
       sortable: false,
-      width: "60px",
+      width: "120px",
       render: (contact: any) => (
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => onRowClick?.(contact)}
+            className="text-xs"
+            data-testid={`button-view-contact-${contact.id}`}
+          >
+            Ver
+          </Button>
           <TableActionButtons
             onEdit={() => onEdit(contact)}
             onDelete={() => onDelete(contact)}
@@ -193,7 +202,7 @@ export default function ContactList({
         </div>
       )
     }
-  ], [onEdit, onDelete])
+  ], [onEdit, onDelete, onRowClick])
 
   return (
     <div className="space-y-6">
@@ -245,10 +254,6 @@ export default function ContactList({
           key: 'first_name',
           direction: 'asc'
         }}
-        primaryRowAction={(contact) => ({
-          label: 'Ver',
-          onClick: () => onRowClick?.(contact)
-        })}
         emptyStateConfig={{
           title: "No hay contactos",
           description: "Comienza agregando tu primer contacto a la organización"
