@@ -140,7 +140,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         organization_id: organizationId,
         user_id: userId,
         role_id: roleId,
-        role: "member",
         joined_at: new Date().toISOString(),
       })
       .select()
