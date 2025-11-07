@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useModalPanelStore } from "./modalPanelStore";
 import FormModalBody from "./FormModalBody";
 import { ModalErrorBoundary } from "../utils/ModalErrorBoundary";
-import { ModalReadinessResult } from "../utils/modal-readiness";
+import { ModalReadinessState } from "../utils/modal-readiness";
 
 interface FormModalLayoutProps {
   viewPanel?: ReactNode;
@@ -32,7 +32,7 @@ interface FormModalLayoutProps {
   // NUEVAS PROPIEDADES AVANZADAS
   
   /** Estado de readiness del modal */
-  readinessState?: ModalReadinessResult;
+  readinessState?: ModalReadinessState;
   
   /** Prevenir cierre con ESC key */
   preventEscapeClose?: boolean;
@@ -118,7 +118,6 @@ export function FormModalLayout({
   const { currentPanel, setPanel } = useModalPanelStore();
   const modalRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
-  const [isClosing, setIsClosing] = useState(false);
   const [focusableElements, setFocusableElements] = useState<HTMLElement[]>([]);
   const lastActiveElement = useRef<HTMLElement | null>(null);
 
@@ -253,17 +252,9 @@ export function FormModalLayout({
   const handleClose = useCallback(() => {
     if (!attemptClose()) return;
 
-    setIsClosing(true);
     setPanel('view');
-    
-    if (enableAnimations) {
-      setTimeout(() => {
-        onClose();
-      }, 250); // Tiempo para animación (sincronizado con CSS duration-250)
-    } else {
-      onClose();
-    }
-  }, [attemptClose, setPanel, enableAnimations, onClose]);
+    onClose();
+  }, [attemptClose, setPanel, onClose]);
 
   // MANEJO DE TECLADO MEJORADO
   useEffect(() => {
@@ -359,8 +350,7 @@ export function FormModalLayout({
       ref={overlayRef}
       className={cn(
         "fixed inset-0 z-50 bg-black/80",
-        enableAnimations && !isClosing && "animate-in fade-in duration-75",
-        enableAnimations && isClosing && "animate-out fade-out duration-75"
+        enableAnimations && "animate-in fade-in duration-75"
       )}
       onClick={handleOverlayClick}
       data-testid={`modal-overlay-${modalId}`}
@@ -380,8 +370,7 @@ export function FormModalLayout({
           // Desktop: modal centrado con altura dinámica
           "md:inset-auto md:top-1/2 md:left-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2",
           "md:w-auto md:min-w-[500px] md:max-w-[90vw] md:max-h-[90vh] md:border md:rounded-lg",
-          enableAnimations && !isClosing && "animate-in fade-in-0 zoom-in-95 md:slide-in-from-bottom-4 duration-200",
-          enableAnimations && isClosing && "animate-out fade-out-0 zoom-out-95 md:slide-out-to-bottom-4 duration-200",
+          enableAnimations && "animate-in fade-in-0 zoom-in-95 md:slide-in-from-bottom-4 duration-200",
           className
         )}
         onClick={(e) => e.stopPropagation()}
