@@ -160,8 +160,13 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
       form.setValue("first_name", firstName);
       form.setValue("last_name", lastName);
       form.setValue("email", foundUser.email || '');
+    } else {
+      // Si no hay usuario encontrado y no estamos editando un contacto ya vinculado, limpiar el linked_user_id
+      if (!editingContact?.linked_user) {
+        form.setValue("linked_user_id", "");
+      }
     }
-  }, [foundUser, form]);
+  }, [foundUser, form, editingContact]);
 
   React.useEffect(() => {
     if (editingContact) {
@@ -394,7 +399,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     <>
       {/* Badge si el contacto ya está vinculado */}
       {(editingContact?.linked_user || form.watch('linked_user_id')) && (
-        <div className="mb-2 p-3 border border-accent/20 bg-accent/5 rounded-lg flex items-center justify-between">
+        <div className="mb-0 p-3 border border-accent/20 bg-accent/5 rounded-lg flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link2 className="h-4 w-4 text-accent" />
             <div>
