@@ -16,6 +16,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
 import ContactList from './ContactList'
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export default function Contacts() {
   const [activeTab, setActiveTab] = useState('contacts')
@@ -235,13 +236,7 @@ export default function Contacts() {
           actionButton: {
             label: 'Crear Contacto',
             icon: UserPlus,
-            onClick: () => openModal('contact', { isEditing: false }),
-            additionalButton: {
-              label: 'Invitar a Archub',
-              icon: UserPlus,
-              onClick: () => openModal('member', { isEditing: false }),
-              variant: 'secondary' as const
-            }
+            onClick: () => openModal('contact', { isEditing: false })
           }
         }}
       >
@@ -282,22 +277,36 @@ export default function Contacts() {
           }
         ],
         onTabChange: (tabId: string) => setActiveTab(tabId),
-        showFilters: true,
-        onClearFilters: () => {
-          setSearchValue("");
-          setFilterByType('all');
-          setShowSearch(false);
-        },
         actionButton: {
           label: 'Crear Contacto',
           icon: UserPlus,
-          onClick: () => openModal('contact', { isEditing: false }),
-          additionalButton: {
-            label: 'Invitar a Archub',
-            icon: UserPlus,
-            onClick: () => openModal('member', { isEditing: false }),
-            variant: 'secondary' as const
-          }
+          onClick: () => openModal('contact', { isEditing: false })
+        },
+        showHeaderFilter: true,
+        renderHeaderFilterContent: () => (
+          <div className="space-y-2">
+            <div className="text-sm font-medium">Filtrar por tipo</div>
+            <Select value={filterByType} onValueChange={setFilterByType}>
+              <SelectTrigger>
+                <SelectValue placeholder="Todos los tipos" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los tipos</SelectItem>
+                {contactTypes.map((type: any) => (
+                  <SelectItem key={type.id} value={type.name.toLowerCase()}>
+                    {type.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ),
+        isHeaderFilterActive: filterByType !== 'all',
+        showHeaderClearFilters: filterByType !== 'all' || searchValue !== '',
+        onHeaderClearFilters: () => {
+          setSearchValue("");
+          setFilterByType('all');
+          setShowSearch(false);
         }
       }}
     >
