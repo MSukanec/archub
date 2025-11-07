@@ -1,0 +1,288 @@
+1. Esta tabla ya existe:
+
+create table public.organization_invitations (
+  id uuid not null default gen_random_uuid (),
+  organization_id uuid null,
+  email text not null,
+  status text null default 'pending'::text,
+  token text null,
+  created_at timestamp with time zone null default now(),
+  accepted_at timestamp with time zone null,
+  role_id uuid null,
+  invited_by uuid null,
+  updated_at timestamp with time zone null default now(),
+  user_id uuid null,
+  constraint organization_invitations_pkey primary key (id),
+  constraint organization_invitations_invited_by_fkey foreign KEY (invited_by) references organization_members (id) on delete set null,
+  constraint organization_invitations_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint organization_invitations_role_id_fkey foreign KEY (role_id) references roles (id) on delete CASCADE,
+  constraint organization_invitations_user_id_fkey foreign KEY (user_id) references users (id) on delete set null,
+  constraint valid_invitation_status check (
+    (
+      status = any (array['pending'::text, 'registered'::text])
+    )
+  )
+) TABLESPACE pg_default;
+
+create index IF not exists organization_invitations_email_idx on public.organization_invitations using btree (email) TABLESPACE pg_default;
+
+create index IF not exists organization_invitations_organization_id_idx on public.organization_invitations using btree (organization_id) TABLESPACE pg_default;
+
+create trigger trigger_create_contact_on_registered_invitation
+after
+update on organization_invitations for EACH row when (
+  new.user_id is not null
+  and old.user_id is distinct from new.user_id
+)
+execute FUNCTION handle_registered_invitation ();
+
+2. Teneos estas fuciones:
+
+archub_sync_user_contact:
+
+
+declare
+  v_user record;
+  v_updated int := 0;
+begin
+  -- Solo si tenemos user_id válido
+  if NEW.user_id is null then
+    return NEW;
+  end if;
+
+  -- Datos del usuario
+  select u.id, u.full_name, u.email
+    into v_user
+  from public.users u
+  where u.id = NEW.user_id;
+
+  if v_user.id is null then
+    return NEW;
+  end if;
+
+  -- 1) Si ya existe un contacto vinculado en esta org, salir
+  if exists (
+    select 1
+    from public.contacts c
+    where c.organization_id = NEW.organization_id
+      and c.linked_user_id  = v_user.id
+  ) then
+    return NEW;
+  end if;
+
+  -- 2) Promover contacto local (sin linked_user_id) que coincida por email
+  update public.contacts c
+     set linked_user_id = v_user.id,
+         full_name      = coalesce(v_user.full_name, c.full_name),
+         email          = coalesce(v_user.email, c.email),
+         updated_at     = now()
+   where c.organization_id = NEW.organization_id
+     and c.linked_user_id is null
+     and c.email is not distinct from v_user.email;
+
+  GET DIAGNOSTICS v_updated = ROW_COUNT;
+  if v_updated > 0 then
+    return NEW;
+  end if;
+
+  -- 3) Si no había contacto local, crear uno vinculado
+  insert into public.contacts (
+    id, organization_id, linked_user_id, full_name, email, created_at, updated_at
+  )
+  values (
+    gen_random_uuid(), NEW.organization_id, v_user.id, v_user.full_name, v_user.email, now(), now()
+  )
+  on conflict (organization_id, linked_user_id)
+  where linked_user_id is not null
+  do update set
+    full_name  = excluded.full_name,
+    email      = excluded.email,
+    updated_at = now();
+
+  return NEW;
+end;
+
+handle_contact_link_user:
+
+
+declare
+  v_user_id uuid;
+begin
+  -- Buscar usuario con mismo email
+  select id into v_user_id
+  from public.users
+  where lower(email) = lower(new.email)
+  limit 1;
+
+  -- Si existe, asignarlo
+  if v_user_id is not null then
+    new.linked_user_id := v_user_id;
+  end if;
+
+  return new;
+end;
+
+handle_new_org_member_contact:
+
+
+declare
+  v_user record;
+  v_exists_same_link boolean;
+  v_exists_local_match boolean;
+begin
+  -- Traer datos básicos del usuario
+  select u.id, u.full_name, u.email
+  into v_user
+  from public.users u
+  where u.id = new.user_id;
+
+  if v_user.id is null then
+    -- Si no hay usuario, no hacemos nada
+    return new;
+  end if;
+
+  -- 1) ¿Ya existe un contacto vinculado a este user_id en esta organización?
+  select exists (
+    select 1
+    from public.contacts c
+    where c.organization_id = new.organization_id
+      and c.linked_user_id = v_user.id
+  ) into v_exists_same_link;
+
+  if v_exists_same_link then
+    return new;
+  end if;
+
+  -- 2) ¿Existe un contacto local (sin linked_user_id) que coincida por email?
+  select exists (
+    select 1
+    from public.contacts c
+    where c.organization_id = new.organization_id
+      and c.linked_user_id is null
+      and c.email is not distinct from v_user.email
+  ) into v_exists_local_match;
+
+  if v_exists_local_match then
+    -- Promover el contacto local a vinculado
+    update public.contacts c
+    set linked_user_id = v_user.id,
+        full_name      = coalesce(v_user.full_name, c.full_name),
+        email          = coalesce(v_user.email, c.email),
+        updated_at     = now()
+    where c.organization_id = new.organization_id
+      and c.linked_user_id is null
+      and c.email is not distinct from v_user.email;
+
+    return new;
+  end if;
+
+  -- 3) Si no hay coincidencias, crear el contacto vinculado
+  insert into public.contacts (
+    organization_id,
+    linked_user_id,
+    full_name,
+    email,
+    created_at,
+    updated_at
+  ) values (
+    new.organization_id,
+    v_user.id,
+    v_user.full_name,
+    v_user.email,
+    now(),
+    now()
+  );
+
+  return new;
+end;
+
+handle_registered_invitation:
+
+
+declare
+  v_user record;
+  v_exists_same_link boolean;
+  v_exists_local_match boolean;
+begin
+  -- Traer datos básicos del usuario asociado a la invitación
+  select u.id, u.full_name, u.email
+  into v_user
+  from public.users u
+  where u.id = new.id;  -- 🔹 antes: new.user_id
+
+  if v_user.id is null then
+    return new;
+  end if;
+
+  -- 1) ¿Ya existe un contacto vinculado a este user_id en esta organización?
+  select exists (
+    select 1
+    from public.contacts c
+    where c.organization_id = new.organization_id
+      and c.linked_user_id = v_user.id
+  ) into v_exists_same_link;
+
+  if v_exists_same_link then
+    return new;
+  end if;
+
+  -- 2) ¿Existe un contacto local (sin linked_user_id) que coincida por email?
+  select exists (
+    select 1
+    from public.contacts c
+    where c.organization_id = new.organization_id
+      and c.linked_user_id is null
+      and c.email is not distinct from v_user.email
+  ) into v_exists_local_match;
+
+  if v_exists_local_match then
+    -- Promover el contacto local a vinculado
+    update public.contacts c
+    set linked_user_id = v_user.id,
+        full_name      = coalesce(v_user.full_name, c.full_name),
+        email          = coalesce(v_user.email, c.email),
+        updated_at     = now()
+    where c.organization_id = new.organization_id
+      and c.linked_user_id is null
+      and c.email is not distinct from v_user.email;
+
+    return new;
+  end if;
+
+  -- 3) Si no hay coincidencias, crear el contacto vinculado
+  insert into public.contacts (
+    organization_id,
+    linked_user_id,
+    full_name,
+    email,
+    created_at,
+    updated_at
+  ) values (
+    new.organization_id,
+    v_user.id,
+    v_user.full_name,
+    v_user.email,
+    now(),
+    now()
+  );
+
+  return new;
+end;
+
+sync_contact_on_user_update:
+
+
+begin
+  -- Solo si cambian full_name o email
+  if (old.full_name is distinct from new.full_name)
+     or (old.email     is distinct from new.email) then
+
+    update public.contacts c
+    set full_name  = coalesce(new.full_name, c.full_name),
+        email      = coalesce(new.email, c.email),
+        updated_at = now()
+    where c.linked_user_id = new.id;
+  end if;
+
+  return new;
+end;
