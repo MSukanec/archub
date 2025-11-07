@@ -86,6 +86,7 @@ export function DataBasicTab() {
   const [email, setEmail] = useState('');
   const [website, setWebsite] = useState('');
   const [taxId, setTaxId] = useState('');
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Auto-save mutation for organization data
   const saveOrganizationMutation = useMutation({
@@ -164,7 +165,7 @@ export function DataBasicTab() {
     }
   });
 
-  // Auto-save hook with proper configuration
+  // Auto-save hook with proper configuration - only enabled after initialization
   const { isSaving } = useDebouncedAutoSave({
     data: {
       name: organizationName,
@@ -195,7 +196,7 @@ export function DataBasicTab() {
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
     },
     delay: 750,
-    enabled: !!organizationId
+    enabled: !!organizationId && isInitialized
   });
 
   // Initialize form data when data is loaded
@@ -220,6 +221,17 @@ export function DataBasicTab() {
       setTaxId(organizationData.tax_id || '');
     }
   }, [organizationData]);
+
+  // Mark as initialized once both queries have loaded
+  useEffect(() => {
+    if (organizationInfo !== undefined && organizationData !== undefined) {
+      // Add a small delay to ensure all state updates are complete
+      const timer = setTimeout(() => {
+        setIsInitialized(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [organizationInfo, organizationData]);
 
   // Handle logo upload success
   const handleLogoUploadSuccess = async (imageUrl: string) => {
