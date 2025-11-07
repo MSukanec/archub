@@ -32,7 +32,7 @@ import Project from "@/pages/professional/project/dashboard/Project";
 import ProjectData from "@/pages/professional/project-data/ProjectData";
 
 
-import Preferences from "@/pages/professional/preferences/Preferences";
+import OrganizationPreferences from "@/pages/professional/organization-preferences/OrganizationPreferences";
 import ConstructionDashboard from "@/pages/professional/project/construction/ConstructionDashboard";
 import Logs from "@/pages/professional/project/construction/logs/Logs";
 import Personnel from "@/pages/professional/personnel/Personnel";
@@ -141,7 +141,7 @@ function Router() {
 
         {/* Organization Routes - ORDEN IMPORTANTE: rutas específicas primero */}
         <Route path="/organization/dashboard" component={OrganizationDashboard} />
-        <Route path="/organization/preferences" component={Preferences} />
+        <Route path="/organization/preferences" component={OrganizationPreferences} />
         <Route path="/organization/activity" component={Activity} />
         <Route path="/contacts" component={Contacts} />
         <Route path="/notifications" component={Notifications} />

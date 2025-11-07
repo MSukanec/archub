@@ -7,12 +7,12 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted';
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
-import { DataBasicTab } from './DataBasicTab';
-import { MembersTab } from './MembersTab';
-import { FinancesTab } from './FinancesTab';
-import { PartnersTab } from './PartnersTab';
+import { DataBasicTab } from './OrganizationPreferencesDataBasicTab';
+import { MembersTab } from './OrganizationPreferencesMembersTab';
+import { FinancesTab } from './OrganizationPreferencesFinancesTab';
+import { PartnersTab } from './OrganizationPreferencesPartnersTab';
 
-export default function Preferences() {
+export default function OrganizationPreferences() {
   const [activeTab, setActiveTab] = useState('basic');
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
