@@ -1112,11 +1112,12 @@ export function Table<T = any>({
                                 variant="ghost"
                                 size="icon-sm"
                                 className="h-6 w-6"
+                                onClick={(e) => e.stopPropagation()}
                               >
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48 z-40">
+                            <DropdownMenuContent align="end" className="w-48 z-50">
                               {(() => {
                                 const actions = rowActions(item);
                                 const defaultActions = actions.filter(a => a.variant !== 'destructive');
@@ -1243,11 +1244,12 @@ export function Table<T = any>({
                             variant="ghost"
                             size="icon-sm"
                             className="h-6 w-6"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 z-40">
+                        <DropdownMenuContent align="end" className="w-48 z-[70]">
                           {(() => {
                             const actions = rowActions(item);
                             const defaultActions = actions.filter(a => a.variant !== 'destructive');
