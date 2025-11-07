@@ -62,7 +62,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/invite-member", async (req, res) => {
     try {
-      const handler = await import('../api/invite-member.js');
+      const handler = await import('../api/invite-member');
       await handler.default(req as any, res as any);
     } catch (error: any) {
       console.error("[invite-member] Error:", error);

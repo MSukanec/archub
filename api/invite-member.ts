@@ -47,12 +47,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const { data: member } = await supabase
       .from("organization_members")
-      .select("role")
+      .select("role, role_id, roles(name, type)")
       .eq("user_id", dbUser.id)
       .eq("organization_id", organizationId)
       .single();
 
-    if (!member || member.role !== "admin") {
+    // Check if user is admin either by direct role or by role name
+    const roles = Array.isArray(member?.roles) ? member.roles[0] : member?.roles;
+    const isAdmin = member && (
+      member.role === "admin" || 
+      (roles && roles.name && roles.name.toLowerCase().includes("admin"))
+    );
+
+    if (!isAdmin) {
       return res.status(403).json({ 
         error: "Only organization admins can invite members" 
       });
