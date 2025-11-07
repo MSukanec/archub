@@ -1,5 +1,4 @@
 import React from "react";
-import { MainHeader } from "./MainHeader";
 import { PageLayout } from "./PageLayout";
 
 interface AppLayoutProps {
@@ -7,16 +6,12 @@ interface AppLayoutProps {
 }
 
 /**
- * AppLayout es el wrapper principal que incluye el MainHeader y maneja el spacing
- * para que todo el contenido se posicione correctamente debajo del header
+ * AppLayout es el wrapper principal
  */
 export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Main Header fixed at top */}
-      <MainHeader />
-      
-      {/* Content area with top margin to account for fixed header */}
+      {/* Content area */}
       <div className="flex-1 pt-0">
         {children}
       </div>

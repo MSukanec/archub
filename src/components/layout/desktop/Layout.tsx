@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 // import { SecondarySidebar } from "./SecondarySidebar";
-import { MainHeader } from "./MainHeader";
 import { Sidebar } from "./Sidebar";
 import { RightSidebar } from "./RightSidebar";
 // Header removed - now handled by sidebar
