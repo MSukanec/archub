@@ -110,10 +110,11 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     }
   });
 
+  // Watch email value for automatic user detection
+  const emailValue = form.watch('email');
+
   // Detección automática de usuario por email con debounce
   useEffect(() => {
-    const emailValue = form.watch('email');
-    
     if (!emailValue || emailValue.trim().length === 0) {
       setFoundUser(null);
       return;
@@ -151,7 +152,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
       clearTimeout(timeoutId);
       setIsCheckingEmail(false);
     };
-  }, [form.watch('email')]);
+  }, [emailValue]);
 
   React.useEffect(() => {
     if (editingContact) {
