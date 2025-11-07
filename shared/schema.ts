@@ -54,6 +54,15 @@ export const user_preferences = pgTable("user_preferences", {
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
+export const user_organization_preferences = pgTable("user_organization_preferences", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  user_id: uuid("user_id").notNull(),
+  organization_id: uuid("organization_id").notNull(),
+  last_project_id: uuid("last_project_id"),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   full_name: true,
