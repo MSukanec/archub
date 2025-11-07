@@ -5,6 +5,9 @@ import { Badge } from '@/components/ui/badge'
 import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/stat-card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Button } from '@/components/ui/button'
+import { Phone, MessageCircle } from 'lucide-react'
 
 interface ContactListProps {
   contacts: any[]
@@ -81,6 +84,8 @@ export default function ContactList({
       sortType: "string" as const,
       render: (contact: any) => {
         const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || '—'
+        // Limpiar número de teléfono para WhatsApp y llamadas
+        const cleanPhone = contact.phone?.replace(/[\s\-\(\)]/g, '') || ''
         
         return (
           <div className="space-y-0.5">
@@ -88,14 +93,44 @@ export default function ContactList({
               {fullName}
             </div>
             {contact.email && (
-              <div className="text-xs text-muted-foreground">
+              <a 
+                href={`mailto:${contact.email}`}
+                className="text-xs text-muted-foreground hover:text-accent hover:underline transition-colors cursor-pointer block"
+                onClick={(e) => e.stopPropagation()}
+              >
                 {contact.email}
-              </div>
+              </a>
             )}
             {contact.phone && (
-              <div className="text-xs text-muted-foreground">
-                {contact.phone}
-              </div>
+              <Popover>
+                <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
+                  <button className="text-xs text-muted-foreground hover:text-accent hover:underline transition-colors cursor-pointer text-left">
+                    {contact.phone}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-2" align="start">
+                  <div className="flex flex-col gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="justify-start gap-2 h-8"
+                      onClick={() => window.location.href = `tel:${cleanPhone}`}
+                    >
+                      <Phone className="h-4 w-4" />
+                      Llamar
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="justify-start gap-2 h-8 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950"
+                      onClick={() => window.open(`https://wa.me/${cleanPhone}`, '_blank')}
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      WhatsApp
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             )}
           </div>
         )
