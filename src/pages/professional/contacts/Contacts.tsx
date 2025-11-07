@@ -198,9 +198,17 @@ export default function Contacts() {
         description: "El contacto ha sido eliminado correctamente"
       })
       
-      // Invalidar ambas claves de caché para contactos
-      queryClient.invalidateQueries({ queryKey: ['contacts'] })
-      queryClient.invalidateQueries({ queryKey: ['organization-contacts'] })
+      // Invalidar caché de contactos con la misma queryKey que useContacts
+      queryClient.invalidateQueries({ 
+        queryKey: [`/api/contacts?organization_id=${organizationId}`] 
+      })
+      // También invalidar cualquier otra query relacionada con contactos
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0]
+          return typeof key === 'string' && key.includes('/api/contacts')
+        }
+      })
     },
     onError: (error) => {
       toast({
