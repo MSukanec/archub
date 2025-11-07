@@ -72,88 +72,92 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
+    // Buscar usuario existente por email
     const { data: existingUser } = await supabaseAdmin
       .from("users")
       .select("id, auth_id")
       .eq("email", email.toLowerCase())
       .single();
 
-    let userId: string;
-    let authId: string;
-
+    // Si el usuario existe, verificar que no sea ya miembro
     if (existingUser) {
-      userId = existingUser.id;
-      authId = existingUser.auth_id;
-    } else {
-      const { data: invitation, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
+      const { data: existingMembership } = await supabaseAdmin
+        .from("organization_members")
+        .select("id")
+        .eq("user_id", existingUser.id)
+        .eq("organization_id", organizationId)
+        .single();
+
+      if (existingMembership) {
+        return res.status(400).json({ 
+          error: "User is already a member of this organization" 
+        });
+      }
+    }
+
+    // Verificar si ya existe una invitación pendiente
+    const { data: existingInvitation } = await supabaseAdmin
+      .from("organization_invitations")
+      .select("id, status")
+      .eq("email", email.toLowerCase())
+      .eq("organization_id", organizationId)
+      .eq("status", "pending")
+      .single();
+
+    if (existingInvitation) {
+      return res.status(400).json({ 
+        error: "There is already a pending invitation for this email" 
+      });
+    }
+
+    // Obtener el member_id del invitador para guardarlo
+    const { data: inviterMember } = await supabaseAdmin
+      .from("organization_members")
+      .select("id")
+      .eq("user_id", dbUser.id)
+      .eq("organization_id", organizationId)
+      .single();
+
+    // Crear la invitación
+    const { data: invitationData, error: invitationError } = await supabaseAdmin
+      .from("organization_invitations")
+      .insert({
+        organization_id: organizationId,
+        email: email.toLowerCase(),
+        role_id: roleId,
+        user_id: existingUser?.id || null,
+        invited_by: inviterMember?.id || null,
+        status: "pending",
+      })
+      .select()
+      .single();
+
+    if (invitationError) {
+      console.error("Invitation creation error:", invitationError);
+      return res.status(500).json({ error: invitationError.message });
+    }
+
+    // Si el usuario NO existe en Archub, enviar invitación por email de Supabase Auth
+    if (!existingUser) {
+      const { error: authInviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
         email,
         {
           redirectTo: `${env.SUPABASE_URL}/auth/v1/verify`,
         }
       );
 
-      if (inviteError) {
-        console.error("Invite error:", inviteError);
-        return res.status(500).json({ error: inviteError.message });
+      if (authInviteError) {
+        console.warn("Auth invitation email failed (user can still register manually):", authInviteError);
+        // No retornamos error porque la invitación ya fue creada en la DB
       }
-
-      if (!invitation?.user?.id) {
-        return res.status(500).json({ error: "Failed to create invitation" });
-      }
-
-      authId = invitation.user.id;
-
-      const { data: newUser, error: userError } = await supabaseAdmin
-        .from("users")
-        .insert({
-          auth_id: authId,
-          email: email.toLowerCase(),
-          full_name: email.split("@")[0],
-        })
-        .select("id")
-        .single();
-
-      if (userError || !newUser) {
-        console.error("User creation error:", userError);
-        return res.status(500).json({ error: "Failed to create user record" });
-      }
-
-      userId = newUser.id;
-    }
-
-    const { data: existingMembership } = await supabaseAdmin
-      .from("organization_members")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("organization_id", organizationId)
-      .single();
-
-    if (existingMembership) {
-      return res.status(400).json({ 
-        error: "User is already a member of this organization" 
-      });
-    }
-
-    const { data: memberData, error: createError } = await supabaseAdmin
-      .from("organization_members")
-      .insert({
-        organization_id: organizationId,
-        user_id: userId,
-        role_id: roleId,
-        joined_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
-
-    if (createError) {
-      console.error("Member creation error:", createError);
-      return res.status(500).json({ error: createError.message });
     }
 
     return res.status(200).json({ 
       success: true, 
-      member: memberData,
-      isNewUser: !existingUser 
+      invitation: invitationData,
+      message: existingUser 
+        ? "Invitation created successfully. User will be notified." 
+        : "Invitation created and email sent to register."
     });
   } catch (err: any) {
     console.error("Invite member error:", err);

@@ -73,6 +73,56 @@ export const insertUserPreferencesSchema = createInsertSchema(user_preferences).
   last_organization_id: true,
 });
 
+// Roles Table
+export const roles = pgTable("roles", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  type: text("type"),
+});
+
+export type Role = typeof roles.$inferSelect;
+
+// Organization Members Table
+export const organization_members = pgTable("organization_members", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organization_id: uuid("organization_id").notNull(),
+  user_id: uuid("user_id"),
+  role_id: uuid("role_id"),
+  invited_by: uuid("invited_by"),
+  is_active: boolean("is_active").default(true).notNull(),
+  joined_at: timestamp("joined_at", { withTimezone: true }).defaultNow(),
+  last_active_at: timestamp("last_active_at", { withTimezone: true }),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export type OrganizationMember = typeof organization_members.$inferSelect;
+
+// Organization Invitations Table
+export const organization_invitations = pgTable("organization_invitations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organization_id: uuid("organization_id").notNull(),
+  user_id: uuid("user_id"),
+  email: text("email").notNull(),
+  role_id: uuid("role_id"),
+  invited_by: uuid("invited_by"),
+  status: text("status").default("pending"),
+  token: text("token"),
+  accepted_at: timestamp("accepted_at", { withTimezone: true }),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const insertOrganizationInvitationSchema = createInsertSchema(organization_invitations).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export type OrganizationInvitation = typeof organization_invitations.$inferSelect;
+export type InsertOrganizationInvitation = z.infer<typeof insertOrganizationInvitationSchema>;
+
 // Design Documents Table
 export const documents = pgTable("documents", {
   id: uuid("id").primaryKey().defaultRandom(),
