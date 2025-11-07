@@ -20,6 +20,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { GanttContainer } from '@/components/gantt/GanttContainer'
 import { GanttRowProps } from '@/components/gantt/types'
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
 
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted"
 
@@ -133,11 +134,7 @@ export function EstimateSchedule() {
 
   // Mostrar loading state sin Layout complejo para evitar renderizados costosos
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-32">
-        <div className="text-sm text-muted-foreground">Cargando...</div>
-      </div>
-    )
+    return <LoadingSpinner fullScreen size="lg" />
   }
 
   // Crear tabs para el header

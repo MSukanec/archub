@@ -159,14 +159,7 @@ export default function Onboarding() {
   });
 
   if (userLoading) {
-    return (
-      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
-        <div className="text-center">
-          <LoadingSpinner size="xl" />
-          <p className="text-[var(--muted-foreground)]">Cargando...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen size="lg" />
   }
 
   const renderCurrentStep = () => {

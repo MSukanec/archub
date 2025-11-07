@@ -15,6 +15,7 @@ import { useMobile } from '@/hooks/use-mobile'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
 import ContactList from './ContactList'
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
 
 export default function Contacts() {
   const [activeTab, setActiveTab] = useState('contacts')
@@ -211,11 +212,7 @@ export default function Contacts() {
   })
 
   if (isLoading || contactsLoading) {
-    return (
-      <Layout>
-        <div>Cargando...</div>
-      </Layout>
-    )
+    return <LoadingSpinner fullScreen size="lg" />
   }
 
   if (contacts.length === 0 && !searchValue && filterByType === 'all') {

@@ -13,6 +13,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { markAsRead, markAllAsRead, resolveNotificationHref, type UserNotificationRow } from '@/lib/notifications'
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
 
 export default function Notifications() {
   const { data: userData, isLoading } = useCurrentUser()
@@ -204,11 +205,7 @@ export default function Notifications() {
   ]
 
   if (isLoading || notificationsLoading) {
-    return (
-      <Layout>
-        <div>Cargando...</div>
-      </Layout>
-    )
+    return <LoadingSpinner fullScreen size="lg" />
   }
 
   const unreadNotifications = notifications.filter(n => !n.read_at)
