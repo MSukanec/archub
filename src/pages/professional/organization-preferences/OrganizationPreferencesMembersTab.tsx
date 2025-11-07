@@ -63,9 +63,9 @@ export function MembersTab() {
 
   const organizationId = userData?.organization?.id;
 
-  // Fetch organization members
+  // Fetch organization members with complete data
   const { data: members = [], isLoading: membersLoading } = useQuery({
-    queryKey: ['organization-members', organizationId],
+    queryKey: ['organization-members-full', organizationId],
     queryFn: async () => {
       if (!supabase || !organizationId) return [];
       
@@ -95,7 +95,11 @@ export function MembersTab() {
         .eq('is_active', true)
         .order('joined_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching members:', error);
+        throw error;
+      }
+      
       return data || [];
     },
     enabled: !!organizationId,
@@ -199,6 +203,7 @@ export function MembersTab() {
         title: "Miembro eliminado",
         description: "El miembro ha sido eliminado de la organización.",
       });
+      queryClient.invalidateQueries({ queryKey: ['organization-members-full'] });
       queryClient.invalidateQueries({ queryKey: ['organization-members'] });
     },
     onError: (error: any) => {
