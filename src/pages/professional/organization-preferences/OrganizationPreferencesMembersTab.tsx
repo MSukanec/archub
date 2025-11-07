@@ -504,16 +504,15 @@ export function MembersTab() {
 
                       <div className="flex gap-2">
                         <Button 
-                          variant="outline" 
+                          variant="secondary" 
                           size="sm"
                           onClick={() => resendInviteMutation.mutate(invite.id)}
                         >
                           Reenviar
                         </Button>
                         <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="text-red-600 hover:text-red-700"
+                          variant="secondary" 
+                          size="sm"
                           onClick={() => revokeInviteMutation.mutate(invite.id)}
                         >
                           Revocar
@@ -561,16 +560,15 @@ export function MembersTab() {
 
                       <div className="flex gap-2">
                         <Button 
-                          variant="outline" 
+                          variant="secondary" 
                           size="sm"
                           onClick={() => resendInviteMutation.mutate(invite.id)}
                         >
                           Reenviar invitación
                         </Button>
                         <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="text-red-600 hover:text-red-700"
+                          variant="secondary" 
+                          size="sm"
                           onClick={() => revokeInviteMutation.mutate(invite.id)}
                         >
                           Revocar invitación
