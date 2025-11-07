@@ -644,6 +644,7 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
         .from('organization_members')
         .select('id, user_id, created_at')
         .eq('organization_id', organizationId)
+        .eq('is_active', true)
         .order('created_at', { ascending: true });
 
       if (membersError) {

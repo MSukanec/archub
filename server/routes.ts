@@ -154,7 +154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.error('Error fetching role:', roleError);
           }
           
-          // Get organization members (up to 10 for display)
+          // Get organization members (up to 10 for display, only active members)
           const { data: members, error: membersError } = await authenticatedSupabase
             .from('organization_members')
             .select(`
