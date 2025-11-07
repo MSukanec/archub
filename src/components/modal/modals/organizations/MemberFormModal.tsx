@@ -94,6 +94,8 @@ export function MemberFormModal({ editingMember, onClose }: MemberModalProps) {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['organization-members'] });
+      queryClient.invalidateQueries({ queryKey: ['organization-members-full'] });
+      queryClient.invalidateQueries({ queryKey: ['organization-invitations'] });
       queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
       toast({
         title: 'Miembro invitado',

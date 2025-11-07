@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { ChevronLeft, ChevronRight, Mail } from 'lucide-react';
+import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
+import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
+import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import type { PendingInvitation } from '@/hooks/use-pending-invitations';
 
 interface InvitationModalProps {
@@ -21,6 +24,8 @@ export function InvitationModal({ invitations, open, onClose }: InvitationModalP
   
   const currentInvitation = invitations[currentIndex];
   const hasMultiple = invitations.length > 1;
+  
+  if (!open || !currentInvitation) return null;
 
   const acceptMutation = useMutation({
     mutationFn: async (invitationId: string) => {
@@ -104,90 +109,91 @@ export function InvitationModal({ invitations, open, onClose }: InvitationModalP
 
   const isLoading = acceptMutation.isPending || rejectMutation.isPending;
 
-  if (!currentInvitation) return null;
+  // Header content
+  const headerContent = (
+    <FormModalHeader
+      title="Invitación a organización"
+      description={
+        hasMultiple
+          ? `Tienes ${invitations.length} invitaciones pendientes (${currentIndex + 1}/${invitations.length})`
+          : 'Te invitaron a unirte a una organización'
+      }
+      icon={Mail}
+    />
+  );
+
+  // View panel with invitation details
+  const viewPanel = (
+    <div className="space-y-4" data-testid="invitation-modal">
+      <div className="rounded-lg border bg-muted/50 p-4">
+        <p className="text-sm text-muted-foreground mb-2">
+          Te invitaron a unirte a
+        </p>
+        <p className="text-lg font-semibold text-foreground">
+          {currentInvitation.organization_name}
+        </p>
+        <div className="flex items-center gap-2 mt-3">
+          <p className="text-sm text-muted-foreground">
+            como
+          </p>
+          <Badge variant="secondary" className="font-medium">
+            {currentInvitation.role_name}
+          </Badge>
+        </div>
+      </div>
+
+      {hasMultiple && (
+        <div className="flex items-center justify-between border-t pt-4">
+          <Button
+            onClick={handlePrevious}
+            variant="ghost"
+            size="sm"
+            disabled={currentIndex === 0 || isLoading}
+            data-testid="button-previous-invitation"
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Anterior
+          </Button>
+          <p className="text-sm text-muted-foreground">
+            {currentIndex + 1} de {invitations.length}
+          </p>
+          <Button
+            onClick={handleNext}
+            variant="ghost"
+            size="sm"
+            disabled={currentIndex === invitations.length - 1 || isLoading}
+            data-testid="button-next-invitation"
+          >
+            Siguiente
+            <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+
+  // Footer with action buttons
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Rechazar"
+      onLeftClick={handleReject}
+      rightLabel={acceptMutation.isPending ? 'Aceptando...' : 'Aceptar invitación'}
+      onRightClick={handleAccept}
+      submitVariant="default"
+      submitDisabled={isLoading}
+    />
+  );
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent 
-        className="sm:max-w-md"
-        data-testid="invitation-modal"
-      >
-        <DialogHeader>
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              <Mail className="h-6 w-6 text-primary" />
-            </div>
-            <div className="flex-1">
-              <DialogTitle>Invitación a organización</DialogTitle>
-              {hasMultiple && (
-                <DialogDescription>
-                  {currentIndex + 1} de {invitations.length} invitaciones
-                </DialogDescription>
-              )}
-            </div>
-          </div>
-        </DialogHeader>
-
-        <div className="space-y-4 py-4">
-          <div className="rounded-lg border bg-muted/50 p-4">
-            <p className="text-sm text-muted-foreground mb-2">
-              Te invitaron a unirte a
-            </p>
-            <p className="text-lg font-semibold text-foreground">
-              {currentInvitation.organization_name}
-            </p>
-            <p className="text-sm text-muted-foreground mt-2">
-              como <span className="font-medium text-foreground">{currentInvitation.role_name}</span>
-            </p>
-          </div>
-
-          <div className="flex gap-2">
-            <Button
-              onClick={handleReject}
-              variant="secondary"
-              className="flex-1"
-              disabled={isLoading}
-              data-testid="button-reject-invitation"
-            >
-              Rechazar
-            </Button>
-            <Button
-              onClick={handleAccept}
-              variant="default"
-              className="flex-1"
-              disabled={isLoading}
-              data-testid="button-accept-invitation"
-            >
-              {acceptMutation.isPending ? 'Aceptando...' : 'Aceptar invitación'}
-            </Button>
-          </div>
-
-          {hasMultiple && (
-            <div className="flex items-center justify-between border-t pt-4">
-              <Button
-                onClick={handlePrevious}
-                variant="ghost"
-                size="sm"
-                disabled={currentIndex === 0 || isLoading}
-                data-testid="button-previous-invitation"
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Anterior
-              </Button>
-              <Button
-                onClick={handleNext}
-                variant="ghost"
-                size="sm"
-                disabled={currentIndex === invitations.length - 1 || isLoading}
-                data-testid="button-next-invitation"
-              >
-                Siguiente
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
-            </div>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+    <FormModalLayout
+      columns={1}
+      viewPanel={viewPanel}
+      editPanel={null}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      isEditing={false}
+      onClose={onClose}
+      wide={false}
+    />
   );
 }
