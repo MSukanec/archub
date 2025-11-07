@@ -5,7 +5,8 @@ import {
   Calendar, 
   Home, 
   Folder, 
-  Plus
+  Plus,
+  ArrowRight
 } from "lucide-react";
 import { useLocation } from 'wouter';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -287,15 +288,18 @@ export default function OrganizationDashboard() {
               <EmptyState
                 icon={<Folder className="w-12 h-12" />}
                 title="No hay proyectos creados"
-                description="Comienza creando tu primer proyecto para gestionar tu trabajo"
+                description="Ve a la página de gestión de proyectos para crear tu primer proyecto"
                 action={
                   <Button
                     variant="default"
-                    onClick={() => openModal('project', {})}
-                    data-testid="button-nuevo-proyecto"
+                    onClick={() => {
+                      setSidebarLevel('organization');
+                      setLocation('/organization/projects');
+                    }}
+                    data-testid="button-ir-gestion-proyectos"
                   >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nuevo Proyecto
+                    <ArrowRight className="w-4 h-4 mr-2" />
+                    Ir a Gestión de Proyectos
                   </Button>
                 }
               />
