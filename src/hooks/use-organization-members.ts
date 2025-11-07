@@ -11,7 +11,7 @@ export interface OrganizationMember {
 
 export function useOrganizationMembers(organizationId?: string) {
   return useQuery({
-    queryKey: [`/api/organization-members/${organizationId}`],
+    queryKey: ['organization-members', organizationId],
     queryFn: async () => {
       if (!organizationId) {
         throw new Error('Organization ID is required');

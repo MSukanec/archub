@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 // import { SecondarySidebar } from "./SecondarySidebar";
 import { Sidebar } from "./Sidebar";
 import { RightSidebar } from "./RightSidebar";
@@ -23,6 +23,8 @@ import { CourseSidebar } from "@/components/layout/CourseSidebar";
 import { useProjectAccentColor } from "@/hooks/use-project-accent-color";
 import { FloatingAIChat } from "@/components/ui-custom/layout/FloatingAIChat";
 import { FloatingCourseLessons } from "@/components/ui-custom/layout/FloatingCourseLessons";
+import { InvitationModal } from "@/components/invitations/InvitationModal";
+import { usePendingInvitations } from "@/hooks/use-pending-invitations";
 // TEMPORALMENTE DESHABILITADO - GlobalAnnouncement no se usa por ahora
 // import { GlobalAnnouncement, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, AnnouncementProvider } from "@/components/ui-custom/layout/GlobalAnnouncement";
 import { useLocation } from "wouter";
@@ -186,6 +188,17 @@ function LayoutContent({
   // TEMPORALMENTE DESHABILITADO - GlobalAnnouncement
   // const { hasActiveAnnouncement } = useAnnouncementBanner();
 
+  // Pending invitations modal state
+  const [hasShownInvitationsModal, setHasShownInvitationsModal] = useState(false);
+  const { data: pendingInvitations, isLoading: isLoadingInvitations } = usePendingInvitations();
+  
+  const hasPendingInvitations = !isLoadingInvitations && pendingInvitations && pendingInvitations.length > 0;
+  const shouldShowInvitationsModal = hasPendingInvitations && !hasShownInvitationsModal;
+
+  const handleCloseInvitationsModal = () => {
+    setHasShownInvitationsModal(true);
+  };
+
   return (
     <>
       {/* TEMPORALMENTE DESHABILITADO - Global Announcements Banner */}
@@ -322,6 +335,15 @@ function LayoutContent({
           lessons={lessons}
           currentLessonId={currentLessonId}
           courseId={modules[0]?.course_id}
+        />
+      )}
+
+      {/* Pending Invitations Modal - Shows once per session when user has pending invitations */}
+      {shouldShowInvitationsModal && (
+        <InvitationModal
+          invitations={pendingInvitations || []}
+          open={shouldShowInvitationsModal}
+          onClose={handleCloseInvitationsModal}
         />
       )}
         </div>

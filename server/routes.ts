@@ -71,6 +71,246 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ============================================
+  // Organization Invitations Routes
+  // ============================================
+  
+  // GET /api/pending-invitations/:userId - Get pending invitations for a user
+  app.get("/api/pending-invitations/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const token = deps.extractToken(req.headers.authorization);
+      
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = deps.createAuthenticatedClient(token);
+      
+      // Verify the authenticated user matches the requested userId
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      // Get user from users table by auth_id
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      if (!dbUser || dbUser.id !== userId) {
+        return res.status(403).json({ error: "Forbidden" });
+      }
+      
+      // Query pending invitations with organization and role data
+      // Note: This query needs to be done via a view or RPC in Supabase due to PostgREST limitations
+      // For now, we'll fetch invitations and then enrich with additional data
+      const { data: invitations, error: invError } = await authenticatedSupabase
+        .from('organization_invitations')
+        .select(`
+          id,
+          organization_id,
+          role_id,
+          invited_by,
+          created_at,
+          status
+        `)
+        .eq('user_id', userId)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+      
+      if (invError) {
+        console.error('Error fetching pending invitations:', invError);
+        return res.status(500).json({ error: 'Failed to fetch pending invitations' });
+      }
+      
+      if (!invitations || invitations.length === 0) {
+        return res.json([]);
+      }
+      
+      // Fetch organization and role data for each invitation
+      const enrichedInvitations = await Promise.all(
+        invitations.map(async (inv) => {
+          // Get organization name
+          const { data: org } = await authenticatedSupabase
+            .from('organizations')
+            .select('name')
+            .eq('id', inv.organization_id)
+            .maybeSingle();
+          
+          // Get role name
+          const { data: role } = await authenticatedSupabase
+            .from('roles')
+            .select('name')
+            .eq('id', inv.role_id)
+            .maybeSingle();
+          
+          return {
+            id: inv.id,
+            organization_id: inv.organization_id,
+            organization_name: org?.name || 'Organización',
+            role_id: inv.role_id,
+            role_name: role?.name || 'Miembro',
+            invited_by: inv.invited_by,
+            created_at: inv.created_at,
+          };
+        })
+      );
+      
+      res.json(enrichedInvitations);
+    } catch (error: any) {
+      console.error("[pending-invitations] Error:", error);
+      res.status(500).json({ error: error.message || String(error) });
+    }
+  });
+
+  // POST /api/accept-invitation - Accept an organization invitation
+  app.post("/api/accept-invitation", async (req, res) => {
+    try {
+      const { invitationId } = req.body;
+      const token = deps.extractToken(req.headers.authorization);
+      
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      if (!invitationId) {
+        return res.status(400).json({ error: "invitationId is required" });
+      }
+      
+      const authenticatedSupabase = deps.createAuthenticatedClient(token);
+      
+      // Get authenticated user
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      // Get user from users table
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      if (!dbUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Get the invitation and verify it belongs to the current user
+      const { data: invitation, error: invError } = await authenticatedSupabase
+        .from('organization_invitations')
+        .select('id, organization_id, role_id, user_id, status')
+        .eq('id', invitationId)
+        .eq('user_id', dbUser.id)
+        .eq('status', 'pending')
+        .maybeSingle();
+      
+      if (invError || !invitation) {
+        return res.status(404).json({ error: "Invitation not found or already processed" });
+      }
+      
+      // Create organization member
+      const { error: memberError } = await authenticatedSupabase
+        .from('organization_members')
+        .insert({
+          organization_id: invitation.organization_id,
+          user_id: dbUser.id,
+          role_id: invitation.role_id,
+          is_active: true,
+        });
+      
+      if (memberError) {
+        console.error('Error creating organization member:', memberError);
+        return res.status(500).json({ error: 'Failed to create organization member' });
+      }
+      
+      // Update invitation status to accepted
+      const { error: updateError } = await authenticatedSupabase
+        .from('organization_invitations')
+        .update({ 
+          status: 'accepted',
+          accepted_at: new Date().toISOString()
+        })
+        .eq('id', invitationId);
+      
+      if (updateError) {
+        console.error('Error updating invitation status:', updateError);
+      }
+      
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("[accept-invitation] Error:", error);
+      res.status(500).json({ error: error.message || String(error) });
+    }
+  });
+
+  // POST /api/reject-invitation - Reject an organization invitation
+  app.post("/api/reject-invitation", async (req, res) => {
+    try {
+      const { invitationId } = req.body;
+      const token = deps.extractToken(req.headers.authorization);
+      
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      if (!invitationId) {
+        return res.status(400).json({ error: "invitationId is required" });
+      }
+      
+      const authenticatedSupabase = deps.createAuthenticatedClient(token);
+      
+      // Get authenticated user
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      // Get user from users table
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      if (!dbUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Verify the invitation belongs to the current user and is pending
+      const { data: invitation, error: invError } = await authenticatedSupabase
+        .from('organization_invitations')
+        .select('id, user_id, status')
+        .eq('id', invitationId)
+        .eq('user_id', dbUser.id)
+        .eq('status', 'pending')
+        .maybeSingle();
+      
+      if (invError || !invitation) {
+        return res.status(404).json({ error: "Invitation not found or already processed" });
+      }
+      
+      // Update invitation status to rejected
+      const { error: updateError } = await authenticatedSupabase
+        .from('organization_invitations')
+        .update({ status: 'rejected' })
+        .eq('id', invitationId);
+      
+      if (updateError) {
+        console.error('Error updating invitation status:', updateError);
+        return res.status(500).json({ error: 'Failed to reject invitation' });
+      }
+      
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("[reject-invitation] Error:", error);
+      res.status(500).json({ error: error.message || String(error) });
+    }
+  });
+
+  // ============================================
   // Mercado Pago Integration Routes (Proxies)
   // ============================================
 

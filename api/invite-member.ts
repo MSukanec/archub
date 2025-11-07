@@ -137,6 +137,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ error: invitationError.message });
     }
 
+    // Si el usuario existe en Archub, crear notificación in-app
+    if (existingUser) {
+      const { data: orgData } = await supabaseAdmin
+        .from("organizations")
+        .select("name")
+        .eq("id", organizationId)
+        .single();
+
+      const { error: notificationError } = await supabaseAdmin
+        .from("notifications")
+        .insert({
+          type: "organization_invitation",
+          title: `Te invitaron a ${orgData?.name || 'una organización'}`,
+          body: `Has sido invitado a unirte a la organización "${orgData?.name || 'sin nombre'}". Aceptá la invitación para comenzar a colaborar.`,
+          data: {
+            invitation_id: invitationData.id,
+            organization_id: organizationId,
+            organization_name: orgData?.name,
+            user_id: existingUser.id, // Target user
+          },
+          audience: "direct",
+          created_by: dbUser.id,
+        });
+
+      if (notificationError) {
+        console.error("Notification creation error:", notificationError);
+        // No retornamos error porque la invitación ya fue creada
+      }
+    }
+
     // Si el usuario NO existe en Archub, enviar invitación por email de Supabase Auth
     if (!existingUser) {
       const { error: authInviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(

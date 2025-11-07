@@ -123,6 +123,30 @@ export const insertOrganizationInvitationSchema = createInsertSchema(organizatio
 export type OrganizationInvitation = typeof organization_invitations.$inferSelect;
 export type InsertOrganizationInvitation = z.infer<typeof insertOrganizationInvitationSchema>;
 
+// Notifications Table
+export const notifications = pgTable("notifications", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  type: text("type").notNull(),
+  title: text("title").notNull(),
+  body: text("body"),
+  data: jsonb("data"),
+  audience: text("audience").default("direct").notNull(),
+  role_id: uuid("role_id"),
+  org_id: uuid("org_id"),
+  created_by: uuid("created_by"),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  start_at: timestamp("start_at", { withTimezone: true }),
+  expires_at: timestamp("expires_at", { withTimezone: true }),
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  created_at: true,
+});
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+
 // Design Documents Table
 export const documents = pgTable("documents", {
   id: uuid("id").primaryKey().defaultRandom(),
