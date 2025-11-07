@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useCurrentUser } from '@/hooks/use-current-user'
 import { BarChart3, CheckSquare, Package2, Users, Plus } from 'lucide-react'
 import TaskList from './TaskList'
 import MaterialList from './material-costs/MaterialList'
@@ -10,6 +11,8 @@ import LaborList from './LaborList'
 export default function Analysis() {
   const { setSidebarContext } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
+  const { data: userData } = useCurrentUser()
+  const organizationId = userData?.organization?.id
   const [activeTab, setActiveTab] = useState("tasks")
 
   // Set sidebar context on mount
@@ -69,6 +72,8 @@ export default function Analysis() {
   const headerProps = {
     title: "Análisis de Costos",
     icon: BarChart3,
+    organizationId,
+    showMembers: true,
     actionButton: getActionButton(),
     tabs: [
       {

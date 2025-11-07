@@ -23,7 +23,7 @@ export default function Materials() {
   const [groupingType, setGroupingType] = useState('categories')
   
   const { data: userData, isLoading } = useCurrentUser()
-  const { selectedProjectId } = useProjectContext()
+  const { selectedProjectId, currentOrganizationId } = useProjectContext()
   const { data: materialsResult, isLoading: materialsLoading } = useConstructionMaterials(
     selectedProjectId || '',
     selectedPhase
@@ -90,6 +90,8 @@ export default function Materials() {
   const headerProps = {
     icon: Package,
     title: "Materiales de Construcción",
+    organizationId: currentOrganizationId,
+    showMembers: true,
     tabs: headerTabs,
     onTabChange: setActiveTab
   }

@@ -149,6 +149,8 @@ export default function Indirects() {
     const baseProps = {
       icon: TrendingUp,
       title: "Costos Indirectos",
+      organizationId: currentOrganizationId,
+      showMembers: true,
       tabs: [
         { id: 'lista', label: 'Lista', isActive: activeTab === 'lista' },
         { id: 'pagos', label: 'Pagos', isActive: activeTab === 'pagos' }

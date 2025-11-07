@@ -10,6 +10,7 @@ export default function GeneralCosts() {
   const { setSidebarContext } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
+  const organizationId = userData?.organization?.id
   const [activeTab, setActiveTab] = useState("lista")
 
   // Set sidebar context on mount
@@ -37,6 +38,8 @@ export default function GeneralCosts() {
   const headerProps = {
     title: "Gastos Generales",
     icon: CreditCard,
+    organizationId,
+    showMembers: true,
     tabs: headerTabs,
     onTabChange: (tabId: string) => {
       setActiveTab(tabId)

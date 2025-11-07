@@ -65,7 +65,9 @@ export default function Activity() {
   const headerProps = {
     icon: ActivityIcon,
     title: 'Actividad de la Organización',
-    subtitle: 'Registro de actividades y cambios en la organización'
+    subtitle: 'Registro de actividades y cambios en la organización',
+    organizationId,
+    showMembers: true
   };
 
   if (!organizationId) {

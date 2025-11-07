@@ -51,6 +51,7 @@ export default function Contacts() {
   const { showDeleteConfirmation } = useDeleteConfirmation()
   
   const { data: userData, isLoading } = useCurrentUser()
+  const organizationId = userData?.organization?.id
   const { data: contacts = [], isLoading: contactsLoading } = useContacts()
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -400,6 +401,8 @@ export default function Contacts() {
         headerProps={{
           icon: Contact,
           title: "Contactos",
+          organizationId,
+          showMembers: true,
           tabs: headerTabs,
           onTabChange: (tabId: string) => {
             if (tabId === "empresas") {
@@ -446,6 +449,8 @@ export default function Contacts() {
         icon: Contact,
         title: "Contactos",
         pageTitle: "Contactos",
+        organizationId,
+        showMembers: true,
         breadcrumb: [
           { name: "Organización", href: "/organization/dashboard" },
           { name: "Contactos", href: "/contacts" }

@@ -342,6 +342,8 @@ export default function Budgets() {
   const headerProps = {
     title: "Cómputos y Presupuestos",
     icon: CheckSquare,
+    organizationId,
+    showMembers: true,
     tabs: tabs,
     activeTab: activeTab,
     onTabChange: setActiveTab,

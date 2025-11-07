@@ -315,6 +315,8 @@ export default function FinancesCapitalMovements() {
   const headerProps = {
     title: "Movimientos de Capital",
     icon: DollarSign,
+    organizationId,
+    showMembers: true,
     tabs: headerTabs,
     onTabChange: setActiveTab,
     actions: movements.length > 0 ? [

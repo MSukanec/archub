@@ -7,10 +7,14 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 // Import the existing components
 import MovementsList from './MovementsList';
 
+import { useCurrentUser } from '@/hooks/use-current-user';
+
 export default function Movements() {
   const { setSidebarContext } = useNavigationStore();
   const { openModal } = useGlobalModalStore();
   const [activeTab, setActiveTab] = useState('movements');
+  const { data: userData } = useCurrentUser();
+  const organizationId = userData?.organization?.id;
 
   // Set sidebar context on mount
   useEffect(() => {
@@ -24,6 +28,8 @@ export default function Movements() {
   const headerProps = {
     icon: TrendingUp,
     title: "Movimientos",
+    organizationId,
+    showMembers: true,
     tabs,
     onTabChange: setActiveTab,
     actionButton: {

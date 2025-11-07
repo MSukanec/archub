@@ -21,6 +21,8 @@ export default function Projects() {
     title: "Gestión de Proyectos",
     description: "Administra todos los proyectos de tu organización desde un solo lugar",
     icon: Folder,
+    organizationId,
+    showMembers: true,
     breadcrumb: [
       { name: "Perfil", href: "/profile/data" },
       { name: "Gestión de Proyectos", href: "/organization/projects" }

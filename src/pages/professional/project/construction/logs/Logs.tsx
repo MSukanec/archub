@@ -284,6 +284,8 @@ export default function Logs() {
   const headerProps = {
     icon: FileText,
     title: "Bitácora",
+    organizationId,
+    showMembers: true,
     tabs: headerTabs,
     onTabChange: setActiveTab,
     actionButton: activeTab === "bitacoras" ? {

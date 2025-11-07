@@ -15,9 +15,10 @@ import { PartnersTab } from './PartnersTab';
 export default function Preferences() {
   const [activeTab, setActiveTab] = useState('basic');
   const { data: userData } = useCurrentUser();
+  const organizationId = userData?.organization?.id;
   const { setSidebarContext } = useNavigationStore();
   const { openModal } = useGlobalModalStore();
-  const { data: organizationMembers = [] } = useOrganizationMembers(userData?.organization?.id);
+  const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
 
   // Set sidebar context on mount
   useEffect(() => {
@@ -65,6 +66,8 @@ export default function Preferences() {
     icon: Settings,
     title: 'Preferencias',
     subtitle: 'Gestiona los datos básicos, miembros y configuraciones financieras de tu organización',
+    organizationId,
+    showMembers: true,
     tabs: headerTabs,
     onTabChange: (tabId: string) => setActiveTab(tabId),
     actions: membersActions

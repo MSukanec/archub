@@ -152,6 +152,8 @@ export default function Subcontracts() {
     const baseProps = {
       icon: Handshake,
       title: "Subcontratos",
+      organizationId: currentOrganizationId,
+      showMembers: true,
       tabs: [
         { id: 'lista', label: 'Lista', isActive: activeTab === 'lista' },
         { id: 'pagos', label: 'Pagos', isActive: activeTab === 'pagos' }

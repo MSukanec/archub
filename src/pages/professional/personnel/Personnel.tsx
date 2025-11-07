@@ -87,6 +87,8 @@ export default function Personnel() {
     icon: Users,
     title: "Mano de Obra",
     description: "Gestiona el personal asignado a tus proyectos, registra asistencias y administra seguros de trabajo.",
+    organizationId: currentOrganizationId,
+    showMembers: true,
     tabs: [
       {
         id: 'dashboard',
