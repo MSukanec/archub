@@ -329,14 +329,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Invitation not found or already processed" });
       }
       
-      // Delete the invitation (rejected invitations are simply removed)
-      const { error: deleteError } = await authenticatedSupabase
+      // Update invitation status to rejected
+      const { error: updateError } = await authenticatedSupabase
         .from('organization_invitations')
-        .delete()
+        .update({ 
+          status: 'rejected',
+          updated_at: new Date().toISOString()
+        })
         .eq('id', invitationId);
       
-      if (deleteError) {
-        console.error('Error deleting invitation:', deleteError);
+      if (updateError) {
+        console.error('Error updating invitation status:', updateError);
         return res.status(500).json({ error: 'Failed to reject invitation' });
       }
       
