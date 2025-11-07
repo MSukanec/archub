@@ -84,19 +84,11 @@ export function MemberFormModal({ editingMember, onClose }: MemberModalProps) {
     mutationFn: async (memberData: MemberFormData) => {
       if (!organizationId) throw new Error('No organization selected');
 
-      const response = await apiRequest('/api/invite-member', {
-        method: 'POST',
-        body: JSON.stringify({
-          email: memberData.email,
-          roleId: memberData.roleId,
-          organizationId: organizationId,
-        }),
+      const response = await apiRequest('POST', '/api/invite-member', {
+        email: memberData.email,
+        roleId: memberData.roleId,
+        organizationId: organizationId,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to invite member');
-      }
 
       return response.json();
     },
@@ -234,7 +226,7 @@ export function MemberFormModal({ editingMember, onClose }: MemberModalProps) {
       onLeftClick={handleClose}
       rightLabel={editingMember ? 'Actualizar' : 'Invitar'}
       onRightClick={form.handleSubmit(handleSubmit)}
-      rightLoading={isLoading}
+      isSubmitting={isLoading}
     />
   );
 
