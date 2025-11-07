@@ -218,6 +218,24 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
 
       if (isEditing && editingContact) {
         // Update contact
+        // Verificar si ya existe otro contacto con el mismo email (si se proporciona email y cambió)
+        if (data.email && data.email.trim().length > 0 && data.email !== editingContact.email) {
+          const { data: existingContact, error: checkError } = await supabase
+            .from('contacts')
+            .select('id, first_name, last_name, email')
+            .eq('organization_id', userData.organization.id)
+            .ilike('email', data.email.trim())
+            .neq('id', editingContact.id)
+            .maybeSingle();
+
+          if (checkError) throw checkError;
+
+          if (existingContact) {
+            const contactName = `${existingContact.first_name} ${existingContact.last_name || ''}`.trim();
+            throw new Error(`Ya existe otro contacto con el email "${data.email}" (${contactName}). No se pueden tener contactos duplicados con el mismo email.`);
+          }
+        }
+
         const { data: updatedContact, error } = await supabase
           .from('contacts')
           .update({
@@ -259,6 +277,23 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
         return updatedContact;
       } else {
         // Create new contact
+        // Verificar si ya existe un contacto con el mismo email (si se proporciona email)
+        if (data.email && data.email.trim().length > 0) {
+          const { data: existingContact, error: checkError } = await supabase
+            .from('contacts')
+            .select('id, first_name, last_name, email')
+            .eq('organization_id', userData.organization.id)
+            .ilike('email', data.email.trim())
+            .maybeSingle();
+
+          if (checkError) throw checkError;
+
+          if (existingContact) {
+            const contactName = `${existingContact.first_name} ${existingContact.last_name || ''}`.trim();
+            throw new Error(`Ya existe un contacto con el email "${data.email}" (${contactName}). No se pueden crear contactos duplicados con el mismo email.`);
+          }
+        }
+
         const { data: newContact, error } = await supabase
           .from('contacts')
           .insert({
