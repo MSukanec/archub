@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { MoreHorizontal, Edit, Trash2 } from 'lucide-react'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/stat-card'
 
 interface ContactListProps {
   contacts: any[]
@@ -13,6 +14,38 @@ interface ContactListProps {
 }
 
 export default function ContactList({ contacts, onEdit, onDelete }: ContactListProps) {
+  
+  // Calcular KPIs
+  const kpis = useMemo(() => {
+    const totalContacts = contacts.length
+    const archubUsers = contacts.filter(c => c.linked_user).length
+    
+    // Contactos agregados este mes
+    const now = new Date()
+    const currentMonth = now.getMonth()
+    const currentYear = now.getFullYear()
+    const thisMonthContacts = contacts.filter(c => {
+      const createdDate = new Date(c.created_at)
+      return createdDate.getMonth() === currentMonth && createdDate.getFullYear() === currentYear
+    }).length
+    
+    // Tipos de contacto únicos
+    const uniqueTypes = new Set()
+    contacts.forEach(contact => {
+      if (contact.contact_types && Array.isArray(contact.contact_types)) {
+        contact.contact_types.forEach((type: any) => {
+          if (type.name) uniqueTypes.add(type.name)
+        })
+      }
+    })
+    
+    return {
+      total: totalContacts,
+      archubUsers,
+      thisMonth: thisMonthContacts,
+      uniqueTypes: uniqueTypes.size
+    }
+  }, [contacts])
   
   // Columnas de la tabla
   const columns = useMemo(() => [
@@ -149,17 +182,52 @@ export default function ContactList({ contacts, onEdit, onDelete }: ContactListP
   ], [onEdit, onDelete])
 
   return (
-    <Table
-      columns={columns}
-      data={contacts}
-      defaultSort={{
-        key: 'first_name',
-        direction: 'asc'
-      }}
-      emptyStateConfig={{
-        title: "No hay contactos",
-        description: "Comienza agregando tu primer contacto a la organización"
-      }}
-    />
+    <div className="space-y-6">
+      {/* KPIs */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard data-testid="statcard-total-contacts">
+          <StatCardTitle showArrow={false}>Total de Contactos</StatCardTitle>
+          <StatCardValue>{kpis.total}</StatCardValue>
+          <StatCardMeta>En tu organización</StatCardMeta>
+        </StatCard>
+
+        <StatCard data-testid="statcard-archub-users">
+          <StatCardTitle showArrow={false}>Usuarios de Archub</StatCardTitle>
+          <StatCardValue>{kpis.archubUsers}</StatCardValue>
+          <StatCardMeta>
+            {kpis.total > 0 
+              ? `${Math.round((kpis.archubUsers / kpis.total) * 100)}% del total`
+              : 'Sin contactos'
+            }
+          </StatCardMeta>
+        </StatCard>
+
+        <StatCard data-testid="statcard-this-month">
+          <StatCardTitle showArrow={false}>Agregados Este Mes</StatCardTitle>
+          <StatCardValue>{kpis.thisMonth}</StatCardValue>
+          <StatCardMeta>Nuevos contactos</StatCardMeta>
+        </StatCard>
+
+        <StatCard data-testid="statcard-contact-types">
+          <StatCardTitle showArrow={false}>Tipos de Contacto</StatCardTitle>
+          <StatCardValue>{kpis.uniqueTypes}</StatCardValue>
+          <StatCardMeta>Categorías activas</StatCardMeta>
+        </StatCard>
+      </div>
+
+      {/* Tabla */}
+      <Table
+        columns={columns}
+        data={contacts}
+        defaultSort={{
+          key: 'first_name',
+          direction: 'asc'
+        }}
+        emptyStateConfig={{
+          title: "No hay contactos",
+          description: "Comienza agregando tu primer contacto a la organización"
+        }}
+      />
+    </div>
   )
 }
