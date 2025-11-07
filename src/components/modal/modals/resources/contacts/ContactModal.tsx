@@ -93,7 +93,6 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
   const { data: contactTypes } = useContactTypes();
   const { toast } = useToast();
   const [foundUser, setFoundUser] = useState<any>(null);
-  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
   const form = useForm<CreateContactForm>({
     resolver: zodResolver(createContactSchema),
@@ -127,7 +126,6 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
       return;
     }
 
-    setIsCheckingEmail(true);
     const timeoutId = setTimeout(async () => {
       try {
         const { data: existingUser, error } = await supabase
@@ -143,16 +141,27 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
         }
       } catch (err) {
         setFoundUser(null);
-      } finally {
-        setIsCheckingEmail(false);
       }
     }, 600); // 600ms debounce
 
     return () => {
       clearTimeout(timeoutId);
-      setIsCheckingEmail(false);
     };
   }, [emailValue]);
+
+  // Auto-completar campos cuando se encuentra un usuario
+  useEffect(() => {
+    if (foundUser) {
+      const nameParts = foundUser.full_name?.split(' ') || [];
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      
+      form.setValue("linked_user_id", foundUser.id);
+      form.setValue("first_name", firstName);
+      form.setValue("last_name", lastName);
+      form.setValue("email", foundUser.email || '');
+    }
+  }, [foundUser, form]);
 
   React.useEffect(() => {
     if (editingContact) {
@@ -339,22 +348,6 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     createContactMutation.mutate(data);
   };
 
-  // Vincular usuario encontrado automáticamente
-  const handleLinkFoundUser = () => {
-    if (!foundUser) return;
-    
-    form.setValue("linked_user_id", foundUser.id);
-    
-    // Auto-rellenar datos del usuario vinculado
-    const nameParts = foundUser.full_name?.split(' ') || [];
-    const firstName = nameParts[0] || '';
-    const lastName = nameParts.slice(1).join(' ') || '';
-    
-    form.setValue("first_name", firstName);
-    form.setValue("last_name", lastName);
-    form.setValue("email", foundUser.email || '');
-  };
-
   const handleUnlinkUser = () => {
     form.setValue("linked_user_id", "");
     setFoundUser(null);
@@ -464,63 +457,45 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
             />
           </div>
 
-          {/* Email - Telefono */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="email" 
-                      placeholder="email@ejemplo.com" 
-                      {...field} 
-                      disabled={!!foundUser || !!editingContact?.linked_user}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                  
-                  {/* Feedback automático de vinculación */}
-                  {field.value && field.value.length > 0 && !editingContact?.linked_user && !form.watch('linked_user_id') && (
-                    <div className="mt-2">
-                      {isCheckingEmail ? (
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <span className="animate-spin">⏳</span> Verificando...
+          {/* Email - FULL WIDTH */}
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="email" 
+                    placeholder="email@ejemplo.com" 
+                    {...field} 
+                    disabled={!!foundUser || !!editingContact?.linked_user}
+                  />
+                </FormControl>
+                <FormMessage />
+                
+                {/* Feedback automático de vinculación - solo cuando HAY coincidencia */}
+                {foundUser && field.value && field.value.length > 0 && !editingContact?.linked_user && (
+                  <div className="mt-2">
+                    <div className="flex items-start gap-2 p-2 border border-accent/20 bg-accent/5 rounded-md">
+                      <Link2 className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-foreground">
+                          Ya existe un usuario de Archub con este correo.
                         </p>
-                      ) : foundUser ? (
-                        <div className="flex items-start gap-2 p-2 border border-accent/20 bg-accent/5 rounded-md">
-                          <Link2 className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-foreground">
-                              Ya existe un usuario de Archub con este correo.
-                            </p>
-                            <Button
-                              type="button"
-                              variant="link"
-                              size="sm"
-                              className="h-auto p-0 text-accent hover:text-accent/80 text-xs font-medium"
-                              onClick={handleLinkFoundUser}
-                            >
-                              Vincular a {foundUser.full_name}
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-start gap-2 p-2 border border-border/50 bg-muted/20 rounded-md">
-                          <Mail className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                          <p className="text-xs text-muted-foreground">
-                            No se encontró ningún usuario de Archub con este correo.
-                          </p>
-                        </div>
-                      )}
+                        <p className="text-xs text-accent font-medium mt-0.5">
+                          Vinculado a {foundUser.full_name}
+                        </p>
+                      </div>
                     </div>
-                  )}
-                </FormItem>
-              )}
-            />
+                  </div>
+                )}
+              </FormItem>
+            )}
+          />
 
+          {/* Teléfono - Tipos de Contacto */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="phone"
@@ -538,33 +513,32 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
                 </FormItem>
               )}
             />
-          </div>
 
-          {/* Tipos de Contacto - FULL WIDTH */}
-          <FormField
-            control={form.control}
-            name="contact_type_ids"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tipos de contacto</FormLabel>
-                <FormControl>
-                  <ComboBoxMultiSelectField
-                    options={contactTypes?.map(type => ({
-                      value: type.id,
-                      label: type.name
-                    })) || []}
-                    value={field.value || []}
-                    onChange={field.onChange}
-                    placeholder="Seleccionar tipos de contacto..."
-                    searchPlaceholder="Buscar tipos..."
-                    emptyText="No hay tipos disponibles"
-                    className="w-full min-h-[40px]"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="contact_type_ids"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipos de contacto</FormLabel>
+                  <FormControl>
+                    <ComboBoxMultiSelectField
+                      options={contactTypes?.map(type => ({
+                        value: type.id,
+                        label: type.name
+                      })) || []}
+                      value={field.value || []}
+                      onChange={field.onChange}
+                      placeholder="Seleccionar tipos de contacto..."
+                      searchPlaceholder="Buscar tipos..."
+                      emptyText="No hay tipos disponibles"
+                      className="w-full min-h-[40px]"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           {/* Empresa - Ubicacion */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
