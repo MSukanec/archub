@@ -104,30 +104,15 @@ export default function ProjectItemCard({
     >
       {/* Imagen de fondo - SIEMPRE 100% de altura */}
       <div className="absolute inset-0">
-        {/* Imagen de fondo del proyecto con optimización y lazy loading */}
+        {/* Imagen de fondo del proyecto con lazy loading */}
         {imageUrl ? (
-          <>
-            {/* Placeholder borroso para progressive loading - solo si existe */}
-            {getProjectImagePlaceholder(imageUrl) && (
-              <div 
-                className="absolute inset-0 bg-cover bg-center"
-                style={{
-                  backgroundImage: `url(${getProjectImagePlaceholder(imageUrl)})`,
-                  filter: 'blur(10px)',
-                  transform: 'scale(1.1)'
-                }}
-              />
-            )}
-            {/* Imagen optimizada principal */}
-            <img
-              src={getProjectImageUrl(imageUrl, 'card') || imageUrl}
-              srcSet={getProjectImageSrcSet(imageUrl, 'card')}
-              alt={project.name}
-              loading="lazy"
-              decoding="async"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          </>
+          <img
+            src={imageUrl}
+            alt={project.name}
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
         ) : (
           <div 
             className="absolute inset-0"

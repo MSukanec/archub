@@ -67,8 +67,7 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
           {/* Background Image */}
           {project.project_data?.project_image_url ? (
             <img 
-              src={getProjectImageUrl(project.project_data.project_image_url, 'card') || project.project_data.project_image_url} 
-              srcSet={getProjectImageSrcSet(project.project_data.project_image_url, 'card')}
+              src={project.project_data.project_image_url} 
               alt={project.name}
               loading="lazy"
               decoding="async"
