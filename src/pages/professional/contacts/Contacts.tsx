@@ -315,7 +315,7 @@ export default function Contacts() {
                         contact={contact}
                         onEdit={handleEditContact}
                         onDelete={handleDeleteContact}
-                        onClick={(contact) => openModal('contact', { viewingContact: contact })}
+                        onClick={(contact) => openModal('contact', { editingContact: contact, isEditing: true, initialPanel: 'view' })}
                       />
                     ))}
                   </div>

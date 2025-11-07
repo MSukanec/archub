@@ -3,7 +3,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { UserPlus, User, Mail, Phone, Building2, MapPin, FileText, Search, Check, X, Link, Unlink, Link2, MessageCircle } from "lucide-react";
+import { UserPlus, User, Mail, Phone, Building2, MapPin, FileText, Search, Check, X, Link, Unlink, Link2, MessageCircle, Share2, Building, Upload, Trash2, FileUp, Eye, Edit } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 import { FormModalLayout } from "../../../form/FormModalLayout";
 import { FormModalHeader } from "../../../form/FormModalHeader";
@@ -11,6 +12,7 @@ import { FormModalFooter } from "../../../form/FormModalFooter";
 import { FormSubsectionButton } from "../../../form/FormSubsectionButton";
 import { useModalPanelStore } from "../../../form/modalPanelStore";
 import { ContactAttachmentsForm } from "./forms/ContactAttachmentsForm";
+import { ContactAttachmentsPanel } from "@/components/contacts/ContactAttachmentsPanel";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -467,150 +469,218 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     createContactMutation.mutate(data);
   };
 
+  // Get display name and avatar info
+  const getDisplayName = () => {
+    return editingContact?.full_name || `${editingContact?.first_name || ''} ${editingContact?.last_name || ''}`.trim() || 'Sin nombre'
+  }
+
+  const getInitials = () => {
+    const name = getDisplayName()
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
+  }
+
+  const handleShare = () => {
+    if (navigator.share && editingContact) {
+      navigator.share({
+        title: `Contacto: ${getDisplayName()}`,
+        text: `${getDisplayName()}${editingContact.email ? `\nEmail: ${editingContact.email}` : ''}${editingContact.phone ? `\nTeléfono: ${editingContact.phone}` : ''}`,
+      })
+    }
+  }
+
   const viewPanel = (
-    <div className="space-y-4">
-      {/* Badge si el contacto está vinculado */}
-      {editingContact?.linked_user && (
-        <div className="p-3 border border-accent/20 bg-accent/5 rounded-lg flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link2 className="h-4 w-4 text-accent" />
-            <div>
-              <p className="text-sm font-medium">Vinculado a usuario de Archub</p>
-              <p className="text-xs text-muted-foreground">
-                {editingContact.linked_user.full_name}
-              </p>
-            </div>
-          </div>
-          {!isAlreadyMember && (
-            <Button
-              type="button"
-              variant="default"
-              size="sm"
-              onClick={() => inviteMemberMutation.mutate()}
-              disabled={inviteMemberMutation.isPending}
-              data-testid="button-invite-to-organization"
-            >
-              {inviteMemberMutation.isPending ? 'Invitando...' : 'Invitar a la organización'}
-            </Button>
-          )}
-        </div>
-      )}
-
-      {/* Botones de acción rápida - DEBAJO del banner */}
-      {(editingContact?.email || editingContact?.phone) && (
-        <div className="grid grid-cols-2 gap-2">
-          {editingContact.email && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.location.href = `mailto:${editingContact.email}`}
-              className="flex items-center justify-center gap-2 border-muted-foreground text-muted-foreground hover:border-muted-foreground hover:text-foreground"
-              data-testid="button-email-contact"
-            >
-              <Mail className="h-4 w-4" />
-              Enviar Email
-            </Button>
-          )}
-          {editingContact.phone && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                const cleanPhone = editingContact.phone?.replace(/[\s\-\(\)]/g, '') || ''
-                window.open(`https://wa.me/${cleanPhone}`, '_blank')
-              }}
-              className="flex items-center justify-center gap-2 text-green-600 hover:text-green-700 border-green-600 hover:border-green-700"
-              data-testid="button-whatsapp-contact"
-            >
-              <MessageCircle className="h-4 w-4" />
-              WhatsApp
-            </Button>
-          )}
-        </div>
-      )}
-
-      {/* Información básica */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <h4 className="text-sm font-medium text-muted-foreground">Nombre</h4>
-          <p className="text-sm mt-1">
-            {editingContact?.first_name || '—'}
-          </p>
+    <div className="space-y-6">
+      {/* Hero Section - Avatar y Nombre */}
+      <div className="text-center pt-4 pb-4">
+        <div className="flex justify-center mb-4">
+          <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
+            {editingContact?.linked_user?.avatar_url && (
+              <AvatarImage 
+                src={editingContact.linked_user.avatar_url} 
+                alt={`Avatar de ${getDisplayName()}`}
+                className="object-cover"
+              />
+            )}
+            <AvatarFallback className="text-2xl font-bold bg-accent text-white">
+              {getInitials()}
+            </AvatarFallback>
+          </Avatar>
         </div>
 
-        <div>
-          <h4 className="text-sm font-medium text-muted-foreground">Apellido</h4>
-          <p className="text-sm mt-1">
-            {editingContact?.last_name || '—'}
-          </p>
-        </div>
-      </div>
+        <h2 className="text-2xl font-bold text-foreground mb-2">
+          {getDisplayName()}
+        </h2>
 
-      {/* Email y Teléfono en grid */}
-      {(editingContact?.email || editingContact?.phone) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {editingContact.email && (
-            <div>
-              <h4 className="text-sm font-medium text-muted-foreground">Email</h4>
-              <a 
-                href={`mailto:${editingContact.email}`}
-                className="text-sm mt-1 text-accent hover:underline block"
-              >
-                {editingContact.email}
-              </a>
-            </div>
-          )}
-          
-          {editingContact.phone && (
-            <div>
-              <h4 className="text-sm font-medium text-muted-foreground">Teléfono</h4>
-              <p className="text-sm mt-1">{editingContact.phone}</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Tipos de contacto */}
-      {editingContact?.contact_types && editingContact.contact_types.length > 0 && (
-        <div>
-          <h4 className="text-sm font-medium text-muted-foreground mb-2">Tipos de contacto</h4>
-          <div className="flex flex-wrap gap-2">
-            {editingContact.contact_types.map((type) => (
-              <Badge 
-                key={type.id} 
-                variant="outline"
-                className="bg-accent/10 border-accent/20"
+        {/* Tipos de contacto debajo del nombre */}
+        {editingContact?.contact_types && editingContact.contact_types.length > 0 && (
+          <div className="flex flex-wrap gap-2 justify-center mb-4">
+            {editingContact.contact_types.map((type: any) => (
+              <Badge
+                key={type.id}
+                className="bg-accent text-white"
               >
                 {type.name}
               </Badge>
             ))}
           </div>
+        )}
+
+        {/* Badge de Usuario de Archub si está vinculado */}
+        {editingContact?.linked_user && (
+          <div className="flex items-center justify-center gap-1 mb-4">
+            <User className="h-4 w-4 text-green-600" />
+            <span className="text-sm text-green-600 font-medium">Usuario de Archub</span>
+          </div>
+        )}
+      </div>
+
+      <Separator />
+
+      {/* Banner de invitación (si aplica) */}
+      {editingContact?.linked_user && !isAlreadyMember && (
+        <div className="p-3 border border-accent/20 bg-accent/5 rounded-lg flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link2 className="h-4 w-4 text-accent" />
+            <div>
+              <p className="text-sm font-medium">Usuario de Archub</p>
+              <p className="text-xs text-muted-foreground">Invítalo a tu organización</p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="default"
+            size="sm"
+            onClick={() => inviteMemberMutation.mutate()}
+            disabled={inviteMemberMutation.isPending}
+            data-testid="button-invite-to-organization"
+          >
+            {inviteMemberMutation.isPending ? 'Invitando...' : 'Invitar'}
+          </Button>
         </div>
       )}
 
-      {/* Empresa */}
-      {editingContact?.company_name && (
-        <div>
-          <h4 className="text-sm font-medium text-muted-foreground">Empresa</h4>
-          <p className="text-sm mt-1">{editingContact.company_name}</p>
-        </div>
-      )}
+      {/* Botones de acción rápida */}
+      <div className="grid gap-3 grid-cols-3">
+        {editingContact?.phone && (
+          <Button
+            variant="default"
+            onClick={() => {
+              const cleanPhone = editingContact.phone?.replace(/[\s\-\(\)]/g, '') || ''
+              window.location.href = `tel:${cleanPhone}`
+            }}
+            className="flex items-center gap-2 py-3"
+            data-testid="button-call-contact"
+          >
+            <Phone className="h-4 w-4" />
+            Llamar
+          </Button>
+        )}
+        {editingContact?.email && (
+          <Button
+            variant="default"
+            onClick={() => window.location.href = `mailto:${editingContact.email}`}
+            className="flex items-center gap-2 py-3"
+            data-testid="button-email-contact"
+          >
+            <Mail className="h-4 w-4" />
+            Email
+          </Button>
+        )}
+        <Button
+          variant="default"
+          onClick={handleShare}
+          className="flex items-center gap-2 py-3"
+          data-testid="button-share-contact"
+        >
+          <Share2 className="h-4 w-4" />
+          Compartir
+        </Button>
+      </div>
 
-      {/* Ubicación */}
-      {editingContact?.location && (
-        <div>
-          <h4 className="text-sm font-medium text-muted-foreground">Ubicación</h4>
-          <p className="text-sm mt-1">{editingContact.location}</p>
-        </div>
-      )}
+      {/* Información de contacto - Cards */}
+      <div className="grid grid-cols-1 gap-4">
+        {editingContact?.email && (
+          <div className="flex items-start gap-3 p-3 rounded-lg border bg-card">
+            <div className="p-2 bg-accent/10 rounded-lg">
+              <Mail className="h-5 w-5 text-accent" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">Email</p>
+              <p className="font-medium text-sm truncate" title={editingContact.email}>
+                {editingContact.email}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {editingContact?.phone && (
+          <div className="flex items-start gap-3 p-3 rounded-lg border bg-card">
+            <div className="p-2 bg-accent/10 rounded-lg">
+              <Phone className="h-5 w-5 text-accent" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">Teléfono</p>
+              <p className="font-medium text-sm truncate" title={editingContact.phone}>
+                {editingContact.phone}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {editingContact?.company_name && (
+          <div className="flex items-start gap-3 p-3 rounded-lg border bg-card">
+            <div className="p-2 bg-accent/10 rounded-lg">
+              <Building className="h-5 w-5 text-accent" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">Empresa</p>
+              <p className="font-medium text-sm truncate" title={editingContact.company_name}>
+                {editingContact.company_name}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {editingContact?.location && (
+          <div className="flex items-start gap-3 p-3 rounded-lg border bg-card">
+            <div className="p-2 bg-accent/10 rounded-lg">
+              <MapPin className="h-5 w-5 text-accent" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">Ubicación</p>
+              <p className="font-medium text-sm truncate" title={editingContact.location}>
+                {editingContact.location}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Notas */}
       {editingContact?.notes && (
         <div>
-          <h4 className="text-sm font-medium text-muted-foreground">Notas</h4>
-          <p className="text-sm mt-1 text-muted-foreground whitespace-pre-wrap">
-            {editingContact.notes}
-          </p>
+          <h3 className="text-sm font-medium text-muted-foreground mb-3">Notas</h3>
+          <div className="p-3 rounded-lg border bg-card">
+            <p className="text-sm text-foreground leading-relaxed">
+              {editingContact.notes}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Archivos y Media */}
+      {editingContact && (
+        <div>
+          <ContactAttachmentsPanel 
+            contactId={editingContact.id} 
+            contact={{ avatar_attachment_id: editingContact.avatar_attachment_id }}
+            showUpload={false}
+          />
         </div>
       )}
     </div>
