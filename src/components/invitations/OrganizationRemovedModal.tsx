@@ -36,8 +36,8 @@ export function OrganizationRemovedModal() {
     
     setIsSwitching(true);
     try {
-      await apiRequest('POST', '/api/user/switch-organization', {
-        organizationId: selectedOrgId,
+      await apiRequest('POST', '/api/user/select-organization', {
+        organization_id: selectedOrgId,
       });
       
       // Force a full page reload to load the new organization
@@ -104,7 +104,8 @@ export function OrganizationRemovedModal() {
         footerContent={footerContent}
         onClose={() => {/* Cannot close */}}
         isEditing={true}
-        preventClose={true}
+        preventEscapeClose={true}
+        preventClickOutsideClose={true}
       />
     );
   }
@@ -161,7 +162,7 @@ export function OrganizationRemovedModal() {
                     variant="secondary"
                     className="ml-auto"
                   >
-                    {org.plan === 'free' ? 'Gratis' : org.plan === 'pro' ? 'Pro' : 'Teams'}
+                    {org.plan?.name === 'free' ? 'Gratis' : org.plan?.name === 'pro' ? 'Pro' : 'Teams'}
                   </Badge>
                 </Label>
               </div>
@@ -200,7 +201,8 @@ export function OrganizationRemovedModal() {
       footerContent={footerContent}
       onClose={() => {/* Cannot close */}}
       isEditing={true}
-      preventClose={true}
+      preventEscapeClose={true}
+      preventClickOutsideClose={true}
     />
   );
 }
