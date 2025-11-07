@@ -468,35 +468,116 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
   };
 
   const viewPanel = (
-    <>
-      <div>
-        <h4 className="font-medium">Nombre completo</h4>
-        <p className="text-muted-foreground mt-1">
-          {editingContact ? `${editingContact.first_name} ${editingContact.last_name || ''}`.trim() : 'Sin nombre'}
-        </p>
+    <div className="space-y-4">
+      {/* Badge si el contacto está vinculado */}
+      {editingContact?.linked_user && (
+        <div className="p-3 border border-accent/20 bg-accent/5 rounded-lg flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link2 className="h-4 w-4 text-accent" />
+            <div>
+              <p className="text-sm font-medium">Vinculado a usuario de Archub</p>
+              <p className="text-xs text-muted-foreground">
+                {editingContact.linked_user.full_name}
+              </p>
+            </div>
+          </div>
+          {!isAlreadyMember && (
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              onClick={() => inviteMemberMutation.mutate()}
+              disabled={inviteMemberMutation.isPending}
+              data-testid="button-invite-to-organization"
+            >
+              {inviteMemberMutation.isPending ? 'Invitando...' : 'Invitar a la organización'}
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Información básica */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <h4 className="text-sm font-medium text-muted-foreground">Nombre</h4>
+          <p className="text-sm mt-1">
+            {editingContact?.first_name || '—'}
+          </p>
+        </div>
+
+        <div>
+          <h4 className="text-sm font-medium text-muted-foreground">Apellido</h4>
+          <p className="text-sm mt-1">
+            {editingContact?.last_name || '—'}
+          </p>
+        </div>
       </div>
-      
+
+      {/* Email */}
       {editingContact?.email && (
         <div>
-          <h4 className="font-medium">Email</h4>
-          <p className="text-muted-foreground mt-1">{editingContact.email}</p>
+          <h4 className="text-sm font-medium text-muted-foreground">Email</h4>
+          <a 
+            href={`mailto:${editingContact.email}`}
+            className="text-sm mt-1 text-accent hover:underline block"
+          >
+            {editingContact.email}
+          </a>
         </div>
       )}
       
+      {/* Teléfono */}
       {editingContact?.phone && (
         <div>
-          <h4 className="font-medium">Teléfono</h4>
-          <p className="text-muted-foreground mt-1">{editingContact.phone}</p>
+          <h4 className="text-sm font-medium text-muted-foreground">Teléfono</h4>
+          <p className="text-sm mt-1">{editingContact.phone}</p>
         </div>
       )}
-      
+
+      {/* Tipos de contacto */}
+      {editingContact?.contact_types && editingContact.contact_types.length > 0 && (
+        <div>
+          <h4 className="text-sm font-medium text-muted-foreground mb-2">Tipos de contacto</h4>
+          <div className="flex flex-wrap gap-2">
+            {editingContact.contact_types.map((type) => (
+              <Badge 
+                key={type.id} 
+                variant="outline"
+                className="bg-accent/10 border-accent/20"
+              >
+                {type.name}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Empresa */}
       {editingContact?.company_name && (
         <div>
-          <h4 className="font-medium">Empresa</h4>
-          <p className="text-muted-foreground mt-1">{editingContact.company_name}</p>
+          <h4 className="text-sm font-medium text-muted-foreground">Empresa</h4>
+          <p className="text-sm mt-1">{editingContact.company_name}</p>
         </div>
       )}
-    </>
+
+      {/* Ubicación */}
+      {editingContact?.location && (
+        <div>
+          <h4 className="text-sm font-medium text-muted-foreground">Ubicación</h4>
+          <p className="text-sm mt-1">{editingContact.location}</p>
+        </div>
+      )}
+
+      {/* Notas */}
+      {editingContact?.notes && (
+        <div>
+          <h4 className="text-sm font-medium text-muted-foreground">Notas</h4>
+          <p className="text-sm mt-1 text-muted-foreground whitespace-pre-wrap">
+            {editingContact.notes}
+          </p>
+        </div>
+      )}
+    </div>
   );
 
   const editPanel = (
