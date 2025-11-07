@@ -79,71 +79,65 @@ export default function ContactList({
       label: "Nombre",
       sortable: true,
       sortType: "string" as const,
-      render: (contact: any) => (
-        <div>
-          <div className="font-medium text-sm">
-            {contact.first_name || '—'}
+      render: (contact: any) => {
+        const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || '—'
+        
+        return (
+          <div className="space-y-0.5">
+            <div className="font-semibold text-sm">
+              {fullName}
+            </div>
+            {contact.email && (
+              <div className="text-xs text-muted-foreground">
+                {contact.email}
+              </div>
+            )}
+            {contact.phone && (
+              <div className="text-xs text-muted-foreground">
+                {contact.phone}
+              </div>
+            )}
           </div>
-          {contact.linked_user && (
-            <Badge 
-              className="mt-1 text-xs px-1.5 py-0 h-5 border-accent text-accent"
-              variant="outline"
-            >
-              Usuario de Archub
-            </Badge>
+        )
+      }
+    },
+    {
+      key: "contact_types" as const,
+      label: "Tipos de contacto",
+      sortable: false,
+      render: (contact: any) => (
+        <div className="flex flex-wrap gap-1">
+          {contact.contact_types && contact.contact_types.length > 0 ? (
+            contact.contact_types.map((type: any) => (
+              <Badge 
+                key={type.id}
+                className="text-xs px-2 py-0.5 bg-accent/10 text-accent border-accent/20"
+                variant="outline"
+              >
+                {type.name}
+              </Badge>
+            ))
+          ) : (
+            <span className="text-sm text-muted-foreground">—</span>
           )}
         </div>
       )
     },
     {
-      key: "last_name" as const,
-      label: "Apellido",
-      sortable: true,
-      sortType: "string" as const,
-      render: (contact: any) => (
-        <div className="text-sm text-muted-foreground">
-          {contact.last_name || '—'}
-        </div>
-      )
-    },
-    {
-      key: "email" as const,
-      label: "Mail",
-      sortable: true,
-      sortType: "string" as const,
-      render: (contact: any) => (
-        <div className="text-sm text-muted-foreground">
-          {contact.email || '—'}
-        </div>
-      )
-    },
-    {
-      key: "phone" as const,
-      label: "Teléfono",
+      key: "attachments_count" as const,
+      label: "Archivos",
       sortable: false,
-      render: (contact: any) => (
-        <div className="text-sm text-muted-foreground">
-          {contact.phone || '—'}
-        </div>
-      )
-    },
-    {
-      key: "address" as const,
-      label: "Dirección",
-      sortable: false,
+      width: "100px",
       render: (contact: any) => {
-        const addressParts = []
-        
-        if (contact.street_address) addressParts.push(contact.street_address)
-        if (contact.city) addressParts.push(contact.city)
-        if (contact.state) addressParts.push(contact.state)
-        if (contact.country) addressParts.push(contact.country)
-        
-        const fullAddress = addressParts.join(', ')
+        const count = contact.attachments_count || 0
         
         return (
-          <div className="text-sm text-muted-foreground max-w-xs truncate" title={fullAddress}>
-            {fullAddress || '—'}
+          <div className="text-sm text-center">
+            {count > 0 ? (
+              <span className="font-medium">{count}</span>
+            ) : (
+              <span className="text-muted-foreground">—</span>
+            )}
           </div>
         )
       }

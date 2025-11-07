@@ -101,6 +101,21 @@ export function registerContactRoutes(app: Express, deps: RouteDeps) {
         }
       }
       
+      // Query 5: Get attachments count for each contact
+      const { data: attachmentCounts } = await authenticatedSupabase
+        .from('contact_attachments')
+        .select('contact_id')
+        .in('contact_id', contactIds);
+      
+      // Count attachments per contact
+      const attachmentCountsByContact = new Map<string, number>();
+      if (attachmentCounts) {
+        for (const att of attachmentCounts) {
+          const currentCount = attachmentCountsByContact.get(att.contact_id) || 0;
+          attachmentCountsByContact.set(att.contact_id, currentCount + 1);
+        }
+      }
+      
       // Combine all data
       const enrichedContacts = contacts
         .filter(contact => contact.linked_user_id !== currentDbUser?.id) // Filter out current user
@@ -114,10 +129,13 @@ export function registerContactRoutes(app: Express, deps: RouteDeps) {
             .map(id => contactTypesMap.get(id))
             .filter(Boolean);
           
+          const attachments_count = attachmentCountsByContact.get(contact.id) || 0;
+          
           return {
             ...contact,
             linked_user,
-            contact_types
+            contact_types,
+            attachments_count
           };
         });
       
