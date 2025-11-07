@@ -40,11 +40,8 @@ export function OrganizationRemovedModal() {
         organizationId: selectedOrgId,
       });
       
-      // Invalidate all queries to refresh data
-      queryClient.invalidateQueries();
-      
-      // Redirect to home
-      window.location.href = '/home';
+      // Force a full page reload to load the new organization
+      window.location.reload();
     } catch (error) {
       console.error('Error switching organization:', error);
       toast({
