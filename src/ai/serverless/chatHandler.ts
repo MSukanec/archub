@@ -577,6 +577,57 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
               required: []
             }
           }
+        },
+        
+        // 11. getOrganizationInfo (NUEVA)
+        {
+          type: "function" as const,
+          function: {
+            name: "getOrganizationInfo",
+            description: "Obtiene información básica de la organización actual: nombre, plan (free/pro/teams), descripción, datos de contacto, ubicación, estadísticas (total de miembros y proyectos), fecha de creación. Útil para '¿En qué empresa estamos?', 'Dame información de mi organización', '¿Qué plan tenemos?', 'Datos de la empresa'",
+            parameters: {
+              type: "object",
+              properties: {},
+              required: []
+            }
+          }
+        },
+        
+        // 12. getOrganizationMembers (NUEVA)
+        {
+          type: "function" as const,
+          function: {
+            name: "getOrganizationMembers",
+            description: "Obtiene la lista completa de miembros de la organización con sus roles (Admin, Member, Guest), fecha de incorporación y última actividad. Puede filtrar por rol específico. Útil para '¿Cuántos miembros tenemos?', 'Lista de miembros', 'Quiénes son los admins', 'Muéstrame los miembros de la empresa'",
+            parameters: {
+              type: "object",
+              properties: {
+                role: {
+                  type: "string",
+                  description: "Filtrar por rol específico (ej: 'Admin', 'Member', 'Guest'). Opcional."
+                },
+                includeInactive: {
+                  type: "boolean",
+                  description: "Incluir miembros inactivos. Default: false"
+                }
+              },
+              required: []
+            }
+          }
+        },
+        
+        // 13. getOrganizationActivity (NUEVA)
+        {
+          type: "function" as const,
+          function: {
+            name: "getOrganizationActivity",
+            description: "Obtiene actividad en TIEMPO REAL de la organización: cuántos miembros están online AHORA MISMO, qué están viendo, miembros activos en la última hora, porcentaje de actividad. Útil para '¿Cuántos miembros online hay?', '¿Quién está conectado?', 'Actividad de la organización', '¿Quién está trabajando ahora?'",
+            parameters: {
+              type: "object",
+              properties: {},
+              required: []
+            }
+          }
         }
       ]
     });
@@ -749,6 +800,37 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
               args.projectName,
               args.currency,
               args.convertTo
+            );
+            break;
+          }
+          
+          case 'getOrganizationInfo': {
+            const { getOrganizationInfo } = await import('../tools/organization/getOrganizationInfo.js');
+            functionResult = await getOrganizationInfo(
+              organizationId,
+              supabase
+            );
+            break;
+          }
+          
+          case 'getOrganizationMembers': {
+            const { getOrganizationMembers } = await import('../tools/organization/getOrganizationMembers.js');
+            functionResult = await getOrganizationMembers(
+              organizationId,
+              supabase,
+              {
+                role: args.role,
+                includeInactive: args.includeInactive
+              }
+            );
+            break;
+          }
+          
+          case 'getOrganizationActivity': {
+            const { getOrganizationActivity } = await import('../tools/organization/getOrganizationActivity.js');
+            functionResult = await getOrganizationActivity(
+              organizationId,
+              supabase
             );
             break;
           }
