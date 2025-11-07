@@ -426,13 +426,10 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
   app.post("/api/user/select-organization", async (req, res) => {
     try {
       const { organization_id } = req.body;
-      const user_id = req.headers['x-user-id'];
 
-      if (!organization_id || !user_id) {
-        return res.status(400).json({ error: "Missing organization_id or user_id" });
+      if (!organization_id) {
+        return res.status(400).json({ error: "Missing organization_id" });
       }
-
-      console.log(`Updating organization for user ${user_id} to ${organization_id}`);
 
       // Get the authorization token from headers
       const token = extractToken(req.headers.authorization);
@@ -440,8 +437,28 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
         return res.status(401).json({ error: "No authorization token provided" });
       }
       
-      // Create an authenticated Supabase client (same as current-user endpoint)
+      // Create an authenticated Supabase client
       const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // Get the auth user from the token
+      const { data: { user: authUser }, error: authError } = await authenticatedSupabase.auth.getUser();
+      if (authError || !authUser) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      // Get user_id from the database using auth_id
+      const { data: dbUser, error: dbUserError } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', authUser.id)
+        .maybeSingle();
+
+      if (dbUserError || !dbUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const user_id = dbUser.id;
+      console.log(`Updating organization for user ${user_id} to ${organization_id}`);
 
       // Verificar si existe el registro de user_preferences
       const { data: existingPrefs, error: checkError } = await authenticatedSupabase
