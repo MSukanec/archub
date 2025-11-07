@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { UserPlus, User, Mail, Phone, Building2, MapPin, FileText, Search, Check, X, Link, Unlink } from "lucide-react";
+import { UserPlus, User, Mail, Phone, Building2, MapPin, FileText, Search, Check, X, Link, Unlink, Link2 } from "lucide-react";
 
 import { FormModalLayout } from "../../../form/FormModalLayout";
 import { FormModalHeader } from "../../../form/FormModalHeader";
@@ -92,10 +92,8 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
   const { data: userData } = useCurrentUser();
   const { data: contactTypes } = useContactTypes();
   const { toast } = useToast();
-  const [isLinkingUser, setIsLinkingUser] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [foundUser, setFoundUser] = useState<any>(null);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
   const form = useForm<CreateContactForm>({
     resolver: zodResolver(createContactSchema),
@@ -112,7 +110,48 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     }
   });
 
-  const { data: searchResults } = useSearchUsers(searchTerm);
+  // Detección automática de usuario por email con debounce
+  useEffect(() => {
+    const emailValue = form.watch('email');
+    
+    if (!emailValue || emailValue.trim().length === 0) {
+      setFoundUser(null);
+      return;
+    }
+
+    // Validar formato de email básico
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailValue.trim())) {
+      setFoundUser(null);
+      return;
+    }
+
+    setIsCheckingEmail(true);
+    const timeoutId = setTimeout(async () => {
+      try {
+        const { data: existingUser, error } = await supabase
+          .from('users')
+          .select('id, full_name, email, avatar_url')
+          .ilike('email', emailValue.trim())
+          .single();
+
+        if (error || !existingUser) {
+          setFoundUser(null);
+        } else {
+          setFoundUser(existingUser);
+        }
+      } catch (err) {
+        setFoundUser(null);
+      } finally {
+        setIsCheckingEmail(false);
+      }
+    }, 600); // 600ms debounce
+
+    return () => {
+      clearTimeout(timeoutId);
+      setIsCheckingEmail(false);
+    };
+  }, [form.watch('email')]);
 
   React.useEffect(() => {
     if (editingContact) {
@@ -291,9 +330,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
   const handleClose = () => {
     form.reset();
     setPanel('view');
-    setIsLinkingUser(false);
-    setSelectedUser(null);
-    setSearchTerm("");
+    setFoundUser(null);
     onClose();
   };
 
@@ -301,27 +338,25 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     createContactMutation.mutate(data);
   };
 
-  const handleLinkUser = (userId: string) => {
-    const user = searchResults?.find((u: any) => u.id === userId);
-    setSelectedUser(user);
-    setIsLinkingUser(false);
-    form.setValue("linked_user_id", userId);
+  // Vincular usuario encontrado automáticamente
+  const handleLinkFoundUser = () => {
+    if (!foundUser) return;
+    
+    form.setValue("linked_user_id", foundUser.id);
     
     // Auto-rellenar datos del usuario vinculado
-    if (user) {
-      const nameParts = user.full_name?.split(' ') || [];
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
-      
-      form.setValue("first_name", firstName);
-      form.setValue("last_name", lastName);
-      form.setValue("email", user.email || '');
-    }
+    const nameParts = foundUser.full_name?.split(' ') || [];
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    
+    form.setValue("first_name", firstName);
+    form.setValue("last_name", lastName);
+    form.setValue("email", foundUser.email || '');
   };
 
   const handleUnlinkUser = () => {
-    setSelectedUser(null);
     form.setValue("linked_user_id", "");
+    setFoundUser(null);
     
     // Limpiar campos cuando se desvincula el usuario
     form.setValue("first_name", "");
@@ -363,98 +398,28 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
 
   const editPanel = (
     <>
-      {/* User Linking Section */}
-      <div className="space-y-3 lg:col-span-2">
-        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Vincular usuario existente</label>
-        
-        {selectedUser || editingContact?.linked_user ? (
-          <div className="flex items-center justify-between p-3 border rounded-lg">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={(selectedUser || editingContact?.linked_user)?.avatar_url} />
-                <AvatarFallback>
-                  {(selectedUser || editingContact?.linked_user)?.full_name?.[0]?.toUpperCase() || 'U'}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="text-sm font-medium">
-                  {(selectedUser || editingContact?.linked_user)?.full_name}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {(selectedUser || editingContact?.linked_user)?.email}
-                </p>
-              </div>
+      {/* Badge si el contacto ya está vinculado */}
+      {(editingContact?.linked_user || form.watch('linked_user_id')) && (
+        <div className="mb-4 p-3 border border-accent/20 bg-accent/5 rounded-lg flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link2 className="h-4 w-4 text-accent" />
+            <div>
+              <p className="text-sm font-medium">Vinculado a usuario de Archub</p>
+              <p className="text-xs text-muted-foreground">
+                {editingContact?.linked_user?.full_name || foundUser?.full_name || 'Usuario vinculado'}
+              </p>
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={handleUnlinkUser}
-            >
-              <Unlink className="h-4 w-4" />
-            </Button>
           </div>
-        ) : (
           <Button
             type="button"
-            onClick={() => setIsLinkingUser(true)}
-            className="w-full"
+            variant="ghost"
+            size="sm"
+            onClick={handleUnlinkUser}
           >
-            <Link className="h-4 w-4 mr-2" />
-            Vincular usuario existente
+            <Unlink className="h-4 w-4" />
           </Button>
-        )}
-
-        {isLinkingUser && (
-          <div className="space-y-3 p-4 border rounded-lg bg-muted/20">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar usuario por nombre o email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            {searchResults && searchResults.length > 0 && (
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {searchResults.map((user: any) => (
-                  <div
-                    key={user.id}
-                    className="flex items-center justify-between p-2 hover:bg-muted/50 rounded cursor-pointer"
-                    onClick={() => handleLinkUser(user.id)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-6 w-6">
-                        <AvatarImage src={user.avatar_url} />
-                        <AvatarFallback className="text-xs">
-                          {user.full_name?.[0]?.toUpperCase() || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="text-sm font-medium">{user.full_name}</p>
-                        <p className="text-xs text-muted-foreground">{user.email}</p>
-                      </div>
-                    </div>
-                    <Check className="h-4 w-4 text-green-600" />
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setIsLinkingUser(false)}
-              className="w-full"
-            >
-              <X className="h-4 w-4 mr-2" />
-              Cancelar búsqueda
-            </Button>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* FORM FIELDS - CON SPACING CONSISTENTE */}
       <Form {...form}>
@@ -471,7 +436,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
                     <Input 
                       placeholder="Nombre" 
                       {...field} 
-                      disabled={!!selectedUser || !!editingContact?.linked_user}
+                      disabled={!!foundUser || !!editingContact?.linked_user}
                     />
                   </FormControl>
                   <FormMessage />
@@ -489,7 +454,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
                     <Input 
                       placeholder="Apellido" 
                       {...field} 
-                      disabled={!!selectedUser || !!editingContact?.linked_user}
+                      disabled={!!foundUser || !!editingContact?.linked_user}
                     />
                   </FormControl>
                   <FormMessage />
@@ -511,10 +476,46 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
                       type="email" 
                       placeholder="email@ejemplo.com" 
                       {...field} 
-                      disabled={!!selectedUser || !!editingContact?.linked_user}
+                      disabled={!!foundUser || !!editingContact?.linked_user}
                     />
                   </FormControl>
                   <FormMessage />
+                  
+                  {/* Feedback automático de vinculación */}
+                  {field.value && field.value.length > 0 && !editingContact?.linked_user && !form.watch('linked_user_id') && (
+                    <div className="mt-2">
+                      {isCheckingEmail ? (
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <span className="animate-spin">⏳</span> Verificando...
+                        </p>
+                      ) : foundUser ? (
+                        <div className="flex items-start gap-2 p-2 border border-accent/20 bg-accent/5 rounded-md">
+                          <Link2 className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-foreground">
+                              Ya existe un usuario de Archub con este correo.
+                            </p>
+                            <Button
+                              type="button"
+                              variant="link"
+                              size="sm"
+                              className="h-auto p-0 text-accent hover:text-accent/80 text-xs font-medium"
+                              onClick={handleLinkFoundUser}
+                            >
+                              Vincular a {foundUser.full_name}
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-start gap-2 p-2 border border-border/50 bg-muted/20 rounded-md">
+                          <Mail className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                          <p className="text-xs text-muted-foreground">
+                            No se encontró ningún usuario de Archub con este correo.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </FormItem>
               )}
             />
