@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { FormModalHeader } from '../../form/FormModalHeader';
@@ -83,32 +84,30 @@ export function MemberFormModal({ editingMember, onClose }: MemberModalProps) {
     mutationFn: async (memberData: MemberFormData) => {
       if (!organizationId) throw new Error('No organization selected');
 
-      // First, invite the user
-      const { data: invitation, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(
-        memberData.email
-      );
+      const response = await apiRequest('/api/invite-member', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: memberData.email,
+          roleId: memberData.roleId,
+          organizationId: organizationId,
+        }),
+      });
 
-      if (inviteError) throw inviteError;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to invite member');
+      }
 
-      // Then create the organization member record
-      const { data, error } = await supabase
-        .from('organization_members')
-        .insert({
-          organization_id: organizationId,
-          user_id: invitation.user.id,
-          role_id: memberData.roleId,
-          joined_at: new Date().toISOString(),
-        })
-        .select();
-
-      if (error) throw error;
-      return data;
+      return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['organization-members'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
       toast({
         title: 'Miembro invitado',
-        description: 'La invitación ha sido enviada correctamente',
+        description: data.isNewUser 
+          ? 'La invitación ha sido enviada por email' 
+          : 'El usuario existente ha sido agregado a la organización',
       });
       handleClose();
     },
