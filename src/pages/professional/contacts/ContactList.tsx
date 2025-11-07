@@ -2,9 +2,7 @@ import React, { useMemo } from 'react'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Button } from '@/components/ui/button'
-import { MoreHorizontal, Edit, Trash2 } from 'lucide-react'
+import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/stat-card'
 
 interface ContactListProps {
@@ -146,30 +144,10 @@ export default function ContactList({ contacts, onEdit, onDelete }: ContactListP
       width: "60px",
       render: (contact: any) => (
         <div className="flex items-center justify-end">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onEdit(contact)}>
-                <Edit className="w-4 h-4 mr-2" />
-                Editar
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => onDelete(contact)}
-                className="text-red-600"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Eliminar
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <TableActionButtons
+            onEdit={() => onEdit(contact)}
+            onDelete={() => onDelete(contact)}
+          />
         </div>
       )
     }
