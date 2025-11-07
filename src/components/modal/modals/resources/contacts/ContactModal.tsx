@@ -394,7 +394,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     <>
       {/* Badge si el contacto ya está vinculado */}
       {(editingContact?.linked_user || form.watch('linked_user_id')) && (
-        <div className="mb-3 p-3 border border-accent/20 bg-accent/5 rounded-lg flex items-center justify-between">
+        <div className="mb-2 p-3 border border-accent/20 bg-accent/5 rounded-lg flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link2 className="h-4 w-4 text-accent" />
             <div>
@@ -430,7 +430,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
                     <Input 
                       placeholder="Nombre" 
                       {...field} 
-                      disabled={!!foundUser || !!editingContact?.linked_user}
+                      disabled={!!editingContact?.linked_user}
                     />
                   </FormControl>
                   <FormMessage />
@@ -448,7 +448,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
                     <Input 
                       placeholder="Apellido" 
                       {...field} 
-                      disabled={!!foundUser || !!editingContact?.linked_user}
+                      disabled={!!editingContact?.linked_user}
                     />
                   </FormControl>
                   <FormMessage />
@@ -469,7 +469,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
                     type="email" 
                     placeholder="email@ejemplo.com" 
                     {...field} 
-                    disabled={!!foundUser || !!editingContact?.linked_user}
+                    disabled={!!editingContact?.linked_user}
                   />
                 </FormControl>
                 <FormMessage />
