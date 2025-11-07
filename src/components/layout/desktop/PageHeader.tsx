@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ExpandableAvatarGroup } from "@/components/ui-custom/ExpandableAvatarGroup";
 
 interface Tab {
   id: string;
@@ -28,16 +29,28 @@ interface HeaderProps {
   actions?: ActionButton[];
   className?: string;
   selector?: React.ReactNode; // Nuevo: selector de proyecto/organización
+  organizationId?: string; // Nuevo: ID de la organización para mostrar miembros
+  showMembers?: boolean; // Nuevo: si mostrar o no los miembros
 }
 
-export function Header({ icon, title, description, tabs = [], actions = [], className, selector }: HeaderProps) {
+export function Header({ 
+  icon, 
+  title, 
+  description, 
+  tabs = [], 
+  actions = [], 
+  className, 
+  selector,
+  organizationId,
+  showMembers = true
+}: HeaderProps) {
   return (
     <div className={cn(
       "w-full bg-[var(--layout-bg)]",
       className
     )}>
       <div className="px-6 border-b" style={{ borderColor: 'hsl(210, 40%, 93%)' }}>
-        {/* Fila Superior: Icono + Título + Descripción a la izquierda, Selector a la derecha - SIEMPRE VISIBLE */}
+        {/* Fila Superior: Icono + Título + Descripción a la izquierda, Miembros a la derecha - SIEMPRE VISIBLE */}
         <div className="min-h-[50px] flex items-center justify-between py-2">
           {/* Left: Icon + Title + Description */}
           <div className="flex items-center gap-3">
@@ -63,6 +76,10 @@ export function Header({ icon, title, description, tabs = [], actions = [], clas
             </div>
           </div>
 
+          {/* Right: Expandable Avatar Group */}
+          {showMembers && organizationId && (
+            <ExpandableAvatarGroup organizationId={organizationId} />
+          )}
         </div>
 
         {/* Fila Inferior: Tabs a la izquierda, Acciones a la derecha */}
