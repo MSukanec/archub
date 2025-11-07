@@ -1116,7 +1116,7 @@ export function Table<T = any>({
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuContent align="end" className="w-48 z-40">
                               {(() => {
                                 const actions = rowActions(item);
                                 const defaultActions = actions.filter(a => a.variant !== 'destructive');
@@ -1187,9 +1187,11 @@ export function Table<T = any>({
                         ? "border-b border-[var(--table-row-border)]"
                         : "",
                       isInactive && "opacity-50",
+                      onRowClick && "cursor-pointer",
                       getRowClassName?.(item),
                     )}
                     style={{ gridTemplateColumns: getGridTemplateColumns() }}
+                    onClick={() => onRowClick?.(item)}
                   >
                 {selectable && (
                   <div className="flex items-center justify-center">
@@ -1245,7 +1247,7 @@ export function Table<T = any>({
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuContent align="end" className="w-48 z-40">
                           {(() => {
                             const actions = rowActions(item);
                             const defaultActions = actions.filter(a => a.variant !== 'destructive');
