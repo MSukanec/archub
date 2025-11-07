@@ -255,8 +255,8 @@ export default function ContactList({
           direction: 'asc'
         }}
         emptyStateConfig={{
-          title: "No hay contactos",
-          description: "Comienza agregando tu primer contacto a la organización"
+          title: "No hay contactos que coincidan con los filtros",
+          description: "Intenta ajustar los filtros de búsqueda o agrega nuevos contactos a tu organización"
         }}
         topBar={{
           showFilter: true,

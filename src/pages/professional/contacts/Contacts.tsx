@@ -27,7 +27,7 @@ export default function Contacts() {
   
   const { data: userData, isLoading } = useCurrentUser()
   const organizationId = userData?.organization?.id
-  const { data: contacts = [], isLoading: contactsLoading } = useContacts()
+  const { data: contacts = [], isLoading: contactsLoading } = useContacts() as { data: any[], isLoading: boolean }
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setActions, setShowActionBar, clearActions, setFilterConfig } = useActionBarMobile()
@@ -253,12 +253,12 @@ export default function Contacts() {
       >
         <EmptyState
           icon={<Users className="w-8 h-8 text-muted-foreground" />}
-          title="No hay contactos"
-          description="Comienza agregando tu primer contacto a la organización"
+          title="Los contactos son la base de tu organización"
+          description="Comienza construyendo tu red de contactos. Cada contacto que agregues puede convertirse en un cliente, socio, empleado, proveedor o subcontratista. Centraliza toda la información de las personas y empresas con las que trabajas en un solo lugar."
           action={
             <Button onClick={() => openModal('contact', { isEditing: false })}>
               <UserPlus className="w-4 h-4 mr-2" />
-              Crear Contacto
+              Agregar Primer Contacto
             </Button>
           }
         />
