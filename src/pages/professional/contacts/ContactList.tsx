@@ -13,6 +13,7 @@ interface ContactListProps {
   contacts: any[]
   onEdit: (contact: any) => void
   onDelete: (contact: any) => void
+  onRowClick?: (contact: any) => void
   filterByType?: string
   setFilterByType?: (value: string) => void
   contactTypes?: any[]
@@ -22,6 +23,7 @@ export default function ContactList({
   contacts, 
   onEdit, 
   onDelete,
+  onRowClick,
   filterByType = 'all',
   setFilterByType,
   contactTypes = []
@@ -243,6 +245,7 @@ export default function ContactList({
           key: 'first_name',
           direction: 'asc'
         }}
+        onRowClick={onRowClick}
         emptyStateConfig={{
           title: "No hay contactos",
           description: "Comienza agregando tu primer contacto a la organización"

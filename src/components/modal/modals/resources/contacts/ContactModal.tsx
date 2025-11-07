@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { UserPlus, User, Mail, Phone, Building2, MapPin, FileText, Search, Check, X, Link, Unlink, Link2 } from "lucide-react";
+import { UserPlus, User, Mail, Phone, Building2, MapPin, FileText, Search, Check, X, Link, Unlink, Link2, MessageCircle } from "lucide-react";
 
 import { FormModalLayout } from "../../../form/FormModalLayout";
 import { FormModalHeader } from "../../../form/FormModalHeader";
@@ -82,12 +82,13 @@ interface ContactFormModalProps {
   modalData?: {
     editingContact?: Contact;
     isEditing?: boolean;
+    initialPanel?: 'view' | 'edit';
   };
   onClose: () => void;
 }
 
 export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) {
-  const { editingContact, isEditing = false } = modalData || {};
+  const { editingContact, isEditing = false, initialPanel = 'edit' } = modalData || {};
   const { currentPanel, currentSubform, setPanel, setCurrentSubform } = useModalPanelStore();
   const { data: userData } = useCurrentUser();
   const { data: contactTypes } = useContactTypes();
@@ -272,7 +273,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
         notes: editingContact.notes || '',
         linked_user_id: editingContact.linked_user_id || '',
       });
-      setPanel('edit');
+      setPanel(initialPanel);
     } else {
       form.reset({
         first_name: '',
@@ -287,7 +288,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
       });
       setPanel('edit');
     }
-  }, [editingContact, form, setPanel]);
+  }, [editingContact, form, setPanel, initialPanel]);
 
   const createContactMutation = useMutation({
     mutationFn: async (data: CreateContactForm) => {
@@ -469,6 +470,39 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
 
   const viewPanel = (
     <div className="space-y-4">
+      {/* Botones de acción rápida */}
+      {(editingContact?.email || editingContact?.phone) && (
+        <div className="flex gap-2">
+          {editingContact.email && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.location.href = `mailto:${editingContact.email}`}
+              className="flex items-center gap-2"
+              data-testid="button-email-contact"
+            >
+              <Mail className="h-4 w-4" />
+              Enviar Email
+            </Button>
+          )}
+          {editingContact.phone && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const cleanPhone = editingContact.phone?.replace(/[\s\-\(\)]/g, '') || ''
+                window.open(`https://wa.me/${cleanPhone}`, '_blank')
+              }}
+              className="flex items-center gap-2 text-green-600 hover:text-green-700 border-green-600 hover:border-green-700"
+              data-testid="button-whatsapp-contact"
+            >
+              <MessageCircle className="h-4 w-4" />
+              WhatsApp
+            </Button>
+          )}
+        </div>
+      )}
+
       {/* Badge si el contacto está vinculado */}
       {editingContact?.linked_user && (
         <div className="p-3 border border-accent/20 bg-accent/5 rounded-lg flex items-center justify-between">
@@ -819,14 +853,18 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
       title={
         currentPanel === 'subform' && currentSubform === 'attachments' 
           ? "Archivos y Media"
-          : (isEditing ? "Editar Contacto" : "Nuevo Contacto")
+          : currentPanel === 'view'
+            ? "Contacto"
+            : (isEditing ? "Editar Contacto" : "Nuevo Contacto")
       }
       description={
         currentPanel === 'subform' && currentSubform === 'attachments' 
           ? "Gestionar archivos adjuntos del contacto"
-          : isEditing 
-            ? "Actualiza la información del contacto"
-            : "Agrega un nuevo contacto a tu organización"
+          : currentPanel === 'view'
+            ? "Información del contacto"
+            : isEditing 
+              ? "Actualiza la información del contacto"
+              : "Agrega un nuevo contacto a tu organización"
       }
       icon={currentPanel === 'subform' && currentSubform === 'attachments' ? FileText : UserPlus}
       leftActions={
@@ -865,6 +903,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
       onLeftClick={handleClose}
       rightLabel={
         currentPanel === 'subform' && currentSubform === 'attachments' ? "Cerrar" :
+        currentPanel === 'view' ? "Editar" :
         createContactMutation.isPending ? "Guardando..." : 
         (isEditing ? "Actualizar Contacto" : "Crear Contacto")
       }

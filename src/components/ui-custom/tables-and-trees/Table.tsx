@@ -134,6 +134,8 @@ interface TableProps<T = any> {
   getRowClassName?: (item: T) => string;
   // Nueva prop para click-to-edit en cards
   onCardClick?: (item: T) => void;
+  // Nueva prop para click en row
+  onRowClick?: (item: T) => void;
   // Nueva prop para ordenamiento inicial
   defaultSort?: {
     key: string;
@@ -234,6 +236,7 @@ export function Table<T = any>({
   getItemId = (item: T) => (item as any).id,
   getRowClassName,
   onCardClick,
+  onRowClick,
   defaultSort,
   renderCard,
   cardSpacing = "space-y-2",

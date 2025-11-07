@@ -159,10 +159,19 @@ export default function Contacts() {
     return sortedGroups
   }, [filteredContacts])
 
+  const handleViewContact = (contact: any) => {
+    openModal('contact', { 
+      editingContact: contact,
+      isEditing: true,
+      initialPanel: 'view'
+    })
+  }
+
   const handleEditContact = (contact: any) => {
     openModal('contact', { 
       editingContact: contact,
-      isEditing: true
+      isEditing: true,
+      initialPanel: 'edit'
     })
   }
 
@@ -332,6 +341,7 @@ export default function Contacts() {
           contacts={filteredContacts}
           onEdit={handleEditContact}
           onDelete={handleDeleteContact}
+          onRowClick={handleViewContact}
           filterByType={filterByType}
           setFilterByType={setFilterByType}
           contactTypes={contactTypes}
