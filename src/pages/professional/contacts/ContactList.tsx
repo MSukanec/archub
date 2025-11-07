@@ -20,14 +20,8 @@ export default function ContactList({ contacts, onEdit, onDelete }: ContactListP
     const totalContacts = contacts.length
     const archubUsers = contacts.filter(c => c.linked_user).length
     
-    // Contactos agregados este mes
-    const now = new Date()
-    const currentMonth = now.getMonth()
-    const currentYear = now.getFullYear()
-    const thisMonthContacts = contacts.filter(c => {
-      const createdDate = new Date(c.created_at)
-      return createdDate.getMonth() === currentMonth && createdDate.getFullYear() === currentYear
-    }).length
+    // Contactos que son miembros de la organización
+    const organizationMembers = contacts.filter(c => c.is_organization_member).length
     
     // Tipos de contacto únicos
     const uniqueTypes = new Set()
@@ -42,7 +36,7 @@ export default function ContactList({ contacts, onEdit, onDelete }: ContactListP
     return {
       total: totalContacts,
       archubUsers,
-      thisMonth: thisMonthContacts,
+      organizationMembers,
       uniqueTypes: uniqueTypes.size
     }
   }, [contacts])
@@ -202,10 +196,18 @@ export default function ContactList({ contacts, onEdit, onDelete }: ContactListP
           </StatCardMeta>
         </StatCard>
 
-        <StatCard data-testid="statcard-this-month">
-          <StatCardTitle showArrow={false}>Agregados Este Mes</StatCardTitle>
-          <StatCardValue>{kpis.thisMonth}</StatCardValue>
-          <StatCardMeta>Nuevos contactos</StatCardMeta>
+        <StatCard 
+          data-testid="statcard-organization-members"
+          href="/organization/preferences"
+        >
+          <StatCardTitle>Miembros de la Organización</StatCardTitle>
+          <StatCardValue>{kpis.organizationMembers}</StatCardValue>
+          <StatCardMeta>
+            {kpis.total > 0 
+              ? `${Math.round((kpis.organizationMembers / kpis.total) * 100)}% del total`
+              : 'Sin contactos'
+            }
+          </StatCardMeta>
         </StatCard>
 
         <StatCard data-testid="statcard-contact-types">

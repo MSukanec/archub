@@ -68,6 +68,12 @@ interface LayoutProps {
       label: string;
       icon?: React.ComponentType<any>;
       onClick: () => void;
+      additionalButton?: {
+        label: string;
+        icon?: React.ComponentType<any>;
+        onClick: () => void;
+        variant?: "ghost" | "default" | "secondary";
+      };
     };
     breadcrumb?: { name: string; href: string }[];
     showCurrencySelector?: boolean;

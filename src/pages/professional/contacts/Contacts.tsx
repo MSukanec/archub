@@ -238,7 +238,13 @@ export default function Contacts() {
           actionButton: {
             label: 'Crear Contacto',
             icon: UserPlus,
-            onClick: () => openModal('contact', { isEditing: false })
+            onClick: () => openModal('contact', { isEditing: false }),
+            additionalButton: {
+              label: 'Invitar a Archub',
+              icon: UserPlus,
+              onClick: () => openModal('member', { isEditing: false }),
+              variant: 'secondary' as const
+            }
           }
         }}
       >
@@ -288,7 +294,13 @@ export default function Contacts() {
         actionButton: {
           label: 'Crear Contacto',
           icon: UserPlus,
-          onClick: () => openModal('contact', { isEditing: false })
+          onClick: () => openModal('contact', { isEditing: false }),
+          additionalButton: {
+            label: 'Invitar a Archub',
+            icon: UserPlus,
+            onClick: () => openModal('member', { isEditing: false }),
+            variant: 'secondary' as const
+          }
         }
       }}
     >
