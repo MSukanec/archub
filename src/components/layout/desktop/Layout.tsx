@@ -24,6 +24,7 @@ import { useProjectAccentColor } from "@/hooks/use-project-accent-color";
 import { FloatingAIChat } from "@/components/ui-custom/layout/FloatingAIChat";
 import { FloatingCourseLessons } from "@/components/ui-custom/layout/FloatingCourseLessons";
 import { InvitationModal } from "@/components/invitations/InvitationModal";
+import { OrganizationRemovedModal } from "@/components/invitations/OrganizationRemovedModal";
 import { usePendingInvitations } from "@/hooks/use-pending-invitations";
 // TEMPORALMENTE DESHABILITADO - GlobalAnnouncement no se usa por ahora
 // import { GlobalAnnouncement, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, AnnouncementProvider } from "@/components/ui-custom/layout/GlobalAnnouncement";
@@ -346,6 +347,9 @@ function LayoutContent({
           onClose={handleCloseInvitationsModal}
         />
       )}
+
+      {/* Organization Removed Modal - Shows when user no longer belongs to current organization */}
+      <OrganizationRemovedModal />
         </div>
       </div>
     </>
