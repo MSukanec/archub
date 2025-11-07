@@ -146,7 +146,6 @@ export function MembersTab() {
 
   // Mock guests data (empty for now)
   const guests: any[] = [];
-  console.log('No guest accounts table found, using empty array');
 
   // Revoke invitation mutation
   const revokeInviteMutation = useMutation({
