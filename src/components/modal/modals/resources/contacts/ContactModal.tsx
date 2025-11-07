@@ -425,24 +425,19 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           if (checklistError) {
             console.error('Error updating home checklist:', checklistError);
           }
+          
+          // Solo invalidar current-user si se marcó checklist
+          queryClient.invalidateQueries({ queryKey: ['current-user'] });
         } catch (error) {
           console.error('Error calling tick_home_checklist:', error);
         }
       }
 
-      // Invalidate contacts query - using the query key pattern from useContacts hook
-      queryClient.invalidateQueries({ 
-        queryKey: [`/api/contacts?organization_id=${userData?.organization?.id}`] 
+      // Solo invalidar la query específica de contactos (sin refetch automático)
+      await queryClient.refetchQueries({ 
+        queryKey: [`/api/contacts?organization_id=${userData?.organization?.id}`],
+        type: 'active'
       });
-      // Also invalidate any other contact-related queries
-      queryClient.invalidateQueries({ 
-        predicate: (query) => {
-          const key = query.queryKey[0];
-          return typeof key === 'string' && key.includes('/api/contacts');
-        }
-      });
-      // Invalidate current-user to refresh checklist status
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
       
       toast({
         title: isEditing ? "Contacto actualizado" : "Contacto creado",
