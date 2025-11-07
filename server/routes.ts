@@ -132,10 +132,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Fetch organization and role data for each invitation
       const enrichedInvitations = await Promise.all(
         invitations.map(async (inv) => {
-          // Get organization name
+          // Get organization data with avatar
           const { data: org } = await authenticatedSupabase
             .from('organizations')
-            .select('name')
+            .select('name, avatar_url')
             .eq('id', inv.organization_id)
             .maybeSingle();
           
@@ -146,14 +146,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .eq('id', inv.role_id)
             .maybeSingle();
           
+          // Get organization members (up to 10 for display)
+          const { data: members } = await authenticatedSupabase
+            .from('organization_members')
+            .select(`
+              id,
+              users (
+                id,
+                full_name,
+                first_name,
+                last_name,
+                avatar_url
+              )
+            `)
+            .eq('organization_id', inv.organization_id)
+            .eq('is_active', true)
+            .limit(10);
+          
+          // Transform members to flat structure
+          const transformedMembers = (members || []).map((m: any) => ({
+            id: m.users?.id || m.id,
+            full_name: m.users?.full_name,
+            first_name: m.users?.first_name,
+            last_name: m.users?.last_name,
+            avatar_url: m.users?.avatar_url,
+          }));
+          
           return {
             id: inv.id,
             organization_id: inv.organization_id,
             organization_name: org?.name || 'Organización',
+            organization_avatar: org?.avatar_url || null,
             role_id: inv.role_id,
             role_name: role?.name || 'Miembro',
             invited_by: inv.invited_by,
             created_at: inv.created_at,
+            members: transformedMembers,
           };
         })
       );

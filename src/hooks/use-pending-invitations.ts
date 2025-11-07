@@ -2,14 +2,24 @@ import { useQuery } from '@tanstack/react-query';
 import { useCurrentUser } from './use-current-user';
 import { supabase } from '@/lib/supabase';
 
+export interface PendingInvitationMember {
+  id: string;
+  full_name?: string;
+  first_name?: string;
+  last_name?: string;
+  avatar_url?: string;
+}
+
 export interface PendingInvitation {
   id: string;
   organization_id: string;
   organization_name: string;
+  organization_avatar: string | null;
   role_id: string;
   role_name: string;
   invited_by: string;
   created_at: string;
+  members: PendingInvitationMember[];
 }
 
 export function usePendingInvitations() {

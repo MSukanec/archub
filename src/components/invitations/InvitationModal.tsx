@@ -3,12 +3,14 @@ import { useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { ChevronLeft, ChevronRight, Mail } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Mail, Building2 } from 'lucide-react';
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CompactAvatarGroup } from '@/components/ui-custom/general/CompactAvatarGroup';
 import type { PendingInvitation } from '@/hooks/use-pending-invitations';
 
 interface InvitationModalProps {
@@ -126,20 +128,48 @@ export function InvitationModal({ invitations, open, onClose }: InvitationModalP
   const viewPanel = (
     <div className="space-y-4" data-testid="invitation-modal">
       <div className="rounded-lg border bg-muted/50 p-4">
-        <p className="text-sm text-muted-foreground mb-2">
+        <p className="text-sm text-muted-foreground mb-3">
           Te invitaron a unirte a
         </p>
-        <p className="text-lg font-semibold text-foreground">
-          {currentInvitation.organization_name}
-        </p>
-        <div className="flex items-center gap-2 mt-3">
-          <p className="text-sm text-muted-foreground">
-            como
-          </p>
-          <Badge className="font-medium bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90">
-            {currentInvitation.role_name}
-          </Badge>
+        
+        {/* Organization info with avatar */}
+        <div className="flex items-start gap-3 mb-4">
+          <Avatar className="w-14 h-14 border-2 border-background">
+            {currentInvitation.organization_avatar ? (
+              <AvatarImage 
+                src={currentInvitation.organization_avatar} 
+                alt={currentInvitation.organization_name} 
+              />
+            ) : (
+              <AvatarFallback>
+                <Building2 className="h-7 w-7 text-muted-foreground" />
+              </AvatarFallback>
+            )}
+          </Avatar>
+          <div className="flex-1">
+            <p className="text-lg font-semibold text-foreground">
+              {currentInvitation.organization_name}
+            </p>
+            <div className="flex items-center gap-2 mt-1">
+              <p className="text-sm text-muted-foreground">
+                como
+              </p>
+              <Badge className="font-medium bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90">
+                {currentInvitation.role_name}
+              </Badge>
+            </div>
+          </div>
         </div>
+
+        {/* Members preview */}
+        {currentInvitation.members && currentInvitation.members.length > 0 && (
+          <div className="pt-3 border-t">
+            <p className="text-xs text-muted-foreground mb-2">
+              {currentInvitation.members.length} {currentInvitation.members.length === 1 ? 'miembro' : 'miembros'}
+            </p>
+            <CompactAvatarGroup members={currentInvitation.members} maxDisplay={4} size="md" />
+          </div>
+        )}
       </div>
 
       {hasMultiple && (
