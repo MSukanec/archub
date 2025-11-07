@@ -46,7 +46,7 @@ export function ExpandableAvatarGroup({
       {/* Collapsed State */}
       <div 
         className={cn(
-          "flex items-center rounded-full bg-white dark:bg-[var(--main-sidebar-bg)] shadow-sm border border-border px-3 py-2 transition-all duration-300",
+          "flex items-center transition-all duration-300",
           isHovered && "opacity-0 pointer-events-none"
         )}
       >
@@ -54,18 +54,18 @@ export function ExpandableAvatarGroup({
           {visibleMembers.map((member, index) => (
             <Avatar 
               key={member.id}
-              className="h-8 w-8 border-2 border-white dark:border-[var(--main-sidebar-bg)]"
+              className="h-8 w-8"
               style={{ zIndex: visibleMembers.length - index }}
             >
               <AvatarImage src={member.avatar_url} alt={member.full_name} />
-              <AvatarFallback className="text-xs bg-[var(--accent)] text-white border-0">
+              <AvatarFallback className="text-xs bg-[var(--accent)] text-white">
                 {getInitials(member.full_name)}
               </AvatarFallback>
             </Avatar>
           ))}
           {remainingCount > 0 && (
             <div 
-              className="h-8 w-8 rounded-full bg-muted border-2 border-white dark:border-[var(--main-sidebar-bg)] flex items-center justify-center text-xs font-medium text-muted-foreground"
+              className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground"
               style={{ zIndex: 0 }}
             >
               +{remainingCount}
@@ -87,7 +87,7 @@ export function ExpandableAvatarGroup({
             <div key={member.id} className="flex flex-col items-center gap-1.5">
               <Avatar className="h-12 w-12">
                 <AvatarImage src={member.avatar_url} alt={member.full_name} />
-                <AvatarFallback className="text-xs bg-[var(--accent)] text-white border-0">
+                <AvatarFallback className="text-xs bg-[var(--accent)] text-white">
                   {getInitials(member.full_name)}
                 </AvatarFallback>
               </Avatar>
