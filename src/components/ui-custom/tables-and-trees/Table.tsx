@@ -1188,11 +1188,9 @@ export function Table<T = any>({
                         ? "border-b border-[var(--table-row-border)]"
                         : "",
                       isInactive && "opacity-50",
-                      onRowClick && "cursor-pointer",
                       getRowClassName?.(item),
                     )}
                     style={{ gridTemplateColumns: getGridTemplateColumns() }}
-                    onClick={() => onRowClick?.(item)}
                   >
                 {selectable && (
                   <div className="flex items-center justify-center">

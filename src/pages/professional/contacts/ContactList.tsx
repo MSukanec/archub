@@ -7,7 +7,7 @@ import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/componen
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
-import { Phone, MessageCircle } from 'lucide-react'
+import { Phone, MessageCircle, Eye } from 'lucide-react'
 
 interface ContactListProps {
   contacts: any[]
@@ -245,7 +245,10 @@ export default function ContactList({
           key: 'first_name',
           direction: 'asc'
         }}
-        onRowClick={onRowClick}
+        primaryRowAction={(contact) => ({
+          label: 'Ver',
+          onClick: () => onRowClick?.(contact)
+        })}
         emptyStateConfig={{
           title: "No hay contactos",
           description: "Comienza agregando tu primer contacto a la organización"
