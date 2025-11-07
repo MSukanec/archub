@@ -57,6 +57,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerSupportRoutes(app, deps);
 
   // ============================================
+  // Organization Member Invitation (Proxy to Vercel function)
+  // ============================================
+  
+  app.post("/api/invite-member", async (req, res) => {
+    try {
+      const handler = await import('../api/invite-member.js');
+      await handler.default(req as any, res as any);
+    } catch (error: any) {
+      console.error("[invite-member] Error:", error);
+      res.status(500).json({ error: error.message || String(error) });
+    }
+  });
+
+  // ============================================
   // Mercado Pago Integration Routes (Proxies)
   // ============================================
 
