@@ -11,6 +11,7 @@ export const users = pgTable("users", {
   full_name: text("full_name"),
   avatar_url: text("avatar_url"),
   avatar_source: text("avatar_source"),
+  role_id: uuid("role_id"),
   created_at: timestamp("created_at").defaultNow(),
 });
 
