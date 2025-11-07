@@ -291,7 +291,6 @@ export function DataBasicTab() {
             </div>
             <p className="text-sm text-muted-foreground">
               Sube el logo oficial de tu organización. Este logo se mostrará en documentos, reportes y comunicaciones oficiales.
-              {isSaving && <span className="block text-[var(--accent)] mt-2">Guardando...</span>}
             </p>
           </div>
 
@@ -322,7 +321,6 @@ export function DataBasicTab() {
             </div>
             <p className="text-sm text-muted-foreground">
               Datos fundamentales de la organización que se usarán en todo el sistema. Estos campos son la base para proyectos, documentos y comunicaciones.
-              {isSaving && <span className="block text-[var(--accent)] mt-2">Guardando...</span>}
             </p>
           </div>
 
@@ -504,13 +502,6 @@ export function DataBasicTab() {
           </div>
         </div>
 
-        {/* Saving indicator */}
-        {isSaving && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground justify-center mt-8">
-            <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
-            Guardando...
-          </div>
-        )}
       </div>
   );
 }
