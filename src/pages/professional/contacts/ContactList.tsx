@@ -4,14 +4,25 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/stat-card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface ContactListProps {
   contacts: any[]
   onEdit: (contact: any) => void
   onDelete: (contact: any) => void
+  filterByType?: string
+  setFilterByType?: (value: string) => void
+  contactTypes?: any[]
 }
 
-export default function ContactList({ contacts, onEdit, onDelete }: ContactListProps) {
+export default function ContactList({ 
+  contacts, 
+  onEdit, 
+  onDelete,
+  filterByType = 'all',
+  setFilterByType,
+  contactTypes = []
+}: ContactListProps) {
   
   // Calcular KPIs
   const kpis = useMemo(() => {
@@ -206,6 +217,29 @@ export default function ContactList({ contacts, onEdit, onDelete }: ContactListP
         emptyStateConfig={{
           title: "No hay contactos",
           description: "Comienza agregando tu primer contacto a la organización"
+        }}
+        topBar={{
+          showFilter: true,
+          renderFilterContent: () => (
+            <div className="space-y-2">
+              <div className="text-sm font-medium">Filtrar por tipo</div>
+              <Select value={filterByType} onValueChange={setFilterByType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos los tipos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los tipos</SelectItem>
+                  {contactTypes.map((type: any) => (
+                    <SelectItem key={type.id} value={type.name.toLowerCase()}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ),
+          isFilterActive: filterByType !== 'all',
+          onClearFilters: () => setFilterByType?.('all')
         }}
       />
     </div>
