@@ -134,7 +134,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const { data: memberData, error: memberError } = await supabaseAdmin
+    const { data: memberData, error: createError } = await supabaseAdmin
       .from("organization_members")
       .insert({
         organization_id: organizationId,
@@ -145,9 +145,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .select()
       .single();
 
-    if (memberError) {
-      console.error("Member creation error:", memberError);
-      return res.status(500).json({ error: memberError.message });
+    if (createError) {
+      console.error("Member creation error:", createError);
+      return res.status(500).json({ error: createError.message });
     }
 
     return res.status(200).json({ 
