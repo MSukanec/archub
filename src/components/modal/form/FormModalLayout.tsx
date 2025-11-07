@@ -377,10 +377,11 @@ export function FormModalLayout({
         className={cn(
           // Base: fullscreen en mobile
           "fixed inset-0 flex flex-col bg-background shadow-lg transition ease-in-out duration-250",
-          // Desktop: panel del lado derecho ocupando todo el alto
-          "md:inset-y-0 md:inset-x-auto md:right-0 md:h-full md:w-1/2 md:min-w-[600px] md:max-w-[800px] md:border-l",
-          enableAnimations && !isClosing && "animate-in slide-in-from-bottom md:slide-in-from-right duration-250",
-          enableAnimations && isClosing && "animate-out slide-out-to-bottom md:slide-out-to-right duration-250",
+          // Desktop: modal centrado con altura dinámica
+          "md:inset-auto md:top-1/2 md:left-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2",
+          "md:w-auto md:min-w-[500px] md:max-w-[90vw] md:max-h-[90vh] md:border md:rounded-lg",
+          enableAnimations && !isClosing && "animate-in fade-in-0 zoom-in-95 md:slide-in-from-bottom-4 duration-200",
+          enableAnimations && isClosing && "animate-out fade-out-0 zoom-out-95 md:slide-out-to-bottom-4 duration-200",
           className
         )}
         onClick={(e) => e.stopPropagation()}

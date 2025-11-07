@@ -136,7 +136,7 @@ export function InvitationModal({ invitations, open, onClose }: InvitationModalP
           <p className="text-sm text-muted-foreground">
             como
           </p>
-          <Badge variant="secondary" className="font-medium">
+          <Badge className="font-medium bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90">
             {currentInvitation.role_name}
           </Badge>
         </div>
