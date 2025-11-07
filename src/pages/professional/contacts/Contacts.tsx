@@ -235,6 +235,7 @@ export default function Contacts() {
   if (contacts.length === 0 && !searchValue && filterByType === 'all') {
     return (
       <Layout
+        wide={false}
         headerProps={{
           icon: Contact,
           title: "Contactos",
@@ -273,7 +274,7 @@ export default function Contacts() {
 
   return (
     <Layout
-      wide={!isMobile}
+      wide={false}
       headerProps={{
         icon: Contact,
         title: "Contactos",

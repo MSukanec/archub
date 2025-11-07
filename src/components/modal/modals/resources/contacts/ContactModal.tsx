@@ -470,39 +470,6 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
 
   const viewPanel = (
     <div className="space-y-4">
-      {/* Botones de acción rápida */}
-      {(editingContact?.email || editingContact?.phone) && (
-        <div className="flex gap-2">
-          {editingContact.email && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.location.href = `mailto:${editingContact.email}`}
-              className="flex items-center gap-2"
-              data-testid="button-email-contact"
-            >
-              <Mail className="h-4 w-4" />
-              Enviar Email
-            </Button>
-          )}
-          {editingContact.phone && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                const cleanPhone = editingContact.phone?.replace(/[\s\-\(\)]/g, '') || ''
-                window.open(`https://wa.me/${cleanPhone}`, '_blank')
-              }}
-              className="flex items-center gap-2 text-green-600 hover:text-green-700 border-green-600 hover:border-green-700"
-              data-testid="button-whatsapp-contact"
-            >
-              <MessageCircle className="h-4 w-4" />
-              WhatsApp
-            </Button>
-          )}
-        </div>
-      )}
-
       {/* Badge si el contacto está vinculado */}
       {editingContact?.linked_user && (
         <div className="p-3 border border-accent/20 bg-accent/5 rounded-lg flex items-center justify-between">
@@ -530,6 +497,39 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
         </div>
       )}
 
+      {/* Botones de acción rápida - DEBAJO del banner */}
+      {(editingContact?.email || editingContact?.phone) && (
+        <div className="grid grid-cols-2 gap-2">
+          {editingContact.email && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.location.href = `mailto:${editingContact.email}`}
+              className="flex items-center justify-center gap-2 border-muted-foreground text-muted-foreground hover:border-muted-foreground hover:text-foreground"
+              data-testid="button-email-contact"
+            >
+              <Mail className="h-4 w-4" />
+              Enviar Email
+            </Button>
+          )}
+          {editingContact.phone && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const cleanPhone = editingContact.phone?.replace(/[\s\-\(\)]/g, '') || ''
+                window.open(`https://wa.me/${cleanPhone}`, '_blank')
+              }}
+              className="flex items-center justify-center gap-2 text-green-600 hover:text-green-700 border-green-600 hover:border-green-700"
+              data-testid="button-whatsapp-contact"
+            >
+              <MessageCircle className="h-4 w-4" />
+              WhatsApp
+            </Button>
+          )}
+        </div>
+      )}
+
       {/* Información básica */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -547,24 +547,27 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
         </div>
       </div>
 
-      {/* Email */}
-      {editingContact?.email && (
-        <div>
-          <h4 className="text-sm font-medium text-muted-foreground">Email</h4>
-          <a 
-            href={`mailto:${editingContact.email}`}
-            className="text-sm mt-1 text-accent hover:underline block"
-          >
-            {editingContact.email}
-          </a>
-        </div>
-      )}
-      
-      {/* Teléfono */}
-      {editingContact?.phone && (
-        <div>
-          <h4 className="text-sm font-medium text-muted-foreground">Teléfono</h4>
-          <p className="text-sm mt-1">{editingContact.phone}</p>
+      {/* Email y Teléfono en grid */}
+      {(editingContact?.email || editingContact?.phone) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {editingContact.email && (
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground">Email</h4>
+              <a 
+                href={`mailto:${editingContact.email}`}
+                className="text-sm mt-1 text-accent hover:underline block"
+              >
+                {editingContact.email}
+              </a>
+            </div>
+          )}
+          
+          {editingContact.phone && (
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground">Teléfono</h4>
+              <p className="text-sm mt-1">{editingContact.phone}</p>
+            </div>
+          )}
         </div>
       )}
 
