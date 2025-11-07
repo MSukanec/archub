@@ -30,7 +30,6 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useMobile } from "@/hooks/use-mobile";
-import { useOrganizationMembers } from "@/hooks/use-organization-members";
 
 function getInitials(name: string): string {
   return name
@@ -63,9 +62,6 @@ export function MembersTab() {
   const isMobile = useMobile();
 
   const organizationId = userData?.organization?.id;
-
-  // Obtener miembros actuales para restricciones de plan
-  const { data: currentMembers = [] } = useOrganizationMembers(organizationId);
 
   // Fetch organization members
   const { data: members = [], isLoading: membersLoading } = useQuery({
