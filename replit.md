@@ -33,7 +33,7 @@ Preferred communication style: Simple, everyday language.
 - **Payment Architecture**: Unified `payments` table supporting Mercado Pago, PayPal, and bank transfers with an automatic 5% discount for bank transfers.
 - **Access Control**: `PlanRestricted` component system with admin bypass.
 - **Cost System**: Three-tier cost system (Archub Cost, Organization Cost, Independent Cost) for budget items.
-- **AI Integration**: GPT-4o-powered intelligent assistant with comprehensive financial analysis capabilities using 7 specialized function-calling tools, dynamic greetings, and conversational chat with persistent history. Includes a greeting cache system and anti-hallucination measures. FloatingAIChat visibility is route-based and restricted by plan.
+- **AI Integration**: GPT-4o-powered intelligent assistant with comprehensive analysis capabilities using 13 specialized function-calling tools (8 finance tools, 2 project tools, 3 organization tools), dynamic greetings, and conversational chat with persistent history. Organization tools enable queries about company info, member lists with roles, and real-time activity tracking. Includes a greeting cache system and anti-hallucination measures. FloatingAIChat visibility is route-based and restricted by plan.
 - **User Presence & Analytics System**: Dual-layer tracking for real-time user presence (`user_presence` table) and historical usage analytics (`user_view_history` table) for business intelligence, including time spent per view.
 
 ### System Design Choices
