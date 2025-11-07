@@ -5,8 +5,6 @@ import { supabase } from '@/lib/supabase';
 export interface PendingInvitationMember {
   id: string;
   full_name?: string;
-  first_name?: string;
-  last_name?: string;
   avatar_url?: string;
 }
 
@@ -32,17 +30,18 @@ export function usePendingInvitations() {
       if (!userId) return [];
       
       // Get the current session token for authentication
-      const { data } = await supabase.auth.getSession();
-      const session = data?.session;
+      const { data: sessionData } = await supabase.auth.getSession();
+      const session = sessionData?.session;
       
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache',
       };
       if (session?.access_token) {
         headers["Authorization"] = `Bearer ${session.access_token}`;
       }
       
-      const response = await fetch(`/api/pending-invitations/${userId}`, {
+      const response = await fetch(`/api/pending-invitations/${userId}?t=${Date.now()}`, {
         credentials: 'include',
         headers,
       });
@@ -51,10 +50,12 @@ export function usePendingInvitations() {
         throw new Error('Failed to fetch pending invitations');
       }
       
-      return response.json();
+      const invitationsData = await response.json();
+      return invitationsData;
     },
     enabled: !!userId,
     staleTime: 0,
     refetchOnWindowFocus: true,
+    gcTime: 0,
   });
 }

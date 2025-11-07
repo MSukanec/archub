@@ -4,8 +4,6 @@ interface Member {
   id: string;
   avatar_url?: string;
   full_name?: string;
-  first_name?: string;
-  last_name?: string;
 }
 
 interface CompactAvatarGroupProps {
@@ -38,9 +36,6 @@ export function CompactAvatarGroup({
         .join('')
         .toUpperCase()
         .slice(0, 2);
-    }
-    if (member.first_name && member.last_name) {
-      return (member.first_name[0] + member.last_name[0]).toUpperCase();
     }
     return 'U';
   };

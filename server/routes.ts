@@ -132,30 +132,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Fetch organization and role data for each invitation
       const enrichedInvitations = await Promise.all(
         invitations.map(async (inv) => {
-          // Get organization data with avatar
-          const { data: org } = await authenticatedSupabase
+          // Get organization data with logo
+          const { data: org, error: orgError } = await authenticatedSupabase
             .from('organizations')
-            .select('name, avatar_url')
+            .select('name, logo_url')
             .eq('id', inv.organization_id)
-            .maybeSingle();
+            .single();
+          
+          if (orgError) {
+            console.error('Error fetching organization:', orgError);
+          }
           
           // Get role name
-          const { data: role } = await authenticatedSupabase
+          const { data: role, error: roleError } = await authenticatedSupabase
             .from('roles')
             .select('name')
             .eq('id', inv.role_id)
-            .maybeSingle();
+            .single();
+          
+          if (roleError) {
+            console.error('Error fetching role:', roleError);
+          }
           
           // Get organization members (up to 10 for display)
-          const { data: members } = await authenticatedSupabase
+          const { data: members, error: membersError } = await authenticatedSupabase
             .from('organization_members')
             .select(`
               id,
+              user_id,
               users (
                 id,
                 full_name,
-                first_name,
-                last_name,
                 avatar_url
               )
             `)
@@ -163,12 +170,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .eq('is_active', true)
             .limit(10);
           
+          if (membersError) {
+            console.error('Error fetching members:', membersError);
+          }
+          
           // Transform members to flat structure
           const transformedMembers = (members || []).map((m: any) => ({
             id: m.users?.id || m.id,
-            full_name: m.users?.full_name,
-            first_name: m.users?.first_name,
-            last_name: m.users?.last_name,
+            full_name: m.users?.full_name || 'Usuario',
             avatar_url: m.users?.avatar_url,
           }));
           
@@ -176,7 +185,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             id: inv.id,
             organization_id: inv.organization_id,
             organization_name: org?.name || 'Organización',
-            organization_avatar: org?.avatar_url || null,
+            organization_avatar: (org?.logo_url && org.logo_url.trim() !== '') ? org.logo_url : null,
             role_id: inv.role_id,
             role_name: role?.name || 'Miembro',
             invited_by: inv.invited_by,
@@ -320,14 +329,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Invitation not found or already processed" });
       }
       
-      // Update invitation status to rejected
-      const { error: updateError } = await authenticatedSupabase
+      // Delete the invitation (rejected invitations are simply removed)
+      const { error: deleteError } = await authenticatedSupabase
         .from('organization_invitations')
-        .update({ status: 'rejected' })
+        .delete()
         .eq('id', invitationId);
       
-      if (updateError) {
-        console.error('Error updating invitation status:', updateError);
+      if (deleteError) {
+        console.error('Error deleting invitation:', deleteError);
         return res.status(500).json({ error: 'Failed to reject invitation' });
       }
       
