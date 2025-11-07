@@ -1,0 +1,124 @@
+🧠 PROMPT PARA REPLIT — “Integración de sincronización de contactos con frontend”
+Ya tengo toda la lógica de sincronización entre usuarios y contactos implementada en Supabase, así que no debes crear ni modificar nada del backend.  
+Te explico exactamente qué hice y qué quiero que hagas ahora en el FRONTEND.
+
+---
+
+### ✅ Lo que YA está hecho en Supabase
+
+1. Tabla **contacts**:
+   - Tiene `organization_id` y `linked_user_id`.
+   - Se vincula automáticamente con usuarios existentes al detectar el mismo email.
+   - Se actualiza automáticamente cuando un usuario nuevo se une a la organización.
+
+2. Tabla **organization_invitations**:
+   - Guarda invitaciones enviadas a usuarios por email.
+   - Cuando el usuario acepta la invitación, un trigger ejecuta `archub_sync_user_contact()` para vincularlo o crearlo como contacto.
+
+3. Tabla **organization_members**:
+   - Tiene un trigger `archub_sync_user_contact` que crea o actualiza contactos automáticamente al unirse un usuario.
+
+4. Todo esto ya funciona en Supabase: no toques nada del backend, ni funciones ni triggers.
+
+---
+
+### 🎯 Objetivo ahora en el FRONTEND
+
+Quiero que actualices el módulo de CONTACTOS para reflejar visualmente esta sincronización y permitir invitar usuarios de forma clara y moderna.
+
+---
+
+### 👇 Qué debe hacer el FRONTEND (React + Supabase client)
+
+#### 1️⃣ En el **ContactModal** o en la **ContactCard** (vista individual del contacto):
+
+- Si el contacto **no está vinculado (`linked_user_id` es null)**, mostrar:
+
+
+✉️ Este contacto no tiene cuenta en Archub.
+
+(sin acciones)
+
+- Si el contacto **está vinculado (`linked_user_id` existe)**, entonces:
+- Verificar si ese usuario ya es **miembro** de la organización activa (`organization_members`).
+- Si **ya es miembro**, mostrar:
+  ```
+  ✅ Miembro de la organización
+  ```
+- Si **no es miembro**, mostrar un botón:
+  ```
+  [Invitar a la organización]
+  ```
+  que inserta un nuevo registro en `organization_invitations` con:
+  ```ts
+  {
+    organization_id: currentOrganization.id,
+    invited_user_id: contact.linked_user_id,
+    email: contact.email,
+    invited_by: currentMember.id,
+    status: 'pending'
+  }
+  ```
+  Luego mostrar un toast “Invitación enviada correctamente”.
+
+- Si ya hay una invitación pendiente, mostrar un aviso:
+  ```
+  ⏳ Invitación pendiente
+  ```
+  con botón secundario “Cancelar invitación” que actualiza `status = 'revoked'`.
+
+#### 2️⃣ En la lista principal de contactos (`ContactsTable` o equivalente):
+
+- Agregar una pequeña columna o badge que indique el estado:
+| Estado | Color | Descripción |
+|---------|--------|-------------|
+| ✅ Verde | Miembro |
+| ⏳ Amarillo | Invitación pendiente |
+| ✉️ Gris | No vinculado |
+
+Esto permite ver de un vistazo quién está vinculado, quién ya pertenece y quién falta invitar.
+
+#### 3️⃣ En el flujo de creación / edición de contactos:
+
+- Ya existe la detección automática de usuario por email → mantenela igual.
+- Si al escribir un email coincide con un usuario, y no es miembro, mostrar un pequeño aviso tipo:
+
+
+Este usuario aún no pertenece a la organización.
+[Invitar ahora]
+
+que ejecuta la misma lógica que el botón de invitación anterior.
+
+---
+
+### 🎨 Detalles visuales
+
+- Usar íconos de `lucide-react`:
+- `UserCheck` para miembro
+- `UserPlus` para invitar
+- `Clock` para pendiente
+- `Mail` para no vinculado
+- Mantener el estilo compacto y limpio actual (dark mode, estética Archub).
+- Reusar los componentes UI ya existentes (`Badge`, `Button`, `AlertBanner`, `Toast`).
+
+---
+
+### 🧠 Resumen general
+
+- No crear ni modificar funciones ni triggers.
+- Toda la sincronización contactos ↔ usuarios ↔ miembros ya está resuelta del lado de Supabase.
+- Tu tarea es **mostrar los estados correctos en el frontend** y permitir enviar / cancelar invitaciones desde la UI.
+- Toda la comunicación se hace directamente con Supabase client (`from('organization_invitations')`), no con endpoints ni Edge Functions.
+
+Implementá esto de forma clara, visualmente coherente y sin duplicar código.
+
+
+💡 Con este prompt, Replit:
+
+Entiende que el backend ya hace la sincronización automáticamente.
+
+Sabe que solo debe mostrar los estados y manejar las invitaciones desde el frontend.
+
+No va a tocar nada de Supabase que vos ya configuraste manualmente.
+
+¿Querés que te deje el query de prueba visual para ver rápidamente en Supabase si todo está funcionando (contactos vinculados + miembros + invitaciones)? Así podés validar antes de que Replit despliegue el nuevo front.
