@@ -105,13 +105,87 @@ export function MembersTab() {
     enabled: !!organizationId,
   });
 
+  // Fetch pending invitations
+  const { data: pendingInvites = [], isLoading: invitesLoading } = useQuery({
+    queryKey: ['organization-invitations', organizationId],
+    queryFn: async () => {
+      if (!supabase || !organizationId) return [];
+      
+      const { data, error } = await supabase
+        .from('organization_invitations')
+        .select(`
+          id,
+          email,
+          status,
+          created_at,
+          user_id,
+          role_id,
+          roles (
+            id,
+            name,
+            type
+          ),
+          users (
+            id,
+            full_name,
+            avatar_url
+          )
+        `)
+        .eq('organization_id', organizationId)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching invitations:', error);
+        return [];
+      }
+      return data || [];
+    },
+    enabled: !!organizationId,
+  });
+
   // Mock guests data (empty for now)
   const guests: any[] = [];
   console.log('No guest accounts table found, using empty array');
 
-  // Mock pending invites data (empty for now)
-  const pendingInvites: any[] = [];
-  console.log('No invites table found, using empty array');
+  // Revoke invitation mutation
+  const revokeInviteMutation = useMutation({
+    mutationFn: async (invitationId: string) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      const { error } = await supabase
+        .from('organization_invitations')
+        .delete()
+        .eq('id', invitationId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['organization-invitations', organizationId] });
+      toast({
+        title: 'Invitación revocada',
+        description: 'La invitación ha sido eliminada correctamente.',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo revocar la invitación',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Resend invitation mutation (placeholder)
+  const resendInviteMutation = useMutation({
+    mutationFn: async (invitationId: string) => {
+      // TODO: Implement resend invitation logic (send email again)
+      toast({
+        title: 'Reenvío de invitación',
+        description: 'Esta funcionalidad estará disponible pronto.',
+      });
+    },
+  });
 
   const removeMemberMutation = useMutation({
     mutationFn: async (memberId: string) => {
@@ -151,32 +225,6 @@ export function MembersTab() {
       isLoading: removeMemberMutation.isPending
     });
   };
-
-  const resendInviteMutation = useMutation({
-    mutationFn: async (inviteId: string) => {
-      // Mock functionality
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    },
-    onSuccess: () => {
-      toast({
-        title: "Invitación reenviada",
-        description: "La invitación ha sido reenviada exitosamente.",
-      });
-    },
-  });
-
-  const revokeInviteMutation = useMutation({
-    mutationFn: async (inviteId: string) => {
-      // Mock functionality
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    },
-    onSuccess: () => {
-      toast({
-        title: "Invitación revocada",
-        description: "La invitación ha sido revocada exitosamente.",
-      });
-    },
-  });
 
   return (
     <div className="space-y-6">
