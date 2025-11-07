@@ -45,19 +45,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const { data: member } = await supabase
+    const { data: member, error: memberError } = await supabase
       .from("organization_members")
-      .select("role, role_id, roles(name, type)")
+      .select("id, role_id, roles(name, type)")
       .eq("user_id", dbUser.id)
       .eq("organization_id", organizationId)
       .single();
 
-    // Check if user is admin either by direct role or by role name
-    const roles = Array.isArray(member?.roles) ? member.roles[0] : member?.roles;
-    const isAdmin = member && (
-      member.role === "admin" || 
-      (roles && roles.name && roles.name.toLowerCase().includes("admin"))
-    );
+    if (memberError || !member) {
+      console.error("Member lookup error:", memberError);
+      return res.status(403).json({ 
+        error: "User is not a member of this organization" 
+      });
+    }
+
+    // Check if user is admin by role name
+    const roles = Array.isArray(member.roles) ? member.roles[0] : member.roles;
+    const roleName = roles?.name?.toLowerCase() || '';
+    const isAdmin = roleName.includes("admin");
+
+    console.log("Admin check:", { roleName, isAdmin, userId: dbUser.id });
 
     if (!isAdmin) {
       return res.status(403).json({ 
