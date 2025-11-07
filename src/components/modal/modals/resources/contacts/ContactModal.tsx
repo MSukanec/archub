@@ -296,6 +296,8 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
         throw new Error('Organization ID not found');
       }
 
+      const organizationId = userData.organization.id;
+
       if (isEditing && editingContact) {
         // Update contact
         // Verificar si ya existe otro contacto con el mismo email (si se proporciona email y cambió)
@@ -303,7 +305,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           const { data: existingContact, error: checkError } = await supabase
             .from('contacts')
             .select('id, first_name, last_name, email')
-            .eq('organization_id', userData.organization.id)
+            .eq('organization_id', organizationId)
             .ilike('email', data.email.trim())
             .neq('id', editingContact.id)
             .maybeSingle();
@@ -345,6 +347,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           const typeLinks = data.contact_type_ids.map(typeId => ({
             contact_id: editingContact.id,
             contact_type_id: typeId,
+            organization_id: organizationId,
           }));
 
           const { error: linksError } = await supabase
@@ -362,7 +365,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           const { data: existingContact, error: checkError } = await supabase
             .from('contacts')
             .select('id, first_name, last_name, email')
-            .eq('organization_id', userData.organization.id)
+            .eq('organization_id', organizationId)
             .ilike('email', data.email.trim())
             .maybeSingle();
 
@@ -377,7 +380,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
         const { data: newContact, error } = await supabase
           .from('contacts')
           .insert({
-            organization_id: userData.organization.id,
+            organization_id: organizationId,
             first_name: data.first_name,
             last_name: data.last_name || null,
             email: data.email || null,
@@ -397,6 +400,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           const typeLinks = data.contact_type_ids.map(typeId => ({
             contact_id: newContact.id,
             contact_type_id: typeId,
+            organization_id: organizationId,
           }));
 
           const { error: linksError } = await supabase
