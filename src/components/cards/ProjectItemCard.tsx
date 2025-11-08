@@ -76,6 +76,18 @@ export default function ProjectItemCard({
     ? (project as any).custom_color_hex 
     : (project as any).color || projectColor;
   
+  // DEBUG: Ver qué está pasando
+  if (!imageUrl) {
+    console.log(`🎨 ${project.name}:`, {
+      'project.color': (project as any).color,
+      'use_custom_color': (project as any).use_custom_color,
+      'custom_color_hex': (project as any).custom_color_hex,
+      'projectColor (prop)': projectColor,
+      'actualProjectColor': actualProjectColor,
+      'includesVar': actualProjectColor.includes('var(')
+    });
+  }
+  
   // Crear color suave para el badge de estado
   const getSoftAccentColor = () => {
     try {
