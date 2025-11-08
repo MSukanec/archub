@@ -132,11 +132,31 @@ export default function ProjectList() {
   }
 
   const handleDeleteClick = (project: any) => {
+    // Helper para obtener el texto del estado
+    const getStatusText = (status: string) => {
+      const statusConfig = {
+        'active': 'En proceso',
+        'completed': 'Completado',
+        'paused': 'Pausado',
+        'cancelled': 'Cancelado',
+        'planning': 'Planificación'
+      }
+      return statusConfig[status as keyof typeof statusConfig] || status || 'Sin estado';
+    };
+    
+    // Construir detalles del proyecto
+    const projectType = project.project_data?.project_type?.name || 'Sin tipo';
+    const modality = project.project_data?.modality?.name || 'Sin modalidad';
+    const statusText = getStatusText(project.status);
+    const itemDetails = `${projectType} · ${modality} · ${statusText}`;
+    
     openModal('delete-confirmation', {
       mode: 'dangerous',
       title: 'Eliminar proyecto',
       description: 'Esta acción eliminará permanentemente el proyecto y todos sus datos asociados (diseño, obra, finanzas, etc.).',
       itemName: project.name,
+      itemDetails: itemDetails,
+      itemType: 'proyecto',
       destructiveActionText: 'Eliminar',
       onConfirm: () => deleteProjectMutation.mutate(project.id),
       isLoading: deleteProjectMutation.isPending

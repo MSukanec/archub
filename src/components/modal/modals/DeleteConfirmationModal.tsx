@@ -24,6 +24,7 @@ interface DeleteConfirmationModalProps {
   description: string
   itemName?: string
   itemType?: string // Tipo de elemento (ej: "concepto", "material", "categoría", etc.)
+  itemDetails?: string // Detalles adicionales del elemento (ej: "Tipo: Vivienda, Estado: En proceso")
   destructiveActionText?: string
   onConfirm?: () => void
   onDelete?: () => void
@@ -39,6 +40,7 @@ export default function DeleteConfirmationModal({
   description,
   itemName,
   itemType = "elemento",
+  itemDetails,
   destructiveActionText = "Eliminar",
   onConfirm,
   onDelete,
@@ -128,46 +130,46 @@ export default function DeleteConfirmationModal({
 
   const editPanel = (
     <div className="space-y-6">
-      {/* 1. Sección: Lo que hace la acción */}
-      <div className="flex items-start gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 flex-shrink-0">
-          <Trash2 className="h-6 w-6 text-destructive" />
-        </div>
-        <div className="flex-1">
-          <p className="text-sm text-foreground leading-relaxed">
-            {description}
+      {/* 1. Sección: Advertencia */}
+      <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
+          <p className="text-sm text-destructive font-medium">
+            Esta acción no se puede deshacer
           </p>
         </div>
+        <p className="text-sm text-muted-foreground">
+          {description}
+        </p>
       </div>
 
       {/* Dangerous mode - Write to confirm */}
       {mode === 'dangerous' && itemName && (
         <div className="space-y-4">
-          {/* 2. Advertencia de que no se puede deshacer */}
-          <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
-              <p className="text-sm text-destructive font-medium">
-                Esta acción no se puede deshacer
-              </p>
+          {/* 2. Tarjeta con datos del elemento */}
+          <div className="rounded-lg border border-border bg-card p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10 flex-shrink-0">
+                <Trash2 className="h-5 w-5 text-accent" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">
+                  {itemName}
+                </p>
+                {itemDetails && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {itemDetails}
+                  </p>
+                )}
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Para confirmar la eliminación, escribí el nombre del {itemType} exactamente como aparece abajo.
-            </p>
           </div>
 
-          {/* 3. Referencia: Qué vas a borrar */}
-          <div className="rounded-lg border border-border bg-muted/50 p-4">
-            <p className="text-xs text-muted-foreground mb-1">
-              Para eliminar, escribí:
-            </p>
-            <p className="text-sm font-semibold text-foreground font-mono">
-              {itemName}
-            </p>
-          </div>
-
-          {/* 4. Input para escribir */}
+          {/* 3. Instrucciones + Input */}
           <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              Para eliminar, escribí <span className="font-semibold text-foreground font-mono">{itemName}</span> abajo
+            </p>
             <Input
               placeholder={`Escribí "${itemName}" para confirmar`}
               value={inputValue}
