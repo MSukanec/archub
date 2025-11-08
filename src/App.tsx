@@ -56,7 +56,7 @@ import Profile from "@/pages/profile/Profile";
 
 import Onboarding from "@/pages/public/Onboarding";
 import SelectMode from "@/pages/public/SelectMode";
-import Activity from "@/pages/professional/organization/Activity";
+import Activity from "@/pages/activity/Activity";
 
 // Admin Pages (Lazy Loaded - solo admins las usan)
 const AdminAdmin = lazy(() => import("@/pages/admin/administration/AdminAdmin"));

@@ -1,30 +1,19 @@
-import { useEffect } from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Activity as ActivityIcon, Building, Eye } from 'lucide-react';
+import { Activity as ActivityIcon, Eye } from 'lucide-react';
 import { useLocation } from 'wouter';
 
-import { Layout } from '@/components/layout/desktop/Layout';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 
-import { useCurrentUser } from '@/hooks/use-current-user';
-import { useNavigationStore } from '@/stores/navigationStore';
+interface ActivityLogsProps {
+  organizationId: string;
+}
 
-export default function Activity() {
-  const { data: userData } = useCurrentUser();
-  const { setSidebarContext } = useNavigationStore();
+export default function ActivityLogs({ organizationId }: ActivityLogsProps) {
   const [, navigate] = useLocation();
-
-  // Set sidebar context on mount
-  useEffect(() => {
-    setSidebarContext('organization');
-  }, [setSidebarContext]);
-
-  const organizationId = userData?.preferences?.last_organization_id;
 
   // Placeholder activities data - will be implemented with proper data later
   const activities: any[] = []
@@ -61,26 +50,6 @@ export default function Activity() {
         console.log('Activity details:', activity);
     }
   };
-
-  const headerProps = {
-    icon: ActivityIcon,
-    title: 'Actividad de la Organización',
-    subtitle: 'Registro de actividades y cambios en la organización',
-    organizationId,
-    showMembers: true
-  };
-
-  if (!organizationId) {
-    return (
-      <Layout headerProps={headerProps}>
-        <div className="text-center py-12 text-muted-foreground">
-          <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
-          <p className="text-sm">No hay organización seleccionada.</p>
-          <p className="text-xs">Selecciona una organización para ver la actividad.</p>
-        </div>
-      </Layout>
-    );
-  }
 
   // Table columns configuration
   const columns = [
@@ -150,34 +119,32 @@ export default function Activity() {
   ];
 
   return (
-    <Layout headerProps={headerProps}>
-      <div className="space-y-6">
-        {/* Activity Chart and Table */}
-        {isLoading ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <ActivityIcon className="h-12 w-12 mx-auto mb-4 opacity-20 animate-pulse" />
-            <p className="text-sm">Cargando actividades...</p>
-          </div>
-        ) : activities.length === 0 ? (
-          <EmptyState
-            icon={<ActivityIcon className="w-12 h-12" />}
-            title="No hay actividades registradas"
-            description="Cuando se realicen acciones en la organización, aparecerán aquí."
-          />
-        ) : (
-          <Table
-            data={activities}
-            columns={columns}
-            rowActions={(activity) => [
-              {
-                icon: Eye,
-                label: 'Ver detalles',
-                onClick: () => handleActivityClick(activity)
-              }
-            ]}
-          />
-        )}
-      </div>
-    </Layout>
+    <div className="space-y-6">
+      {/* Activity Chart and Table */}
+      {isLoading ? (
+        <div className="text-center py-12 text-muted-foreground">
+          <ActivityIcon className="h-12 w-12 mx-auto mb-4 opacity-20 animate-pulse" />
+          <p className="text-sm">Cargando actividades...</p>
+        </div>
+      ) : activities.length === 0 ? (
+        <EmptyState
+          icon={<ActivityIcon className="w-12 h-12" />}
+          title="No hay actividades registradas"
+          description="Cuando se realicen acciones en la organización, aparecerán aquí."
+        />
+      ) : (
+        <Table
+          data={activities}
+          columns={columns}
+          rowActions={(activity) => [
+            {
+              icon: Eye,
+              label: 'Ver detalles',
+              onClick: () => handleActivityClick(activity)
+            }
+          ]}
+        />
+      )}
+    </div>
   );
 }
