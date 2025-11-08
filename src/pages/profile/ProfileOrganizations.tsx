@@ -1,13 +1,13 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { Building, Crown, Plus, Calendar, Shield, MoreHorizontal, Edit, Trash2, Users, Settings, Network, BarChart3, Eye } from 'lucide-react'
+import { Building, Crown, Plus, Calendar, Shield, MoreHorizontal, Edit, Trash2, Users, Settings, Network, BarChart3, Eye, Building2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -43,19 +43,29 @@ function OrganizationCard({ organization, isSelected, onSelect, onView, onEdit, 
       }}
     >
       <CardContent className="p-4">
-        <div className="grid grid-cols-4 gap-4 items-center">
+        <div className="grid grid-cols-3 gap-4 items-center">
           {/* Organización */}
-          <div className="col-span-1 flex items-center gap-2">
-            <Avatar className="w-8 h-8 avatar-border">
-              <AvatarFallback className="text-xs">
-                {organization.name?.substring(0, 2)?.toUpperCase() || 'ORG'}
-              </AvatarFallback>
+          <div className="col-span-1 flex items-center gap-3">
+            <Avatar className="w-14 h-14 border-2 border-background">
+              {organization.logo_url ? (
+                <AvatarImage 
+                  src={organization.logo_url} 
+                  alt={organization.name} 
+                />
+              ) : (
+                <AvatarFallback>
+                  <Building2 className="h-7 w-7 text-muted-foreground" />
+                </AvatarFallback>
+              )}
             </Avatar>
             <div>
               <div className="font-medium flex items-center gap-2">
                 {organization.name}
                 {isSelected && (
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge 
+                    className="text-xs text-white" 
+                    style={{ backgroundColor: 'var(--accent)' }}
+                  >
                     Activa
                   </Badge>
                 )}
@@ -98,10 +108,9 @@ function OrganizationCard({ organization, isSelected, onSelect, onView, onEdit, 
               {members.slice(0, 3).map((member, index) => (
                 <Avatar key={member.id} className="w-6 h-6 avatar-border" style={{border: '3px solid var(--card-border)'}}>
                   {member.avatar_url ? (
-                    <img 
+                    <AvatarImage 
                       src={member.avatar_url} 
-                      alt={member.full_name || member.email} 
-                      className="w-full h-full object-cover rounded-full"
+                      alt={member.full_name || member.email}
                     />
                   ) : (
                     <AvatarFallback className="text-xs">
@@ -116,13 +125,6 @@ function OrganizationCard({ organization, isSelected, onSelect, onView, onEdit, 
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Estado */}
-          <div className="col-span-1">
-            <Badge variant={organization.is_active ? "default" : "secondary"}>
-              {organization.is_active ? "Activa" : "Inactiva"}
-            </Badge>
           </div>
         </div>
       </CardContent>
@@ -141,6 +143,13 @@ export function OrganizationList() {
 
   const organizations = userData?.organizations || []
   const currentOrganizationId = userData?.organization?.id
+  
+  // Sort organizations: active one first
+  const sortedOrganizations = [...organizations].sort((a, b) => {
+    if (a.id === currentOrganizationId) return -1
+    if (b.id === currentOrganizationId) return 1
+    return 0
+  })
 
   // Mutation para cambiar organización activa
   const switchOrganization = useMutation({
@@ -214,7 +223,7 @@ export function OrganizationList() {
 
       {/* Lista de organizaciones */}
       <div className={isMobile ? "space-y-2" : "space-y-2"}>
-        {organizations.map((organization) => (
+        {sortedOrganizations.map((organization) => (
           isMobile ? (
             <AdminOrganizationRow
               key={organization.id}
