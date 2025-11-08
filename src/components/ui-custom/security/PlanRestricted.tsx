@@ -225,15 +225,15 @@ export function PlanRestricted({
 
   // VERSIÓN LARGE: Overlay con blur + Badge centrado con texto y botón
   return (
-    <div className="relative inline-flex">
+    <div className="relative w-full">
       {/* Contenido con blur */}
-      <div className="relative">
+      <div className="relative w-full">
         <div className="opacity-50 blur-[1.5px] pointer-events-none select-none">
           {children}
         </div>
         
-        {/* Overlay oscuro */}
-        <div className="absolute inset-0 bg-background/40 dark:bg-background/60 rounded-xl" />
+        {/* Overlay oscuro semi-transparente */}
+        <div className="absolute inset-0 bg-background/50 dark:bg-background/70 rounded-xl" />
       </div>
       
       {/* Badge centrado con texto + botón */}
@@ -256,7 +256,7 @@ export function PlanRestricted({
           <Button 
             size="sm"
             variant="secondary"
-            className="bg-white text-gray-900 hover:bg-gray-100 border-0 font-medium"
+            className="bg-white text-gray-900 hover:bg-gray-100 border-0 font-medium shadow-md"
             onClick={() => {
               setLocation('/pricing');
             }}
