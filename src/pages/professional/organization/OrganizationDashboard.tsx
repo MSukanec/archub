@@ -281,7 +281,9 @@ export default function OrganizationDashboard() {
                     onNavigateToProject={() => handleSelectProject(project.id)}
                     onEdit={() => handleEditProject(project)}
                     isActive={project.id === activeProjectId}
-                    projectColor={project.color || 'var(--accent)'}
+                    projectColor={(project as any).use_custom_color && (project as any).custom_color_hex 
+                      ? (project as any).custom_color_hex 
+                      : project.color || 'var(--accent)'}
                   />
                 ))}
               </div>
