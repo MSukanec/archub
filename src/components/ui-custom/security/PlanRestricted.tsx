@@ -238,28 +238,29 @@ export function PlanRestricted({
       
       {/* Badge centrado - UNA LÍNEA HORIZONTAL */}
       <div className="absolute inset-0 flex items-center justify-center z-10 px-4">
-        <div className="flex items-center gap-3 px-4 py-2.5 rounded-lg shadow-xl bg-background border border-border">
-          {/* Candado con fondo accent */}
+        <div 
+          className="flex items-center gap-3 px-4 py-2.5 rounded-full shadow-xl"
+          style={{ 
+            backgroundColor: planBgColor,
+          }}
+        >
+          {/* Candado con borde circular blanco */}
           <div 
-            className="flex items-center justify-center w-8 h-8 rounded-md"
-            style={{ backgroundColor: 'var(--accent)' }}
+            className="flex items-center justify-center w-8 h-8 rounded-full border-2"
+            style={{ borderColor: 'white' }}
           >
             <Lock className="w-4 h-4 text-white" />
           </div>
           
-          {/* Texto */}
-          <span className="text-sm font-medium text-foreground">
+          {/* Texto blanco */}
+          <span className="text-sm font-medium text-white">
             Requiere Plan {planName}
           </span>
           
-          {/* Botón */}
+          {/* Botón blanco con texto negro */}
           <Button 
             size="sm"
-            style={{ 
-              backgroundColor: planBgColor,
-              color: 'white'
-            }}
-            className="border-0 font-medium shadow-sm hover:opacity-90"
+            className="bg-white text-gray-900 hover:bg-gray-100 border-0 font-medium shadow-sm"
             onClick={() => {
               setLocation('/pricing');
             }}
