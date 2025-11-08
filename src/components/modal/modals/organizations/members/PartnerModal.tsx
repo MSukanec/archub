@@ -217,6 +217,10 @@ export function PartnerModal({ editingPartner, onClose }: PartnerModalProps) {
   const headerContent = (
     <FormModalHeader 
       title={editingPartner ? 'Editar Socio' : 'Ingresar Socio'}
+      description={editingPartner 
+        ? 'Actualiza la información del socio de tu organización.' 
+        : 'Selecciona un contacto existente para agregarlo como socio de tu organización.'
+      }
       icon={HandHeart}
     />
   );

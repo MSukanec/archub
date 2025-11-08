@@ -218,6 +218,10 @@ export function MemberFormModal({ editingMember, onClose }: MemberModalProps) {
   const headerContent = (
     <FormModalHeader
       title={editingMember ? 'Editar Miembro' : 'Invitar Miembro'}
+      description={editingMember 
+        ? 'Actualiza el rol y permisos del miembro en tu organización.' 
+        : 'Ingresa el email del nuevo miembro. Si no tiene cuenta, recibirá una invitación por correo.'
+      }
       icon={editingMember ? Users : UserPlus}
     />
   );
