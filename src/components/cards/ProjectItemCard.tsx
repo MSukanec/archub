@@ -71,14 +71,19 @@ export default function ProjectItemCard({
   const imageUrl = project.project_data?.project_image_url;
   const statusText = getStatusText(project.status);
   
+  // Obtener el color real del proyecto desde el objeto project
+  const actualProjectColor = (project as any).use_custom_color && (project as any).custom_color_hex 
+    ? (project as any).custom_color_hex 
+    : (project as any).color || projectColor;
+  
   // Crear color suave para el badge de estado
   const getSoftAccentColor = () => {
     try {
       // Si el color es una variable CSS, usar un color por defecto
-      if (projectColor.includes('var(')) {
+      if (actualProjectColor.includes('var(')) {
         return 'rgba(139, 92, 246, 0.15)'; // violeta suave por defecto
       }
-      return chroma(projectColor).alpha(0.15).css();
+      return chroma(actualProjectColor).alpha(0.15).css();
     } catch {
       return 'rgba(139, 92, 246, 0.15)';
     }
@@ -117,9 +122,9 @@ export default function ProjectItemCard({
           <div 
             className="absolute inset-0"
             style={{ 
-              background: projectColor.includes('var(')
-                ? `radial-gradient(ellipse at top right, rgba(139, 92, 246, 0.25) 0%, rgba(139, 92, 246, 0.15) 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.7) 100%)`
-                : `radial-gradient(ellipse at top right, ${chroma(projectColor).alpha(0.25).css()} 0%, ${chroma(projectColor).alpha(0.15).css()} 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.7) 100%)`
+              background: actualProjectColor && !actualProjectColor.includes('var(')
+                ? `radial-gradient(ellipse at top right, ${chroma(actualProjectColor).alpha(0.25).css()} 0%, ${chroma(actualProjectColor).alpha(0.15).css()} 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.7) 100%)`
+                : `radial-gradient(ellipse at top right, rgba(139, 92, 246, 0.25) 0%, rgba(139, 92, 246, 0.15) 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.7) 100%)`
             }}
           />
         )}
@@ -138,9 +143,9 @@ export default function ProjectItemCard({
           <div 
             className="absolute inset-0" 
             style={{ 
-              background: projectColor.includes('var(')
-                ? `linear-gradient(to top, var(--accent) 0%, rgba(139, 92, 246, 0.3) 20%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.1) 60%, transparent 100%)`
-                : `linear-gradient(to top, ${chroma(projectColor).alpha(1).css()} 0%, ${chroma(projectColor).alpha(0.3).css()} 20%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.1) 60%, transparent 100%)`
+              background: actualProjectColor && !actualProjectColor.includes('var(')
+                ? `linear-gradient(to top, ${chroma(actualProjectColor).alpha(1).css()} 0%, ${chroma(actualProjectColor).alpha(0.3).css()} 20%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.1) 60%, transparent 100%)`
+                : `linear-gradient(to top, var(--accent) 0%, rgba(139, 92, 246, 0.3) 20%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.1) 60%, transparent 100%)`
             }}
           />
         )}
@@ -158,7 +163,7 @@ export default function ProjectItemCard({
               {isActive && (
                 <div 
                   className="w-5 h-5 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: projectColor }}
+                  style={{ backgroundColor: actualProjectColor }}
                 >
                   <CheckCircle2 className="h-3.5 w-3.5 text-white" />
                 </div>
@@ -203,8 +208,8 @@ export default function ProjectItemCard({
               size="sm"
               className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               style={{ 
-                borderColor: isActive ? 'white' : projectColor,
-                color: isActive ? 'white' : projectColor
+                borderColor: isActive ? 'white' : actualProjectColor,
+                color: isActive ? 'white' : actualProjectColor
               }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -217,7 +222,7 @@ export default function ProjectItemCard({
             <Button 
               size="sm"
               className="text-white border-0 text-sm font-medium shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              style={{ backgroundColor: projectColor }}
+              style={{ backgroundColor: actualProjectColor }}
               onClick={(e) => {
                 e.stopPropagation();
                 onNavigateToProject?.();
