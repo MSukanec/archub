@@ -228,7 +228,7 @@ export default function OrganizationDashboard() {
           >
             <StatCardTitle>Contactos</StatCardTitle>
             <StatCardValue>
-              {contactsLoading ? '...' : contacts.length}
+              {contactsLoading ? '...' : (contacts as any[]).length}
             </StatCardValue>
           </StatCard>
 
