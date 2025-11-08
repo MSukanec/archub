@@ -4,6 +4,7 @@ import { uploadToBucket, removeFromBucket, getPublicUrl } from '@/lib/supabase/s
 export interface ContactAttachment {
   id: string;
   contact_id: string;
+  organization_id: string;
   storage_bucket: string;
   storage_path: string;
   file_name: string;
@@ -47,6 +48,17 @@ export async function createContactAttachment(params: {
 }): Promise<ContactAttachment> {
   const { contactId, file, category, metadata, createdBy } = params;
 
+  // Primero obtener el organization_id del contacto
+  const { data: contact, error: contactError } = await supabase
+    .from('contacts')
+    .select('organization_id')
+    .eq('id', contactId)
+    .single();
+
+  if (contactError || !contact) {
+    throw new Error(`Error al obtener información del contacto: ${contactError?.message || 'Contacto no encontrado'}`);
+  }
+
   // Generar storage_path
   const uuid = crypto.randomUUID();
   const sluggedName = slugify(file.name);
@@ -61,6 +73,7 @@ export async function createContactAttachment(params: {
       .from('contact_attachments')
       .insert({
         contact_id: contactId,
+        organization_id: contact.organization_id,
         storage_bucket: 'contact-files',
         storage_path,
         file_name: file.name,
