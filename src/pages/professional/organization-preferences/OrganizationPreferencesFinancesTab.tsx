@@ -172,14 +172,37 @@ export function FinancesTab({}: FinancesTabProps) {
 
   const updateSecondaryCurrenciesMutation = useMutation({
     mutationFn: async (currencyIds: string[]) => {
-      // Delete all non-default currencies
+      // 1. Identificar monedas que se van a ELIMINAR
+      const currenciesToRemove = organizationCurrencies
+        ?.filter(c => !c.is_default && !currencyIds.includes(c.currency_id))
+        .map(c => c.currency_id) || [];
+      
+      // 2. VALIDAR: ¿Hay movimientos usando esas monedas?
+      if (currenciesToRemove.length > 0) {
+        const { data: movementsUsingCurrency, error: checkError } = await supabase
+          .from('movements')
+          .select('id')
+          .eq('organization_id', userData?.organization?.id)
+          .in('currency_id', currenciesToRemove)
+          .limit(1);
+        
+        if (checkError) throw checkError;
+        
+        if (movementsUsingCurrency && movementsUsingCurrency.length > 0) {
+          throw new Error(
+            'No puedes eliminar monedas que tienen movimientos registrados. Primero elimina o modifica los movimientos que usan estas monedas.'
+          );
+        }
+      }
+      
+      // 3. Solo si pasa la validación, eliminar
       await supabase
         .from('organization_currencies')
         .delete()
         .eq('organization_id', userData?.organization?.id)
         .eq('is_default', false);
 
-      // Insert new secondary currencies
+      // 4. Insertar nuevas monedas secundarias
       if (currencyIds.length > 0) {
         const { error } = await supabase
           .from('organization_currencies')
@@ -199,12 +222,11 @@ export function FinancesTab({}: FinancesTabProps) {
         description: 'La configuración de monedas se ha guardado exitosamente.' 
       });
       queryClient.invalidateQueries({ queryKey: ['organizationCurrencies', userData?.organization?.id] });
-      queryClient.invalidateQueries({ queryKey: ['organizationCurrencies', userData?.organization?.id] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({ 
-        title: 'Error al actualizar monedas', 
-        description: 'No se pudieron actualizar las monedas secundarias.',
+        title: 'No se puede eliminar', 
+        description: error.message || 'No se pudieron actualizar las monedas secundarias.',
         variant: 'destructive'
       });
     }
@@ -212,14 +234,37 @@ export function FinancesTab({}: FinancesTabProps) {
 
   const updateSecondaryWalletsMutation = useMutation({
     mutationFn: async (walletIds: string[]) => {
-      // Delete all non-default wallets
+      // 1. Identificar billeteras que se van a ELIMINAR
+      const walletsToRemove = organizationWallets
+        ?.filter(w => !w.is_default && !walletIds.includes(w.wallet_id)) || [];
+      
+      // 2. VALIDAR: ¿Hay movimientos usando esas billeteras? (CRÍTICO)
+      if (walletsToRemove.length > 0) {
+        const walletIdsToCheck = walletsToRemove.map(w => w.id);
+        
+        const { data: movementsUsingWallet, error: checkError } = await supabase
+          .from('movements')
+          .select('id')
+          .in('wallet_id', walletIdsToCheck)
+          .limit(1);
+        
+        if (checkError) throw checkError;
+        
+        if (movementsUsingWallet && movementsUsingWallet.length > 0) {
+          throw new Error(
+            'No puedes eliminar billeteras que tienen movimientos registrados. Primero elimina o reasigna los movimientos que usan estas billeteras.'
+          );
+        }
+      }
+      
+      // 3. Solo si pasa la validación, eliminar
       await supabase
         .from('organization_wallets')
         .delete()
         .eq('organization_id', userData?.organization?.id)
         .eq('is_default', false);
 
-      // Insert new secondary wallets
+      // 4. Insertar nuevas billeteras secundarias
       if (walletIds.length > 0) {
         const { error } = await supabase
           .from('organization_wallets')
@@ -239,12 +284,11 @@ export function FinancesTab({}: FinancesTabProps) {
         description: 'La configuración de billeteras se ha guardado exitosamente.' 
       });
       queryClient.invalidateQueries({ queryKey: ['organizationWallets', userData?.organization?.id] });
-      queryClient.invalidateQueries({ queryKey: ['organizationWallets', userData?.organization?.id] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({ 
-        title: 'Error al actualizar billeteras', 
-        description: 'No se pudieron actualizar las billeteras secundarias.',
+        title: 'No se puede eliminar', 
+        description: error.message || 'No se pudieron actualizar las billeteras secundarias.',
         variant: 'destructive'
       });
     }
