@@ -76,10 +76,19 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
             />
           ) : (
             <div 
-              className="w-full h-full flex items-center justify-center text-6xl font-bold text-white/80"
-              style={{ backgroundColor: project.color || '#ffffff' }}
+              className="w-full h-full flex items-center justify-center text-6xl font-bold text-white/80 relative overflow-hidden"
             >
-              {getProjectInitials(project.name)}
+              {/* Degradado radial suave de fondo */}
+              <div 
+                className="absolute inset-0"
+                style={{ 
+                  background: `radial-gradient(ellipse at top right, ${project.color || '#8b5cf6'}40 0%, ${project.color || '#8b5cf6'}26 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.7) 100%)`
+                }}
+              />
+              {/* Iniciales del proyecto sobre el degradado */}
+              <span className="relative z-10">
+                {getProjectInitials(project.name)}
+              </span>
             </div>
           )}
           

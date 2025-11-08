@@ -116,7 +116,11 @@ export default function ProjectItemCard({
         ) : (
           <div 
             className="absolute inset-0"
-            style={{ backgroundColor: 'var(--muted)' }}
+            style={{ 
+              background: projectColor.includes('var(')
+                ? `radial-gradient(ellipse at top right, rgba(139, 92, 246, 0.25) 0%, rgba(139, 92, 246, 0.15) 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.7) 100%)`
+                : `radial-gradient(ellipse at top right, ${chroma(projectColor).alpha(0.25).css()} 0%, ${chroma(projectColor).alpha(0.15).css()} 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.7) 100%)`
+            }}
           />
         )}
         
