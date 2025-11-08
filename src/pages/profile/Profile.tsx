@@ -73,7 +73,7 @@ export default function Profile() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps} wide={true}>
+      <Layout headerProps={headerProps} wide={false}>
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">Cargando perfil...</div>
         </div>
@@ -83,7 +83,7 @@ export default function Profile() {
 
   if (!user) {
     return (
-      <Layout headerProps={headerProps} wide={true}>
+      <Layout headerProps={headerProps} wide={false}>
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">Usuario no encontrado</div>
         </div>
@@ -92,7 +92,7 @@ export default function Profile() {
   }
 
   return (
-    <Layout headerProps={headerProps} wide={true}>
+    <Layout headerProps={headerProps} wide={false}>
       {activeTab === 'Datos Básicos' && <ProfileBasicData user={user} />}
       {activeTab === 'Preferencias' && <ProfilePreferences user={user} />}
       {activeTab === 'Organizaciones' && <ProfileOrganizations user={user} />}

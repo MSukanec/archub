@@ -18,6 +18,7 @@ import { useLocation } from 'wouter'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { OrganizationMemberAvatars } from '@/components/ui-custom/general/OrganizationMemberAvatars'
+import { CompactAvatarGroup } from '@/components/ui-custom/general/CompactAvatarGroup'
 import { AdminOrganizationRow } from '@/components/ui/data-row/rows'
 import { useMobile } from '@/hooks/use-mobile'
 
@@ -43,9 +44,10 @@ function OrganizationCard({ organization, isSelected, onSelect, onView, onEdit, 
       }}
     >
       <CardContent className="p-4">
-        {/* Organization info with avatar - EXACT COPY from InvitationModal */}
-        <div className="flex items-start gap-3">
-          <Avatar className="w-14 h-14 border-2 border-background">
+        {/* Single row: Avatar / Name / Plan / Members */}
+        <div className="flex items-center gap-4">
+          {/* Avatar */}
+          <Avatar className="w-14 h-14 border-2 border-background shrink-0">
             {organization.logo_url ? (
               <AvatarImage 
                 src={organization.logo_url} 
@@ -57,79 +59,59 @@ function OrganizationCard({ organization, isSelected, onSelect, onView, onEdit, 
               </AvatarFallback>
             )}
           </Avatar>
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <p className="text-lg font-semibold text-foreground">
+          
+          {/* Name */}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <p className="text-lg font-semibold text-foreground truncate">
                 {organization.name}
               </p>
               {isSelected && (
                 <Badge 
-                  className="text-xs text-white" 
+                  className="text-xs text-white shrink-0" 
                   style={{ backgroundColor: 'var(--accent)' }}
                 >
                   Activa
                 </Badge>
               )}
             </div>
-            
-            {/* Plan and members info */}
-            <div className="flex items-center gap-4 flex-wrap">
-              {/* Plan */}
-              <div>
-                {organization.plan ? (
-                  <Badge 
-                    variant="secondary" 
-                    className="text-xs text-white" 
-                    style={{
-                      backgroundColor: organization.plan.name?.toLowerCase() === 'free' ? 'var(--plan-free-bg)' :
-                                     organization.plan.name?.toLowerCase() === 'pro' ? 'var(--plan-pro-bg)' :
-                                     organization.plan.name?.toLowerCase() === 'teams' ? 'var(--plan-teams-bg)' :
-                                     'var(--plan-free-bg)'
-                    }}
-                  >
-                    <Crown className="w-3 h-3 mr-1" />
-                    {organization.plan.name}
-                  </Badge>
-                ) : (
-                  <Badge 
-                    variant="secondary" 
-                    className="text-xs text-white" 
-                    style={{ backgroundColor: 'var(--plan-free-bg)' }}
-                  >
-                    <Crown className="w-3 h-3 mr-1" />
-                    Free
-                  </Badge>
-                )}
-              </div>
+          </div>
 
-              {/* Miembros */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-muted-foreground">
-                  {members.length} {members.length === 1 ? 'miembro' : 'miembros'}
-                </span>
-                <div className="flex -space-x-1">
-                  {members.slice(0, 3).map((member, index) => (
-                    <Avatar key={member.id} className="w-6 h-6 avatar-border" style={{border: '2px solid var(--card)'}}>
-                      {member.avatar_url ? (
-                        <AvatarImage 
-                          src={member.avatar_url} 
-                          alt={member.full_name || member.email}
-                        />
-                      ) : (
-                        <AvatarFallback className="text-xs">
-                          {(member.full_name || member.email || 'U').substring(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
-                  ))}
-                  {members.length > 3 && (
-                    <div className="w-6 h-6 rounded-full bg-[var(--muted)] flex items-center justify-center text-xs font-medium text-[var(--muted-foreground)]" style={{border: '2px solid var(--card)'}}>
-                      +{members.length - 3}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+          {/* Plan */}
+          <div className="shrink-0">
+            {organization.plan ? (
+              <Badge 
+                variant="secondary" 
+                className="text-xs text-white" 
+                style={{
+                  backgroundColor: organization.plan.name?.toLowerCase() === 'free' ? 'var(--plan-free-bg)' :
+                                 organization.plan.name?.toLowerCase() === 'pro' ? 'var(--plan-pro-bg)' :
+                                 organization.plan.name?.toLowerCase() === 'teams' ? 'var(--plan-teams-bg)' :
+                                 'var(--plan-free-bg)'
+                }}
+              >
+                <Crown className="w-3 h-3 mr-1" />
+                {organization.plan.name}
+              </Badge>
+            ) : (
+              <Badge 
+                variant="secondary" 
+                className="text-xs text-white" 
+                style={{ backgroundColor: 'var(--plan-free-bg)' }}
+              >
+                <Crown className="w-3 h-3 mr-1" />
+                Free
+              </Badge>
+            )}
+          </div>
+
+          {/* Members - Using CompactAvatarGroup like InvitationModal */}
+          <div className="shrink-0">
+            <CompactAvatarGroup 
+              members={members} 
+              maxDisplay={4} 
+              size="md" 
+            />
           </div>
         </div>
       </CardContent>
