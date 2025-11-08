@@ -18,7 +18,7 @@ interface ProfilePreferencesProps {
 export function ProfilePreferences({ user }: ProfilePreferencesProps) {
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
-  const { setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore()
+  const { setDocked: setMainSidebarDocked } = useSidebarStore()
   const { isDark, setTheme } = useThemeStore()
   
   const [sidebarDocked, setSidebarDocked] = useState(false)
@@ -89,7 +89,7 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
 
   const handleSidebarDockedChange = (value: boolean) => {
     setSidebarDocked(value)
-    setSecondarySidebarDocked(value)
+    setMainSidebarDocked(value)
   }
 
   // Load settings data
