@@ -1,14 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { HandHeart, MoreHorizontal } from 'lucide-react';
+import { Trash2, HandHeart } from 'lucide-react';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -17,8 +10,6 @@ import { useMutation } from '@tanstack/react-query';
 import { usePartners } from '@/hooks/use-partners';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 function getInitials(name: string): string {
   if (!name) return '?';
@@ -120,57 +111,37 @@ export function PartnersTab() {
                     <CardContent className="p-0">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10 bg-[var(--accent)]/10">
-                            <AvatarFallback className="bg-transparent text-[var(--accent)] font-medium">
-                              {getInitials(displayName)}
-                            </AvatarFallback>
+                          <Avatar className="h-10 w-10 border-2 border-background">
+                            {(contact as any)?.avatar_url ? (
+                              <AvatarImage 
+                                src={(contact as any).avatar_url} 
+                                alt={displayName} 
+                              />
+                            ) : (
+                              <AvatarFallback className="bg-[var(--accent)]/10 text-[var(--accent)] font-medium">
+                                {getInitials(displayName)}
+                              </AvatarFallback>
+                            )}
                           </Avatar>
                           
                           <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-medium text-sm">
-                                {displayName}
-                              </h4>
-                            </div>
+                            <h4 className="font-medium text-sm">
+                              {displayName}
+                            </h4>
                             <p className="text-xs text-muted-foreground">
                               {contact?.email || 'Sin email'}
                             </p>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-4">
-                          <div className="text-xs text-muted-foreground text-right">
-                            <div>
-                              {partner.created_at && !isNaN(new Date(partner.created_at).getTime()) 
-                                ? format(new Date(partner.created_at), 'MMM dd, yyyy', { locale: es })
-                                : 'Fecha no disponible'
-                              }
-                            </div>
-                          </div>
-
-                          <Badge variant="secondary">
-                            Socio
-                          </Badge>
-
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => openModal('partner', { editingPartner: partner })}>
-                                Editar socio
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                className="text-red-600"
-                                onClick={() => handleDeletePartner(partner)}
-                              >
-                                Eliminar socio
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => handleDeletePartner(partner)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>

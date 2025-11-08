@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Settings, UserPlus } from 'lucide-react';
+import { Settings, UserPlus, HandHeart } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -48,19 +48,39 @@ export default function OrganizationPreferences() {
     }
   ];
 
-  // Create action button for members tab
-  const membersActions = activeTab === 'members' ? [
-    <PlanRestricted key="invite-member" feature="max_members" current={organizationMembers.length}>
-      <Button 
-        onClick={() => openModal('member')}
-        className="flex items-center gap-2"
-        data-testid="invite-member-button"
-      >
-        <UserPlus className="h-4 w-4" />
-        Invitar Miembro
-      </Button>
-    </PlanRestricted>
-  ] : undefined;
+  // Create action buttons based on active tab
+  const getHeaderActions = () => {
+    if (activeTab === 'members') {
+      return [
+        <PlanRestricted key="invite-member" feature="max_members" current={organizationMembers.length}>
+          <Button 
+            onClick={() => openModal('member')}
+            className="flex items-center gap-2"
+            data-testid="invite-member-button"
+          >
+            <UserPlus className="h-4 w-4" />
+            Invitar Miembro
+          </Button>
+        </PlanRestricted>
+      ];
+    }
+    
+    if (activeTab === 'partners') {
+      return [
+        <Button 
+          key="add-partner"
+          onClick={() => openModal('partner')}
+          className="flex items-center gap-2"
+          data-testid="add-partner-button"
+        >
+          <HandHeart className="h-4 w-4" />
+          Agregar Socio
+        </Button>
+      ];
+    }
+    
+    return undefined;
+  };
 
   const headerProps = {
     icon: Settings,
@@ -71,7 +91,7 @@ export default function OrganizationPreferences() {
     showMembers: true,
     tabs: headerTabs,
     onTabChange: (tabId: string) => setActiveTab(tabId),
-    actions: membersActions
+    actions: getHeaderActions()
   };
 
   const renderTabContent = () => {
