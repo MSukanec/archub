@@ -1,4 +1,5 @@
 import React from "react";
+import { useLocation } from "wouter";
 import {
   Popover,
   PopoverContent,
@@ -17,7 +18,7 @@ interface PlanRestrictedProps {
   current?: number;
   reason?: "coming_soon" | "general_mode" | string;
   functionName?: string;
-  badgeOnly?: boolean;
+  size?: "small" | "large";
   adminBypass?: boolean;
   children: React.ReactNode;
 }
@@ -27,7 +28,7 @@ export function PlanRestricted({
   current,
   reason,
   functionName,
-  badgeOnly = false,
+  size = "small",
   adminBypass = false,
   children,
 }: PlanRestrictedProps) {
@@ -35,6 +36,7 @@ export function PlanRestricted({
   const { data: userData } = useCurrentUser();
   const isAdmin = useIsAdmin();
   const { selectedProjectId } = useProjectContext();
+  const [, setLocation] = useLocation();
 
   // Determinar si está restringido
   let isRestricted = false;
@@ -59,7 +61,6 @@ export function PlanRestricted({
       const currentOrganization = userData?.organizations?.find(
         (org) => org.id === organizationId,
       );
-      const currentPlan = currentOrganization?.plan;
 
       if (featureLimit !== Infinity && current >= featureLimit) {
         isRestricted = true;
@@ -100,34 +101,90 @@ export function PlanRestricted({
     );
   }
 
-  // CASO: RESTRICCIÓN DE PLAN - Popover con upgrade
+  // CASO: RESTRICCIÓN DE PLAN - Overlay con blur + Badge + Popover
   const organizationId = userData?.preferences?.last_organization_id;
   const currentOrganization = userData?.organizations?.find(
     (org) => org.id === organizationId,
   );
-  const currentPlan = currentOrganization?.plan || "free";
+  const currentPlan = currentOrganization?.plan?.name || "free";
   
-  // Determinar el plan requerido
-  const requiredPlan = restrictionKey.includes("premium") ? "premium" : "pro";
+  // Determinar el plan requerido basado en el feature
+  const getRequiredPlan = (): 'pro' | 'teams' => {
+    if (!feature) return 'pro';
+    
+    // Features que requieren Teams
+    const teamsFeatures = [
+      'max_members',
+      'team_collaboration',
+      'advanced_permissions',
+    ];
+    
+    if (teamsFeatures.some(f => feature.includes(f))) {
+      return 'teams';
+    }
+    
+    return 'pro';
+  };
+
+  const requiredPlan = getRequiredPlan();
   
+  // Colores según el plan requerido
+  const planColors = {
+    pro: 'hsl(213, 100%, 33%)',    // Azul
+    teams: 'hsl(271, 76%, 53%)',   // Morado
+  };
+
+  const planBgColor = planColors[requiredPlan];
+  const planName = requiredPlan === 'pro' ? 'Pro' : 'Teams';
+
   return (
     <Popover>
       <PopoverTrigger asChild>
         <div className="relative inline-flex cursor-pointer">
-          <div className="opacity-60 pointer-events-none">
-            {React.cloneElement(children as React.ReactElement, {
-              disabled: true,
-              className: `${(children as React.ReactElement).props.className || ''} opacity-70 cursor-pointer`,
-            })}
+          {/* Overlay con blur - SIEMPRE presente */}
+          <div className="relative">
+            {/* Contenido deshabilitado */}
+            <div className={size === 'large' ? 'opacity-60 pointer-events-none' : 'opacity-60 pointer-events-none'}>
+              {React.cloneElement(children as React.ReactElement, {
+                disabled: true,
+                className: `${(children as React.ReactElement).props.className || ''} cursor-pointer`,
+              })}
+            </div>
+            
+            {/* Overlay con blur para LARGE */}
+            {size === 'large' && (
+              <div className="absolute inset-0 bg-background/60 dark:bg-background/80 backdrop-blur-[2px] rounded-xl flex items-center justify-center z-10 pointer-events-none">
+                {/* El badge se renderiza fuera del overlay */}
+              </div>
+            )}
           </div>
-          {/* Badge con candado */}
-          <Badge 
-            className="absolute -top-2 -right-2 text-[10px] px-1.5 py-0 h-5 bg-amber-500 hover:bg-amber-500 border-amber-600 cursor-pointer"
-            variant="default"
-          >
-            <Lock className="w-3 h-3 mr-1" />
-            {requiredPlan === "premium" ? "Premium" : "Pro"}
-          </Badge>
+          
+          {/* Badge con candado - posición según tamaño */}
+          {size === 'small' ? (
+            <Badge 
+              className="absolute -top-2 -right-2 text-[10px] px-1.5 py-0.5 h-5 cursor-pointer border-0"
+              style={{ 
+                backgroundColor: planBgColor,
+                color: 'white'
+              }}
+            >
+              <Lock className="w-3 h-3" />
+            </Badge>
+          ) : (
+            <div 
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center gap-2 px-4 py-2 rounded-lg border cursor-pointer"
+              style={{ 
+                backgroundColor: planBgColor,
+                borderColor: planBgColor,
+                color: 'white'
+              }}
+            >
+              <Lock className="w-4 h-4" />
+              <span className="text-xs font-medium">
+                Función disponible en plan {planName}
+              </span>
+            </div>
+          )}
         </div>
       </PopoverTrigger>
       <PopoverContent 
@@ -137,16 +194,24 @@ export function PlanRestricted({
       >
         <div className="space-y-3">
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
-              <Lock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+            <div 
+              className="p-2 rounded-lg"
+              style={{ 
+                backgroundColor: `${planBgColor}20`,
+              }}
+            >
+              <Lock 
+                className="w-5 h-5" 
+                style={{ color: planBgColor }}
+              />
             </div>
             <div className="flex-1">
               <h4 className="font-semibold text-sm mb-1">
-                Función de Plan {requiredPlan === "premium" ? "Premium" : "Pro"}
+                Función de Plan {planName}
               </h4>
               <p className="text-xs text-muted-foreground">
                 {feature 
-                  ? `Esta función requiere el plan ${requiredPlan === "premium" ? "Premium" : "Pro"}. Tu plan actual: ${currentPlan}.`
+                  ? `Esta función requiere el plan ${planName}. Tu plan actual: ${currentPlan}.`
                   : `Esta función no está disponible en tu plan actual.`
                 }
               </p>
@@ -163,17 +228,12 @@ export function PlanRestricted({
             <Button 
               size="sm" 
               className="flex-1"
-              onClick={() => {
-                console.log("Upgrade to", requiredPlan);
+              style={{ 
+                backgroundColor: planBgColor,
+                color: 'white'
               }}
-            >
-              Mejorar Plan
-            </Button>
-            <Button 
-              size="sm" 
-              variant="outline"
               onClick={() => {
-                console.log("Ver planes");
+                setLocation('/pricing');
               }}
             >
               Ver Planes
