@@ -1,0 +1,77 @@
+🧠 PROMPT PARA REPLIT
+Ya tengo creada en Supabase la tabla public.organization_activity_logs y la función pública log_activity().
+
+### Tabla: organization_activity_logs
+Campos:
+- id (uuid, PK)
+- organization_id (uuid)
+- user_id (uuid)
+- action (text)
+- target_table (text)
+- target_id (uuid, opcional)
+- metadata (jsonb)
+- created_at (timestamp)
+
+### Función: log_activity()
+Recibe:
+- p_organization_id
+- p_user_id
+- p_action
+- p_target_table
+- p_target_id (opcional)
+- p_metadata (jsonb, opcional)
+
+Inserta automáticamente un nuevo registro en organization_activity_logs con toda esta información.
+
+---
+
+### 🎯 Tu tarea en el FRONTEND y BACKEND
+
+1️⃣ **Integrar los llamados a log_activity()** en todos los puntos donde ocurren acciones importantes del usuario:
+   - Crear contacto → action: 'CREATE_CONTACT'
+   - Actualizar contacto → action: 'UPDATE_CONTACT'
+   - Crear movimiento → action: 'CREATE_MOVEMENT'
+   - Actualizar tarea → action: 'UPDATE_TASK'
+   - Borrar registro → action: 'DELETE_[TABLA]'
+   - Cambiar plan → action: 'UPDATE_PLAN'
+
+2️⃣ **Cada vez que se realice una acción exitosa**, ejecutar:
+   ```ts
+   await supabase.rpc('log_activity', {
+     p_organization_id: currentOrganization.id,
+     p_user_id: currentUser.id,
+     p_action: 'CREATE_CONTACT', // dinámico según el caso
+     p_target_table: 'contacts',
+     p_target_id: createdContact.id,
+     p_metadata: { name: createdContact.full_name, email: createdContact.email }
+   })
+
+
+(Si no hay datos adicionales, simplemente no envíes p_metadata.)
+
+3️⃣ Mostrar los registros de actividad en una nueva sección “Actividad” dentro del panel de la organización:
+
+Fuente: organization_activity_logs_view
+
+Columnas visibles: usuario, acción, fecha/hora, target_table, metadata.
+
+Ordenar por created_at desc.
+
+Mostrar el avatar del usuario (users.avatar_url) y su nombre (users.full_name).
+
+4️⃣ Diseño UI sugerido:
+
+Estilo compacto tipo Notion Activity Feed.
+
+Iconos: Plus para creaciones, Edit para actualizaciones, Trash para borrados.
+
+Tooltip al pasar el mouse mostrando detalles de metadata.
+
+5️⃣ Importante:
+
+No crear ni modificar funciones en Supabase (ya está todo hecho).
+
+Solo conectar los puntos del backend y UI para registrar y mostrar las acciones.
+
+El resultado esperado:
+Cada vez que un usuario haga algo relevante (crear, editar, borrar, etc.), automáticamente se registra en Supabase y aparece en el panel de “Actividad reciente” de la organización, con nombre, avatar, acción y hora.
