@@ -172,7 +172,7 @@ export function PartnerModal({ editingPartner, onClose }: PartnerModalProps) {
   // Convert contacts to ComboBox options
   const contactOptions = contacts.map(contact => ({
     value: contact.id,
-    label: `${contact.first_name} ${contact.last_name || ''} - ${contact.email || contact.company_name || ''}`.trim(),
+    label: `${contact.first_name || ''} ${contact.last_name || ''}`.trim(),
   }));
 
   const editPanel = (
