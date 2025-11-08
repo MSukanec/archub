@@ -111,14 +111,6 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      {/* Saving indicator */}
-      {isSaving && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground justify-center">
-          <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
-          Guardando...
-        </div>
-      )}
-
       {/* Preferencias Section */}
       <div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
