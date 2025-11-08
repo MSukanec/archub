@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
-import { TrendingUp, Plus } from 'lucide-react';
+import { DollarSign, Plus } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
@@ -26,8 +26,9 @@ export default function Movements() {
   ];
 
   const headerProps = {
-    icon: TrendingUp,
+    icon: DollarSign,
     title: "Movimientos",
+    description: "Registra y gestiona todos los movimientos financieros de tu organización.",
     organizationId,
     showMembers: true,
     tabs,

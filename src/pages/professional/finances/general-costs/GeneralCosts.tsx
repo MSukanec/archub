@@ -37,6 +37,7 @@ export default function GeneralCosts() {
   // Header configuration
   const headerProps = {
     title: "Gastos Generales",
+    description: "Administra los gastos generales y costos operativos de tu organización.",
     icon: CreditCard,
     organizationId,
     showMembers: true,

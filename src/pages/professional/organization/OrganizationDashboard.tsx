@@ -162,7 +162,8 @@ export default function OrganizationDashboard() {
 
   const headerProps = {
     icon: Home,
-    title: "Resumen de la Organización",
+    title: "Visión General",
+    description: "Vista general de tu organización, proyectos y actividad reciente.",
     organizationId: organizationId,
     showMembers: true
   };

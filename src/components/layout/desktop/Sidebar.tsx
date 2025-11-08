@@ -42,7 +42,9 @@ import {
   Wallet,
   CreditCard,
   Headphones,
-  BarChart3
+  BarChart3,
+  Folder,
+  TrendingUp
 } from "lucide-react";
 import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -130,12 +132,12 @@ export function Sidebar() {
     } else if (sidebarLevel === 'organization') {
       return [
         { id: 'dashboard', label: 'Visión General', icon: Home, href: '/organization/dashboard' },
-        { id: 'projects', label: 'Gestión de Proyectos', icon: Building, href: '/organization/projects' },
+        { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects' },
         { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts' },
-        { id: 'analysis', label: 'Análisis de Costos', icon: FileText, href: '/analysis' },
+        { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis' },
         { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements' },
-        { id: 'capital', label: 'Capital', icon: Calculator, href: '/finances/capital' },
-        { id: 'expenses', label: 'Gastos Generales', icon: FolderOpen, href: '/finances/general-costs' },
+        { id: 'capital', label: 'Capital', icon: TrendingUp, href: '/finances/capital' },
+        { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/finances/general-costs' },
         { id: 'activity', label: 'Actividad', icon: Activity, href: '/organization/activity', restricted: 'coming_soon' },
         { id: 'preferences', label: 'Preferencias', icon: Settings, href: '/organization/preferences' },
       ];

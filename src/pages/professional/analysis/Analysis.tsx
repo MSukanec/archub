@@ -71,6 +71,7 @@ export default function Analysis() {
   // Header configuration with dynamic tabs
   const headerProps = {
     title: "Análisis de Costos",
+    description: "Crea y gestiona análisis de costos para tareas, materiales y mano de obra.",
     icon: BarChart3,
     organizationId,
     showMembers: true,

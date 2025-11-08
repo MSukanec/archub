@@ -231,7 +231,7 @@ export default function Contacts() {
       <Layout
         wide={false}
         headerProps={{
-          icon: Contact,
+          icon: Users,
           title: "Contactos",
           description: "Gestiona los contactos de tu organización",
           organizationId,
@@ -270,7 +270,7 @@ export default function Contacts() {
     <Layout
       wide={false}
       headerProps={{
-        icon: Contact,
+        icon: Users,
         title: "Contactos",
         description: "Gestiona los contactos de tu organización",
         pageTitle: "Contactos",
