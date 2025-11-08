@@ -65,7 +65,8 @@ export default function OrganizationPreferences() {
   const headerProps = {
     icon: Settings,
     title: 'Preferencias',
-    subtitle: 'Gestiona los datos básicos, miembros y configuraciones financieras de tu organización',
+    subtitle: 'Configuración de tu Organización',
+    description: 'Gestiona los datos básicos, miembros, configuraciones financieras y socios de tu organización.',
     organizationId,
     showMembers: true,
     tabs: headerTabs,
