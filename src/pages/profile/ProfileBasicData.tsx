@@ -11,17 +11,12 @@ import { useState, useEffect } from 'react'
 import { useLocation } from 'wouter'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
 import { useAuthStore } from '@/stores/authStore'
 import { supabase } from '@/lib/supabase'
-
-interface Country {
-  id: string;
-  name: string;
-  code: string;
-}
+import { useCountries } from '@/hooks/use-countries'
 
 interface ProfileBasicDataProps {
   user: any;
@@ -154,27 +149,8 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
   const handleCountryChange = (value: string) => setCountry(value)
   const handleBirthdateChange = (value: Date | undefined) => setBirthdate(value)
 
-  // Countries query
-  const { data: countries = [] } = useQuery<Country[]>({
-    queryKey: ['countries'],
-    queryFn: async () => {
-      if (!supabase) throw new Error('Supabase not initialized');
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('No active session');
-
-      const response = await fetch('/api/countries', {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch countries')
-      }
-      return response.json()
-    },
-  })
+  // Countries query - using optimized hook
+  const { data: countries = [] } = useCountries()
 
   // Load profile data
   useEffect(() => {

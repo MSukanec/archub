@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-interface Country {
+export interface Country {
   id: string;
   name: string;
   alpha_3: string;
@@ -17,5 +17,7 @@ export function useCountries() {
       }
       return response.json();
     },
+    staleTime: Infinity, // Countries don't change, cache forever
+    gcTime: Infinity, // Keep in cache forever (previously cacheTime)
   });
 }

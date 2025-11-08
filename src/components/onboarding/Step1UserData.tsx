@@ -3,28 +3,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOnboardingStore } from "@/stores/onboardingStore";
-import { useQuery } from "@tanstack/react-query";
 import DatePickerField from "@/components/ui-custom/fields/DatePickerField";
 import { Loader2 } from "lucide-react";
+import { useCountries } from "@/hooks/use-countries";
 
 interface Step1UserDataProps {
   onFinish?: () => void;
 }
 
-interface Country {
-  id: string;
-  name: string;
-  alpha_3: string;
-  country_code: string;
-}
-
 export function Step1UserData({ onFinish }: Step1UserDataProps = {}) {
   const { formData, updateFormData } = useOnboardingStore();
 
-  // Fetch countries
-  const { data: countries, isLoading: loadingCountries } = useQuery<Country[]>({
-    queryKey: ['/api/countries'],
-  });
+  // Fetch countries - using optimized hook
+  const { data: countries, isLoading: loadingCountries } = useCountries();
 
   const handleFinish = () => {
     if (formData.first_name && formData.last_name && formData.country && formData.birthdate && formData.organization_name && onFinish) {
