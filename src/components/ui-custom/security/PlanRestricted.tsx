@@ -228,7 +228,7 @@ export function PlanRestricted({
     <div className="relative w-full">
       {/* Contenido con blur */}
       <div className="relative w-full">
-        <div className="opacity-50 blur-[1.5px] pointer-events-none select-none">
+        <div className="opacity-50 blur-[0.8px] pointer-events-none select-none">
           {children}
         </div>
         
@@ -236,27 +236,30 @@ export function PlanRestricted({
         <div className="absolute inset-0 bg-background/50 dark:bg-background/70 rounded-xl" />
       </div>
       
-      {/* Badge centrado con texto + botón */}
+      {/* Badge centrado - UNA LÍNEA HORIZONTAL */}
       <div className="absolute inset-0 flex items-center justify-center z-10 px-4">
-        <div 
-          className="flex flex-col items-center gap-3 px-6 py-4 rounded-xl shadow-2xl border-2"
-          style={{ 
-            backgroundColor: planBgColor,
-            borderColor: planBgColor,
-            color: 'white'
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <Lock className="w-5 h-5" />
-            <span className="text-sm font-semibold">
-              Requiere Plan {planName}
-            </span>
+        <div className="flex items-center gap-3 px-4 py-2.5 rounded-lg shadow-xl bg-background border border-border">
+          {/* Candado con fondo accent */}
+          <div 
+            className="flex items-center justify-center w-8 h-8 rounded-md"
+            style={{ backgroundColor: 'var(--accent)' }}
+          >
+            <Lock className="w-4 h-4 text-white" />
           </div>
           
+          {/* Texto */}
+          <span className="text-sm font-medium text-foreground">
+            Requiere Plan {planName}
+          </span>
+          
+          {/* Botón */}
           <Button 
             size="sm"
-            variant="secondary"
-            className="bg-white text-gray-900 hover:bg-gray-100 border-0 font-medium shadow-md"
+            style={{ 
+              backgroundColor: planBgColor,
+              color: 'white'
+            }}
+            className="border-0 font-medium shadow-sm hover:opacity-90"
             onClick={() => {
               setLocation('/pricing');
             }}
