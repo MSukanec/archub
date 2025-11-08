@@ -80,17 +80,19 @@ export function PlanRestricted({
     return <>{children}</>;
   }
 
-  // ADMIN BYPASS: Los administradores siempre pueden acceder aunque se vea disabled
-  if (isAdmin) {
-    return (
-      <div className="opacity-40">
-        {children}
-      </div>
-    );
-  }
-
-  // CASO: COMING SOON - Solo deshabilitar sin decoración
+  // CASO: COMING SOON
+  // Los admins SÍ pueden acceder (bypass), usuarios normales NO
   if (reason === "coming_soon") {
+    if (isAdmin) {
+      // Admin bypass: permitir acceso pero con opacidad reducida
+      return (
+        <div className="opacity-40">
+          {children}
+        </div>
+      );
+    }
+    
+    // Usuario normal: bloquear completamente
     return (
       <div className="opacity-40 pointer-events-none cursor-not-allowed">
         {React.cloneElement(children as React.ReactElement, {
