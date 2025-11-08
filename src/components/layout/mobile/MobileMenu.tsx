@@ -154,7 +154,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements' },
         { id: 'capital', label: 'Capital', icon: Calculator, href: '/finances/capital' },
         { id: 'expenses', label: 'Gastos Generales', icon: FolderOpen, href: '/finances/general-costs' },
-        { id: 'activity', label: 'Actividad', icon: Activity, href: '/organization/activity', restricted: 'coming_soon' },
+        { id: 'activity', label: 'Actividad', icon: Activity, href: '/organization/activity' },
         { id: 'preferences', label: 'Preferencias', icon: Settings, href: '/organization/preferences' },
       ];
     } else if (sidebarLevel === 'project' && selectedProjectId) {
