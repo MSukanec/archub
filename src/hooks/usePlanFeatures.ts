@@ -41,6 +41,11 @@ export function usePlanFeatures(): PlanFeatures {
       return planName !== 'free';
     }
     
+    // Custom Project Color - solo para Pro y superiores
+    if (feature === 'custom_project_color') {
+      return planName === 'pro' || planName === 'teams';
+    }
+    
     // Si la feature no está definida, permitir por defecto (compatibilidad)
     return true;
   };
