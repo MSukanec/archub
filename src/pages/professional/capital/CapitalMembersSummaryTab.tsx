@@ -24,7 +24,7 @@ interface CapitalDashboardProps {
   memberSummary: MemberSummary[]
 }
 
-export function CapitalDashboard({ memberSummary }: CapitalDashboardProps) {
+export function CapitalMembersSummaryTab({ memberSummary }: CapitalDashboardProps) {
   // Member summary table columns
   const memberSummaryColumns = [
     {

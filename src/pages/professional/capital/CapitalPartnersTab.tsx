@@ -21,14 +21,13 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-export function PartnersTab() {
+export function CapitalPartnersTab() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   
   const organizationId = userData?.organization?.id;
 
-  // Query to get partners with their contact information
   const { data: partners = [], isLoading } = usePartners(organizationId);
 
   const removeMemberMutation = useMutation({
@@ -70,9 +69,7 @@ export function PartnersTab() {
 
   return (
     <div className="space-y-6">
-      {/* Two Column Layout - Section descriptions left, content right */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column - Section Description */}
         <div className="lg:col-span-4">
           <div className="flex items-center gap-2 mb-6">
             <HandHeart className="h-5 w-5 text-[var(--accent)]" />
@@ -83,7 +80,6 @@ export function PartnersTab() {
           </p>
         </div>
 
-        {/* Right Column - Partners Content */}
         <div className="lg:col-span-8">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">

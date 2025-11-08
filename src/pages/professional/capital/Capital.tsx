@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
-import { TrendingUp, Plus } from 'lucide-react'
+import { TrendingUp, Plus, HandHeart } from 'lucide-react'
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
@@ -11,9 +11,10 @@ import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useToast } from '@/hooks/use-toast'
 
-import { CapitalDashboard } from './CapitalDashboard'
-import { CapitalHistory } from './CapitalHistory'
-import DashboardTab from './DashboardTab'
+import { CapitalMembersSummaryTab } from './CapitalMembersSummaryTab'
+import { CapitalHistoryTab } from './CapitalHistoryTab'
+import CapitalFinancialSummaryTab from './CapitalFinancialSummaryTab'
+import { CapitalPartnersTab } from './CapitalPartnersTab'
 
 interface CapitalMovement {
   id: string
@@ -309,8 +310,50 @@ export default function FinancesCapitalMovements() {
       id: "details",
       label: "Detalle de Aportes/Retiros",
       isActive: activeTab === "details"
+    },
+    {
+      id: "partners",
+      label: "Socios",
+      isActive: activeTab === "partners"
     }
   ]
+
+  // Get header actions based on active tab
+  const getHeaderActions = () => {
+    if (activeTab === 'partners') {
+      return [
+        <Button
+          key="add-partner"
+          variant="default"
+          size="sm"
+          onClick={() => openModal('partner')}
+          className="h-8 px-3 text-xs font-normal"
+          data-testid="button-add-partner"
+        >
+          <HandHeart className="w-4 h-4 mr-1" />
+          Agregar Socio
+        </Button>
+      ];
+    }
+    
+    if (movements.length > 0) {
+      return [
+        <Button
+          key="new-movement"
+          variant="default"
+          size="sm"
+          onClick={handleNewMovement}
+          className="h-8 px-3 text-xs font-normal"
+          data-testid="button-new-movement"
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          Nuevo Movimiento
+        </Button>
+      ];
+    }
+    
+    return [];
+  };
 
   const headerProps = {
     title: "Capital",
@@ -320,19 +363,7 @@ export default function FinancesCapitalMovements() {
     showMembers: true,
     tabs: headerTabs,
     onTabChange: setActiveTab,
-    actions: movements.length > 0 ? [
-      <Button
-        key="new-movement"
-        variant="default"
-        size="sm"
-        onClick={handleNewMovement}
-        className="h-8 px-3 text-xs font-normal"
-        data-testid="button-new-movement"
-      >
-        <Plus className="w-4 h-4 mr-1" />
-        Nuevo Movimiento
-      </Button>
-    ] : []
+    actions: getHeaderActions()
   }
 
   if (isLoading) {
@@ -368,16 +399,15 @@ export default function FinancesCapitalMovements() {
       ) : (
         <div className="space-y-4">
           {activeTab === "dashboard" && (
-            <DashboardTab />
+            <CapitalFinancialSummaryTab />
           )}
 
           {activeTab === "members" && memberSummary.length > 0 && (
-            <CapitalDashboard memberSummary={memberSummary} />
+            <CapitalMembersSummaryTab memberSummary={memberSummary} />
           )}
 
-
           {activeTab === "details" && (
-            <CapitalHistory
+            <CapitalHistoryTab
               movements={movements as any}
               searchValue={searchValue}
               aportesPropriosConcept={aportesPropriosConcept}
@@ -389,6 +419,10 @@ export default function FinancesCapitalMovements() {
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
+          )}
+
+          {activeTab === "partners" && (
+            <CapitalPartnersTab />
           )}
         </div>
       )}

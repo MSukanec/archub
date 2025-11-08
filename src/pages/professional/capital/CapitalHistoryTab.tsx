@@ -52,7 +52,7 @@ interface CapitalHistoryProps {
   onDelete: (movement: CapitalMovement) => void
 }
 
-export function CapitalHistory({ 
+export function CapitalHistoryTab({ 
   movements, 
   searchValue, 
   aportesPropriosConcept, 

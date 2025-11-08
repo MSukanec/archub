@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Settings, UserPlus, HandHeart } from 'lucide-react';
+import { Settings, UserPlus } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -10,7 +10,6 @@ import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { DataBasicTab } from './OrganizationPreferencesDataBasicTab';
 import { MembersTab } from './OrganizationPreferencesMembersTab';
 import { FinancesTab } from './OrganizationPreferencesFinancesTab';
-import { PartnersTab } from './OrganizationPreferencesPartnersTab';
 
 export default function OrganizationPreferences() {
   const [activeTab, setActiveTab] = useState('basic');
@@ -40,11 +39,6 @@ export default function OrganizationPreferences() {
       id: 'finances',
       label: 'Finanzas',
       isActive: activeTab === 'finances'
-    },
-    {
-      id: 'partners',
-      label: 'Socios',
-      isActive: activeTab === 'partners'
     }
   ];
 
@@ -62,20 +56,6 @@ export default function OrganizationPreferences() {
             Invitar Miembro
           </Button>
         </PlanRestricted>
-      ];
-    }
-    
-    if (activeTab === 'partners') {
-      return [
-        <Button 
-          key="add-partner"
-          onClick={() => openModal('partner')}
-          className="flex items-center gap-2"
-          data-testid="add-partner-button"
-        >
-          <HandHeart className="h-4 w-4" />
-          Agregar Socio
-        </Button>
       ];
     }
     
@@ -102,8 +82,6 @@ export default function OrganizationPreferences() {
         return <MembersTab />;
       case 'finances':
         return <FinancesTab />;
-      case 'partners':
-        return <PartnersTab />;
       default:
         return <DataBasicTab />;
     }
