@@ -43,87 +43,92 @@ function OrganizationCard({ organization, isSelected, onSelect, onView, onEdit, 
       }}
     >
       <CardContent className="p-4">
-        <div className="grid grid-cols-3 gap-4 items-center">
-          {/* Organización */}
-          <div className="col-span-1 flex items-center gap-3">
-            <Avatar className="w-14 h-14 border-2 border-background">
-              {organization.logo_url ? (
-                <AvatarImage 
-                  src={organization.logo_url} 
-                  alt={organization.name} 
-                />
-              ) : (
-                <AvatarFallback>
-                  <Building2 className="h-7 w-7 text-muted-foreground" />
-                </AvatarFallback>
-              )}
-            </Avatar>
-            <div>
-              <div className="font-medium flex items-center gap-2">
+        {/* Organization info with avatar - EXACT COPY from InvitationModal */}
+        <div className="flex items-start gap-3">
+          <Avatar className="w-14 h-14 border-2 border-background">
+            {organization.logo_url ? (
+              <AvatarImage 
+                src={organization.logo_url} 
+                alt={organization.name} 
+              />
+            ) : (
+              <AvatarFallback>
+                <Building2 className="h-7 w-7 text-muted-foreground" />
+              </AvatarFallback>
+            )}
+          </Avatar>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-lg font-semibold text-foreground">
                 {organization.name}
-                {isSelected && (
+              </p>
+              {isSelected && (
+                <Badge 
+                  className="text-xs text-white" 
+                  style={{ backgroundColor: 'var(--accent)' }}
+                >
+                  Activa
+                </Badge>
+              )}
+            </div>
+            
+            {/* Plan and members info */}
+            <div className="flex items-center gap-4 flex-wrap">
+              {/* Plan */}
+              <div>
+                {organization.plan ? (
                   <Badge 
+                    variant="secondary" 
                     className="text-xs text-white" 
-                    style={{ backgroundColor: 'var(--accent)' }}
+                    style={{
+                      backgroundColor: organization.plan.name?.toLowerCase() === 'free' ? 'var(--plan-free-bg)' :
+                                     organization.plan.name?.toLowerCase() === 'pro' ? 'var(--plan-pro-bg)' :
+                                     organization.plan.name?.toLowerCase() === 'teams' ? 'var(--plan-teams-bg)' :
+                                     'var(--plan-free-bg)'
+                    }}
                   >
-                    Activa
+                    <Crown className="w-3 h-3 mr-1" />
+                    {organization.plan.name}
+                  </Badge>
+                ) : (
+                  <Badge 
+                    variant="secondary" 
+                    className="text-xs text-white" 
+                    style={{ backgroundColor: 'var(--plan-free-bg)' }}
+                  >
+                    <Crown className="w-3 h-3 mr-1" />
+                    Free
                   </Badge>
                 )}
               </div>
-            </div>
-          </div>
 
-          {/* Plan */}
-          <div className="col-span-1">
-            {organization.plan ? (
-              <Badge 
-                variant="secondary" 
-                className="text-xs text-white" 
-                style={{
-                  backgroundColor: organization.plan.name?.toLowerCase() === 'free' ? 'var(--plan-free-bg)' :
-                                 organization.plan.name?.toLowerCase() === 'pro' ? 'var(--plan-pro-bg)' :
-                                 organization.plan.name?.toLowerCase() === 'teams' ? 'var(--plan-teams-bg)' :
-                                 'var(--plan-free-bg)'
-                }}
-              >
-                <Crown className="w-3 h-3 mr-1" />
-                {organization.plan.name}
-              </Badge>
-            ) : (
-              <Badge 
-                variant="secondary" 
-                className="text-xs text-white" 
-                style={{ backgroundColor: 'var(--plan-free-bg)' }}
-              >
-                <Crown className="w-3 h-3 mr-1" />
-                Free
-              </Badge>
-            )}
-          </div>
-
-          {/* Miembros */}
-          <div className="col-span-1 flex items-center gap-2">
-            <span className="text-xs font-medium">({members.length})</span>
-            <div className="flex -space-x-1">
-              {members.slice(0, 3).map((member, index) => (
-                <Avatar key={member.id} className="w-6 h-6 avatar-border" style={{border: '3px solid var(--card-border)'}}>
-                  {member.avatar_url ? (
-                    <AvatarImage 
-                      src={member.avatar_url} 
-                      alt={member.full_name || member.email}
-                    />
-                  ) : (
-                    <AvatarFallback className="text-xs">
-                      {(member.full_name || member.email || 'U').substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
+              {/* Miembros */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-muted-foreground">
+                  {members.length} {members.length === 1 ? 'miembro' : 'miembros'}
+                </span>
+                <div className="flex -space-x-1">
+                  {members.slice(0, 3).map((member, index) => (
+                    <Avatar key={member.id} className="w-6 h-6 avatar-border" style={{border: '2px solid var(--card)'}}>
+                      {member.avatar_url ? (
+                        <AvatarImage 
+                          src={member.avatar_url} 
+                          alt={member.full_name || member.email}
+                        />
+                      ) : (
+                        <AvatarFallback className="text-xs">
+                          {(member.full_name || member.email || 'U').substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                  ))}
+                  {members.length > 3 && (
+                    <div className="w-6 h-6 rounded-full bg-[var(--muted)] flex items-center justify-center text-xs font-medium text-[var(--muted-foreground)]" style={{border: '2px solid var(--card)'}}>
+                      +{members.length - 3}
+                    </div>
                   )}
-                </Avatar>
-              ))}
-              {members.length > 3 && (
-                <div className="w-6 h-6 rounded-full bg-[var(--muted)] flex items-center justify-center" style={{border: '3px solid var(--card-border)'}}>
-                  <span className="text-xs font-medium text-[var(--muted-foreground)]">+{members.length - 3}</span>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>

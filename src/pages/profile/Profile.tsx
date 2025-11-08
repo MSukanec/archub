@@ -66,6 +66,7 @@ export default function Profile() {
     icon: User,
     title: user?.full_name || 'Perfil de Usuario',
     subtitle: `${user?.email || 'Usuario'} • Perfil Personal`,
+    description: 'Administra tu información personal, preferencias de la aplicación y las organizaciones a las que perteneces.',
     tabs: headerTabs,
     onTabChange: handleTabChange
   };
