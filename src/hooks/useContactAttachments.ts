@@ -25,8 +25,10 @@ export function useCreateContactAttachment() {
     onSuccess: (data) => {
       // Invalidar cache de adjuntos
       queryClient.invalidateQueries({ queryKey: ['contact-attachments', data.contact_id] });
-      // Invalidar cache del contacto
+      // Invalidar cache del contacto individual
       queryClient.invalidateQueries({ queryKey: ['contact', data.contact_id] });
+      // Invalidar cache de la lista de contactos (para actualizar attachments_count)
+      queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
       
       toast({
         title: "Éxito",
@@ -53,6 +55,8 @@ export function useDeleteContactAttachment() {
       // Invalidar todos los caches relacionados
       queryClient.invalidateQueries({ queryKey: ['contact-attachments'] });
       queryClient.invalidateQueries({ queryKey: ['contact'] });
+      // Invalidar cache de la lista de contactos (para actualizar attachments_count)
+      queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
       
       toast({
         title: "Éxito",
