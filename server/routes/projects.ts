@@ -725,7 +725,8 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
   // GET /api/community/projects - Get all public projects with location data
   app.get("/api/community/projects", async (req, res) => {
     try {
-      // Use admin client to bypass RLS for public community data
+      // Use admin client to bypass RLS for this public endpoint
+      // (organizations table requires authenticated access)
       const adminClient = getAdminClient();
       
       const { data: projects, error } = await adminClient
@@ -760,7 +761,10 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
         return res.status(500).json({ error: "Failed to fetch projects" });
       }
 
-      console.log(`Found ${projects?.length || 0} projects with location data`);
+      // Debug: log first project to see organizations structure
+      if (projects && projects.length > 0) {
+        console.log('First project sample:', JSON.stringify(projects[0], null, 2));
+      }
 
       // Flatten the data structure for easier consumption
       const projectsWithLocation = (projects || []).map((p: any) => {

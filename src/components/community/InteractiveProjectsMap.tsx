@@ -152,7 +152,7 @@ export function InteractiveProjectsMap() {
   }
 
   return (
-    <div className="w-full h-[600px] rounded-lg overflow-hidden border border-gray-200 shadow-lg relative">
+    <div className="w-full h-full relative">
       {projects.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/90 z-[1000] pointer-events-none">
           <div className="text-center text-gray-600">

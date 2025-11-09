@@ -21,18 +21,18 @@ export default function Community() {
 
   return (
     <Layout wide headerProps={headerProps}>
-      <div className="space-y-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-          <div className="mb-4">
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
-              Proyectos de la Comunidad
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Descubre proyectos de construcción alrededor del mundo. 
-              Haz zoom para ver más detalles y haz clic en los marcadores para obtener información.
-            </p>
-          </div>
-          
+      <div className="absolute inset-0 flex flex-col">
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">
+            Proyectos de la Comunidad
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Descubre proyectos de construcción alrededor del mundo. 
+            Haz zoom para ver más detalles y haz clic en los marcadores para obtener información.
+          </p>
+        </div>
+        
+        <div className="flex-1 min-h-0">
           <InteractiveProjectsMap />
         </div>
       </div>
