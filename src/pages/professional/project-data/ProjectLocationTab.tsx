@@ -191,6 +191,12 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
     setLng(isNaN(parsed) ? null : parsed);
   };
 
+  // Handle marker drag on map
+  const handleMarkerDragEnd = (newLat: number, newLng: number) => {
+    setLat(newLat);
+    setLng(newLng);
+  };
+
   if (!activeProjectId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -262,12 +268,17 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
         {/* Map - shown right below search */}
         {hasCoordinates && googleMapsApiKey && (
           <div className="mt-4">
+            <p className="text-sm text-muted-foreground mb-2">
+              Puedes arrastrar el pin en el mapa para ajustar la ubicación exacta.
+            </p>
             <GoogleMap
               apiKey={googleMapsApiKey}
               center={{ lat: lat!, lng: lng! }}
               zoom={16}
               markerTitle={addressFull || 'Ubicación del proyecto'}
               className="h-96 w-full rounded-lg border"
+              draggable={true}
+              onMarkerDragEnd={handleMarkerDragEnd}
             />
           </div>
         )}
