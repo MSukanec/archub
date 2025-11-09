@@ -10,7 +10,7 @@ import { PhoneField } from '@/components/ui-custom/fields/PhoneField';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';
 
-import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave';
+import { useDebouncedAutoSave } from '@/components/save';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';

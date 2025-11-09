@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 
-interface UseDebouncedAutoSaveOptions<T> {
+export interface UseDebouncedAutoSaveOptions<T> {
   data: T;
   saveFn: (data: T) => Promise<void>;
   delay?: number;
   enabled?: boolean;
 }
 
-interface UseDebouncedAutoSaveReturn {
+export interface UseDebouncedAutoSaveReturn {
   isSaving: boolean;
   lastSavedAt: Date | null;
 }

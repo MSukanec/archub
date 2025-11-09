@@ -3,7 +3,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
 import { supabase } from '@/lib/supabase'
-import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave'
+import { useDebouncedAutoSave } from '@/components/save'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -48,7 +48,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
   const [customColorHex, setCustomColorHex] = useState<string | null>(null)
 
   // Get project data for BasicData tab
-  const { data: projectData } = useQuery({
+  const { data: projectData, isSuccess: projectDataSuccess } = useQuery({
     queryKey: ['project-data', activeProjectId],
     queryFn: async () => {
       if (!activeProjectId || !supabase) return null;
@@ -70,7 +70,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
   });
 
   // Get actual project info for BasicData tab
-  const { data: projectInfo } = useQuery({
+  const { data: projectInfo, isSuccess: projectInfoSuccess } = useQuery({
     queryKey: ['project-info', activeProjectId],
     queryFn: async () => {
       if (!activeProjectId || !supabase) return null;
@@ -180,7 +180,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
     }
   });
 
-  // Auto-save hook
+  // Auto-save hook - enabled only after both queries complete (even if projectData is null for new projects)
   const { isSaving } = useDebouncedAutoSave({
     data: {
       name: projectName,
@@ -196,7 +196,8 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       zip_code: zipCode
     },
     saveFn: (data) => saveProjectDataMutation.mutateAsync(data),
-    delay: 1500
+    delay: 1500,
+    enabled: projectInfoSuccess && projectDataSuccess
   });
 
   // Load data when project changes or data is fetched
