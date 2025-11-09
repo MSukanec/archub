@@ -38,6 +38,9 @@ function MapController({ projects }: { projects: ProjectLocation[] }) {
 export function InteractiveProjectsMap() {
   const { data: projects = [], isLoading, error } = useQuery<ProjectLocation[]>({
     queryKey: ['/api/community/projects'],
+    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    refetchOnWindowFocus: true, // Refresh when user returns to tab
+    staleTime: 0, // Always consider data stale to ensure fresh data
   });
 
   const createCustomIcon = (color: string, logoUrl?: string) => {
