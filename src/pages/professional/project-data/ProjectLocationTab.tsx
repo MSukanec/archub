@@ -302,72 +302,75 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
           </div>
         )}
 
-        <div className="space-y-4">
-          {googleMapsApiKey ? (
-            <GooglePlacesAutocomplete
-              apiKey={googleMapsApiKey}
-              value={addressFull}
-              onChange={setAddressFull}
-              onPlaceSelected={handlePlaceSelected}
-              label="Buscar dirección en Google Maps"
-              placeholder="Ej: Av. Corrientes 1234, Buenos Aires"
-            />
-          ) : (
-            <div className="space-y-2">
-              <Label htmlFor="address-full">Dirección Completa</Label>
-              <Input 
-                id="address-full"
-                placeholder="Ej: Av. Corrientes 1234, Buenos Aires, Argentina"
+        {/* Desktop: 4 columns (search=2, lat=1, lng=1), Mobile: 1 column */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          {/* Search field - takes 2 columns on desktop */}
+          <div className="lg:col-span-2 space-y-2">
+            {googleMapsApiKey ? (
+              <GooglePlacesAutocomplete
+                apiKey={googleMapsApiKey}
                 value={addressFull}
-                onChange={(e) => setAddressFull(e.target.value)}
-                data-testid="input-address-full"
+                onChange={setAddressFull}
+                onPlaceSelected={handlePlaceSelected}
+                label="Buscar dirección en Google Maps"
+                placeholder="Ej: Av. Corrientes 1234, Buenos Aires"
               />
-            </div>
-          )}
-
-          {/* Latitude and Longitude inputs inline */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="latitude">Latitud</Label>
-              <Input 
-                id="latitude"
-                type="number"
-                step="0.000001"
-                placeholder="Ej: -34.603722"
-                value={lat !== null ? lat : ''}
-                onChange={(e) => handleLatChange(e.target.value)}
-                data-testid="input-latitude"
-              />
-              <p className="text-xs text-muted-foreground">
-                Norte-Sur (-90 a 90)
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="longitude">Longitud</Label>
-              <Input 
-                id="longitude"
-                type="number"
-                step="0.000001"
-                placeholder="Ej: -58.381592"
-                value={lng !== null ? lng : ''}
-                onChange={(e) => handleLngChange(e.target.value)}
-                data-testid="input-longitude"
-              />
-              <p className="text-xs text-muted-foreground">
-                Este-Oeste (-180 a 180)
-              </p>
-            </div>
+            ) : (
+              <>
+                <Label htmlFor="address-full">Dirección Completa</Label>
+                <Input 
+                  id="address-full"
+                  placeholder="Ej: Av. Corrientes 1234, Buenos Aires, Argentina"
+                  value={addressFull}
+                  onChange={(e) => setAddressFull(e.target.value)}
+                  data-testid="input-address-full"
+                />
+              </>
+            )}
           </div>
 
-          {/* Coordinates Status Indicator */}
-          {hasCoordinates && (
-            <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-500">
-              <CheckCircle2 className="h-4 w-4" />
-              <span>Ubicación guardada: {lat?.toFixed(6)}, {lng?.toFixed(6)}</span>
-            </div>
-          )}
+          {/* Latitude - takes 1 column */}
+          <div className="space-y-2">
+            <Label htmlFor="latitude">Latitud</Label>
+            <Input 
+              id="latitude"
+              type="number"
+              step="0.000001"
+              placeholder="Ej: -34.603722"
+              value={lat !== null ? lat : ''}
+              onChange={(e) => handleLatChange(e.target.value)}
+              data-testid="input-latitude"
+            />
+            <p className="text-xs text-muted-foreground">
+              Norte-Sur (-90 a 90)
+            </p>
+          </div>
+
+          {/* Longitude - takes 1 column */}
+          <div className="space-y-2">
+            <Label htmlFor="longitude">Longitud</Label>
+            <Input 
+              id="longitude"
+              type="number"
+              step="0.000001"
+              placeholder="Ej: -58.381592"
+              value={lng !== null ? lng : ''}
+              onChange={(e) => handleLngChange(e.target.value)}
+              data-testid="input-longitude"
+            />
+            <p className="text-xs text-muted-foreground">
+              Este-Oeste (-180 a 180)
+            </p>
+          </div>
         </div>
+
+        {/* Coordinates Status Indicator */}
+        {hasCoordinates && (
+          <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-500">
+            <CheckCircle2 className="h-4 w-4" />
+            <span>Ubicación guardada: {lat?.toFixed(6)}, {lng?.toFixed(6)}</span>
+          </div>
+        )}
 
         {/* Map - shown right below search */}
         {hasCoordinates && googleMapsApiKey && (
