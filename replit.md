@@ -12,9 +12,10 @@ Preferred communication style: Simple, everyday language.
 - **Design System**: "new-york" style with a neutral color palette, dark mode, and reusable UI components, leveraging `shadcn/ui` and Tailwind CSS.
 - **Typography System**: Unified Inter Variable Font with Apple-style optical letter-spacing, antialiased rendering, and consistent font weights.
 - **Dynamic Color System**: Project-based color theming using `chroma-js` for intelligent color calculations, including dynamic accent colors, hover states, foreground colors, and organic radial gradients. All UI components automatically "breathe" the project color.
-- **Modals**: Responsive Dialog component (right-side panel on desktop, fullscreen on mobile) with a standardized development pattern using `FormModalLayout`, React Hook Form with Zod validation, and `useMutation` from React Query.
+- **Modals**: Responsive Dialog component (right-side panel on desktop, fullscreen on mobile) with a standardized development pattern using `FormModalLayout`, React Hook Form with Zod validation, and `useMutation` from React Query. Delete confirmation modal uses Vercel-style "type to confirm" pattern with three sections: warning message, item details card showing contextual data, and text input requiring exact name match.
 - **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub. UserQuickAccess Popover is context-aware, hiding irrelevant selectors on specific pages.
 - **Home Page UX Flow**: Minimalist AI welcome interface with dynamic greetings and quick action buttons.
+- **Auto-Save System**: Centralized debounced auto-save hook located in `src/components/save/` with intelligent initial-load detection. Uses TanStack Query `isSuccess` flags to prevent false saves during data hydration while supporting projects without existing data.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui, Tailwind CSS, Zustand, Wouter, TanStack Query.
