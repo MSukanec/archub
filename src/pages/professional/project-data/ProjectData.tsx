@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FileText, Share2, Copy, MessageCircle, Mail } from 'lucide-react';
+import { FileText, Share2, Copy, MessageCircle, Mail, MapPin } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useProjectContext } from '@/stores/projectContext';
@@ -123,6 +123,21 @@ Generado desde Archub`);
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   };
 
+  const openInGoogleMaps = () => {
+    if (!projectLocationData || !projectLocationData.lat || !projectLocationData.lng) {
+      toast({
+        title: "Sin coordenadas",
+        description: "No hay coordenadas disponibles para abrir en Google Maps",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Open Google Maps with directions to the location
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${projectLocationData.lat},${projectLocationData.lng}`;
+    window.open(mapsUrl, '_blank');
+  };
+
   const headerTabs = [
     {
       id: 'basic',
@@ -157,6 +172,17 @@ Generado desde Archub`);
       </PopoverTrigger>
       <PopoverContent className="w-56 p-2" align="end">
         <div className="space-y-1">
+          <button
+            onClick={openInGoogleMaps}
+            className="flex items-center gap-3 w-full px-3 py-2 text-sm rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+            data-testid="button-open-google-maps"
+          >
+            <MapPin className="h-4 w-4" />
+            <span>Abrir en Google Maps</span>
+          </button>
+
+          <div className="h-px bg-border my-1" />
+          
           <button
             onClick={copyLocationDataToClipboard}
             className="flex items-center gap-3 w-full px-3 py-2 text-sm rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
