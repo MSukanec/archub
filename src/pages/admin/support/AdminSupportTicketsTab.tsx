@@ -336,7 +336,7 @@ const AdminSupportTicketsTab = () => {
                       ) : (
                         <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center p-1">
                           <img 
-                            src="/ArchubLogo.png" 
+                            src="/Seencel512.png" 
                             alt="Admin" 
                             className="w-full h-full object-contain"
                           />

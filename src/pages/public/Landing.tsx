@@ -160,11 +160,11 @@ export default function Landing() {
             <div className="flex items-center space-x-8">
               <div className="flex items-center space-x-2">
                 <img 
-                  src="/ArchubLogo.png" 
-                  alt="Archub" 
+                  src="/Seencel512.png" 
+                  alt="Seencel" 
                   className="h-8 w-8 object-contain"
                 />
-                <span className="text-xl font-bold">Archub</span>
+                <span className="text-xl font-bold">Seencel</span>
               </div>
               
               <nav className="hidden md:flex items-center space-x-6">
@@ -503,14 +503,14 @@ export default function Landing() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <img 
-                src="/ArchubLogo.png" 
-                alt="Archub" 
+                src="/Seencel512.png" 
+                alt="Seencel" 
                 className="h-8 w-8 object-contain"
               />
-              <span className="font-bold">Archub</span>
+              <span className="font-bold">Seencel</span>
             </div>
             <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              © 2025 Archub. Plataforma integral para arquitectura y construcción.
+              © 2025 Seencel. Plataforma integral para arquitectura y construcción.
             </div>
           </div>
         </div>

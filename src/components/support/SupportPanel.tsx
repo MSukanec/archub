@@ -286,8 +286,8 @@ export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: S
                   ) : (
                     <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center p-1">
                       <img 
-                        src="/ArchubLogo.png" 
-                        alt="Archub" 
+                        src="/Seencel512.png" 
+                        alt="Seencel" 
                         className="w-full h-full object-contain"
                       />
                     </div>
@@ -312,11 +312,11 @@ export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: S
       ) : (
         // Vista inicial (sin mensajes)
         <div className="flex-1 px-4 py-6 flex flex-col items-center justify-center text-center">
-          {/* Logo Archub */}
+          {/* Logo Seencel */}
           <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center p-3 mb-4">
             <img 
-              src="/ArchubLogo.png" 
-              alt="Archub" 
+              src="/Seencel512.png" 
+              alt="Seencel" 
               className="w-full h-full object-contain"
             />
           </div>

@@ -221,8 +221,8 @@ export function Sidebar() {
                   {/* Logo siempre en la misma posición */}
                   <div className="flex items-center justify-center w-8 flex-shrink-0">
                     <img 
-                      src="/ArchubLogo.png" 
-                      alt="Archub Logo" 
+                      src="/Seencel512.png" 
+                      alt="Seencel Logo" 
                       className="h-8 w-auto object-contain"
                     />
                   </div>
@@ -231,7 +231,7 @@ export function Sidebar() {
                   {isExpanded && (
                     <div className="flex items-center overflow-hidden min-w-0 ml-3">
                       <span className="text-lg font-normal text-[var(--main-sidebar-fg)] group-hover:text-white truncate">
-                        Archub
+                        Seencel
                       </span>
                     </div>
                   )}
@@ -541,8 +541,8 @@ export function Sidebar() {
                     {/* Logo siempre en la misma posición */}
                     <div className="flex items-center justify-center w-8 flex-shrink-0">
                       <img 
-                        src="/ArchubLogo.png" 
-                        alt="Archub Logo" 
+                        src="/Seencel512.png" 
+                        alt="Seencel Logo" 
                         className="h-8 w-auto object-contain"
                       />
                     </div>
@@ -554,7 +554,7 @@ export function Sidebar() {
                           {sidebarLevel === 'organization' ? 'Organización' :
                            sidebarLevel === 'project' ? 'Proyecto' :
                            sidebarLevel === 'learning' ? 'Capacitaciones' :
-                           sidebarLevel === 'admin' ? 'Administración' : 'Archub'}
+                           sidebarLevel === 'admin' ? 'Administración' : 'Seencel'}
                         </span>
                       </div>
                     )}

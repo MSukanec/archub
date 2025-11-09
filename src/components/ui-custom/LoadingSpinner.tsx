@@ -24,8 +24,8 @@ export function LoadingSpinner({ size = 'md', fullScreen = false }: LoadingSpinn
         }}
       />
       <img 
-        src="/ArchubLogo.png" 
-        alt="Archub" 
+        src="/Seencel512.png" 
+        alt="Seencel" 
         className={`${logoSize} absolute`}
       />
     </div>

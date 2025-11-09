@@ -174,8 +174,8 @@ export default function Onboarding() {
           {/* Logo */}
           <div className="flex justify-center">
             <img 
-              src="/ArchubLogo.png" 
-              alt="Archub Logo" 
+              src="/Seencel512.png" 
+              alt="Seencel Logo" 
               className="w-32 h-32 object-contain"
             />
           </div>
@@ -188,7 +188,7 @@ export default function Onboarding() {
               <span style={{ color: 'var(--accent)' }}>Comenzar!</span>
             </h1>
             <p className="text-base !text-gray-400">
-              Completa tu perfil para personalizar tu experiencia en Archub.
+              Completa tu perfil para personalizar tu experiencia en Seencel.
               Solo te tomará un momento.
             </p>
           </div>
@@ -210,8 +210,8 @@ export default function Onboarding() {
             <div className="flex items-center justify-between gap-4 mb-8">
               <div className="flex items-center gap-3 lg:hidden">
                 <img 
-                  src="/ArchubLogo.png" 
-                  alt="Archub Logo" 
+                  src="/Seencel512.png" 
+                  alt="Seencel Logo" 
                   className="w-10 h-10 object-contain"
                 />
               </div>

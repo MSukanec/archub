@@ -28,8 +28,8 @@ export default function Register() {
           {/* Logo */}
           <div className="flex justify-center">
             <img 
-              src="/ArchubLogo.png" 
-              alt="Archub Logo" 
+              src="/Seencel512.png" 
+              alt="Seencel Logo" 
               className="w-32 h-32 object-contain"
             />
           </div>
@@ -42,7 +42,7 @@ export default function Register() {
               <span style={{ color: 'var(--accent)' }}>Construir el Futuro</span>
             </h1>
             <p className="text-base !text-gray-400">
-              Únete a cientos de profesionales que ya optimizan sus proyectos con Archub.
+              Únete a cientos de profesionales que ya optimizan sus proyectos con Seencel.
               La herramienta completa para gestión de construcción.
             </p>
           </div>
@@ -64,8 +64,8 @@ export default function Register() {
             <div className="flex items-center justify-between gap-4 mb-8">
               <div className="flex items-center gap-3">
                 <img 
-                  src="/ArchubLogo.png" 
-                  alt="Archub Logo" 
+                  src="/Seencel512.png" 
+                  alt="Seencel Logo" 
                   className="w-10 h-10 object-contain"
                 />
               </div>
