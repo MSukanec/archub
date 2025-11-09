@@ -753,24 +753,26 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
         return res.status(500).json({ error: "Failed to fetch projects" });
       }
 
-      // Also fetch organization names
+      // Also fetch organization names and logos
       const orgIds = Array.from(new Set((projects || []).map((p: any) => p.organization_id)));
       const { data: orgs } = await supabase
         .from('organizations')
-        .select('id, name')
+        .select('id, name, logo_url')
         .in('id', orgIds);
 
-      const orgMap = new Map((orgs || []).map((o: any) => [o.id, o.name]));
+      const orgMap = new Map((orgs || []).map((o: any) => [o.id, { name: o.name, logo: o.logo_url }]));
 
       // Flatten the data structure for easier consumption
       // Note: project_data is an array from the inner join
       const projectsWithLocation = (projects || []).map((p: any) => {
         const projectData = Array.isArray(p.project_data) ? p.project_data[0] : p.project_data;
+        const orgData = orgMap.get(p.organization_id);
         return {
           id: p.id,
           name: p.name,
           organizationId: p.organization_id,
-          organizationName: orgMap.get(p.organization_id) || 'Organización',
+          organizationName: orgData?.name || 'Organización',
+          organizationLogo: orgData?.logo,
           color: p.color,
           lat: parseFloat(projectData.lat),
           lng: parseFloat(projectData.lng),

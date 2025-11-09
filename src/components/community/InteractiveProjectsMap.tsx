@@ -11,6 +11,7 @@ interface ProjectLocation {
   name: string;
   organizationId: string;
   organizationName: string;
+  organizationLogo?: string;
   color: string;
   lat: number;
   lng: number;
@@ -39,7 +40,13 @@ export function InteractiveProjectsMap() {
     queryKey: ['/api/community/projects'],
   });
 
-  const createCustomIcon = (color: string) => {
+  const createCustomIcon = (color: string, logoUrl?: string) => {
+    const logoHtml = logoUrl 
+      ? `<img src="${logoUrl}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />`
+      : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        </svg>`;
+    
     return L.divIcon({
       className: 'custom-marker',
       html: `
@@ -66,17 +73,16 @@ export function InteractiveProjectsMap() {
             transform: translateX(-50%);
             width: 24px;
             height: 24px;
-            background-color: ${color};
+            background-color: ${logoUrl ? 'white' : color};
             border-radius: 50%;
             border: 2px solid white;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
           ">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            </svg>
+            ${logoHtml}
           </div>
         </div>
       `,
@@ -145,19 +151,17 @@ export function InteractiveProjectsMap() {
     );
   }
 
-  if (projects.length === 0) {
-    return (
-      <div className="w-full h-[600px] flex items-center justify-center bg-gray-100 rounded-lg">
-        <div className="text-center text-gray-600">
-          <MapPin className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-          <p>No hay proyectos con ubicación disponibles</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full h-[600px] rounded-lg overflow-hidden border border-gray-200 shadow-lg">
+    <div className="w-full h-[600px] rounded-lg overflow-hidden border border-gray-200 shadow-lg relative">
+      {projects.length === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white/90 z-[1000] pointer-events-none">
+          <div className="text-center text-gray-600">
+            <MapPin className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+            <p>No hay proyectos con ubicación disponibles</p>
+          </div>
+        </div>
+      )}
+      
       <MapContainer
         center={[0, 0]}
         zoom={2}
@@ -170,65 +174,37 @@ export function InteractiveProjectsMap() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        <MarkerClusterGroup
-          chunkedLoading
-          iconCreateFunction={createClusterCustomIcon}
-          maxClusterRadius={80}
-          spiderfyOnMaxZoom={true}
-          showCoverageOnHover={false}
-          zoomToBoundsOnClick={true}
-        >
-          {projects.map((project) => (
-            <Marker
-              key={project.id}
-              position={[project.lat, project.lng]}
-              icon={createCustomIcon(project.color || '#84cc16')}
-            >
-              <Popup className="custom-popup" maxWidth={300}>
-                <Card className="border-0 shadow-none p-0">
-                  <div className="space-y-3">
-                    {project.imageUrl && (
-                      <div className="w-full h-32 bg-gray-200 rounded-md overflow-hidden">
-                        <img 
-                          src={project.imageUrl} 
-                          alt={project.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    
-                    <div>
-                      <h3 className="font-semibold text-lg text-gray-900 mb-1">
-                        {project.name}
-                      </h3>
-                      
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                        <Building2 className="h-4 w-4" />
-                        <span>{project.organizationName}</span>
-                      </div>
-                      
-                      {(project.address || project.city || project.country) && (
-                        <div className="flex items-start gap-2 text-sm text-gray-500">
-                          <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                          <div>
-                            {project.address && <div>{project.address}</div>}
-                            <div>
-                              {[project.city, project.state, project.country]
-                                .filter(Boolean)
-                                .join(', ')}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+        {projects.length > 0 && (
+          <MarkerClusterGroup
+            chunkedLoading
+            iconCreateFunction={createClusterCustomIcon}
+            maxClusterRadius={80}
+            spiderfyOnMaxZoom={true}
+            showCoverageOnHover={false}
+            zoomToBoundsOnClick={true}
+          >
+            {projects.map((project) => (
+              <Marker
+                key={project.id}
+                position={[project.lat, project.lng]}
+                icon={createCustomIcon(project.color || '#84cc16', project.organizationLogo)}
+              >
+                <Popup className="custom-popup" maxWidth={250}>
+                  <div className="p-2">
+                    <h3 className="font-semibold text-base text-gray-900 mb-1">
+                      {project.organizationName}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {project.name}
+                    </p>
                   </div>
-                </Card>
-              </Popup>
-            </Marker>
-          ))}
-        </MarkerClusterGroup>
+                </Popup>
+              </Marker>
+            ))}
+          </MarkerClusterGroup>
+        )}
 
-        <MapController projects={projects} />
+        {projects.length > 0 && <MapController projects={projects} />}
       </MapContainer>
     </div>
   );
