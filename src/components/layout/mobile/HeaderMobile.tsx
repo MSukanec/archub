@@ -43,7 +43,7 @@ export function HeaderMobile({
     if (location.startsWith("/settings")) return "Configuración";
     if (location.startsWith("/admin")) return "Administración";
     if (location.startsWith("/organization")) return "Organización";
-    return "Archub";
+    return "Seencel";
   };
 
   const getBreadcrumbIcon = () => {

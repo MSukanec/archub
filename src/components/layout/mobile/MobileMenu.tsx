@@ -181,6 +181,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         { id: 'costs', label: 'Costos', icon: DollarSign, href: '/admin/costs' },
         { id: 'products', label: 'Productos', icon: Package, href: '/providers/products' },
       ];
+    } else if (sidebarLevel === 'community') {
+      return [
+        { id: 'dashboard', label: 'Visión General', icon: Home, href: '/community/dashboard' },
+      ];
     } else if (sidebarLevel === 'learning') {
       return [
         { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/learning/dashboard' },
@@ -214,6 +218,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         return 'Organización';
       case 'project':
         return 'Proyecto';
+      case 'community':
+        return 'Comunidad';
       case 'learning':
         return 'Capacitaciones';
       case 'admin':
@@ -347,6 +353,17 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     showChevron={true}
                     disabled={!projectsData || projectsData.length === 0}
                     testId="button-mobile-project"
+                  />
+
+                  <MobileMenuButton
+                    icon={Users}
+                    label="Visión General"
+                    onClick={() => {
+                      setSidebarLevel('community');
+                    }}
+                    isActive={location.startsWith('/community')}
+                    showChevron={true}
+                    testId="button-mobile-community"
                   />
 
                   <MobileMenuButton
@@ -500,8 +517,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 </div>
               )}
 
-              {/* Spacer para admin y learning (sin selector) */}
-              {(sidebarLevel === 'admin' || sidebarLevel === 'learning' || sidebarLevel === 'general') && (
+              {/* Spacer para admin, community y learning (sin selector) */}
+              {(sidebarLevel === 'admin' || sidebarLevel === 'community' || sidebarLevel === 'learning' || sidebarLevel === 'general') && (
                 <div className="flex-1" />
               )}
 

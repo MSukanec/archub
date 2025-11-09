@@ -168,7 +168,7 @@ export function Sidebar() {
       ];
     } else if (sidebarLevel === 'community') {
       return [
-        { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/community/dashboard' },
+        { id: 'dashboard', label: 'Visión General', icon: Home, href: '/community/dashboard' },
       ];
     } else if (sidebarLevel === 'learning') {
       return [
@@ -458,7 +458,7 @@ export function Sidebar() {
                         location.startsWith('/community') ? "text-white" : "text-[var(--main-sidebar-fg)]",
                         "group-hover:text-white"
                       )}>
-                        Comunidad
+                        Visión General
                       </span>
                       <span className={cn(
                         "text-xs truncate text-left",
