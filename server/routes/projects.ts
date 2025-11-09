@@ -793,4 +793,113 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
       res.status(500).json({ error: "Failed to fetch projects" });
     }
   });
+
+  // GET /api/community/stats - Get community statistics
+  app.get("/api/community/stats", async (req, res) => {
+    try {
+      const adminClient = getAdminClient();
+
+      // Parallelize count queries for better performance
+      const [
+        { count: organizationsCount, error: orgsError },
+        { count: projectsCount, error: projectsError },
+        { count: usersCount, error: usersError }
+      ] = await Promise.all([
+        adminClient
+          .from('organizations')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_active', true),
+        adminClient
+          .from('projects')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_active', true),
+        adminClient
+          .from('users')
+          .select('*', { count: 'exact', head: true })
+      ]);
+
+      if (orgsError || projectsError || usersError) {
+        console.error("Error counting stats:", { orgsError, projectsError, usersError });
+        return res.status(500).json({ error: "Failed to fetch community stats" });
+      }
+
+      res.json({
+        totalOrganizations: organizationsCount || 0,
+        totalProjects: projectsCount || 0,
+        totalMembers: usersCount || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching community stats:", error);
+      res.status(500).json({ error: "Failed to fetch community stats" });
+    }
+  });
+
+  // GET /api/community/organizations - Get featured organizations
+  app.get("/api/community/organizations", async (req, res) => {
+    try {
+      const adminClient = getAdminClient();
+
+      const { data: organizations, error } = await adminClient
+        .from('organizations')
+        .select('id, name, logo_url, created_at')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(12);
+
+      if (error) {
+        console.error("Error fetching organizations:", error);
+        return res.status(500).json({ error: "Failed to fetch organizations" });
+      }
+
+      res.json(organizations || []);
+    } catch (error) {
+      console.error("Error fetching organizations:", error);
+      res.status(500).json({ error: "Failed to fetch organizations" });
+    }
+  });
+
+  // GET /api/community/active-users - Get recently active users
+  app.get("/api/community/active-users", async (req, res) => {
+    try {
+      const adminClient = getAdminClient();
+
+      // Calculate timestamp for 24 hours ago
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+      const { data: activeUsers, error } = await adminClient
+        .from('user_presence')
+        .select(`
+          user_id,
+          updated_at,
+          current_page,
+          users (
+            id,
+            name,
+            avatar_url
+          )
+        `)
+        .gte('updated_at', twentyFourHoursAgo)
+        .order('updated_at', { ascending: false })
+        .limit(20);
+
+      if (error) {
+        console.error("Error fetching active users:", error);
+        return res.status(500).json({ error: "Failed to fetch active users" });
+      }
+
+      // Flatten the data structure
+      const formattedUsers = (activeUsers || []).map((presence: any) => ({
+        id: presence.user_id,
+        name: presence.users?.name || 'Usuario',
+        avatar_url: presence.users?.avatar_url,
+        last_activity: presence.updated_at,
+        current_page: presence.current_page,
+      }));
+
+      res.json(formattedUsers);
+    } catch (error) {
+      console.error("Error fetching active users:", error);
+      res.status(500).json({ error: "Failed to fetch active users" });
+    }
+  });
 }

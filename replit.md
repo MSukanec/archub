@@ -12,9 +12,12 @@ Seencel is a comprehensive construction management platform designed to optimize
   - Backward compatible - all existing pages work unchanged
   - Applied to Community Map page for seamless full-width map experience
 - **Community Module Reorganization**: Split into two separate pages with dedicated navigation
-  - `/community/dashboard` - Main community page with `wide={true}` layout (ready for community features)
+  - `/community/dashboard` - Main community dashboard with stats, organizations grid, and active users (uses `wide={true}`)
   - `/community/map` - Interactive global map with `wide="full"` layout for edge-to-edge display
   - Two sidebar buttons under Community section: "Visión General" and "Mapa"
+  - Backend endpoints: `/api/community/stats`, `/api/community/organizations`, `/api/community/active-users`
+  - Dashboard features: stats cards, featured organizations (12 max), active users (last 24h), loading/error states
+  - Performance: parallelized queries with Promise.all for faster loading
 - **Community Map Feature**: Interactive global map displaying organization projects with Leaflet clustering
   - Backend endpoint `/api/community/projects` uses admin client to bypass RLS and fetch public projects with location data and organization logos
   - Auto-refresh every 10 seconds with `gcTime: 0` for real-time updates
