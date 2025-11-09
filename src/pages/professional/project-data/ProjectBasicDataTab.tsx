@@ -34,7 +34,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
   const [projectName, setProjectName] = useState('')
   const [projectTypeId, setProjectTypeId] = useState('')
   const [modalityId, setModalityId] = useState('')
-  const [status, setStatus] = useState('active')
+  const [status, setStatus] = useState('')
   
   // Form states - Details
   const [description, setDescription] = useState('')
@@ -195,7 +195,10 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
     }
   });
 
-  // Auto-save hook - enabled only when userData is loaded
+  // Check if project data is loaded
+  const isProjectLoaded = projectInfoSuccess || projectDataSuccess;
+
+  // Auto-save hook - enabled only when userData is loaded AND project data has been fetched
   const { isSaving } = useDebouncedAutoSave({
     data: {
       name: projectName,
@@ -215,14 +218,14 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
     },
     saveFn: (data) => saveProjectDataMutation.mutateAsync(data),
     delay: 3000,
-    enabled: !!userData
+    enabled: !!userData && isProjectLoaded
   });
 
   // Load data when project changes or data is fetched
   useEffect(() => {
     if (projectInfo) {
       setProjectName(projectInfo.name || '');
-      setStatus(projectInfo.status || 'active');
+      setStatus(projectInfo.status || 'active'); // Default to 'active' only after loading
       setSelectedColor(projectInfo.color || '#84cc16');
       setUseCustomColor(projectInfo.use_custom_color || false);
       setCustomColorH(projectInfo.custom_color_h);
