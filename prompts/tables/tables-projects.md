@@ -15,17 +15,19 @@ create table public.projects (
   use_custom_color boolean not null default false,
   custom_color_h integer null,
   custom_color_hex text null,
+  code text null,
   constraint projects_pkey primary key (id),
   constraint projects_id_key unique (id),
+  constraint projects_code_unique_per_org unique (organization_id, code),
   constraint projects_created_by_fkey foreign KEY (created_by) references organization_members (id),
   constraint projects_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint projects_name_not_blank_chk check ((btrim(name) <> ''::text)),
   constraint projects_custom_color_h_check check (
     (
       (custom_color_h >= 0)
       and (custom_color_h <= 360)
     )
-  ),
-  constraint projects_name_not_blank_chk check ((btrim(name) <> ''::text))
+  )
 ) TABLESPACE pg_default;
 
 create index IF not exists projects_org_idx on public.projects using btree (organization_id) TABLESPACE pg_default;
@@ -36,9 +38,7 @@ create index IF not exists projects_org_active_idx on public.projects using btre
 
 create unique INDEX IF not exists projects_org_name_lower_uniq on public.projects using btree (organization_id, lower(name)) TABLESPACE pg_default;
 
-create trigger on_new_project
-after INSERT on projects for EACH row
-execute FUNCTION handle_new_project ();
+create index IF not exists idx_projects_code on public.projects using btree (code) TABLESPACE pg_default;
 
 ---------- TABLA PROJECT_DATA:
 
@@ -68,7 +68,7 @@ create table public.project_data (
   modality_id uuid null,
   organization_id uuid null,
   constraint project_data_pkey primary key (project_id),
-  constraint project_data_modality_id_fkey foreign KEY (modality_id) references project_modalities (id) on delete set null,
+  constraint project_data_modality_id_fkey foreign KEY (modality_id) references modalities (id) on delete set null,
   constraint project_data_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
   constraint project_data_project_id_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
   constraint project_data_project_type_id_fkey foreign KEY (project_type_id) references project_types (id) on delete set null
