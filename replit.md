@@ -5,6 +5,17 @@ Seencel is a comprehensive construction management platform designed to optimize
 
 ## Recent Changes
 **November 9, 2025**
+- **Community Map Feature**: Interactive global map displaying organization projects with Leaflet clustering
+  - Backend endpoint `/api/community/projects` fetches public projects with location data and organization logos
+  - Map displays even when no projects are available (shows empty state overlay)
+  - Custom markers using organization logos embedded in map pins (fallback to building icon)
+  - Simplified popup showing only organization name and project name
+  - Dynamic clustering based on zoom levels (world → country → city → block)
+- **Button System Redesign**: Updated default button variant to match design system
+  - Removed shine effects and elevation animations
+  - Identical styling to secondary variant but without border
+  - Accent background color with white text
+  - Clean, minimal hover state (bg-accent/90)
 - **Project Data Organization**: Organized project information into logical tabs (Datos Básicos, Ubicación, Cliente)
 - **Projects Table Schema**: Added `projects` table definition to Drizzle schema (`shared/schema.ts`) with complete field mappings including `code`, `color`, `use_custom_color`, and other project metadata
 - **Project Basic Data Tab**: Implemented with unified hydration pattern using `isHydrated` flag that waits for both `projectInfoSuccess` and `projectDataSuccess` before enabling auto-save, preventing unwanted saves on initial page load. Added `code` field with auto-formatting validation (uppercase, A-Z0-9-_, max 30 chars, optional)
@@ -41,7 +52,8 @@ Preferred communication style: Simple, everyday language.
 - **Database Views**: Extensive use of optimized database views for efficient data fetching.
 
 ### Feature Specifications
-- **Core Modules**: Home page (AI-powered), Project Management, Financial Management, Document Management, Learning Module, and Notification System.
+- **Core Modules**: Home page (AI-powered), Project Management, Financial Management, Document Management, Learning Module, Community Map, and Notification System.
+- **Community Map**: Global interactive map powered by React Leaflet showing all organization projects with location data. Features organization logo-based markers, smart clustering, simplified popups, and graceful empty state handling.
 - **Learning Module ("Capacitaciones")**: Course management, Vimeo integration, progress tracking, note-taking, and Mercado Pago integration. Includes improved UX for course navigation and mobile-specific floating lesson navigation.
 - **Admin Management**: Reorganized admin section with comprehensive analytics dashboard (`/admin/dashboard`) showing 5 KPI sections: real-time active users, engagement by view with horizontal bar chart, top active users table with current/last visited page below username, drop-off analysis, and hourly activity line chart. Includes date range filtering (Today/7days/30days) and dedicated pages for administration and support. Global announcement system with audience targeting and dismissal tracking. Top Active Users table shows live status (📍 online / ⏸️ offline) with fallback to last visited page from history.
 - **Real-Time Support System**: Bidirectional support conversation system with automatic read tracking (`read_by_admin` and `read_by_user` columns), notification badges on sidebar for unread messages. **🔥 Powered by Supabase Realtime** for instant message delivery with zero polling - PostgreSQL database changes trigger immediate UI updates via WebSocket subscriptions. RightSidebar (always mounted) maintains realtime subscriptions and invalidates all support queries ensuring messages update even when panels are closed. Support tab prioritized first in admin section. Includes RLS policies for secure message updates and optimized queries with React Query.
