@@ -151,6 +151,63 @@ export const projects = pgTable("projects", {
 
 export type Project = typeof projects.$inferSelect;
 export type InsertProject = typeof projects.$inferInsert;
+
+// Project Data Table (extended information for projects)
+export const project_data = pgTable("project_data", {
+  project_id: uuid("project_id").primaryKey().notNull(),
+  organization_id: uuid("organization_id"),
+  
+  // Surface/Area
+  surface_total: numeric("surface_total", { precision: 12, scale: 2 }),
+  surface_covered: numeric("surface_covered", { precision: 12, scale: 2 }),
+  surface_semi: numeric("surface_semi", { precision: 12, scale: 2 }),
+  
+  // Dates
+  start_date: timestamp("start_date", { mode: 'date' }),
+  estimated_end: timestamp("estimated_end", { mode: 'date' }),
+  
+  // Project Classification
+  project_type_id: uuid("project_type_id"),
+  modality_id: uuid("modality_id"),
+  
+  // Image
+  project_image_url: text("project_image_url"),
+  
+  // Location - Basic Fields
+  address: text("address"),
+  city: text("city"),
+  state: text("state"),
+  country: text("country"),
+  zip_code: text("zip_code"),
+  
+  // Location - Google Places Integration
+  address_full: text("address_full"),
+  place_id: text("place_id"),
+  lat: numeric("lat", { precision: 9, scale: 6 }),
+  lng: numeric("lng", { precision: 9, scale: 6 }),
+  
+  // Location - Additional Info
+  timezone: text("timezone"),
+  location_type: text("location_type", { enum: ["urban", "rural", "industrial", "other"] }),
+  accessibility_notes: text("accessibility_notes"),
+  
+  // Client Info
+  client_name: text("client_name"),
+  contact_phone: text("contact_phone"),
+  email: text("email"),
+  
+  // Project Details
+  description: text("description"),
+  internal_notes: text("internal_notes"),
+  
+  // Timestamps
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export type ProjectData = typeof project_data.$inferSelect;
+export type InsertProjectData = typeof project_data.$inferInsert;
+
 export type InsertOrganizationInvitation = z.infer<typeof insertOrganizationInvitationSchema>;
 
 // Notifications Table
