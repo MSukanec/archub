@@ -81,6 +81,7 @@ import GeneralCosts from "@/pages/professional/finances/general-costs/GeneralCos
 
 // Community Pages
 import Community from "@/pages/community/Community";
+import CommunityMap from "@/pages/community/CommunityMap";
 
 // Learning Pages (Lazy Loaded - incluye reproductor Vimeo pesado)
 const LearningDashboard = lazy(() => import("@/pages/learning/dashboard/LearningDashboard"));
@@ -195,6 +196,7 @@ function Router() {
         
         {/* Community Routes */}
         <Route path="/community/dashboard" component={Community} />
+        <Route path="/community/map" component={CommunityMap} />
         <Route path="/community" component={Community} />
         
         {/* Learning Routes - Lazy Loaded (incluye reproductor Vimeo pesado) */}

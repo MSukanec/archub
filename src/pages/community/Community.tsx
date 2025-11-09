@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { useNavigationStore } from '@/stores/navigationStore';
-import { MapPin } from 'lucide-react';
-import { InteractiveProjectsMap } from '@/components/community/InteractiveProjectsMap';
+import { Users } from 'lucide-react';
 
 export default function Community() {
   const { setSidebarLevel } = useNavigationStore();
@@ -12,17 +11,17 @@ export default function Community() {
   }, [setSidebarLevel]);
 
   const headerProps = {
-    title: "Mapa de Proyectos",
-    icon: MapPin,
-    description: "Explora proyectos de la comunidad en todo el mundo",
+    title: "Comunidad",
+    icon: Users,
+    description: "Conecta con otros profesionales de la construcción",
     showSearch: false,
     showFilters: false,
   };
 
   return (
-    <Layout wide="full" headerProps={headerProps}>
-      <div className="h-[calc(100vh-180px)]">
-        <InteractiveProjectsMap />
+    <Layout wide headerProps={headerProps}>
+      <div className="space-y-6">
+        {/* Contenido de la comunidad aquí */}
       </div>
     </Layout>
   );

@@ -44,7 +44,8 @@ import {
   Headphones,
   BarChart3,
   Folder,
-  TrendingUp
+  TrendingUp,
+  MapPin
 } from "lucide-react";
 import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -169,6 +170,7 @@ export function Sidebar() {
     } else if (sidebarLevel === 'community') {
       return [
         { id: 'dashboard', label: 'Visión General', icon: Home, href: '/community/dashboard' },
+        { id: 'map', label: 'Mapa', icon: MapPin, href: '/community/map' },
       ];
     } else if (sidebarLevel === 'learning') {
       return [

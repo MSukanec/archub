@@ -11,13 +11,18 @@ Seencel is a comprehensive construction management platform designed to optimize
   - Full-width mode maintains header but removes content padding for edge-to-edge layouts
   - Backward compatible - all existing pages work unchanged
   - Applied to Community Map page for seamless full-width map experience
+- **Community Module Reorganization**: Split into two separate pages with dedicated navigation
+  - `/community/dashboard` - Main community page with `wide={true}` layout (ready for community features)
+  - `/community/map` - Interactive global map with `wide="full"` layout for edge-to-edge display
+  - Two sidebar buttons under Community section: "Visión General" and "Mapa"
 - **Community Map Feature**: Interactive global map displaying organization projects with Leaflet clustering
   - Backend endpoint `/api/community/projects` uses admin client to bypass RLS and fetch public projects with location data and organization logos
+  - Auto-refresh every 10 seconds with `gcTime: 0` for real-time updates
   - Map displays even when no projects are available (shows empty state overlay)
   - Custom markers using organization logos embedded in map pins (40px size, same as cluster markers, fallback to building icon)
-  - Simplified popup showing only organization name and project name
-  - Dynamic clustering with black background (not green/accent) based on zoom levels (world → country → city → block)
-  - Uses new full-width layout (`wide="full"`) for edge-to-edge map display
+  - Optimized popup with compact padding, inline logo (20px), and location details
+  - Marker triangle uses `--accent` color for consistent theming
+  - Dynamic clustering with black background based on zoom levels (world → country → city → block)
 - **Button System Redesign**: Updated default button variant to match design system
   - Removed shine effects and elevation animations
   - Identical styling to secondary variant but without border
