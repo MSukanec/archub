@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-black text-white button-black-glow rounded-full px-6 py-2.5 md:py-2.5 hover:-translate-y-0.5 gap-2 text-sm font-medium [&_svg]:size-4 tracking-wide uppercase",
+          "bg-accent text-white hover:bg-accent/90 rounded-lg px-3 py-1.5 md:py-1.5 py-3 gap-2 text-sm font-medium [&_svg]:size-4",
         destructive:
           "bg-destructive text-[var(--destructive-text)] hover:bg-destructive/80 rounded-lg px-3 py-1.5 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 gap-2 text-sm font-medium [&_svg]:size-4",
         outline:
