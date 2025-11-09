@@ -192,9 +192,61 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
   };
 
   // Handle marker drag on map
-  const handleMarkerDragEnd = (newLat: number, newLng: number) => {
+  const handleMarkerDragEnd = async (newLat: number, newLng: number) => {
     setLat(newLat);
     setLng(newLng);
+
+    // Reverse geocoding: convert coordinates to address
+    if (googleMapsApiKey && window.google) {
+      try {
+        const geocoder = new google.maps.Geocoder();
+        const response = await geocoder.geocode({
+          location: { lat: newLat, lng: newLng }
+        });
+
+        if (response.results && response.results.length > 0) {
+          const result = response.results[0];
+          const newAddress = result.formatted_address;
+          
+          // Update address field
+          setAddressFull(newAddress);
+          setAddress(newAddress);
+
+          // Extract address components
+          const components = result.address_components;
+          let newCity = '';
+          let newState = '';
+          let newCountry = '';
+          let newZipCode = '';
+
+          components.forEach((component) => {
+            const types = component.types;
+            if (types.includes('locality')) {
+              newCity = component.long_name;
+            } else if (types.includes('administrative_area_level_1')) {
+              newState = component.long_name;
+            } else if (types.includes('country')) {
+              newCountry = component.long_name;
+            } else if (types.includes('postal_code')) {
+              newZipCode = component.long_name;
+            }
+          });
+
+          setCity(newCity);
+          setState(newState);
+          setCountry(newCountry);
+          setZipCode(newZipCode);
+          setPlaceId(result.place_id);
+
+          toast({
+            title: "Ubicación actualizada",
+            description: "La dirección se actualizó automáticamente"
+          });
+        }
+      } catch (error) {
+        console.error('Error in reverse geocoding:', error);
+      }
+    }
   };
 
   if (!activeProjectId) {
