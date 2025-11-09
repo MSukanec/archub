@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ImageIcon, FileText, Users, Palette, Settings } from 'lucide-react'
+import { ImageIcon, Palette, Settings } from 'lucide-react'
 import ImageUploadAndShowField from '@/components/ui-custom/fields/ImageUploadAndShowField'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
@@ -39,9 +39,6 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
   // Form states - Details
   const [description, setDescription] = useState('')
   const [internalNotes, setInternalNotes] = useState('')
-  const [clientName, setClientName] = useState('')
-  const [contactPhone, setContactPhone] = useState('')
-  const [email, setEmail] = useState('')
   const [projectImageUrl, setProjectImageUrl] = useState<string | null>(null)
   
   // Color states
@@ -201,10 +198,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       modality_id: modalityId,
       status: status,
       description: description,
-      internal_notes: internalNotes,
-      client_name: clientName,
-      contact_phone: contactPhone,
-      email: email
+      internal_notes: internalNotes
     },
     saveFn: (data) => saveProjectDataMutation.mutateAsync(data),
     delay: 3000,
@@ -229,9 +223,6 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       setModalityId(projectData.modality_id || '');
       setDescription(projectData.description || '');
       setInternalNotes(projectData.internal_notes || '');
-      setClientName(projectData.client_name || '');
-      setContactPhone(projectData.contact_phone || '');
-      setEmail(projectData.email || '');
       setProjectImageUrl(projectData.project_image_url || null);
     }
   }, [projectData]);
@@ -306,20 +297,20 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
 
       <hr className="border-t border-[var(--section-divider)] my-8" />
 
-      {/* Project Information Section */}
+      {/* Información Básica Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column - Información del Proyecto */}
+        {/* Left Column - Información Básica */}
         <div>
           <div className="flex items-center gap-2 mb-6">
             <Settings className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="text-lg font-semibold">Información del Proyecto</h2>
+            <h2 className="text-lg font-semibold">Información Básica</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Datos fundamentales que definen el proyecto. El nombre, tipo, modalidad y estado ayudan a organizar y clasificar tus proyectos.
+            Datos fundamentales que definen el proyecto. El nombre, tipo, modalidad, estado, descripción y notas ayudan a organizar y clasificar tus proyectos.
           </p>
         </div>
 
-        {/* Right Column - Project Information Content */}
+        {/* Right Column - Información Básica Content */}
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="project-name">Nombre del Proyecto</Label>
@@ -328,6 +319,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
               placeholder="Ej: Casa Unifamiliar López"
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
+              data-testid="input-project-name"
             />
           </div>
 
@@ -382,6 +374,30 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
               </SelectContent>
             </Select>
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Descripción</Label>
+            <Textarea 
+              id="description"
+              placeholder="Descripción general del proyecto..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              data-testid="textarea-description"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="internal-notes">Notas Internas</Label>
+            <Textarea 
+              id="internal-notes"
+              placeholder="Notas internas para el equipo..."
+              value={internalNotes}
+              onChange={(e) => setInternalNotes(e.target.value)}
+              rows={2}
+              data-testid="textarea-internal-notes"
+            />
+          </div>
         </div>
       </div>
 
@@ -419,111 +435,6 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
         </div>
       </div>
 
-      <hr className="border-t border-[var(--section-divider)] my-8" />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column - Información Básica */}
-        <div>
-          <div className="flex items-center gap-2 mb-6">
-            <FileText className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="text-lg font-semibold">Información Básica</h2>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Datos fundamentales del proyecto que se usarán en todo el sistema. Estos campos son la base para presupuestos, documentos y comunicaciones.
-          </p>
-        </div>
-
-        {/* Right Column - Información Básica Content */}
-        <div>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="project-name">Nombre del Proyecto</Label>
-              <Input 
-                id="project-name"
-                placeholder="Ej: Casa Unifamiliar López"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Descripción</Label>
-              <Textarea 
-                id="description"
-                placeholder="Descripción general del proyecto..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={3}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="internal-notes">Notas Internas</Label>
-              <Textarea 
-                id="internal-notes"
-                placeholder="Notas internas para el equipo..."
-                value={internalNotes}
-                onChange={(e) => setInternalNotes(e.target.value)}
-                rows={2}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <hr className="border-t border-[var(--section-divider)] my-8" />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column - Información del Cliente */}
-        <div>
-          <div className="flex items-center gap-2 mb-6">
-            <Users className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="text-lg font-semibold">Información del Cliente</h2>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Datos de contacto del cliente responsable del proyecto. Esta información estará disponible para todo el equipo cuando necesiten comunicarse.
-          </p>
-        </div>
-
-        {/* Right Column - Información del Cliente Content */}
-        <div>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="client-name">Nombre del Cliente</Label>
-              <Input 
-                id="client-name"
-                placeholder="Ej: Familia López"
-                value={clientName}
-                onChange={(e) => setClientName(e.target.value)}
-                data-testid="input-client-name"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="contact-phone">Teléfono de Contacto</Label>
-              <Input 
-                id="contact-phone"
-                placeholder="Ej: +54 11 1234-5678"
-                value={contactPhone}
-                onChange={(e) => setContactPhone(e.target.value)}
-                data-testid="input-contact-phone"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email de Contacto</Label>
-              <Input 
-                id="email"
-                type="email"
-                placeholder="Ej: contacto@cliente.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                data-testid="input-email"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useProjectContext } from '@/stores/projectContext';
 import ProjectBasicDataTab from './ProjectBasicDataTab';
 import ProjectLocationTab from './ProjectLocationTab';
+import ProjectClientTab from './ProjectClientTab';
 
 export default function ProjectData() {
   const [activeTab, setActiveTab] = useState('basic');
@@ -26,6 +27,11 @@ export default function ProjectData() {
       id: 'location',
       label: 'Ubicación',
       isActive: activeTab === 'location'
+    },
+    {
+      id: 'client',
+      label: 'Cliente',
+      isActive: activeTab === 'client'
     }
   ];
 
@@ -43,6 +49,8 @@ export default function ProjectData() {
         return <ProjectBasicDataTab />;
       case 'location':
         return <ProjectLocationTab />;
+      case 'client':
+        return <ProjectClientTab />;
       default:
         return <ProjectBasicDataTab />;
     }
