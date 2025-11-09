@@ -458,7 +458,7 @@ export function Sidebar() {
                         location.startsWith('/community') ? "text-white" : "text-[var(--main-sidebar-fg)]",
                         "group-hover:text-white"
                       )}>
-                        Visión General
+                        Comunidad
                       </span>
                       <span className={cn(
                         "text-xs truncate text-left",

@@ -357,7 +357,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
                   <MobileMenuButton
                     icon={Users}
-                    label="Visión General"
+                    label="Comunidad"
                     onClick={() => {
                       setSidebarLevel('community');
                     }}
