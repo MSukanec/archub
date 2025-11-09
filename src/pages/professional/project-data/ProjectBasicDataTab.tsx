@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ImageIcon, FileText, Users, MapPin, Palette, Settings } from 'lucide-react'
+import { ImageIcon, FileText, Users, Palette, Settings } from 'lucide-react'
 import ImageUploadAndShowField from '@/components/ui-custom/fields/ImageUploadAndShowField'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
@@ -42,11 +42,6 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
   const [clientName, setClientName] = useState('')
   const [contactPhone, setContactPhone] = useState('')
   const [email, setEmail] = useState('')
-  const [address, setAddress] = useState('')
-  const [city, setCity] = useState('')
-  const [state, setState] = useState('')
-  const [country, setCountry] = useState('')
-  const [zipCode, setZipCode] = useState('')
   const [projectImageUrl, setProjectImageUrl] = useState<string | null>(null)
   
   // Color states
@@ -209,12 +204,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       internal_notes: internalNotes,
       client_name: clientName,
       contact_phone: contactPhone,
-      email: email,
-      address: address,
-      city: city,
-      state: state,
-      country: country,
-      zip_code: zipCode
+      email: email
     },
     saveFn: (data) => saveProjectDataMutation.mutateAsync(data),
     delay: 3000,
@@ -242,11 +232,6 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       setClientName(projectData.client_name || '');
       setContactPhone(projectData.contact_phone || '');
       setEmail(projectData.email || '');
-      setAddress(projectData.address || '');
-      setCity(projectData.city || '');
-      setState(projectData.state || '');
-      setCountry(projectData.country || '');
-      setZipCode(projectData.zip_code || '');
       setProjectImageUrl(projectData.project_image_url || null);
     }
   }, [projectData]);
@@ -510,6 +495,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
                 placeholder="Ej: Familia López"
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
+                data-testid="input-client-name"
               />
             </div>
 
@@ -520,6 +506,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
                 placeholder="Ej: +54 11 1234-5678"
                 value={contactPhone}
                 onChange={(e) => setContactPhone(e.target.value)}
+                data-testid="input-contact-phone"
               />
             </div>
 
@@ -531,72 +518,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
                 placeholder="Ej: contacto@cliente.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Left Column - Ubicación */}
-        <div>
-          <div className="flex items-center gap-2 mb-6">
-            <MapPin className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="text-lg font-semibold">Ubicación del Proyecto</h2>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Dirección completa donde se ejecutará la obra. Esta información se usa para logística, entregas y documentación oficial.
-          </p>
-        </div>
-
-        {/* Right Column - Ubicación Content */}
-        <div>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="address">Dirección</Label>
-              <Input 
-                id="address"
-                placeholder="Ej: Av. Corrientes 1234"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="city">Ciudad</Label>
-              <Input 
-                id="city"
-                placeholder="Ej: Buenos Aires"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="state">Provincia/Estado</Label>
-              <Input 
-                id="state"
-                placeholder="Ej: Buenos Aires"
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="country">País</Label>
-              <Input 
-                id="country"
-                placeholder="Ej: Argentina"
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="zip-code">Código Postal</Label>
-              <Input 
-                id="zip-code"
-                placeholder="Ej: C1043AAX"
-                value={zipCode}
-                onChange={(e) => setZipCode(e.target.value)}
+                data-testid="input-email"
               />
             </div>
           </div>
