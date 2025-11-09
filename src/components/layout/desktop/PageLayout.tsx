@@ -43,7 +43,7 @@ import { ExpandableAvatarGroup } from "@/components/ui-custom/ExpandableAvatarGr
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
-import { type WidthProp, resolveWidthMode, getContainerClasses, getPaddingClasses } from "./layoutWidth";
+import { type WidthProp, resolveWidthMode, getContainerClasses, getHeaderPaddingClasses, getContentPaddingClasses } from "./layoutWidth";
 
 // Mapeo de rutas a nombres e iconos de páginas (exactamente como en el sidebar)
 const PAGE_CONFIG: Record<string, { name: string; icon: any }> = {
@@ -293,7 +293,7 @@ export function PageLayout({
         <div style={{ backgroundColor: "var(--layout-bg)" }}>
           <div className={(() => {
             const mode = resolveWidthMode(wide);
-            return `${getContainerClasses(mode)} ${getPaddingClasses(mode)} pt-0`;
+            return `${getContainerClasses(mode)} ${getHeaderPaddingClasses(mode)} pt-0`;
           })()}>
           {/* FILA 1: Icono + Título + Descripción a la izquierda + Selector a la derecha */}
           <div className={`min-h-[50px] flex items-center justify-between ${!showSecondRow ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
@@ -633,7 +633,7 @@ export function PageLayout({
         {/* Page Content */}
         <div className={(() => {
           const mode = resolveWidthMode(wide);
-          return `${getContainerClasses(mode)} ${getPaddingClasses(mode)} pt-6 pb-6 min-h-0 overflow-x-hidden`;
+          return `${getContainerClasses(mode)} ${getContentPaddingClasses(mode)} pt-6 pb-6 min-h-0 overflow-x-hidden`;
         })()}>
           {children}
         </div>

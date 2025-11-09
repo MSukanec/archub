@@ -64,7 +64,7 @@ export function InteractiveProjectsMap() {
             height: 0;
             border-left: 20px solid transparent;
             border-right: 20px solid transparent;
-            border-top: 24px solid ${color};
+            border-top: 24px solid var(--accent);
           "></div>
           <div style="
             position: absolute;
@@ -152,7 +152,7 @@ export function InteractiveProjectsMap() {
   }
 
   return (
-    <div className="w-full h-full rounded-lg overflow-hidden border border-gray-200 shadow-lg relative">
+    <div className="w-full h-full relative">
       {projects.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/90 z-[1000] pointer-events-none">
           <div className="text-center text-gray-600">

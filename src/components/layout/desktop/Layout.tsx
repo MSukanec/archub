@@ -29,7 +29,7 @@ import { usePendingInvitations } from "@/hooks/use-pending-invitations";
 // TEMPORALMENTE DESHABILITADO - GlobalAnnouncement no se usa por ahora
 // import { GlobalAnnouncement, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, AnnouncementProvider } from "@/components/ui-custom/layout/GlobalAnnouncement";
 import { useLocation } from "wouter";
-import { type WidthProp, resolveWidthMode, getContainerClasses, getPaddingClasses } from "./layoutWidth";
+import { type WidthProp, resolveWidthMode, getContainerClasses, getContentPaddingClasses } from "./layoutWidth";
 
 interface Tab {
   id: string;
@@ -296,7 +296,7 @@ function LayoutContent({
                   <div
                     className={(() => {
                       const mode = resolveWidthMode(wide);
-                      return `${getContainerClasses(mode)} ${getPaddingClasses(mode)} pt-3 pb-6 min-h-0`;
+                      return `${getContainerClasses(mode)} ${getContentPaddingClasses(mode)} pt-3 pb-6 min-h-0`;
                     })()}
                   >
                     {children}
