@@ -166,6 +166,10 @@ export function Sidebar() {
         { id: 'costs', label: 'Costos', icon: DollarSign, href: '/admin/costs' },
         { id: 'products', label: 'Productos', icon: Package, href: '/providers/products' },
       ];
+    } else if (sidebarLevel === 'community') {
+      return [
+        { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/community/dashboard' },
+      ];
     } else if (sidebarLevel === 'learning') {
       return [
         { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/learning/dashboard' },
@@ -425,6 +429,48 @@ export function Sidebar() {
                   )}
                 </div>
 
+                {/* Botón Comunidad */}
+                <button
+                  onClick={() => {
+                    setSidebarLevel('community');
+                    navigate('/community/dashboard');
+                  }}
+                  className={cn(
+                    "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
+                    isExpanded ? "w-full" : "w-8",
+                    location.startsWith('/community') && "bg-[var(--main-sidebar-button-active-bg)]"
+                  )}
+                  data-testid="button-sidebar-community"
+                >
+                  <div className="flex items-center justify-center w-8 flex-shrink-0">
+                    <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+                      <Users className={cn(
+                        "h-4 w-4 transition-colors",
+                        location.startsWith('/community') ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
+                        "group-hover:text-[var(--accent)]"
+                      )} />
+                    </div>
+                  </div>
+                  {isExpanded && (
+                    <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
+                      <span className={cn(
+                        "text-sm font-medium truncate text-left",
+                        location.startsWith('/community') ? "text-white" : "text-[var(--main-sidebar-fg)]",
+                        "group-hover:text-white"
+                      )}>
+                        Comunidad
+                      </span>
+                      <span className={cn(
+                        "text-xs truncate text-left",
+                        location.startsWith('/community') ? "text-white opacity-100" : "text-[var(--main-sidebar-fg)] opacity-60",
+                        "group-hover:text-white group-hover:opacity-100"
+                      )}>
+                        Conecta y comparte
+                      </span>
+                    </div>
+                  )}
+                </button>
+
                 {/* Botón Capacitaciones */}
                 <button
                   onClick={() => {
@@ -553,6 +599,7 @@ export function Sidebar() {
                         <span className="text-lg font-normal text-[var(--main-sidebar-fg)] group-hover:text-white truncate">
                           {sidebarLevel === 'organization' ? 'Organización' :
                            sidebarLevel === 'project' ? 'Proyecto' :
+                           sidebarLevel === 'community' ? 'Comunidad' :
                            sidebarLevel === 'learning' ? 'Capacitaciones' :
                            sidebarLevel === 'admin' ? 'Administración' : 'Seencel'}
                         </span>

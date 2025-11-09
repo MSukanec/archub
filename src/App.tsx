@@ -79,6 +79,9 @@ import TaskView from "@/pages/professional/analysis/TaskView";
 import MaterialsView from "@/pages/professional/analysis/material-costs/MaterialsView";
 import GeneralCosts from "@/pages/professional/finances/general-costs/GeneralCosts";
 
+// Community Pages
+import Community from "@/pages/community/Community";
+
 // Learning Pages (Lazy Loaded - incluye reproductor Vimeo pesado)
 const LearningDashboard = lazy(() => import("@/pages/learning/dashboard/LearningDashboard"));
 const CourseList = lazy(() => import("@/pages/learning/courses/CourseList"));
@@ -189,6 +192,10 @@ function Router() {
         <Route path="/analysis" component={Analysis} />
         <Route path="/analysis/:id" component={TaskView} />
         <Route path="/analysis/materials/:id" component={MaterialsView} />
+        
+        {/* Community Routes */}
+        <Route path="/community/dashboard" component={Community} />
+        <Route path="/community" component={Community} />
         
         {/* Learning Routes - Lazy Loaded (incluye reproductor Vimeo pesado) */}
         <Route path="/learning/dashboard">
