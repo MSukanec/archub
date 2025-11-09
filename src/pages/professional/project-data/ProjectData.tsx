@@ -142,11 +142,11 @@ Generado desde Archub`);
   ];
 
   // Share button for location tab
-  const shareButton = (
+  const shareButton = activeTab === 'location' ? (
     <Popover>
       <PopoverTrigger asChild>
         <Button 
-          variant="outline" 
+          variant="default" 
           size="sm"
           className="gap-2"
           data-testid="button-share-location-data"
@@ -186,7 +186,7 @@ Generado desde Archub`);
         </div>
       </PopoverContent>
     </Popover>
-  );
+  ) : null;
 
   const headerProps = {
     icon: FileText,
@@ -194,7 +194,7 @@ Generado desde Archub`);
     subtitle: 'Información general del proyecto, datos del cliente y ubicación',
     tabs: headerTabs,
     onTabChange: (tabId: string) => setActiveTab(tabId),
-    actions: activeTab === 'location' ? [shareButton] : undefined
+    actions: shareButton ? [shareButton] : undefined
   };
 
   const renderTabContent = () => {
