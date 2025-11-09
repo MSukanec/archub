@@ -754,29 +754,33 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
       }
 
       // Also fetch organization names
-      const orgIds = [...new Set(projects?.map(p => p.organization_id) || [])];
+      const orgIds = Array.from(new Set((projects || []).map((p: any) => p.organization_id)));
       const { data: orgs } = await supabase
         .from('organizations')
         .select('id, name')
         .in('id', orgIds);
 
-      const orgMap = new Map(orgs?.map(o => [o.id, o.name]) || []);
+      const orgMap = new Map((orgs || []).map((o: any) => [o.id, o.name]));
 
       // Flatten the data structure for easier consumption
-      const projectsWithLocation = projects?.map(p => ({
-        id: p.id,
-        name: p.name,
-        organizationId: p.organization_id,
-        organizationName: orgMap.get(p.organization_id) || 'Organización',
-        color: p.color,
-        lat: parseFloat(p.project_data.lat),
-        lng: parseFloat(p.project_data.lng),
-        address: p.project_data.address,
-        city: p.project_data.city,
-        state: p.project_data.state,
-        country: p.project_data.country,
-        imageUrl: p.project_data.project_image_url
-      })) || [];
+      // Note: project_data is an array from the inner join
+      const projectsWithLocation = (projects || []).map((p: any) => {
+        const projectData = Array.isArray(p.project_data) ? p.project_data[0] : p.project_data;
+        return {
+          id: p.id,
+          name: p.name,
+          organizationId: p.organization_id,
+          organizationName: orgMap.get(p.organization_id) || 'Organización',
+          color: p.color,
+          lat: parseFloat(projectData.lat),
+          lng: parseFloat(projectData.lng),
+          address: projectData.address,
+          city: projectData.city,
+          state: projectData.state,
+          country: projectData.country,
+          imageUrl: projectData.project_image_url
+        };
+      });
 
       res.json(projectsWithLocation);
     } catch (error) {
