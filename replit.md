@@ -5,10 +5,18 @@ Archub is a comprehensive construction management platform designed to optimize 
 
 ## Recent Changes
 **November 9, 2025**
-- Added `projects` table definition to Drizzle schema (`shared/schema.ts`) with complete field mappings including `code`, `color`, `use_custom_color`, and other project metadata
-- Fixed auto-save issue in `ProjectBasicDataTab.tsx`: Implemented unified hydration pattern with `isHydrated` flag that waits for both `projectInfoSuccess` and `projectDataSuccess` before enabling auto-save, preventing unwanted saves on initial page load
-- Added `code` field to project basic data UI with auto-formatting validation (uppercase, A-Z0-9-_, max 30 chars, optional)
-- Updated `saveProjectDataMutation` to persist `code` field alongside name and status in projects table
+- **Project Data Organization**: Organized project information into logical tabs (Datos Básicos, Ubicación, Cliente)
+- **Projects Table Schema**: Added `projects` table definition to Drizzle schema (`shared/schema.ts`) with complete field mappings including `code`, `color`, `use_custom_color`, and other project metadata
+- **Project Basic Data Tab**: Implemented with unified hydration pattern using `isHydrated` flag that waits for both `projectInfoSuccess` and `projectDataSuccess` before enabling auto-save, preventing unwanted saves on initial page load. Added `code` field with auto-formatting validation (uppercase, A-Z0-9-_, max 30 chars, optional)
+- **Project Location Tab - Google Maps Integration**: Complete implementation with enriched location data management
+  - Custom Google Maps components using CDN script loading (no npm packages): `useGoogleMapsScript`, `GooglePlacesAutocomplete`, `GoogleMap` with interactive marker
+  - Google Places Autocomplete with auto-population of all location fields (address, city, state, country, zip code, coordinates, place_id, timezone)
+  - Interactive map display showing project location with marker (only if coordinates exist)
+  - Extended `project_data` table schema with location fields: `address_full`, `place_id`, `lat`, `lng`, `timezone`, `location_type` (enum: urban/rural/industrial/other), `accessibility_notes`
+  - Unified hydration pattern with `isHydrated` reset on project change to prevent premature auto-save when switching projects
+  - Conditional auto-save payload: only sends `location_type` if it's a valid enum value to prevent database constraint violations
+  - UX indicators: coordinates status badge, API key configuration warning, loading states
+  - Requires `VITE_GOOGLE_MAPS_API_KEY` environment variable (Google Cloud Console with Maps JavaScript API, Places API, and Geocoding API enabled)
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
