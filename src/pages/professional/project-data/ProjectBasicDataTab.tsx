@@ -30,8 +30,12 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
   // Use projectId from props if provided, otherwise use selectedProjectId from context
   const activeProjectId = projectId || selectedProjectId
 
+  // Hydration state - CRITICAL for preventing auto-save on page load
+  const [isHydrated, setIsHydrated] = useState(false)
+  
   // Form states - Basic
   const [projectName, setProjectName] = useState('')
+  const [projectCode, setProjectCode] = useState('')
   const [projectTypeId, setProjectTypeId] = useState('')
   const [modalityId, setModalityId] = useState('')
   const [status, setStatus] = useState('')
@@ -130,9 +134,10 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
     mutationFn: async (dataToSave: any) => {
       if (!activeProjectId || !supabase) return;
 
-      // Update project name and status in projects table
+      // Update project name, code, and status in projects table
       const projectsUpdate: any = {};
       if (dataToSave.name !== undefined) projectsUpdate.name = dataToSave.name;
+      if (dataToSave.code !== undefined) projectsUpdate.code = dataToSave.code;
       if (dataToSave.status !== undefined) projectsUpdate.status = dataToSave.status;
       
       if (Object.keys(projectsUpdate).length > 0) {
@@ -148,7 +153,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       }
 
       // Prepare project_data payload - explicitly exclude fields that belong to projects table
-      const { name, status, ...projectDataPayload } = dataToSave;
+      const { name, code, status, ...projectDataPayload } = dataToSave;
 
       if (Object.keys(projectDataPayload).length === 0) return;
 
@@ -187,13 +192,11 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
     }
   });
 
-  // Check if project data is loaded
-  const isProjectLoaded = projectInfoSuccess || projectDataSuccess;
-
-  // Auto-save hook - enabled only when userData is loaded AND project data has been fetched
+  // Auto-save hook - enabled ONLY after hydration is complete
   const { isSaving } = useDebouncedAutoSave({
     data: {
       name: projectName,
+      code: projectCode,
       project_type_id: projectTypeId,
       modality_id: modalityId,
       status: status,
@@ -202,22 +205,28 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
     },
     saveFn: (data) => saveProjectDataMutation.mutateAsync(data),
     delay: 3000,
-    enabled: !!userData && isProjectLoaded
+    enabled: !!userData && isHydrated
   });
 
-  // Load data when project changes or data is fetched
+  // UNIFIED hydration effect - loads ALL data at once, then marks as hydrated
   useEffect(() => {
+    // Only hydrate when BOTH queries have completed (even if projectData is null)
+    if (!projectInfoSuccess || !projectDataSuccess) {
+      return;
+    }
+
+    // Load project info data
     if (projectInfo) {
       setProjectName(projectInfo.name || '');
-      setStatus(projectInfo.status || 'active'); // Default to 'active' only after loading
+      setProjectCode(projectInfo.code || '');
+      setStatus(projectInfo.status || 'active');
       setSelectedColor(projectInfo.color || '#84cc16');
       setUseCustomColor(projectInfo.use_custom_color || false);
       setCustomColorH(projectInfo.custom_color_h);
       setCustomColorHex(projectInfo.custom_color_hex);
     }
-  }, [projectInfo]);
 
-  useEffect(() => {
+    // Load project data (may be null for new projects)
     if (projectData) {
       setProjectTypeId(projectData.project_type_id || '');
       setModalityId(projectData.modality_id || '');
@@ -225,7 +234,12 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       setInternalNotes(projectData.internal_notes || '');
       setProjectImageUrl(projectData.project_image_url || null);
     }
-  }, [projectData]);
+
+    // Mark as hydrated AFTER all state updates are queued
+    setTimeout(() => {
+      setIsHydrated(true);
+    }, 100);
+  }, [projectInfo, projectData, projectInfoSuccess, projectDataSuccess]);
 
   // Handlers for color changes (NO usar saveProjectColorMutation como dependencia para evitar loops)
   const handlePaletteColorChange = useCallback((color: string) => {
@@ -313,14 +327,41 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
         {/* Right Column - Información Básica Content */}
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="project-name">Nombre del Proyecto</Label>
+            <Label htmlFor="project-name">
+              Nombre del Proyecto <span className="text-red-500">*</span>
+            </Label>
             <Input 
               id="project-name"
               placeholder="Ej: Casa Unifamiliar López"
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
               data-testid="input-project-name"
+              required
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="project-code">
+              Código Interno <span className="text-muted-foreground text-xs">(opcional)</span>
+            </Label>
+            <Input 
+              id="project-code"
+              placeholder="Ej: CASA-2024-01"
+              value={projectCode}
+              onChange={(e) => {
+                // Auto format: uppercase, only A-Z0-9-_
+                const formatted = e.target.value
+                  .toUpperCase()
+                  .replace(/[^A-Z0-9\-_]/g, '')
+                  .slice(0, 30);
+                setProjectCode(formatted);
+              }}
+              data-testid="input-project-code"
+              maxLength={30}
+            />
+            <p className="text-xs text-muted-foreground">
+              Máximo 30 caracteres. Solo letras, números, guiones y guiones bajos.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

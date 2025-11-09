@@ -131,6 +131,26 @@ export const insertOrganizationInvitationSchema = createInsertSchema(organizatio
 });
 
 export type OrganizationInvitation = typeof organization_invitations.$inferSelect;
+
+// Projects Table
+export const projects = pgTable("projects", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  code: text("code"),
+  organization_id: uuid("organization_id").notNull(),
+  created_by: uuid("created_by").notNull(),
+  status: text("status").notNull().default("active"),
+  is_active: boolean("is_active").notNull().default(true),
+  color: text("color"),
+  use_custom_color: boolean("use_custom_color").notNull().default(false),
+  custom_color_h: integer("custom_color_h"),
+  custom_color_hex: text("custom_color_hex"),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export type Project = typeof projects.$inferSelect;
+export type InsertProject = typeof projects.$inferInsert;
 export type InsertOrganizationInvitation = z.infer<typeof insertOrganizationInvitationSchema>;
 
 // Notifications Table

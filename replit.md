@@ -3,6 +3,13 @@
 ## Overview
 Archub is a comprehensive construction management platform designed to optimize operations, enhance collaboration, and improve efficiency in the construction industry. It provides tools for project tracking, team management, budget monitoring, financial management with multi-currency support, robust document management, a detailed project dashboard with KPIs, and a learning module for professional development. Archub aims to streamline workflows and provide a unified platform for all construction project needs, with a business vision to transform the construction industry through intelligent, integrated management solutions.
 
+## Recent Changes
+**November 9, 2025**
+- Added `projects` table definition to Drizzle schema (`shared/schema.ts`) with complete field mappings including `code`, `color`, `use_custom_color`, and other project metadata
+- Fixed auto-save issue in `ProjectBasicDataTab.tsx`: Implemented unified hydration pattern with `isHydrated` flag that waits for both `projectInfoSuccess` and `projectDataSuccess` before enabling auto-save, preventing unwanted saves on initial page load
+- Added `code` field to project basic data UI with auto-formatting validation (uppercase, A-Z0-9-_, max 30 chars, optional)
+- Updated `saveProjectDataMutation` to persist `code` field alongside name and status in projects table
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
