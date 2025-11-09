@@ -719,4 +719,69 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
       res.status(500).json({ error: "Failed to create design phase task" });
     }
   });
+
+  // ========== COMMUNITY/PUBLIC ENDPOINTS ==========
+
+  // GET /api/community/projects - Get all public projects with location data
+  app.get("/api/community/projects", async (req, res) => {
+    try {
+      // Use non-authenticated supabase client for public data
+      const { data: projects, error } = await supabase
+        .from('projects')
+        .select(`
+          id,
+          name,
+          organization_id,
+          color,
+          project_data!inner (
+            lat,
+            lng,
+            address,
+            city,
+            state,
+            country,
+            project_type_id,
+            project_image_url
+          )
+        `)
+        .eq('is_active', true)
+        .not('project_data.lat', 'is', null)
+        .not('project_data.lng', 'is', null);
+
+      if (error) {
+        console.error("Error fetching community projects:", error);
+        return res.status(500).json({ error: "Failed to fetch projects" });
+      }
+
+      // Also fetch organization names
+      const orgIds = [...new Set(projects?.map(p => p.organization_id) || [])];
+      const { data: orgs } = await supabase
+        .from('organizations')
+        .select('id, name')
+        .in('id', orgIds);
+
+      const orgMap = new Map(orgs?.map(o => [o.id, o.name]) || []);
+
+      // Flatten the data structure for easier consumption
+      const projectsWithLocation = projects?.map(p => ({
+        id: p.id,
+        name: p.name,
+        organizationId: p.organization_id,
+        organizationName: orgMap.get(p.organization_id) || 'Organización',
+        color: p.color,
+        lat: parseFloat(p.project_data.lat),
+        lng: parseFloat(p.project_data.lng),
+        address: p.project_data.address,
+        city: p.project_data.city,
+        state: p.project_data.state,
+        country: p.project_data.country,
+        imageUrl: p.project_data.project_image_url
+      })) || [];
+
+      res.json(projectsWithLocation);
+    } catch (error) {
+      console.error("Error fetching community projects:", error);
+      res.status(500).json({ error: "Failed to fetch projects" });
+    }
+  });
 }
