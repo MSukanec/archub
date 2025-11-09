@@ -20,7 +20,7 @@ export default function Community() {
   };
 
   return (
-    <Layout wide headerProps={headerProps}>
+    <Layout wide="full" headerProps={headerProps}>
       <div className="space-y-6">
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
           <div className="mb-4">

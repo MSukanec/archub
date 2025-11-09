@@ -29,6 +29,7 @@ import { usePendingInvitations } from "@/hooks/use-pending-invitations";
 // TEMPORALMENTE DESHABILITADO - GlobalAnnouncement no se usa por ahora
 // import { GlobalAnnouncement, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, AnnouncementProvider } from "@/components/ui-custom/layout/GlobalAnnouncement";
 import { useLocation } from "wouter";
+import { type WidthProp, resolveWidthMode, getContainerClasses, getPaddingClasses } from "./layoutWidth";
 
 interface Tab {
   id: string;
@@ -39,7 +40,7 @@ interface Tab {
 
 interface LayoutProps {
   children: React.ReactNode;
-  wide?: boolean;
+  wide?: WidthProp;
   headerProps?: {
     icon?: React.ComponentType<any>;
     title?: string;
@@ -293,7 +294,10 @@ function LayoutContent({
                   </PageLayout>
                 ) : (
                   <div
-                    className={`${wide ? "" : "max-w-[1440px] mx-auto"} ${wide ? "px-24" : "px-20"} pt-3 pb-6 min-h-0`}
+                    className={(() => {
+                      const mode = resolveWidthMode(wide);
+                      return `${getContainerClasses(mode)} ${getPaddingClasses(mode)} pt-3 pb-6 min-h-0`;
+                    })()}
                   >
                     {children}
                   </div>

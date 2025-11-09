@@ -43,6 +43,7 @@ import { ExpandableAvatarGroup } from "@/components/ui-custom/ExpandableAvatarGr
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
+import { type WidthProp, resolveWidthMode, getContainerClasses, getPaddingClasses } from "./layoutWidth";
 
 // Mapeo de rutas a nombres e iconos de páginas (exactamente como en el sidebar)
 const PAGE_CONFIG: Record<string, { name: string; icon: any }> = {
@@ -175,7 +176,7 @@ interface PageLayoutProps {
   onCurrencyViewChange?: (view: 'discriminado' | 'pesificado' | 'dolarizado') => void;
   
   // Control de ancho - debe coincidir con el contenido
-  wide?: boolean;
+  wide?: WidthProp;
   
   // Contenido de la página
   children: React.ReactNode;
@@ -290,7 +291,10 @@ export function PageLayout({
       {/* Page Content - HEADER Y CONTENIDO juntos para que se muevan con scroll */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden">
         <div style={{ backgroundColor: "var(--layout-bg)" }}>
-          <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} ${wide ? "px-24" : "px-20"} pt-0`}>
+          <div className={(() => {
+            const mode = resolveWidthMode(wide);
+            return `${getContainerClasses(mode)} ${getPaddingClasses(mode)} pt-0`;
+          })()}>
           {/* FILA 1: Icono + Título + Descripción a la izquierda + Selector a la derecha */}
           <div className={`min-h-[50px] flex items-center justify-between ${!showSecondRow ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
           <div className="flex items-center gap-4 py-2">
@@ -627,7 +631,10 @@ export function PageLayout({
         </div>
 
         {/* Page Content */}
-        <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} ${wide ? "px-24" : "px-20"} pt-6 pb-6 min-h-0 overflow-x-hidden`}>
+        <div className={(() => {
+          const mode = resolveWidthMode(wide);
+          return `${getContainerClasses(mode)} ${getPaddingClasses(mode)} pt-6 pb-6 min-h-0 overflow-x-hidden`;
+        })()}>
           {children}
         </div>
       </div>
