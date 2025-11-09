@@ -5,7 +5,7 @@ import type { RouteDeps } from "./_base";
  * Register project-related endpoints (projects, budgets, budget items, design phase tasks)
  */
 export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
-  const { supabase, createAuthenticatedClient, extractToken } = deps;
+  const { supabase, createAuthenticatedClient, extractToken, getAdminClient } = deps;
 
   // ========== PROJECT ENDPOINTS ==========
 
@@ -725,14 +725,21 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
   // GET /api/community/projects - Get all public projects with location data
   app.get("/api/community/projects", async (req, res) => {
     try {
-      // Use non-authenticated supabase client for public data
-      const { data: projects, error } = await supabase
+      // Use admin client to bypass RLS for public community data
+      const adminClient = getAdminClient();
+      
+      const { data: projects, error } = await adminClient
         .from('projects')
         .select(`
           id,
           name,
           organization_id,
           color,
+          organizations (
+            id,
+            name,
+            logo_url
+          ),
           project_data!inner (
             lat,
             lng,
@@ -753,26 +760,18 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
         return res.status(500).json({ error: "Failed to fetch projects" });
       }
 
-      // Also fetch organization names and logos
-      const orgIds = Array.from(new Set((projects || []).map((p: any) => p.organization_id)));
-      const { data: orgs } = await supabase
-        .from('organizations')
-        .select('id, name, logo_url')
-        .in('id', orgIds);
-
-      const orgMap = new Map((orgs || []).map((o: any) => [o.id, { name: o.name, logo: o.logo_url }]));
+      console.log(`Found ${projects?.length || 0} projects with location data`);
 
       // Flatten the data structure for easier consumption
-      // Note: project_data is an array from the inner join
       const projectsWithLocation = (projects || []).map((p: any) => {
         const projectData = Array.isArray(p.project_data) ? p.project_data[0] : p.project_data;
-        const orgData = orgMap.get(p.organization_id);
+        const orgData = p.organizations;
         return {
           id: p.id,
           name: p.name,
           organizationId: p.organization_id,
           organizationName: orgData?.name || 'Organización',
-          organizationLogo: orgData?.logo,
+          organizationLogo: orgData?.logo_url,
           color: p.color,
           lat: parseFloat(projectData.lat),
           lng: parseFloat(projectData.lng),
