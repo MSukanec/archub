@@ -180,15 +180,73 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
     setTimezone(place.timezone || '');
   };
 
-  // Handle manual latitude/longitude input
-  const handleLatChange = (value: string) => {
+  // Handle manual latitude/longitude input with reverse geocoding
+  const handleLatChange = async (value: string) => {
     const parsed = parseFloat(value);
-    setLat(isNaN(parsed) ? null : parsed);
+    const newLat = isNaN(parsed) ? null : parsed;
+    setLat(newLat);
+
+    // If both lat and lng are valid, do reverse geocoding
+    if (newLat !== null && lng !== null && googleMapsApiKey && window.google) {
+      await performReverseGeocoding(newLat, lng);
+    }
   };
 
-  const handleLngChange = (value: string) => {
+  const handleLngChange = async (value: string) => {
     const parsed = parseFloat(value);
-    setLng(isNaN(parsed) ? null : parsed);
+    const newLng = isNaN(parsed) ? null : parsed;
+    setLng(newLng);
+
+    // If both lat and lng are valid, do reverse geocoding
+    if (lat !== null && newLng !== null && googleMapsApiKey && window.google) {
+      await performReverseGeocoding(lat, newLng);
+    }
+  };
+
+  // Reverse geocoding helper function
+  const performReverseGeocoding = async (latitude: number, longitude: number) => {
+    try {
+      const geocoder = new google.maps.Geocoder();
+      const response = await geocoder.geocode({
+        location: { lat: latitude, lng: longitude }
+      });
+
+      if (response.results && response.results.length > 0) {
+        const result = response.results[0];
+        const newAddress = result.formatted_address;
+        
+        setAddressFull(newAddress);
+        setAddress(newAddress);
+
+        // Extract address components
+        const components = result.address_components;
+        let newCity = '';
+        let newState = '';
+        let newCountry = '';
+        let newZipCode = '';
+
+        components.forEach((component) => {
+          const types = component.types;
+          if (types.includes('locality')) {
+            newCity = component.long_name;
+          } else if (types.includes('administrative_area_level_1')) {
+            newState = component.long_name;
+          } else if (types.includes('country')) {
+            newCountry = component.long_name;
+          } else if (types.includes('postal_code')) {
+            newZipCode = component.long_name;
+          }
+        });
+
+        setCity(newCity);
+        setState(newState);
+        setCountry(newCountry);
+        setZipCode(newZipCode);
+        setPlaceId(result.place_id);
+      }
+    } catch (error) {
+      console.error('Error in reverse geocoding:', error);
+    }
   };
 
   // Handle marker drag on map
@@ -196,56 +254,13 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
     setLat(newLat);
     setLng(newLng);
 
-    // Reverse geocoding: convert coordinates to address
+    // Use the helper function for reverse geocoding
     if (googleMapsApiKey && window.google) {
-      try {
-        const geocoder = new google.maps.Geocoder();
-        const response = await geocoder.geocode({
-          location: { lat: newLat, lng: newLng }
-        });
-
-        if (response.results && response.results.length > 0) {
-          const result = response.results[0];
-          const newAddress = result.formatted_address;
-          
-          // Update address field
-          setAddressFull(newAddress);
-          setAddress(newAddress);
-
-          // Extract address components
-          const components = result.address_components;
-          let newCity = '';
-          let newState = '';
-          let newCountry = '';
-          let newZipCode = '';
-
-          components.forEach((component) => {
-            const types = component.types;
-            if (types.includes('locality')) {
-              newCity = component.long_name;
-            } else if (types.includes('administrative_area_level_1')) {
-              newState = component.long_name;
-            } else if (types.includes('country')) {
-              newCountry = component.long_name;
-            } else if (types.includes('postal_code')) {
-              newZipCode = component.long_name;
-            }
-          });
-
-          setCity(newCity);
-          setState(newState);
-          setCountry(newCountry);
-          setZipCode(newZipCode);
-          setPlaceId(result.place_id);
-
-          toast({
-            title: "Ubicación actualizada",
-            description: "La dirección se actualizó automáticamente"
-          });
-        }
-      } catch (error) {
-        console.error('Error in reverse geocoding:', error);
-      }
+      await performReverseGeocoding(newLat, newLng);
+      toast({
+        title: "Ubicación actualizada",
+        description: "La dirección se actualizó al mover el pin"
+      });
     }
   };
 
@@ -269,8 +284,8 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
         </div>
         
         <p className="text-sm text-muted-foreground">
-          Utiliza el buscador de Google para encontrar la dirección exacta. 
-          Los campos se completarán automáticamente con la información de ubicación.
+          Busca una dirección o ingresa las coordenadas manualmente. Todos los campos se sincronizan automáticamente. 
+          También puedes arrastrar el pin en el mapa para ajustar la ubicación.
         </p>
 
         {!googleMapsApiKey && (
@@ -287,35 +302,72 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
           </div>
         )}
 
-        {googleMapsApiKey ? (
-          <GooglePlacesAutocomplete
-            apiKey={googleMapsApiKey}
-            value={addressFull}
-            onChange={setAddressFull}
-            onPlaceSelected={handlePlaceSelected}
-            label="Buscar dirección en Google Maps"
-            placeholder="Ej: Av. Corrientes 1234, Buenos Aires"
-          />
-        ) : (
-          <div className="space-y-2">
-            <Label htmlFor="address-full">Dirección Completa</Label>
-            <Input 
-              id="address-full"
-              placeholder="Ej: Av. Corrientes 1234, Buenos Aires, Argentina"
+        <div className="space-y-4">
+          {googleMapsApiKey ? (
+            <GooglePlacesAutocomplete
+              apiKey={googleMapsApiKey}
               value={addressFull}
-              onChange={(e) => setAddressFull(e.target.value)}
-              data-testid="input-address-full"
+              onChange={setAddressFull}
+              onPlaceSelected={handlePlaceSelected}
+              label="Buscar dirección en Google Maps"
+              placeholder="Ej: Av. Corrientes 1234, Buenos Aires"
             />
-          </div>
-        )}
+          ) : (
+            <div className="space-y-2">
+              <Label htmlFor="address-full">Dirección Completa</Label>
+              <Input 
+                id="address-full"
+                placeholder="Ej: Av. Corrientes 1234, Buenos Aires, Argentina"
+                value={addressFull}
+                onChange={(e) => setAddressFull(e.target.value)}
+                data-testid="input-address-full"
+              />
+            </div>
+          )}
 
-        {/* Coordinates Status Indicator */}
-        {hasCoordinates && (
-          <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-500">
-            <CheckCircle2 className="h-4 w-4" />
-            <span>Coordenadas: {lat?.toFixed(6)}, {lng?.toFixed(6)}</span>
+          {/* Latitude and Longitude inputs inline */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="latitude">Latitud</Label>
+              <Input 
+                id="latitude"
+                type="number"
+                step="0.000001"
+                placeholder="Ej: -34.603722"
+                value={lat !== null ? lat : ''}
+                onChange={(e) => handleLatChange(e.target.value)}
+                data-testid="input-latitude"
+              />
+              <p className="text-xs text-muted-foreground">
+                Norte-Sur (-90 a 90)
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="longitude">Longitud</Label>
+              <Input 
+                id="longitude"
+                type="number"
+                step="0.000001"
+                placeholder="Ej: -58.381592"
+                value={lng !== null ? lng : ''}
+                onChange={(e) => handleLngChange(e.target.value)}
+                data-testid="input-longitude"
+              />
+              <p className="text-xs text-muted-foreground">
+                Este-Oeste (-180 a 180)
+              </p>
+            </div>
           </div>
-        )}
+
+          {/* Coordinates Status Indicator */}
+          {hasCoordinates && (
+            <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-500">
+              <CheckCircle2 className="h-4 w-4" />
+              <span>Ubicación guardada: {lat?.toFixed(6)}, {lng?.toFixed(6)}</span>
+            </div>
+          )}
+        </div>
 
         {/* Map - shown right below search */}
         {hasCoordinates && googleMapsApiKey && (
@@ -334,53 +386,6 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
             />
           </div>
         )}
-      </div>
-
-      {/* Manual Coordinates Section */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Navigation className="h-5 w-5 text-[var(--accent)]" />
-          <h2 className="text-lg font-semibold">Coordenadas Manuales</h2>
-        </div>
-        
-        <p className="text-sm text-muted-foreground">
-          Si no encuentras la ubicación en el buscador, puedes ingresar las coordenadas manualmente. 
-          Usa Google Maps para obtener las coordenadas exactas del lugar.
-        </p>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="latitude">Latitud</Label>
-            <Input 
-              id="latitude"
-              type="number"
-              step="0.000001"
-              placeholder="Ej: -34.603722"
-              value={lat !== null ? lat : ''}
-              onChange={(e) => handleLatChange(e.target.value)}
-              data-testid="input-latitude"
-            />
-            <p className="text-xs text-muted-foreground">
-              Coordenada Norte-Sur (-90 a 90)
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="longitude">Longitud</Label>
-            <Input 
-              id="longitude"
-              type="number"
-              step="0.000001"
-              placeholder="Ej: -58.381592"
-              value={lng !== null ? lng : ''}
-              onChange={(e) => handleLngChange(e.target.value)}
-              data-testid="input-longitude"
-            />
-            <p className="text-xs text-muted-foreground">
-              Coordenada Este-Oeste (-180 a 180)
-            </p>
-          </div>
-        </div>
       </div>
 
       {/* Address Details Section */}
