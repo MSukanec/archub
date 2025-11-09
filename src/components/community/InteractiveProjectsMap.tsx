@@ -43,7 +43,7 @@ export function InteractiveProjectsMap() {
   const createCustomIcon = (color: string, logoUrl?: string) => {
     const logoHtml = logoUrl 
       ? `<img src="${logoUrl}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />`
-      : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+      : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
         </svg>`;
     
@@ -52,8 +52,8 @@ export function InteractiveProjectsMap() {
       html: `
         <div style="
           position: relative;
-          width: 32px;
-          height: 32px;
+          width: 48px;
+          height: 52px;
         ">
           <div style="
             position: absolute;
@@ -62,21 +62,21 @@ export function InteractiveProjectsMap() {
             transform: translateX(-50%);
             width: 0;
             height: 0;
-            border-left: 16px solid transparent;
-            border-right: 16px solid transparent;
-            border-top: 20px solid ${color};
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 24px solid ${color};
           "></div>
           <div style="
             position: absolute;
             top: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 24px;
-            height: 24px;
+            width: 40px;
+            height: 40px;
             background-color: ${logoUrl ? 'white' : color};
             border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -86,9 +86,9 @@ export function InteractiveProjectsMap() {
           </div>
         </div>
       `,
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      popupAnchor: [0, -32],
+      iconSize: [48, 52],
+      iconAnchor: [24, 52],
+      popupAnchor: [0, -52],
     });
   };
 
@@ -110,7 +110,7 @@ export function InteractiveProjectsMap() {
         <div style="
           width: ${size}px;
           height: ${size}px;
-          background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%);
+          background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
           border-radius: 50%;
           border: 3px solid white;
           box-shadow: 0 4px 12px rgba(0,0,0,0.3);
@@ -152,7 +152,7 @@ export function InteractiveProjectsMap() {
   }
 
   return (
-    <div className="w-full h-full relative">
+    <div className="w-full h-full rounded-lg overflow-hidden border border-gray-200 shadow-lg relative">
       {projects.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/90 z-[1000] pointer-events-none">
           <div className="text-center text-gray-600">

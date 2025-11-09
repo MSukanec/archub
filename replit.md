@@ -6,11 +6,12 @@ Seencel is a comprehensive construction management platform designed to optimize
 ## Recent Changes
 **November 9, 2025**
 - **Community Map Feature**: Interactive global map displaying organization projects with Leaflet clustering
-  - Backend endpoint `/api/community/projects` fetches public projects with location data and organization logos
+  - Backend endpoint `/api/community/projects` uses admin client to bypass RLS and fetch public projects with location data and organization logos
   - Map displays even when no projects are available (shows empty state overlay)
-  - Custom markers using organization logos embedded in map pins (fallback to building icon)
+  - Custom markers using organization logos embedded in map pins (40px size, same as cluster markers, fallback to building icon)
   - Simplified popup showing only organization name and project name
-  - Dynamic clustering based on zoom levels (world → country → city → block)
+  - Dynamic clustering with black background (not green/accent) based on zoom levels (world → country → city → block)
+  - Standard page layout with wide=true, card container, and 700px fixed height
 - **Button System Redesign**: Updated default button variant to match design system
   - Removed shine effects and elevation animations
   - Identical styling to secondary variant but without border
