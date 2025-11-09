@@ -5,9 +5,12 @@ import { supabase } from '@/lib/supabase'
 import { useDebouncedAutoSave } from '@/components/save'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { MapPin } from 'lucide-react'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { MapPin, Building2, Navigation, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
+import { GooglePlacesAutocomplete, GoogleMap } from '@/components/google-maps'
 
 interface ProjectLocationTabProps {
   projectId?: string;
@@ -22,12 +25,27 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
 
+  // API Key from environment variable
+  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+
+  // Hydration state - CRITICAL for preventing auto-save on page load
+  const [isHydrated, setIsHydrated] = useState(false);
+
   // Form states - Location
-  const [address, setAddress] = useState('')
-  const [city, setCity] = useState('')
-  const [state, setState] = useState('')
-  const [country, setCountry] = useState('')
-  const [zipCode, setZipCode] = useState('')
+  const [addressFull, setAddressFull] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [country, setCountry] = useState('');
+  const [zipCode, setZipCode] = useState('');
+  const [placeId, setPlaceId] = useState('');
+  const [lat, setLat] = useState<number | null>(null);
+  const [lng, setLng] = useState<number | null>(null);
+  
+  // Form states - Additional Info
+  const [timezone, setTimezone] = useState('');
+  const [locationType, setLocationType] = useState<string>(''); // Will be empty or valid enum value
+  const [accessibilityNotes, setAccessibilityNotes] = useState('');
 
   // Get project data for location fields
   const { data: projectData, isSuccess: projectDataSuccess } = useQuery({
@@ -90,30 +108,77 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
     }
   });
 
-  // Auto-save hook - enabled only when userData is loaded AND project data has been fetched
+  // Auto-save hook - enabled ONLY after hydration is complete
   const { isSaving } = useDebouncedAutoSave({
     data: {
+      address_full: addressFull,
       address: address,
       city: city,
       state: state,
       country: country,
-      zip_code: zipCode
+      zip_code: zipCode,
+      place_id: placeId,
+      lat: lat,
+      lng: lng,
+      timezone: timezone,
+      // Only include location_type if it's a valid enum value
+      ...(locationType && ['urban', 'rural', 'industrial', 'other'].includes(locationType) 
+        ? { location_type: locationType } 
+        : {}),
+      accessibility_notes: accessibilityNotes
     },
     saveFn: (data) => saveProjectLocationMutation.mutateAsync(data),
     delay: 3000,
-    enabled: !!userData && projectDataSuccess
+    enabled: !!userData && isHydrated
   });
 
-  // Load data when project data is fetched
+  // Reset hydration when project changes
   useEffect(() => {
+    setIsHydrated(false);
+  }, [activeProjectId]);
+
+  // UNIFIED hydration effect - loads ALL data at once, then marks as hydrated
+  useEffect(() => {
+    // Only hydrate when query has completed (even if projectData is null)
+    if (!projectDataSuccess) {
+      return;
+    }
+
+    // Load project data (may be null for new projects)
     if (projectData) {
+      setAddressFull(projectData.address_full || '');
       setAddress(projectData.address || '');
       setCity(projectData.city || '');
       setState(projectData.state || '');
       setCountry(projectData.country || '');
       setZipCode(projectData.zip_code || '');
+      setPlaceId(projectData.place_id || '');
+      setLat(projectData.lat ? Number(projectData.lat) : null);
+      setLng(projectData.lng ? Number(projectData.lng) : null);
+      setTimezone(projectData.timezone || '');
+      setLocationType(projectData.location_type || '');
+      setAccessibilityNotes(projectData.accessibility_notes || '');
     }
-  }, [projectData]);
+
+    // Mark as hydrated AFTER all state updates are queued
+    setTimeout(() => {
+      setIsHydrated(true);
+    }, 100);
+  }, [projectData, projectDataSuccess]);
+
+  // Handle Google Places selection
+  const handlePlaceSelected = (place: any) => {
+    setAddressFull(place.address_full);
+    setAddress(place.address_full); // Also set main address field
+    setCity(place.city);
+    setState(place.state);
+    setCountry(place.country);
+    setZipCode(place.postal_code);
+    setPlaceId(place.place_id);
+    setLat(place.lat);
+    setLng(place.lng);
+    setTimezone(place.timezone || '');
+  };
 
   if (!activeProjectId) {
     return (
@@ -123,35 +188,111 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
     )
   }
 
+  const hasCoordinates = lat !== null && lng !== null;
+
   return (
-    <div className="space-y-6">
-      {/* Two Column Layout - Section descriptions left, content right */}
+    <div className="space-y-8">
+      {/* Google Places Search Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column - Ubicación */}
         <div>
           <div className="flex items-center gap-2 mb-6">
             <MapPin className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="text-lg font-semibold">Ubicación del Proyecto</h2>
+            <h2 className="text-lg font-semibold">Búsqueda de Dirección</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Dirección completa donde se ejecutará la obra. Esta información se usa para logística, entregas y documentación oficial.
+            Utiliza el buscador de Google para encontrar la dirección exacta. 
+            Los campos se completarán automáticamente con la información de ubicación.
+          </p>
+          {!googleMapsApiKey && (
+            <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-500 mt-0.5 flex-shrink-0" />
+                <div className="text-sm">
+                  <p className="font-medium text-yellow-800 dark:text-yellow-200">API Key de Google Maps no configurada</p>
+                  <p className="text-yellow-700 dark:text-yellow-300 mt-1">
+                    Agrega <code className="bg-yellow-100 dark:bg-yellow-900 px-1 rounded">VITE_GOOGLE_MAPS_API_KEY</code> en tus variables de entorno para habilitar la búsqueda automática.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          {googleMapsApiKey ? (
+            <GooglePlacesAutocomplete
+              apiKey={googleMapsApiKey}
+              value={addressFull}
+              onChange={setAddressFull}
+              onPlaceSelected={handlePlaceSelected}
+              label="Buscar dirección en Google Maps"
+              placeholder="Ej: Av. Corrientes 1234, Buenos Aires"
+            />
+          ) : (
+            <div className="space-y-2">
+              <Label htmlFor="address-full">Dirección Completa</Label>
+              <Input 
+                id="address-full"
+                placeholder="Ej: Av. Corrientes 1234, Buenos Aires, Argentina"
+                value={addressFull}
+                onChange={(e) => setAddressFull(e.target.value)}
+                data-testid="input-address-full"
+              />
+            </div>
+          )}
+
+          {/* Coordinates Status Indicator */}
+          {hasCoordinates && (
+            <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-500">
+              <CheckCircle2 className="h-4 w-4" />
+              <span>Coordenadas guardadas: {lat?.toFixed(6)}, {lng?.toFixed(6)}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Map Section */}
+      {hasCoordinates && googleMapsApiKey && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div>
+            <div className="flex items-center gap-2 mb-6">
+              <Navigation className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Vista del Mapa</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Visualización interactiva de la ubicación del proyecto. 
+              Puedes hacer zoom y explorar el área circundante.
+            </p>
+          </div>
+
+          <div>
+            <GoogleMap
+              apiKey={googleMapsApiKey}
+              center={{ lat: lat!, lng: lng! }}
+              zoom={16}
+              markerTitle={addressFull || 'Ubicación del proyecto'}
+              className="h-96 w-full rounded-lg border"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Address Details Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <Building2 className="h-5 w-5 text-[var(--accent)]" />
+            <h2 className="text-lg font-semibold">Detalles de Ubicación</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Información específica de la ubicación. 
+            Estos campos se completan automáticamente al buscar una dirección, 
+            pero puedes editarlos manualmente si es necesario.
           </p>
         </div>
 
-        {/* Right Column - Ubicación Content */}
-        <div>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="address">Dirección</Label>
-              <Input 
-                id="address"
-                placeholder="Ej: Av. Corrientes 1234"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                data-testid="input-address"
-              />
-            </div>
-
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="city">Ciudad</Label>
               <Input 
@@ -163,6 +304,19 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
               />
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="zip-code">Código Postal</Label>
+              <Input 
+                id="zip-code"
+                placeholder="Ej: C1043AAX"
+                value={zipCode}
+                onChange={(e) => setZipCode(e.target.value)}
+                data-testid="input-zip-code"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="state">Provincia/Estado</Label>
               <Input 
@@ -184,17 +338,36 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
                 data-testid="input-country"
               />
             </div>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="zip-code">Código Postal</Label>
-              <Input 
-                id="zip-code"
-                placeholder="Ej: C1043AAX"
-                value={zipCode}
-                onChange={(e) => setZipCode(e.target.value)}
-                data-testid="input-zip-code"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="location-type">Tipo de Ubicación</Label>
+            <Select value={locationType} onValueChange={setLocationType}>
+              <SelectTrigger id="location-type" data-testid="select-location-type">
+                <SelectValue placeholder="Seleccionar tipo de ubicación" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="urban">Urbana</SelectItem>
+                <SelectItem value="rural">Rural</SelectItem>
+                <SelectItem value="industrial">Industrial</SelectItem>
+                <SelectItem value="other">Otra</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="accessibility-notes">Notas de Accesibilidad</Label>
+            <Textarea 
+              id="accessibility-notes"
+              placeholder="Ej: Acceso por calle lateral, estacionamiento disponible en la esquina, horario de entregas de 8 a 18hs"
+              value={accessibilityNotes}
+              onChange={(e) => setAccessibilityNotes(e.target.value)}
+              rows={3}
+              data-testid="textarea-accessibility-notes"
+            />
+            <p className="text-xs text-muted-foreground">
+              Información sobre acceso al sitio, estacionamiento, restricciones de horario, etc.
+            </p>
           </div>
         </div>
       </div>
