@@ -8,7 +8,9 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ImageIcon, Palette, Settings } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { ImageIcon, Palette, Settings, Share2, Copy, MessageCircle, Mail } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import ImageUploadAndShowField from '@/components/ui-custom/fields/ImageUploadAndShowField'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
@@ -273,6 +275,86 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
     });
   }, []);
 
+  // Helper function to copy project data to clipboard
+  const copyProjectDataToClipboard = async () => {
+    const projectTypeName = projectTypes.find(pt => pt.id === projectTypeId)?.name || 'No especificado';
+    const modalityName = projectModalities.find(m => m.id === modalityId)?.name || 'No especificado';
+    
+    const dataText = `📋 DATOS DEL PROYECTO
+
+Nombre: ${projectName || 'Sin nombre'}
+${projectCode ? `Código: ${projectCode}\n` : ''}Tipología: ${projectTypeName}
+Modalidad: ${modalityName}
+Estado: ${status || 'No especificado'}
+
+Descripción:
+${description || 'Sin descripción'}
+
+${internalNotes ? `Notas Internas:\n${internalNotes}\n` : ''}
+---
+Generado desde Archub`;
+
+    try {
+      await navigator.clipboard.writeText(dataText);
+      toast({
+        title: "Datos copiados",
+        description: "Los datos del proyecto se copiaron al portapapeles"
+      });
+    } catch (error) {
+      toast({
+        title: "Error al copiar",
+        description: "No se pudieron copiar los datos",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Helper function to share via WhatsApp
+  const shareViaWhatsApp = () => {
+    const projectTypeName = projectTypes.find(pt => pt.id === projectTypeId)?.name || 'No especificado';
+    const modalityName = projectModalities.find(m => m.id === modalityId)?.name || 'No especificado';
+    
+    const message = `📋 *DATOS DEL PROYECTO*
+
+*Nombre:* ${projectName || 'Sin nombre'}
+${projectCode ? `*Código:* ${projectCode}\n` : ''}*Tipología:* ${projectTypeName}
+*Modalidad:* ${modalityName}
+*Estado:* ${status || 'No especificado'}
+
+*Descripción:*
+${description || 'Sin descripción'}
+
+${internalNotes ? `*Notas Internas:*\n${internalNotes}\n` : ''}
+---
+_Compartido desde Archub_`;
+
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
+  };
+
+  // Helper function to share via Email
+  const shareViaEmail = () => {
+    const projectTypeName = projectTypes.find(pt => pt.id === projectTypeId)?.name || 'No especificado';
+    const modalityName = projectModalities.find(m => m.id === modalityId)?.name || 'No especificado';
+    
+    const subject = encodeURIComponent(`Datos del Proyecto: ${projectName || 'Sin nombre'}`);
+    const body = encodeURIComponent(`DATOS DEL PROYECTO
+
+Nombre: ${projectName || 'Sin nombre'}
+${projectCode ? `Código: ${projectCode}\n` : ''}Tipología: ${projectTypeName}
+Modalidad: ${modalityName}
+Estado: ${status || 'No especificado'}
+
+Descripción:
+${description || 'Sin descripción'}
+
+${internalNotes ? `Notas Internas:\n${internalNotes}\n` : ''}
+---
+Generado desde Archub`);
+
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  };
+
   if (!activeProjectId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -283,6 +365,61 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
 
   return (
     <div className="space-y-6">
+      {/* Header with Share Button */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Datos Básicos</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Información fundamental del proyecto
+          </p>
+        </div>
+        
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="gap-2"
+              data-testid="button-share-project-data"
+            >
+              <Share2 className="h-4 w-4" />
+              Compartir
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-56 p-2" align="end">
+            <div className="space-y-1">
+              <button
+                onClick={copyProjectDataToClipboard}
+                className="flex items-center gap-3 w-full px-3 py-2 text-sm rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                data-testid="button-copy-data"
+              >
+                <Copy className="h-4 w-4" />
+                <span>Copiar datos</span>
+              </button>
+              
+              <button
+                onClick={shareViaWhatsApp}
+                className="flex items-center gap-3 w-full px-3 py-2 text-sm rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                data-testid="button-share-whatsapp"
+              >
+                <MessageCircle className="h-4 w-4" />
+                <span>Enviar por WhatsApp</span>
+              </button>
+              
+              <button
+                onClick={shareViaEmail}
+                className="flex items-center gap-3 w-full px-3 py-2 text-sm rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                data-testid="button-share-email"
+              >
+                <Mail className="h-4 w-4" />
+                <span>Enviar por Email</span>
+              </button>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      <hr className="border-t border-[var(--section-divider)]" />
       {/* Two Column Layout - Section descriptions left, content right */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column - Imagen Principal */}
