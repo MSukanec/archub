@@ -192,14 +192,39 @@ export function InteractiveProjectsMap() {
                 position={[project.lat, project.lng]}
                 icon={createCustomIcon(project.color || '#84cc16', project.organizationLogo)}
               >
-                <Popup className="custom-popup" maxWidth={250}>
-                  <div className="p-2">
-                    <h3 className="font-semibold text-base text-gray-900 mb-1">
-                      {project.organizationName}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {project.name}
-                    </p>
+                <Popup className="custom-popup" maxWidth={300}>
+                  <div className="p-3">
+                    {/* Organization with inline logo */}
+                    <div className="flex items-center gap-2 mb-2">
+                      {project.organizationLogo ? (
+                        <img 
+                          src={project.organizationLogo} 
+                          alt={project.organizationName}
+                          className="w-6 h-6 rounded-full object-cover border border-gray-200"
+                        />
+                      ) : (
+                        <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
+                          <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                          </svg>
+                        </div>
+                      )}
+                      <span className="font-semibold text-sm text-gray-900">
+                        {project.organizationName}
+                      </span>
+                    </div>
+                    
+                    {/* Project name */}
+                    <div className="pl-8">
+                      <p className="text-sm text-gray-700 font-medium">
+                        {project.name}
+                      </p>
+                      {project.city && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          {project.city}{project.state && `, ${project.state}`}{project.country && ` • ${project.country}`}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </Popup>
               </Marker>
