@@ -7,6 +7,6 @@ export const supabaseAdmin = createClient(
   env.SUPABASE_SERVICE_ROLE_KEY,
   {
     auth: { persistSession: false },
-    global: { headers: { "X-Client-Info": "archub-api" } },
+    global: { headers: { "X-Client-Info": "seencel-api" } },
   },
 );

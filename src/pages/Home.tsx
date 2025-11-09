@@ -352,7 +352,7 @@ export default function Home() {
               {/* Toggle para ver historial completo *\/}
               {chatMessages.length > 0 && (
                 <div className="text-center pt-1 flex items-center justify-center gap-2 text-xs text-muted-foreground/70">
-                  <span>Archub puede cometer errores. Comprueba la información importante.</span>
+                  <span>Seencel puede cometer errores. Comprueba la información importante.</span>
                   <span>-</span>
                   <button
                     onClick={() => setShowFullHistory(!showFullHistory)}

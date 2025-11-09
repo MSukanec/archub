@@ -62,7 +62,7 @@ Dirección: ${projectLocationData.address_full || 'No especificada'}
 ${projectLocationData.city ? `Ciudad: ${projectLocationData.city}\n` : ''}${projectLocationData.state ? `Provincia/Estado: ${projectLocationData.state}\n` : ''}${projectLocationData.country ? `País: ${projectLocationData.country}\n` : ''}${projectLocationData.zip_code ? `Código Postal: ${projectLocationData.zip_code}\n` : ''}
 ${projectLocationData.lat && projectLocationData.lng ? `Coordenadas: ${projectLocationData.lat}, ${projectLocationData.lng}\n` : ''}${projectLocationData.location_type ? `Tipo de ubicación: ${projectLocationData.location_type}\n` : ''}${projectLocationData.accessibility_notes ? `Notas de accesibilidad: ${projectLocationData.accessibility_notes}\n` : ''}
 ---
-Generado desde Archub`;
+Generado desde Seencel`;
 
     try {
       await navigator.clipboard.writeText(dataText);
@@ -95,7 +95,7 @@ Generado desde Archub`;
 ${projectLocationData.city ? `*Ciudad:* ${projectLocationData.city}\n` : ''}${projectLocationData.state ? `*Provincia/Estado:* ${projectLocationData.state}\n` : ''}${projectLocationData.country ? `*País:* ${projectLocationData.country}\n` : ''}${projectLocationData.zip_code ? `*Código Postal:* ${projectLocationData.zip_code}\n` : ''}
 ${projectLocationData.lat && projectLocationData.lng ? `*Coordenadas:* ${projectLocationData.lat}, ${projectLocationData.lng}\n` : ''}${projectLocationData.lat && projectLocationData.lng ? `*Google Maps:* https://www.google.com/maps?q=${projectLocationData.lat},${projectLocationData.lng}\n` : ''}${projectLocationData.location_type ? `*Tipo de ubicación:* ${projectLocationData.location_type}\n` : ''}${projectLocationData.accessibility_notes ? `*Notas de accesibilidad:* ${projectLocationData.accessibility_notes}\n` : ''}
 ---
-_Compartido desde Archub_`;
+_Compartido desde Seencel_`;
 
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
@@ -118,7 +118,7 @@ Dirección: ${projectLocationData.address_full || 'No especificada'}
 ${projectLocationData.city ? `Ciudad: ${projectLocationData.city}\n` : ''}${projectLocationData.state ? `Provincia/Estado: ${projectLocationData.state}\n` : ''}${projectLocationData.country ? `País: ${projectLocationData.country}\n` : ''}${projectLocationData.zip_code ? `Código Postal: ${projectLocationData.zip_code}\n` : ''}
 ${projectLocationData.lat && projectLocationData.lng ? `Coordenadas: ${projectLocationData.lat}, ${projectLocationData.lng}\n` : ''}${projectLocationData.lat && projectLocationData.lng ? `Google Maps: https://www.google.com/maps?q=${projectLocationData.lat},${projectLocationData.lng}\n` : ''}${projectLocationData.location_type ? `Tipo de ubicación: ${projectLocationData.location_type}\n` : ''}${projectLocationData.accessibility_notes ? `Notas de accesibilidad: ${projectLocationData.accessibility_notes}\n` : ''}
 ---
-Generado desde Archub`);
+Generado desde Seencel`);
 
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   };

@@ -209,7 +209,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let first_name = fullNameParts[0] || "Usuario";
     let last_name = fullNameParts.length > 1 
       ? fullNameParts.slice(1).join(" ") 
-      : "Archub"; // Default si solo tiene un nombre
+      : "Seencel"; // Default si solo tiene un nombre
 
     // Validar que tengamos un token válido (producción o test)
     const isValidToken = MP_ACCESS_TOKEN && 
@@ -279,7 +279,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
       auto_return: "approved",
       binary_mode: true,
-      statement_descriptor: "ARCHUB",
+      statement_descriptor: "SEENCEL",
     };
 
     // SIEMPRE agregar metadata IDÉNTICA (con o sin cupón)

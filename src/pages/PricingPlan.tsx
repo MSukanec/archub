@@ -823,7 +823,7 @@ export default function PricingPlan() {
               ¿Listo para transformar tu gestión?
             </h3>
             <p className="text-base text-[var(--text-muted)] max-w-2xl mx-auto">
-              Únete a cientos de profesionales optimizando sus proyectos con Archub.
+              Únete a cientos de profesionales optimizando sus proyectos con Seencel.
             </p>
             <div className="flex gap-4 justify-center mt-8">
               <Button 

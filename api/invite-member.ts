@@ -137,7 +137,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ error: invitationError.message });
     }
 
-    // Si el usuario existe en Archub, crear notificación in-app
+    // Si el usuario existe en Seencel, crear notificación in-app
     if (existingUser) {
       const { data: orgData } = await supabaseAdmin
         .from("organizations")
@@ -167,7 +167,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // Si el usuario NO existe en Archub, enviar invitación por email de Supabase Auth
+    // Si el usuario NO existe en Seencel, enviar invitación por email de Supabase Auth
     if (!existingUser) {
       const { error: authInviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
         email,

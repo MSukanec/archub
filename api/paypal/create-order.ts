@@ -10,7 +10,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.setHeader("Access-Control-Allow-Origin", "*").status(405).json({ ok:false, error:"Method not allowed" });
 
   try {
-    const { user_id, course_slug, amount_usd, description = "Archub purchase" } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    const { user_id, course_slug, amount_usd, description = "Seencel purchase" } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
     if (!user_id || !course_slug || !amount_usd) {
       return res.setHeader("Access-Control-Allow-Origin", "*").status(400).json({ ok:false, error:"Missing user_id, course_slug or amount_usd" });
@@ -47,7 +47,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         invoice_id: uniqueInvoiceId,
       }],
       application_context: {
-        brand_name: "Archub",
+        brand_name: "Seencel",
         user_action: "PAY_NOW",
         return_url: `${returnBase}/api/paypal/capture-and-redirect?course_slug=${course_slug}`,
         cancel_url: `${returnBase}/learning/courses`,

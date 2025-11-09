@@ -1,7 +1,7 @@
-# Archub - Construction Management Platform
+# Seencel - Construction Management Platform
 
 ## Overview
-Archub is a comprehensive construction management platform designed to optimize operations, enhance collaboration, and improve efficiency in the construction industry. It provides tools for project tracking, team management, budget monitoring, financial management with multi-currency support, robust document management, a detailed project dashboard with KPIs, and a learning module for professional development. Archub aims to streamline workflows and provide a unified platform for all construction project needs, with a business vision to transform the construction industry through intelligent, integrated management solutions.
+Seencel is a comprehensive construction management platform designed to optimize operations, enhance collaboration, and improve efficiency in the construction industry. It provides tools for project tracking, team management, budget monitoring, financial management with multi-currency support, robust document management, a detailed project dashboard with KPIs, and a learning module for professional development. Seencel aims to streamline workflows and provide a unified platform for all construction project needs, with a business vision to transform the construction industry through intelligent, integrated management solutions.
 
 ## Recent Changes
 **November 9, 2025**
@@ -48,7 +48,7 @@ Preferred communication style: Simple, everyday language.
 - **Coupon System**: Discount coupon system for courses, with a workaround for Mercado Pago limitations when coupons are applied.
 - **Payment Architecture**: Unified `payments` table supporting Mercado Pago, PayPal, and bank transfers with an automatic 5% discount for bank transfers.
 - **Access Control**: `PlanRestricted` component system with admin bypass.
-- **Cost System**: Three-tier cost system (Archub Cost, Organization Cost, Independent Cost) for budget items.
+- **Cost System**: Three-tier cost system (Seencel Cost, Organization Cost, Independent Cost) for budget items.
 - **AI Integration**: GPT-4o-powered intelligent assistant with comprehensive analysis capabilities using 13 specialized function-calling tools (8 finance tools, 2 project tools, 3 organization tools), dynamic greetings, and conversational chat with persistent history. Organization tools enable queries about company info, member lists with roles, and real-time activity tracking. Includes a greeting cache system and anti-hallucination measures. FloatingAIChat visibility is route-based and restricted by plan.
 - **User Presence & Analytics System**: Dual-layer tracking for real-time user presence (`user_presence` table) and historical usage analytics (`user_view_history` table) for business intelligence, including time spent per view.
 - **Organization Membership Security System**: Comprehensive access control enforcement when users are deactivated (`is_active=false`). Backend endpoints filter by `is_active=true`, Supabase RPC `get_user()` excludes inactive memberships in three locations, and `OrganizationRemovedModal` provides elegant UX: detects invalid organization access, shows non-dismissible modal with two flows: (1) multi-org users see organization selector with avatars and can switch organizations, (2) zero-org users see forced logout modal with clear messaging. Ensures complete security when admins remove members.

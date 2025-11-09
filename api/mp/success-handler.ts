@@ -21,7 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         <!DOCTYPE html>
         <html>
           <head>
-            <title>Pago - Archub</title>
+            <title>Pago - Seencel</title>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
           </head>
@@ -55,7 +55,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         <!DOCTYPE html>
         <html>
           <head>
-            <title>Error - Archub</title>
+            <title>Error - Seencel</title>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
           </head>
@@ -186,7 +186,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         <!DOCTYPE html>
         <html>
           <head>
-            <title>Pago Exitoso - Archub</title>
+            <title>Pago Exitoso - Seencel</title>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
           </head>
@@ -215,7 +215,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         <!DOCTYPE html>
         <html>
           <head>
-            <title>Pago Pendiente - Archub</title>
+            <title>Pago Pendiente - Seencel</title>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
           </head>
@@ -236,7 +236,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         <!DOCTYPE html>
         <html>
           <head>
-            <title>Pago Rechazado - Archub</title>
+            <title>Pago Rechazado - Seencel</title>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
           </head>
