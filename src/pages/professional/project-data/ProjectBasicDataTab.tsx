@@ -7,10 +7,13 @@ import { useDebouncedAutoSave } from '@/components/save'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { ImageIcon, FileText, Users, MapPin, Palette } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ImageIcon, FileText, Users, MapPin, Palette, Settings } from 'lucide-react'
 import ImageUploadAndShowField from '@/components/ui-custom/fields/ImageUploadAndShowField'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
+import { useProjectTypes } from '@/hooks/use-project-types'
+import { useProjectModalities } from '@/hooks/use-project-modalities'
 import ProjectColorAdvanced from '@/components/projects/ProjectColorAdvanced'
 import ProjectColorPalette from '@/components/projects/ProjectColorPalette'
 
@@ -27,8 +30,13 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
   // Use projectId from props if provided, otherwise use selectedProjectId from context
   const activeProjectId = projectId || selectedProjectId
 
-  // Form states
+  // Form states - Basic
   const [projectName, setProjectName] = useState('')
+  const [projectTypeId, setProjectTypeId] = useState('')
+  const [modalityId, setModalityId] = useState('')
+  const [status, setStatus] = useState('active')
+  
+  // Form states - Details
   const [description, setDescription] = useState('')
   const [internalNotes, setInternalNotes] = useState('')
   const [clientName, setClientName] = useState('')
@@ -46,6 +54,10 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
   const [useCustomColor, setUseCustomColor] = useState(false)
   const [customColorH, setCustomColorH] = useState<number | null>(null)
   const [customColorHex, setCustomColorHex] = useState<string | null>(null)
+  
+  // Get project types and modalities
+  const { data: projectTypes = [] } = useProjectTypes()
+  const { data: projectModalities = [] } = useProjectModalities()
 
   // Get project data for BasicData tab
   const { data: projectData, isSuccess: projectDataSuccess } = useQuery({
@@ -126,22 +138,25 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
     mutationFn: async (dataToSave: any) => {
       if (!activeProjectId || !supabase) return;
 
-      // Update project name in projects table
-      if (dataToSave.name !== undefined) {
+      // Update project name and status in projects table
+      const projectsUpdate: any = {};
+      if (dataToSave.name !== undefined) projectsUpdate.name = dataToSave.name;
+      if (dataToSave.status !== undefined) projectsUpdate.status = dataToSave.status;
+      
+      if (Object.keys(projectsUpdate).length > 0) {
         const { error: projectError } = await supabase
           .from('projects')
-          .update({ name: dataToSave.name })
+          .update(projectsUpdate)
           .eq('id', activeProjectId);
 
         if (projectError) {
-          console.error('Error updating project name:', projectError);
+          console.error('Error updating project:', projectError);
           throw projectError;
         }
       }
 
-      // Prepare project_data payload
-      const projectDataPayload = { ...dataToSave };
-      delete projectDataPayload.name; // Remove name as it goes to projects table
+      // Prepare project_data payload - explicitly exclude fields that belong to projects table
+      const { name, status, ...projectDataPayload } = dataToSave;
 
       if (Object.keys(projectDataPayload).length === 0) return;
 
@@ -180,10 +195,13 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
     }
   });
 
-  // Auto-save hook - enabled only after both queries complete (even if projectData is null for new projects)
+  // Auto-save hook - enabled only when userData is loaded
   const { isSaving } = useDebouncedAutoSave({
     data: {
       name: projectName,
+      project_type_id: projectTypeId,
+      modality_id: modalityId,
+      status: status,
       description: description,
       internal_notes: internalNotes,
       client_name: clientName,
@@ -196,14 +214,15 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       zip_code: zipCode
     },
     saveFn: (data) => saveProjectDataMutation.mutateAsync(data),
-    delay: 1500,
-    enabled: projectInfoSuccess && projectDataSuccess
+    delay: 3000,
+    enabled: !!userData
   });
 
   // Load data when project changes or data is fetched
   useEffect(() => {
     if (projectInfo) {
       setProjectName(projectInfo.name || '');
+      setStatus(projectInfo.status || 'active');
       setSelectedColor(projectInfo.color || '#84cc16');
       setUseCustomColor(projectInfo.use_custom_color || false);
       setCustomColorH(projectInfo.custom_color_h);
@@ -213,6 +232,8 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
 
   useEffect(() => {
     if (projectData) {
+      setProjectTypeId(projectData.project_type_id || '');
+      setModalityId(projectData.modality_id || '');
       setDescription(projectData.description || '');
       setInternalNotes(projectData.internal_notes || '');
       setClientName(projectData.client_name || '');
@@ -292,6 +313,87 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
               onImageUpdate={setProjectImageUrl}
             />
           )}
+        </div>
+      </div>
+
+      <hr className="border-t border-[var(--section-divider)] my-8" />
+
+      {/* Project Information Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column - Información del Proyecto */}
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <Settings className="h-5 w-5 text-[var(--accent)]" />
+            <h2 className="text-lg font-semibold">Información del Proyecto</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Datos fundamentales que definen el proyecto. El nombre, tipo, modalidad y estado ayudan a organizar y clasificar tus proyectos.
+          </p>
+        </div>
+
+        {/* Right Column - Project Information Content */}
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="project-name">Nombre del Proyecto</Label>
+            <Input 
+              id="project-name"
+              placeholder="Ej: Casa Unifamiliar López"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="project-type">Tipología</Label>
+              <Select value={projectTypeId} onValueChange={setProjectTypeId}>
+                <SelectTrigger id="project-type">
+                  <SelectValue placeholder="Selecciona un tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Sin especificar</SelectItem>
+                  {projectTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.id}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="modality">Modalidad</Label>
+              <Select value={modalityId} onValueChange={setModalityId}>
+                <SelectTrigger id="modality">
+                  <SelectValue placeholder="Selecciona una modalidad" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Sin especificar</SelectItem>
+                  {projectModalities.map((modality) => (
+                    <SelectItem key={modality.id} value={modality.id}>
+                      {modality.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="status">Estado</Label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger id="status">
+                <SelectValue placeholder="Selecciona un estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">En proceso</SelectItem>
+                <SelectItem value="completed">Completado</SelectItem>
+                <SelectItem value="paused">Pausado</SelectItem>
+                <SelectItem value="cancelled">Cancelado</SelectItem>
+                <SelectItem value="planning">Planificación</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
