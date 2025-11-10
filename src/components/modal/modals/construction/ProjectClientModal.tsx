@@ -11,6 +11,7 @@ import { FormModalFooter } from '../../form/FormModalFooter';
 import { FormModalLayout } from '../../form/FormModalLayout';
 import { useGlobalModalStore } from '../../form/useGlobalModalStore';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
 import { Users } from 'lucide-react';
 
@@ -22,12 +23,15 @@ const clientSchema = z.object({
 type ClientFormData = z.infer<typeof clientSchema>;
 
 interface ProjectClientModalProps {
-  projectId?: string;
-  clientId?: string;
+  modalData?: {
+    projectId?: string;
+    clientId?: string;
+  };
   onClose: () => void;
 }
 
-export function ProjectClientModal({ projectId, clientId, onClose }: ProjectClientModalProps) {
+export function ProjectClientModal({ modalData, onClose }: ProjectClientModalProps) {
+  const { projectId, clientId } = modalData || {};
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const queryClient = useQueryClient();
@@ -166,11 +170,9 @@ export function ProjectClientModal({ projectId, clientId, onClose }: ProjectClie
             <FormItem>
               <FormLabel>Unidad Funcional (Opcional)</FormLabel>
               <FormControl>
-                <input
+                <Input
                   {...field}
-                  type="text"
                   placeholder="Ej: Departamento 101, Casa 5, etc."
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
               </FormControl>
               <FormMessage />
