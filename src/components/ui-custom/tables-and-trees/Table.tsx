@@ -121,7 +121,8 @@ interface TableProps<T = any> {
   emptyStateConfig?: {
     icon?: React.ReactNode;
     title: string;
-    description?: string;
+    description?: React.ReactNode;
+    action?: React.ReactNode;
   };
   isLoading?: boolean;
   className?: string;
@@ -1005,6 +1006,7 @@ export function Table<T = any>({
                   icon={emptyStateConfig.icon}
                   title={emptyStateConfig.title}
                   description={emptyStateConfig.description}
+                  action={emptyStateConfig.action}
                 />
               </div>
             ) : emptyState ? (
@@ -1318,6 +1320,7 @@ export function Table<T = any>({
                 icon={emptyStateConfig.icon}
                 title={emptyStateConfig.title}
                 description={emptyStateConfig.description}
+                action={emptyStateConfig.action}
               />
             </div>
           ) : emptyState ? (

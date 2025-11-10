@@ -131,10 +131,29 @@ export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
         columns={columns}
         data={projectClients}
         isLoading={isLoading}
+        showDoubleHeader={true}
         emptyStateConfig={{
           icon: <Users className="h-12 w-12 text-muted-foreground" />,
           title: 'No hay clientes en este proyecto',
-          description: 'Agrega clientes para gestionar la información del proyecto',
+          description: (
+            <>
+              Agrega clientes para gestionar la información del proyecto. Recuerda que un cliente, antes debe ser un{' '}
+              <a href="/professional/contacts" className="text-primary hover:underline font-medium">
+                contacto
+              </a>
+              .
+            </>
+          ),
+          action: (
+            <Button
+              onClick={handleAddClient}
+              size="sm"
+              data-testid="button-add-client-empty"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Agregar Cliente
+            </Button>
+          ),
         }}
         headerActions={{
           rightActions: (
