@@ -15,7 +15,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useUnreadSupportMessages } from '@/hooks/use-unread-support-messages';
 import ButtonSidebar from "./ButtonSidebar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { 
   Settings, 
   Home,
@@ -46,10 +45,7 @@ import {
   BarChart3,
   Folder,
   TrendingUp,
-  MapPin,
-  Pencil,
-  Hammer,
-  ShoppingCart
+  MapPin
 } from "lucide-react";
 import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -64,15 +60,6 @@ interface SidebarItem {
   adminOnly?: boolean;
   restricted?: "coming_soon" | string;
 }
-
-interface AccordionSection {
-  id: string;
-  label: string;
-  icon: React.ComponentType<any>;
-  items: SidebarItem[];
-}
-
-type NavigationItem = SidebarItem | { type: 'accordion'; section: AccordionSection };
 
 export function Sidebar() {
   const [location, navigate] = useLocation();
@@ -139,7 +126,7 @@ export function Sidebar() {
   };
 
   // Navegación según el nivel del sidebar
-  const getNavigationItems = (): NavigationItem[] => {
+  const getNavigationItems = (): SidebarItem[] => {
     if (sidebarLevel === 'general') {
       // Sidebar general - hub central
       return [];
@@ -158,43 +145,14 @@ export function Sidebar() {
     } else if (sidebarLevel === 'project' && selectedProjectId) {
       return [
         { id: 'dashboard', label: 'Visión General', icon: Home, href: '/project/dashboard' },
-        {
-          type: 'accordion',
-          section: {
-            id: 'diseno',
-            label: 'Diseño',
-            icon: Pencil,
-            items: []
-          }
-        },
-        {
-          type: 'accordion',
-          section: {
-            id: 'construccion',
-            label: 'Construcción',
-            icon: Hammer,
-            items: [
-              { id: 'basic-data', label: 'Datos Básicos', icon: FileText, href: '/project' },
-              { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets' },
-              { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel', restricted: 'coming_soon' },
-              { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials', restricted: 'coming_soon' },
-              { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'coming_soon' },
-              { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts', restricted: 'coming_soon' },
-              { id: 'logs', label: 'Bitácora', icon: History, href: '/construction/logs', restricted: 'coming_soon' },
-            ]
-          }
-        },
-        {
-          type: 'accordion',
-          section: {
-            id: 'comercializacion',
-            label: 'Comercialización',
-            icon: ShoppingCart,
-            items: [
-              { id: 'clients', label: 'Clientes', icon: Users, href: '/clients', restricted: 'coming_soon' },
-            ]
-          }
-        },
+        { id: 'basic-data', label: 'Datos Básicos', icon: FileText, href: '/project' },
+        { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets' },
+        { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel', restricted: 'coming_soon' },
+        { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials', restricted: 'coming_soon' },
+        { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'coming_soon' },
+        { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts', restricted: 'coming_soon' },
+        { id: 'logs', label: 'Bitácora', icon: History, href: '/construction/logs', restricted: 'coming_soon' },
+        { id: 'clients', label: 'Clientes', icon: Users, href: '/clients', restricted: 'coming_soon' },
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
       return [
@@ -804,196 +762,82 @@ export function Sidebar() {
                   </div>
                 )} */}
                 
-                {sidebarLevel === 'project' && selectedProjectId ? (
-                  // Render especial para proyecto con acordeones
-                  <Accordion type="single" collapsible className="w-full">
-                    {navigationItems.map((navItem) => {
-                      // Check if it's an accordion
-                      if ('type' in navItem && navItem.type === 'accordion') {
-                        const section = navItem.section;
-                        
-                        return (
-                          <AccordionItem key={section.id} value={section.id} className="border-none mb-[2px]">
-                            <AccordionTrigger 
-                              className={cn(
-                                "flex items-center h-8 transition-all duration-200 ease-out overflow-hidden rounded border-none p-0 hover:no-underline",
-                                isExpanded ? "w-full" : "w-8",
-                                "text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)]",
-                                "hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]",
-                                "group",
-                                "[&>svg]:hidden"
-                              )}
-                            >
-                              <span className="flex-shrink-0 w-8 flex items-center justify-center transition-colors duration-200 relative">
-                                <span className={cn(
-                                  "transition-colors duration-200",
-                                  "text-[var(--main-sidebar-button-fg)] group-hover:text-[var(--accent)]"
-                                )}>
-                                  <section.icon className="w-[18px] h-[18px]" />
-                                </span>
-                              </span>
-                              {isExpanded && (
-                                <>
-                                  <span className="text-xs whitespace-nowrap text-left flex items-center justify-start flex-1 pr-2 text-current ml-3 font-normal">
-                                    {section.label}
-                                  </span>
-                                  <span className="transition-transform duration-200 mr-2 flex-shrink-0 [button[data-state=open]_&]:rotate-180">
-                                    <ChevronDown className="h-4 w-4" />
-                                  </span>
-                                </>
-                              )}
-                            </AccordionTrigger>
-                            <AccordionContent className="px-0 py-1">
-                              <div className="flex flex-col gap-[2px]">
-                                {section.items.map((item) => {
-                                  const isActive = location === item.href;
-                                  const isExternalLink = item.href?.startsWith('http') || false;
-                                  const button = (
-                                    <ButtonSidebar
-                                      key={item.id}
-                                      icon={<item.icon className="w-[18px] h-[18px]" />}
-                                      label={item.label}
-                                      isActive={isActive}
-                                      isExpanded={isExpanded}
-                                      onClick={() => {
-                                        if (isExternalLink) {
-                                          window.open(item.href, '_blank', 'noopener,noreferrer');
-                                        } else {
-                                          navigate(item.href);
-                                        }
-                                      }}
-                                      href={item.href}
-                                      variant="secondary"
-                                    />
-                                  );
-                                  
-                                  return item.restricted ? (
-                                    <PlanRestricted key={item.id} reason={item.restricted}>
-                                      {button}
-                                    </PlanRestricted>
-                                  ) : (
-                                    <div key={item.id}>{button}</div>
-                                  );
-                                })}
-                              </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        );
-                      } else {
-                        // Regular item (not accordion)
-                        const item = navItem as SidebarItem;
-                        if (item.adminOnly && !isAdmin) return null;
-                        
-                        const isActive = location === item.href;
-                        const isExternalLink = item.href?.startsWith('http') || false;
-                        const button = (
-                          <ButtonSidebar
-                            icon={<item.icon className="w-[18px] h-[18px]" />}
-                            label={item.label}
-                            isActive={isActive}
-                            isExpanded={isExpanded}
-                            onClick={() => {
-                              if (isExternalLink) {
-                                window.open(item.href, '_blank', 'noopener,noreferrer');
-                              } else {
-                                navigate(item.href);
-                              }
-                            }}
-                            href={item.href}
-                            variant="secondary"
-                            badgeCount={item.id === 'support' && isAdmin ? unreadCount : undefined}
-                          />
-                        );
-                        
-                        return (
-                          <div key={item.id} className="mb-[2px]">
-                            {item.restricted ? (
-                              <PlanRestricted reason={item.restricted}>
-                                {button}
-                              </PlanRestricted>
-                            ) : (
-                              button
-                            )}
-                          </div>
-                        );
-                      }
-                    })}
-                  </Accordion>
-                ) : (
-                  // Render normal para otros niveles (sin acordeones)
-                  navigationItems.map((navItem) => {
-                    const item = navItem as SidebarItem;
-                    if (item.adminOnly && !isAdmin) return null;
-                    
-                    const isActive = location === item.href;
-                    // Configuración de divisores con texto
-                    const getDividerInfo = () => {
-                      if (sidebarLevel === 'organization') {
-                        if (item.id === 'dashboard') return { show: true, text: 'Gestión' };
-                        if (item.id === 'analysis') return { show: true, text: 'Finanzas' };
-                        if (item.id === 'activity') return { show: true, text: 'Organización' };
-                      } else if (sidebarLevel === 'learning') {
-                        if (item.id === 'dashboard') return { show: true, text: 'Capacitaciones' };
-                      } else if (sidebarLevel === 'admin') {
-                        if (item.id === 'community') return { show: true, text: 'Administración' };
-                        if (item.id === 'general') return { show: true, text: 'Construcción' };
-                      }
-                      return { show: false, text: '' };
-                    };
+                {navigationItems.map((item, index) => {
+                if (item.adminOnly && !isAdmin) return null;
+                
+                const isActive = location === item.href;
+                // Configuración de divisores con texto
+                const getDividerInfo = () => {
+                  if (sidebarLevel === 'organization') {
+                    if (item.id === 'dashboard') return { show: true, text: 'Gestión' };
+                    if (item.id === 'analysis') return { show: true, text: 'Finanzas' };
+                    if (item.id === 'activity') return { show: true, text: 'Organización' };
+                  } else if (sidebarLevel === 'project') {
+                    if (item.id === 'dashboard') return { show: true, text: 'Planificación' };
+                    if (item.id === 'basic-data') return { show: true, text: 'Recursos' };
+                    if (item.id === 'subcontracts') return { show: true, text: 'Ejecución' };
+                    if (item.id === 'logs') return { show: true, text: 'Comercialización' };
+                  } else if (sidebarLevel === 'learning') {
+                    if (item.id === 'dashboard') return { show: true, text: 'Capacitaciones' };
+                  } else if (sidebarLevel === 'admin') {
+                    if (item.id === 'community') return { show: true, text: 'Administración' };
+                    if (item.id === 'general') return { show: true, text: 'Construcción' };
+                  }
+                  return { show: false, text: '' };
+                };
 
-                    const dividerInfo = getDividerInfo();
-                    
-                    // Botón con o sin restricción
-                    const isExternalLink = item.href?.startsWith('http') || false;
-                    const button = (
-                      <ButtonSidebar
-                        icon={<item.icon className="w-[18px] h-[18px]" />}
-                        label={item.label}
-                        isActive={isActive}
-                        isExpanded={isExpanded}
-                        onClick={() => {
-                          if (isExternalLink) {
-                            window.open(item.href, '_blank', 'noopener,noreferrer');
-                          } else {
-                            navigate(item.href);
-                          }
-                        }}
-                        href={item.href}
-                        variant="secondary"
-                        badgeCount={item.id === 'support' && isAdmin ? unreadCount : undefined}
-                      />
-                    );
-                    
-                    return (
-                      <div key={item.id}>
-                        {item.restricted ? (
-                          <PlanRestricted reason={item.restricted}>
-                            {button}
-                          </PlanRestricted>
-                        ) : (
-                          button
-                        )}
-                        {dividerInfo.show && (
-                          <div className="my-3 h-[12px] flex items-center justify-center w-full">
-                            {isExpanded ? (
-                              // Divisor con texto cuando está expandido
-                              <div className="flex items-center gap-2 w-full">
-                                <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                                <span className="text-[10px] font-medium text-[var(--main-sidebar-fg)] opacity-60 px-1 leading-none">
-                                  {dividerInfo.text}
-                                </span>
-                                <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                              </div>
-                            ) : (
-                              // Línea simple cuando está colapsado - centrada en los 32px del botón
-                              <div className="w-8 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                            )}
+                const dividerInfo = getDividerInfo();
+                
+                // Botón con o sin restricción
+                const isExternalLink = item.href.startsWith('http');
+                const button = (
+                  <ButtonSidebar
+                    icon={<item.icon className="w-[18px] h-[18px]" />}
+                    label={item.label}
+                    isActive={isActive}
+                    isExpanded={isExpanded}
+                    onClick={() => {
+                      if (isExternalLink) {
+                        window.open(item.href, '_blank', 'noopener,noreferrer');
+                      } else {
+                        navigate(item.href);
+                      }
+                    }}
+                    href={item.href}
+                    variant="secondary"
+                    badgeCount={item.id === 'support' && isAdmin ? unreadCount : undefined}
+                  />
+                );
+                
+                return (
+                  <div key={item.id}>
+                    {item.restricted ? (
+                      <PlanRestricted reason={item.restricted}>
+                        {button}
+                      </PlanRestricted>
+                    ) : (
+                      button
+                    )}
+                    {dividerInfo.show && (
+                      <div className="my-3 h-[12px] flex items-center justify-center w-full">
+                        {isExpanded ? (
+                          // Divisor con texto cuando está expandido
+                          <div className="flex items-center gap-2 w-full">
+                            <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+                            <span className="text-[10px] font-medium text-[var(--main-sidebar-fg)] opacity-60 px-1 leading-none">
+                              {dividerInfo.text}
+                            </span>
+                            <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
                           </div>
+                        ) : (
+                          // Línea simple cuando está colapsado - centrada en los 32px del botón
+                          <div className="w-8 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
                         )}
                       </div>
-                    );
-                  })
-                )}
+                    )}
+                  </div>
+                );
+              })}
             </div>
             )}
           </div>
