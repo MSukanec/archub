@@ -161,6 +161,7 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
                     buttonText="Ir a Contactos"
                     onClick={handleGoToContacts}
                     icon={UserPlus}
+                    sidebarLevel="organization"
                   />
                 ) : (
                   <ComboBox
