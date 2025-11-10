@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
 import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
-import { Folder, Plus, Bell } from 'lucide-react'
+import { Folder, Plus, Bell, Search, Filter } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useProjectContext } from '@/stores/projectContext'
@@ -28,28 +28,89 @@ export default function ProjectActives() {
   const { setSidebarLevel } = useNavigationStore()
   const [, navigate] = useLocation()
 
+  // Filter states
+  const [filterByProjectType, setFilterByProjectType] = useState('all')
+  const [filterByModality, setFilterByModality] = useState('all')
+  const [filterByStatus, setFilterByStatus] = useState('all')
+  const [searchValue, setSearchValue] = useState('')
+
   // Mobile Action Bar
   const {
     setActions,
     setShowActionBar,
-    clearActions
+    clearActions,
+    setFilterConfig,
+    searchValue: mobileSearchValue,
+    setSearchValue: setMobileSearchValue
   } = useActionBarMobile()
   const isMobile = useMobile()
+
+  // Sync search values between mobile and desktop
+  useEffect(() => {
+    if (isMobile && mobileSearchValue !== searchValue) {
+      setSearchValue(mobileSearchValue)
+    }
+  }, [mobileSearchValue, isMobile])
 
   // Get active project
   const { data: userOrgPrefs } = useUserOrganizationPreferences(organizationId);
   const activeProjectId = userOrgPrefs?.last_project_id
+
+  // Extract unique values for filters
+  const availableProjectTypes = useMemo(() => Array.from(
+    new Set(projects.map(p => p.project_data?.project_type?.name).filter(Boolean))
+  ), [projects]);
+
+  const availableModalities = useMemo(() => Array.from(
+    new Set(projects.map(p => p.project_data?.modality?.name).filter(Boolean))
+  ), [projects]);
+
+  const availableStatuses = useMemo(() => {
+    const statusNames: Record<string, string> = {
+      'active': 'En proceso',
+      'completed': 'Completado',
+      'paused': 'Pausado',
+      'cancelled': 'Cancelado',
+      'planning': 'Planificación'
+    };
+    return Array.from(
+      new Set(projects.map(p => p.status).filter(Boolean))
+    ).map(status => ({
+      value: status,
+      label: statusNames[status as keyof typeof statusNames] || status
+    }));
+  }, [projects]);
 
   const projectsWithActive = projects.map(project => ({
     ...project,
     is_active: project.id === activeProjectId
   }))
 
+  // Apply filters
+  const filteredProjects = projectsWithActive.filter(project => {
+    const searchLower = searchValue.toLowerCase();
+    const nameMatch = project.name?.toLowerCase().includes(searchLower);
+    const searchMatch = !searchValue || nameMatch;
+    
+    const matchesProjectType = filterByProjectType === 'all' || 
+      project.project_data?.project_type_id === filterByProjectType ||
+      project.project_data?.project_type?.name?.toLowerCase().includes(filterByProjectType.toLowerCase());
+    
+    const matchesModality = filterByModality === 'all' || 
+      project.project_data?.modality_id === filterByModality ||
+      project.project_data?.modality?.name?.toLowerCase().includes(filterByModality.toLowerCase());
+    
+    const matchesStatus = filterByStatus === 'all' || 
+      project.status?.toLowerCase() === filterByStatus.toLowerCase();
+
+    return searchMatch && matchesProjectType && matchesModality && matchesStatus;
+  })
+
   // Put active project first
   const sortedProjects = activeProjectId ? [
-    ...projectsWithActive.filter(project => project.id === activeProjectId),
-    ...projectsWithActive.filter(project => project.id !== activeProjectId)
-  ] : projectsWithActive
+    ...filteredProjects.filter(project => project.id === activeProjectId),
+    ...filteredProjects.filter(project => project.id !== activeProjectId)
+  ] : filteredProjects
 
   // Select project mutation - AHORA SIN NAVEGACIÓN
   const selectProjectMutation = useMutation({
@@ -162,24 +223,51 @@ export default function ProjectActives() {
     openModal('project', { editingProject: project, isEditing: true })
   }
 
+  // Stabilize action handlers with useCallback
+  const handleSearchClick = useCallback(() => {
+    // Popover is handled in MobileActionBar
+  }, []);
+
+  const handleCreateClick = useCallback(() => {
+    openModal('project', {});
+  }, [openModal]);
+
+  const handleFilterClick = useCallback(() => {
+    // Popover is handled in MobileActionBar
+  }, []);
+
+  const handleNotificationsClick = useCallback(() => {
+    // Popover is handled in MobileActionBar
+  }, []);
+
   // Configure Mobile Action Bar
   useEffect(() => {
     if (isMobile) {
       setActions({
+        search: {
+          id: 'search',
+          icon: Search,
+          label: 'Buscar',
+          onClick: handleSearchClick,
+        },
         create: {
           id: 'create',
           icon: Plus,
           label: 'Nuevo Proyecto',
-          onClick: () => openModal('project', {}),
+          onClick: handleCreateClick,
           variant: 'primary'
+        },
+        filter: {
+          id: 'filter',
+          icon: Filter,
+          label: 'Filtros',
+          onClick: handleFilterClick,
         },
         notifications: {
           id: 'notifications',
           icon: Bell,
           label: 'Notificaciones',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
+          onClick: handleNotificationsClick,
         },
       });
       setShowActionBar(true);
@@ -190,9 +278,45 @@ export default function ProjectActives() {
       if (isMobile) {
         clearActions();
         setShowActionBar(false);
+        setMobileSearchValue('');
+        setSearchValue('');
       }
     };
-  }, [isMobile, setActions, setShowActionBar, clearActions, openModal]);
+  }, [isMobile, setActions, setShowActionBar, clearActions, setMobileSearchValue, handleSearchClick, handleCreateClick, handleFilterClick, handleNotificationsClick]);
+
+  // Configure filters for Mobile Action Bar
+  useEffect(() => {
+    if (isMobile && availableProjectTypes.length > 0) {
+      setFilterConfig({
+        filters: [
+          {
+            label: 'Filtrar por tipo',
+            value: filterByProjectType,
+            onChange: setFilterByProjectType,
+            placeholder: 'Todos los tipos',
+            allOptionLabel: 'Todos los tipos',
+            options: availableProjectTypes.map(type => ({ value: type!, label: type! }))
+          },
+          {
+            label: 'Filtrar por modalidad',
+            value: filterByModality,
+            onChange: setFilterByModality,
+            placeholder: 'Todas las modalidades',
+            allOptionLabel: 'Todas las modalidades',
+            options: availableModalities.map(modality => ({ value: modality!, label: modality! }))
+          },
+          {
+            label: 'Filtrar por estado',
+            value: filterByStatus,
+            onChange: setFilterByStatus,
+            placeholder: 'Todos los estados',
+            allOptionLabel: 'Todos los estados',
+            options: availableStatuses
+          }
+        ]
+      });
+    }
+  }, [filterByProjectType, filterByModality, filterByStatus, availableProjectTypes, availableModalities, availableStatuses, isMobile]);
 
   if (projectsLoading) {
     return (

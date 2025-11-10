@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
 import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
@@ -122,6 +122,23 @@ export default function ProjectList() {
     setFilterByStatus('all')
   }
 
+  // Stabilize action handlers with useCallback
+  const handleSearchClick = useCallback(() => {
+    // Popover is handled in MobileActionBar
+  }, []);
+
+  const handleCreateClick = useCallback(() => {
+    openModal('project', {});
+  }, [openModal]);
+
+  const handleFilterClick = useCallback(() => {
+    // Popover is handled in MobileActionBar
+  }, []);
+
+  const handleNotificationsClick = useCallback(() => {
+    // Popover is handled in MobileActionBar
+  }, []);
+
   // Configure Mobile Action Bar
   useEffect(() => {
     if (isMobile) {
@@ -130,32 +147,26 @@ export default function ProjectList() {
           id: 'search',
           icon: Search,
           label: 'Buscar',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
+          onClick: handleSearchClick,
         },
         create: {
           id: 'create',
           icon: Plus,
           label: 'Nuevo Proyecto',
-          onClick: () => openModal('project', {}),
+          onClick: handleCreateClick,
           variant: 'primary'
         },
         filter: {
           id: 'filter',
           icon: Filter,
           label: 'Filtros',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
+          onClick: handleFilterClick,
         },
         notifications: {
           id: 'notifications',
           icon: Bell,
           label: 'Notificaciones',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
+          onClick: handleNotificationsClick,
         },
       });
       setShowActionBar(true);
@@ -167,9 +178,10 @@ export default function ProjectList() {
         clearActions();
         setShowActionBar(false);
         setMobileSearchValue('');
+        setSearchValue('');
       }
     };
-  }, [isMobile, setActions, setShowActionBar, clearActions, openModal, setMobileSearchValue]);
+  }, [isMobile, setActions, setShowActionBar, clearActions, setMobileSearchValue, handleSearchClick, handleCreateClick, handleFilterClick, handleNotificationsClick]);
 
   // Configure filters for Mobile Action Bar
   useEffect(() => {
@@ -203,7 +215,7 @@ export default function ProjectList() {
         ]
       });
     }
-  }, [isMobile, filterByProjectType, filterByModality, filterByStatus, setFilterConfig, availableProjectTypes, availableModalities, availableStatuses]);
+  }, [filterByProjectType, filterByModality, filterByStatus, availableProjectTypes, availableModalities, availableStatuses, isMobile]);
 
   // Select project mutation
   const selectProjectMutation = useMutation({
