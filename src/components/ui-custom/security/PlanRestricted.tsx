@@ -218,6 +218,7 @@ export function PlanRestricted({
               </BottomSheetBody>
               <BottomSheetFooter>
                 <Button 
+                  type="button"
                   className="w-full"
                   style={{ 
                     backgroundColor: planBgColor,
@@ -301,6 +302,7 @@ export function PlanRestricted({
             
             <div className="flex gap-2 pt-2 border-t">
               <Button 
+                type="button"
                 size="sm" 
                 className="flex-1"
                 style={{ 
@@ -356,6 +358,7 @@ export function PlanRestricted({
           
           {/* Botón blanco con texto negro */}
           <Button 
+            type="button"
             size="sm"
             className="bg-white text-gray-900 hover:bg-gray-100 border-0 font-medium shadow-sm"
             onClick={() => {
