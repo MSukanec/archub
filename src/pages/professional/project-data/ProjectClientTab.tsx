@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { apiRequest } from '@/lib/queryClient'
-import { Users, Plus, Edit, Trash2 } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, User } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -24,6 +24,7 @@ interface ProjectClient {
     first_name: string;
     last_name: string;
     email: string;
+    phone?: string;
   } | null;
 }
 
@@ -92,6 +93,30 @@ export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
     });
   };
 
+  const handleEditContact = (client: ProjectClient) => {
+    if (!client.contacts) {
+      toast({
+        title: 'Error',
+        description: 'Este cliente no tiene un contacto asociado',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    openModal('contact', {
+      isEditing: true,
+      editingContact: {
+        id: client.contacts.id,
+        organization_id: organizationId,
+        first_name: client.contacts.first_name,
+        last_name: client.contacts.last_name,
+        email: client.contacts.email,
+        phone: client.contacts.phone,
+        created_at: new Date().toISOString(),
+      },
+    });
+  };
+
   const handleAddClient = () => {
     openModal('project-client', {
       projectId: activeProjectId,
@@ -139,6 +164,18 @@ export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
       sortable: true,
       render: (client: ProjectClient) => client.unit || '-',
     },
+    {
+      key: 'email',
+      label: 'Email',
+      sortable: true,
+      render: (client: ProjectClient) => client.contacts?.email || '-',
+    },
+    {
+      key: 'phone',
+      label: 'Teléfono',
+      sortable: true,
+      render: (client: ProjectClient) => client.contacts?.phone || '-',
+    },
   ];
 
   return (
@@ -180,9 +217,14 @@ export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
         }}
         rowActions={(client: ProjectClient) => [
           {
-            label: 'Editar',
+            label: 'Editar Cliente',
             icon: Edit,
             onClick: () => handleEdit(client),
+          },
+          {
+            label: 'Editar Contacto',
+            icon: User,
+            onClick: () => handleEditContact(client),
           },
           {
             label: 'Eliminar',
