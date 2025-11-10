@@ -61,7 +61,7 @@
     
     { "source": "/api/invite-member", "destination": "/api/invite-member" },
     
-    { "source": "/api/:path*", "destination": "/api/express-handler" },
+    { "source": "/api/:path*", "destination": "/api" },
     
     { "source": "/(.*)", "destination": "/" }
   ]
