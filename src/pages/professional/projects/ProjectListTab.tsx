@@ -19,6 +19,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
+import ProjectRow from '@/components/ui/data-row/rows/ProjectRow'
 
 export default function ProjectList() {
   const { openModal } = useGlobalModalStore()
@@ -440,74 +441,101 @@ export default function ProjectList() {
   return (
     <div className="space-y-6">
       {sortedProjects.length > 0 ? (
-        <Table
-          data={sortedProjects}
-          columns={columns}
-          isLoading={projectsLoading}
-          rowActions={getProjectRowActions}
-          primaryRowAction={getPrimaryRowAction}
-          getIsInactive={(project) => project.status === 'completed'}
-          inactiveSeparatorLabel="Proyectos Completados"
-          emptyState={
-            <EmptyState
-              icon={<Folder className="w-12 h-12" />}
-              title="No hay proyectos que coincidan"
-              description="Ajusta los filtros de búsqueda para encontrar proyectos"
-            />
-          }
-          topBar={{
-            showSearch: true,
-            searchValue: searchValue,
-            onSearchChange: setSearchValue,
-            showClearFilters: searchValue !== '' || filterByProjectType !== 'all' || filterByModality !== 'all' || filterByStatus !== 'all',
-            onClearFilters: handleClearFilters,
-            showFilter: true,
-            renderFilterContent: () => (
-              <div className="space-y-4 w-72">
-                <div className="space-y-2">
-                  <label className="text-xs font-medium">Tipo de Proyecto</label>
-                  <select 
-                    value={filterByProjectType} 
-                    onChange={(e) => setFilterByProjectType(e.target.value)}
-                    className="w-full h-8 px-2 text-xs border rounded"
-                  >
-                    <option value="all">Todos los tipos</option>
-                    {availableProjectTypes.map(type => (
-                      <option key={type} value={type}>{type}</option>
-                    ))}
-                  </select>
+        isMobile ? (
+          <div className="space-y-3 pb-20">
+            {sortedProjects.map(project => (
+              <ProjectRow
+                key={project.id}
+                project={project}
+                onClick={() => handleSelectProject(project.id)}
+                isActive={project.is_active}
+                actions={[
+                  {
+                    label: 'Editar',
+                    icon: Edit,
+                    onClick: () => handleEdit(project)
+                  },
+                  {
+                    label: 'Eliminar',
+                    icon: Trash2,
+                    onClick: () => handleDeleteClick(project),
+                    variant: 'destructive'
+                  }
+                ]}
+                data-testid={`project-row-${project.id}`}
+              />
+            ))}
+          </div>
+        ) : (
+          <Table
+            data={sortedProjects}
+            columns={columns}
+            isLoading={projectsLoading}
+            rowActions={getProjectRowActions}
+            primaryRowAction={getPrimaryRowAction}
+            getIsInactive={(project) => project.status === 'completed'}
+            inactiveSeparatorLabel="Proyectos Completados"
+            emptyState={
+              <EmptyState
+                icon={<Folder className="w-12 h-12" />}
+                title="No hay proyectos que coincidan"
+                description="Ajusta los filtros de búsqueda para encontrar proyectos"
+              />
+            }
+            topBar={{
+              showSearch: true,
+              searchValue: searchValue,
+              onSearchChange: setSearchValue,
+              showClearFilters: searchValue !== '' || filterByProjectType !== 'all' || filterByModality !== 'all' || filterByStatus !== 'all',
+              onClearFilters: handleClearFilters,
+              showFilter: true,
+              renderFilterContent: () => (
+                <div className="space-y-4 w-72">
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium">Tipo de Proyecto</label>
+                    <select 
+                      value={filterByProjectType} 
+                      onChange={(e) => setFilterByProjectType(e.target.value)}
+                      className="w-full h-8 px-2 text-xs border rounded"
+                    >
+                      <option value="all">Todos los tipos</option>
+                      {availableProjectTypes.map(type => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium">Modalidad</label>
+                    <select 
+                      value={filterByModality} 
+                      onChange={(e) => setFilterByModality(e.target.value)}
+                      className="w-full h-8 px-2 text-xs border rounded"
+                    >
+                      <option value="all">Todas las modalidades</option>
+                      {availableModalities.map(modality => (
+                        <option key={modality} value={modality}>{modality}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium">Estado</label>
+                    <select 
+                      value={filterByStatus} 
+                      onChange={(e) => setFilterByStatus(e.target.value)}
+                      className="w-full h-8 px-2 text-xs border rounded"
+                    >
+                      <option value="all">Todos los estados</option>
+                      {availableStatuses.map(status => (
+                        <option key={status.value} value={status.value}>{status.label}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-medium">Modalidad</label>
-                  <select 
-                    value={filterByModality} 
-                    onChange={(e) => setFilterByModality(e.target.value)}
-                    className="w-full h-8 px-2 text-xs border rounded"
-                  >
-                    <option value="all">Todas las modalidades</option>
-                    {availableModalities.map(modality => (
-                      <option key={modality} value={modality}>{modality}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-medium">Estado</label>
-                  <select 
-                    value={filterByStatus} 
-                    onChange={(e) => setFilterByStatus(e.target.value)}
-                    className="w-full h-8 px-2 text-xs border rounded"
-                  >
-                    <option value="all">Todos los estados</option>
-                    {availableStatuses.map(status => (
-                      <option key={status.value} value={status.value}>{status.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            ),
-            isFilterActive: filterByProjectType !== 'all' || filterByModality !== 'all' || filterByStatus !== 'all'
-          }}
-        />
+              ),
+              isFilterActive: filterByProjectType !== 'all' || filterByModality !== 'all' || filterByStatus !== 'all'
+            }}
+          />
+        )
       ) : (
         <EmptyState
           icon={<Folder className="w-12 h-12" />}

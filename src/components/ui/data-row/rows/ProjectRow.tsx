@@ -1,5 +1,12 @@
 import DataRowCard, { DataRowCardProps } from '../DataRowCard';
 import { formatDateCompact } from '@/lib/date-utils';
+import { MoreHorizontal } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 // Interface para el proyecto (usando la estructura real de la app)
 interface Project {
@@ -42,6 +49,13 @@ interface ProjectRowProps {
   density?: 'compact' | 'normal' | 'comfortable';
   className?: string;
   isActive?: boolean; // Para marcar el proyecto activo
+  actions?: Array<{
+    label: string;
+    icon?: any;
+    onClick: () => void;
+    variant?: 'default' | 'destructive';
+  }>;
+  'data-testid'?: string;
 }
 
 // Helper para obtener el tipo de proyecto basado en el estado
@@ -73,7 +87,9 @@ export default function ProjectRow({
   selected, 
   density = 'normal',
   className,
-  isActive = false
+  isActive = false,
+  actions,
+  'data-testid': dataTestId
 }: ProjectRowProps) {
   // Configurar las props base del DataRowCard
   const baseProps: Omit<DataRowCardProps, 'children'> = {
@@ -82,6 +98,7 @@ export default function ProjectRow({
     density,
     className,
     activeBorder: isActive,
+    'data-testid': dataTestId,
   };
 
   return (
@@ -108,27 +125,64 @@ export default function ProjectRow({
             </p>
           </div>
 
-          {/* COLUMNA DERECHA: Fecha de creación y Badge activo */}
-          <div className="flex-shrink-0 text-right ml-4 flex flex-col items-end gap-1">
-            {/* Fecha de creación */}
-            <p className={`
-              text-muted-foreground
-              ${density === 'compact' ? 'text-xs' : 'text-sm'}
-            `}>
-              {formatDateCompact(project.created_at)}
-            </p>
-            
-            {/* Badge activo únicamente si es el proyecto activo */}
-            {isActive && (
-              <span 
-                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white" 
-                style={{ 
-                  backgroundColor: 'hsl(76, 100%, 40%)',
-                  color: 'white'
-                }}
-              >
-                Activo
-              </span>
+          {/* COLUMNA DERECHA: Fecha de creación, Badge activo y Menú de acciones */}
+          <div className="flex items-start gap-2">
+            <div className="flex-shrink-0 text-right flex flex-col items-end gap-1">
+              {/* Fecha de creación */}
+              <p className={`
+                text-muted-foreground
+                ${density === 'compact' ? 'text-xs' : 'text-sm'}
+              `}>
+                {formatDateCompact(project.created_at)}
+              </p>
+              
+              {/* Badge activo únicamente si es el proyecto activo */}
+              {isActive && (
+                <span 
+                  className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white" 
+                  style={{ 
+                    backgroundColor: 'hsl(76, 100%, 40%)',
+                    color: 'white'
+                  }}
+                >
+                  Activo
+                </span>
+              )}
+            </div>
+
+            {/* Botón de menú contextual */}
+            {actions && actions.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex items-center justify-center w-8 h-8 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                    aria-label="Acciones"
+                    data-testid="button-project-actions"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {actions.map((action, index) => {
+                    const Icon = action.icon;
+                    return (
+                      <DropdownMenuItem
+                        key={index}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          action.onClick();
+                        }}
+                        className={action.variant === 'destructive' ? 'text-red-600 focus:text-red-600' : ''}
+                        data-testid={`menuitem-${action.label.toLowerCase().replace(/\s+/g, '-')}`}
+                      >
+                        {Icon && <Icon className="mr-2 h-4 w-4" />}
+                        {action.label}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         </div>
