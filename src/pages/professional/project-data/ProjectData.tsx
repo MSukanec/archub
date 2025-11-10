@@ -281,7 +281,7 @@ Generado desde Seencel`);
   const headerProps = {
     icon: FileText,
     title: 'Datos Básicos',
-    subtitle: 'Información general del proyecto, datos del cliente y ubicación',
+    description: 'Información general del proyecto, datos del cliente y ubicación',
     tabs: headerTabs,
     onTabChange: (tabId: string) => setActiveTab(tabId),
     actions: shareButton ? [shareButton] : undefined
