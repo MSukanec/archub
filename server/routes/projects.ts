@@ -359,6 +359,118 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
   });
 
   // DELETE /api/projects/:projectId/clients/:clientId - Remove a client from a project
+  // GET individual project client
+  app.get("/api/projects/:projectId/clients/:clientId", async (req, res) => {
+    try {
+      const { projectId, clientId } = req.params;
+      const { organization_id } = req.query;
+
+      if (!organization_id) {
+        return res.status(400).json({ error: "organization_id is required" });
+      }
+
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // Query single project_client with contact information
+      const { data: projectClient, error } = await authenticatedSupabase
+        .from('project_clients')
+        .select(`
+          *,
+          contacts:contacts!client_id (
+            id,
+            first_name,
+            last_name,
+            email
+          )
+        `)
+        .eq('id', clientId)
+        .eq('project_id', projectId)
+        .eq('organization_id', organization_id as string)
+        .single();
+
+      if (error) {
+        console.error("Error fetching project client:", error);
+        return res.status(404).json({ error: "Project client not found" });
+      }
+
+      res.json(projectClient);
+    } catch (error) {
+      console.error("Error in get project client endpoint:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // PATCH update project client
+  app.patch("/api/projects/:projectId/clients/:clientId", async (req, res) => {
+    try {
+      const { projectId, clientId } = req.params;
+      const updateData = req.body;
+
+      if (!updateData.organization_id) {
+        return res.status(400).json({ error: "organization_id is required" });
+      }
+
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // Build update object with only provided fields
+      const updates: any = {
+        updated_at: new Date().toISOString()
+      };
+
+      // Only include fields that are explicitly provided in the request
+      if (updateData.hasOwnProperty('unit')) {
+        updates.unit = updateData.unit || null;
+      }
+      if (updateData.hasOwnProperty('committed_amount')) {
+        updates.committed_amount = updateData.committed_amount || null;
+      }
+      if (updateData.hasOwnProperty('currency_id')) {
+        updates.currency_id = updateData.currency_id || null;
+      }
+      if (updateData.hasOwnProperty('exchange_rate')) {
+        updates.exchange_rate = updateData.exchange_rate || null;
+      }
+
+      // Update project_client
+      const { data: projectClient, error } = await authenticatedSupabase
+        .from('project_clients')
+        .update(updates)
+        .eq('id', clientId)
+        .eq('project_id', projectId)
+        .eq('organization_id', updateData.organization_id)
+        .select(`
+          *,
+          contacts:contacts!client_id (
+            id,
+            first_name,
+            last_name,
+            email
+          )
+        `)
+        .single();
+
+      if (error) {
+        console.error("Error updating project client:", error);
+        return res.status(500).json({ error: "Failed to update project client" });
+      }
+
+      res.json(projectClient);
+    } catch (error) {
+      console.error("Error in update project client endpoint:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   app.delete("/api/projects/:projectId/clients/:clientId", async (req, res) => {
     try {
       const { projectId, clientId } = req.params;

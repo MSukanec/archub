@@ -16,16 +16,18 @@ import { Users } from 'lucide-react';
 
 const clientSchema = z.object({
   contactId: z.string().min(1, 'Debe seleccionar un contacto'),
+  unit: z.string().optional(),
 });
 
 type ClientFormData = z.infer<typeof clientSchema>;
 
 interface ProjectClientModalProps {
   projectId?: string;
+  clientId?: string;
   onClose: () => void;
 }
 
-export function ProjectClientModal({ projectId, onClose }: ProjectClientModalProps) {
+export function ProjectClientModal({ projectId, clientId, onClose }: ProjectClientModalProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const queryClient = useQueryClient();
@@ -33,6 +35,7 @@ export function ProjectClientModal({ projectId, onClose }: ProjectClientModalPro
   const [isLoading, setIsLoading] = useState(false);
 
   const organizationId = userData?.organization?.id;
+  const isEditing = !!clientId;
 
   // Query to get available contacts
   const { data: contacts = [] } = useQuery<any[]>({
@@ -40,41 +43,67 @@ export function ProjectClientModal({ projectId, onClose }: ProjectClientModalPro
     enabled: !!organizationId,
   });
 
+  // Query to get existing client data when editing
+  const { data: existingClient } = useQuery<any>({
+    queryKey: [`/api/projects/${projectId}/clients/${clientId}?organization_id=${organizationId}`],
+    enabled: !!clientId && !!projectId && !!organizationId,
+  });
+
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
     defaultValues: {
       contactId: '',
+      unit: '',
     },
   });
 
-  // Reset form when modal opens
+  // Load existing data when editing
   useEffect(() => {
-    form.reset({
-      contactId: '',
-    });
-  }, [form]);
+    if (existingClient) {
+      form.reset({
+        contactId: existingClient.client_id,
+        unit: existingClient.unit || '',
+      });
+    } else if (!isEditing) {
+      form.reset({
+        contactId: '',
+        unit: '',
+      });
+    }
+  }, [existingClient, isEditing, form]);
 
-  const addClientMutation = useMutation({
+  const saveClientMutation = useMutation({
     mutationFn: async (data: ClientFormData) => {
       if (!organizationId || !projectId) throw new Error('Missing organization or project ID');
 
-      return await apiRequest('POST', `/api/projects/${projectId}/clients`, {
-        client_id: data.contactId,
-        organization_id: organizationId,
-        unit: null,
-      });
+      if (isEditing) {
+        // Update existing client
+        return await apiRequest('PATCH', `/api/projects/${projectId}/clients/${clientId}`, {
+          unit: data.unit || null,
+          organization_id: organizationId,
+        });
+      } else {
+        // Create new client
+        return await apiRequest('POST', `/api/projects/${projectId}/clients`, {
+          client_id: data.contactId,
+          organization_id: organizationId,
+          unit: data.unit || null,
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/clients?organization_id=${organizationId}`] });
       toast({
-        title: 'Cliente agregado',
-        description: 'El cliente ha sido agregado al proyecto correctamente',
+        title: isEditing ? 'Cliente actualizado' : 'Cliente agregado',
+        description: isEditing 
+          ? 'El cliente ha sido actualizado correctamente'
+          : 'El cliente ha sido agregado al proyecto correctamente',
       });
       handleClose();
     },
     onError: (error: any) => {
       toast({
-        title: 'Error al agregar cliente',
+        title: isEditing ? 'Error al actualizar cliente' : 'Error al agregar cliente',
         description: error.message,
         variant: 'destructive',
       });
@@ -90,7 +119,7 @@ export function ProjectClientModal({ projectId, onClose }: ProjectClientModalPro
   const handleSubmit = async (data: ClientFormData) => {
     setIsLoading(true);
     try {
-      await addClientMutation.mutateAsync(data);
+      await saveClientMutation.mutateAsync(data);
     } catch (error) {
       // Error handling is done in mutation onError
     } finally {
@@ -122,6 +151,26 @@ export function ProjectClientModal({ projectId, onClose }: ProjectClientModalPro
                   searchPlaceholder="Buscar contacto..."
                   emptyMessage="No se encontraron contactos."
                   className="w-full"
+                  disabled={isEditing}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="unit"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Unidad Funcional (Opcional)</FormLabel>
+              <FormControl>
+                <input
+                  {...field}
+                  type="text"
+                  placeholder="Ej: Departamento 101, Casa 5, etc."
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
               </FormControl>
               <FormMessage />
@@ -134,8 +183,10 @@ export function ProjectClientModal({ projectId, onClose }: ProjectClientModalPro
 
   const headerContent = (
     <FormModalHeader
-      title="Seleccionar Cliente"
-      description="Selecciona un contacto para agregarlo como cliente del proyecto"
+      title={isEditing ? "Editar Cliente" : "Agregar Cliente"}
+      description={isEditing 
+        ? "Modifica la información del cliente del proyecto"
+        : "Selecciona un contacto para agregarlo como cliente del proyecto"}
       icon={Users}
     />
   );
@@ -144,7 +195,7 @@ export function ProjectClientModal({ projectId, onClose }: ProjectClientModalPro
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel="Agregar"
+      rightLabel={isEditing ? "Guardar" : "Agregar"}
       onRightClick={form.handleSubmit(handleSubmit)}
       showLoadingSpinner={isLoading}
       submitDisabled={isLoading}

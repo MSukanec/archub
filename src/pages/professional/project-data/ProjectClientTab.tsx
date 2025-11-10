@@ -69,10 +69,9 @@ export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
   };
 
   const handleEdit = (client: ProjectClient) => {
-    // TODO: Implement edit functionality
-    toast({
-      title: 'Editar cliente',
-      description: 'Funcionalidad de edición en desarrollo',
+    openModal('project-client', {
+      projectId: activeProjectId,
+      clientId: client.id,
     });
   };
 
@@ -131,7 +130,7 @@ export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
         columns={columns}
         data={projectClients}
         isLoading={isLoading}
-        showDoubleHeader={true}
+        showDoubleHeader={false}
         emptyStateConfig={{
           icon: <Users className="h-12 w-12 text-muted-foreground" />,
           title: 'No hay clientes en este proyecto',
