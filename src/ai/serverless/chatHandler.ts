@@ -685,7 +685,7 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
         // Ejecutar la función correspondiente
         switch (toolCall.function.name) {
           case 'getTotalPaymentsByContactAndProject': {
-            const { getTotalPaymentsByContactAndProject } = await import('../tools/finances/getTotalPayments.js');
+            const { getTotalPaymentsByContactAndProject } = await import('../tools/finances/getTotalPayments');
             functionResult = await getTotalPaymentsByContactAndProject(
               args.contactName,
               args.projectName,
@@ -696,7 +696,7 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
           }
           
           case 'getOrganizationBalance': {
-            const { getOrganizationBalance } = await import('../tools/finances/getOrganizationBalance.js');
+            const { getOrganizationBalance } = await import('../tools/finances/getOrganizationBalance');
             functionResult = await getOrganizationBalance(
               organizationId,
               supabase,
@@ -707,7 +707,7 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
           }
           
           case 'getProjectFinancialSummary': {
-            const { getProjectFinancialSummary } = await import('../tools/finances/getProjectFinancialSummary.js');
+            const { getProjectFinancialSummary } = await import('../tools/finances/getProjectFinancialSummary');
             functionResult = await getProjectFinancialSummary(
               args.projectName,
               organizationId,
@@ -718,7 +718,7 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
           }
           
           case 'getRoleSpending': {
-            const { getRoleSpending } = await import('../tools/finances/getRoleSpending.js');
+            const { getRoleSpending } = await import('../tools/finances/getRoleSpending');
             functionResult = await getRoleSpending(
               args.role,
               organizationId,
@@ -731,7 +731,7 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
           }
           
           case 'getContactMovements': {
-            const { getContactMovements } = await import('../tools/finances/getContactMovements.js');
+            const { getContactMovements } = await import('../tools/finances/getContactMovements');
             functionResult = await getContactMovements(
               args.contactName,
               organizationId,
@@ -745,7 +745,7 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
           }
           
           case 'getDateRangeMovements': {
-            const { getDateRangeMovements } = await import('../tools/finances/getDateRangeMovements.js');
+            const { getDateRangeMovements } = await import('../tools/finances/getDateRangeMovements');
             functionResult = await getDateRangeMovements(
               organizationId,
               args.dateRange,
@@ -758,7 +758,7 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
           }
           
           case 'getCashflowTrend': {
-            const { getCashflowTrend } = await import('../tools/finances/getCashflowTrend.js');
+            const { getCashflowTrend } = await import('../tools/finances/getCashflowTrend');
             functionResult = await getCashflowTrend(
               organizationId,
               supabase,
@@ -772,7 +772,7 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
           }
           
           case 'getProjectsList': {
-            const { getProjectsList } = await import('../tools/projects/getProjectsList.js');
+            const { getProjectsList } = await import('../tools/projects/getProjectsList');
             functionResult = await getProjectsList(
               organizationId,
               supabase,
@@ -782,7 +782,7 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
           }
           
           case 'getProjectDetails': {
-            const { getProjectDetails } = await import('../tools/projects/getProjectDetails.js');
+            const { getProjectDetails } = await import('../tools/projects/getProjectDetails');
             functionResult = await getProjectDetails(
               args.projectName,
               organizationId,
@@ -792,7 +792,7 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
           }
           
           case 'getClientCommitments': {
-            const { getClientCommitments } = await import('../tools/finances/getClientCommitments.js');
+            const { getClientCommitments } = await import('../tools/finances/getClientCommitments');
             functionResult = await getClientCommitments(
               organizationId,
               supabase,
@@ -805,7 +805,7 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
           }
           
           case 'getOrganizationInfo': {
-            const { getOrganizationInfo } = await import('../tools/organization/getOrganizationInfo.js');
+            const { getOrganizationInfo } = await import('../tools/organization/getOrganizationInfo');
             functionResult = await getOrganizationInfo(
               organizationId,
               supabase
@@ -814,7 +814,7 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
           }
           
           case 'getOrganizationMembers': {
-            const { getOrganizationMembers } = await import('../tools/organization/getOrganizationMembers.js');
+            const { getOrganizationMembers } = await import('../tools/organization/getOrganizationMembers');
             functionResult = await getOrganizationMembers(
               organizationId,
               supabase,
@@ -827,7 +827,7 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
           }
           
           case 'getOrganizationActivity': {
-            const { getOrganizationActivity } = await import('../tools/organization/getOrganizationActivity.js');
+            const { getOrganizationActivity } = await import('../tools/organization/getOrganizationActivity');
             functionResult = await getOrganizationActivity(
               organizationId,
               supabase
