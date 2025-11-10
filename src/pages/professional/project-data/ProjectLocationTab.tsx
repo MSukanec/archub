@@ -331,7 +331,7 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
 
           {/* Latitude - takes 1 column */}
           <div className="space-y-2">
-            <Label htmlFor="latitude">Latitud</Label>
+            <Label htmlFor="latitude">Latitud (-90 a 90)</Label>
             <Input 
               id="latitude"
               type="number"
@@ -341,14 +341,11 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
               onChange={(e) => handleLatChange(e.target.value)}
               data-testid="input-latitude"
             />
-            <p className="text-xs text-muted-foreground">
-              Norte-Sur (-90 a 90)
-            </p>
           </div>
 
           {/* Longitude - takes 1 column */}
           <div className="space-y-2">
-            <Label htmlFor="longitude">Longitud</Label>
+            <Label htmlFor="longitude">Longitud (-180 a 180)</Label>
             <Input 
               id="longitude"
               type="number"
@@ -358,19 +355,8 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
               onChange={(e) => handleLngChange(e.target.value)}
               data-testid="input-longitude"
             />
-            <p className="text-xs text-muted-foreground">
-              Este-Oeste (-180 a 180)
-            </p>
           </div>
         </div>
-
-        {/* Coordinates Status Indicator */}
-        {hasCoordinates && (
-          <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-500">
-            <CheckCircle2 className="h-4 w-4" />
-            <span>Ubicación guardada: {lat?.toFixed(6)}, {lng?.toFixed(6)}</span>
-          </div>
-        )}
 
         {/* Map - shown right below search */}
         {hasCoordinates && googleMapsApiKey && (
@@ -387,6 +373,12 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
               draggable={true}
               onMarkerDragEnd={handleMarkerDragEnd}
             />
+            
+            {/* Coordinates Status Indicator - below map */}
+            <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-500 mt-2">
+              <CheckCircle2 className="h-4 w-4" />
+              <span>Ubicación guardada: {lat?.toFixed(6)}, {lng?.toFixed(6)}</span>
+            </div>
           </div>
         )}
       </div>
