@@ -166,6 +166,7 @@ export default function ImageUploadAndShowField({
             <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
               <div className="flex gap-2">
                 <Button
+                  type="button"
                   size="sm"
                   variant="default"
                   onClick={() => document.getElementById('hero-image-input')?.click()}
@@ -175,6 +176,7 @@ export default function ImageUploadAndShowField({
                   Cambiar
                 </Button>
                 <Button
+                  type="button"
                   size="sm"
                   variant="default"
                   onClick={() => removeMutation.mutate()}

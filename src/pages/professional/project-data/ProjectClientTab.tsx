@@ -4,11 +4,12 @@ import { apiRequest } from '@/lib/queryClient'
 import { Users, Plus, Edit, Trash2 } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
+import { useNavigationStore } from '@/stores/navigationStore'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { Link } from 'wouter'
+import { Link, useLocation } from 'wouter'
 
 interface ProjectClientTabProps {
   projectId?: string;
@@ -32,6 +33,8 @@ export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
   const { data: userData } = useCurrentUser();
   const { selectedProjectId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
+  const { setSidebarLevel } = useNavigationStore();
+  const [, navigate] = useLocation();
   
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
@@ -151,13 +154,16 @@ export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
           description: (
             <>
               Agrega clientes para gestionar la información del proyecto. Recuerda que un cliente, antes debe ser un{' '}
-              <Link 
-                href="/contacts" 
-                className="hover:underline font-bold"
+              <button
+                onClick={() => {
+                  setSidebarLevel('organization');
+                  navigate('/contacts');
+                }}
+                className="hover:underline font-bold cursor-pointer"
                 style={{ color: 'var(--accent)' }}
               >
                 contacto
-              </Link>
+              </button>
               .
             </>
           ),
