@@ -20,14 +20,14 @@ export function extractToken(authHeader: string | undefined): string | null {
  * Respects RLS policies for the authenticated user
  */
 export function createAuthenticatedClient(token: string): SupabaseClient {
-  const url = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const anonKey = process.env.VITE_SUPABASE_ANON_KEY;
 
-  if (!url || !serviceKey) {
-    throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !anonKey) {
+    throw new Error("Missing SUPABASE_URL or VITE_SUPABASE_ANON_KEY");
   }
 
-  return createClient(url, serviceKey, {
+  return createClient(url, anonKey, {
     auth: { persistSession: false },
     global: { headers: { Authorization: `Bearer ${token}` } },
   });
