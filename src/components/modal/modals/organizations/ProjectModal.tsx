@@ -429,8 +429,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
-        {/* Mobile: Stack vertically */}
-        <div className="space-y-4 lg:hidden">
+        <div className="space-y-4">
           {/* Image Upload - Show for creating or editing */}
           {!isEditing ? (
             <div className="space-y-2">
@@ -530,99 +529,101 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
             )
           )}
 
-          {/* Form Fields - Mobile */}
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre del Proyecto *</FormLabel>
-                <FormControl>
-                  <Input placeholder="Nombre del proyecto" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Tipo */}
-          <FormField
-            control={form.control}
-            name="project_type_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tipo</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
+          {/* Nombre y Estado en 2 columnas */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre del Proyecto *</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar tipo" />
-                    </SelectTrigger>
+                    <Input placeholder="Nombre del proyecto" {...field} />
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="">Sin especificar</SelectItem>
-                    {projectTypes?.map((type) => (
-                      <SelectItem key={type.id} value={type.id}>
-                        {type.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* Modalidad */}
-          <FormField
-            control={form.control}
-            name="modality_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Modalidad</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar modalidad" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="">Sin especificar</SelectItem>
-                    {projectModalities?.map((modality) => (
-                      <SelectItem key={modality.id} value={modality.id}>
-                        {modality.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Estado *</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar estado" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="active">Activo</SelectItem>
+                      <SelectItem value="inactive">Inactivo</SelectItem>
+                      <SelectItem value="completed">Completado</SelectItem>
+                      <SelectItem value="paused">Pausado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-          {/* Estado */}
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Estado *</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar estado" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="active">Activo</SelectItem>
-                    <SelectItem value="inactive">Inactivo</SelectItem>
-                    <SelectItem value="completed">Completado</SelectItem>
-                    <SelectItem value="paused">Pausado</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Tipo y Modalidad en 2 columnas */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="project_type_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar tipo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">Sin especificar</SelectItem>
+                      {projectTypes?.map((type) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {type.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="modality_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Modalidad</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar modalidad" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">Sin especificar</SelectItem>
+                      {projectModalities?.map((modality) => (
+                        <SelectItem key={modality.id} value={modality.id}>
+                          {modality.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           {/* Color - Paleta visual */}
           <FormField
@@ -695,260 +696,6 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
               }
             }}
           />
-        </div>
-
-        {/* Desktop: 2 columns */}
-        <div className="hidden lg:grid lg:grid-cols-2 gap-6">
-          {/* Left Column: Image */}
-          <div className="space-y-2">
-            <FormLabel className="flex items-center gap-2">
-              <ImageIcon className="h-4 w-4 text-[var(--accent)]" />
-              Imagen Principal
-              {!isEditing && <span className="text-xs text-muted-foreground font-normal">(opcional)</span>}
-            </FormLabel>
-            
-            {!isEditing ? (
-              <div 
-                className={`relative w-full h-full min-h-[400px] rounded-lg overflow-hidden transition-colors ${
-                  dragActive ? 'bg-primary/10' : 'bg-muted/30'
-                }`}
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-              >
-                {imagePreviewUrl ? (
-                  <>
-                    <img
-                      src={imagePreviewUrl}
-                      alt="Vista previa de la imagen del proyecto"
-                      className="w-full h-full object-cover"
-                    />
-                    
-                    <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="default"
-                          onClick={() => document.getElementById('project-image-input')?.click()}
-                        >
-                          <Upload className="h-4 w-4 mr-1" />
-                          Cambiar
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="default"
-                          onClick={handleRemoveImage}
-                          className="bg-red-500 hover:bg-red-600 text-white"
-                        >
-                          <X className="h-4 w-4 mr-1" />
-                          Eliminar
-                        </Button>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div 
-                    className="w-full h-full flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-[var(--accent)]/40 hover:border-[var(--accent)] transition-colors rounded-lg"
-                    onClick={() => document.getElementById('project-image-input')?.click()}
-                  >
-                    <div className="text-center space-y-3 p-6">
-                      <div className="w-12 h-12 mx-auto bg-muted/50 rounded-full flex items-center justify-center border border-muted-foreground/20">
-                        <Upload className="h-6 w-6 text-muted-foreground" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-sm text-muted-foreground">
-                          Arrastra una imagen aquí o haz clic para seleccionar
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          JPG, PNG, WebP • Máx. 10MB
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              editingProject && organizationId && (
-                <ImageUploadAndShowField
-                  projectId={editingProject.id}
-                  organizationId={organizationId}
-                  currentImageUrl={(editingProject.project_data as any)?.project_image_url || null}
-                  onImageUpdate={() => {
-                    queryClient.invalidateQueries({ queryKey: ['projects'] });
-                  }}
-                />
-              )
-            )}
-          </div>
-
-          {/* Right Column: Form Fields */}
-          <div className="space-y-4">
-            {/* Nombre */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre del Proyecto *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Nombre del proyecto" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Tipo y Modalidad en una fila */}
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="project_type_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo</FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar tipo" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="">Sin especificar</SelectItem>
-                        {projectTypes?.map((type) => (
-                          <SelectItem key={type.id} value={type.id}>
-                            {type.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="modality_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Modalidad</FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar modalidad" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="">Sin especificar</SelectItem>
-                        {projectModalities?.map((modality) => (
-                          <SelectItem key={modality.id} value={modality.id}>
-                            {modality.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Estado */}
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Estado *</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar estado" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="active">Activo</SelectItem>
-                      <SelectItem value="inactive">Inactivo</SelectItem>
-                      <SelectItem value="completed">Completado</SelectItem>
-                      <SelectItem value="paused">Pausado</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Color - Paleta visual */}
-            <FormField
-              control={form.control}
-              name="color"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Color del proyecto</FormLabel>
-                  <div className="space-y-3">
-                    <div className="flex flex-wrap gap-2">
-                      {PRESET_COLORS.map((colorOption) => (
-                        <button
-                          key={colorOption.hex}
-                          type="button"
-                          onClick={() => {
-                            field.onChange(colorOption.hex);
-                            form.setValue('use_custom_color', false);
-                            form.setValue('custom_color_h', null);
-                            form.setValue('custom_color_hex', null);
-                          }}
-                          className="relative w-10 h-10 rounded-full transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
-                          style={{ backgroundColor: colorOption.hex }}
-                          title={colorOption.name}
-                          data-testid={`color-option-${colorOption.name.toLowerCase()}`}
-                        >
-                          {field.value === colorOption.hex && !form.watch('use_custom_color') && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <Check className="w-5 h-5 text-white drop-shadow-md" strokeWidth={3} />
-                            </div>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                    
-                    {!form.watch('use_custom_color') && (
-                      <div className="flex items-center gap-3 pt-2 border-t border-border">
-                        <span className="text-sm text-muted-foreground">Vista previa:</span>
-                        <Badge 
-                          style={{ 
-                            backgroundColor: field.value || '#84cc16',
-                            color: getTextColor(field.value || '#84cc16')
-                          }}
-                          data-testid="color-preview-badge"
-                        >
-                          {PRESET_COLORS.find(c => c.hex === field.value)?.name || 'Personalizado'}
-                        </Badge>
-                      </div>
-                    )}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Color personalizado (PRO/TEAMS) */}
-            <ProjectColorAdvanced
-              initialHue={form.watch('custom_color_h') ?? undefined}
-              initialEnabled={form.watch('use_custom_color')}
-              onChange={({ useCustom, hue, hex }) => {
-                form.setValue('use_custom_color', useCustom);
-                form.setValue('custom_color_h', hue);
-                form.setValue('custom_color_hex', hex);
-                
-                if (useCustom) {
-                  form.setValue('color', undefined);
-                }
-              }}
-            />
-          </div>
         </div>
       </form>
     </Form>
