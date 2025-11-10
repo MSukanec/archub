@@ -29,9 +29,6 @@ const AdminGeneralMovementConcepts = () => {
   
   // Debug logging
   React.useEffect(() => {
-    console.log('📋 System movement concepts data:', concepts);
-    console.log('⚠️ Movement concepts error:', error);
-    console.log('🔄 Is loading:', isLoading);
   }, [concepts, error, isLoading]);
   
   const deleteConceptMutation = useDeleteMovementConcept();
@@ -166,7 +163,6 @@ const AdminGeneralMovementConcepts = () => {
         try {
           await deleteConceptMutation.mutateAsync(conceptId);
         } catch (error) {
-          console.error('Error deleting concept:', error);
         }
       },
       onReplace: async (newConceptId: string) => {
@@ -175,7 +171,6 @@ const AdminGeneralMovementConcepts = () => {
         try {
           await deleteConceptMutation.mutateAsync(conceptId);
         } catch (error) {
-          console.error('Error replacing concept:', error);
         }
       },
       replacementOptions,
@@ -195,12 +190,10 @@ const AdminGeneralMovementConcepts = () => {
     try {
       await moveConceptMutation.mutateAsync({ conceptId, newParentId });
     } catch (error) {
-      console.error('Error moving concept:', error);
     }
   };
 
   if (isError) {
-    console.error('❌ AdminMovementConcepts error:', error);
   }
 
   return (

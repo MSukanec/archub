@@ -43,7 +43,6 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
         .eq("project_id", projectId);
 
       if (constructionTasksError) {
-        console.error("Error fetching construction tasks:", constructionTasksError);
         throw constructionTasksError;
       }
 
@@ -65,7 +64,6 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
         filteredConstructionTasks = filteredConstructionTasks.filter(ct => 
           filterTaskIds.includes(ct.task_id)
         );
-        console.log("🎯 Budget Task Filter Debug:", {
           filterTaskIds,
           beforeFilter: shouldFilterByPhase ? 'already filtered by phase' : constructionTasksData.length,
           afterTaskIdFilter: filteredConstructionTasks.length,
@@ -73,7 +71,6 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
         });
       }
 
-      console.log("🔍 Filter Debug:", {
         selectedPhase: `'${selectedPhase}'`,
         shouldFilterByPhase,
         filterTaskIds: filterTaskIds || 'none',
@@ -83,7 +80,6 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
       });
 
       // DEBUG: Log construction tasks data to understand quantities and phases
-      console.log("🔧 Construction Tasks Data:", filteredConstructionTasks.map(ct => ({
         id: ct.id,
         task_id: ct.task_id,
         quantity: ct.quantity,
@@ -124,7 +120,6 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
         .in("task_id", taskIds);
 
       if (error) {
-        console.error("Error fetching task materials:", error);
         throw error;
       }
 
@@ -145,14 +140,6 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
           
           // Enhanced logging for deck specifically
           if (material.name.toLowerCase().includes('deck')) {
-            console.log(`🎯 DECK DEBUG:`)
-            console.log(`   - Material: ${material.name}`)
-            console.log(`   - Task ID: ${item.task_id}`)
-            console.log(`   - Material amount (per unit): ${item.amount}`)
-            console.log(`   - Related construction tasks:`, relatedConstructionTasks.map(ct => `${ct.phase_name} (qty: ${ct.quantity})`))
-            console.log(`   - Total construction quantity: ${totalConstructionQuantity}`)
-            console.log(`   - Total quantity: ${totalQuantity}`)
-            console.log(`   - Existing material in map:`, existingMaterial ? `YES (current: ${existingMaterial.computed_quantity})` : 'NO')
           }
           
           if (existingMaterial) {
@@ -161,10 +148,6 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
             
             // Enhanced logging for deck accumulation
             if (material.name.toLowerCase().includes('deck')) {
-              console.log(`🔄 DECK ACCUMULATION:`)
-              console.log(`   - Previous total: ${previousQty}`)
-              console.log(`   - Adding: ${totalQuantity}`)
-              console.log(`   - New total: ${existingMaterial.computed_quantity}`)
             }
             
             // Recalcular la cantidad a comprar y comercial
@@ -212,8 +195,6 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
             
             // Enhanced logging for deck first time
             if (material.name.toLowerCase().includes('deck')) {
-              console.log(`🆕 DECK FIRST TIME:`)
-              console.log(`   - Initial quantity: ${computedQty}`)
             }
           }
         }
@@ -223,7 +204,6 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
         a.category_name.localeCompare(b.category_name) || a.name.localeCompare(b.name)
       );
       
-      console.log("Final materials result:", materials.length, "unique materials");
       return { materials, phases: uniquePhases };
     },
     enabled: !!projectId && !!supabase

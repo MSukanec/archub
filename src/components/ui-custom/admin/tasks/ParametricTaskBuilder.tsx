@@ -117,7 +117,6 @@ export const ParametricTaskBuilder = forwardRef<
         .order('label')
       
       if (error) {
-        console.error('Error loading parameters:', error)
         throw error
       }
 
@@ -136,7 +135,6 @@ export const ParametricTaskBuilder = forwardRef<
         .order('label')
       
       if (error) {
-        console.error('Error loading options:', error)
         throw error
       }
 
@@ -154,7 +152,6 @@ export const ParametricTaskBuilder = forwardRef<
         .select('*')
       
       if (error) {
-        console.error('Error loading dependencies:', error)
         throw error
       }
 
@@ -172,7 +169,6 @@ export const ParametricTaskBuilder = forwardRef<
         .select('*')
       
       if (error) {
-        console.error('Error loading dependency options:', error)
         throw error
       }
 
@@ -330,11 +326,9 @@ export const ParametricTaskBuilder = forwardRef<
             // Agregar parámetros seleccionados que no están en el orden guardado
             const missingFromOrder = availableSlugs.filter(slug => !initialOrder.includes(slug));
             if (missingFromOrder.length > 0) {
-              console.log('🔄 Adding missing params to saved order:', missingFromOrder);
               initialOrder.push(...missingFromOrder);
             }
             
-            console.log('📊 Using filtered saved parameter order:', initialOrder);
           } else {
             // Filtrar el orden estándar para incluir solo los parámetros disponibles
             const filteredStandardOrder = standardOrder.filter(slug => availableSlugs.includes(slug));
@@ -343,14 +337,11 @@ export const ParametricTaskBuilder = forwardRef<
             const remainingSlugs = availableSlugs.filter(slug => !standardOrder.includes(slug));
             
             initialOrder = [...filteredStandardOrder, ...remainingSlugs];
-            console.log('📊 Using standard parameter order for new task:', initialOrder);
           }
           
           setParameterOrder(initialOrder);
-          console.log('🎯 Initial selections set:', initialSelections.length, 'parameters');
         }
       } catch (e) {
-        console.error('❌ Error parsing initial parameters:', e);
       }
     }
   }, [initialParameters, parameters, allOptions, selections.length]);
@@ -363,19 +354,16 @@ export const ParametricTaskBuilder = forwardRef<
       return
     }
 
-    console.log('🎯 Generando vista previa con selecciones:', selections)
 
     // Crear un mapa de parámetros para reemplazo usando labels legibles
     const paramMap: Record<string, string> = {}
     selections.forEach(selection => {
       paramMap[selection.parameterSlug] = selection.optionLabel
-      console.log(`📝 Mapeando: {{${selection.parameterSlug}}} → ${selection.optionLabel}`)
     })
 
     // NUEVA LÓGICA: Construir frase concatenando expression_templates de parámetros seleccionados
     const processedParts: string[] = []
     
-    console.log('🎯 Construyendo frase sin template base, solo con expression_templates')
 
     // Procesar cada parámetro en el orden correcto 
     const orderedParameterIds = getOrderedParameters()
@@ -387,15 +375,12 @@ export const ParametricTaskBuilder = forwardRef<
       const parameter = parameters.find(p => p.id === selection.parameterId)
       if (!parameter) return
 
-      console.log(`🔍 Procesando parámetro en orden: ${parameter.slug}`)
       
       // Aplicar expression_template del parámetro o usar {value} como fallback
       const expressionTemplate = parameter.expression_template || '{value}'
-      console.log(`📋 Expression template del parámetro: ${expressionTemplate}`)
       
       // Reemplazar {value} con el label de la opción seleccionada
       const generatedText = expressionTemplate.replace('{value}', selection.optionLabel)
-      console.log(`🔄 Texto generado: ${generatedText}`)
       
       // Agregar a las partes procesadas
       processedParts.push(generatedText)
@@ -418,7 +403,6 @@ export const ParametricTaskBuilder = forwardRef<
       finalText += '.'
     }
     
-    console.log('✅ Vista previa final concatenada:', finalText)
     setTaskPreview(finalText)
     onPreviewChange?.(finalText)
     lastPreview = finalText
@@ -476,15 +460,12 @@ export const ParametricTaskBuilder = forwardRef<
         
         // Insertar el parámetro en la posición correcta
         updatedOrder.splice(insertIndex, 0, parameter.slug)
-        console.log(`🎯 Parameter ${parameter.slug} intelligently inserted at position ${insertIndex}`)
       } else {
         // Si no está en standardOrder, agregarlo al final
         updatedOrder.push(parameter.slug)
-        console.log(`🎯 Parameter ${parameter.slug} added at end (not in standard order)`)
       }
       
       setParameterOrder(updatedOrder)
-      console.log('🎯 Parameter order updated:', updatedOrder)
     }
 
     // Cerrar el popover
@@ -510,7 +491,6 @@ export const ParametricTaskBuilder = forwardRef<
     if (parameter) {
       const updatedOrder = parameterOrder.filter(slug => slug !== parameter.slug)
       setParameterOrder(updatedOrder)
-      console.log('🗑️ Parameter removed from order:', parameter.slug, '→ New order:', updatedOrder)
     }
   }
 
@@ -574,7 +554,6 @@ export const ParametricTaskBuilder = forwardRef<
     const missingParams = availableSlugs.filter(slug => !enhancedOrder.includes(slug))
     
     if (missingParams.length > 0) {
-      console.log('🔄 Detected missing parameters in order:', missingParams)
       
       // Para cada parámetro faltante, insertarlo en la posición correcta según standardOrder
       missingParams.forEach(missingParam => {
@@ -595,7 +574,6 @@ export const ParametricTaskBuilder = forwardRef<
           
           // Insertar el parámetro en la posición correcta
           enhancedOrder.splice(insertIndex, 0, missingParam)
-          console.log(`🎯 Intelligently inserted ${missingParam} at position ${insertIndex}`)
         } else {
           // Si no está en standardOrder, agregarlo al final
           enhancedOrder.push(missingParam)
@@ -618,7 +596,6 @@ export const ParametricTaskBuilder = forwardRef<
       }
     })
     
-    console.log('🔀 Parameter ordering:', {
       parameterOrder,
       enhancedOrder,
       availableParameters,

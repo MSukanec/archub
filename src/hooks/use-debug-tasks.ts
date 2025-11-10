@@ -10,7 +10,6 @@ export function useDebugTasks(organizationId: string) {
         throw new Error("Supabase client not initialized");
       }
 
-      console.log("Debugging task data...");
 
       // Verificar task_generated
       const { data: taskGenerated, error: taskGeneratedError } = await supabase
@@ -19,8 +18,6 @@ export function useDebugTasks(organizationId: string) {
         .eq("organization_id", organizationId)
         .limit(5);
 
-      console.log("task_generated data:", taskGenerated);
-      console.log("task_generated error:", taskGeneratedError);
 
       // Verificar task_view
       const { data: taskView, error: taskViewError } = await supabase
@@ -29,8 +26,6 @@ export function useDebugTasks(organizationId: string) {
         .eq("organization_id", organizationId)
         .limit(5);
 
-      console.log("task_view data:", taskView);
-      console.log("task_view error:", taskViewError);
 
       return {
         taskGenerated,

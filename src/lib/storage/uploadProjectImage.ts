@@ -25,7 +25,6 @@ export async function uploadProjectImage(
     const extension = file.name.split('.').pop() || 'jpg';
     const filePath = `${organizationId}/${projectId}/hero.${extension}`;
 
-    console.log('Uploading project image:', filePath);
 
     // Upload to Supabase Storage
     const { error: uploadError } = await supabase.storage
@@ -36,7 +35,6 @@ export async function uploadProjectImage(
       });
 
     if (uploadError) {
-      console.error('Error uploading project image:', uploadError);
       throw new Error(`Error al subir imagen: ${uploadError.message}`);
     }
 
@@ -53,7 +51,6 @@ export async function uploadProjectImage(
       file_path: filePath
     };
   } catch (error) {
-    console.error('Error processing project image:', error);
     throw error;
   }
 }
@@ -65,11 +62,9 @@ export async function deleteProjectImage(filePath: string): Promise<void> {
       .remove([filePath]);
 
     if (error) {
-      console.error('Error deleting project image:', error);
       throw new Error(`Error al eliminar imagen: ${error.message}`);
     }
   } catch (error) {
-    console.error('Error deleting project image:', error);
     throw error;
   }
 }
@@ -87,7 +82,6 @@ export async function updateProjectImageUrl(
       .single();
 
     if (projectError || !projectData) {
-      console.error('Error getting project organization:', projectError);
       throw new Error(`Error al obtener organización del proyecto: ${projectError?.message || 'Proyecto no encontrado'}`);
     }
 
@@ -102,11 +96,9 @@ export async function updateProjectImageUrl(
       });
 
     if (error) {
-      console.error('Error updating project image URL:', error);
       throw new Error(`Error al actualizar URL de imagen: ${error.message}`);
     }
   } catch (error) {
-    console.error('Error updating project image URL:', error);
     throw error;
   }
 }

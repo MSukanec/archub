@@ -40,7 +40,6 @@ export function SubcontractTaskFormModal({ modalData, onClose }: SubcontractTask
       return;
     }
 
-    console.log('Adding tasks to subcontract:', subcontractId, selectedTasks);
     
     // Convertir tareas seleccionadas al formato requerido por la base de datos
     const tasksToAdd = selectedTasks.map(task => ({
@@ -58,7 +57,6 @@ export function SubcontractTaskFormModal({ modalData, onClose }: SubcontractTask
       onSuccess?.();
       onClose();
     } catch (error) {
-      console.error('Error adding tasks:', error);
       // El error se maneja en el hook con toast
     }
   };

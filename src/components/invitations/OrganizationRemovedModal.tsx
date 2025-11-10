@@ -43,7 +43,6 @@ export function OrganizationRemovedModal() {
       // Force a full page reload to load the new organization
       window.location.reload();
     } catch (error) {
-      console.error('Error switching organization:', error);
       toast({
         title: 'Error',
         description: 'No se pudo cambiar de organización. Inténtalo de nuevo.',

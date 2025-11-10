@@ -68,7 +68,6 @@ export function BudgetMaterialsTab({ budget, onNavigateToTasks }: BudgetMaterial
         .in('task_id', budgetTaskIds);
 
       if (error) {
-        console.error('Error fetching budget materials:', error);
         throw error;
       }
 
@@ -80,7 +79,6 @@ export function BudgetMaterialsTab({ budget, onNavigateToTasks }: BudgetMaterial
         .in('task_id', budgetTaskIds);
 
       if (constructionError) {
-        console.error('Error fetching construction tasks for phases:', constructionError);
         throw constructionError;
       }
 

@@ -42,7 +42,6 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
       // Validar que el usuario esté autenticado
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.user) {
-        console.warn('⚠️ Usuario no autenticado, no se puede actualizar current_view')
         return
       }
 
@@ -54,7 +53,6 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
         p_view: view 
       })
     } catch (err) {
-      console.error('❌ Error en setCurrentView:', err)
     }
   },
 
@@ -95,7 +93,6 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
 
       set({ onlineUsers })
     } catch (err) {
-      console.error('❌ Error en fetchOnlineUsers:', err)
     }
   },
 

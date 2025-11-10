@@ -109,7 +109,6 @@ export function MaterialCategoryFormModal({ modalData, onClose }: MaterialCatego
       onClose()
       form.reset()
     } catch (error) {
-      console.error('Error saving material category:', error)
     } finally {
       setIsLoading(false)
     }

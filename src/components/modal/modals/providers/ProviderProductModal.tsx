@@ -109,7 +109,6 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
     }
     
     if (!data.currency_id) {
-      console.error('No se pudo determinar la moneda');
       return;
     }
     
@@ -123,14 +122,12 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
         price: data.amount || 0
       };
       
-      console.log('Guardando producto con:', requestData);
       
       // Actualizar el provider_code, moneda y precio usando el hook existente
       await toggleProviderProduct.mutateAsync(requestData);
       
       onClose();
     } catch (error) {
-      console.error("Error al guardar:", error);
     } finally {
       setIsLoading(false);
     }
@@ -172,7 +169,6 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
         <form 
           onSubmit={(e) => {
             e.preventDefault();
-            console.log('Form onSubmit triggered');
             form.handleSubmit(handleSubmit)(e);
           }} 
           className="space-y-4"

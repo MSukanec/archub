@@ -79,7 +79,6 @@ export function ImageViewer({
             const publicUrl = storageHelpers.getPublicUrl(bucket, path);
             imageUrl = publicUrl;
           } catch (error) {
-            console.error('Error getting public URL:', error);
             throw new Error('No se pudo obtener la URL de la imagen');
           }
         } else {
@@ -120,7 +119,6 @@ export function ImageViewer({
       } catch (error) {
         if (!isMounted) return;
         
-        console.error('Error loading image:', error);
         setState(prev => ({
           ...prev,
           loading: false,

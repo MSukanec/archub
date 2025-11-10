@@ -191,12 +191,10 @@ export default function CheckoutPage() {
           .maybeSingle();
 
         if (error) {
-          console.error('[billing_profiles] Error loading profile:', error);
           return;
         }
 
         if (data) {
-          console.log('[billing_profiles] Loaded existing profile');
           // Only set fields that are empty (don't overwrite if user already started filling)
           if (!isCompany && data.is_company) setIsCompany(data.is_company);
           if (!companyName && data.company_name) setCompanyName(data.company_name);
@@ -206,7 +204,6 @@ export default function CheckoutPage() {
           if (!billingPostcode && data.postcode) setBillingPostcode(data.postcode);
         }
       } catch (e) {
-        console.error('[billing_profiles] Unexpected error:', e);
       }
     };
 
@@ -315,7 +312,6 @@ export default function CheckoutPage() {
       });
 
       if (error) {
-        console.error("Error validando cupón:", error);
         setCouponError("Error al validar el cupón");
         return;
       }
@@ -357,7 +353,6 @@ export default function CheckoutPage() {
 
       setCouponCode("");
     } catch (error: any) {
-      console.error("Error al validar cupón:", error);
       setCouponError(error.message || "No se pudo validar el cupón");
     } finally {
       setValidatingCoupon(false);
@@ -405,7 +400,6 @@ export default function CheckoutPage() {
 
         const data = await response.json();
         if (!response.ok) {
-          console.error("Error al inscribir con cupón 100%:", data);
           throw new Error(data?.error || "No se pudo completar la inscripción");
         }
 
@@ -446,7 +440,6 @@ export default function CheckoutPage() {
         ...(appliedCoupon && { code: appliedCoupon.code }),
       };
 
-      console.log("[MP] Creando preferencia…", requestBody);
 
       const API_BASE = getApiBase();
       const mpUrl = `${API_BASE}/api/mp/create-preference`;
@@ -472,7 +465,6 @@ export default function CheckoutPage() {
         payload = { error: text };
       }
 
-      console.log("[MP] Respuesta create-preference:", {
         status: res.status,
         ok: res.ok,
         data: payload,
@@ -481,7 +473,6 @@ export default function CheckoutPage() {
       if (!res.ok) {
         // Si el cupón da 100% descuento, usar flujo de inscripción gratuita
         if (payload?.free_enrollment && appliedCoupon) {
-          console.log("[MP] Cupón da acceso gratuito, usando free-enroll...");
           
           const freeEnrollResponse = await fetch(`${API_BASE}/api/checkout/free-enroll`, {
             method: "POST",
@@ -497,7 +488,6 @@ export default function CheckoutPage() {
 
           const freeEnrollData = await freeEnrollResponse.json();
           if (!freeEnrollResponse.ok) {
-            console.error("Error al inscribir con cupón 100%:", freeEnrollData);
             throw new Error(freeEnrollData?.error || "No se pudo completar la inscripción");
           }
 
@@ -512,7 +502,6 @@ export default function CheckoutPage() {
           return;
         }
         
-        console.error("[MP] Error al crear preferencia:", payload);
         throw new Error(
           payload?.error
             ? `No se pudo crear la preferencia: ${String(payload.error)}`
@@ -524,10 +513,8 @@ export default function CheckoutPage() {
         throw new Error("La preferencia no tiene init_point");
       }
 
-      console.log("[MP] Redirigiendo a:", payload.init_point);
       window.location.assign(payload.init_point);
     } catch (error: any) {
-      console.error("[MP] Error fatal:", error);
       toast({
         title: "Error al procesar el pago",
         description: error.message || "No se pudo iniciar el pago",
@@ -591,7 +578,6 @@ export default function CheckoutPage() {
         ...(billing && { billing }),
       };
 
-      console.log("[PayPal] Creando orden…", requestBody);
 
       const API_BASE = getApiBase();
       const paypalUrl = `${API_BASE}/api/paypal/create-order`;
@@ -614,14 +600,12 @@ export default function CheckoutPage() {
         payload = { ok: false, error: text };
       }
 
-      console.log("[PayPal] Respuesta create-order:", {
         status: res.status,
         ok: res.ok,
         data: payload,
       });
 
       if (!res.ok || !payload?.ok) {
-        console.error("[PayPal] Error al crear orden:", payload);
         throw new Error(payload?.error || `HTTP ${res.status}`);
       }
 
@@ -630,11 +614,9 @@ export default function CheckoutPage() {
         (link: any) => link.rel === "approve"
       );
       if (!approvalLink?.href) {
-        console.error("[PayPal] Order sin approval link:", paypal_order);
         throw new Error("No se recibió la URL de aprobación de PayPal");
       }
 
-      console.log("[PayPal] Redirigiendo a:", approvalLink.href);
       window.location.assign(approvalLink.href);
     } catch (error: any) {
       toast({
@@ -728,7 +710,6 @@ Titular: Matias Esteban Sukanec`;
 
       setBankTransferPaymentId(data.btp_id);
     } catch (error: any) {
-      console.error("Error creating bank transfer payment:", error);
       toast({
         title: "Error",
         description: error.message || "No se pudo crear el registro de pago",
@@ -829,7 +810,6 @@ Titular: Matias Esteban Sukanec`;
         description: "Tu comprobante fue recibido. Te notificaremos cuando sea aprobado.",
       });
     } catch (error: any) {
-      console.error("Error uploading receipt:", error);
       toast({
         title: "Error al subir comprobante",
         description: error.message || "No se pudo subir el archivo",
@@ -888,12 +868,9 @@ Titular: Matias Esteban Sukanec`;
         });
 
       if (error) {
-        console.error('[billing_profiles] Error saving billing profile:', error);
       } else {
-        console.log('[billing_profiles] Billing profile saved successfully');
       }
     } catch (e) {
-      console.error('[billing_profiles] Unexpected error:', e);
     }
   };
 
@@ -1066,7 +1043,6 @@ Titular: Matias Esteban Sukanec`;
           });
         }
       } catch (error) {
-        console.error("Error saving profile data:", error);
         // Continue with payment even if profile save fails
       }
     }

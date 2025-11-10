@@ -214,7 +214,6 @@ export default function PersonnelPaymentsTab({
         return sum + convertedAmount
       } catch (error) {
         // Si hay error en conversión, usar el monto original
-        console.warn('Error converting payment amount:', error)
         return sum + payment.amount
       }
     }, 0)

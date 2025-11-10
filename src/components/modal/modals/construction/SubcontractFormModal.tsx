@@ -110,7 +110,6 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       closeModal();
 
     } catch (error) {
-      console.error('Error guardando subcontrato:', error);
       toast({
         title: "Error",
         description: "No se pudo guardar el subcontrato",

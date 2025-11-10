@@ -43,7 +43,6 @@ export function SmartChatInput({
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
-      console.warn("🎤 Web Speech API no está soportada en este navegador");
       return;
     }
 
@@ -69,7 +68,6 @@ export function SmartChatInput({
         transcript += event.results[i][0].transcript;
       }
       
-      console.log("🎤 Transcripción:", transcript);
       
       // Actualizar el input con el texto transcripto
       onChange(value + (value ? " " : "") + transcript);
@@ -77,13 +75,11 @@ export function SmartChatInput({
 
     // Evento cuando termina de escuchar
     recognition.onend = () => {
-      console.log("🎤 Reconocimiento de voz finalizado");
       setIsListening(false);
     };
 
     // Evento de error
     recognition.onerror = (event: any) => {
-      console.error("🎤 Error en reconocimiento de voz:", event.error);
       setIsListening(false);
     };
 
@@ -107,21 +103,17 @@ export function SmartChatInput({
   // Toggle reconocimiento de voz
   const toggleVoiceRecognition = () => {
     if (!recognitionRef.current) {
-      console.warn("🎤 Reconocimiento de voz no disponible");
       return;
     }
 
     if (isListening) {
-      console.log("🎤 Deteniendo reconocimiento de voz...");
       recognitionRef.current.stop();
       setIsListening(false);
     } else {
-      console.log("🎤 Iniciando reconocimiento de voz...");
       try {
         recognitionRef.current.start();
         setIsListening(true);
       } catch (error) {
-        console.error("🎤 Error al iniciar reconocimiento:", error);
       }
     }
   };

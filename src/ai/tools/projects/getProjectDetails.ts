@@ -53,7 +53,6 @@ export async function getProjectDetails(
       .ilike('name', `%${projectName}%`);
 
     if (error) {
-      console.error('Error fetching project:', error);
       return `Error al buscar el proyecto: ${error.message}`;
     }
 
@@ -188,7 +187,6 @@ export async function getProjectDetails(
     return response;
 
   } catch (err) {
-    console.error('Unexpected error in getProjectDetails:', err);
     return 'Error inesperado al buscar el proyecto. Por favor intenta nuevamente.';
   }
 }

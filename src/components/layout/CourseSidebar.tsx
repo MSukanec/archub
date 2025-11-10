@@ -46,7 +46,6 @@ export function CourseSidebar({ modules, lessons, currentLessonId }: CourseSideb
       });
       
       if (!res.ok) {
-        console.error('Failed to fetch progress:', res.status);
         return [];
       }
       

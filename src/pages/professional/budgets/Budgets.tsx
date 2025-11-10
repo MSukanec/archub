@@ -80,7 +80,6 @@ export default function Budgets() {
 
   const handleAddTask = () => {
     if (!projectId || !organizationId || !userData?.user?.id) {
-      console.error('Missing required data for task creation')
       return
     }
 
@@ -94,7 +93,6 @@ export default function Budgets() {
 
   const handleAddBudget = () => {
     if (!projectId || !organizationId || !userData?.user?.id) {
-      console.error('Missing required data for budget creation')
       return
     }
 
@@ -108,7 +106,6 @@ export default function Budgets() {
 
   const handleAddSingleTask = () => {
     if (!projectId || !organizationId || !userData?.user?.id) {
-      console.error('Missing required data for single task creation')
       return
     }
 
@@ -122,7 +119,6 @@ export default function Budgets() {
 
   const handleAddPhase = () => {
     if (!projectId || !organizationId || !userData?.user?.id) {
-      console.error('Missing required data for phase creation')
       return
     }
 
@@ -136,7 +132,6 @@ export default function Budgets() {
 
   const handleDuplicateTask = (task: any) => {
     if (!projectId || !organizationId || !userData?.user?.id) {
-      console.error('Missing required data for task duplication')
       return
     }
 
@@ -218,7 +213,6 @@ export default function Budgets() {
             .eq('id', phaseId)
           
           if (error) {
-            console.error('Error eliminando fase:', error)
             throw error
           }
           
@@ -234,7 +228,6 @@ export default function Budgets() {
             description: "La fase ha sido eliminada correctamente."
           })
         } catch (error) {
-          console.error('Error:', error)
           toast({
             title: "Error al eliminar",
             description: "No se pudo eliminar la fase. Inténtalo de nuevo.",
@@ -318,8 +311,6 @@ export default function Budgets() {
           placeholder: 'Todos los rubros'
         }
       ],
-      onApplyFilters: (filters: any) => console.log('Applied filters:', filters),
-      onClearFilters: () => console.log('Cleared filters')
     }
     
     setFilterConfig(filterConfig)

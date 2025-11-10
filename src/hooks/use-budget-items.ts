@@ -243,7 +243,6 @@ export function useMoveBudgetItem() {
 
       if (!response.ok) {
         const errorText = await response.text()
-        console.error('Move budget item failed:', response.status, errorText)
         throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
       }
 

@@ -21,7 +21,6 @@ export async function uploadSiteLogFiles(
     try {
       // Validate file first
       if (!file || file.size === 0) {
-        console.error('Archivo vacío o inválido');
         continue;
       }
 
@@ -38,7 +37,6 @@ export async function uploadSiteLogFiles(
         });
 
       if (uploadError) {
-        console.error('Error uploading file:', uploadError);
         throw uploadError;
       }
 
@@ -63,8 +61,6 @@ export async function uploadSiteLogFiles(
         visibility: 'organization'
       };
 
-      console.log('Insertando archivo de bitácora en DB:', insertData);
-      console.log('File details:', {
         name: file.name,
         size: file.size,
         type: file.type,
@@ -78,8 +74,6 @@ export async function uploadSiteLogFiles(
         .insert(insertData);
 
       if (dbError) {
-        console.error('Error creating file record:', dbError);
-        console.error('Detailed error:', {
           message: dbError.message,
           details: dbError.details,
           hint: dbError.hint,
@@ -92,9 +86,7 @@ export async function uploadSiteLogFiles(
         throw dbError;
       }
 
-      console.log('Archivo de bitácora subido exitosamente:', filePath);
     } catch (error) {
-      console.error('Error processing site log file:', file.name, error);
       throw error;
     }
   }

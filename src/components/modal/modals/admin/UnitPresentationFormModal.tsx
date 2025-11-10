@@ -106,7 +106,6 @@ export function UnitPresentationFormModal({ modalData, onClose }: UnitPresentati
       onClose()
       form.reset()
     } catch (error) {
-      console.error('Error saving unit presentation:', error)
     } finally {
       setIsLoading(false)
     }

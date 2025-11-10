@@ -61,7 +61,6 @@ export function RightSidebar() {
       const count = await getUnreadCount(userId);
       setUnreadCount(count);
     } catch (error) {
-      console.error('Error fetching unread count:', error);
     }
   };
 
@@ -111,7 +110,6 @@ export function RightSidebar() {
             ...(isAdmin ? {} : { filter: `user_id=eq.${dbUserId}` }) // Admin escucha todo, usuario solo sus mensajes
           },
           (payload) => {
-            console.log('🔥 Support badge Realtime update:', payload);
             
             if (isAdmin) {
               // Admin: invalidar contador Y conversaciones
@@ -333,7 +331,6 @@ export function RightSidebar() {
               data-testid="button-dock-right"
               onClick={() => {
                 // Sin función por ahora
-                console.log('Botón de anclar clickeado (sin función)');
               }}
             >
               <div className="h-8 w-8 flex items-center justify-center">

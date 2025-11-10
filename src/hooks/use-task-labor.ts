@@ -30,7 +30,6 @@ export const useTaskLabor = (taskId: string | null) => {
             .single()
             
           if (laborError) {
-            console.warn('Error fetching labor view:', laborError)
             return { ...laborItem, labor_view: null }
           }
           

@@ -20,7 +20,6 @@ export async function uploadGalleryFiles(
     try {
       // Validate file first
       if (!file || file.size === 0) {
-        console.error('Archivo vacío o inválido');
         continue;
       }
 
@@ -39,7 +38,6 @@ export async function uploadGalleryFiles(
         });
 
       if (uploadError) {
-        console.error('Error uploading file:', uploadError);
         throw uploadError;
       }
 
@@ -63,8 +61,6 @@ export async function uploadGalleryFiles(
         visibility: 'organization'
       };
 
-      console.log('Insertando en DB después de subir archivo:', insertData);
-      console.log('File details:', {
         name: file.name,
         size: file.size,
         type: file.type,
@@ -73,14 +69,12 @@ export async function uploadGalleryFiles(
 
       // Test current user auth first
       const { data: authUser } = await supabase.auth.getUser();
-      console.log('Current auth user:', authUser?.user?.id);
       
       // Test if we can select from table first
       const { data: testSelect, error: selectError } = await supabase
         .from('project_media')
         .select('id')
         .limit(1);
-      console.log('Test select result:', { testSelect, selectError });
 
       // Now create the database record
       const { error: dbError } = await supabase
@@ -88,8 +82,6 @@ export async function uploadGalleryFiles(
         .insert(insertData);
 
       if (dbError) {
-        console.error('Error creating file record:', dbError);
-        console.error('Detailed error:', {
           message: dbError.message,
           details: dbError.details,
           hint: dbError.hint,
@@ -102,9 +94,7 @@ export async function uploadGalleryFiles(
         throw dbError;
       }
 
-      console.log('Archivo subido exitosamente:', filePath);
     } catch (error) {
-      console.error('Error processing file:', file.name, error);
       throw error;
     }
   }

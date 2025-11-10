@@ -77,7 +77,6 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
 
   // Submit function
   const handleSubmit = async (data: TaskParameterFormData) => {
-    console.log('Creating parameter with data:', data);
     setIsSubmitting(true);
     
     try {
@@ -93,7 +92,6 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
         result = await createMutation.mutateAsync(data);
       }
       
-      console.log('Parameter created with ID:', result.id);
       
       toast({
         title: parameter ? 'Parámetro actualizado' : 'Parámetro creado',
@@ -106,7 +104,6 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
       
       onClose();
     } catch (error: any) {
-      console.error('Error:', error);
       toast({
         variant: 'destructive',
         title: 'Error',

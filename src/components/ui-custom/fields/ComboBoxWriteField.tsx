@@ -85,7 +85,6 @@ export function ComboBox({
       setOpen(false);
       setSearchValue('');
     } catch (error) {
-      console.error('Error creating new option:', error);
     } finally {
       setIsCreating(false);
     }

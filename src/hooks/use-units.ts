@@ -21,7 +21,6 @@ export function useUnits() {
         .order("name", { ascending: true });
 
       if (error) {
-        console.error("Error fetching units:", error);
         throw error;
       }
 

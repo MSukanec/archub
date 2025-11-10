@@ -48,7 +48,6 @@ export function useProviderProducts() {
         .eq('organization_id', organizationId);
 
       if (error) {
-        console.error('Error fetching provider products:', error);
         throw error;
       }
 
@@ -72,7 +71,6 @@ export function useToggleProviderProduct() {
       currencyId?: string;
       price?: number;
     }) => {
-      console.log('useToggleProviderProduct received:', { productId, isActive, providerCode, currencyId, price });
       
       if (!organizationId || !supabase) {
         throw new Error('No organization or supabase client');
@@ -145,13 +143,11 @@ export function useToggleProviderProduct() {
             .single();
 
           if (priceSelectError && priceSelectError.code !== 'PGRST116') {
-            console.warn('Error checking existing price:', priceSelectError);
           }
 
           if (existingPrice) {
             // Si existe y se proporcionan currencyId/price, actualizar
             if (currencyId && price !== undefined) {
-              console.log('Updating price with currencyId:', currencyId);
               
               const { error: priceUpdateError } = await supabase
                 .from('product_prices')
@@ -163,9 +159,7 @@ export function useToggleProviderProduct() {
                 .eq('id', existingPrice.id);
 
               if (priceUpdateError) {
-                console.warn('Error updating price:', priceUpdateError);
               } else {
-                console.log('Price updated successfully');
               }
             }
           } else {
@@ -178,10 +172,8 @@ export function useToggleProviderProduct() {
 
             // Si se proporcionan currencyId/price, usarlos
             if (currencyId && price !== undefined) {
-              console.log('Inserting price with currencyId:', currencyId);
               insertData.currency_id = currencyId;
               insertData.price = price;
-              console.log('Final insertData:', insertData);
             }
 
             const { error: priceInsertError } = await supabase
@@ -189,7 +181,6 @@ export function useToggleProviderProduct() {
               .insert(insertData);
 
             if (priceInsertError) {
-              console.warn('Error creating price:', priceInsertError);
             }
           }
         }

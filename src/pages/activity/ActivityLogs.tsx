@@ -31,7 +31,6 @@ export default function ActivityLogs({ organizationId }: ActivityLogsProps) {
 
   // Handle activity click
   const handleActivityClick = (activity: any) => {
-    console.log('Activity clicked:', activity);
     // Navigate to related sections based on activity type
     switch (activity.target_table) {
       case 'movements':
@@ -47,7 +46,6 @@ export default function ActivityLogs({ organizationId }: ActivityLogsProps) {
         navigate('/contacts');
         break;
       default:
-        console.log('Activity details:', activity);
     }
   };
 

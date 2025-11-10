@@ -275,7 +275,6 @@ export default function AdminDashboard() {
         .in('user_id', userIds);
       
       if (presenceError) {
-        console.error('Error fetching presence data:', presenceError);
         // Continue without presence data - use fallback to last_view_from_history
       }
       

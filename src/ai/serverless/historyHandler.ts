@@ -33,7 +33,6 @@ export async function getHistoryHandler(params: {
       .limit(50);
 
     if (messagesError) {
-      console.error('Error fetching messages:', messagesError);
       return {
         success: false,
         error: "Error fetching chat history",
@@ -54,7 +53,6 @@ export async function getHistoryHandler(params: {
     };
 
   } catch (err: any) {
-    console.error('Error in getHistoryHandler:', err);
     return {
       success: false,
       error: "Error fetching chat history",

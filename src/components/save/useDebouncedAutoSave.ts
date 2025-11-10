@@ -34,9 +34,7 @@ export function useDebouncedAutoSave<T>({
     try {
       await saveFn(dataToSave);
       setLastSavedAt(new Date());
-      console.log('Auto-save completed successfully');
     } catch (error) {
-      console.error('Auto-save error:', error);
     } finally {
       setIsSaving(false);
     }
@@ -76,7 +74,6 @@ export function useDebouncedAutoSave<T>({
     
     if (!previousHadValues && currentHasValues && !hasUserEditedRef.current) {
       // This looks like initial data loading, not user editing
-      console.log('Skipping auto-save: detected initial data loading');
       previousDataRef.current = data;
       // Set a flag to enable saves after a delay (allowing for user interactions)
       setTimeout(() => {

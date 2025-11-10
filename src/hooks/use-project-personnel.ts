@@ -44,7 +44,6 @@ export function useProjectPersonnel(projectId?: string) {
         .order('created_at', { ascending: true })
 
       if (error) {
-        console.error('Error fetching project personnel:', error)
         throw error
       }
 

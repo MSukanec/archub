@@ -30,7 +30,6 @@ export function MediaForm({
         .remove([fileToDelete.file_path]);
 
       if (storageError) {
-        console.error('Error deleting from storage:', storageError);
       }
 
       // Delete from database
@@ -51,7 +50,6 @@ export function MediaForm({
         description: "El archivo se ha eliminado correctamente."
       });
     } catch (error) {
-      console.error('Error deleting file:', error);
       toast({
         title: "Error",
         description: "No se pudo eliminar el archivo.",

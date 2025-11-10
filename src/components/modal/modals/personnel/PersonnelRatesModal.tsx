@@ -167,7 +167,6 @@ export function PersonnelRatesModal({ modalData, onClose }: PersonnelRatesModalP
       })
     },
     onError: (error: any) => {
-      console.error('Error creating rate:', error)
       toast({
         title: 'Error al crear tarifa',
         description: error.message || 'No se pudo crear la tarifa',

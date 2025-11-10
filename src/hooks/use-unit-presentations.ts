@@ -44,7 +44,6 @@ export function useUnitPresentations() {
         .order('name')
 
       if (error) {
-        console.error('Error fetching unit presentations:', error)
         throw error
       }
 
@@ -72,7 +71,6 @@ export function useCreateUnitPresentation() {
         .single()
 
       if (error) {
-        console.error('Error creating unit presentation:', error)
         throw error
       }
 
@@ -87,7 +85,6 @@ export function useCreateUnitPresentation() {
       })
     },
     onError: (error) => {
-      console.error('Error creating unit presentation:', error)
       toast({
         title: "Error",
         description: "No se pudo crear la unidad de presentación.",
@@ -115,7 +112,6 @@ export function useUpdateUnitPresentation() {
         .single()
 
       if (error) {
-        console.error('Error updating unit presentation:', error)
         throw error
       }
 
@@ -130,7 +126,6 @@ export function useUpdateUnitPresentation() {
       })
     },
     onError: (error) => {
-      console.error('Error updating unit presentation:', error)
       toast({
         title: "Error",
         description: "No se pudo actualizar la unidad de presentación.",
@@ -153,7 +148,6 @@ export function useDeleteUnitPresentation() {
         .eq('id', id)
 
       if (error) {
-        console.error('Error deleting unit presentation:', error)
         throw error
       }
     },
@@ -166,7 +160,6 @@ export function useDeleteUnitPresentation() {
       })
     },
     onError: (error) => {
-      console.error('Error deleting unit presentation:', error)
       toast({
         title: "Error",
         description: "No se pudo eliminar la unidad de presentación.",

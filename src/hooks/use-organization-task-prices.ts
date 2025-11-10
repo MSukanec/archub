@@ -121,7 +121,6 @@ export function useUpsertOrganizationTaskPrice() {
           .single()
 
         if (error) {
-          console.error('Error updating organization task price:', error)
           throw error
         }
 
@@ -138,7 +137,6 @@ export function useUpsertOrganizationTaskPrice() {
           .single()
 
         if (error) {
-          console.error('Error creating organization task price:', error)
           throw error
         }
 
@@ -157,7 +155,6 @@ export function useUpsertOrganizationTaskPrice() {
       })
     },
     onError: (error) => {
-      console.error('Error saving organization task price:', error)
       toast({
         title: 'Error',
         description: 'No se pudieron guardar los costos personalizados.',
@@ -183,7 +180,6 @@ export function useDeleteOrganizationTaskPrice() {
         .eq('task_id', taskId)
 
       if (error) {
-        console.error('Error deleting organization task price:', error)
         throw error
       }
     },
@@ -197,7 +193,6 @@ export function useDeleteOrganizationTaskPrice() {
       })
     },
     onError: (error) => {
-      console.error('Error deleting organization task price:', error)
       toast({
         title: 'Error',
         description: 'No se pudo eliminar el precio personalizado.',

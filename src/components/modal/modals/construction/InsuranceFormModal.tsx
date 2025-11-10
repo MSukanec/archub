@@ -86,7 +86,6 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
           .eq('project_id', projectId)
 
         if (error) {
-          console.error('Error fetching project personnel:', error)
           return []
         }
 
@@ -108,7 +107,6 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
         
         return validPersonnel
       } catch (error) {
-        console.error('Error in personnel query:', error)
         return []
       }
     },
@@ -183,7 +181,6 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
 
       onClose()
     } catch (error) {
-      console.error('Error saving insurance:', error)
     }
   }
 

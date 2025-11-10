@@ -43,7 +43,6 @@ export default function ProjectCard({ project, onEdit, onDelete, onSelect }: Pro
           icon: <Star className="w-4 h-4" />,
           onClick: () => {
             // TODO: Implement favorite functionality
-            console.log('Toggle favorite for project:', project.id);
           }
         },
         {

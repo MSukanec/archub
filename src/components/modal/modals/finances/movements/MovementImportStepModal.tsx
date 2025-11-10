@@ -69,7 +69,6 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
       });
     });
     
-    console.log('🔧 Type mappings created:', {
       typesFound: types.length,
       typeNames: types.map(t => t.name),
       mappingKeys: Object.keys(valueMap.type_id).slice(0, 10)
@@ -101,7 +100,6 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
 
   // Extract categories (intermediate level: children of types, parents of subcategories)
   const allCategories = types?.flatMap(type => type.children || []) || [];
-  console.log('🔧 Categories for mapping:', {
     typesFound: types.length,
     categoriesFound: allCategories.length,
     categoryNames: allCategories.map(c => c.name).slice(0, 5)
@@ -134,7 +132,6 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
 
   // Extract subcategories (children of categories)
   const allSubcategories = allCategories?.flatMap(category => category.children || []) || [];
-  console.log('🔧 Subcategories for mapping:', {
     categoriesFound: allCategories.length,
     subcategoriesFound: allSubcategories.length,
     subcategoryNames: allSubcategories.map(s => s.name).slice(0, 5)
@@ -230,7 +227,6 @@ const normalizeValue = (field: string, value: any, valueMap: any, manualMappings
   // This prevents database constraint errors
   if (['type_id', 'subcategory_id', 'currency_id', 'wallet_id'].includes(field)) {
     if (!isValidUUID(stringValue)) {
-      console.warn(`⚠️ ${field} could not be mapped to UUID for value:`, stringValue);
       return null; // This will force it to appear in step 3 as incompatible
     }
   }
@@ -397,13 +393,11 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         
         if (mappedField) {
           autoMapping[index] = mappedField
-          console.log(`🎯 Auto-mapped "${header}" to "${mappedField}"`)
         }
       })
       
       if (Object.keys(autoMapping).length > 0) {
         setColumnMapping(autoMapping)
-        console.log('🚀 Auto-mapping applied:', autoMapping)
       }
     }
   }, [parsedData, columnMapping])
@@ -444,7 +438,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         document.body.scrollTop = 0
         window.scrollTo({ top: 0, behavior: 'instant' })
         
-        console.log(`✅ Aggressively scrolled ${scrolledContainers} containers to top`)
         
         // Second attempt after a brief moment to catch dynamic content
         setTimeout(() => {
@@ -459,7 +452,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           })
           document.documentElement.scrollTop = 0
           document.body.scrollTop = 0
-          console.log(`🔄 Second scroll attempt completed`)
         }, 100)
         
       }, 100) // Reduced initial delay
@@ -542,7 +534,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   const valueMap = createValueMap(movementConcepts || [], organizationCurrencies || [], organizationWallets || [])
   
   // Debug valueMap construction
-  console.log('🔧 ValueMap constructed:', {
     type_id: Object.keys(valueMap.type_id || {}).length,
     subcategory_id: Object.keys(valueMap.subcategory_id || {}).length,
     currency_id: Object.keys(valueMap.currency_id || {}).length,
@@ -596,7 +587,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       }
     },
     onError: (error) => {
-      console.error('Error creating category:', error)
       toast({
         title: "Error al crear categoría",
         description: "No se pudo crear la categoría. Inténtalo de nuevo.",
@@ -746,7 +736,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         })
       }
     } catch (error) {
-      console.error('Error processing file:', error)
       toast({
         variant: "destructive",
         title: "Error",
@@ -878,7 +867,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         
         return response.json()
       } catch (error) {
-        console.error('Import mutation error:', error)
         throw error
       }
     },
@@ -894,7 +882,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       onClose()
     },
     onError: (error) => {
-      console.error('Import error:', error)
       const errorMessage = error?.message || "Error al importar los movimientos."
       toast({
         variant: "destructive",
@@ -919,9 +906,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       return
     }
     
-    console.log('Selected creator user_id:', selectedCreator)
-    console.log('Found organization member:', selectedMember)
-    console.log('ValueMap created:', valueMap)
     
     const selectedRowsArray = Array.from(selectedRows)
     const rowsToProcess = selectedRowsArray.length > 0 
@@ -955,7 +939,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                   const jsDate = new Date(excelEpoch.getTime() + (value - 2) * 24 * 60 * 60 * 1000)
                   movement.movement_date = jsDate.toISOString().split('T')[0]
                   hasValidData = true
-                  console.log(`Converted Excel date ${value} to ${movement.movement_date}`)
                 } else if (value && typeof value === 'string') {
                   // Handle string dates
                   const dateRegex = /^\d{4}-\d{2}-\d{2}$/
@@ -1000,9 +983,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                   if (normalizedValue && typeof normalizedValue === 'string' && isValidUUID(normalizedValue)) {
                     movement[fieldName] = normalizedValue
                     hasValidData = true
-                    console.log(`✅ ${fieldName} mapped successfully: ${value} → ${normalizedValue}`)
                   } else {
-                    console.warn(`⚠️ ${fieldName} SKIPPED - no valid mapping for: "${value}"`)
                     // CRITICAL: Never set non-UUID values - they should appear in step 3
                   }
                 } else if (value) {
@@ -1019,8 +1000,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       .filter(Boolean) // Remove null movements
 
     // Log detailed info about what's being sent
-    console.log(`Enviando ${processedMovements.length} movimientos válidos al servidor`);
-    console.log('Primer movimiento procesado:', processedMovements[0]);
     
     // Check for any remaining text values in UUID fields
     const badMovements = processedMovements.filter(m => 
@@ -1032,7 +1011,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     );
     
     if (badMovements.length > 0) {
-      console.log('Movimientos con valores no UUID encontrados:', badMovements);
       toast({
         variant: "destructive",
         title: "Error de mapeo",

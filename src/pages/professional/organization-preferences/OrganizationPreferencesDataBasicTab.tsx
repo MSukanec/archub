@@ -42,7 +42,6 @@ export function DataBasicTab() {
         .single();
         
       if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
-        console.error('Error fetching organization data:', error);
         throw error;
       }
       
@@ -64,7 +63,6 @@ export function DataBasicTab() {
         .single();
         
       if (error) {
-        console.error('Error fetching organization info:', error);
         throw error;
       }
       
@@ -235,10 +233,8 @@ export function DataBasicTab() {
 
   // Handle logo upload success
   const handleLogoUploadSuccess = async (imageUrl: string) => {
-    console.log('Logo upload success callback called with URL:', imageUrl);
     
     if (!organizationId || !supabase) {
-      console.error('Missing organizationId or supabase in callback');
       return;
     }
 
@@ -250,7 +246,6 @@ export function DataBasicTab() {
         .eq('id', organizationId);
 
       if (error) {
-        console.error('Error updating logo URL:', error);
         toast({
           title: "Error",
           description: "No se pudo actualizar el logo en la base de datos",
@@ -259,7 +254,6 @@ export function DataBasicTab() {
         return;
       }
 
-      console.log('Logo URL updated successfully in database');
 
       // Update local state
       setLogoUrl(imageUrl);
@@ -274,7 +268,6 @@ export function DataBasicTab() {
       });
       
     } catch (error) {
-      console.error('Unexpected error in logo upload callback:', error);
     }
   };
 

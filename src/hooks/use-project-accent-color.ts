@@ -103,7 +103,6 @@ export function useProjectAccentColor() {
         applyAccentColor(projectColorHex, hslFormatted, rgbFormatted, isDark);
 
       } catch (err) {
-        console.error('Error updating accent color:', err);
         // En caso de error, usar el color por defecto
         applyAccentColor(DEFAULT_ACCENT.hex, DEFAULT_ACCENT.hsl, DEFAULT_ACCENT.rgb, isDark);
       }

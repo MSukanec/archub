@@ -186,7 +186,6 @@ export function Gallery({
               variant="ghost"
               size="sm"
               onClick={() => {
-                console.log("Search clicked - TODO: Implement search modal");
               }}
               className="h-8 px-3 text-xs"
             >

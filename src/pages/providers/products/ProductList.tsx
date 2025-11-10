@@ -44,7 +44,6 @@ export default function ProductList() {
       
       await toggleProviderProduct.mutateAsync(payload)
     } catch (error) {
-      console.error('Error toggling product:', error)
     }
   }
 

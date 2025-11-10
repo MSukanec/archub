@@ -83,7 +83,6 @@ export function useProducts() {
         .order('name')
 
       if (error) {
-        console.error('Error fetching products:', error)
         throw error
       }
 
@@ -93,7 +92,6 @@ export function useProducts() {
         .select('product_id, avg_price, provider_count')
 
       if (avgError) {
-        console.error('Error fetching average prices:', avgError)
         // Si hay error con precios promedio, continuar solo con productos
         return products || []
       }
@@ -140,7 +138,6 @@ export function useCreateProduct() {
         .single()
 
       if (error) {
-        console.error('Error creating product:', error)
         throw error
       }
 
@@ -155,7 +152,6 @@ export function useCreateProduct() {
       })
     },
     onError: (error) => {
-      console.error('Error creating product:', error)
       toast({
         title: "Error",
         description: "No se pudo crear el producto.",
@@ -191,7 +187,6 @@ export function useUpdateProduct() {
         .single()
 
       if (error) {
-        console.error('Error updating product:', error)
         throw error
       }
 
@@ -206,7 +201,6 @@ export function useUpdateProduct() {
       })
     },
     onError: (error) => {
-      console.error('Error updating product:', error)
       toast({
         title: "Error",
         description: "No se pudo actualizar el producto.",
@@ -229,7 +223,6 @@ export function useDeleteProduct() {
         .eq('id', id)
 
       if (error) {
-        console.error('Error deleting product:', error)
         throw error
       }
     },
@@ -242,7 +235,6 @@ export function useDeleteProduct() {
       })
     },
     onError: (error) => {
-      console.error('Error deleting product:', error)
       toast({
         title: "Error",
         description: "No se pudo eliminar el producto.",

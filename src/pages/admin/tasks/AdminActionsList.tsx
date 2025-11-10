@@ -17,7 +17,6 @@ const AdminActionsList = () => {
 
   const handleEdit = (taskKind: TaskKind) => {
     // Por ahora usamos un modal genérico, luego crearemos el modal específico para task kinds
-    console.log('Editar acción:', taskKind)
   }
 
   const handleDelete = (taskKind: TaskKind) => {
@@ -44,7 +43,6 @@ const AdminActionsList = () => {
         filename: 'acciones'
       })
     } catch (error) {
-      console.error('Error exporting to Excel:', error)
     }
   }
 

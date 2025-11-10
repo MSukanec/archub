@@ -62,7 +62,6 @@ export function ConstructionPhaseFormModal({
         .single();
 
       if (error) {
-        console.error('Error fetching member:', error);
         return null;
       }
 
@@ -119,7 +118,6 @@ export function ConstructionPhaseFormModal({
           .eq("id", modalData.editingPhase.phase_id);
 
         if (phaseError) {
-          console.error("Error updating phase:", phaseError);
           throw phaseError;
         }
 
@@ -148,7 +146,6 @@ export function ConstructionPhaseFormModal({
 
       onClose();
     } catch (error) {
-      console.error('Error with phase operation:', error);
       toast({
         title: modalData.isEditing ? "Error al actualizar la fase" : "Error al crear la fase",
         description: modalData.isEditing ? "No se pudieron guardar los cambios. Por favor, intente de nuevo." : "No se pudo crear la fase. Por favor, intente de nuevo.",

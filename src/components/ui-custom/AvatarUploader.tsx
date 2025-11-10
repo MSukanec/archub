@@ -145,7 +145,6 @@ export function AvatarUploader({
       });
 
     } catch (error) {
-      console.error('Error uploading image:', error);
       toast({
         title: "Error",
         description: "No se pudo subir la imagen. Inténtalo de nuevo.",

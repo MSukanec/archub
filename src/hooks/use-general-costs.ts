@@ -64,7 +64,6 @@ export function useGeneralCosts(organizationId: string | null) {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching general costs:', error);
         throw error;
       }
 
@@ -108,7 +107,6 @@ export function useGeneralCost(generalCostId: string | null) {
         .single();
 
       if (error) {
-        console.error('Error fetching general cost:', error);
         throw error;
       }
 
@@ -135,7 +133,6 @@ export function useCreateGeneralCost() {
         .single();
 
       if (error) {
-        console.error('Error creating general cost:', error);
         throw error;
       }
 
@@ -151,7 +148,6 @@ export function useCreateGeneralCost() {
       });
     },
     onError: (error: any) => {
-      console.error('Error creating general cost:', error);
       toast({
         title: 'Error',
         description: error.message || 'No se pudo crear el gasto general',
@@ -188,7 +184,6 @@ export function useUpdateGeneralCost() {
         .single();
 
       if (error) {
-        console.error('Error updating general cost:', error);
         throw error;
       }
 
@@ -205,7 +200,6 @@ export function useUpdateGeneralCost() {
       });
     },
     onError: (error: any) => {
-      console.error('Error updating general cost:', error);
       toast({
         title: 'Error',
         description: error.message || 'No se pudo actualizar el gasto general',
@@ -231,7 +225,6 @@ export function useDeleteGeneralCost() {
         .eq('id', generalCostId);
 
       if (error) {
-        console.error('Error deleting general cost:', error);
         throw error;
       }
 
@@ -247,7 +240,6 @@ export function useDeleteGeneralCost() {
       });
     },
     onError: (error: any) => {
-      console.error('Error deleting general cost:', error);
       toast({
         title: 'Error',
         description: error.message || 'No se pudo eliminar el gasto general',

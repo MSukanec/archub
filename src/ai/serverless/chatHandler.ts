@@ -80,7 +80,6 @@ export async function checkAndIncrementUsageLimit(
         .single();
 
       if (insertError || !newRecord) {
-        console.error('Error creating usage limits:', insertError);
         // Fail-closed: rechazar en caso de error para evitar bypass de límites
         return { 
           allowed: false, 
@@ -144,7 +143,6 @@ export async function checkAndIncrementUsageLimit(
     };
 
   } catch (err) {
-    console.error('Error in checkAndIncrementUsageLimit:', err);
     // Fail-closed: rechazar en caso de error para prevenir bypass de límites
     return { 
       allowed: false, 
@@ -218,7 +216,6 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
 
     // Si el pipeline devolvió un resultado cacheado, devolverlo directamente
     if (pipelineContext.metadata.cacheHit && pipelineContext.result) {
-      console.log('[AI Pipeline] Cache hit - returning cached response');
       return {
         success: true,
         status: 200,
@@ -232,7 +229,6 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
 
     // Si hubo error en el pipeline, continuar con GPT pero sin enriquecer
     if (pipelineContext.error) {
-      console.warn('[AI Pipeline] Error:', pipelineContext.error);
     }
 
     // Obtener base system prompt
@@ -245,11 +241,8 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
 
     // Log del pipeline para debugging
     if (pipelineContext.intent) {
-      console.log('[AI Pipeline] Intent:', pipelineContext.intent.type, pipelineContext.intent.subtype);
-      console.log('[AI Pipeline] Entities:', pipelineContext.intent.entities.map(e => `${e.type}:${e.name}`));
     }
     if (pipelineContext.queryPlan) {
-      console.log('[AI Pipeline] Suggested tool:', pipelineContext.queryPlan.toolName);
     }
 
     // Construir el historial de mensajes para GPT
@@ -636,9 +629,6 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
     let responseContent = responseMessage?.content || "Lo siento, no pude generar una respuesta.";
     let usage = completion.usage;
 
-    console.log('===== AI CHAT DEBUG =====');
-    console.log('Response message tool_calls:', responseMessage?.tool_calls);
-    console.log('Response message content:', responseMessage?.content);
 
     // Si la IA decidió usar una función
     if (responseMessage?.tool_calls && responseMessage.tool_calls.length > 0) {
@@ -646,7 +636,6 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
       
       // Validar que sea un function tool call (ANTES de acceder a .function)
       if (toolCall.type !== 'function') {
-        console.error('Unsupported tool call type:', toolCall.type);
         return {
           success: false,
           error: "Tipo de herramienta no soportado.",
@@ -654,8 +643,6 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
         };
       }
       
-      console.log('Function name:', toolCall.function.name);
-      console.log('Function arguments:', toolCall.function.arguments);
       
       // Verificar que haya organizationId
       if (!organizationId) {
@@ -672,7 +659,6 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
         try {
           args = JSON.parse(toolCall.function.arguments);
         } catch (parseError) {
-          console.error('Error parsing tool arguments:', parseError);
           return {
             success: false,
             error: "Error al procesar los parámetros de la consulta.",
@@ -839,7 +825,6 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
             functionResult = `Función ${toolCall.function.name} no implementada.`;
         }
         
-        console.log('Function result:', functionResult);
         
         // Segunda llamada a OpenAI con el resultado de la función
         const secondCompletion = await openai.chat.completions.create({
@@ -861,7 +846,6 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
         usage = secondCompletion.usage || usage;
         
       } catch (toolError) {
-        console.error('Error executing tool:', toolError);
         responseContent = "Lo siento, hubo un error al consultar los datos. Por favor intenta nuevamente.";
       }
     }
@@ -876,7 +860,6 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
         context_type: 'home_chat'
       })
       .then(({ error }) => {
-        if (error) console.error('Error saving user message:', error);
       });
 
     // Guardar la respuesta de la IA (no bloqueante)
@@ -889,7 +872,6 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
         context_type: 'home_chat'
       })
       .then(({ error }) => {
-        if (error) console.error('Error saving assistant message:', error);
       });
 
     // Registrar el uso (no bloqueante)
@@ -911,7 +893,6 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
         context_type: 'home_chat'
       })
       .then(({ error }) => {
-        if (error) console.error('Error logging usage:', error);
       });
 
     // Cachear el resultado para futuras consultas idénticas
@@ -931,7 +912,6 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
     };
 
   } catch (err: any) {
-    console.error('Error in chat handler:', err);
     return {
       success: false,
       error: "Error processing chat message",

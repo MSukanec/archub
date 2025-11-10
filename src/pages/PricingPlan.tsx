@@ -51,7 +51,6 @@ export default function PricingPlan() {
         setPlans(mainPlans);
         setEnterprisePlan(enterprise || null);
       } catch (error) {
-        console.error('Error fetching plans:', error);
       } finally {
         setIsLoading(false);
       }

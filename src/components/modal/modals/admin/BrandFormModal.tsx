@@ -78,7 +78,6 @@ export function BrandFormModal({ modalData, onClose }: BrandFormModalProps) {
       onClose()
       form.reset()
     } catch (error) {
-      console.error('Error saving brand:', error)
     } finally {
       setIsLoading(false)
     }

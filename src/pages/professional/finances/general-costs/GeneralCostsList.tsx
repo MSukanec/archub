@@ -182,7 +182,6 @@ export default function GeneralCostsList({ filterByCategory = 'all', filterBySta
   // Función para ver detalle
   const handleView = (id: string) => {
     // TODO: Implementar vista de detalle cuando esté disponible
-    console.log('Ver detalle de gasto general:', id);
   };
 
   // Configuración de las columnas de la tabla

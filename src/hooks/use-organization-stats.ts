@@ -69,7 +69,6 @@ export function useOrganizationStats() {
         financialMovementsLast30Days: Math.abs(totalMovements)
       }
       } catch (error) {
-        console.error('Error fetching organization stats:', error)
         // Return default values instead of throwing to avoid breaking the UI
         return {
           activeProjects: 0,
@@ -156,7 +155,6 @@ export function useOrganizationActivity() {
 
         return activityData
       } catch (error) {
-        console.error('Error fetching organization activity:', error)
         // Return empty array instead of throwing to avoid breaking the UI
         return []
       }

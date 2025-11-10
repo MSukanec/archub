@@ -31,7 +31,6 @@ export function useDesignDocumentFolders() {
         .order('name', { ascending: true });
 
       if (error) {
-        console.error('Error fetching design document folders:', error);
         return [];
       }
 

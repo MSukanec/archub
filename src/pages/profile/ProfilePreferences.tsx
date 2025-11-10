@@ -32,7 +32,6 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
   // Auto-save mutation for settings data
   const saveSettingsMutation = useMutation({
     mutationFn: async (data: typeof settingsData) => {
-      console.log('Saving settings data:', data)
       
       // Use the server endpoint to update preferences
       if (data.sidebarDocked !== userData?.preferences?.sidebar_docked ||
@@ -66,11 +65,9 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
       return data
     },
     onSuccess: () => {
-      console.log('Settings auto-save completed successfully')
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
     },
     onError: (error) => {
-      console.error('Settings auto-save error:', error)
       toast({
         title: "Error",
         description: "No se pudieron guardar las preferencias automáticamente.",

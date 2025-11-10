@@ -163,10 +163,6 @@ export function SubcontractBidFormModal({
         })
       };
 
-      console.log('Saving bid:', bidData);
-      console.log('UserData:', userData?.user?.id);
-      console.log('Members available:', members);
-      console.log('Member found:', members?.find((m: any) => m.user_id === userData?.user?.id));
 
       const response = await fetch('/api/subcontract-bids', {
         method: mode === 'create' ? 'POST' : 'PUT',
@@ -190,7 +186,6 @@ export function SubcontractBidFormModal({
       }
       onClose();
     } catch (error) {
-      console.error('Error saving bid:', error);
       toast({
         title: 'Error',
         description: 'No se pudo guardar la oferta',
@@ -428,7 +423,6 @@ export function SubcontractBidFormModal({
 
       setCurrentPanel('edit');
     } catch (error) {
-      console.error('Error saving bid tasks:', error);
       toast({
         title: "Error",
         description: "No se pudieron guardar las tareas",

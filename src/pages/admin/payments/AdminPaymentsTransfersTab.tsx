@@ -145,7 +145,6 @@ const AdminPaymentsTransfersTab = () => {
       });
     },
     onError: (error) => {
-      console.error('Error deleting transfer:', error);
       toast({
         title: 'Error al eliminar',
         description: 'No se pudo eliminar la transferencia. Por favor intenta nuevamente.',

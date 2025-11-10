@@ -24,7 +24,6 @@ async function processDisplayName(displayName: string, paramValues: any): Promis
     .in('name', paramValueIds);
   
   if (error) {
-    console.error("Error fetching parameter values:", error);
     return displayName;
   }
   
@@ -136,7 +135,6 @@ export function useTaskSearch(
       const { data: allTasks, error } = await query;
 
       if (error) {
-        console.error("Error searching tasks:", error);
         throw error;
       }
       
@@ -176,7 +174,6 @@ export function useTaskSearchFilterOptions(organizationId: string) {
         .limit(1000);
 
       if (error) {
-        console.error("Error fetching filter options:", error);
         throw error;
       }
 

@@ -767,9 +767,7 @@ function DocumentItem({ document, onDocumentSelect }: DocumentItemProps) {
       onConfirm: async () => {
         try {
           await deleteDocumentMutation.mutateAsync(document.id);
-          console.log('Documento eliminado exitosamente:', document.id);
         } catch (error) {
-          console.error('Error al eliminar documento:', error);
         }
       }
     });

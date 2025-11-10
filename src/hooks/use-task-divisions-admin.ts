@@ -45,7 +45,6 @@ export function useAllTaskDivisions() {
         .order('name');
 
       if (error) {
-        console.error('Error fetching all divisions:', error);
         throw error;
       }
 
@@ -106,7 +105,6 @@ export function useCreateTaskDivision() {
         .single();
 
       if (error) {
-        console.error('Error creating division:', error);
         throw error;
       }
 
@@ -121,7 +119,6 @@ export function useCreateTaskDivision() {
       });
     },
     onError: (error: any) => {
-      console.error('Create division error:', error);
       toast({
         title: "Error",
         description: "No se pudo crear la división. Inténtalo de nuevo.",
@@ -146,7 +143,6 @@ export function useUpdateTaskDivision() {
         .single();
 
       if (error) {
-        console.error('Error updating division:', error);
         throw error;
       }
 
@@ -161,7 +157,6 @@ export function useUpdateTaskDivision() {
       });
     },
     onError: (error: any) => {
-      console.error('Update division error:', error);
       toast({
         title: "Error",
         description: "No se pudo actualizar la división. Inténtalo de nuevo.",
@@ -184,7 +179,6 @@ export function useDeleteTaskDivision() {
         .eq('id', id);
 
       if (error) {
-        console.error('Error deleting division:', error);
         throw error;
       }
     },
@@ -197,7 +191,6 @@ export function useDeleteTaskDivision() {
       });
     },
     onError: (error: any) => {
-      console.error('Delete division error:', error);
       toast({
         title: "Error",
         description: "No se pudo eliminar la división. Inténtalo de nuevo.",
@@ -222,7 +215,6 @@ export function useUpdateTaskDivisionsOrder() {
           .eq('id', division.id);
 
         if (error) {
-          console.error('Error updating division order:', error);
           throw error;
         }
       });
@@ -239,7 +231,6 @@ export function useUpdateTaskDivisionsOrder() {
       });
     },
     onError: (error: any) => {
-      console.error('Update divisions order error:', error);
       toast({
         title: "Error",
         description: "No se pudo actualizar el orden de las divisiones. Inténtalo de nuevo.",

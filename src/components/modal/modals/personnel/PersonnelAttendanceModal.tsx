@@ -177,7 +177,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
       onClose()
     },
     onError: (error) => {
-      console.error('Error creating attendance:', error)
       toast({
         title: 'Error',
         description: 'No se pudo registrar la asistencia',
@@ -227,7 +226,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
       onClose()
     },
     onError: (error) => {
-      console.error('Error updating attendance:', error)
       toast({
         title: 'Error',
         description: 'No se pudo actualizar la asistencia',
@@ -266,7 +264,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
       onClose()
     },
     onError: (error) => {
-      console.error('Error deleting attendance:', error)
       toast({
         title: 'Error',
         description: 'No se pudo eliminar la asistencia',

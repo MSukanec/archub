@@ -167,7 +167,6 @@ export async function getCashflowTrend(
     const { data: allMovements, error } = (await query) as { data: MovementRow[] | null, error: any };
 
     if (error) {
-      console.error('Error fetching movements:', error);
       return `Error al buscar movimientos: ${error.message}`;
     }
 
@@ -309,7 +308,6 @@ export async function getCashflowTrend(
     return response;
 
   } catch (err) {
-    console.error('Unexpected error in getCashflowTrend:', err);
     return 'Error inesperado al analizar el flujo de efectivo. Por favor intenta nuevamente.';
   }
 }

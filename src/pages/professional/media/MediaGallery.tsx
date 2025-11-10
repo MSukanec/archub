@@ -48,7 +48,6 @@ export function MediaGallery() {
         .single();
       
       if (error) {
-        console.log('Project not found in current organization:', error);
         return null;
       }
       
@@ -62,12 +61,9 @@ export function MediaGallery() {
     queryKey: ['galleryFiles', userData?.organization?.id, currentProject?.id],
     queryFn: async () => {
       if (!userData?.organization?.id || !supabase) {
-        console.log('Fetching gallery files - missing data:', { orgId: userData?.organization?.id, supabase: !!supabase });
         return [];
       }
 
-      console.log('Fetching gallery files for project:', currentProject?.id);
-      console.log('Organization ID:', userData.organization.id);
 
       // Get organization files (visibility = 'organization')
       const orgQuery = supabase
@@ -135,7 +131,6 @@ export function MediaGallery() {
         // Sort by creation date (newest first)
         return allFiles.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       } catch (error) {
-        console.error('Error fetching gallery files:', error);
         throw error;
       }
     },
@@ -184,7 +179,6 @@ export function MediaGallery() {
         description: 'No se pudo eliminar el archivo',
         variant: 'destructive',
       });
-      console.error('Delete error:', error);
     },
   });
 

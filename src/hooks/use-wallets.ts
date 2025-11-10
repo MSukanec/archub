@@ -78,7 +78,6 @@ export function useWallets(organizationId: string | undefined) {
         wallets: walletDetails?.find(w => w.id === orgWallet.wallet_id)
       }))
 
-      console.log('Wallet hook debug:', { orgWallets, walletDetails, data })
       
       return data || []
     },

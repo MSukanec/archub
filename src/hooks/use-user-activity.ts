@@ -193,7 +193,6 @@ export function useUserActivity(organizationId: string | undefined, timePeriod: 
 
         return userActivityData
       } catch (error) {
-        console.error('Error fetching user activity:', error)
         return []
       }
     },

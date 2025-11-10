@@ -24,7 +24,6 @@ export function useSubcontracts(projectId: string | null) {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching subcontracts:', error);
         throw error;
       }
       
@@ -106,7 +105,6 @@ export function useCreateSubcontract() {
       });
     },
     onError: (error) => {
-      console.error('Error creating subcontract:', error);
       toast({
         title: "Error",
         description: "No se pudo crear el subcontrato",
@@ -175,7 +173,6 @@ export function useUpdateSubcontract() {
       });
     },
     onError: (error) => {
-      console.error('Error updating subcontract:', error);
       toast({
         title: "Error",
         description: "No se pudo actualizar el subcontrato",
@@ -208,7 +205,6 @@ export function useDeleteSubcontract() {
       });
     },
     onError: (error) => {
-      console.error('Error deleting subcontract:', error);
       toast({
         title: "Error",
         description: "No se pudo eliminar el subcontrato",

@@ -127,7 +127,6 @@ export function IndirectCostsModal({ modalData, onClose }: IndirectCostsModalPro
 
       onClose();
     } catch (error) {
-      console.error('Error submitting form:', error);
     }
   };
 

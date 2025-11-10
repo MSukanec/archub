@@ -118,7 +118,6 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
       });
     },
     onError: (error: any) => {
-      console.error('Error in saveCourseDataMutation:', error);
       toast({
         title: "Error al guardar",
         description: "No se pudieron guardar los cambios del curso",

@@ -20,7 +20,6 @@ const AdminCostCategories = () => {
 
   // Debug query state (only log errors)
   if (isError) {
-    console.error('❌ AdminMaterialCategories error:', error);
   }
 
   // Auto-expand categories that have children (only on initial load)
@@ -73,7 +72,6 @@ const AdminCostCategories = () => {
         try {
           await deleteMaterialCategoryMutation.mutateAsync(categoryId);
         } catch (error) {
-          console.error('Error deleting material category:', error);
         }
       },
       isLoading: deleteMaterialCategoryMutation.isPending,

@@ -28,7 +28,6 @@ export function NotificationBell({ isExpanded }: NotificationBellProps) {
       const count = await getUnreadCount(userId);
       setUnreadCount(count);
     } catch (error) {
-      console.error('Error fetching unread count:', error);
     }
   };
 

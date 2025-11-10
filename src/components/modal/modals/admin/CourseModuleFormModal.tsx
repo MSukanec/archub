@@ -110,7 +110,6 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       handleClose();
     },
     onError: (error: any) => {
-      console.error('Error creating module:', error);
       toast({
         title: 'Error',
         description: error.message || 'No se pudo crear el módulo. Inténtalo de nuevo.',
@@ -146,7 +145,6 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       handleClose();
     },
     onError: (error: any) => {
-      console.error('Error updating module:', error);
       toast({
         title: 'Error',
         description: error.message || 'No se pudo actualizar el módulo. Inténtalo de nuevo.',

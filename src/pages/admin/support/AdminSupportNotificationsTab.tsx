@@ -54,7 +54,6 @@ const AdminSupportNotificationsTab = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching notifications:', error);
         throw error;
       }
 
@@ -113,7 +112,6 @@ const AdminSupportNotificationsTab = () => {
           .eq('id', notification.id);
         
         if (error) {
-          console.error('Error deleting notification:', error);
           toast({
             title: 'Error',
             description: 'No se pudo eliminar la notificación.',

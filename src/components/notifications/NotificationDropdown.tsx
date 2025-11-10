@@ -31,7 +31,6 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
       const data = await fetchNotifications(userId, 30, 0);
       setNotifications(data);
     } catch (error) {
-      console.error('Error loading notifications:', error);
     } finally {
       setLoading(false);
     }
@@ -53,7 +52,6 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
       navigate(href);
       onClose();
     } catch (error) {
-      console.error('Error handling notification click:', error);
     }
   };
 
@@ -63,7 +61,6 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
       onRefresh();
       await loadNotifications();
     } catch (error) {
-      console.error('Error marking all as read:', error);
     }
   };
 

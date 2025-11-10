@@ -42,7 +42,6 @@ export async function getOrganizationInfo(
       .single();
 
     if (error) {
-      console.error('Error fetching organization:', error);
       return `Error al obtener información de la organización: ${error.message}`;
     }
 
@@ -153,7 +152,6 @@ export async function getOrganizationInfo(
     return response;
 
   } catch (err) {
-    console.error('Unexpected error in getOrganizationInfo:', err);
     return 'Error inesperado al obtener información de la organización. Por favor intenta nuevamente.';
   }
 }

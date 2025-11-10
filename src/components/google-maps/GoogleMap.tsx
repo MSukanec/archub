@@ -117,7 +117,6 @@ export function GoogleMap({
         infoWindow.open(map, marker);
       });
     } catch (error) {
-      console.error('Error initializing Google Map:', error);
       setMapError('Error al cargar el mapa');
     }
   }, [isLoaded, apiKey, markerTitle, draggable]);

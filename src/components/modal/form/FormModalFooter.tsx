@@ -166,7 +166,6 @@ export function FormModalFooter({
     
     // Prevenir double-submit rápido (dentro de 1 segundo)
     if (now - lastSubmitTime < 1000) {
-      console.warn('FormModalFooter: Double-submit prevented');
       return;
     }
     

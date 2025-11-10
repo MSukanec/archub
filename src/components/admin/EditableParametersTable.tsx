@@ -83,7 +83,6 @@ export function EditableParametersTable() {
         description: "No se pudo guardar el cambio. Inténtalo de nuevo.",
         variant: "destructive"
       })
-      console.error('Error updating parameter:', error)
     }
   })
 
@@ -458,7 +457,6 @@ export function EditableParametersTable() {
               className=""
               onClick={() => {
                 // TODO: Implementar duplicar
-                console.log('Duplicar parámetro:', param.id)
               }}
             >
               <Copy className="h-3 w-3" />
@@ -474,7 +472,6 @@ export function EditableParametersTable() {
                   itemName: param.label,
                   onConfirm: () => {
                     // TODO: Implementar eliminación
-                    console.log('Eliminar parámetro:', param.id)
                   }
                 })
               }}

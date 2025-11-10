@@ -88,7 +88,6 @@ export function useLessonFavorite({ lessonId, courseId, currentlyFavorite }: Use
         queryClient.setQueryData(['/api/courses', courseId, 'progress'], context.previousProgress);
       }
       
-      console.error('Error toggling favorite:', error);
       toast({
         title: "Error",
         description: error.message || "No se pudo marcar como favorito",

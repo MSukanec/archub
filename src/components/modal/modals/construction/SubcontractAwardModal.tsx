@@ -93,7 +93,6 @@ export function SubcontractAwardModal({
 
       onClose();
     } catch (error) {
-      console.error('Error awarding subcontract:', error);
       toast({
         title: "Error",
         description: error.message || "No se pudo adjudicar el subcontrato",

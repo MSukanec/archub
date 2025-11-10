@@ -96,7 +96,6 @@ export function MembersTab() {
         .order('joined_at', { ascending: false });
       
       if (error) {
-        console.error('Error fetching members:', error);
         throw error;
       }
       
@@ -136,7 +135,6 @@ export function MembersTab() {
         .order('created_at', { ascending: false });
       
       if (error) {
-        console.error('Error fetching invitations:', error);
         return [];
       }
       return data || [];

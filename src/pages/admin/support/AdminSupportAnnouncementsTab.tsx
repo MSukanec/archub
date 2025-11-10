@@ -33,7 +33,6 @@ const AdminSupportAnnouncementsTab = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching announcements:', error);
         throw error;
       }
 
@@ -72,7 +71,6 @@ const AdminSupportAnnouncementsTab = () => {
           .eq('id', announcement.id);
         
         if (error) {
-          console.error('Error deleting announcement:', error);
           toast({
             title: 'Error',
             description: 'No se pudo eliminar el anuncio.',

@@ -19,7 +19,6 @@ export function useAdminPermissions() {
         .eq('auth_id', userData.user.auth_id)
 
       if (error) {
-        console.error('Error checking admin permissions:', error)
         return { isAdmin: false, loading: false }
       }
 

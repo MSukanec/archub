@@ -148,7 +148,6 @@ export function NotificationFormModal({ modalData, onClose }: NotificationFormMo
       handleClose();
     },
     onError: (error) => {
-      console.error('Error creating notification:', error);
       toast({
         title: 'Error',
         description: 'No se pudo crear la notificación. Inténtalo de nuevo.',
@@ -188,7 +187,6 @@ export function NotificationFormModal({ modalData, onClose }: NotificationFormMo
       handleClose();
     },
     onError: (error) => {
-      console.error('Error updating notification:', error);
       toast({
         title: 'Error',
         description: 'No se pudo actualizar la notificación. Inténtalo de nuevo.',

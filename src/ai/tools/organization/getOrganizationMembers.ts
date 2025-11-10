@@ -48,7 +48,6 @@ export async function getOrganizationMembers(
     const { data: members, error } = await query;
 
     if (error) {
-      console.error('Error fetching organization members:', error);
       return `Error al buscar miembros de la organización: ${error.message}`;
     }
 
@@ -161,7 +160,6 @@ export async function getOrganizationMembers(
     return response.trim();
 
   } catch (err) {
-    console.error('Unexpected error in getOrganizationMembers:', err);
     return 'Error inesperado al buscar miembros. Por favor intenta nuevamente.';
   }
 }

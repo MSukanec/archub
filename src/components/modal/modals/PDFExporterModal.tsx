@@ -257,7 +257,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       const asPdf = pdf(pdfDoc);
       return await asPdf.toBlob();
     } catch (error) {
-      console.error('Error generating PDF:', error);
       throw error;
     }
   }, [blocks, sections, debouncedPdfConfig, debouncedFooterConfig, debouncedTableConfig, debouncedHeaderConfig, paymentPlanConfig]);
@@ -280,7 +279,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
         page: 1,
       }));
     } catch (error) {
-      console.error('Error loading PDF:', error);
       setState(prev => ({
         ...prev,
         loading: false,
@@ -315,7 +313,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       await page.render(renderContext).promise;
 
     } catch (error) {
-      console.error('Error rendering page:', error);
     }
   }, [state.pdfDoc, state.page, state.scale]);
 

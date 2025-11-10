@@ -193,7 +193,6 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
       handleClose();
     },
     onError: (error: any) => {
-      console.error('Error creating coupon:', error);
       toast({
         title: 'Error',
         description: error.message || 'No se pudo crear el cupón. Inténtalo de nuevo.',
@@ -221,7 +220,6 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
       handleClose();
     },
     onError: (error: any) => {
-      console.error('Error updating coupon:', error);
       toast({
         title: 'Error',
         description: error.message || 'No se pudo actualizar el cupón. Inténtalo de nuevo.',

@@ -33,7 +33,6 @@ export async function getProjectFinancialSummary(
       .eq('organization_id', organizationId)) as { data: MovementRow[] | null, error: any };
 
     if (error) {
-      console.error('Error fetching project movements:', error);
       return `Error al buscar movimientos del proyecto: ${error.message}`;
     }
 
@@ -123,7 +122,6 @@ export async function getProjectFinancialSummary(
     return response;
 
   } catch (err) {
-    console.error('Unexpected error in getProjectFinancialSummary:', err);
     return 'Error inesperado al generar el resumen del proyecto. Por favor intenta nuevamente.';
   }
 }

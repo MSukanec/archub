@@ -21,7 +21,6 @@ export function useMovementGeneralCosts(movementId: string | undefined) {
         .order('created_at', { ascending: false })
 
       if (error) {
-        console.error('Error fetching movement general costs:', error)
         throw error
       }
 
@@ -51,7 +50,6 @@ export function useCreateMovementGeneralCosts() {
         .select()
 
       if (error) {
-        console.error('Error creating movement general costs:', error)
         throw error
       }
 
@@ -66,7 +64,6 @@ export function useCreateMovementGeneralCosts() {
       }
     },
     onError: (error) => {
-      console.error('Error creating movement general costs:', error)
       toast({
         title: "Error",
         description: "No se pudieron guardar los gastos generales del movimiento",
@@ -99,7 +96,6 @@ export function useUpdateMovementGeneralCosts() {
         .eq('movement_id', movementId)
 
       if (deleteError) {
-        console.error('Error deleting existing movement general costs:', deleteError)
         throw deleteError
       }
 
@@ -114,7 +110,6 @@ export function useUpdateMovementGeneralCosts() {
         .select()
 
       if (error) {
-        console.error('Error inserting new movement general costs:', error)
         throw error
       }
 
@@ -126,7 +121,6 @@ export function useUpdateMovementGeneralCosts() {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
     },
     onError: (error) => {
-      console.error('Error updating movement general costs:', error)
       toast({
         title: "Error",
         description: "No se pudieron actualizar los gastos generales del movimiento",

@@ -111,7 +111,6 @@ export default function IndexedInstallmentPlan({
       })
     },
     onError: (error) => {
-      console.error('Error deleting payment plan:', error)
       toast({
         title: "Error",
         description: "No se pudo eliminar el plan de pagos. Inténtalo de nuevo.",
@@ -132,11 +131,9 @@ export default function IndexedInstallmentPlan({
         .order('number', { ascending: true })
 
       if (error) {
-        console.error('Error fetching installments:', error)
         throw error
       }
 
-      console.log('FRESH installments from DB:', data)
       return data as InstallmentData[]
     },
     enabled: !!projectId && !!organizationId,
@@ -162,7 +159,6 @@ export default function IndexedInstallmentPlan({
         .order('unit', { ascending: true })
 
       if (error) {
-        console.error('Error fetching commitments:', error)
         throw error
       }
 
@@ -185,7 +181,6 @@ export default function IndexedInstallmentPlan({
         .eq('organization_id', organizationId)
 
       if (error) {
-        console.error('Error fetching contacts info:', error)
         return []
       }
 
@@ -205,7 +200,6 @@ export default function IndexedInstallmentPlan({
         .eq('organization_id', organizationId)
 
       if (error) {
-        console.error('Error fetching payments from view:', error)
         throw error
       }
 

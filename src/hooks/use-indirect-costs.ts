@@ -55,7 +55,6 @@ export function useIndirectCosts(organizationId: string | null) {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching indirect costs:', error);
         throw error;
       }
       
@@ -148,7 +147,6 @@ export function useCreateIndirectCost() {
       });
     },
     onError: (error) => {
-      console.error('Error creating indirect cost:', error);
       toast({
         title: "Error",
         description: "No se pudo crear el costo indirecto",
@@ -211,7 +209,6 @@ export function useUpdateIndirectCost() {
       });
     },
     onError: (error) => {
-      console.error('Error updating indirect cost:', error);
       toast({
         title: "Error",
         description: "No se pudo actualizar el costo indirecto",
@@ -245,7 +242,6 @@ export function useDeleteIndirectCost() {
       });
     },
     onError: (error) => {
-      console.error('Error deleting indirect cost:', error);
       toast({
         title: "Error",
         description: "No se pudo eliminar el costo indirecto",

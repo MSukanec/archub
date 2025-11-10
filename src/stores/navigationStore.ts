@@ -29,7 +29,6 @@ export const useNavigationStore = create<NavigationState>((set) => ({
   // Project management
   setCurrentProject: (project: any) => {
     // Implementation for setting current project
-    console.log('Setting current project:', project)
   },
   // Estados para los niveles del sidebar
   sidebarLevel: 'general',

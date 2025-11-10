@@ -25,13 +25,10 @@ export function useProjectContextInit() {
     
     // Solo establecer si es diferente al valor actual del store
     if (userOrganizationId !== currentStoreOrgId) {
-      console.log("🔧 ProjectContextInit: Initializing organization context", userOrganizationId);
       try {
         setCurrentOrganization(userOrganizationId);
         lastInitializedOrgRef.current = userOrganizationId;
-        console.log("🔧 ProjectContextInit: Successfully set organization");
       } catch (error) {
-        console.error("🔧 ProjectContextInit: Error setting organization:", error);
       }
     } else {
       // Actualizar ref aún si no se establece, para evitar checks repetidos

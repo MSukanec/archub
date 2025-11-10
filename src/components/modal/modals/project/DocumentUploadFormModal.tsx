@@ -212,7 +212,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
         description: `${selectedFiles.length > 1 ? 'Documentos subidos' : 'Documento subido'} correctamente`,
       });
       // Invalidate all document-related queries
-      console.log('Invalidating cache queries after document upload');
       queryClient.invalidateQueries({ queryKey: ['design-documents'] });
       queryClient.invalidateQueries({ queryKey: ['design-documents-folder'] });
       queryClient.invalidateQueries({ queryKey: ['design-document-folders'] });

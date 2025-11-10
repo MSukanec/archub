@@ -136,7 +136,6 @@ export function HierarchicalTree({
             shouldBeBefore = mouseY < beforeThreshold;
           }
           
-          console.log('🔧 First item detection:', {
             mouseY,
             elementTop,
             elementHeight,
@@ -182,7 +181,6 @@ export function HierarchicalTree({
 
     // Handle parent-child relationship change
     if (currentDropPosition === 'child' && onParentChange) {
-      console.log('Making', active.id, 'child of', over.id);
       onParentChange(active.id as string, over.id as string);
       return;
     }
@@ -203,7 +201,6 @@ export function HierarchicalTree({
       // Clamp to valid range
       newIndex = Math.max(0, Math.min(newIndex, categories.length));
       
-      console.log('Reordering:', { 
         oldIndex, 
         targetIndex, 
         newIndex, 
@@ -227,7 +224,6 @@ export function HierarchicalTree({
           order: index + 1
         }));
         
-        console.log('New order:', reorderedWithOrder.map(c => ({ id: c.id, name: c.name, order: c.order })));
         onReorder(reorderedWithOrder);
       }
     }

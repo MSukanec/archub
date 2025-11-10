@@ -425,13 +425,11 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           });
           
           if (checklistError) {
-            console.error('Error updating home checklist:', checklistError);
           }
           
           // Solo invalidar current-user si se marcó checklist
           queryClient.invalidateQueries({ queryKey: ['current-user'] });
         } catch (error) {
-          console.error('Error calling tick_home_checklist:', error);
         }
       }
 

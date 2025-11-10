@@ -23,13 +23,11 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
   const { data: subcontractBids = [], isLoading, refetch } = useQuery({
     queryKey: ['subcontract-bids', subcontract?.id],
     queryFn: async () => {
-      console.log('Fetching bids for subcontract:', subcontract.id);
       const response = await fetch(`/api/subcontract-bids/${subcontract.id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch bids');
       }
       const data = await response.json();
-      console.log('Bids fetched:', data);
       return data;
     },
     enabled: !!subcontract?.id,
@@ -40,7 +38,6 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
 
   // Invalidar cache después de cambios
   const invalidateBids = () => {
-    console.log('Invalidating bids cache for:', subcontract?.id);
     queryClient.invalidateQueries({ queryKey: ['subcontract-bids', subcontract?.id] });
     // También forzar refetch inmediato
     refetch();
@@ -82,10 +79,8 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
           if (response.ok) {
             invalidateBids(); // Refresh the list
           } else {
-            console.error('Error deleting bid');
           }
         } catch (error) {
-          console.error('Error deleting bid:', error);
         }
       }
     });
@@ -93,7 +88,6 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
 
   const handleViewBid = (bid: any) => {
     // TODO: Implementar vista detallada de oferta
-    console.log('View bid:', bid.id);
   };
 
   const handleSelectWinner = (bid: any) => {

@@ -59,7 +59,6 @@ export function IndirectPayments({ projectId, organizationId }: IndirectPayments
         .order('movement(movement_date)', { ascending: false })
 
       if (error) {
-        console.error('Error fetching indirect payments:', error)
         throw error
       }
 

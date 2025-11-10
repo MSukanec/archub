@@ -68,7 +68,6 @@ export default function VimeoPlayer({ vimeoId, initialPosition = 0, onProgress, 
           }
         })
         .catch((error) => {
-          console.error('❌ Error al cargar video Vimeo:', error);
         });
     }
     // If same video but position changed significantly, seek
@@ -81,7 +80,6 @@ export default function VimeoPlayer({ vimeoId, initialPosition = 0, onProgress, 
           onSeekApplied?.();
         })
         .catch((error) => {
-          console.error('❌ Error al actualizar posición:', error);
         });
     }
   }, [vimeoId, initialPosition]);

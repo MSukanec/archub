@@ -111,7 +111,6 @@ export function ContactAttachmentsPanel({ contactId, contact, showUpload = true 
             description: `${file.name} se ha subido correctamente`,
           });
         } catch (error) {
-          console.error('Error al subir archivo:', error);
           toast({
             title: "Error",
             description: `No se pudo subir ${file.name}`,
@@ -181,7 +180,6 @@ export function ContactAttachmentsPanel({ contactId, contact, showUpload = true 
           attachmentId: '' // o null según tu implementación
         });
       } catch (error) {
-        console.error('Error removing avatar:', error);
       }
     }
 

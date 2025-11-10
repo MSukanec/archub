@@ -61,7 +61,6 @@ function DependencyNode({ node, level }: DependencyNodeProps) {
             className=""
             onClick={() => {
               // TODO: Implementar modal para crear dependencia
-              console.log('Crear dependencia para:', node.parameterId)
             }}
           >
             <Plus className="h-3 w-3" />
@@ -127,7 +126,6 @@ function DependencyConnection({ dependency, level }: DependencyConnectionProps) 
             className=""
             onClick={() => {
               // TODO: Implementar modal para editar dependencia
-              console.log('Editar dependencia:', dependency.dependencyId)
             }}
           >
             <Edit className="h-3 w-3" />
@@ -143,7 +141,6 @@ function DependencyConnection({ dependency, level }: DependencyConnectionProps) 
                 itemName: `${dependency.parentOptionLabel} → ${dependency.childParameter.label}`,
                 onConfirm: () => {
                   // TODO: Implementar eliminación de dependencia
-                  console.log('Eliminar dependencia:', dependency.dependencyId)
                 }
               })
             }}

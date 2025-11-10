@@ -113,7 +113,6 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
         }
       }
     } catch (error) {
-      console.error('Error loading AI history:', error);
     } finally {
       setIsLoadingHistory(false);
     }
@@ -134,7 +133,6 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
       try {
         sessionStorage.setItem(getSessionKey(), 'true');
       } catch (error) {
-        console.error('Error saving to sessionStorage:', error);
       }
       setIsLoadingHistory(false);
     }
@@ -181,7 +179,6 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
       
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error: any) {
-      console.error('Error sending message:', error);
       
       // Mostrar error como mensaje de la IA
       const errorMessage: ChatMessage = {

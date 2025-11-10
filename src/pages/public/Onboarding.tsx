@@ -93,7 +93,6 @@ export default function Onboarding() {
         .eq('user_id', userId);
 
       if (preferencesError) {
-        console.error('Error updating user preferences:', preferencesError);
         throw preferencesError;
       }
 
@@ -149,7 +148,6 @@ export default function Onboarding() {
       resetOnboarding();
     },
     onError: (error) => {
-      console.error('Error saving onboarding data:', error);
       toast({
         variant: "destructive",
         title: "Error",

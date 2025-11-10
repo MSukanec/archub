@@ -102,7 +102,6 @@ export default function ClientInstallment({ modalData, onClose }: ClientInstallm
           .select()
 
         if (error) {
-          console.error('Error updating installment:', error)
           throw new Error('Error actualizando la cuota: ' + error.message)
         }
 
@@ -115,7 +114,6 @@ export default function ClientInstallment({ modalData, onClose }: ClientInstallm
           .select()
 
         if (error) {
-          console.error('Error creating installment:', error)
           throw new Error('Error creando la cuota: ' + error.message)
         }
 

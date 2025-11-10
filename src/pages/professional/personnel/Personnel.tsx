@@ -30,14 +30,12 @@ export default function Personnel() {
         .eq('id', personnelId)
 
       if (error) {
-        console.error('Error deleting personnel:', error)
         return
       }
 
       queryClient.invalidateQueries({ queryKey: ['project-personnel', selectedProjectId] })
       queryClient.invalidateQueries({ queryKey: ['attendance-data'] })
     } catch (error) {
-      console.error('Error deleting personnel:', error)
     }
   }
 

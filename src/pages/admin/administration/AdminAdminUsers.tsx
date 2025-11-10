@@ -174,7 +174,6 @@ const AdminAdminUsers = () => {
       setDeletingUser(null)
     },
     onError: (error) => {
-      console.error('Error deleting user:', error)
       toast({
         title: 'Error',
         description: 'No se pudo desactivar el usuario.',

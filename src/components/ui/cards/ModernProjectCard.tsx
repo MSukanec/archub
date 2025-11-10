@@ -45,7 +45,6 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
           label: "Favorito",
           icon: <Star className="w-4 h-4" />,
           onClick: () => {
-            console.log('Toggle favorite for project:', project.id);
           }
         },
         {

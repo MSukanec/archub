@@ -144,7 +144,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         .eq('site_log_id', siteLogId);
 
       if (error) {
-        console.error('Error fetching site log files:', error);
         return [];
       }
       
@@ -296,7 +295,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
             siteLogId: savedSiteLog.id 
           });
         } catch (error) {
-          console.error('Error uploading files:', error);
           // No hacer throw aquí para no fallar todo el proceso
         }
       }

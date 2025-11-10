@@ -140,7 +140,6 @@ export default function Home() {
         setIsLoadingGreeting(false);
 
       } catch (err: any) {
-        console.error('Error loading data:', err);
         setError(err.message || "Error al cargar los datos");
         setIsLoadingHistory(false);
         setIsLoadingGreeting(false);
@@ -238,7 +237,6 @@ export default function Home() {
       setHasActiveConversation(true);
       
     } catch (err: any) {
-      console.error('Error sending message:', err);
       // No agregamos mensaje al historial para mantenerlo limpio
       // El error ya se registró en la consola para debugging
     } finally {

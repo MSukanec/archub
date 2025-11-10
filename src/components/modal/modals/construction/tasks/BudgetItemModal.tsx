@@ -102,7 +102,6 @@ export function BudgetItemModal({
   ];
 
   // Debug: Log modalData al inicializar
-  console.log('🔧 BudgetItemModal - modalData received:', modalData);
 
   // Calcular costo de Archub (materiales + mano de obra por unidad)
   const archubUnitCost = useMemo(() => {
@@ -161,7 +160,6 @@ export function BudgetItemModal({
             organization_id: modalData.organizationId
           };
         }
-        console.error('❌ Error obteniendo membresía de organización:', error);
         return null;
       }
       
@@ -185,11 +183,9 @@ export function BudgetItemModal({
         .order('custom_name', { ascending: true });
       
       if (error) {
-        console.error('❌ Error cargando librería de tareas:', error);
         throw error;
       }
       
-      console.log('📋 Loaded tasks from TASKS_VIEW:', allTasks?.length, 'tasks (Sistema + Organización)');
       return allTasks || [];
     },
     enabled: !!supabase && !!modalData.organizationId
@@ -212,7 +208,6 @@ export function BudgetItemModal({
   // Si estamos editando, configurar los valores iniciales
   useEffect(() => {
     if (isEditing && modalData.editingTask) {
-      console.log('Loading task for editing:', modalData.editingTask);
       
       setSelectedTaskId(modalData.editingTask.task_id || '');
       
@@ -258,7 +253,6 @@ export function BudgetItemModal({
       .filter((rubro, index, self) => self.indexOf(rubro) === index)
       .sort();
     
-    console.log('🏗️ Unique rubros found:', rubros);
     return rubros;
   }, [tasks]);
 
@@ -348,7 +342,6 @@ export function BudgetItemModal({
       
       onClose();
     } catch (error) {
-      console.error('❌ Error al procesar tarea:', error);
     } finally {
       setIsSubmitting(false);
     }

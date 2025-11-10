@@ -130,7 +130,6 @@ export default function PersonnelListTab({
         `)
         .eq('project_id', selectedProjectId)
 
-      console.log('🔍 RAW PERSONNEL DATA:', JSON.stringify(data, null, 2))
       if (error) throw error
       
       // Helper para obtener nombre
@@ -152,7 +151,6 @@ export default function PersonnelListTab({
         return a.displayName.toLowerCase().localeCompare(b.displayName.toLowerCase())
       })
       
-      console.log('✅ PROCESSED PERSONNEL DATA (after sort):', JSON.stringify(sorted, null, 2))
       return sorted
     },
     enabled: !!selectedProjectId

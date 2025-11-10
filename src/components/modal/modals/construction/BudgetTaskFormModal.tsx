@@ -37,7 +37,6 @@ export function BudgetTaskFormModal({ modalData, onClose }: BudgetTaskFormModalP
       return;
     }
 
-    console.log('Adding tasks to budget:', budgetId, selectedTasks);
     
     // Convertir tareas seleccionadas al formato requerido por la base de datos
     const tasksToAdd = selectedTasks.map(task => ({
@@ -52,7 +51,6 @@ export function BudgetTaskFormModal({ modalData, onClose }: BudgetTaskFormModalP
       onSuccess?.();
       onClose();
     } catch (error) {
-      console.error('Error adding tasks:', error);
       // El error se maneja en el hook con toast
     }
   };

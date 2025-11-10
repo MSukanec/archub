@@ -32,7 +32,6 @@ const AdminGeneral = () => {
         return {
           label: "Nuevo Concepto",
           icon: Plus,
-          onClick: () => console.log('Crear nuevo concepto')
         };
     }
   };

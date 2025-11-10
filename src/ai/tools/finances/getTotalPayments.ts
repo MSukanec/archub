@@ -36,7 +36,6 @@ export async function getTotalPaymentsByContactAndProject(
       .eq('organization_id', organizationId)) as { data: MovementRow[] | null, error: any };
 
     if (error) {
-      console.error('Error fetching movements:', error);
       return `Error al buscar pagos: ${error.message}`;
     }
 
@@ -109,7 +108,6 @@ export async function getTotalPaymentsByContactAndProject(
     return `Le pagaste **${currency}${formattedTotal}** a **${matchedName}** en el proyecto **"${actualProjectName}"** (**${filteredMovements.length}** movimiento${filteredMovements.length > 1 ? 's' : ''})`;
 
   } catch (err) {
-    console.error('Unexpected error in getTotalPaymentsByContactAndProject:', err);
     return `Error inesperado al buscar pagos. Por favor intenta nuevamente.`;
   }
 }

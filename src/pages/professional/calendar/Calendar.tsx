@@ -142,7 +142,6 @@ function CalendarContent() {
         boardId: currentBoardId
       });
     } catch (error) {
-      console.error('Error moving card:', error);
     }
   };
 

@@ -68,7 +68,6 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
         .single();
         
       if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
-        console.error('Error fetching project data:', error);
         throw error;
       }
       
@@ -90,7 +89,6 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
         .single();
         
       if (error) {
-        console.error('Error fetching project info:', error);
         throw error;
       }
       
@@ -110,7 +108,6 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
         .eq('id', activeProjectId);
 
       if (error) {
-        console.error('Error updating project color:', error);
         throw error;
       }
     },
@@ -120,7 +117,6 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       queryClient.invalidateQueries({ queryKey: ['project-color', activeProjectId] });
     },
     onError: (error: any) => {
-      console.error('Error in saveProjectColorMutation:', error);
       toast({
         title: "Error al guardar",
         description: "No se pudo guardar el color del proyecto",
@@ -147,7 +143,6 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
           .eq('id', activeProjectId);
 
         if (projectError) {
-          console.error('Error updating project:', projectError);
           throw projectError;
         }
       }
@@ -169,7 +164,6 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
         });
 
       if (error) {
-        console.error('Error saving project data:', error);
         throw error;
       }
     },
@@ -183,7 +177,6 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       });
     },
     onError: (error: any) => {
-      console.error('Error in saveProjectDataMutation:', error);
       toast({
         title: "Error al guardar",
         description: "No se pudieron guardar los cambios del proyecto",

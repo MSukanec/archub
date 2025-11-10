@@ -134,7 +134,6 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
         });
       }
     } catch (error) {
-      console.error('Error saving card:', error);
       toast({
         title: "Error",
         description: isEditing ? "No se pudo actualizar la tarjeta" : "No se pudo crear la tarjeta",

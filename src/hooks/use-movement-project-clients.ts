@@ -51,7 +51,6 @@ export function useMovementProjectClients(movementId?: string) {
         return []
       }
 
-      console.log('🔍 Fetching movement project client assignments for movement:', movementId)
 
       // Use MOVEMENT_PAYMENTS_VIEW for simplified queries
       const { data, error } = await supabase
@@ -59,10 +58,8 @@ export function useMovementProjectClients(movementId?: string) {
         .select('*')
         .eq('movement_id', movementId)
 
-      console.log('📊 Movement project client assignments query result:', { data, error, count: data?.length || 0 })
 
       if (error) {
-        console.error('❌ Error fetching movement project client assignments:', error)
         throw error
       }
 
@@ -114,7 +111,6 @@ export function useCreateMovementProjectClients() {
         throw new Error('No assignments provided')
       }
 
-      console.log('💾 Creating movement project client assignments:', assignments.length)
 
       const { data, error } = await supabase
         .from('movement_clients')
@@ -125,11 +121,9 @@ export function useCreateMovementProjectClients() {
         .select()
 
       if (error) {
-        console.error('❌ Error creating movement project client assignments:', error)
         throw error
       }
 
-      console.log('✅ Movement project client assignments created successfully:', data?.length || 0)
       return data
     },
     onSuccess: (data, variables) => {
@@ -156,7 +150,6 @@ export function useUpdateMovementProjectClients() {
         throw new Error('Missing required parameters')
       }
 
-      console.log('🔄 Updating movement project client assignments for movement:', movementId)
 
       // Primero eliminamos todas las asignaciones existentes
       const { error: deleteError } = await supabase
@@ -165,11 +158,9 @@ export function useUpdateMovementProjectClients() {
         .eq('movement_id', movementId)
 
       if (deleteError) {
-        console.error('❌ Error deleting existing movement project client assignments:', deleteError)
         throw deleteError
       }
 
-      console.log('🗑️ Existing movement project client assignments deleted')
 
       // Si hay nuevas asignaciones, las creamos
       if (assignments.length > 0) {
@@ -183,15 +174,12 @@ export function useUpdateMovementProjectClients() {
           .select()
 
         if (error) {
-          console.error('❌ Error creating new movement project client assignments:', error)
           throw error
         }
 
-        console.log('✅ New movement project client assignments created:', data?.length || 0)
         return data
       }
 
-      console.log('✅ Movement project client assignments updated (no new assignments)')
       return []
     },
     onSuccess: (data, variables) => {

@@ -159,7 +159,6 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
       onClose()
     },
     onError: (error) => {
-      console.error('Error updating personnel:', error)
       toast({
         title: 'Error',
         description: 'No se pudo actualizar la información del personal',

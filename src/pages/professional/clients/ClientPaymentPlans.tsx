@@ -27,7 +27,6 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
 
   const handleDeleteInstallment = (installment: any) => {
     // Could open a confirmation modal or handle deletion directly
-    console.log('Delete installment:', installment)
   }
 
   // Fetch installments to check if any exist
@@ -44,7 +43,6 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
         .order('number', { ascending: true })
 
       if (error) {
-        console.error('Error fetching installments:', error)
         throw error
       }
 
@@ -84,7 +82,6 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
           // No rows found - no payment plan exists
           return null
         }
-        console.error('Error fetching payment plan:', error)
         return null
       }
 

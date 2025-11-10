@@ -75,7 +75,6 @@ export function useSaveDependencyOptions() {
       });
     },
     onError: (error) => {
-      console.error('Error saving dependency options:', error);
       toast({
         title: "Error",
         description: "No se pudo guardar la configuración de visibilidad.",

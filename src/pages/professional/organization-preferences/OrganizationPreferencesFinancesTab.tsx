@@ -114,7 +114,6 @@ export function FinancesTab({}: FinancesTabProps) {
 
   const saveDefaultWalletMutation = useMutation({
     mutationFn: async (walletId: string) => {
-      console.log('🔧 SaveDefaultWallet: Starting mutation', { 
         walletId, 
         organizationId: userData?.organization?.id,
         currentOrganizationWallets: organizationWallets?.length || 0
@@ -135,7 +134,6 @@ export function FinancesTab({}: FinancesTabProps) {
         .eq('organization_id', userData.organization.id)
         .eq('is_default', true);
       
-      console.log('🔧 Step 1 - Reset existing default wallets:', { updateError });
       if (updateError) throw updateError;
 
       // Paso 2: Encender la nueva billetera como default usando upsert
@@ -149,18 +147,14 @@ export function FinancesTab({}: FinancesTabProps) {
         }, { onConflict: 'organization_id,wallet_id' })
         .select();
 
-      console.log('🔧 Step 2 - Upsert new default wallet:', { upsertData, upsertError });
       if (upsertError) throw upsertError;
 
-      console.log('🔧 SaveDefaultWallet: Mutation completed successfully');
     },
     onSuccess: () => {
-      console.log('🔧 SaveDefaultWallet: Success callback triggered');
       toast({ title: 'Billetera por defecto actualizada', description: 'La configuración se ha guardado exitosamente.' });
       queryClient.invalidateQueries({ queryKey: ['organizationWallets', userData?.organization?.id] });
     },
     onError: (error) => {
-      console.error('🔧 SaveDefaultWallet: Error occurred:', error);
       const errorMessage = error instanceof Error ? error.message : 'No se pudo actualizar la billetera por defecto.';
       toast({ 
         title: 'Error al actualizar billetera', 

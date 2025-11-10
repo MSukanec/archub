@@ -163,7 +163,6 @@ export function CourseFormModal({ modalData, onClose }: CourseFormModalProps) {
       handleClose();
     },
     onError: (error: any) => {
-      console.error('Error creating course:', error);
       toast({
         title: 'Error',
         description: error.message || 'No se pudo crear el curso. Inténtalo de nuevo.',
@@ -201,7 +200,6 @@ export function CourseFormModal({ modalData, onClose }: CourseFormModalProps) {
       handleClose();
     },
     onError: (error: any) => {
-      console.error('Error updating course:', error);
       toast({
         title: 'Error',
         description: error.message || 'No se pudo actualizar el curso. Inténtalo de nuevo.',

@@ -60,7 +60,6 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
   // Mutation para cambiar organización activa
   const switchOrganization = useMutation({
     mutationFn: async (organizationId: string) => {
-      console.log('🔄 [UserQuickAccess] Switching to organization:', organizationId);
       const { data, error } = await supabase
         .from('user_preferences')
         .update({ last_organization_id: organizationId })
@@ -68,10 +67,8 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
         .select();
       
       if (error) {
-        console.error('❌ [UserQuickAccess] Error switching organization:', error);
         throw error;
       }
-      console.log('✅ [UserQuickAccess] Organization switch successful:', data);
       return data;
     },
     onSuccess: () => {
@@ -86,7 +83,6 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
       setOrgSelectorOpen(false);
     },
     onError: (error: any) => {
-      console.error('❌ [UserQuickAccess] Organization switch error:', error);
       toast({
         title: "Error",
         description: error.message || "No se pudo cambiar la organización.",
@@ -98,12 +94,10 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
   const handleOrgChange = (orgId: string) => {
     // No hacer nada si ya está seleccionada la misma organización
     if (orgId === currentOrganizationId) {
-      console.log('🔄 [UserQuickAccess] Organization already selected:', orgId);
       setOrgSelectorOpen(false);
       return;
     }
     
-    console.log('🔄 [UserQuickAccess] Selecting organization:', orgId, 'Current:', currentOrganizationId);
     switchOrganization.mutate(orgId);
   };
 
@@ -122,7 +116,6 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
       await useAuthStore.getState().logout();
       navigate('/login');
     } catch (error) {
-      console.error('Logout error:', error);
     }
   };
 

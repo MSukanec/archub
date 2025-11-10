@@ -100,15 +100,12 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
   // Debug logs para verificar los datos de edición
   useEffect(() => {
     if (isEditing && editingClient) {
-      console.log('🔍 ClientObligationModal: Editing client data:', editingClient)
-      console.log('🔍 ClientObligationModal: exchange_rate value:', editingClient.exchange_rate)
     }
   }, [isEditing, editingClient])
 
   // Reinicializar formulario cuando se está editando
   useEffect(() => {
     if (isEditing && editingClient) {
-      console.log('🔄 ClientObligationModal: Reinicializando formulario con:', {
         client_id: editingClient.client_id,
         unit: editingClient.unit,
         currency_id: editingClient.currency_id,

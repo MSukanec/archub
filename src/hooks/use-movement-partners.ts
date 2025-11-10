@@ -54,7 +54,6 @@ export function useMovementPartners(movementId?: string) {
         .eq('movement_id', movementId)
 
       if (error) {
-        console.error('Error fetching movement partners:', error)
         throw error
       }
 
@@ -94,7 +93,6 @@ export function useAllMovementPartners(organizationId?: string, movementIds?: st
         .in('movement_id', movementIds)
 
       if (error) {
-        console.error('Error fetching all movement partners:', error)
         throw error
       }
 
@@ -137,7 +135,6 @@ export function useCreateMovementPartners() {
       // No mostrar toast aquí - el componente padre maneja las notificaciones
     },
     onError: (error) => {
-      console.error('Error creating movement partners:', error)
       toast({
         variant: 'destructive',
         title: 'Error',
@@ -192,7 +189,6 @@ export function useUpdateMovementPartners() {
       // No mostrar toast aquí - el componente padre maneja las notificaciones
     },
     onError: (error) => {
-      console.error('Error updating movement partners:', error)
       toast({
         variant: 'destructive',
         title: 'Error',

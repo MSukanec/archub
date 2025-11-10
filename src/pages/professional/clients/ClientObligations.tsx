@@ -65,7 +65,6 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         .order('created_at', { ascending: false })
 
       if (error) {
-        console.error('Error fetching project clients:', error)
         throw error
       }
 
@@ -90,7 +89,6 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         .order('movement_date', { ascending: false })
 
       if (error) {
-        console.error('Error fetching installments:', error)
         throw error
       }
 

@@ -175,7 +175,6 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
       onClose();
     },
     onError: (error) => {
-      console.error('Error saving budget:', error);
       toast({
         title: "Error",
         description: isEditing 

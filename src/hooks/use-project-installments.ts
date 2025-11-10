@@ -22,11 +22,9 @@ export function useProjectInstallments(projectId?: string, options?: { enabled?:
     queryKey: ['project-installments', projectId],
     queryFn: async (): Promise<ProjectInstallment[]> => {
       if (!supabase || !projectId || !organizationId) {
-        console.log('useProjectInstallments - Missing parameters:', { supabase: !!supabase, projectId, organizationId })
         throw new Error('Missing required parameters')
       }
       
-      console.log('useProjectInstallments - Fetching with:', { projectId, organizationId })
       
       const { data, error } = await supabase
         .from('project_installments')
@@ -35,10 +33,8 @@ export function useProjectInstallments(projectId?: string, options?: { enabled?:
         .eq('organization_id', organizationId)
         .order('number', { ascending: true })
 
-      console.log('useProjectInstallments - Query result:', { data, error, count: data?.length || 0 })
       
       if (error) {
-        console.error('useProjectInstallments - Query error:', error)
         throw error
       }
       
