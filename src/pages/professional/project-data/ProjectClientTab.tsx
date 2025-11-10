@@ -152,7 +152,7 @@ export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
             <>
               Agrega clientes para gestionar la información del proyecto. Recuerda que un cliente, antes debe ser un{' '}
               <Link 
-                href="/app/contacts" 
+                href="/contacts" 
                 className="hover:underline font-bold"
                 style={{ color: 'var(--accent)' }}
               >

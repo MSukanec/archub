@@ -151,7 +151,7 @@ export function Sidebar() {
         { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials', restricted: 'coming_soon' },
         { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'coming_soon' },
         { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts', restricted: 'coming_soon' },
-        { id: 'logs', label: 'Bitácora', icon: History, href: '/construction/logs', restricted: 'coming_soon' },
+        { id: 'logs', label: 'Bitácora de Obra', icon: History, href: '/construction/logs', restricted: 'coming_soon' },
         { id: 'clients', label: 'Clientes', icon: Users, href: '/clients', restricted: 'coming_soon' },
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
@@ -773,9 +773,7 @@ export function Sidebar() {
                     if (item.id === 'analysis') return { show: true, text: 'Finanzas' };
                     if (item.id === 'activity') return { show: true, text: 'Organización' };
                   } else if (sidebarLevel === 'project') {
-                    if (item.id === 'dashboard') return { show: true, text: 'Planificación' };
-                    if (item.id === 'basic-data') return { show: true, text: 'Recursos' };
-                    if (item.id === 'subcontracts') return { show: true, text: 'Ejecución' };
+                    if (item.id === 'basic-data') return { show: true, text: 'Dirección y Construcción' };
                     if (item.id === 'logs') return { show: true, text: 'Comercialización' };
                   } else if (sidebarLevel === 'learning') {
                     if (item.id === 'dashboard') return { show: true, text: 'Capacitaciones' };

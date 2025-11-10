@@ -283,7 +283,7 @@ export default function Logs() {
 
   const headerProps = {
     icon: FileText,
-    title: "Bitácora",
+    title: "Bitácora de Obra",
     organizationId,
     showMembers: true,
     tabs: headerTabs,
