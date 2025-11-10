@@ -813,28 +813,39 @@ export function Sidebar() {
                         const section = navItem.section;
                         
                         return (
-                          <AccordionItem key={section.id} value={section.id} className="border-none mb-0">
+                          <AccordionItem key={section.id} value={section.id} className="border-none mb-[2px]">
                             <AccordionTrigger 
-                              className={cn(
-                                "h-8 rounded transition-all duration-200 ease-out overflow-hidden",
-                                "text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)]",
-                                "hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]",
-                                "py-0 px-0",
-                                "[&[data-state=open]>svg]:rotate-180"
-                              )}
+                              asChild
+                              className="border-none p-0 hover:no-underline [&[data-state=open]>span:last-child]:rotate-180"
                             >
-                              <div className="flex items-center flex-1">
-                                <span className="flex-shrink-0 w-8 flex items-center justify-center">
-                                  <span className="transition-colors duration-200 text-[var(--main-sidebar-button-fg)] hover:text-[var(--accent)]">
+                              <button
+                                className={cn(
+                                  "flex items-center h-8 transition-all duration-200 ease-out overflow-hidden rounded border-none",
+                                  isExpanded ? "w-full" : "w-8",
+                                  "text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)]",
+                                  "hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]",
+                                  "group"
+                                )}
+                              >
+                                <span className="flex-shrink-0 w-8 flex items-center justify-center transition-colors duration-200 relative">
+                                  <span className={cn(
+                                    "transition-colors duration-200",
+                                    "text-[var(--main-sidebar-button-fg)] group-hover:text-[var(--accent)]"
+                                  )}>
                                     <section.icon className="w-[18px] h-[18px]" />
                                   </span>
                                 </span>
                                 {isExpanded && (
-                                  <span className="text-xs whitespace-nowrap text-left flex items-center justify-start flex-1 pr-2 text-current ml-3 font-normal">
-                                    {section.label}
-                                  </span>
+                                  <>
+                                    <span className="text-xs whitespace-nowrap text-left flex items-center justify-start flex-1 pr-2 text-current ml-3 font-normal">
+                                      {section.label}
+                                    </span>
+                                    <span className="transition-transform duration-200 mr-2 flex-shrink-0">
+                                      <ChevronDown className="h-4 w-4" />
+                                    </span>
+                                  </>
                                 )}
-                              </div>
+                              </button>
                             </AccordionTrigger>
                             <AccordionContent className="px-0 py-1">
                               <div className="flex flex-col gap-[2px]">
