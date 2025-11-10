@@ -1,16 +1,28 @@
-import { useState, useEffect } from 'react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
-import { supabase } from '@/lib/supabase'
-import { useDebouncedAutoSave } from '@/components/save'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import { Users } from 'lucide-react'
+import { apiRequest } from '@/lib/queryClient'
+import { Users, Plus, Edit, Trash2 } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
+import { Table } from '@/components/ui-custom/tables-and-trees/Table'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
 interface ProjectClientTabProps {
   projectId?: string;
+}
+
+interface ProjectClient {
+  id: string;
+  client_id: string;
+  unit: string | null;
+  contacts: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+  } | null;
 }
 
 export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
@@ -18,96 +30,57 @@ export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId } = useProjectContext();
+  const { openModal } = useGlobalModalStore();
   
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
 
-  // Form states - Client
-  const [clientName, setClientName] = useState('')
-  const [contactPhone, setContactPhone] = useState('')
-  const [email, setEmail] = useState('')
-
-  // Get project data for client fields
-  const { data: projectData, isSuccess: projectDataSuccess } = useQuery({
-    queryKey: ['project-data', activeProjectId],
-    queryFn: async () => {
-      if (!activeProjectId || !supabase) return null;
-
-      const { data, error } = await supabase
-        .from('project_data')
-        .select('*')
-        .eq('project_id', activeProjectId)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching project data:', error);
-        throw error;
-      }
-
-      return data;
-    },
-    enabled: !!activeProjectId && !!supabase
+  // Query to get project clients
+  const { data: projectClients = [], isLoading } = useQuery<ProjectClient[]>({
+    queryKey: [`/api/projects/${activeProjectId}/clients?organization_id=${organizationId}`],
+    enabled: !!activeProjectId && !!organizationId
   });
 
-  // Auto-save mutation for project client data
-  const saveProjectClientMutation = useMutation({
-    mutationFn: async (dataToSave: any) => {
-      if (!activeProjectId || !supabase) return;
+  // Delete mutation
+  const deleteClientMutation = useMutation({
+    mutationFn: async (clientId: string) => {
+      if (!activeProjectId || !organizationId) return;
 
-      // Use upsert to avoid race conditions
-      const { error } = await supabase
-        .from('project_data')
-        .upsert({
-          project_id: activeProjectId,
-          organization_id: organizationId,
-          ...dataToSave
-        }, {
-          onConflict: 'project_id'
-        });
-
-      if (error) {
-        console.error('Error saving project client data:', error);
-        throw error;
-      }
+      await apiRequest('DELETE', `/api/projects/${activeProjectId}/clients/${clientId}?organization_id=${organizationId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project-data', activeProjectId] });
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${activeProjectId}/clients?organization_id=${organizationId}`] });
       toast({
-        title: "Cambios guardados",
-        description: "Los datos del cliente se han guardado automáticamente"
+        title: 'Cliente eliminado',
+        description: 'El cliente ha sido eliminado del proyecto correctamente',
       });
     },
     onError: (error: any) => {
-      console.error('Error in saveProjectClientMutation:', error);
       toast({
-        title: "Error al guardar",
-        description: "No se pudieron guardar los cambios del cliente",
-        variant: "destructive"
+        title: 'Error al eliminar cliente',
+        description: error.message,
+        variant: 'destructive',
       });
-    }
-  });
-
-  // Auto-save hook - enabled only when userData is loaded AND project data has been fetched
-  const { isSaving } = useDebouncedAutoSave({
-    data: {
-      client_name: clientName,
-      contact_phone: contactPhone,
-      email: email
     },
-    saveFn: (data) => saveProjectClientMutation.mutateAsync(data),
-    delay: 3000,
-    enabled: !!userData && projectDataSuccess
   });
 
-  // Load data when project data is fetched
-  useEffect(() => {
-    if (projectData) {
-      setClientName(projectData.client_name || '');
-      setContactPhone(projectData.contact_phone || '');
-      setEmail(projectData.email || '');
-    }
-  }, [projectData]);
+  const handleDelete = (client: ProjectClient) => {
+    deleteClientMutation.mutate(client.id);
+  };
+
+  const handleEdit = (client: ProjectClient) => {
+    // TODO: Implement edit functionality
+    toast({
+      title: 'Editar cliente',
+      description: 'Funcionalidad de edición en desarrollo',
+    });
+  };
+
+  const handleAddClient = () => {
+    openModal('project-client', {
+      projectId: activeProjectId,
+    });
+  };
 
   if (!activeProjectId) {
     return (
@@ -117,60 +90,78 @@ export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
     )
   }
 
+  // Table columns
+  const columns = [
+    {
+      key: 'avatar',
+      label: '',
+      width: '60px',
+      sortable: false,
+      render: (client: ProjectClient) => (
+        <Avatar className="h-8 w-8">
+          <AvatarFallback>
+            {client.contacts?.first_name?.[0]}{client.contacts?.last_name?.[0]}
+          </AvatarFallback>
+        </Avatar>
+      ),
+    },
+    {
+      key: 'first_name',
+      label: 'Nombre',
+      sortable: true,
+      render: (client: ProjectClient) => client.contacts?.first_name || '-',
+    },
+    {
+      key: 'last_name',
+      label: 'Apellido',
+      sortable: true,
+      render: (client: ProjectClient) => client.contacts?.last_name || '-',
+    },
+    {
+      key: 'unit',
+      label: 'Unidad Funcional',
+      sortable: true,
+      render: (client: ProjectClient) => client.unit || '-',
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Two Column Layout - Section descriptions left, content right */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column - Información del Cliente */}
-        <div>
-          <div className="flex items-center gap-2 mb-6">
-            <Users className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="text-lg font-semibold">Información del Cliente</h2>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Datos de contacto del cliente responsable del proyecto. Esta información estará disponible para todo el equipo cuando necesiten comunicarse.
-          </p>
-        </div>
-
-        {/* Right Column - Información del Cliente Content */}
-        <div>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="client-name">Nombre del Cliente</Label>
-              <Input 
-                id="client-name"
-                placeholder="Ej: Familia López"
-                value={clientName}
-                onChange={(e) => setClientName(e.target.value)}
-                data-testid="input-client-name"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="contact-phone">Teléfono de Contacto</Label>
-              <Input 
-                id="contact-phone"
-                placeholder="Ej: +54 11 1234-5678"
-                value={contactPhone}
-                onChange={(e) => setContactPhone(e.target.value)}
-                data-testid="input-contact-phone"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email de Contacto</Label>
-              <Input 
-                id="email"
-                type="email"
-                placeholder="Ej: contacto@cliente.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                data-testid="input-email"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      <Table
+        columns={columns}
+        data={projectClients}
+        isLoading={isLoading}
+        emptyStateConfig={{
+          icon: <Users className="h-12 w-12 text-muted-foreground" />,
+          title: 'No hay clientes en este proyecto',
+          description: 'Agrega clientes para gestionar la información del proyecto',
+        }}
+        headerActions={{
+          rightActions: (
+            <Button
+              onClick={handleAddClient}
+              size="sm"
+              data-testid="button-add-client"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Agregar Cliente
+            </Button>
+          ),
+        }}
+        rowActions={(client: ProjectClient) => [
+          {
+            label: 'Editar',
+            icon: Edit,
+            onClick: () => handleEdit(client),
+          },
+          {
+            label: 'Eliminar',
+            icon: Trash2,
+            onClick: () => handleDelete(client),
+            variant: 'destructive',
+          },
+        ]}
+      />
     </div>
   )
 }

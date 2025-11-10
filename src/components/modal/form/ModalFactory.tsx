@@ -60,6 +60,7 @@ import { SubcontractTaskFormModal } from '../modals/construction/SubcontractTask
 import { InsuranceFormModal } from '../modals/construction/InsuranceFormModal';
 import { RenewInsuranceFormModal } from '../modals/construction/RenewInsuranceFormModal';
 import { PartnerModal } from '../modals/organizations/members/PartnerModal';
+import { ProjectClientModal } from '../modals/construction/ProjectClientModal';
 import { PDFExporterModal } from '../modals/PDFExporterModal';
 import { ProviderProductModal } from '../modals/providers/ProviderProductModal';
 import { ProductModal } from '../modals/analysis/ProductModal';
@@ -109,7 +110,7 @@ export function ModalFactory() {
     case 'project':
       return <ProjectModal modalData={data || undefined} onClose={closeModal} />;
     case 'project-client':
-      return <ClientObligationModal modalData={data || undefined} onClose={closeModal} />;
+      return <ProjectClientModal projectId={data?.projectId} onClose={closeModal} />;
     case 'document-upload':
       return <DocumentUploadFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'document-folder':

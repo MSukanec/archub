@@ -267,14 +267,13 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
         .from('project_clients')
         .select(`
           *,
-          contact:contacts!client_id (
+          contacts:contacts!client_id (
             id,
             first_name,
             last_name,
             full_name,
             email,
             phone,
-            avatar_url,
             company_name
           ),
           currency:currencies!currency_id (
@@ -330,14 +329,13 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
         })
         .select(`
           *,
-          contact:contacts!client_id (
+          contacts:contacts!client_id (
             id,
             first_name,
             last_name,
             full_name,
             email,
             phone,
-            avatar_url,
             company_name
           ),
           currency:currencies!currency_id (
