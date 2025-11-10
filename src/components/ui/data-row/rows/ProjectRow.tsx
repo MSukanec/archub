@@ -1,12 +1,7 @@
-import DataRowCard, { DataRowCardProps } from '../DataRowCard';
-import { formatDateCompact } from '@/lib/date-utils';
-import { MoreHorizontal } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import DataRowCard from '../DataRowCard';
+import SwipeableCard from '@/components/layout/mobile/SwipeableCard';
+import { Edit, Trash2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 // Interface para el proyecto (usando la estructura real de la app)
 interface Project {
@@ -44,39 +39,35 @@ interface Project {
 
 interface ProjectRowProps {
   project: Project;
-  onClick?: () => void;
+  onClick?: (project: Project) => void;
+  onEdit?: (project: Project) => void;
+  onDelete?: (project: Project) => void;
   selected?: boolean;
   density?: 'compact' | 'normal' | 'comfortable';
-  className?: string;
+  showChevron?: boolean;
+  enableSwipe?: boolean;
   isActive?: boolean; // Para marcar el proyecto activo
-  actions?: Array<{
-    label: string;
-    icon?: any;
-    onClick: () => void;
-    variant?: 'default' | 'destructive';
-  }>;
   'data-testid'?: string;
 }
 
-// Helper para obtener el tipo de proyecto basado en el estado
-const getProjectType = (project: Project): string => {
-  if (project.description) {
-    return project.description;
-  }
-  if (project.project_data?.client_name) {
-    return project.project_data.client_name;
-  }
-  return project.status || 'Proyecto';
+// Helper para obtener iniciales del proyecto
+const getProjectInitials = (name: string): string => {
+  if (!name) return "P";
+  return name
+    .split(" ")
+    .map((word) => word.charAt(0))
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 };
 
 // Función helper para mapear status a texto legible
 const getStatusText = (status: string): string => {
   const statusMap: { [key: string]: string } = {
-    'active': 'En proceso',
+    'active': 'Activo',
+    'inactive': 'Inactivo',
     'completed': 'Completado',
     'paused': 'Pausado',
-    'cancelled': 'Cancelado',
-    'planning': 'Planificación'
   };
   return statusMap[status] || status;
 };
@@ -84,109 +75,107 @@ const getStatusText = (status: string): string => {
 export default function ProjectRow({ 
   project, 
   onClick, 
+  onEdit,
+  onDelete,
   selected, 
   density = 'normal',
-  className,
+  showChevron = false,
+  enableSwipe = true,
   isActive = false,
-  actions,
   'data-testid': dataTestId
 }: ProjectRowProps) {
-  // Configurar las props base del DataRowCard
-  const baseProps: Omit<DataRowCardProps, 'children'> = {
-    onClick,
-    selected,
-    density,
-    className,
-    activeBorder: isActive,
-    'data-testid': dataTestId,
-  };
+  // Get avatar from project image or use fallback
+  const avatarUrl = project.project_data?.project_image_url || undefined;
+  const avatarFallback = getProjectInitials(project.name);
 
-  return (
-    <DataRowCard {...baseProps}>
-      {/* Contenido con dos columnas */}
+  // Build metadata string (tipo, modalidad, estado)
+  const metadata: string[] = [];
+  
+  if (project.project_data?.project_type?.name) {
+    metadata.push(project.project_data.project_type.name);
+  }
+  
+  if (project.project_data?.modality?.name) {
+    metadata.push(project.project_data.modality.name);
+  }
+  
+  metadata.push(getStatusText(project.status));
+
+  // Contenido interno del card usando el nuevo sistema de 3 columnas
+  const cardContent = (
+    <>
+      {/* Columna 2: Nombre (negrita) y metadata abajo */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between">
-          {/* COLUMNA IZQUIERDA: Nombre y Tipo */}
-          <div className="flex-1 min-w-0">
-            {/* Nombre del proyecto */}
-            <p className={`
-              font-medium text-foreground truncate
-              ${density === 'compact' ? 'text-sm' : 'text-sm'}
-            `}>
-              {project.name}
-            </p>
-
-            {/* Status del proyecto */}
-            <p className={`
-              text-muted-foreground truncate mt-1
-              ${density === 'compact' ? 'text-xs' : 'text-sm'}
-            `}>
-              {getStatusText(project.status)}
-            </p>
-          </div>
-
-          {/* COLUMNA DERECHA: Fecha de creación, Badge activo y Menú de acciones */}
-          <div className="flex items-start gap-2">
-            <div className="flex-shrink-0 text-right flex flex-col items-end gap-1">
-              {/* Fecha de creación */}
-              <p className={`
-                text-muted-foreground
-                ${density === 'compact' ? 'text-xs' : 'text-sm'}
-              `}>
-                {formatDateCompact(project.created_at)}
-              </p>
-              
-              {/* Badge activo únicamente si es el proyecto activo */}
-              {isActive && (
-                <span 
-                  className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white" 
-                  style={{ 
-                    backgroundColor: 'hsl(76, 100%, 40%)',
-                    color: 'white'
-                  }}
-                >
-                  Activo
-                </span>
-              )}
-            </div>
-
-            {/* Botón de menú contextual */}
-            {actions && actions.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex items-center justify-center w-8 h-8 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
-                    aria-label="Acciones"
-                    data-testid="button-project-actions"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {actions.map((action, index) => {
-                    const Icon = action.icon;
-                    return (
-                      <DropdownMenuItem
-                        key={index}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          action.onClick();
-                        }}
-                        className={action.variant === 'destructive' ? 'text-red-600 focus:text-red-600' : ''}
-                        data-testid={`menuitem-${action.label.toLowerCase().replace(/\s+/g, '-')}`}
-                      >
-                        {Icon && <Icon className="mr-2 h-4 w-4" />}
-                        {action.label}
-                      </DropdownMenuItem>
-                    );
-                  })}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
+        {/* Nombre del proyecto en negrita */}
+        <div className="font-semibold text-sm truncate">
+          {project.name}
         </div>
+
+        {/* Metadata: Tipo, Modalidad, Estado */}
+        {metadata.length > 0 && (
+          <div className="text-muted-foreground text-xs truncate mt-0.5">
+            {metadata.join(' • ')}
+          </div>
+        )}
       </div>
+
+      {/* Columna 3: Badge de ACTIVO */}
+      {isActive && (
+        <div className="flex items-center">
+          <Badge 
+            variant="default"
+            className="bg-[var(--accent)] text-white"
+            data-testid="badge-active-project"
+          >
+            Activo
+          </Badge>
+        </div>
+      )}
+    </>
+  );
+
+  // Usar el nuevo DataRowCard con avatar (Columna 1)
+  const projectCard = (
+    <DataRowCard
+      avatarUrl={avatarUrl}
+      avatarFallback={avatarFallback}
+      selected={selected}
+      density={density}
+      onClick={onClick ? () => onClick(project) : undefined}
+      data-testid={dataTestId}
+    >
+      {cardContent}
     </DataRowCard>
   );
+
+  // If swipe is enabled and we have edit/delete handlers, wrap in SwipeableCard
+  if (enableSwipe && (onEdit || onDelete)) {
+    const swipeActions = [];
+    
+    if (onEdit) {
+      swipeActions.push({
+        label: "Editar",
+        icon: <Edit className="w-4 h-4" />,
+        variant: "default" as const,
+        onClick: () => onEdit(project),
+      });
+    }
+    
+    if (onDelete) {
+      swipeActions.push({
+        label: "Eliminar",
+        icon: <Trash2 className="w-4 h-4" />,
+        variant: "destructive" as const,
+        onClick: () => onDelete(project),
+      });
+    }
+
+    return (
+      <SwipeableCard actions={swipeActions}>
+        {projectCard}
+      </SwipeableCard>
+    );
+  }
+
+  return projectCard;
 }

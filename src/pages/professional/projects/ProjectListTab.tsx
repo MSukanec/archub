@@ -447,21 +447,10 @@ export default function ProjectList() {
               <ProjectRow
                 key={project.id}
                 project={project}
-                onClick={() => handleSelectProject(project.id)}
+                onClick={(proj) => handleSelectProject(proj.id)}
+                onEdit={handleEdit}
+                onDelete={handleDeleteClick}
                 isActive={project.is_active}
-                actions={[
-                  {
-                    label: 'Editar',
-                    icon: Edit,
-                    onClick: () => handleEdit(project)
-                  },
-                  {
-                    label: 'Eliminar',
-                    icon: Trash2,
-                    onClick: () => handleDeleteClick(project),
-                    variant: 'destructive'
-                  }
-                ]}
                 data-testid={`project-row-${project.id}`}
               />
             ))}
