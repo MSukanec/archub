@@ -8,6 +8,7 @@ import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { Link } from 'wouter'
 
 interface ProjectClientTabProps {
   projectId?: string;
@@ -65,7 +66,20 @@ export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
   });
 
   const handleDelete = (client: ProjectClient) => {
-    deleteClientMutation.mutate(client.id);
+    const clientName = client.contacts 
+      ? `${client.contacts.first_name} ${client.contacts.last_name}`.trim()
+      : 'Cliente';
+    
+    openModal('delete-confirmation', {
+      mode: 'dangerous',
+      title: 'Eliminar Cliente',
+      description: 'Se eliminará este cliente del proyecto. Esta acción no se puede deshacer.',
+      itemName: clientName,
+      itemType: 'cliente',
+      onConfirm: () => {
+        deleteClientMutation.mutate(client.id);
+      },
+    });
   };
 
   const handleEdit = (client: ProjectClient) => {
@@ -137,13 +151,13 @@ export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
           description: (
             <>
               Agrega clientes para gestionar la información del proyecto. Recuerda que un cliente, antes debe ser un{' '}
-              <a 
-                href="/professional/contacts" 
+              <Link 
+                href="/app/contacts" 
                 className="hover:underline font-bold"
                 style={{ color: 'var(--accent)' }}
               >
                 contacto
-              </a>
+              </Link>
               .
             </>
           ),
