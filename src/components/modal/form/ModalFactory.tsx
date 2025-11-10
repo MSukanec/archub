@@ -110,7 +110,7 @@ export function ModalFactory() {
     case 'project':
       return <ProjectModal modalData={data || undefined} onClose={closeModal} />;
     case 'project-client':
-      return <ProjectClientModal projectId={data?.projectId} onClose={closeModal} />;
+      return <ProjectClientModal modalData={data || undefined} onClose={closeModal} />;
     case 'document-upload':
       return <DocumentUploadFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'document-folder':

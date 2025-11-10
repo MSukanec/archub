@@ -294,13 +294,22 @@ Generado desde Seencel`);
     </Button>
   ) : null;
 
+  // Get organization ID from user data
+  const { data: userData } = useQuery({
+    queryKey: ['/api/current-user'],
+  });
+
+  const organizationId = userData?.organization?.id;
+
   const headerProps = {
     icon: FileText,
     title: 'Datos Básicos',
     description: 'Información general del proyecto, datos del cliente y ubicación',
     tabs: headerTabs,
     onTabChange: (tabId: string) => setActiveTab(tabId),
-    actions: shareButton ? [shareButton] : addClientButton ? [addClientButton] : undefined
+    actions: shareButton ? [shareButton] : addClientButton ? [addClientButton] : undefined,
+    organizationId,
+    showMembers: true
   };
 
   const renderTabContent = () => {
