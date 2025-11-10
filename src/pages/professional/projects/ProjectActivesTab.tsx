@@ -223,66 +223,48 @@ export default function ProjectActives() {
     openModal('project', { editingProject: project, isEditing: true })
   }
 
-  // Stabilize action handlers with useCallback
-  const handleSearchClick = useCallback(() => {
-    // Popover is handled in MobileActionBar
-  }, []);
-
-  const handleCreateClick = useCallback(() => {
-    openModal('project', {});
-  }, [openModal]);
-
-  const handleFilterClick = useCallback(() => {
-    // Popover is handled in MobileActionBar
-  }, []);
-
-  const handleNotificationsClick = useCallback(() => {
-    // Popover is handled in MobileActionBar
-  }, []);
-
-  // Configure Mobile Action Bar
+  // Configure Mobile Action Bar - ONLY RUN ONCE when isMobile changes
   useEffect(() => {
-    if (isMobile) {
-      setActions({
-        search: {
-          id: 'search',
-          icon: Search,
-          label: 'Buscar',
-          onClick: handleSearchClick,
-        },
-        create: {
-          id: 'create',
-          icon: Plus,
-          label: 'Nuevo Proyecto',
-          onClick: handleCreateClick,
-          variant: 'primary'
-        },
-        filter: {
-          id: 'filter',
-          icon: Filter,
-          label: 'Filtros',
-          onClick: handleFilterClick,
-        },
-        notifications: {
-          id: 'notifications',
-          icon: Bell,
-          label: 'Notificaciones',
-          onClick: handleNotificationsClick,
-        },
-      });
-      setShowActionBar(true);
-    }
+    if (!isMobile) return;
+
+    setActions({
+      search: {
+        id: 'search',
+        icon: Search,
+        label: 'Buscar',
+        onClick: () => { }, // Popover is handled in ActionBarMobile
+      },
+      create: {
+        id: 'create',
+        icon: Plus,
+        label: 'Nuevo Proyecto',
+        onClick: () => openModal('project', {}),
+        variant: 'primary'
+      },
+      filter: {
+        id: 'filter',
+        icon: Filter,
+        label: 'Filtros',
+        onClick: () => { }, // Popover is handled in ActionBarMobile
+      },
+      notifications: {
+        id: 'notifications',
+        icon: Bell,
+        label: 'Notificaciones',
+        onClick: () => { }, // Popover is handled in ActionBarMobile
+      },
+    });
+    setShowActionBar(true);
 
     // Cleanup when component unmounts
     return () => {
-      if (isMobile) {
-        clearActions();
-        setShowActionBar(false);
-        setMobileSearchValue('');
-        setSearchValue('');
-      }
+      clearActions();
+      setShowActionBar(false);
+      setMobileSearchValue('');
+      setSearchValue('');
     };
-  }, [isMobile, setActions, setShowActionBar, clearActions, setMobileSearchValue, handleSearchClick, handleCreateClick, handleFilterClick, handleNotificationsClick]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile]);
 
   // Configure filters for Mobile Action Bar
   useEffect(() => {
