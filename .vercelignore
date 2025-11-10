@@ -1,0 +1,2 @@
+# Ignore api/index.ts - this file imports from server/routes which is not compatible with Vercel serverless
+api/index.ts
