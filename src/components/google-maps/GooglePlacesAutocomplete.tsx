@@ -38,6 +38,13 @@ export function GooglePlacesAutocomplete({
   const { isLoaded, loadError } = useGoogleMapsScript({ apiKey, libraries: ['places'] });
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
 
+  // Sync external value changes to the input (e.g., when clearing the field)
+  useEffect(() => {
+    if (inputRef.current && value !== inputRef.current.value) {
+      inputRef.current.value = value;
+    }
+  }, [value]);
+
   useEffect(() => {
     if (!isLoaded || !inputRef.current) return;
 
@@ -142,7 +149,7 @@ export function GooglePlacesAutocomplete({
       <div className="relative">
         <Input
           ref={inputRef}
-          value={value}
+          defaultValue={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={!isLoaded ? "Cargando Google Maps..." : placeholder}
           disabled={!isLoaded}
