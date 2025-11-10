@@ -243,6 +243,160 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
     }
   });
 
+  // ========== PROJECT CLIENTS ENDPOINTS ==========
+
+  // GET /api/projects/:projectId/clients - Get all clients for a project
+  app.get("/api/projects/:projectId/clients", async (req, res) => {
+    try {
+      const { projectId } = req.params;
+      const { organization_id } = req.query;
+
+      if (!organization_id) {
+        return res.status(400).json({ error: "organization_id is required" });
+      }
+
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // Query project_clients with contact information
+      const { data: projectClients, error } = await authenticatedSupabase
+        .from('project_clients')
+        .select(`
+          *,
+          contact:contacts!client_id (
+            id,
+            first_name,
+            last_name,
+            full_name,
+            email,
+            phone,
+            avatar_url,
+            company_name
+          ),
+          currency:currencies!currency_id (
+            id,
+            code,
+            symbol
+          )
+        `)
+        .eq('project_id', projectId)
+        .eq('organization_id', organization_id as string)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error fetching project clients:", error);
+        return res.status(500).json({ error: "Failed to fetch project clients" });
+      }
+
+      res.json(projectClients || []);
+    } catch (error) {
+      console.error("Error in get project clients endpoint:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // POST /api/projects/:projectId/clients - Add a client to a project
+  app.post("/api/projects/:projectId/clients", async (req, res) => {
+    try {
+      const { projectId } = req.params;
+      const clientData = req.body;
+
+      if (!clientData.client_id || !clientData.organization_id) {
+        return res.status(400).json({ error: "client_id and organization_id are required" });
+      }
+
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // Create project_client relationship
+      const { data: projectClient, error } = await authenticatedSupabase
+        .from('project_clients')
+        .insert({
+          project_id: projectId,
+          client_id: clientData.client_id,
+          organization_id: clientData.organization_id,
+          committed_amount: clientData.committed_amount || null,
+          currency_id: clientData.currency_id || null,
+          unit: clientData.unit || null,
+          exchange_rate: clientData.exchange_rate || null
+        })
+        .select(`
+          *,
+          contact:contacts!client_id (
+            id,
+            first_name,
+            last_name,
+            full_name,
+            email,
+            phone,
+            avatar_url,
+            company_name
+          ),
+          currency:currencies!currency_id (
+            id,
+            code,
+            symbol
+          )
+        `)
+        .single();
+
+      if (error) {
+        console.error("Error adding client to project:", error);
+        return res.status(500).json({ error: "Failed to add client to project" });
+      }
+
+      res.json(projectClient);
+    } catch (error) {
+      console.error("Error in add project client endpoint:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // DELETE /api/projects/:projectId/clients/:clientId - Remove a client from a project
+  app.delete("/api/projects/:projectId/clients/:clientId", async (req, res) => {
+    try {
+      const { projectId, clientId } = req.params;
+      const { organization_id } = req.query;
+
+      if (!organization_id) {
+        return res.status(400).json({ error: "organization_id is required" });
+      }
+
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // Delete the project_client relationship
+      const { error } = await authenticatedSupabase
+        .from('project_clients')
+        .delete()
+        .eq('id', clientId)
+        .eq('project_id', projectId)
+        .eq('organization_id', organization_id as string);
+
+      if (error) {
+        console.error("Error removing client from project:", error);
+        return res.status(500).json({ error: "Failed to remove client from project" });
+      }
+
+      res.json({ success: true, message: "Client removed from project successfully" });
+    } catch (error) {
+      console.error("Error in remove project client endpoint:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // ========== BUDGET ENDPOINTS ==========
 
   // Get budgets for a project
