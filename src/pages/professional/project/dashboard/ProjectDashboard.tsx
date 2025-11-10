@@ -116,7 +116,7 @@ export default function ProjectDashboard() {
                   variant={currentProject.status === 'active' ? 'default' : 'secondary'}
                   className="capitalize"
                 >
-                  {currentProject.status === 'active' ? 'Activo' : currentProject.status}
+                  {currentProject.status === 'active' ? 'En Proceso' : currentProject.status}
                 </Badge>
               )}
             </div>

@@ -405,7 +405,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       <div>
         <h4 className="font-medium">Estado</h4>
         <p className="text-muted-foreground mt-1">
-          {editingProject?.status === 'active' ? 'Activo' : 
+          {editingProject?.status === 'active' ? 'En Proceso' : 
            editingProject?.status === 'completed' ? 'Completado' :
            editingProject?.status === 'paused' ? 'Pausado' : 'Inactivo'}
         </p>
@@ -558,7 +558,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="active">Activo</SelectItem>
+                      <SelectItem value="active">En Proceso</SelectItem>
                       <SelectItem value="inactive">Inactivo</SelectItem>
                       <SelectItem value="completed">Completado</SelectItem>
                       <SelectItem value="paused">Pausado</SelectItem>

@@ -64,7 +64,7 @@ const getProjectInitials = (name: string): string => {
 // Función helper para mapear status a texto legible
 const getStatusText = (status: string): string => {
   const statusMap: { [key: string]: string } = {
-    'active': 'Activo',
+    'active': 'En Proceso',
     'inactive': 'Inactivo',
     'completed': 'Completado',
     'paused': 'Pausado',

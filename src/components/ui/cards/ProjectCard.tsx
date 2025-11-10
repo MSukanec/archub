@@ -19,7 +19,7 @@ import SwipeableCard from '@/components/layout/mobile/SwipeableCard';
 // Project status configurations
 const projectStatuses = {
   planning: { label: 'Planificación', variant: 'secondary' as const },
-  active: { label: 'Activo', variant: 'default' as const },
+  active: { label: 'En Proceso', variant: 'default' as const },
   on_hold: { label: 'En Pausa', variant: 'outline' as const },
   completed: { label: 'Completado', variant: 'default' as const },
   cancelled: { label: 'Cancelado', variant: 'destructive' as const }
