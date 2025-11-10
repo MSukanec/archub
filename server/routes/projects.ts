@@ -870,16 +870,16 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
         .from('user_presence')
         .select(`
           user_id,
-          updated_at,
-          current_page,
+          last_seen_at,
+          current_view,
           users (
             id,
-            name,
+            full_name,
             avatar_url
           )
         `)
-        .gte('updated_at', twentyFourHoursAgo)
-        .order('updated_at', { ascending: false })
+        .gte('last_seen_at', twentyFourHoursAgo)
+        .order('last_seen_at', { ascending: false })
         .limit(20);
 
       if (error) {
@@ -890,10 +890,10 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
       // Flatten the data structure
       const formattedUsers = (activeUsers || []).map((presence: any) => ({
         id: presence.user_id,
-        name: presence.users?.name || 'Usuario',
+        name: presence.users?.full_name || 'Usuario',
         avatar_url: presence.users?.avatar_url,
-        last_activity: presence.updated_at,
-        current_page: presence.current_page,
+        last_activity: presence.last_seen_at,
+        current_page: presence.current_view,
       }));
 
       res.json(formattedUsers);

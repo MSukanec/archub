@@ -209,7 +209,7 @@ function OrganizationCard({ organization }: OrganizationCardProps) {
     <Card className="hover:shadow-lg transition-all hover:scale-105 cursor-pointer" data-testid={`org-card-${organization.id}`}>
       <CardContent className="p-6">
         <div className="flex flex-col items-center text-center space-y-3">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--accent-hover)' }}>
+          <div className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden bg-[var(--accent-hover)]">
             {organization.logo_url ? (
               <img 
                 src={organization.logo_url} 
@@ -217,7 +217,7 @@ function OrganizationCard({ organization }: OrganizationCardProps) {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <Building2 className="h-8 w-8" style={{ color: 'var(--accent)' }} />
+              <Building2 className="h-8 w-8 text-[var(--accent)]" />
             )}
           </div>
           <div>
@@ -228,10 +228,11 @@ function OrganizationCard({ organization }: OrganizationCardProps) {
               {formatDistanceToNow(new Date(organization.created_at), { addSuffix: true, locale: es })}
             </p>
           </div>
-          <Link href={`/organization/${organization.id}`}>
-            <a className="text-sm font-medium hover:underline" style={{ color: 'var(--accent)' }}>
-              Ver proyectos
-            </a>
+          <Link 
+            href={`/organization/${organization.id}`}
+            className="text-sm font-medium hover:underline text-[var(--accent)]"
+          >
+            Ver proyectos
           </Link>
         </div>
       </CardContent>
