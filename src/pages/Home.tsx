@@ -313,21 +313,13 @@ export default function Home() {
                   })()
                 ) : (
                   // Si NO hay conversación activa, mostrar el saludo
-                  <>
-                    <h1 className={cn(
-                      "text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight",
-                      "bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent",
-                      "leading-tight px-4"
-                    )}>
-                      {greetingData?.greeting || ""}
-                    </h1>
-
-                    {error && (
-                      <p className="text-sm text-muted-foreground/60">
-                        (Modo offline)
-                      </p>
-                    )}
-                  </>
+                  <h1 className={cn(
+                    "text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight",
+                    "bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent",
+                    "leading-tight px-4"
+                  )}>
+                    {greetingData?.greeting || `Bienvenido, ${userData?.user?.full_name || userData?.user_data?.first_name || 'Usuario'}`}
+                  </h1>
                 )}
               </motion.div>
             )}
