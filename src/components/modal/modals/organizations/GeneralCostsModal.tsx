@@ -99,6 +99,7 @@ export function GeneralCostsModal({ modalData, onClose }: GeneralCostsModalProps
       
       onClose()
     } catch (error) {
+      console.error('Error saving general cost:', error)
       // Los hooks ya manejan el toast de error
     } finally {
       setIsSubmitting(false)

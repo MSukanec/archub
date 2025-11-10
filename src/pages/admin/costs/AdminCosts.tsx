@@ -21,24 +21,34 @@ const AdminCosts = () => {
   const refreshPricesMutation = useMutation({
     mutationFn: async () => {
       try {
+        console.log('Refrescando vista product_avg_prices...');
         // Refrescar primera vista materializada (precios promedio de productos)
         const { error: productAvgError } = await supabase.rpc('refresh_product_avg_prices');
         if (productAvgError) {
+          console.error('Error refreshing product_avg_prices:', productAvgError);
           throw new Error(`Error al refrescar precios de productos: ${productAvgError.message}`);
         }
+        console.log('Vista product_avg_prices refrescada exitosamente');
 
+        console.log('Refrescando vista material_avg_prices...');
         // Refrescar segunda vista materializada (precios promedio de materiales)
         const { error: materialAvgError } = await supabase.rpc('refresh_material_avg_prices');
         if (materialAvgError) {
+          console.error('Error refreshing material_avg_prices:', materialAvgError);
           throw new Error(`Error al refrescar precios de materiales: ${materialAvgError.message}`);
         }
+        console.log('Vista material_avg_prices refrescada exitosamente');
 
+        console.log('Refrescando vista labor_avg_prices...');
         // Refrescar tercera vista materializada (precios promedio de mano de obra)
         const { error: laborAvgError } = await supabase.rpc('refresh_labor_avg_prices');
         if (laborAvgError) {
+          console.error('Error refreshing labor_avg_prices:', laborAvgError);
           throw new Error(`Error al refrescar precios de mano de obra: ${laborAvgError.message}`);
         }
+        console.log('Vista labor_avg_prices refrescada exitosamente');
       } catch (error: any) {
+        console.error('Error general al refrescar vistas:', error);
         throw error;
       }
     },
@@ -64,6 +74,7 @@ const AdminCosts = () => {
       });
     },
     onError: (error) => {
+      console.error('Error refreshing prices:', error);
       toast({
         title: "Error al actualizar datos",
         description: "No se pudieron actualizar los datos de las vistas materializadas.",

@@ -45,6 +45,7 @@ export function useMovementSubcontracts(movementId?: string) {
         .eq('movement_id', movementId)
 
       if (error) {
+        console.error('Error fetching movement subcontracts:', error)
         throw error
       }
 
@@ -89,6 +90,7 @@ export function useCreateMovementSubcontracts() {
       })
     },
     onError: (error) => {
+      console.error('Error creating movement subcontracts:', error)
       toast({
         variant: 'destructive',
         title: 'Error',
@@ -145,6 +147,7 @@ export function useUpdateMovementSubcontracts() {
       })
     },
     onError: (error) => {
+      console.error('Error updating movement subcontracts:', error)
       toast({
         variant: 'destructive',
         title: 'Error',

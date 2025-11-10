@@ -262,6 +262,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
         await createEnrollmentMutation.mutateAsync(data);
       }
     } catch (error) {
+      console.error('Error saving enrollment:', error);
     } finally {
       setIsLoading(false);
     }

@@ -50,11 +50,14 @@ export async function logActivity({
       });
 
     if (error) {
+      console.error('Error logging activity:', error);
       // No lanzamos el error para evitar que interrumpa el flujo principal
       return;
     }
 
+    console.log(`Activity logged: ${action} on ${target_table}`, { target_id, metadata });
   } catch (error) {
+    console.error('Error in logActivity:', error);
     // No lanzamos el error para evitar que interrumpa el flujo principal
     // pero lo registramos para debugging
   }

@@ -79,6 +79,7 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
         .order('movements(movement_date)', { ascending: false });
 
       if (error) {
+        console.error('Error fetching subcontract payments:', error);
         return [];
       }
 

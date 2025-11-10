@@ -32,6 +32,12 @@ export default function ProjectDashboard() {
   const currentProject = projects.find(p => p.id === selectedProjectId);
 
   // DEBUG: Log to diagnose the issue
+  console.log('=== ProjectDashboard DEBUG ===');
+  console.log('selectedProjectId:', selectedProjectId);
+  console.log('organizationId:', organizationId);
+  console.log('projectsLoading:', projectsLoading);
+  console.log('projects:', projects);
+  console.log('currentProject:', currentProject);
 
   // Set sidebar level to project
   useEffect(() => {

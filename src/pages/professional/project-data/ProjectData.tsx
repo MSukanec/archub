@@ -36,6 +36,7 @@ export default function ProjectData() {
         .single();
         
       if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching project data:', error);
         return null;
       }
       

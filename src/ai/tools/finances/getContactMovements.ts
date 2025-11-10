@@ -66,6 +66,7 @@ export async function getContactMovements(
     const { data: movements, error } = (await query) as { data: MovementRow[] | null, error: any };
 
     if (error) {
+      console.error('Error fetching movements:', error);
       return `Error al buscar movimientos: ${error.message}`;
     }
 
@@ -314,6 +315,7 @@ export async function getContactMovements(
     return response;
 
   } catch (err) {
+    console.error('Unexpected error in getContactMovements:', err);
     return 'Error inesperado al buscar movimientos del contacto. Por favor intenta nuevamente.';
   }
 }

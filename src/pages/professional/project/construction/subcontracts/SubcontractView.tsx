@@ -111,6 +111,7 @@ export default function SubcontractView() {
       icon: FileText,
       onClick: () => {
         // TODO: Implement contract upload functionality
+        console.log('Upload contract functionality to be implemented');
       },
       disabled: true
     } : undefined

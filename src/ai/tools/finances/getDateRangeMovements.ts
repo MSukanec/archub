@@ -77,6 +77,7 @@ export async function getDateRangeMovements(
     const { data: movements, error } = (await query) as { data: MovementRow[] | null, error: any };
 
     if (error) {
+      console.error('Error fetching movements:', error);
       return `Error al buscar movimientos: ${error.message}`;
     }
 
@@ -246,6 +247,7 @@ export async function getDateRangeMovements(
     return response;
 
   } catch (err) {
+    console.error('Unexpected error in getDateRangeMovements:', err);
     return 'Error inesperado al buscar movimientos por rango de fechas. Por favor intenta nuevamente.';
   }
 }

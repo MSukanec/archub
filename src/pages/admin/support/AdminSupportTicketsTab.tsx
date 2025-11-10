@@ -97,6 +97,7 @@ const AdminSupportTicketsTab = () => {
           table: 'support_messages'
         },
         (payload) => {
+          console.log('🔥 Admin conversations Realtime update:', payload);
           // Invalidar conversaciones y contador
           queryClient.invalidateQueries({ queryKey: ['admin-support-conversations'] });
           queryClient.invalidateQueries({ queryKey: ['unread-support-messages-count'] });

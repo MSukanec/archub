@@ -82,6 +82,7 @@ export function SupportConversationStartModal({ onClose }: SupportConversationSt
       handleClose();
     },
     onError: (error) => {
+      console.error('Error starting conversation:', error);
       toast({
         title: 'Error',
         description: 'No se pudo iniciar la conversación. Inténtalo de nuevo.',

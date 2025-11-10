@@ -66,6 +66,7 @@ const AdminCostBrands = () => {
       onDelete: () => deleteBrandMutation.mutate(brand.id),
       onReplace: (newBrandId: string) => {
         // Aquí puedes implementar la lógica de reemplazo si es necesaria
+        console.log('Reemplazar marca', brand.id, 'por', newBrandId)
         // Por ahora solo eliminamos la marca actual
         deleteBrandMutation.mutate(brand.id)
       },

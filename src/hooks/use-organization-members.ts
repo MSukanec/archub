@@ -35,6 +35,7 @@ export function useOrganizationMembers(organizationId?: string) {
       
       if (!response.ok) {
         const error = await response.json().catch(() => ({ error: 'Failed to fetch organization members' }));
+        console.error('Error fetching organization members:', error);
         throw new Error(error.error || 'Failed to fetch organization members');
       }
 

@@ -50,8 +50,10 @@ export function PartnerModal({ editingPartner, onClose }: PartnerModalProps) {
         .order('first_name');
 
       if (error) {
+        console.error('Error fetching contacts:', error);
         throw error;
       }
+      console.log('Contacts fetched:', data);
       return data || [];
     },
     enabled: !!organizationId,

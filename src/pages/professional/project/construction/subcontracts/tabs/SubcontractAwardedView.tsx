@@ -49,6 +49,7 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
   const handleSaveTask = (taskId: string, updatedData: any) => {
     // TODO: Update subcontract_bid_tasks and recalculate subcontract.amount_total
     setEditingTaskId(null);
+    console.log('Saving task:', taskId, updatedData);
   };
 
   const handleCancelEdit = () => {
@@ -57,6 +58,7 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
 
   const handleUploadContract = () => {
     // TODO: Implement contract upload functionality
+    console.log('Upload contract functionality to be implemented');
   };
 
   const calculateTotal = () => {

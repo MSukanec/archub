@@ -112,6 +112,7 @@ export function Sidebar() {
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
     },
     onError: (error) => {
+      console.error('❌ Project selection error:', error)
       toast({
         title: "Error",
         description: "No se pudo seleccionar el proyecto",

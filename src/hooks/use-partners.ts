@@ -38,9 +38,11 @@ export function usePartners(organizationId?: string, options?: { enabled?: boole
         .order('created_at', { ascending: false });
 
       if (error) {
+        console.error('Error fetching partners:', error);
         throw error;
       }
       
+      console.log('Partners fetched:', data);
       return (data as Partner[]) || [];
     },
     enabled: options?.enabled !== false && !!organizationId && !!supabase,

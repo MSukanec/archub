@@ -26,6 +26,7 @@ export default function BudgetView() {
   // Función para agregar tarea
   const handleAddTask = () => {
     if (!selectedProjectId || !currentOrganizationId || !budget) {
+      console.error('No project, organization or budget selected');
       return;
     }
 
@@ -37,12 +38,14 @@ export default function BudgetView() {
       isEditing: false
     };
 
+    console.log('🔧 BudgetView - handleAddTask modalData:', modalData);
     openModal('budget-item', modalData);
   };
 
   // Función para duplicar tarea
   const handleDuplicateTask = (task: any) => {
     if (!selectedProjectId || !currentOrganizationId || !budget || !task) {
+      console.error('No project, organization, budget or task selected');
       return;
     }
 
@@ -69,6 +72,7 @@ export default function BudgetView() {
   // Función para eliminar tarea
   const handleDeleteTask = (taskId: string) => {
     if (!taskId) {
+      console.error('No task ID provided');
       return;
     }
 

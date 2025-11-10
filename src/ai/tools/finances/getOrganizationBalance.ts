@@ -32,6 +32,7 @@ export async function getOrganizationBalance(
       .eq('organization_id', organizationId)) as { data: MovementRow[] | null, error: any };
 
     if (error) {
+      console.error('Error fetching movements:', error);
       return `Error al buscar movimientos: ${error.message}`;
     }
 
@@ -139,6 +140,7 @@ export async function getOrganizationBalance(
     }
 
   } catch (err) {
+    console.error('Unexpected error in getOrganizationBalance:', err);
     return 'Error inesperado al calcular el balance. Por favor intenta nuevamente.';
   }
 }

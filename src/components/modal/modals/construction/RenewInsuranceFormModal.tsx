@@ -92,6 +92,7 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
 
       onClose()
     } catch (error) {
+      console.error('Error renewing insurance:', error)
     }
   }
 

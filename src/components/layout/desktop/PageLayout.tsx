@@ -264,6 +264,7 @@ export function PageLayout({
         // Obtener el padding interno del botón (px-1 = 4px cada lado)
         const buttonPadding = 4;
         
+        // console.log('🔧 Tab positioning:', {
         //   activeTabId: activeTab.id,
         //   tabOffsetLeft,
         //   tabWidth,

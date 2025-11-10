@@ -127,6 +127,7 @@ export default function PaymentMethodModal({
       });
 
       if (error) {
+        console.error("Error validando cupón:", error);
         setCouponError("Error al validar el cupón");
         return;
       }
@@ -169,6 +170,7 @@ export default function PaymentMethodModal({
 
       setCouponCode("");
     } catch (error: any) {
+      console.error("Error al validar cupón:", error);
       setCouponError(error.message || "No se pudo validar el cupón");
     } finally {
       setValidatingCoupon(false);
@@ -218,6 +220,7 @@ export default function PaymentMethodModal({
 
         const data = await response.json();
         if (!response.ok) {
+          console.error("Error al inscribir con cupón 100%:", data);
           throw new Error(data?.error || "No se pudo completar la inscripción");
         }
 
@@ -257,14 +260,18 @@ export default function PaymentMethodModal({
         months: priceData?.months || 12,
       };
 
+      console.log("[MP] Creando preferencia…", requestBody);
 
       // Llamada al nuevo endpoint en Vercel con timeout
       const API_BASE = getApiBase();
+      console.log("[MP] API_BASE:", API_BASE);
+      console.log("[MP] VITE_API_BASE:", import.meta.env.VITE_API_BASE);
       
       // DIAGNÓSTICO: Para probar con endpoint fake, descomentar esta línea y comentar la de abajo:
       // const mpUrl = `${API_BASE}/api/diag/fake-mp`;
       const mpUrl = `${API_BASE}/api/mp/create-preference`;
       
+      console.log("[MP] URL completa:", mpUrl);
       
       const res = await fetchWithTimeout(
         mpUrl,
@@ -284,12 +291,14 @@ export default function PaymentMethodModal({
         payload = { error: text };
       }
 
+      console.log("[MP] Respuesta create-preference:", { 
         status: res.status, 
         ok: res.ok,
         data: payload 
       });
 
       if (!res.ok || !payload?.init_point) {
+        console.error("[MP] Error al crear preferencia:", payload);
         throw new Error(
           payload?.error 
             ? `No se pudo crear la preferencia: ${String(payload.error)}`
@@ -298,8 +307,10 @@ export default function PaymentMethodModal({
       }
 
       // Redirige al checkout de Mercado Pago
+      console.log("[MP] Redirigiendo a:", payload.init_point);
       window.location.assign(payload.init_point);
     } catch (error: any) {
+      console.error("[MP] Error fatal:", error);
       toast({
         title: "Error al procesar el pago",
         description: error.message || "No se pudo iniciar el pago",
@@ -358,10 +369,14 @@ export default function PaymentMethodModal({
         description,
       };
 
+      console.log("[PayPal] Creando orden…", requestBody);
 
       const API_BASE = getApiBase();
+      console.log("[PayPal] API_BASE:", API_BASE);
+      console.log("[PayPal] VITE_API_BASE:", import.meta.env.VITE_API_BASE);
       
       const paypalUrl = `${API_BASE}/api/paypal/create-order`;
+      console.log("[PayPal] URL completa:", paypalUrl);
       
       const res = await fetchWithTimeout(
         paypalUrl,
@@ -381,12 +396,14 @@ export default function PaymentMethodModal({
         payload = { ok: false, error: text };
       }
 
+      console.log("[PayPal] Respuesta create-order:", {
         status: res.status,
         ok: res.ok,
         data: payload
       });
 
       if (!res.ok || !payload?.ok) {
+        console.error("[PayPal] Error al crear orden:", payload);
         throw new Error(payload?.error || `HTTP ${res.status}`);
       }
 
@@ -395,9 +412,11 @@ export default function PaymentMethodModal({
         (link: any) => link.rel === "approve",
       );
       if (!approvalLink?.href) {
+        console.error("[PayPal] Order sin approval link:", paypal_order);
         throw new Error("No se recibió la URL de aprobación de PayPal");
       }
 
+      console.log("[PayPal] Redirigiendo a:", approvalLink.href);
       window.location.assign(approvalLink.href);
     } catch (error: any) {
       toast({

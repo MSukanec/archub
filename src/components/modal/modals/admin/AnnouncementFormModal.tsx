@@ -167,6 +167,7 @@ export function AnnouncementFormModal({ modalData, onClose }: AnnouncementFormMo
       handleClose();
     },
     onError: (error) => {
+      console.error('Error creating announcement:', error);
       toast({
         title: 'Error',
         description: 'No se pudo crear el anuncio. Inténtalo de nuevo.',
@@ -210,6 +211,7 @@ export function AnnouncementFormModal({ modalData, onClose }: AnnouncementFormMo
       handleClose();
     },
     onError: (error) => {
+      console.error('Error updating announcement:', error);
       toast({
         title: 'Error',
         description: 'No se pudo actualizar el anuncio. Inténtalo de nuevo.',

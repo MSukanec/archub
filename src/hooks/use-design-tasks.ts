@@ -36,6 +36,7 @@ export function useDesignTasks(organizationId: string | undefined) {
     queryFn: async () => {
       if (!organizationId) return [];
       
+      console.log('Fetching design tasks for project:', organizationId);
       
       const { data, error } = await supabase
         .from('design_phase_tasks')
@@ -43,6 +44,7 @@ export function useDesignTasks(organizationId: string | undefined) {
         .order('position', { ascending: true });
 
       if (error) {
+        console.error('Error fetching design tasks:', error);
         throw error;
       }
 
@@ -64,6 +66,7 @@ export function useCreateDesignTask() {
         .single();
 
       if (error) {
+        console.error('Error creating design task:', error);
         throw error;
       }
 
@@ -88,6 +91,7 @@ export function useUpdateDesignTask() {
         .single();
 
       if (error) {
+        console.error('Error updating design task:', error);
         throw error;
       }
 
@@ -110,6 +114,7 @@ export function useDeleteDesignTask() {
         .eq('id', id);
 
       if (error) {
+        console.error('Error deleting design task:', error);
         throw error;
       }
     },

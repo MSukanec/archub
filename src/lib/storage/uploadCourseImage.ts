@@ -22,6 +22,7 @@ export async function uploadCourseImage(
     const extension = file.name.split('.').pop() || 'jpg';
     const filePath = `${courseId}/hero.${extension}`;
 
+    console.log('Uploading course image:', filePath);
 
     const { error: uploadError } = await supabase.storage
       .from('course-cover')
@@ -31,6 +32,7 @@ export async function uploadCourseImage(
       });
 
     if (uploadError) {
+      console.error('Error uploading course image:', uploadError);
       throw new Error(`Error al subir imagen: ${uploadError.message}`);
     }
 
@@ -45,6 +47,7 @@ export async function uploadCourseImage(
       file_path: filePath
     };
   } catch (error) {
+    console.error('Error processing course image:', error);
     throw error;
   }
 }
@@ -56,9 +59,11 @@ export async function deleteCourseImage(filePath: string): Promise<void> {
       .remove([filePath]);
 
     if (error) {
+      console.error('Error deleting course image:', error);
       throw new Error(`Error al eliminar imagen: ${error.message}`);
     }
   } catch (error) {
+    console.error('Error deleting course image:', error);
     throw error;
   }
 }
@@ -88,6 +93,7 @@ export async function updateCourseImageUrl(
       throw new Error('Failed to update course image URL');
     }
   } catch (error) {
+    console.error('Error updating course image URL:', error);
     throw error;
   }
 }

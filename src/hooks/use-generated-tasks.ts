@@ -114,6 +114,9 @@ export function useCreateGeneratedTask() {
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
+      console.log('🚀 Creating task with parameters:', payload.param_values);
+      console.log('🎯 Parameter order:', payload.param_order);
+      console.log('🔧 Additional fields:', {
         unit_id: payload.unit_id,
         category_id: payload.category_id,
         organization_id: payload.organization_id,
@@ -132,9 +135,11 @@ export function useCreateGeneratedTask() {
         });
         
         if (error) {
+          console.error('❌ Error calling create_parametric_task RPC:', error);
           throw error;
         }
         
+        console.log('✅ RPC function returned:', data);
         
         if (!data || data.length === 0) {
           throw new Error('No data returned from create_parametric_task function');
@@ -148,6 +153,7 @@ export function useCreateGeneratedTask() {
           is_existing: false
         };
       } catch (rpcError) {
+        console.error('❌ RPC function failed, falling back to direct insertion:', rpcError);
         
         // Fallback: use direct table insertion if RPC fails
         // Verificar si ya existe una tarea con esos parámetros exactos
@@ -159,6 +165,7 @@ export function useCreateGeneratedTask() {
           .single();
         
         if (searchError && searchError.code !== 'PGRST116') { // PGRST116 = no rows found
+          console.error('❌ Error searching for existing task:', searchError);
           throw searchError;
         }
         
@@ -166,6 +173,7 @@ export function useCreateGeneratedTask() {
         
         if (existingTask) {
           // Task already exists, return it
+          console.log('✅ Found existing task:', existingTask);
           taskResult = existingTask;
         } else {
           // Get the last code number
@@ -195,9 +203,11 @@ export function useCreateGeneratedTask() {
             .single();
           
           if (createError) {
+            console.error('❌ Error creating new task:', createError);
             throw createError;
           }
           
+          console.log('✅ Created new task via fallback:', newTask);
           taskResult = newTask;
         }
         
@@ -225,9 +235,11 @@ export function useCreateGeneratedTask() {
         description: `Tarea creada exitosamente con código ${data.generated_code}`,
         variant: "default"
       });
+      console.log('🎉 Task creation successful:', data.new_task);
       return data.new_task;
     },
     onError: (error: any) => {
+      console.error('❌ Error creating task:', error);
       
       toast({
         title: "Error",
@@ -306,6 +318,7 @@ export function useTaskMaterials(taskId: string | null) {
         .eq('task_id', taskId);
       
       if (error) {
+        console.error('Error fetching task materials:', error);
         throw error;
       }
       
@@ -324,6 +337,7 @@ export function useCreateTaskMaterial() {
     mutationFn: async (data: { task_id: string; material_id: string; amount: number; organization_id: string }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
+      console.log('Attempting to create task material with data:', data);
       
       const { data: result, error } = await supabase
         .from('task_materials')
@@ -332,9 +346,11 @@ export function useCreateTaskMaterial() {
         .single();
       
       if (error) {
+        console.error('Error creating task material:', error);
         throw error;
       }
       
+      console.log('Task material created successfully:', result);
       return result;
     },
     onSuccess: (_, variables) => {
@@ -441,6 +457,8 @@ export function useUpdateGeneratedTask() {
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
+      console.log('Updating generated task with data:', payload);
+      console.log('🎯 Updating param_order:', payload.param_order);
       
       const updateData: any = {
         param_values: payload.input_param_values
@@ -459,9 +477,11 @@ export function useUpdateGeneratedTask() {
         .single();
       
       if (error) {
+        console.error('Error updating task:', error);
         throw error;
       }
       
+      console.log('Task updated successfully:', data);
       return data;
     },
     onSuccess: () => {

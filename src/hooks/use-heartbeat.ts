@@ -29,8 +29,10 @@ export function useHeartbeat(orgId: string | null | undefined) {
         });
 
         if (error) {
+          console.error('Error enviando heartbeat:', error);
         }
       } catch (err) {
+        console.error('Error en heartbeat:', err);
       }
     };
 

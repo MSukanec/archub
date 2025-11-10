@@ -56,6 +56,7 @@ export function useMovementPersonnel(movementId?: string) {
         .eq('movement_id', movementId)
 
       if (error) {
+        console.error('Error fetching movement personnel:', error)
         throw error
       }
 
@@ -94,6 +95,7 @@ export function useCreateMovementPersonnel() {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
     },
     onError: (error) => {
+      console.error('Error creating movement personnel:', error)
       toast({
         title: "Error",
         description: "No se pudo asignar el personal al movimiento",
@@ -143,6 +145,7 @@ export function useUpdateMovementPersonnel() {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
     },
     onError: (error) => {
+      console.error('Error updating movement personnel:', error)
       toast({
         title: "Error",
         description: "No se pudo actualizar el personal del movimiento",

@@ -19,6 +19,7 @@ export async function uploadSiteLogFiles(
     try {
       // Validate file first
       if (!file || file.size === 0) {
+        console.error('Archivo vacío o inválido')
         continue
       }
 
@@ -49,6 +50,7 @@ export async function uploadSiteLogFiles(
         })
 
       if (dbError) {
+        console.error('Error creating file record:', dbError)
         throw dbError
       }
 
@@ -61,6 +63,7 @@ export async function uploadSiteLogFiles(
         })
 
       if (uploadError) {
+        console.error('Error uploading file:', uploadError)
         // Clean up database record if upload fails
         await supabase
           .from('project_media')
@@ -75,6 +78,7 @@ export async function uploadSiteLogFiles(
         original_name: file.name
       })
     } catch (error) {
+      console.error('Error processing file:', file.name, error)
       throw error
     }
   }
@@ -91,6 +95,7 @@ export async function getSiteLogFiles(siteLogId: string) {
     .eq('site_log_id', siteLogId)
 
   if (error) {
+    console.error('Error fetching site log files:', error)
     throw error
   }
 
@@ -113,6 +118,7 @@ export async function deleteSiteLogFile(fileId: string, fileUrl: string): Promis
         .remove([filePath])
 
       if (storageError) {
+        console.error('Error deleting file from storage:', storageError)
       }
     }
 
@@ -123,9 +129,11 @@ export async function deleteSiteLogFile(fileId: string, fileUrl: string): Promis
       .eq('id', fileId)
 
     if (dbError) {
+      console.error('Error deleting file record:', dbError)
       throw dbError
     }
   } catch (error) {
+    console.error('Error in deleteSiteLogFile:', error)
     throw error
   }
 }

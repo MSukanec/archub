@@ -141,6 +141,7 @@ export function OrganizationList() {
   // Mutation para cambiar organización activa
   const switchOrganization = useMutation({
     mutationFn: async (organizationId: string) => {
+      console.log('🔄 Switching to organization:', organizationId)
       const { data, error } = await supabase
         .from('user_preferences')
         .update({ last_organization_id: organizationId })
@@ -148,8 +149,10 @@ export function OrganizationList() {
         .select()
       
       if (error) {
+        console.error('❌ Error switching organization:', error)
         throw error
       }
+      console.log('✅ Organization switch successful:', data)
       return data
     },
     onSuccess: () => {
@@ -165,6 +168,7 @@ export function OrganizationList() {
       navigate('/organization')
     },
     onError: (error: any) => {
+      console.error('❌ Organization switch error:', error)
       toast({
         title: "Error",
         description: error.message || "No se pudo cambiar la organización.",
@@ -176,9 +180,11 @@ export function OrganizationList() {
   const handleSelect = (organizationId: string) => {
     // No hacer nada si ya está seleccionada la misma organización
     if (organizationId === currentOrganizationId) {
+      console.log('🔄 Organization already selected:', organizationId)
       return
     }
     
+    console.log('🔄 Selecting organization:', organizationId, 'Current:', currentOrganizationId)
     switchOrganization.mutate(organizationId)
   }
 
@@ -192,6 +198,7 @@ export function OrganizationList() {
 
   const handleDelete = (organization: any) => {
     // Implement delete logic
+    console.log('Delete organization:', organization)
   }
 
 

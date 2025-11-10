@@ -33,6 +33,7 @@ export async function getClientCommitments(
       .select('id, code, name, symbol');
     
     if (currenciesError) {
+      console.error('Error fetching currencies:', currenciesError);
       return `Error al buscar monedas: ${currenciesError.message}`;
     }
 
@@ -70,6 +71,7 @@ export async function getClientCommitments(
     const { data: projectClients, error: clientsError } = await projectClientsQuery;
 
     if (clientsError) {
+      console.error('Error fetching project clients:', clientsError);
       return `Error al buscar compromisos de clientes: ${clientsError.message}`;
     }
 
@@ -121,6 +123,7 @@ export async function getClientCommitments(
       .eq('organization_id', organizationId);
 
     if (paymentsError) {
+      console.error('Error fetching client payments:', paymentsError);
       return `Error al buscar pagos de clientes: ${paymentsError.message}`;
     }
 
@@ -333,6 +336,7 @@ export async function getClientCommitments(
     }
 
   } catch (err) {
+    console.error('Unexpected error in getClientCommitments:', err);
     return 'Error inesperado al buscar compromisos de clientes. Por favor intenta nuevamente.';
   }
 }

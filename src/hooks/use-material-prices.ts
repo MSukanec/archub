@@ -69,6 +69,7 @@ export function useMaterialPrices() {
         .order('created_at', { ascending: false })
 
       if (error) {
+        console.error('Error fetching material prices:', error)
         throw error
       }
 
@@ -97,6 +98,7 @@ export function useCreateMaterialPrice() {
         .single()
 
       if (error) {
+        console.error('Error creating material price:', error)
         throw error
       }
 
@@ -113,6 +115,7 @@ export function useCreateMaterialPrice() {
       })
     },
     onError: (error) => {
+      console.error('Error creating material price:', error)
       toast({
         title: 'Error',
         description: 'No se pudo agregar el precio del material.',
@@ -140,6 +143,7 @@ export function useUpdateMaterialPrice() {
         .single()
 
       if (error) {
+        console.error('Error updating material price:', error)
         throw error
       }
 
@@ -156,6 +160,7 @@ export function useUpdateMaterialPrice() {
       })
     },
     onError: (error) => {
+      console.error('Error updating material price:', error)
       toast({
         title: 'Error',
         description: 'No se pudo actualizar el precio del material.',
@@ -178,6 +183,7 @@ export function useDeleteMaterialPrice() {
         .eq('id', id)
 
       if (error) {
+        console.error('Error deleting material price:', error)
         throw error
       }
     },
@@ -192,6 +198,7 @@ export function useDeleteMaterialPrice() {
       })
     },
     onError: (error) => {
+      console.error('Error deleting material price:', error)
       toast({
         title: 'Error',
         description: 'No se pudo eliminar el precio del material.',

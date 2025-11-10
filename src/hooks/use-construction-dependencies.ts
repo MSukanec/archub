@@ -59,6 +59,7 @@ export function useConstructionDependencies(projectId: string) {
         .eq('successor_task.project_id', projectId);
 
       if (error) {
+        console.error('Error fetching construction dependencies:', error);
         throw error;
       }
 
@@ -92,6 +93,7 @@ export function useCreateConstructionDependency() {
         .single();
 
       if (error) {
+        console.error('Error creating construction dependency:', error);
         throw error;
       }
 
@@ -106,6 +108,7 @@ export function useCreateConstructionDependency() {
       });
     },
     onError: (error: any) => {
+      console.error('Failed to create construction dependency:', error);
       toast({
         title: "Error",
         description: "No se pudo crear la dependencia entre tareas.",
@@ -139,6 +142,7 @@ export function useUpdateConstructionDependency() {
         .single();
 
       if (error) {
+        console.error('Error updating construction dependency:', error);
         throw error;
       }
 
@@ -153,6 +157,7 @@ export function useUpdateConstructionDependency() {
       });
     },
     onError: (error: any) => {
+      console.error('Failed to update construction dependency:', error);
       toast({
         title: "Error",
         description: "No se pudo actualizar la dependencia entre tareas.",
@@ -175,6 +180,7 @@ export function useDeleteConstructionDependency() {
         .eq('id', id);
 
       if (error) {
+        console.error('Error deleting construction dependency:', error);
         throw error;
       }
 
@@ -189,6 +195,7 @@ export function useDeleteConstructionDependency() {
       });
     },
     onError: (error: any) => {
+      console.error('Failed to delete construction dependency:', error);
       toast({
         title: "Error",
         description: "No se pudo eliminar la dependencia entre tareas.",

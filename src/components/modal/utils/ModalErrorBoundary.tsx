@@ -61,6 +61,8 @@ export class ModalErrorBoundary extends Component<ModalErrorBoundaryProps, Modal
     });
 
     // Log del error
+    console.error('ModalErrorBoundary caught an error:', error);
+    console.error('Error info:', errorInfo);
 
     // Callback personalizado
     if (this.props.onError) {
@@ -78,6 +80,7 @@ export class ModalErrorBoundary extends Component<ModalErrorBoundaryProps, Modal
     const { retryCount } = this.state;
 
     if (retryCount >= maxRetries) {
+      console.warn(`Maximum retry attempts (${maxRetries}) reached for modal error boundary`);
       return;
     }
 
@@ -225,6 +228,7 @@ export function useModalErrorHandler() {
 
   const handleError = React.useCallback((error: Error) => {
     setError(error);
+    console.error('Modal error caught by hook:', error);
   }, []);
 
   // Lanzar error para ser capturado por el boundary

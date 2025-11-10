@@ -10,6 +10,7 @@ export function useTaskCosts(taskId: string | null) {
         throw new Error("Supabase client not initialized or no task ID provided");
       }
 
+      console.log('Fetching task costs for task:', taskId);
       
       // Obtener materiales
       const { data: materials, error: materialsError } = await supabase
@@ -30,6 +31,7 @@ export function useTaskCosts(taskId: string | null) {
         .eq("task_id", taskId);
 
       if (materialsError) {
+        console.error("Error fetching task materials:", materialsError);
         throw materialsError;
       }
 
@@ -46,6 +48,7 @@ export function useTaskCosts(taskId: string | null) {
         .eq("task_id", taskId);
 
       if (laborError) {
+        console.error("Error fetching task labor:", laborError);
         throw laborError;
       }
       
@@ -59,6 +62,7 @@ export function useTaskCosts(taskId: string | null) {
             .single()
             
           if (laborViewError) {
+            console.warn('Error fetching labor view:', laborViewError)
             return { ...laborItem, labor_view: null }
           }
           

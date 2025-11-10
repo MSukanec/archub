@@ -36,6 +36,7 @@ export default function Analysis() {
 
   const handleNewLabor = () => {
     // TODO: Implementar modal para nuevo análisis de mano de obra
+    console.log('Crear nuevo análisis de mano de obra')
   }
 
   // Get action button based on active tab

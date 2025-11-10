@@ -206,6 +206,7 @@ export function TaskBasicDataView({
       });
     },
     onError: (error: any) => {
+      console.error('Error saving task data:', error);
       toast({
         title: "Error al guardar",
         description: "No se pudieron guardar los cambios de la tarea",
@@ -249,6 +250,7 @@ export function TaskBasicDataView({
       });
     },
     onError: (error: any) => {
+      console.error('Error saving task division:', error);
       toast({
         title: "Error al guardar rubro",
         description: "No se pudo guardar el rubro de la tarea",
@@ -292,6 +294,7 @@ export function TaskBasicDataView({
       });
     },
     onError: (error: any) => {
+      console.error('Error saving task unit:', error);
       toast({
         title: "Error al guardar unidad",
         description: "No se pudo guardar la unidad de cómputo",
@@ -387,6 +390,7 @@ export function TaskBasicDataView({
           navigate(isFromAdmin ? '/admin/tasks' : '/analysis');
           
         } catch (error: any) {
+          console.error('Error deleting task:', error);
           toast({
             title: "Error",
             description: error.message || "Error al eliminar la tarea",
@@ -409,6 +413,7 @@ export function TaskBasicDataView({
         .order('name');
       
       if (error) {
+        console.error('Error loading divisions:', error);
         return [];
       }
       
@@ -427,6 +432,7 @@ export function TaskBasicDataView({
         .order('name');
       
       if (error) {
+        console.error('Error loading units:', error);
         return [];
       }
       

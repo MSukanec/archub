@@ -152,6 +152,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
       handleClose();
     },
     onError: (error) => {
+      console.error('Error creating payment:', error);
       toast({
         title: 'Error',
         description: 'No se pudo crear el pago. Inténtalo de nuevo.',
@@ -187,6 +188,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
       handleClose();
     },
     onError: (error) => {
+      console.error('Error updating payment:', error);
       toast({
         title: 'Error',
         description: 'No se pudo actualizar el pago. Inténtalo de nuevo.',

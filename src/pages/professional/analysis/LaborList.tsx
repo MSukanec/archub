@@ -136,6 +136,7 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
       })
     },
     onError: (error) => {
+      console.error('Error deleting labor type:', error)
       toast({
         title: "Error al eliminar",
         description: "No se pudo eliminar el tipo de mano de obra.",

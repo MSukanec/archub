@@ -83,6 +83,7 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
       }));
 
       // Obtener el organization_member ID consultando directamente
+      console.log('Searching for organization member:', {
         organizationId,
         userId: userData.user?.id
       });
@@ -95,6 +96,7 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
         .eq('is_active', true)
         .single();
       
+      console.log('Member query result:', { memberData, memberError });
       
       if (memberError || !memberData?.id) {
         // Fallback: try to find any active member for this user
@@ -104,11 +106,13 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
           .eq('user_id', userData.user?.id)
           .eq('is_active', true);
         
+        console.log('Fallback member search:', fallbackData);
         throw new Error(`No se encontró la membresía activa. Error: ${memberError?.message || 'Member not found'}`);
       }
       
       const createdByMemberId = memberData.id;
       
+      console.log('Final upload data check:', {
         projectId,
         organizationId,
         createdBy: createdByMemberId,
@@ -215,6 +219,8 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
       return;
     }
 
+    console.log('Form submit data:', data);
+    console.log('Files to upload:', files.map((f, i) => ({ name: f.name, customName: fileNames[i] })));
     uploadMutation.mutate(data);
   };
 

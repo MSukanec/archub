@@ -60,6 +60,7 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
         .single();
 
       if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching project data:', error);
         throw error;
       }
 
@@ -85,6 +86,7 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
         });
 
       if (error) {
+        console.error('Error saving project location:', error);
         throw error;
       }
     },
@@ -97,6 +99,7 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
       });
     },
     onError: (error: any) => {
+      console.error('Error in saveProjectLocationMutation:', error);
       toast({
         title: "Error al guardar",
         description: "No se pudieron guardar los cambios de ubicación",
@@ -242,6 +245,7 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
         setPlaceId(result.place_id);
       }
     } catch (error) {
+      console.error('Error in reverse geocoding:', error);
     }
   };
 

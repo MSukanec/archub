@@ -56,6 +56,7 @@ export function ParameterVisibilityConfigModal() {
   const saveDependencyOptionsMutation = useSaveDependencyOptions();
 
   // LOGS DE DEBUG DESPUÉS DE TODOS LOS HOOKS
+  console.log('🔧 ParameterVisibilityConfigModal render:', {
     open,
     modalType,
     parameterId,
@@ -113,6 +114,7 @@ export function ParameterVisibilityConfigModal() {
       
       closeModal();
     } catch (error) {
+      console.error('Error saving configurations:', error);
     } finally {
       setIsSubmitting(false);
     }

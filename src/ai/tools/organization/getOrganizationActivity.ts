@@ -31,6 +31,7 @@ export async function getOrganizationActivity(
       .eq('organization_id', organizationId);
 
     if (presenceError) {
+      console.error('Error fetching user presence:', presenceError);
       return `Error al obtener actividad de usuarios: ${presenceError.message}`;
     }
 
@@ -144,6 +145,7 @@ export async function getOrganizationActivity(
     return response.trim();
 
   } catch (err) {
+    console.error('Unexpected error in getOrganizationActivity:', err);
     return 'Error inesperado al obtener actividad de la organización. Por favor intenta nuevamente.';
   }
 }

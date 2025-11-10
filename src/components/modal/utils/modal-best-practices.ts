@@ -68,8 +68,10 @@ export const ExampleModalWithReadiness = () => {
       projectId: projectId,
     },
     onReady: () => {
+      console.log('Modal ready - all critical data loaded');
     },
     onError: (error) => {
+      console.error('Modal readiness error:', error);
     },
   });
 
@@ -440,6 +442,7 @@ export const ErrorHandlingPattern = () => {
     criticalQueries: [/* ... */],
     onError: (error) => {
       // Log error para debugging
+      console.error('Modal readiness error:', error);
       
       // Reportar a servicio de monitoreo
       // Sentry.captureException(error);
@@ -452,6 +455,7 @@ export const ErrorHandlingPattern = () => {
       fallbackTitle="Error en el Modal"
       onError={(error, errorInfo) => {
         // Log completo del error
+        console.error('Modal crashed:', error, errorInfo);
       }}
     >
       <FormModalLayout readinessState={readiness}>

@@ -142,6 +142,7 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
       }
       onClose()
     } catch (error) {
+      console.error('Error creating product:', error)
     } finally {
       setIsLoading(false)
     }
@@ -167,6 +168,7 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
       const newBrand = await createBrandMutation.mutateAsync({ name: brandName })
       return { value: newBrand.id, label: newBrand.name }
     } catch (error) {
+      console.error('Error creating brand:', error)
       throw error
     }
   }

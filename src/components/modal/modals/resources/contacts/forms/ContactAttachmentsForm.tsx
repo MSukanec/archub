@@ -53,6 +53,7 @@ export function ContactAttachmentsForm({ contactId, contact }: ContactAttachment
             description: `${fileInput.file.name} se ha subido correctamente`,
           });
         } catch (error) {
+          console.error('Error al subir archivo:', error);
           toast({
             title: "Error",
             description: `No se pudo subir ${fileInput.file.name}`,
@@ -77,6 +78,7 @@ export function ContactAttachmentsForm({ contactId, contact }: ContactAttachment
           attachmentId: '' // Remove avatar
         });
       } catch (error) {
+        console.error('Error removing avatar:', error);
       }
     }
 

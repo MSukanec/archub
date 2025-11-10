@@ -670,6 +670,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         .order('amount', { ascending: false })
 
       if (error || !allGroupMovements || allGroupMovements.length !== 2) {
+        console.error('Error al buscar grupo de conversión:', error)
         return
       }
 
@@ -688,6 +689,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       const destinationMovement = allGroupMovements.find(m => m.type_id === ingressType?.id)
       
       if (!originMovement || !destinationMovement) {
+        console.error('No se pudieron identificar movimientos de origen y destino por tipo')
         return
       }
       
@@ -720,6 +722,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
       
     } catch (error) {
+      console.error('Error al cargar datos de conversión:', error)
     }
   }
 
@@ -737,6 +740,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         .single()
 
       if (error) {
+        console.error('Error al buscar movimiento complementario:', error)
         return
       }
 
@@ -762,6 +766,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
       
     } catch (error) {
+      console.error('Error al cargar datos de transferencia:', error)
     }
   }
 
@@ -881,6 +886,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         setSelectedPersonnel(formattedPersonnel)
       }
     } catch (error) {
+      console.error('Error loading personnel assignments:', error)
     }
   }, [])
 
@@ -919,6 +925,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         setSelectedSubcontracts(formattedSubcontracts)
       }
     } catch (error) {
+      console.error('Error loading subcontract assignments:', error)
     }
   }, [])
 
@@ -975,6 +982,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         setSelectedClients(formattedClients)
       }
     } catch (error) {
+      console.error('Error loading project client assignments:', error)
     }
   }, [])
 
@@ -1007,6 +1015,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         setSelectedIndirects(formattedIndirects)
       }
     } catch (error) {
+      console.error('Error loading indirect cost assignments:', error)
     }
   }, [])
 
@@ -1273,8 +1282,10 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           });
           
           if (checklistError) {
+            console.error('Error updating home checklist:', checklistError);
           }
         } catch (error) {
+          console.error('Error calling tick_home_checklist:', error);
         }
       }
 

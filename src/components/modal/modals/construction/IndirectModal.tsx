@@ -68,8 +68,10 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
       organizationId: organizationId || userQuery.data?.organization?.id 
     },
     onReady: () => {
+      console.log('IndirectModal ready with all data loaded')
     },
     onError: (error) => {
+      console.error('IndirectModal failed to load:', error)
       toast({
         title: 'Error',
         description: 'No se pudo cargar los datos necesarios para este modal',
@@ -152,6 +154,7 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
       
       onClose()
     } catch (error) {
+      console.error('Error saving indirect cost:', error)
       // Los hooks ya manejan el toast de error
     } finally {
       setIsSubmitting(false)

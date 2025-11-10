@@ -22,6 +22,7 @@ const AdminTaskCategories = () => {
 
   // Debug query state (only log errors)
   if (isError) {
+    console.error('❌ AdminCategories error:', error);
   }
 
   // Auto-expand categories that have children (only on initial load)
@@ -74,6 +75,7 @@ const AdminTaskCategories = () => {
         try {
           await deleteTaskCategoryMutation.mutateAsync(categoryId);
         } catch (error) {
+          console.error('Error deleting category:', error);
           throw error;
         }
       }

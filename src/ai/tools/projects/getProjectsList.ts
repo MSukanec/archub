@@ -43,6 +43,7 @@ export async function getProjectsList(
     const { data: projects, error } = await query;
 
     if (error) {
+      console.error('Error fetching projects:', error);
       return `Error al buscar proyectos: ${error.message}`;
     }
 
@@ -108,6 +109,7 @@ export async function getProjectsList(
     return response.trim();
 
   } catch (err) {
+    console.error('Unexpected error in getProjectsList:', err);
     return 'Error inesperado al buscar proyectos. Por favor intenta nuevamente.';
   }
 }

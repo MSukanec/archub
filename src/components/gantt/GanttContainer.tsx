@@ -265,6 +265,7 @@ export function GanttContainer({
     const totalDays = allDays.length;
     
     // Calendar structure generated correctly
+    // console.log('Calendar:', totalDays, 'days from', timelineStart.toDateString(), 'to', timelineEnd.toDateString());
     
     return { weeks, totalDays };
   }, [timelineStart, timelineEnd]);
@@ -382,6 +383,7 @@ export function GanttContainer({
         setAutoScrolled(true);
         
         // Auto-scroll to show current week
+        // console.log('Auto-scroll to day', targetDayIndex);
       }
     };
 
@@ -865,6 +867,7 @@ export function GanttContainer({
                         const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2) - 1; // -1px para centrar mejor
                         
                         // Today line positioned correctly
+                        // console.log('Today line at day', todayDayIndex, 'position', todayPosition);
                         
                         return (
                           <div 

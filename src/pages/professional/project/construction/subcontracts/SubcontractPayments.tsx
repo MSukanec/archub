@@ -61,6 +61,7 @@ export function SubcontractPayments({ projectId, organizationId }: SubcontractPa
         .order('movement(movement_date)', { ascending: false })
 
       if (error) {
+        console.error('Error fetching subcontract payments:', error)
         throw error
       }
 

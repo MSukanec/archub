@@ -68,16 +68,20 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized')
       
+      console.log('🔧 CostModal: Fetching labor types from labor_view (global)')
       const { data, error } = await supabase
         .from('labor_view')
         .select('*')
         .order('labor_name')
       
       if (error) {
+        console.error('🔧 CostModal: Error fetching labor types:', error)
         throw error
       }
       
+      console.log('🔧 CostModal: Fetched labor types:', data?.length, 'items')
       if (data?.length > 0) {
+        console.log('🔧 CostModal: Sample labor type:', data[0])
       }
       
       return data || []
@@ -109,6 +113,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       })
     },
     onError: (error) => {
+      console.error('Error adding material to task:', error)
       toast({
         title: "Error al agregar material",
         description: "No se pudo agregar el material a la tarea.",
@@ -141,6 +146,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       })
     },
     onError: (error) => {
+      console.error('Error adding labor to task:', error)
       toast({
         title: "Error al agregar mano de obra",
         description: "No se pudo agregar la mano de obra a la tarea.",
@@ -173,6 +179,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       })
     },
     onError: (error) => {
+      console.error('Error updating material:', error)
       toast({
         title: "Error al actualizar material",
         description: "No se pudo actualizar el material.",
@@ -205,6 +212,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       })
     },
     onError: (error) => {
+      console.error('Error updating labor:', error)
       toast({
         title: "Error al actualizar mano de obra",
         description: "No se pudo actualizar la mano de obra.",
@@ -348,6 +356,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       onClose()
       form.reset()
     } catch (error) {
+      console.error('Error saving cost:', error)
     } finally {
       setIsLoading(false)
     }

@@ -46,6 +46,7 @@ export default function AdminCourseDashboardTab() {
 
       if (!res.ok) throw new Error('Failed to fetch dashboard data')
       const data = await res.json()
+      console.log('💰 Dashboard data received:', data)
       return data
     },
     enabled: !!supabase,

@@ -161,6 +161,7 @@ const AdminCostMaterials = () => {
       onDelete: () => deleteMaterialMutation.mutate(material.id),
       onReplace: (newMaterialId: string) => {
         // Aquí puedes implementar la lógica de reemplazo si es necesaria
+        console.log('Reemplazar material', material.id, 'por', newMaterialId)
         // Por ahora solo eliminamos el material actual
         deleteMaterialMutation.mutate(material.id)
       },

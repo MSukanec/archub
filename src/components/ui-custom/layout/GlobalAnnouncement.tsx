@@ -46,6 +46,7 @@ export function AnnouncementProvider({ children }: { children: React.ReactNode }
       try {
         setDismissedIds(JSON.parse(stored));
       } catch (e) {
+        console.error('Error parsing dismissed announcements:', e);
       }
     }
   }, []);
@@ -63,6 +64,7 @@ export function AnnouncementProvider({ children }: { children: React.ReactNode }
         .order('created_at', { ascending: false });
 
       if (error) {
+        console.error('Error fetching announcements:', error);
         return [];
       }
 

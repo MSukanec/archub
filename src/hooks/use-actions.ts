@@ -24,6 +24,7 @@ export function useTaskKinds() {
         .order('name', { ascending: true });
 
       if (error) {
+        console.error('Error fetching task kinds:', error);
         throw error;
       }
 
@@ -54,6 +55,7 @@ export function useDeleteTaskKind() {
       });
     },
     onError: (error) => {
+      console.error('Error deleting task kind:', error);
       toast({
         title: "Error",
         description: "No se pudo eliminar la acción.",

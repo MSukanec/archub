@@ -20,6 +20,7 @@ export function useUnreadSupportMessages() {
         .eq('read_by_admin', false);
 
       if (error) {
+        console.error('Error fetching unread support messages:', error);
         return 0;
       }
 

@@ -128,6 +128,7 @@ export function BudgetListTab({
         next_item_id,
       });
     } catch (error) {
+      console.error('Error reordering tasks:', error);
       // The mutation hook will show a toast, but we can add additional logging here
     }
   }

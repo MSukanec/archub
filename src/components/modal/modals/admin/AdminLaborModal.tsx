@@ -158,6 +158,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       })
     },
     onError: (error) => {
+      console.error('Error creating labor type:', error)
       toast({
         title: "Error al crear",
         description: "No se pudo crear el tipo de mano de obra.",
@@ -184,6 +185,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       })
     },
     onError: (error) => {
+      console.error('Error updating labor type:', error)
       toast({
         title: "Error al actualizar",
         description: "No se pudo actualizar el tipo de mano de obra.",
@@ -215,6 +217,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
   // Set default currency when currencies are loaded
   React.useEffect(() => {
     if (currencyOptions.length > 0 && !form.getValues('currency_id')) {
+      console.log('💱 Setting default currency:', currencyOptions[0])
       form.setValue('currency_id', currencyOptions[0].id)
     }
   }, [currencyOptions, form])
@@ -272,6 +275,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       }
       
       // Handle labor price if provided
+      console.log('💰 Price data:', { unit_price: data.unit_price, currency_id: data.currency_id, org: userData?.organization?.id })
       if (data.unit_price && data.currency_id && data.currency_id !== '' && userData?.organization?.id) {
         const priceData: LaborPriceData = {
           labor_id: laborTypeId,
@@ -301,6 +305,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       onClose()
       form.reset()
     } catch (error) {
+      console.error('Error saving labor type:', error)
     } finally {
       setIsLoading(false)
     }

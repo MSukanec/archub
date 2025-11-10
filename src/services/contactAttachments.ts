@@ -98,6 +98,7 @@ export async function createContactAttachment(params: {
     try {
       await removeFromBucket('contact-files', [storage_path]);
     } catch (cleanupError) {
+      console.error('Error al limpiar archivo tras fallo:', cleanupError);
     }
     throw error;
   }

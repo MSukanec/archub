@@ -125,6 +125,7 @@ export function UnifiedViewer({
       }
       
     } catch (error) {
+      console.error('Error loading file:', error);
       setState(prev => ({
         ...prev,
         loading: false,
@@ -154,6 +155,7 @@ export function UnifiedViewer({
         scale: 1.0 // This represents the relative zoom from the fit-to-width base
       }));
     } catch (error) {
+      console.error('Error loading PDF:', error);
       setState(prev => ({
         ...prev,
         error: 'Error al cargar PDF'
@@ -182,6 +184,7 @@ export function UnifiedViewer({
         rotation: 0
       }));
     } catch (error) {
+      console.error('Error loading image:', error);
       setState(prev => ({
         ...prev,
         error: 'Error al cargar imagen'
@@ -213,7 +216,9 @@ export function UnifiedViewer({
       };
 
       await page.render(renderContext).promise;
+      console.log('PDF page rendered successfully');
     } catch (error) {
+      console.error('Error rendering PDF page:', error);
     }
   }, [state.pdfDoc, state.page, state.scale]);
 

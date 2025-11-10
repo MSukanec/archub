@@ -161,6 +161,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       await upsertCustomPrice.mutateAsync(priceData);
       setIsEditingMaterial(false);
     } catch (error) {
+      console.error('Error saving material cost:', error);
     }
   };
 
@@ -191,6 +192,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       await upsertCustomPrice.mutateAsync(priceData);
       setIsEditingLabor(false);
     } catch (error) {
+      console.error('Error saving labor cost:', error);
     }
   };
 
@@ -221,6 +223,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       await upsertCustomPrice.mutateAsync(priceData);
       setIsEditingSupply(false);
     } catch (error) {
+      console.error('Error saving supply cost:', error);
     }
   };
 
@@ -235,6 +238,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       setIsEditingLabor(false);
       setIsEditingSupply(false);
     } catch (error) {
+      console.error('Error deleting custom price:', error);
     }
   };
 
@@ -283,6 +287,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
             await deleteLaborMutation.mutateAsync(cost.id);
           }
         } catch (error) {
+          console.error('Error eliminando costo:', error);
         }
       }
     });

@@ -58,6 +58,7 @@ export function useSubcontractTasks(subcontractId: string) {
       queryClient.invalidateQueries({ queryKey: ['subcontract-tasks', subcontractId] });
     },
     onError: (error) => {
+      console.error('Error creating subcontract tasks:', error);
       toast({
         title: 'Error',
         description: 'No se pudieron agregar las tareas al subcontrato',
@@ -84,6 +85,7 @@ export function useSubcontractTasks(subcontractId: string) {
       queryClient.invalidateQueries({ queryKey: ['subcontract-tasks', subcontractId] });
     },
     onError: (error) => {
+      console.error('Error deleting subcontract task:', error);
       toast({
         title: 'Error',
         description: 'No se pudo eliminar la tarea del subcontrato',
@@ -111,6 +113,7 @@ export function useSubcontractTasks(subcontractId: string) {
       queryClient.invalidateQueries({ queryKey: ['subcontract-tasks', subcontractId] });
     },
     onError: (error) => {
+      console.error('Error updating subcontract task:', error);
       toast({
         title: 'Error',
         description: 'No se pudo actualizar la tarea',

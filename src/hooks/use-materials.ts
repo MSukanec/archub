@@ -69,9 +69,11 @@ export function useMaterials() {
         .order('name')
 
       if (error) {
+        console.error('Error fetching materials:', error)
         throw error
       }
 
+      console.log('🔧 Raw materials data sample:', data?.slice(0, 3)?.map(m => ({ 
         name: m.name, 
         category_name: m.category_name,
         avg_price: m.avg_price,
@@ -130,6 +132,7 @@ export function useCreateMaterial() {
         .single()
 
       if (error) {
+        console.error('Error creating material:', error)
         throw error
       }
 
@@ -146,6 +149,7 @@ export function useCreateMaterial() {
       })
     },
     onError: (error) => {
+      console.error('Error creating material:', error)
       toast({
         title: "Error",
         description: "No se pudo crear el material.",
@@ -174,6 +178,7 @@ export function useUpdateMaterial() {
         .single()
 
       if (error) {
+        console.error('Error updating material:', error)
         throw error
       }
 
@@ -190,6 +195,7 @@ export function useUpdateMaterial() {
       })
     },
     onError: (error) => {
+      console.error('Error updating material:', error)
       toast({
         title: "Error",
         description: "No se pudo actualizar el material.",
@@ -212,6 +218,7 @@ export function useDeleteMaterial() {
         .eq('id', id)
 
       if (error) {
+        console.error('Error deleting material:', error)
         throw error
       }
 
@@ -226,6 +233,7 @@ export function useDeleteMaterial() {
       })
     },
     onError: (error) => {
+      console.error('Error deleting material:', error)
       toast({
         title: "Error",
         description: "No se pudo eliminar el material.",
@@ -249,6 +257,7 @@ export function useCreateMaterialPrice() {
         .single()
 
       if (error) {
+        console.error('Error creating material price:', error)
         throw error
       }
 
@@ -261,6 +270,7 @@ export function useCreateMaterialPrice() {
       queryClient.invalidateQueries({ queryKey: ['material-view'] })
     },
     onError: (error) => {
+      console.error('Error creating material price:', error)
       toast({
         title: "Error",
         description: "No se pudo guardar el precio del material.",
@@ -313,6 +323,7 @@ export function useUpdateMaterialPrice() {
         .single()
 
       if (error) {
+        console.error('Error updating material price:', error)
         throw error
       }
 
@@ -326,6 +337,7 @@ export function useUpdateMaterialPrice() {
       queryClient.invalidateQueries({ queryKey: ['material-view'] })
     },
     onError: (error) => {
+      console.error('Error updating material price:', error)
       toast({
         title: "Error",
         description: "No se pudo actualizar el precio del material.",

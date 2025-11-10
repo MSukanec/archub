@@ -53,6 +53,7 @@ export async function getRoleSpending(
     const { data: movements, error } = (await query) as { data: MovementRow[] | null, error: any };
 
     if (error) {
+      console.error('Error fetching role spending:', error);
       return `Error al buscar gastos: ${error.message}`;
     }
 
@@ -182,6 +183,7 @@ export async function getRoleSpending(
     return response;
 
   } catch (err) {
+    console.error('Unexpected error in getRoleSpending:', err);
     return 'Error inesperado al calcular gastos por rol. Por favor intenta nuevamente.';
   }
 }

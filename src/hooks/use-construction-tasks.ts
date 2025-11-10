@@ -41,6 +41,7 @@ export function useConstructionTasksView(projectId: string, organizationId: stri
         .order('created_at', { ascending: true });
 
       if (error) {
+        console.error('Error fetching construction tasks view:', error);
         throw error;
       }
 
@@ -107,9 +108,11 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
     queryFn: async (): Promise<ConstructionTask[]> => {
       if (!supabase) throw new Error('Supabase not initialized');
       
+      console.log('Fetching construction tasks for project:', projectId, 'in organization:', organizationId);
       
       // Validar que tenemos los parámetros necesarios
       if (!projectId || !organizationId) {
+        console.log('Missing projectId or organizationId, returning empty array');
         return [];
       }
       
@@ -122,10 +125,12 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         .order('created_at', { ascending: true });
 
       if (constructionError) {
+        console.error('Error fetching construction tasks:', constructionError);
         throw constructionError;
       }
       
       if (!constructionTasks || constructionTasks.length === 0) {
+        console.log('No construction tasks found for project:', projectId);
         return [];
       }
 
@@ -160,15 +165,18 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         .in('construction_task_id', constructionTaskIds);
 
       if (phaseError) {
+        console.error('Error fetching phase relations:', phaseError);
       }
 
       // Debug logs removed
 
       if (error) {
+        console.error('Error fetching construction tasks:', error);
         throw error;
       }
 
       if (!constructionTasks || constructionTasks.length === 0) {
+        console.log('No construction tasks found for project:', projectId);
         return [];
       }
 
@@ -279,6 +287,7 @@ export function useCreateConstructionTask() {
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
 
+      console.log('🔧 HOOK useCreateConstructionTask - DATOS RECIBIDOS:', taskData);
 
       // Preparar datos para inserción (solo campos que existen en construction_tasks)
       const insertData = {
@@ -293,6 +302,7 @@ export function useCreateConstructionTask() {
         description: taskData.description || null
       };
 
+      console.log('📝 DATOS PREPARADOS PARA INSERT (construction_tasks):', insertData);
 
       // Crear la tarea de construcción
       const { data: constructionTask, error: taskError } = await supabase
@@ -302,12 +312,17 @@ export function useCreateConstructionTask() {
         .single();
 
       if (taskError) {
+        console.error('❌ ERROR CREANDO CONSTRUCCION TASK:', taskError);
+        console.error('❌ Datos que causaron el error:', taskData);
+        console.error('❌ Error completo:', JSON.stringify(taskError, null, 2));
         throw taskError;
       }
 
+      console.log('✅ TAREA DE CONSTRUCCION CREADA EXITOSAMENTE:', constructionTask);
 
       // Si se especifica una fase, crear la relación en construction_phase_tasks
       if (taskData.project_phase_id) {
+        console.log('📋 CREANDO RELACION FASE-TAREA para phase_id:', taskData.project_phase_id);
         
         const { error: phaseTaskError } = await supabase
           .from('construction_phase_tasks')
@@ -319,8 +334,10 @@ export function useCreateConstructionTask() {
           });
 
         if (phaseTaskError) {
+          console.error('❌ ERROR CREANDO RELACION FASE-TAREA:', phaseTaskError);
           // No lanzamos error porque la tarea principal ya se creó
         } else {
+          console.log('✅ RELACION FASE-TAREA CREADA EXITOSAMENTE');
         }
       }
 
@@ -347,6 +364,7 @@ export function useCreateConstructionTask() {
       });
     },
     onError: (error) => {
+      console.error('Error adding construction task:', error);
       toast({
         title: "Error",
         description: "No se pudo agregar el cómputo",
@@ -376,12 +394,14 @@ export function useInitializeCostScope() {
         .select();
 
       if (error) {
+        console.error('Error initializing cost_scope:', error);
         throw error;
       }
 
       return result;
     },
     onSuccess: (result, data) => {
+      console.log(`Initialized cost_scope for ${result?.length || 0} tasks`);
       // Invalidar cache para refrescar los datos
       queryClient.invalidateQueries({ 
         queryKey: ['construction-tasks-view']
@@ -432,6 +452,7 @@ export function useUpdateConstructionTask() {
         .single();
 
       if (error) {
+        console.error('Error updating construction task:', error);
         throw error;
       }
 
@@ -455,6 +476,7 @@ export function useUpdateConstructionTask() {
             });
 
           if (phaseTaskError) {
+            console.error('Error linking task to phase:', phaseTaskError);
             // No lanzamos error aquí para que la actualización continúe
           }
         }
@@ -468,6 +490,7 @@ export function useUpdateConstructionTask() {
           .eq('construction_task_id', data.id);
 
         if (progressError) {
+          console.error('Error updating progress:', progressError);
         }
       }
 
@@ -504,6 +527,7 @@ export function useUpdateConstructionTask() {
       }
     },
     onError: (error) => {
+      console.error('Error updating construction task:', error);
       toast({
         title: "Error",
         description: "No se pudieron guardar los cambios",
@@ -543,6 +567,7 @@ export function useUpdateConstructionTaskResize() {
         .single();
 
       if (error) {
+        console.error('Error updating construction task resize:', error);
         throw error;
       }
 
@@ -576,6 +601,7 @@ export function useUpdateConstructionTaskResize() {
       });
     },
     onError: (error) => {
+      console.error('Error updating construction task resize:', error);
       // Sin toast para redimensionamiento - feedback visual suficiente
     },
   });
@@ -609,6 +635,7 @@ export function useUpdateConstructionTaskDrag() {
         .single();
 
       if (error) {
+        console.error('Error updating construction task drag:', error);
         throw error;
       }
 
@@ -616,6 +643,7 @@ export function useUpdateConstructionTaskDrag() {
     },
     // NO onSuccess para evitar invalidación inmediata de caché
     onError: (error) => {
+      console.error('Error updating construction task drag:', error);
     },
   });
 }
@@ -637,6 +665,7 @@ export function useDeleteConstructionTask() {
         .eq('id', data.id);
 
       if (error) {
+        console.error('Error deleting construction task:', error);
         throw error;
       }
 
@@ -664,6 +693,7 @@ export function useDeleteConstructionTask() {
       });
     },
     onError: (error: any) => {
+      console.error('Error deleting construction task:', error);
       
       // Manejar diferentes tipos de errores con mensajes específicos
       let title = "Error";

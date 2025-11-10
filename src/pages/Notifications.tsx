@@ -108,6 +108,7 @@ export default function Notifications() {
       const href = resolveNotificationHref(notification)
       navigate(href)
     } catch (error) {
+      console.error('Error handling notification click:', error)
     }
   }
 

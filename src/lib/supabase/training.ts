@@ -84,6 +84,7 @@ export async function fetchGlobalProgress(userId: string): Promise<GlobalProgres
       progress_pct
     }
   } catch (error) {
+    console.error('Error fetching global progress:', error)
     return null
   }
 }
@@ -144,6 +145,7 @@ export async function fetchCourseProgress(userId: string): Promise<CourseProgres
 
     return courseProgress
   } catch (error) {
+    console.error('Error fetching course progress:', error)
     return []
   }
 }
@@ -188,6 +190,7 @@ export async function fetchStudyTime(userId: string): Promise<StudyTime | null> 
       seconds_this_month
     }
   } catch (error) {
+    console.error('Error fetching study time:', error)
     return null
   }
 }
@@ -219,6 +222,7 @@ export async function fetchActiveDays(userId: string, limitDays = 90): Promise<A
       day
     }))
   } catch (error) {
+    console.error('Error fetching active days:', error)
     return []
   }
 }
@@ -264,6 +268,7 @@ export async function fetchRecentActivity(userId: string, limit = 10): Promise<R
 
     return items
   } catch (error) {
+    console.error('Error fetching recent activity:', error)
     return []
   }
 }

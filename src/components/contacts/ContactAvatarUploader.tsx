@@ -81,6 +81,7 @@ export function ContactAvatarUploader({ contactId, contact }: ContactAvatarUploa
 
       setShowUpload(false);
     } catch (error) {
+      console.error('Error al subir avatar:', error);
     } finally {
       setIsUploading(false);
     }

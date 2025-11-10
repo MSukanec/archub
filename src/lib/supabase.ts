@@ -30,10 +30,12 @@ export async function refreshSupabaseSession() {
   try {
     const { data, error } = await supabase.auth.refreshSession()
     if (error) {
+      console.error('Error refreshing session:', error)
       return false
     }
     return true
   } catch (error) {
+    console.error('Exception during session refresh:', error)
     return false
   }
 }

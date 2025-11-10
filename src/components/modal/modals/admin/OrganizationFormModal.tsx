@@ -136,6 +136,7 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
       handleClose();
     },
     onError: (error) => {
+      console.error('Error with organization:', error);
       toast({
         title: 'Error',
         description: organization ? 'No se pudo actualizar la organización. Inténtalo de nuevo.' : 'No se pudo crear la organización. Inténtalo de nuevo.',

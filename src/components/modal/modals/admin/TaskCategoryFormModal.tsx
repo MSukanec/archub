@@ -85,6 +85,7 @@ export function TaskCategoryFormModal({ modalData, onClose }: TaskCategoryFormMo
       
       onClose();
     } catch (error) {
+      console.error('Error saving category:', error);
     } finally {
       setIsSubmitting(false);
     }

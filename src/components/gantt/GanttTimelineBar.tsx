@@ -141,6 +141,7 @@ export function GanttTimelineBar({
   const widthPixels = calculatedDuration * dayWidth;
   
   // Clean up debug logs - alignment is now working perfectly
+  // console.log('BAR ALIGNED:', item.name.substring(0, 20), startPixels);
 
 
 

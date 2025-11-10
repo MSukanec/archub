@@ -29,6 +29,7 @@ export function useBrands() {
         .order('name')
 
       if (error) {
+        console.error('Error fetching brands:', error)
         throw error
       }
 
@@ -53,6 +54,7 @@ export function useCreateBrand() {
         .single()
 
       if (error) {
+        console.error('Error creating brand:', error)
         throw error
       }
 
@@ -67,6 +69,7 @@ export function useCreateBrand() {
       })
     },
     onError: (error) => {
+      console.error('Error creating brand:', error)
       toast({
         title: "Error",
         description: "No se pudo crear la marca.",
@@ -91,6 +94,7 @@ export function useUpdateBrand() {
         .single()
 
       if (error) {
+        console.error('Error updating brand:', error)
         throw error
       }
 
@@ -105,6 +109,7 @@ export function useUpdateBrand() {
       })
     },
     onError: (error) => {
+      console.error('Error updating brand:', error)
       toast({
         title: "Error",
         description: "No se pudo actualizar la marca.",
@@ -127,6 +132,7 @@ export function useDeleteBrand() {
         .eq('id', id)
 
       if (error) {
+        console.error('Error deleting brand:', error)
         throw error
       }
     },
@@ -139,6 +145,7 @@ export function useDeleteBrand() {
       })
     },
     onError: (error) => {
+      console.error('Error deleting brand:', error)
       toast({
         title: "Error",
         description: "No se pudo eliminar la marca.",

@@ -29,6 +29,7 @@ export async function getUnreadCount(userId: string): Promise<number> {
     .is('read_at', null);
 
   if (error) {
+    console.error('Error getting unread count:', error);
     return 0;
   }
 
@@ -65,6 +66,7 @@ export async function fetchNotifications(
     .range(offset, offset + limit - 1);
 
   if (error) {
+    console.error('Error fetching notifications:', error);
     throw error;
   }
 
@@ -81,6 +83,7 @@ export async function markAsRead(deliveryId: string, userId: string): Promise<vo
     .eq('user_id', userId);
 
   if (error) {
+    console.error('Error marking notification as read:', error);
     throw error;
   }
 }
@@ -95,6 +98,7 @@ export async function markAllAsRead(userId: string): Promise<void> {
     .is('read_at', null);
 
   if (error) {
+    console.error('Error marking all notifications as read:', error);
     throw error;
   }
 }
@@ -104,6 +108,7 @@ export function subscribeUserNotifications(
   callback: () => void
 ): () => void {
   if (!supabase) {
+    console.error('Supabase not initialized');
     return () => {};
   }
 

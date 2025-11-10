@@ -183,6 +183,7 @@ export function useKanbanCards(boardId: string) {
       if (!boardId) throw new Error('Board ID required')
       if (!supabase) throw new Error('Supabase not initialized')
 
+      console.log('Fetching cards for board:', boardId)
 
       // First get all list IDs for this board
       const { data: lists, error: listsError } = await supabase
@@ -191,12 +192,15 @@ export function useKanbanCards(boardId: string) {
         .eq('board_id', boardId)
 
       if (listsError) {
+        console.error('Error fetching lists:', listsError)
         throw listsError
       }
 
       const listIds = lists?.map(list => list.id) || []
+      console.log('List IDs found:', listIds)
 
       if (listIds.length === 0) {
+        console.log('No lists found for board, returning empty array')
         return []
       }
 
@@ -208,9 +212,11 @@ export function useKanbanCards(boardId: string) {
         .order('position', { ascending: true })
 
       if (error) {
+        console.error('Error fetching cards:', error)
         throw error
       }
 
+      console.log('Cards fetched:', data?.length || 0, 'cards')
       
       // If we have cards, fetch organization member data for creators and assigned users
       if (data && data.length > 0) {
@@ -501,6 +507,7 @@ export function useCreateKanbanList() {
       toast({ title: "Lista creada exitosamente" })
     },
     onError: (error) => {
+      console.error('Error creating kanban list:', error)
       toast({
         title: "Error al crear lista",
         description: error.message,
@@ -539,6 +546,7 @@ export function useUpdateKanbanList() {
       toast({ title: "Lista actualizada exitosamente" })
     },
     onError: (error) => {
+      console.error('Error updating kanban list:', error)
       toast({
         title: "Error al actualizar lista",
         description: error.message,
@@ -705,6 +713,7 @@ export function useMoveKanbanCard() {
       })
     },
     onError: (error) => {
+      console.error('Error moving card:', error)
       toast({
         title: "Error al mover tarjeta",
         description: error.message,
@@ -760,6 +769,7 @@ export function useUpdateKanbanCard() {
           })
         }
       } catch (error) {
+        console.warn('Could not invalidate cache after card update:', error)
         // Fallback: invalidate all kanban-cards queries
         queryClient.invalidateQueries({ queryKey: ['kanban-cards'] })
       }
@@ -902,6 +912,7 @@ export function useUpdateLastKanbanBoard() {
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
     },
     onError: (error) => {
+      console.error('Error updating last kanban board:', error)
     }
   })
 }

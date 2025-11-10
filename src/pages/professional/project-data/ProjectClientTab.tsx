@@ -40,6 +40,7 @@ export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
         .single();
 
       if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching project data:', error);
         throw error;
       }
 
@@ -65,6 +66,7 @@ export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
         });
 
       if (error) {
+        console.error('Error saving project client data:', error);
         throw error;
       }
     },
@@ -77,6 +79,7 @@ export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
       });
     },
     onError: (error: any) => {
+      console.error('Error in saveProjectClientMutation:', error);
       toast({
         title: "Error al guardar",
         description: "No se pudieron guardar los cambios del cliente",

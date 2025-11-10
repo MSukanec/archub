@@ -111,8 +111,10 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
       }
 
       // 5. Pagos (basado en datos reales)
+      console.log('Subcontract payments:', subcontractPayments);
       if (subcontractPayments && subcontractPayments.length > 0) {
         subcontractPayments.forEach((payment: any, index: number) => {
+          console.log('Adding payment event:', payment);
           events.push({
             id: `payment_${payment.id || index}`,
             type: 'payment',
@@ -140,6 +142,7 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
         status: 'pending'
       });
 
+      console.log('All events before sorting:', events);
       const sortedEvents = events.sort((a, b) => {
         // Eventos pendientes (sin fecha) van al final
         if (!a.created_at && !b.created_at) return 0;
@@ -151,6 +154,7 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
         const dateB = new Date(b.created_at).getTime();
         return dateB - dateA; // Descendente: lo más nuevo arriba
       });
+      console.log('Sorted events:', sortedEvents);
       return sortedEvents;
     },
     enabled: !!subcontract?.id

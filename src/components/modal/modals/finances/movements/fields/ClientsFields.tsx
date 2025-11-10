@@ -63,6 +63,7 @@ export const ClientsFields: React.FC<ClientsFieldsProps> = ({
         if (error.code === 'PGRST116') {
           return null
         }
+        console.error('Error fetching payment plan:', error)
         return null
       }
 

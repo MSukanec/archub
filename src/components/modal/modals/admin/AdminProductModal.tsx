@@ -75,6 +75,7 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
 
   // Load editing data (including duplication)
   useEffect(() => {
+    console.log('AdminProductModal useEffect triggered:', {
       isEditing,
       isDuplicating,
       hasEditingProduct: !!editingProduct,
@@ -92,6 +93,7 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
         url: editingProduct.url || '',
       }
       
+      console.log('Loading form data:', formData)
       form.reset(formData)
     } else {
       form.reset({
@@ -132,6 +134,7 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
       onClose()
       form.reset()
     } catch (error) {
+      console.error('Error saving product:', error)
     } finally {
       setIsLoading(false)
     }

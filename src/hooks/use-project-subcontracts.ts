@@ -38,6 +38,7 @@ export function useProjectSubcontracts(projectId?: string) {
         .order('created_at', { ascending: false })
 
       if (error) {
+        console.error('Error fetching project subcontracts:', error)
         throw error
       }
 

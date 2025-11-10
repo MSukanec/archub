@@ -189,6 +189,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
         return actualTask.param_values;
       }
     } catch (e) {
+      console.error('❌ Error parsing param_values:', e);
       return null;
     }
   }, [actualTask?.param_values]);
@@ -200,6 +201,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       try {
         return JSON.parse(actualTask.param_order);
       } catch (e) {
+        console.error('❌ Error parsing param_order:', e);
         return null;
       }
     }
@@ -284,6 +286,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
         .order('name', { ascending: true });
       
       if (error) {
+        console.error('Error fetching task divisions:', error);
         throw error;
       }
       
@@ -342,6 +345,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
   // This ensures duplication fields are populated instantly, not waiting for reference data
   React.useEffect(() => {
     if ((isEditingMode || isDuplicating) && actualTask) {
+      console.log('🔧 DUPLICATION: Loading task data for editing/duplicating:', {
         taskId: actualTask.id,
         customName: actualTask.custom_name,
         taskDivisionId: actualTask.task_division_id,
@@ -354,16 +358,19 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
         const baseName = actualTask.custom_name
         const duplicatedName = isDuplicating ? `${baseName} - Copia` : baseName
         setCustomName(duplicatedName)
+        console.log('🔧 DUPLICATION: Set custom name:', duplicatedName)
       }
       
       // IMMEDIATE: Set task_division_id directly if available (don't wait for reference data)
       if (actualTask.task_division_id) {
         setTaskDivisionId(actualTask.task_division_id)
+        console.log('🔧 DUPLICATION: Set division ID immediately:', actualTask.task_division_id)
       }
       
       // IMMEDIATE: Set unit_id directly if available (don't wait for reference data)
       if (actualTask.unit_id) {
         setUnitId(actualTask.unit_id)
+        console.log('🔧 DUPLICATION: Set unit ID immediately:', actualTask.unit_id)
       }
     }
   }, [isEditingMode, isDuplicating, actualTask]) // Removed units and taskDivisions dependencies
@@ -372,12 +379,14 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
   // This runs after the immediate effect above, providing fallbacks if direct IDs weren't available
   React.useEffect(() => {
     if ((isEditingMode || isDuplicating) && actualTask && (units.length > 0 || taskDivisions.length > 0)) {
+      console.log('🔧 FALLBACK: Resolving names to IDs with reference data')
       
       // Fallback: Find unit ID by name from tasks_view (only if not already set)
       if (!unitId && actualTask.unit && units.length > 0) {
         const foundUnit = units.find(unit => unit.name === actualTask.unit)
         if (foundUnit) {
           setUnitId(foundUnit.id)
+          console.log('🔧 FALLBACK: Set unit ID from name lookup:', foundUnit.id, 'for unit name:', actualTask.unit)
         }
       }
       
@@ -386,6 +395,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
         const foundDivision = taskDivisions.find(div => div.name === actualTask.division)
         if (foundDivision) {
           setTaskDivisionId(foundDivision.id)
+          console.log('🔧 FALLBACK: Set division ID from name lookup:', foundDivision.id, 'for division name:', actualTask.division)
         }
       }
     }
@@ -482,6 +492,9 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
           is_completed: false
         }
         
+        console.log('🔧 Updating task with data:', updateData)
+        console.log('🔧 Current isCompleted value:', isCompleted)
+        console.log('🔧 UnitId value:', unitId)
         
         const { error: updateError } = await supabase
           .from('tasks')
@@ -489,6 +502,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
           .eq('id', actualTask.id)
         
         if (updateError) {
+          console.error('Error updating task:', updateError)
           throw updateError
         }
         
@@ -509,6 +523,11 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
           is_completed: false
         }
         
+        console.log('🔧 Creating task with data:', newTask)
+        console.log('🔧 Current isCompleted value:', isCompleted)
+        console.log('🔧 UnitId value:', unitId)
+        console.log('🔧 TaskDivisionId value:', taskDivisionId)
+        console.log('🔧 TaskTemplateId value:', taskTemplateId)
         
         const { data, error } = await supabase
           .from('tasks')
@@ -517,10 +536,12 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
           .single()
         
         if (error) {
+          console.error('Error creating task:', error)
           throw error
         }
         
         taskId = data.id
+        console.log('✅ Task created successfully with ID:', taskId)
       }
 
       // Save materials if any
@@ -537,6 +558,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
             try {
               await createTaskMaterialMutation.mutateAsync(materialData);
             } catch (materialError: any) {
+              console.error('❌ Error saving material:', materialError);
               throw materialError;
             }
           }
@@ -562,6 +584,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
               const result = await createTaskMaterialMutation.mutateAsync(materialData);
               copiedMaterials.push(result.id);
             } catch (materialError: any) {
+              console.error('❌ Error copying material:', materialError);
               throw new Error(`Error copiando material: ${material.materials_view?.name || 'Material desconocido'}`);
             }
           }
@@ -579,11 +602,13 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
               const result = await createTaskLaborMutation.mutateAsync(laborData);
               copiedLabor.push(result.id);
             } catch (laborError: any) {
+              console.error('❌ Error copying labor:', laborError);
               throw new Error(`Error copiando mano de obra: ${labor.labor_view?.labor_type || 'Tipo de labor desconocido'}`);
             }
           }
         } catch (duplicationError: any) {
           // If duplication fails, show specific error
+          console.error('❌ Duplication failed:', duplicationError);
           throw new Error(`Tarea creada pero fallo en duplicación: ${duplicationError.message}. Revisa la tarea y agrega los costos manualmente.`);
         }
       }
@@ -612,6 +637,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       
       onClose()
     } catch (error: any) {
+      console.error('Error completing task:', error)
       toast({
         title: "Error",
         description: error.message || "Error al procesar la tarea.",

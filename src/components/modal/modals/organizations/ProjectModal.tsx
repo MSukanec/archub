@@ -211,8 +211,10 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
           });
           
           if (checklistError) {
+            console.error('Error updating home checklist:', checklistError);
           }
         } catch (error) {
+          console.error('Error updating checklist:', error);
         }
       }
 

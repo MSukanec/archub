@@ -26,6 +26,7 @@ const AdminTasks = () => {
         return {
           label: "Nueva Tarea",
           icon: Plus,
+          onClick: () => console.log('Nueva tarea - funcionalidad pendiente')
         };
       case 'categorias':
         return {
@@ -49,11 +50,13 @@ const AdminTasks = () => {
         return {
           label: "Nueva Acción",
           icon: Plus,
+          onClick: () => console.log('Nueva acción - modal pendiente')
         };
       default:
         return {
           label: "Nueva Tarea",
           icon: Plus,
+          onClick: () => console.log('Crear nueva tarea')
         };
     }
   };

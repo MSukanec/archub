@@ -126,6 +126,7 @@ export default function AdminCourseContentTab({ courseId, modules = [], lessons 
         description: 'El orden de los elementos se actualizó correctamente',
       });
     } catch (error) {
+      console.error('Error al actualizar el orden:', error);
       toast({
         variant: 'destructive',
         title: 'Error',
@@ -177,6 +178,7 @@ export default function AdminCourseContentTab({ courseId, modules = [], lessons 
         description: 'La lección se movió al nuevo módulo correctamente',
       });
     } catch (error) {
+      console.error('Error al cambiar el módulo padre:', error);
       toast({
         variant: 'destructive',
         title: 'Error',

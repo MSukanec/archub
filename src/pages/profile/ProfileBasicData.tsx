@@ -63,6 +63,7 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
   // Auto-save mutation for profile data
   const saveProfileMutation = useMutation({
     mutationFn: async (data: typeof profileData) => {
+      console.log('Saving profile data:', data)
       
       if (!supabase) throw new Error('Supabase not initialized');
       
@@ -121,9 +122,11 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
       return data
     },
     onSuccess: () => {
+      console.log('Auto-save completed successfully')
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
     },
     onError: (error) => {
+      console.error('Auto-save error:', error)
       toast({
         title: "Error",
         description: "No se pudieron guardar los cambios automáticamente.",
@@ -173,6 +176,7 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
     try {
       await logout()
     } catch (error) {
+      console.error('Logout error:', error)
       toast({
         title: "Error",
         description: "No se pudo cerrar la sesión. Inténtalo de nuevo.",

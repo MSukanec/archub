@@ -104,6 +104,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
   // Convert categories to cascading format - memoize to prevent recreation
   const cascadingOptions = useMemo(() => {
     const options = convertToCascadingOptions(categories)
+    console.log('Cascading options:', options)
     return options
   }, [categories])
   
@@ -129,6 +130,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
 
   // Load editing data
   useEffect(() => {
+    console.log('MaterialFormModal useEffect triggered:', { 
       isEditing, 
       isDuplicating,
       hasEditingMaterial: !!editingMaterial, 
@@ -198,6 +200,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       }
       onClose()
     } catch (error) {
+      console.error('Error saving material:', error)
     } finally {
       setIsLoading(false)
     }

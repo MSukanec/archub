@@ -66,6 +66,7 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
         .single();
 
       if (error) {
+        console.error('Error fetching member:', error);
         return null;
       }
 
@@ -86,6 +87,7 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
         .order('name', { ascending: true })
 
       if (error) {
+        console.error('Error fetching payment plans:', error)
         return []
       }
 
@@ -147,6 +149,7 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
           .eq('project_id', projectId)
 
         if (deletePaymentPlanError) {
+          console.error('Error deleting existing payment plan:', deletePaymentPlanError)
           throw new Error('Error eliminando plan de pagos existente')
         }
 
@@ -158,6 +161,7 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
           .eq('organization_id', organizationId)
 
         if (deleteInstallmentsError) {
+          console.error('Error deleting existing installments:', deleteInstallmentsError)
           throw new Error('Error eliminando cuotas existentes')
         }
       } else {
@@ -169,6 +173,7 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
           .eq('organization_id', organizationId)
 
         if (checkError) {
+          console.error('Error checking existing installments:', checkError)
           throw new Error('Error verificando cuotas existentes')
         }
 
@@ -190,6 +195,7 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
         .single()
 
       if (paymentPlanError) {
+        console.error('Error creating payment plan:', paymentPlanError)
         throw new Error('Error creando el plan de pagos: ' + paymentPlanError.message)
       }
 
@@ -220,6 +226,7 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
         .select()
 
       if (error) {
+        console.error('Error creating installments:', error)
         throw new Error('Error creando las cuotas: ' + error.message)
       }
 

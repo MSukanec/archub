@@ -100,6 +100,7 @@ export function GooglePlacesAutocomplete({
         setStatus('idle');
       });
     } catch (error) {
+      console.error('Error initializing Google Places Autocomplete:', error);
       setStatus('error');
     }
 

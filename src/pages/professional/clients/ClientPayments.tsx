@@ -33,6 +33,7 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
         .order('movement_date', { ascending: false })
 
       if (error) {
+        console.error('Error fetching installments:', error)
         throw error
       }
 
@@ -201,10 +202,12 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
 
   const handleEdit = (item: any) => {
     // TODO: Implement edit functionality
+    console.log('Edit item:', item)
   }
 
   const handleDelete = (item: any) => {
     // TODO: Implement delete functionality
+    console.log('Delete item:', item)
   }
 
   if (isLoading) {

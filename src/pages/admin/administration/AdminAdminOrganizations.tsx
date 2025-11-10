@@ -122,6 +122,7 @@ function useAllOrganizations() {
         .order('created_at', { ascending: false });
 
       if (error) {
+        console.error('Error fetching organizations:', error);
         throw error;
       }
 
@@ -147,6 +148,7 @@ function useAllOrganizations() {
         creator: usersResult.data?.find(user => user.id === org.created_by) || null
       }));
 
+      console.log('Organizations with plans:', organizationsWithPlans);
 
       // Obtener conteos de miembros, proyectos y última actividad para cada organización
       const organizationsWithCounts = await Promise.all(
@@ -243,6 +245,7 @@ const AdminAdminOrganizations = () => {
       });
     },
     onError: (error) => {
+      console.error('Error deactivating organization:', error);
       toast({
         title: 'Error',
         description: 'No se pudo desactivar la organización. Inténtalo de nuevo.',

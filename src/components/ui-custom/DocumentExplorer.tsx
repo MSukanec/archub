@@ -112,6 +112,7 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
       itemName: folder.name,
       onConfirm: () => {
         // TODO: Implement delete folder logic
+        console.log('Delete folder:', folder.id);
       }
     });
   };

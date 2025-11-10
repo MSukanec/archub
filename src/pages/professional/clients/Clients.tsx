@@ -119,6 +119,7 @@ export function Clients() {
           // No rows found - no payment plan exists
           return null
         }
+        console.error('Error fetching payment plan:', error)
         return null
       }
 

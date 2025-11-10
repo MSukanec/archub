@@ -37,6 +37,7 @@ const AdminTaskDivisions = () => {
 
   // Debug query state (only log errors)
   if (isError) {
+    console.error('❌ AdminDivisions error:', error);
   }
 
   // Auto-expand divisions that have children (only on initial load)
@@ -90,6 +91,7 @@ const AdminTaskDivisions = () => {
           // Force immediate UI refresh
           await refetch();
         } catch (error) {
+          console.error('Error deleting division:', error);
           throw error;
         }
       }
@@ -97,6 +99,7 @@ const AdminTaskDivisions = () => {
   };
 
   const handleEditDivision = (division: CategoryTreeNode) => {
+    console.log('🔧 Editing division:', { division, divisionsLength: divisions.length });
     openModal('task-division', { 
       isEditing: true, 
       divisionId: division.id,
@@ -118,6 +121,7 @@ const AdminTaskDivisions = () => {
 
       await updateDivisionsOrderMutation.mutateAsync(divisionsWithOrder);
     } catch (error) {
+      console.error('Error reordering divisions:', error);
     }
   };
 
@@ -139,6 +143,7 @@ const AdminTaskDivisions = () => {
         description: "La relación padre-hijo se ha actualizado correctamente.",
       });
     } catch (error) {
+      console.error('Error changing parent:', error);
       toast({
         title: "Error",
         description: "No se pudo actualizar la relación padre-hijo.",

@@ -36,6 +36,7 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
   const { editingDivision, isEditing = false, divisionId } = modalData || {};
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  console.log('🔧 TaskDivisionFormModal props:', { modalData, editingDivision, isEditing, divisionId });
   
   const createMutation = useCreateTaskDivision();
   const updateMutation = useUpdateTaskDivision();
@@ -86,6 +87,7 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
         organization_id: undefined, // Always undefined for system divisions
       };
       
+      console.log('🔧 Submit data:', { originalData: data, submitData });
 
       if (editingDivision) {
         await updateMutation.mutateAsync({ 
@@ -98,6 +100,7 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
       
       onClose();
     } catch (error) {
+      console.error('Error saving division:', error);
     } finally {
       setIsSubmitting(false);
     }

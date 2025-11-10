@@ -146,6 +146,7 @@ export function useCreateTaskParameter() {
       });
     },
     onError: (error) => {
+      console.error('Error creating parameter:', error);
       toast({
         title: 'Error',
         description: 'No se pudo crear el parámetro.',
@@ -180,6 +181,7 @@ export function useUpdateTaskParameter() {
       if (paramError) throw paramError;
 
       // Recalcular name_rendered de todas las tareas cuando se actualiza un expression_template
+      console.log('🔄 Recalculando name_rendered de todas las tareas...');
       
       // Obtener todas las tareas
       const { data: tasks, error: tasksError } = await supabase
@@ -187,6 +189,7 @@ export function useUpdateTaskParameter() {
         .select('id, param_values');
         
       if (tasksError) {
+        console.error('Error obteniendo tareas para recálculo:', tasksError);
       } else if (tasks && tasks.length > 0) {
         // Actualizar cada tarea individualmente para forzar el recálculo del name_rendered
         // Esto activa los triggers de base de datos que regeneran el name_rendered
@@ -197,6 +200,7 @@ export function useUpdateTaskParameter() {
             .eq('id', task.id);
         }
         
+        console.log(`✅ Nombres de ${tasks.length} tareas recalculados correctamente`);
       }
 
       return parameter;
@@ -215,6 +219,7 @@ export function useUpdateTaskParameter() {
       });
     },
     onError: (error) => {
+      console.error('Error updating parameter:', error);
       toast({
         title: 'Error',
         description: 'No se pudo actualizar el parámetro.',
@@ -259,6 +264,7 @@ export function useDeleteTaskParameter() {
       });
     },
     onError: (error) => {
+      console.error('Error deleting parameter:', error);
       toast({
         title: 'Error',
         description: 'No se pudo eliminar el parámetro.',
@@ -309,6 +315,7 @@ export function useCreateTaskParameterOption() {
       });
     },
     onError: (error) => {
+      console.error('Error creating option:', error);
       toast({
         title: 'Error',
         description: 'No se pudo crear la opción.',
@@ -360,6 +367,7 @@ export function useUpdateTaskParameterOption() {
       });
     },
     onError: (error) => {
+      console.error('Error updating option:', error);
       toast({
         title: 'Error',
         description: 'No se pudo actualizar la opción.',
@@ -397,6 +405,7 @@ export function useDeleteTaskParameterOption() {
       });
     },
     onError: (error) => {
+      console.error('Error deleting option:', error);
       toast({
         title: 'Error',
         description: 'No se pudo eliminar la opción.',

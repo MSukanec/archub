@@ -45,6 +45,7 @@ export function MaterialBasicDataTab({
           await deleteMaterialMutation.mutateAsync(material.id);
           navigate('/analysis');
         } catch (error) {
+          console.error('Error deleting material:', error);
         }
       }
     });

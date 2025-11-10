@@ -340,6 +340,7 @@ export async function getHomeGreetingHandler(
           greetingResponse.suggestions = [];
         }
       } catch (parseError) {
+        console.error('Error parsing GPT response:', parseError);
         // Fallback si la respuesta no es JSON válido
         greetingResponse = {
           greeting: `¡Hola, ${displayName}! ¿Cómo estás hoy?`,
@@ -358,6 +359,7 @@ export async function getHomeGreetingHandler(
           onConflict: 'user_id,period'
         })
         .then(({ error }) => {
+          if (error) console.error('Error saving greeting cache:', error);
         });
 
       // ========================================
@@ -379,6 +381,7 @@ export async function getHomeGreetingHandler(
           context_type: 'home_greeting'
         })
         .then(({ error }) => {
+          if (error) console.error('Error saving message:', error);
         });
 
       // Registrar el uso (no bloqueante)
@@ -395,6 +398,7 @@ export async function getHomeGreetingHandler(
           context_type: 'home_greeting'
         })
         .then(({ error }) => {
+          if (error) console.error('Error logging usage:', error);
         });
     
     } else {
@@ -449,6 +453,7 @@ export async function getHomeGreetingHandler(
     };
 
   } catch (err: any) {
+    console.error('Error in getHomeGreetingHandler:', err);
     
     // Fallback en caso de error - retornar respuesta básica pero válida
     return {

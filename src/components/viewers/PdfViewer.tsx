@@ -105,6 +105,7 @@ export function PdfViewer({
       }));
 
     } catch (error) {
+      console.error('Error loading PDF:', error);
       setState(prev => ({
         ...prev,
         loading: false,
@@ -143,6 +144,7 @@ export function PdfViewer({
       await page.render(renderContext).promise;
 
     } catch (error) {
+      console.error('Error rendering page:', error);
     }
   }, [state.pdfDoc, state.page, baseScale, state.scale]);
 

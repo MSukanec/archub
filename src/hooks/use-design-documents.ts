@@ -57,6 +57,7 @@ export function useDesignDocuments(folderId?: string) {
       const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
+        console.error('Error fetching design documents:', error);
         return [];
       }
 
@@ -96,6 +97,7 @@ export function useDesignDocumentsByFolder(folderId?: string) {
         .eq('folder_id', folderId)
         .order('created_at', { ascending: false });
 
+      console.log('useDesignDocumentsByFolder Query Result:', {
         folderId,
         projectId,
         organizationId,
@@ -105,6 +107,7 @@ export function useDesignDocumentsByFolder(folderId?: string) {
       });
 
       if (error) {
+        console.error('Error fetching folder documents:', error);
         return [];
       }
 

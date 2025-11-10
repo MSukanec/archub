@@ -39,6 +39,7 @@ function useProjectPersonnel(projectId: string | undefined) {
         `)
         .eq('project_id', projectId)
 
+      console.log('🔍 ATTENDANCE TAB - RAW PERSONNEL FROM SUPABASE:', JSON.stringify(data, null, 2))
 
       if (error) {
         return []

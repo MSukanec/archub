@@ -30,6 +30,7 @@ export function useUnreadUserSupportMessages(userId: string | undefined) {
         .eq('read_by_user', false);
 
       if (error) {
+        console.error('Error fetching unread user support messages:', error);
         return 0;
       }
 

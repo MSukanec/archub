@@ -147,12 +147,14 @@ export function toE164(
   
   // Intentar obtener el código de discado del mapeo
   if (!countryAlpha3) {
+    console.warn('[toE164] No country code provided, cannot convert to E.164');
     return '';
   }
 
   const dialCode = DIAL_CODE_MAP[countryAlpha3.toUpperCase()];
   
   if (!dialCode) {
+    console.warn(
       `[toE164] Country "${countryAlpha3}" not found in dial code mapping. ` +
       `Phone number cannot be converted to E.164 format. ` +
       `Returning empty string to prevent invalid data.`
@@ -198,6 +200,7 @@ export function toE164(
   // La mayoría de números tienen entre 8-15 dígitos (excluyendo el +)
   const digitCount = result.replace(/\+/g, '').length;
   if (digitCount < 8 || digitCount > 15) {
+    console.warn(
       `[toE164] Invalid phone number length (${digitCount} digits). ` +
       `Expected 8-15 digits. Input: "${raw}", Output: "${result}"`
     );

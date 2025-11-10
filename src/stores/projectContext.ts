@@ -28,6 +28,7 @@ export const useProjectContext = create<ProjectContextState>()(
         });
       },
       setCurrentOrganization: (organizationId: string | null) => {
+        console.log("🔧 ProjectContext: Setting organization to", organizationId);
         
         // Al cambiar organización, setear inmediatamente la organización
         // El proyecto se cargará automáticamente via React Query en los componentes

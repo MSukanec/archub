@@ -53,6 +53,7 @@ const AdminSupportChangelogTab = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
+        console.error('Error fetching changelog entries:', error);
         throw error;
       }
 
@@ -93,6 +94,7 @@ const AdminSupportChangelogTab = () => {
           .eq('id', entry.id);
         
         if (error) {
+          console.error('Error deleting changelog entry:', error);
         } else {
           // Invalidar caché para actualizar la tabla
           queryClient.invalidateQueries({ queryKey: ['admin-changelog-entries'] });

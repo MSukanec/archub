@@ -168,6 +168,7 @@ class AICache {
     this.cleanupInterval = setInterval(() => {
       const deleted = this.cleanup();
       if (deleted > 0) {
+        console.log(`[AICache] Cleaned up ${deleted} expired entries`);
       }
     }, 60 * 1000); // cada minuto
   }

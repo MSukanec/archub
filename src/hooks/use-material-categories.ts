@@ -33,6 +33,7 @@ export function useMaterialCategories() {
         .order('name', { ascending: true });
 
       if (error) {
+        console.error('Error fetching material categories:', error);
         throw error;
       }
 
@@ -81,6 +82,7 @@ export function useCreateMaterialCategory() {
         .single();
 
       if (error) {
+        console.error('Error creating material category:', error);
         throw error;
       }
 
@@ -95,6 +97,7 @@ export function useCreateMaterialCategory() {
       });
     },
     onError: (error: any) => {
+      console.error('Error creating material category:', error);
       
       let errorMessage = "No se pudo crear la categoría de material.";
       
@@ -129,6 +132,7 @@ export function useUpdateMaterialCategory() {
         .single();
 
       if (error) {
+        console.error('Error updating material category:', error);
         throw error;
       }
 
@@ -143,6 +147,7 @@ export function useUpdateMaterialCategory() {
       });
     },
     onError: (error: any) => {
+      console.error('Error updating material category:', error);
       
       let errorMessage = "No se pudo actualizar la categoría de material.";
       
@@ -175,6 +180,7 @@ export function useDeleteMaterialCategory() {
         .eq('id', id);
 
       if (error) {
+        console.error('Error deleting material category:', error);
         throw error;
       }
 
@@ -189,6 +195,7 @@ export function useDeleteMaterialCategory() {
       });
     },
     onError: (error) => {
+      console.error('Error deleting material category:', error);
       toast({
         title: "Error",
         description: "No se pudo eliminar la categoría de material.",

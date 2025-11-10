@@ -115,6 +115,7 @@ export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: S
             filter: `user_id=eq.${dbUserId}` // Solo mensajes de este usuario
           },
           (payload) => {
+            console.log('🔥 Realtime change:', payload);
             
             // Invalidar query para refrescar los mensajes
             queryClient.invalidateQueries({ queryKey: ['support-messages', userId] });

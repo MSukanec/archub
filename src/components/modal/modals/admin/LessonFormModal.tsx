@@ -176,6 +176,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
       handleClose();
     },
     onError: (error: any) => {
+      console.error('Error creating lesson:', error);
       toast({
         title: 'Error',
         description: error.message || 'No se pudo crear la lección. Inténtalo de nuevo.',
@@ -224,6 +225,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
       handleClose();
     },
     onError: (error: any) => {
+      console.error('Error updating lesson:', error);
       toast({
         title: 'Error',
         description: error.message || 'No se pudo actualizar la lección. Inténtalo de nuevo.',
