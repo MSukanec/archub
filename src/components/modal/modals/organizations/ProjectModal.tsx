@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { FolderPlus, Check } from "lucide-react";
+import { FolderPlus, Check, Upload, X, ImageIcon } from "lucide-react";
 import chroma from "chroma-js";
 
 import { FormModalLayout } from "../../form/FormModalLayout";
@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import ProjectColorAdvanced from "@/components/projects/ProjectColorAdvanced";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -26,6 +27,7 @@ import { supabase } from "@/lib/supabase";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from 'wouter';
+import { uploadProjectImage, updateProjectImageUrl } from "@/lib/storage/uploadProjectImage";
 
 // Paleta de colores predefinidos
 const PRESET_COLORS = [
@@ -107,6 +109,12 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
 
+  // Image upload states
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
   // Encontrar el member_id del usuario actual
   const currentUserMember = organizationMembers.find(member => 
     member.user_id === userData?.user?.id
@@ -154,6 +162,64 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
     // Siempre establecer en modo edit
     setPanel('edit');
   }, [editingProject, form, setPanel]);
+
+  // Image handlers
+  const handleFileSelect = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    
+    const file = files[0];
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Error",
+        description: "Solo se permiten archivos de imagen",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "Error", 
+        description: "La imagen no puede superar los 10MB",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setSelectedImageFile(file);
+    
+    // Create preview URL
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreviewUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    handleFileSelect(e.dataTransfer.files);
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImageFile(null);
+    setImagePreviewUrl(null);
+  };
 
   const createProjectMutation = useMutation({
     mutationFn: async (data: CreateProjectForm) => {
@@ -216,6 +282,37 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
         } catch (error) {
           console.error('Error updating checklist:', error);
         }
+
+        // Upload image if one was selected (only for new projects)
+        if (selectedImageFile && newProject.id && organizationId) {
+          setIsUploadingImage(true);
+          try {
+            toast({
+              title: "Subiendo imagen...",
+              description: "Tu imagen se está procesando",
+            });
+
+            // Upload image to storage
+            const uploadResult = await uploadProjectImage(selectedImageFile, newProject.id, organizationId);
+            
+            // Update project_data table with new image URL
+            await updateProjectImageUrl(newProject.id, uploadResult.file_url);
+            
+            toast({
+              title: "Imagen subida",
+              description: "La imagen principal se ha guardado correctamente"
+            });
+          } catch (error: any) {
+            console.error('Error uploading project image:', error);
+            toast({
+              title: "Error al subir imagen",
+              description: error.message || "No se pudo subir la imagen. Puedes intentarlo más tarde desde los datos del proyecto.",
+              variant: "destructive"
+            });
+          } finally {
+            setIsUploadingImage(false);
+          }
+        }
       }
 
       // Only invalidate necessary queries to prevent unnecessary requests
@@ -225,6 +322,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       queryClient.invalidateQueries({ queryKey: ['user-data'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['current-user'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['project-data', newProject.id], exact: false });
       
       toast({
         title: isEditing ? "Proyecto actualizado" : "Proyecto creado",
@@ -245,8 +343,22 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
   });
 
   const handleClose = () => {
+    // Prevent closing while uploading image
+    if (isUploadingImage) {
+      toast({
+        title: "Espera un momento",
+        description: "La imagen se está subiendo, por favor espera...",
+        variant: "default"
+      });
+      return;
+    }
+
     form.reset();
     setPanel('view');
+    // Clean up image state
+    setSelectedImageFile(null);
+    setImagePreviewUrl(null);
+    setDragActive(false);
     onClose();
   };
 
@@ -317,6 +429,94 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
         <div className="space-y-4">
+          {/* Image Upload - Only show when creating new project */}
+          {!isEditing && (
+            <div className="space-y-2">
+              <FormLabel className="flex items-center gap-2">
+                <ImageIcon className="h-4 w-4 text-[var(--accent)]" />
+                Imagen Principal
+                <span className="text-xs text-muted-foreground font-normal">(opcional)</span>
+              </FormLabel>
+              
+              <div 
+                className={`relative w-full h-48 rounded-lg overflow-hidden transition-colors ${
+                  dragActive ? 'bg-primary/10' : 'bg-muted/30'
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+              >
+                {imagePreviewUrl ? (
+                  <>
+                    {/* Image Preview */}
+                    <img
+                      src={imagePreviewUrl}
+                      alt="Vista previa de la imagen del proyecto"
+                      className="w-full h-full object-cover"
+                    />
+                    
+                    {/* Overlay with actions */}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="default"
+                          onClick={() => document.getElementById('project-image-input')?.click()}
+                        >
+                          <Upload className="h-4 w-4 mr-1" />
+                          Cambiar
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="default"
+                          onClick={handleRemoveImage}
+                          className="bg-red-500 hover:bg-red-600 text-white"
+                        >
+                          <X className="h-4 w-4 mr-1" />
+                          Eliminar
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* No Image Placeholder */}
+                    <div 
+                      className="w-full h-full flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-[var(--accent)]/40 hover:border-[var(--accent)] transition-colors rounded-lg"
+                      onClick={() => document.getElementById('project-image-input')?.click()}
+                    >
+                      <div className="text-center space-y-3 p-6">
+                        <div className="w-12 h-12 mx-auto bg-muted/50 rounded-full flex items-center justify-center border border-muted-foreground/20">
+                          <Upload className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm text-muted-foreground">
+                            Arrastra una imagen aquí o haz clic para seleccionar
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            JPG, PNG, WebP • Máx. 10MB
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Hidden file input */}
+              <input
+                id="project-image-input"
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleFileSelect(e.target.files)}
+                className="hidden"
+              />
+            </div>
+          )}
+
           {/* Nombre del Proyecto */}
           <FormField
             control={form.control}
@@ -501,8 +701,8 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       onLeftClick={handleClose}
       rightLabel={isEditing ? "Actualizar Proyecto" : "Crear Proyecto"}
       onRightClick={() => form.handleSubmit(onSubmit)()}
-      submitDisabled={createProjectMutation.isPending}
-      showLoadingSpinner={createProjectMutation.isPending}
+      submitDisabled={createProjectMutation.isPending || isUploadingImage}
+      showLoadingSpinner={createProjectMutation.isPending || isUploadingImage}
     />
   );
 
