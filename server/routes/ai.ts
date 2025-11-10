@@ -1,8 +1,8 @@
 import type { Express } from "express";
 import type { RouteDeps } from "./_base";
-import { getHomeGreetingHandler } from "../../src/ai/serverless/homeGreetingHandler";
-import { getChatHandler } from "../../src/ai/serverless/chatHandler";
-import { getHistoryHandler } from "../../src/ai/serverless/historyHandler";
+import { getHomeGreetingHandler } from "../../api/_lib/ai/serverless/homeGreetingHandler";
+import { getChatHandler } from "../../api/_lib/ai/serverless/chatHandler";
+import { getHistoryHandler } from "../../api/_lib/ai/serverless/historyHandler";
 
 export function registerAIRoutes(app: Express, deps: RouteDeps) {
   const { createAuthenticatedClient, extractToken } = deps;
