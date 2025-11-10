@@ -40,6 +40,7 @@ Preferred communication style: Simple, everyday language.
 - **Organization Membership Security System**: Comprehensive access control enforcement when users are deactivated, ensuring secure access and providing elegant UX for invalid organization access.
 - **Project Data Management**: Organized project information into logical tabs (Basic Data, Location, Client) with Google Maps integration for enriched location data management and an auto-save system.
 - **Mobile Action Bar**: Fully functional mobile action bars for Project Data and Project Management sections with dynamic filtering and shared state.
+- **Project Client Management**: Tab-based interface using Table.tsx for managing project clients with add/edit/delete functionality via API endpoints `/api/projects/:projectId/clients`.
 
 ### System Design Choices
 - **Backend Modular Architecture**: Modularized domain-specific route modules.
