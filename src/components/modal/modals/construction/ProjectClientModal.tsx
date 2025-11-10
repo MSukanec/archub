@@ -158,6 +158,7 @@ export function ProjectClientModal({ projectId, onClose }: ProjectClientModalPro
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={handleClose}
+      forcedPanel="edit"
     />
   );
 }
