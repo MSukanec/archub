@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { FileText, Share2, Copy, MessageCircle, Mail, MapPin } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { FileText, Share2, Copy, MessageCircle, Mail, MapPin, Home, Bell } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useProjectContext } from '@/stores/projectContext';
@@ -8,15 +8,23 @@ import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
+import { BottomSheet, BottomSheetContent, BottomSheetHeader, BottomSheetTitle, BottomSheetBody } from '@/components/ui/bottom-sheet';
+import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
+import { useMobile } from '@/hooks/use-mobile';
+import { useLocation } from 'wouter';
 import ProjectBasicDataTab from './ProjectBasicDataTab';
 import ProjectLocationTab from './ProjectLocationTab';
 import ProjectClientTab from './ProjectClientTab';
 
 export default function ProjectData() {
   const [activeTab, setActiveTab] = useState('basic');
+  const [showShareBottomSheet, setShowShareBottomSheet] = useState(false);
   const { setSidebarContext } = useNavigationStore();
   const { selectedProjectId } = useProjectContext();
   const { toast } = useToast();
+  const { setActions, setShowActionBar, clearActions } = useActionBarMobile();
+  const isMobile = useMobile();
+  const [, navigate] = useLocation();
 
   // Set sidebar context on mount
   useEffect(() => {
@@ -45,8 +53,8 @@ export default function ProjectData() {
     enabled: !!selectedProjectId && !!supabase && activeTab === 'location'
   });
 
-  // Helper functions for sharing location data
-  const copyLocationDataToClipboard = async () => {
+  // Helper functions for sharing location data (memoized)
+  const copyLocationDataToClipboard = useCallback(async () => {
     if (!projectLocationData) {
       toast({
         title: "No hay datos",
@@ -77,9 +85,9 @@ Generado desde Seencel`;
         variant: "destructive"
       });
     }
-  };
+  }, [projectLocationData, toast]);
 
-  const shareLocationViaWhatsApp = () => {
+  const shareLocationViaWhatsApp = useCallback(() => {
     if (!projectLocationData) {
       toast({
         title: "No hay datos",
@@ -99,9 +107,9 @@ _Compartido desde Seencel_`;
 
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
-  };
+  }, [projectLocationData, toast]);
 
-  const shareLocationViaEmail = () => {
+  const shareLocationViaEmail = useCallback(() => {
     if (!projectLocationData) {
       toast({
         title: "No hay datos",
@@ -121,9 +129,9 @@ ${projectLocationData.lat && projectLocationData.lng ? `Coordenadas: ${projectLo
 Generado desde Seencel`);
 
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
-  };
+  }, [projectLocationData, toast]);
 
-  const openInGoogleMaps = () => {
+  const openInGoogleMaps = useCallback(() => {
     if (!projectLocationData || !projectLocationData.lat || !projectLocationData.lng) {
       toast({
         title: "Sin coordenadas",
@@ -133,10 +141,66 @@ Generado desde Seencel`);
       return;
     }
 
-    // Open Google Maps with directions to the location
     const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${projectLocationData.lat},${projectLocationData.lng}`;
     window.open(mapsUrl, '_blank');
-  };
+  }, [projectLocationData, toast]);
+
+  // Mobile Action Bar handlers (memoized to prevent popover teardown)
+  const handleGoHome = useCallback(() => {
+    navigate('/');
+  }, [navigate]);
+
+  const handleNotifications = useCallback(() => {
+    // TODO: Implement notifications
+    toast({
+      title: "Notificaciones",
+      description: "Funcionalidad en desarrollo"
+    });
+  }, [toast]);
+
+  const handleShareLocation = useCallback(() => {
+    setShowShareBottomSheet(true);
+  }, []);
+
+  // Configure Mobile Action Bar based on active tab
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const actions: Record<string, any> = {
+      home: {
+        id: 'home',
+        icon: Home,
+        label: 'Inicio',
+        onClick: handleGoHome,
+      },
+      notifications: {
+        id: 'notifications',
+        icon: Bell,
+        label: 'Notificaciones',
+        onClick: handleNotifications,
+      }
+    };
+
+    // Add share button for location tab using 'create' slot
+    if (activeTab === 'location') {
+      actions.create = {
+        id: 'share',
+        icon: Share2,
+        label: 'Compartir',
+        onClick: handleShareLocation,
+        variant: 'primary' as const
+      };
+    }
+    // Datos Básicos and Cliente tabs don't have action buttons (only home + notifications)
+
+    setActions(actions);
+    setShowActionBar(true);
+
+    return () => {
+      clearActions();
+      setShowActionBar(false);
+    };
+  }, [isMobile, activeTab, handleGoHome, handleNotifications, handleShareLocation, setActions, setShowActionBar, clearActions]);
 
   const headerTabs = [
     {
@@ -237,8 +301,72 @@ Generado desde Seencel`);
   };
 
   return (
-    <Layout headerProps={headerProps} wide={false}>
-      {renderTabContent()}
-    </Layout>
+    <>
+      {/* Share Location BottomSheet (Mobile Only) */}
+      <BottomSheet open={showShareBottomSheet} onOpenChange={setShowShareBottomSheet}>
+        <BottomSheetContent>
+          <BottomSheetHeader>
+            <BottomSheetTitle>Compartir Ubicación</BottomSheetTitle>
+          </BottomSheetHeader>
+          <BottomSheetBody>
+            <div className="space-y-1">
+              <button
+                onClick={() => {
+                  openInGoogleMaps();
+                  setShowShareBottomSheet(false);
+                }}
+                className="flex items-center gap-3 w-full px-3 py-3 text-sm rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                data-testid="button-open-google-maps-mobile"
+              >
+                <MapPin className="h-5 w-5" />
+                <span>Abrir en Google Maps</span>
+              </button>
+
+              <div className="h-px bg-border my-1" />
+              
+              <button
+                onClick={() => {
+                  copyLocationDataToClipboard();
+                  setShowShareBottomSheet(false);
+                }}
+                className="flex items-center gap-3 w-full px-3 py-3 text-sm rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                data-testid="button-copy-location-data-mobile"
+              >
+                <Copy className="h-5 w-5" />
+                <span>Copiar datos</span>
+              </button>
+              
+              <button
+                onClick={() => {
+                  shareLocationViaWhatsApp();
+                  setShowShareBottomSheet(false);
+                }}
+                className="flex items-center gap-3 w-full px-3 py-3 text-sm rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                data-testid="button-share-location-whatsapp-mobile"
+              >
+                <MessageCircle className="h-5 w-5" />
+                <span>Enviar por WhatsApp</span>
+              </button>
+              
+              <button
+                onClick={() => {
+                  shareLocationViaEmail();
+                  setShowShareBottomSheet(false);
+                }}
+                className="flex items-center gap-3 w-full px-3 py-3 text-sm rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                data-testid="button-share-location-email-mobile"
+              >
+                <Mail className="h-5 w-5" />
+                <span>Enviar por Email</span>
+              </button>
+            </div>
+          </BottomSheetBody>
+        </BottomSheetContent>
+      </BottomSheet>
+
+      <Layout headerProps={headerProps} wide={false}>
+        {renderTabContent()}
+      </Layout>
+    </>
   );
 }

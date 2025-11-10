@@ -3,59 +3,6 @@
 ## Overview
 Seencel is a comprehensive construction management platform designed to optimize operations, enhance collaboration, and improve efficiency in the construction industry. It provides tools for project tracking, team management, budget monitoring, financial management with multi-currency support, robust document management, a detailed project dashboard with KPIs, and a learning module for professional development. Seencel aims to streamline workflows and provide a unified platform for all construction project needs, with a business vision to transform the construction industry through intelligent, integrated management solutions.
 
-## Recent Changes
-**November 10, 2025**
-- **Project Management Mobile Action Bar**: Fully functional Mobile Action Bar in both tabs of Gestión de Proyectos with stable handlers and dynamic filtering
-  - Both tabs: 5 buttons total (search, create, filter, notifications + fixed Home button)
-  - ProjectListTab & ProjectActivesTab: 4 configured actions with 3 dynamic filters (project types, modalities, statuses)
-  - Handlers memoized with useCallback to prevent popover teardown loops
-  - Filter/search state shared with ActionBar context including proper cleanup on unmount
-  - Search sync between mobile and desktop views
-  - Projects correctly filtered before rendering
-  - Fixed bug in desktop filters that used incorrect hardcoded values
-  - No console/runtime errors
-- **Community Module Access Control**: Temporarily blocked Community button in sidebar (desktop & mobile) using PlanRestricted with "coming_soon" to allow for development without user visibility
-
-**November 9, 2025**
-- **Layout System Enhancement**: Extended width control system with third option for full-width content
-  - New `wide` prop accepts: `false` (normal), `true` (wide), or `"full"` (100% width, no padding)
-  - Centralized width utilities in `layoutWidth.ts` to avoid circular dependencies
-  - Full-width mode maintains header but removes content padding for edge-to-edge layouts
-  - Backward compatible - all existing pages work unchanged
-  - Applied to Community Map page for seamless full-width map experience
-- **Community Module Reorganization**: Split into two separate pages with dedicated navigation
-  - `/community/dashboard` - Main community dashboard with stats, organizations grid, and active users (uses `wide={true}`)
-  - `/community/map` - Interactive global map with `wide="full"` layout for edge-to-edge display
-  - Two sidebar buttons under Community section: "Visión General" and "Mapa"
-  - Backend endpoints: `/api/community/stats`, `/api/community/organizations`, `/api/community/active-users`
-  - Dashboard features: stats cards, featured organizations (12 max), active users (last 24h), loading/error states
-  - Performance: parallelized queries with Promise.all for faster loading
-- **Community Map Feature**: Interactive global map displaying organization projects with Leaflet clustering
-  - Backend endpoint `/api/community/projects` uses admin client to bypass RLS and fetch public projects with location data and organization logos
-  - Auto-refresh every 10 seconds with `gcTime: 0` for real-time updates
-  - Map displays even when no projects are available (shows empty state overlay)
-  - Custom markers using organization logos embedded in map pins (40px size, same as cluster markers, fallback to building icon)
-  - Optimized popup with compact padding, inline logo (20px), and location details
-  - Marker triangle uses `--accent` color for consistent theming
-  - Dynamic clustering with black background based on zoom levels (world → country → city → block)
-- **Button System Redesign**: Updated default button variant to match design system
-  - Removed shine effects and elevation animations
-  - Identical styling to secondary variant but without border
-  - Accent background color with white text
-  - Clean, minimal hover state (bg-accent/90)
-- **Project Data Organization**: Organized project information into logical tabs (Datos Básicos, Ubicación, Cliente)
-- **Projects Table Schema**: Added `projects` table definition to Drizzle schema (`shared/schema.ts`) with complete field mappings including `code`, `color`, `use_custom_color`, and other project metadata
-- **Project Basic Data Tab**: Implemented with unified hydration pattern using `isHydrated` flag that waits for both `projectInfoSuccess` and `projectDataSuccess` before enabling auto-save, preventing unwanted saves on initial page load. Added `code` field with auto-formatting validation (uppercase, A-Z0-9-_, max 30 chars, optional)
-- **Project Location Tab - Google Maps Integration**: Complete implementation with enriched location data management
-  - Custom Google Maps components using CDN script loading (no npm packages): `useGoogleMapsScript`, `GooglePlacesAutocomplete`, `GoogleMap` with interactive marker
-  - Google Places Autocomplete with auto-population of all location fields (address, city, state, country, zip code, coordinates, place_id, timezone)
-  - Interactive map display showing project location with marker (only if coordinates exist)
-  - Extended `project_data` table schema with location fields: `address_full`, `place_id`, `lat`, `lng`, `timezone`, `location_type` (enum: urban/rural/industrial/other), `accessibility_notes`
-  - Unified hydration pattern with `isHydrated` reset on project change to prevent premature auto-save when switching projects
-  - Conditional auto-save payload: only sends `location_type` if it's a valid enum value to prevent database constraint violations
-  - UX indicators: coordinates status badge, API key configuration warning, loading states
-  - Requires `VITE_GOOGLE_MAPS_API_KEY` environment variable (Google Cloud Console with Maps JavaScript API, Places API, and Geocoding API enabled)
-
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
@@ -65,10 +12,10 @@ Preferred communication style: Simple, everyday language.
 - **Design System**: "new-york" style with a neutral color palette, dark mode, and reusable UI components, leveraging `shadcn/ui` and Tailwind CSS.
 - **Typography System**: Unified Inter Variable Font with Apple-style optical letter-spacing, antialiased rendering, and consistent font weights.
 - **Dynamic Color System**: Project-based color theming using `chroma-js` for intelligent color calculations, including dynamic accent colors, hover states, foreground colors, and organic radial gradients. All UI components automatically "breathe" the project color.
-- **Modals**: Responsive Dialog component (right-side panel on desktop, fullscreen on mobile) with a standardized development pattern using `FormModalLayout`, React Hook Form with Zod validation, and `useMutation` from React Query. Delete confirmation modal uses Vercel-style "type to confirm" pattern with three sections: warning message, item details card showing contextual data, and text input requiring exact name match.
-- **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub. UserQuickAccess Popover is context-aware, hiding irrelevant selectors on specific pages.
+- **Modals**: Responsive Dialog component (right-side panel on desktop, fullscreen on mobile) with a standardized development pattern using `FormModalLayout`, React Hook Form with Zod validation, and `useMutation` from React Query. Delete confirmation modal uses Vercel-style "type to confirm" pattern.
+- **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub.
 - **Home Page UX Flow**: Minimalist AI welcome interface with dynamic greetings and quick action buttons.
-- **Auto-Save System**: Centralized debounced auto-save hook located in `src/components/save/` with intelligent initial-load detection. Uses TanStack Query `isSuccess` flags to prevent false saves during data hydration while supporting projects without existing data.
+- **Auto-Save System**: Centralized debounced auto-save hook with intelligent initial-load detection, using TanStack Query `isSuccess` flags to prevent false saves during data hydration.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui, Tailwind CSS, Zustand, Wouter, TanStack Query.
@@ -80,17 +27,19 @@ Preferred communication style: Simple, everyday language.
 
 ### Feature Specifications
 - **Core Modules**: Home page (AI-powered), Project Management, Financial Management, Document Management, Learning Module, Community Map, and Notification System.
-- **Community Map**: Global interactive map powered by React Leaflet showing all organization projects with location data. Features organization logo-based markers, smart clustering, simplified popups, and graceful empty state handling.
-- **Learning Module ("Capacitaciones")**: Course management, Vimeo integration, progress tracking, note-taking, and Mercado Pago integration. Includes improved UX for course navigation and mobile-specific floating lesson navigation.
-- **Admin Management**: Reorganized admin section with comprehensive analytics dashboard (`/admin/dashboard`) showing 5 KPI sections: real-time active users, engagement by view with horizontal bar chart, top active users table with current/last visited page below username, drop-off analysis, and hourly activity line chart. Includes date range filtering (Today/7days/30days) and dedicated pages for administration and support. Global announcement system with audience targeting and dismissal tracking. Top Active Users table shows live status (📍 online / ⏸️ offline) with fallback to last visited page from history.
-- **Real-Time Support System**: Bidirectional support conversation system with automatic read tracking (`read_by_admin` and `read_by_user` columns), notification badges on sidebar for unread messages. **🔥 Powered by Supabase Realtime** for instant message delivery with zero polling - PostgreSQL database changes trigger immediate UI updates via WebSocket subscriptions. RightSidebar (always mounted) maintains realtime subscriptions and invalidates all support queries ensuring messages update even when panels are closed. Support tab prioritized first in admin section. Includes RLS policies for secure message updates and optimized queries with React Query.
-- **Coupon System**: Discount coupon system for courses, with a workaround for Mercado Pago limitations when coupons are applied.
-- **Payment Architecture**: Unified `payments` table supporting Mercado Pago, PayPal, and bank transfers with an automatic 5% discount for bank transfers.
+- **Community Map**: Global interactive map powered by React Leaflet showing all organization projects with location data. Features organization logo-based markers, smart clustering, and simplified popups.
+- **Learning Module ("Capacitaciones")**: Course management, Vimeo integration, progress tracking, note-taking, and Mercado Pago integration.
+- **Admin Management**: Reorganized admin section with comprehensive analytics dashboard showing 5 KPI sections, date range filtering, global announcement system, and real-time active user status.
+- **Real-Time Support System**: Bidirectional support conversation system with automatic read tracking and notification badges, powered by Supabase Realtime for instant message delivery via WebSocket subscriptions.
+- **Coupon System**: Discount coupon system for courses.
+- **Payment Architecture**: Unified `payments` table supporting Mercado Pago, PayPal, and bank transfers.
 - **Access Control**: `PlanRestricted` component system with admin bypass.
 - **Cost System**: Three-tier cost system (Seencel Cost, Organization Cost, Independent Cost) for budget items.
-- **AI Integration**: GPT-4o-powered intelligent assistant with comprehensive analysis capabilities using 13 specialized function-calling tools (8 finance tools, 2 project tools, 3 organization tools), dynamic greetings, and conversational chat with persistent history. Organization tools enable queries about company info, member lists with roles, and real-time activity tracking. Includes a greeting cache system and anti-hallucination measures. FloatingAIChat visibility is route-based and restricted by plan.
-- **User Presence & Analytics System**: Dual-layer tracking for real-time user presence (`user_presence` table) and historical usage analytics (`user_view_history` table) for business intelligence, including time spent per view.
-- **Organization Membership Security System**: Comprehensive access control enforcement when users are deactivated (`is_active=false`). Backend endpoints filter by `is_active=true`, Supabase RPC `get_user()` excludes inactive memberships in three locations, and `OrganizationRemovedModal` provides elegant UX: detects invalid organization access, shows non-dismissible modal with two flows: (1) multi-org users see organization selector with avatars and can switch organizations, (2) zero-org users see forced logout modal with clear messaging. Ensures complete security when admins remove members.
+- **AI Integration**: GPT-4o-powered intelligent assistant with comprehensive analysis capabilities using 13 specialized function-calling tools (8 finance, 2 project, 3 organization), dynamic greetings, and conversational chat with persistent history.
+- **User Presence & Analytics System**: Dual-layer tracking for real-time user presence and historical usage analytics.
+- **Organization Membership Security System**: Comprehensive access control enforcement when users are deactivated, ensuring secure access and providing elegant UX for invalid organization access.
+- **Project Data Management**: Organized project information into logical tabs (Basic Data, Location, Client) with Google Maps integration for enriched location data management and an auto-save system.
+- **Mobile Action Bar**: Fully functional mobile action bars for Project Data and Project Management sections with dynamic filtering and shared state.
 
 ### System Design Choices
 - **Backend Modular Architecture**: Modularized domain-specific route modules.
@@ -118,3 +67,4 @@ Preferred communication style: Simple, everyday language.
 - **PayPal**: Payment gateway for USD.
 - **Vimeo**: Video hosting and integration for the learning module.
 - **OpenAI**: GPT-4o for AI-powered features.
+- **Google Maps Platform**: For location services and interactive maps.
