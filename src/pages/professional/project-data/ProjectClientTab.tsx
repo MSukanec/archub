@@ -138,7 +138,11 @@ export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
           description: (
             <>
               Agrega clientes para gestionar la información del proyecto. Recuerda que un cliente, antes debe ser un{' '}
-              <a href="/professional/contacts" className="text-primary hover:underline font-medium">
+              <a 
+                href="/professional/contacts" 
+                className="hover:underline font-bold"
+                style={{ color: 'var(--accent)' }}
+              >
                 contacto
               </a>
               .
@@ -149,18 +153,6 @@ export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
               onClick={handleAddClient}
               size="sm"
               data-testid="button-add-client-empty"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Agregar Cliente
-            </Button>
-          ),
-        }}
-        headerActions={{
-          rightActions: (
-            <Button
-              onClick={handleAddClient}
-              size="sm"
-              data-testid="button-add-client"
             >
               <Plus className="h-4 w-4 mr-2" />
               Agregar Cliente

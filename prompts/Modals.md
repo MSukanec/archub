@@ -294,9 +294,177 @@ Antes de dar por terminado un modal, verificar:
 ## 📚 Ejemplos de Referencia
 
 Buenos ejemplos a seguir en el proyecto:
+
+**Form Modals (con formularios tradicionales):**
 - `src/components/modal/modals/admin/NotificationFormModal.tsx`
 - `src/components/modal/modals/admin/ChangelogFormModal.tsx`
 - `src/components/modal/modals/admin/AnnouncementFormModal.tsx`
+- `src/components/modal/modals/organizations/members/PartnerModal.tsx`
+
+**Selection Modals (selección de items):**
+- `src/components/modal/modals/construction/ProjectClientModal.tsx`
+
+---
+
+## 🎯 Modales de Selección (Selection Modals)
+
+Para modales que **NO usan formularios** sino que permiten **seleccionar items de una lista/tabla**, seguir este patrón:
+
+### Características de Selection Modals:
+
+1. **NO usan React Hook Form** - No hay `useForm`, `zodResolver`, ni `Form`
+2. **Usan Table o List** con `onRowClick` para capturar la selección
+3. **Acción ocurre al hacer click** - No hay botón "Guardar/Crear"
+4. **Footer solo tiene "Cancelar"** - No tiene `rightLabel` porque la acción ya ocurrió
+5. **DEBEN forzar panel 'edit'** - Usar `isEditing={true}` en FormModalLayout
+
+### Template de Selection Modal:
+
+```typescript
+import { useState } from 'react';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { FormModalHeader } from '../../form/FormModalHeader';
+import { FormModalFooter } from '../../form/FormModalFooter';
+import { FormModalLayout } from '../../form/FormModalLayout';
+import { useGlobalModalStore } from '../../form/useGlobalModalStore';
+import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { IconName } from 'lucide-react';
+
+interface MySelectionModalProps {
+  projectId?: string;
+  onClose: () => void;
+}
+
+export function MySelectionModal({ projectId, onClose }: MySelectionModalProps) {
+  const { toast } = useToast();
+  const { data: userData } = useCurrentUser();
+  const queryClient = useQueryClient();
+  const { closeModal } = useGlobalModalStore();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const organizationId = userData?.organization?.id;
+
+  // Query para obtener items disponibles
+  const { data: items = [], isLoading: isLoadingItems } = useQuery({
+    queryKey: [`/api/items?organization_id=${organizationId}`],
+    enabled: !!organizationId,
+  });
+
+  // Mutation que se ejecuta al hacer click en un item
+  const selectItemMutation = useMutation({
+    mutationFn: async (itemId: string) => {
+      if (!organizationId || !projectId) throw new Error('Missing IDs');
+      return await apiRequest('POST', `/api/projects/${projectId}/items`, {
+        item_id: itemId,
+        organization_id: organizationId,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/items`] });
+      toast({
+        title: 'Item agregado',
+        description: 'El item ha sido agregado correctamente',
+      });
+      handleClose();
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const handleClose = () => {
+    closeModal();
+    onClose();
+  };
+
+  const handleItemClick = async (item: any) => {
+    setIsLoading(true);
+    try {
+      await selectItemMutation.mutateAsync(item.id);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const columns = [
+    { key: 'name', label: 'Nombre', sortable: true },
+    { key: 'description', label: 'Descripción', sortable: true },
+  ];
+
+  const editPanel = (
+    <div className="space-y-4">
+      <Table
+        columns={columns}
+        data={items}
+        isLoading={isLoadingItems || isLoading}
+        onRowClick={handleItemClick}
+        emptyStateConfig={{
+          icon: <IconName className="h-12 w-12 text-muted-foreground" />,
+          title: 'No hay items disponibles',
+          description: 'Crea items primero para poder seleccionarlos',
+        }}
+        className="cursor-pointer"
+      />
+    </div>
+  );
+
+  const headerContent = (
+    <FormModalHeader
+      title="Seleccionar Item"
+      description="Selecciona un item de la lista para agregarlo"
+      icon={IconName}
+    />
+  );
+
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={handleClose}
+      showLoadingSpinner={isLoading}
+    />
+  );
+
+  return (
+    <FormModalLayout
+      columns={1}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      onClose={handleClose}
+      isEditing={true} // 🚨 CRÍTICO: Esto fuerza el panel edit a ser visible
+    />
+  );
+}
+```
+
+### Diferencias clave vs Form Modals:
+
+| Aspecto | Form Modal | Selection Modal |
+|---------|------------|-----------------|
+| Hook principal | `useForm` | `useState` para loading |
+| Componente UI | `Form` + `FormField` | `Table` o `List` |
+| Validación | Zod con `zodResolver` | No hay validación |
+| Acción principal | Botón "Guardar/Crear" | Click en fila `onRowClick` |
+| Footer | Cancelar + Guardar | Solo Cancelar |
+| `isEditing` | Opcional | **REQUERIDO**: `true` |
+
+### Checklist para Selection Modals:
+
+- [ ] ✅ NO usa `useForm` ni Zod
+- [ ] ✅ Usa `Table` con `onRowClick` o similar
+- [ ] ✅ `useMutation` para la acción de selección
+- [ ] ✅ Footer solo tiene `leftLabel="Cancelar"` (no rightLabel)
+- [ ] ✅ `FormModalLayout` tiene `isEditing={true}`
+- [ ] ✅ `handleClose` llama a `closeModal()` y `onClose()`
+- [ ] ✅ Loading state mientras ejecuta la mutation
+- [ ] ✅ Toast de éxito y error
 
 ---
 

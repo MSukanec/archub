@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { FileText, Share2, Copy, MessageCircle, Mail, MapPin, Home, Bell } from 'lucide-react';
+import { FileText, Share2, Copy, MessageCircle, Mail, MapPin, Home, Bell, Users, Plus } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useProjectContext } from '@/stores/projectContext';
@@ -12,6 +12,7 @@ import { BottomSheet, BottomSheetContent, BottomSheetHeader, BottomSheetTitle, B
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
 import { useMobile } from '@/hooks/use-mobile';
 import { useLocation } from 'wouter';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import ProjectBasicDataTab from './ProjectBasicDataTab';
 import ProjectLocationTab from './ProjectLocationTab';
 import ProjectClientTab from './ProjectClientTab';
@@ -25,6 +26,7 @@ export default function ProjectData() {
   const { setActions, setShowActionBar, clearActions } = useActionBarMobile();
   const isMobile = useMobile();
   const [, navigate] = useLocation();
+  const { openModal } = useGlobalModalStore();
 
   // Set sidebar context on mount
   useEffect(() => {
@@ -215,7 +217,7 @@ Generado desde Seencel`);
     },
     {
       id: 'client',
-      label: 'Cliente',
+      label: 'Clientes',
       isActive: activeTab === 'client'
     }
   ];
@@ -278,13 +280,27 @@ Generado desde Seencel`);
     </Popover>
   ) : null;
 
+  // Add client button for client tab
+  const addClientButton = activeTab === 'client' ? (
+    <Button 
+      variant="default" 
+      size="sm"
+      className="gap-2"
+      onClick={() => openModal('project-client', { projectId: selectedProjectId })}
+      data-testid="button-add-client-header"
+    >
+      <Plus className="h-4 w-4" />
+      Agregar Cliente
+    </Button>
+  ) : null;
+
   const headerProps = {
     icon: FileText,
     title: 'Datos Básicos',
     description: 'Información general del proyecto, datos del cliente y ubicación',
     tabs: headerTabs,
     onTabChange: (tabId: string) => setActiveTab(tabId),
-    actions: shareButton ? [shareButton] : undefined
+    actions: shareButton ? [shareButton] : addClientButton ? [addClientButton] : undefined
   };
 
   const renderTabContent = () => {

@@ -26,7 +26,7 @@ export function ProjectClientModal({ projectId, onClose }: ProjectClientModalPro
   const organizationId = userData?.organization?.id;
 
   // Query to get available contacts
-  const { data: contacts = [], isLoading: isLoadingContacts } = useQuery({
+  const { data: contacts = [], isLoading: isLoadingContacts } = useQuery<any[]>({
     queryKey: [`/api/contacts?organization_id=${organizationId}`],
     enabled: !!organizationId,
   });
@@ -146,6 +146,7 @@ export function ProjectClientModal({ projectId, onClose }: ProjectClientModalPro
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={handleClose}
+      isEditing={true}
     />
   );
 }
