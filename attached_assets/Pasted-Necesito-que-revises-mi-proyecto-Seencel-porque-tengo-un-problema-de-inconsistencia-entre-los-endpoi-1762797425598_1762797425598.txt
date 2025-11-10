@@ -1,0 +1,52 @@
+Necesito que revises mi proyecto Seencel porque tengo un problema de inconsistencia entre los endpoints que funcionan en Replit y los que funcionan en Vercel.
+
+Actualmente tengo un archivo `server/routes.ts` con endpoints de Express, y también algunas funciones en la carpeta `/api` (que son las que Vercel usa como serverless functions).  
+El resultado es que en producción (Vercel) algunas cosas funcionan —como proyectos, organizaciones o presupuestos— pero otras (como contactos, movimientos o pagos) no, porque dependen de endpoints que solo existen en `server/routes.ts`.
+
+Tu tarea es la siguiente:
+
+1. **Unificar todo el backend** bajo la carpeta `/api`, eliminando la dependencia de Express en producción.  
+   - Cada ruta de `server/routes.ts` debe transformarse en un archivo independiente dentro de `/api`.  
+   - Por ejemplo, si hay una ruta `app.post('/api/movements/create')`, debe convertirse en el archivo `/api/movements/create.ts`.
+
+2. **Usar el formato de serverless function compatible con Vercel**, así:
+   ```ts
+   import { NextResponse } from 'next/server';
+   import { createClient } from '@supabase/supabase-js';
+
+   export async function POST(req: Request) {
+     const body = await req.json();
+     const supabase = createClient(
+       process.env.SUPABASE_URL!,
+       process.env.SUPABASE_SERVICE_ROLE_KEY!
+     );
+
+     // lógica actual de esta ruta
+     return NextResponse.json({ success: true });
+   }
+No modificar la lógica interna de cada endpoint (validaciones, inserts o selects de Supabase, etc.), solo adaptarla al nuevo formato serverless.
+
+Asegurarte de que todos los endpoints que actualmente existen en server/routes.ts también existan en /api.
+Los más críticos son:
+
+/api/current-user
+
+/api/movements/*
+
+/api/contacts/*
+
+/api/payments/*
+
+/api/mp/*
+
+/api/paypal/*
+
+/api/fx/*
+
+Mantener las variables de entorno (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_ANON_KEY, etc.) sin cambios.
+Solo asegurate de que cada función las use correctamente.
+
+Una vez migradas las rutas, eliminar o comentar el bloque de Express en server/routes.ts para que no haya duplicados.
+Replit puede seguir usándose solo como entorno de desarrollo, pero Vercel debe depender 100% de las funciones dentro de /api.
+
+El objetivo final es que todo funcione igual en desarrollo y producción, pero con backend unificado en /api, completamente serverless.
