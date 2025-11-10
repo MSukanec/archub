@@ -34,6 +34,16 @@ export function createAuthenticatedClient(token: string): SupabaseClient {
 }
 
 /**
+ * Custom HTTP Error for domain logic
+ */
+export class HttpError extends Error {
+  constructor(public statusCode: number, message: string) {
+    super(message);
+    this.name = 'HttpError';
+  }
+}
+
+/**
  * Gets the database user ID from an authenticated token
  * Returns user ID from the users table (not auth.users)
  */
@@ -71,4 +81,24 @@ export async function getUserFromToken(token: string): Promise<{
     console.error('Error in getUserFromToken:', err);
     return null;
   }
+}
+
+/**
+ * Requires a valid user from token, throws HttpError if not found
+ */
+export async function requireUser(token: string | null): Promise<{
+  userId: string;
+  authId: string;
+  supabase: SupabaseClient;
+}> {
+  if (!token) {
+    throw new HttpError(401, "No authorization token provided");
+  }
+
+  const user = await getUserFromToken(token);
+  if (!user) {
+    throw new HttpError(401, "Unauthorized");
+  }
+
+  return user;
 }

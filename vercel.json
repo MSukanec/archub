@@ -60,6 +60,10 @@
     { "source": "/api/projects/:id", "destination": "/api/projects/[id]" },
     
     { "source": "/api/invite-member", "destination": "/api/invite-member" },
+    { "source": "/api/organization-members/:organizationId", "destination": "/api/organization-members/[organizationId]" },
+    { "source": "/api/pending-invitations/:userId", "destination": "/api/pending-invitations/[userId]" },
+    { "source": "/api/accept-invitation", "destination": "/api/accept-invitation" },
+    { "source": "/api/reject-invitation", "destination": "/api/reject-invitation" },
     
     { "source": "/api/:path*", "destination": "/api" },
     
