@@ -48,6 +48,7 @@ Preferred communication style: Simple, everyday language.
 - **Performance Optimizations (Gacela Mode)**: Sub-second page loads using database views, smart caching, and optimized backend endpoints.
 - **Personnel Module Organization**: Reorganized into modular components.
 - **Personnel Assignment Modal Optimization**: Enhanced with real-time search filtering and optimized loading.
+- **AI Code Architecture**: Dual-location AI code structure to support both development (Express) and production (Vercel serverless). The authoritative AI implementation lives in `api/_lib/ai/` for Vercel bundling. A mirror copy exists in `src/ai/` for Vite HMR compatibility during development. All AI-related changes must be made in `api/_lib/ai/`.
 
 ## External Dependencies
 - **Supabase**: Authentication.
