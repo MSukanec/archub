@@ -902,4 +902,32 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
       res.status(500).json({ error: "Failed to fetch active users" });
     }
   });
+
+  // TEMPORARY FIX: Drop unique constraint on projects.code
+  app.post("/api/fix/drop-code-constraint", async (req, res) => {
+    try {
+      const adminClient = getAdminClient();
+      
+      // Execute raw SQL to drop the constraint
+      const { data, error } = await adminClient.rpc('exec_sql', {
+        sql_query: 'ALTER TABLE projects DROP CONSTRAINT IF EXISTS projects_code_unique_per_org'
+      });
+
+      if (error) {
+        console.error("Error dropping constraint:", error);
+        return res.status(500).json({ 
+          error: "Failed to drop constraint",
+          details: error.message 
+        });
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Constraint projects_code_unique_per_org dropped successfully" 
+      });
+    } catch (error) {
+      console.error("Error in drop constraint endpoint:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
 }
