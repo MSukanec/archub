@@ -5,6 +5,12 @@ Seencel is a comprehensive construction management platform designed to optimize
 
 ## Recent Changes
 **November 10, 2025**
+- **Project Management Mobile Action Bar**: Implemented Action Bar Mobile in both tabs of Gestión de Proyectos with dynamic filter configuration
+  - ProjectListTab: 4 actions (search, create, filter, notifications) with 3 dynamic filters extracted from real project data (types, modalities, statuses)
+  - ProjectActivesTab: 2 actions (create, notifications) optimized for card view
+  - Fixed bug in desktop filters that used incorrect hardcoded values
+  - Proper cleanup on unmount to prevent stale UI state
+  - Search sync between mobile and desktop views
 - **Community Module Access Control**: Temporarily blocked Community button in sidebar (desktop & mobile) using PlanRestricted with "coming_soon" to allow for development without user visibility
 
 **November 9, 2025**

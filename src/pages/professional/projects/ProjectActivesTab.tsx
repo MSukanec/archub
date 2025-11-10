@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
 import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
-import { Folder, Plus } from 'lucide-react'
+import { Folder, Plus, Bell } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useProjectContext } from '@/stores/projectContext'
@@ -14,6 +14,8 @@ import ProjectItemCard from '@/components/cards/ProjectItemCard'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
+import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
+import { useMobile } from '@/hooks/use-mobile'
 
 export default function ProjectActives() {
   const { openModal } = useGlobalModalStore()
@@ -25,6 +27,14 @@ export default function ProjectActives() {
   const { setSelectedProject } = useProjectContext()
   const { setSidebarLevel } = useNavigationStore()
   const [, navigate] = useLocation()
+
+  // Mobile Action Bar
+  const {
+    setActions,
+    setShowActionBar,
+    clearActions
+  } = useActionBarMobile()
+  const isMobile = useMobile()
 
   // Get active project
   const { data: userOrgPrefs } = useUserOrganizationPreferences(organizationId);
@@ -151,6 +161,38 @@ export default function ProjectActives() {
   const handleEdit = (project: any) => {
     openModal('project', { editingProject: project, isEditing: true })
   }
+
+  // Configure Mobile Action Bar
+  useEffect(() => {
+    if (isMobile) {
+      setActions({
+        create: {
+          id: 'create',
+          icon: Plus,
+          label: 'Nuevo Proyecto',
+          onClick: () => openModal('project', {}),
+          variant: 'primary'
+        },
+        notifications: {
+          id: 'notifications',
+          icon: Bell,
+          label: 'Notificaciones',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+      });
+      setShowActionBar(true);
+    }
+
+    // Cleanup when component unmounts
+    return () => {
+      if (isMobile) {
+        clearActions();
+        setShowActionBar(false);
+      }
+    };
+  }, [isMobile, setActions, setShowActionBar, clearActions, openModal]);
 
   if (projectsLoading) {
     return (

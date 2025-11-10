@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
 import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
-import { Folder, Edit, Trash2, Plus, CheckCircle2 } from 'lucide-react'
+import { Folder, Edit, Trash2, Plus, CheckCircle2, Search, Filter, Bell } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -17,6 +17,8 @@ import { Button } from '@/components/ui/button'
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
+import { useMobile } from '@/hooks/use-mobile'
 
 export default function ProjectList() {
   const { openModal } = useGlobalModalStore()
@@ -35,9 +37,52 @@ export default function ProjectList() {
   const [filterByStatus, setFilterByStatus] = useState('all')
   const [searchValue, setSearchValue] = useState('')
 
+  // Mobile Action Bar
+  const {
+    setActions,
+    setShowActionBar,
+    clearActions,
+    setFilterConfig,
+    searchValue: mobileSearchValue,
+    setSearchValue: setMobileSearchValue
+  } = useActionBarMobile()
+  const isMobile = useMobile()
+
+  // Sync search values between mobile and desktop
+  useEffect(() => {
+    if (isMobile && mobileSearchValue !== searchValue) {
+      setSearchValue(mobileSearchValue)
+    }
+  }, [mobileSearchValue, isMobile])
+
   // Get active project
   const { data: userOrgPrefs } = useUserOrganizationPreferences(organizationId);
   const activeProjectId = userOrgPrefs?.last_project_id
+
+  // Extract unique values for filters
+  const availableProjectTypes = useMemo(() => Array.from(
+    new Set(projects.map(p => p.project_data?.project_type?.name).filter(Boolean))
+  ), [projects]);
+
+  const availableModalities = useMemo(() => Array.from(
+    new Set(projects.map(p => p.project_data?.modality?.name).filter(Boolean))
+  ), [projects]);
+
+  const availableStatuses = useMemo(() => {
+    const statusNames: Record<string, string> = {
+      'active': 'En proceso',
+      'completed': 'Completado',
+      'paused': 'Pausado',
+      'cancelled': 'Cancelado',
+      'planning': 'Planificación'
+    };
+    return Array.from(
+      new Set(projects.map(p => p.status).filter(Boolean))
+    ).map(status => ({
+      value: status,
+      label: statusNames[status as keyof typeof statusNames] || status
+    }));
+  }, [projects]);
 
   const projectsWithActive = projects.map(project => ({
     ...project,
@@ -76,6 +121,89 @@ export default function ProjectList() {
     setFilterByModality('all')
     setFilterByStatus('all')
   }
+
+  // Configure Mobile Action Bar
+  useEffect(() => {
+    if (isMobile) {
+      setActions({
+        search: {
+          id: 'search',
+          icon: Search,
+          label: 'Buscar',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+        create: {
+          id: 'create',
+          icon: Plus,
+          label: 'Nuevo Proyecto',
+          onClick: () => openModal('project', {}),
+          variant: 'primary'
+        },
+        filter: {
+          id: 'filter',
+          icon: Filter,
+          label: 'Filtros',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+        notifications: {
+          id: 'notifications',
+          icon: Bell,
+          label: 'Notificaciones',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+      });
+      setShowActionBar(true);
+    }
+
+    // Cleanup when component unmounts
+    return () => {
+      if (isMobile) {
+        clearActions();
+        setShowActionBar(false);
+        setMobileSearchValue('');
+      }
+    };
+  }, [isMobile, setActions, setShowActionBar, clearActions, openModal, setMobileSearchValue]);
+
+  // Configure filters for Mobile Action Bar
+  useEffect(() => {
+    if (isMobile && availableProjectTypes.length > 0) {
+      setFilterConfig({
+        filters: [
+          {
+            label: 'Filtrar por tipo',
+            value: filterByProjectType,
+            onChange: setFilterByProjectType,
+            placeholder: 'Todos los tipos',
+            allOptionLabel: 'Todos los tipos',
+            options: availableProjectTypes.map(type => ({ value: type!, label: type! }))
+          },
+          {
+            label: 'Filtrar por modalidad',
+            value: filterByModality,
+            onChange: setFilterByModality,
+            placeholder: 'Todas las modalidades',
+            allOptionLabel: 'Todas las modalidades',
+            options: availableModalities.map(modality => ({ value: modality!, label: modality! }))
+          },
+          {
+            label: 'Filtrar por estado',
+            value: filterByStatus,
+            onChange: setFilterByStatus,
+            placeholder: 'Todos los estados',
+            allOptionLabel: 'Todos los estados',
+            options: availableStatuses
+          }
+        ]
+      });
+    }
+  }, [isMobile, filterByProjectType, filterByModality, filterByStatus, setFilterConfig, availableProjectTypes, availableModalities, availableStatuses]);
 
   // Select project mutation
   const selectProjectMutation = useMutation({
@@ -350,11 +478,9 @@ export default function ProjectList() {
                     className="w-full h-8 px-2 text-xs border rounded"
                   >
                     <option value="all">Todos los tipos</option>
-                    <option value="vivienda">Vivienda</option>
-                    <option value="obra nueva">Obra Nueva</option>
-                    <option value="remodelacion">Remodelación</option>
-                    <option value="mantenimiento">Mantenimiento</option>
-                    <option value="consultoria">Consultoría</option>
+                    {availableProjectTypes.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="space-y-2">
@@ -365,11 +491,9 @@ export default function ProjectList() {
                     className="w-full h-8 px-2 text-xs border rounded"
                   >
                     <option value="all">Todas las modalidades</option>
-                    <option value="activo">Activo</option>
-                    <option value="completado">Completado</option>
-                    <option value="pausado">Pausado</option>
-                    <option value="cancelado">Cancelado</option>
-                    <option value="planificacion">Planificación</option>
+                    {availableModalities.map(modality => (
+                      <option key={modality} value={modality}>{modality}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="space-y-2">
@@ -380,11 +504,9 @@ export default function ProjectList() {
                     className="w-full h-8 px-2 text-xs border rounded"
                   >
                     <option value="all">Todos los estados</option>
-                    <option value="active">En proceso</option>
-                    <option value="completed">Completado</option>
-                    <option value="paused">Pausado</option>
-                    <option value="cancelled">Cancelado</option>
-                    <option value="planning">Planificación</option>
+                    {availableStatuses.map(status => (
+                      <option key={status.value} value={status.value}>{status.label}</option>
+                    ))}
                   </select>
                 </div>
               </div>
