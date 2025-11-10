@@ -355,16 +355,18 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     testId="button-mobile-project"
                   />
 
-                  <MobileMenuButton
-                    icon={Users}
-                    label="Comunidad"
-                    onClick={() => {
-                      setSidebarLevel('community');
-                    }}
-                    isActive={location.startsWith('/community')}
-                    showChevron={true}
-                    testId="button-mobile-community"
-                  />
+                  <PlanRestricted reason="coming_soon">
+                    <MobileMenuButton
+                      icon={Users}
+                      label="Comunidad"
+                      onClick={() => {
+                        setSidebarLevel('community');
+                      }}
+                      isActive={location.startsWith('/community')}
+                      showChevron={true}
+                      testId="button-mobile-community"
+                    />
+                  </PlanRestricted>
 
                   <MobileMenuButton
                     icon={GraduationCap}
