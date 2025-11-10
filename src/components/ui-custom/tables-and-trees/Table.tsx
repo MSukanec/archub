@@ -556,9 +556,7 @@ export function Table<T = any>({
                 </PopoverTrigger>
                 <PopoverContent 
                   className="w-56" 
-                  align="end" 
-                  collisionPadding={{ top: 20, right: 20, bottom: 20, left: 20 }}
-                  avoidCollisions={true}
+                  align="center"
                 >
                   {topBar.renderSortContent()}
                 </PopoverContent>
@@ -583,9 +581,7 @@ export function Table<T = any>({
                 </PopoverTrigger>
                 <PopoverContent 
                   className="w-64 p-4" 
-                  align="end" 
-                  collisionPadding={{ top: 20, right: 20, bottom: 20, left: 20 }}
-                  avoidCollisions={true}
+                  align="center"
                 >
                   <div className="space-y-4">
                     {/* Botón limpiar filtros dentro del popover si hay filtros activos */}
@@ -624,9 +620,7 @@ export function Table<T = any>({
                 </PopoverTrigger>
                 <PopoverContent 
                   className="w-64 p-4" 
-                  align="end" 
-                  collisionPadding={{ top: 20, right: 20, bottom: 20, left: 20 }}
-                  avoidCollisions={true}
+                  align="center"
                 >
                   {(topBar?.renderGroupingContent ?? defaultGroupingContent)()}
                 </PopoverContent>
