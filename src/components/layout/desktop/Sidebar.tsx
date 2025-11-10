@@ -815,37 +815,33 @@ export function Sidebar() {
                         return (
                           <AccordionItem key={section.id} value={section.id} className="border-none mb-[2px]">
                             <AccordionTrigger 
-                              asChild
-                              className="border-none p-0 hover:no-underline [&[data-state=open]>span:last-child]:rotate-180"
+                              className={cn(
+                                "flex items-center h-8 transition-all duration-200 ease-out overflow-hidden rounded border-none p-0 hover:no-underline",
+                                isExpanded ? "w-full" : "w-8",
+                                "text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)]",
+                                "hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]",
+                                "group",
+                                "[&>svg]:hidden"
+                              )}
                             >
-                              <button
-                                className={cn(
-                                  "flex items-center h-8 transition-all duration-200 ease-out overflow-hidden rounded border-none",
-                                  isExpanded ? "w-full" : "w-8",
-                                  "text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)]",
-                                  "hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]",
-                                  "group"
-                                )}
-                              >
-                                <span className="flex-shrink-0 w-8 flex items-center justify-center transition-colors duration-200 relative">
-                                  <span className={cn(
-                                    "transition-colors duration-200",
-                                    "text-[var(--main-sidebar-button-fg)] group-hover:text-[var(--accent)]"
-                                  )}>
-                                    <section.icon className="w-[18px] h-[18px]" />
-                                  </span>
+                              <span className="flex-shrink-0 w-8 flex items-center justify-center transition-colors duration-200 relative">
+                                <span className={cn(
+                                  "transition-colors duration-200",
+                                  "text-[var(--main-sidebar-button-fg)] group-hover:text-[var(--accent)]"
+                                )}>
+                                  <section.icon className="w-[18px] h-[18px]" />
                                 </span>
-                                {isExpanded && (
-                                  <>
-                                    <span className="text-xs whitespace-nowrap text-left flex items-center justify-start flex-1 pr-2 text-current ml-3 font-normal">
-                                      {section.label}
-                                    </span>
-                                    <span className="transition-transform duration-200 mr-2 flex-shrink-0">
-                                      <ChevronDown className="h-4 w-4" />
-                                    </span>
-                                  </>
-                                )}
-                              </button>
+                              </span>
+                              {isExpanded && (
+                                <>
+                                  <span className="text-xs whitespace-nowrap text-left flex items-center justify-start flex-1 pr-2 text-current ml-3 font-normal">
+                                    {section.label}
+                                  </span>
+                                  <span className="transition-transform duration-200 mr-2 flex-shrink-0 [button[data-state=open]_&]:rotate-180">
+                                    <ChevronDown className="h-4 w-4" />
+                                  </span>
+                                </>
+                              )}
                             </AccordionTrigger>
                             <AccordionContent className="px-0 py-1">
                               <div className="flex flex-col gap-[2px]">
