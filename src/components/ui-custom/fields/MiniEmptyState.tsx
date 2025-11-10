@@ -28,6 +28,7 @@ export function MiniEmptyState({
         size="sm"
         onClick={onClick}
         className="mt-1 h-7 text-xs"
+        data-testid="button-mini-empty-state-action"
       >
         {buttonText}
       </Button>

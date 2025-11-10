@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -13,7 +14,8 @@ import { useGlobalModalStore } from '../../form/useGlobalModalStore';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
-import { Users } from 'lucide-react';
+import { MiniEmptyState } from '@/components/ui-custom/fields/MiniEmptyState';
+import { Users, UserPlus } from 'lucide-react';
 
 const clientSchema = z.object({
   contactId: z.string().min(1, 'Debe seleccionar un contacto'),
@@ -37,6 +39,7 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
   const queryClient = useQueryClient();
   const { closeModal } = useGlobalModalStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [, setLocation] = useLocation();
 
   const organizationId = userData?.organization?.id;
   const isEditing = !!clientId;
@@ -120,6 +123,11 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
     onClose();
   };
 
+  const handleGoToContacts = () => {
+    handleClose();
+    setLocation('/contacts');
+  };
+
   const handleSubmit = async (data: ClientFormData) => {
     setIsLoading(true);
     try {
@@ -147,16 +155,25 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
             <FormItem>
               <FormLabel>Contacto</FormLabel>
               <FormControl>
-                <ComboBox
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  options={contactOptions}
-                  placeholder="Seleccionar contacto..."
-                  searchPlaceholder="Buscar contacto..."
-                  emptyMessage="No se encontraron contactos."
-                  className="w-full"
-                  disabled={isEditing}
-                />
+                {contacts.length === 0 ? (
+                  <MiniEmptyState
+                    message="Aún no tienes contactos creados. Crea tu primer contacto para poder agregarlo como cliente."
+                    buttonText="Ir a Contactos"
+                    onClick={handleGoToContacts}
+                    icon={UserPlus}
+                  />
+                ) : (
+                  <ComboBox
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    options={contactOptions}
+                    placeholder="Seleccionar contacto..."
+                    searchPlaceholder="Buscar contacto..."
+                    emptyMessage="No se encontraron contactos."
+                    className="w-full"
+                    disabled={isEditing}
+                  />
+                )}
               </FormControl>
               <FormMessage />
             </FormItem>
