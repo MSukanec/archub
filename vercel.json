@@ -1,13 +1,20 @@
 {
   "rewrites": [
     { "source": "/current-user", "destination": "/api/current-user" },
+    { "source": "/api/current-user", "destination": "/api/current-user" },
     { "source": "/api/countries", "destination": "/api/countries" },
+    
+    { "source": "/api/ai/home_greeting", "destination": "/api/ai/home_greeting" },
+    { "source": "/api/ai/chat", "destination": "/api/ai/chat" },
+    { "source": "/api/ai/history", "destination": "/api/ai/history" },
+    
     { "source": "/api/user/profile", "destination": "/api/user/profile" },
     { "source": "/api/budgets", "destination": "/api/budgets" },
     { "source": "/api/budgets/:id", "destination": "/api/budgets/[id]" },
     { "source": "/api/budget-items", "destination": "/api/budget-items" },
     { "source": "/api/budget-items/move", "destination": "/api/budget-items/move" },
     { "source": "/api/budget-items/:id", "destination": "/api/budget-items/[id]" },
+    
     { "source": "/api/admin/courses", "destination": "/api/admin/courses" },
     { "source": "/api/admin/courses/:id", "destination": "/api/admin/courses/[id]" },
     { "source": "/api/admin/modules", "destination": "/api/admin/modules" },
@@ -17,26 +24,43 @@
     { "source": "/api/admin/enrollments", "destination": "/api/admin/enrollments" },
     { "source": "/api/admin/enrollments/:id", "destination": "/api/admin/enrollments/[id]" },
     { "source": "/api/admin/dashboard", "destination": "/api/admin/dashboard" },
+    
     { "source": "/api/learning/dashboard", "destination": "/api/learning/dashboard" },
+    { "source": "/api/learning/courses-full", "destination": "/api/learning/courses-full" },
+    
     { "source": "/api/courses/:id/progress", "destination": "/api/courses/[id]/progress" },
     { "source": "/api/lessons/:id/progress", "destination": "/api/lessons/[id]/progress" },
     { "source": "/api/lessons/:id/notes", "destination": "/api/lessons/[id]/notes" },
+    
     { "source": "/api/checkout/mp/create", "destination": "/api/checkout/mp/create" },
     { "source": "/api/checkout/free-enroll", "destination": "/api/checkout/free-enroll" },
     { "source": "/api/webhooks/mp", "destination": "/api/webhooks/mp" },
     { "source": "/api/webhooks/mercadopago", "destination": "/api/webhooks/mercadopago" },
+    
     { "source": "/api/mp/create-preference", "destination": "/api/mp/create-preference" },
+    { "source": "/api/mp/success-handler", "destination": "/api/mp/success-handler" },
+    { "source": "/api/mp/webhook", "destination": "/api/mp/webhook" },
+    
     { "source": "/api/paypal/create-order", "destination": "/api/paypal/create-order" },
     { "source": "/api/paypal/capture-order", "destination": "/api/paypal/capture-order" },
     { "source": "/api/paypal/capture-and-redirect", "destination": "/api/paypal/capture-and-redirect" },
     { "source": "/api/paypal/webhook", "destination": "/api/paypal/webhook" },
+    
     { "source": "/api/diag/ping", "destination": "/api/diag/ping" },
     { "source": "/api/diag/fake-mp", "destination": "/api/diag/fake-mp" },
+    
     { "source": "/api/user/enrollments", "destination": "/api/user/enrollments" },
     { "source": "/api/user/all-progress", "destination": "/api/user/all-progress" },
+    
     { "source": "/api/coupons/validate", "destination": "/api/coupons/validate" },
     { "source": "/api/admin/coupons", "destination": "/api/admin/coupons" },
     { "source": "/api/admin/coupons/:id", "destination": "/api/admin/coupons/[id]" },
+    
+    { "source": "/api/projects", "destination": "/api/projects" },
+    { "source": "/api/projects/:id", "destination": "/api/projects/[id]" },
+    
+    { "source": "/api/invite-member", "destination": "/api/invite-member" },
+    
     { "source": "/(.*)", "destination": "/" }
   ]
 }
