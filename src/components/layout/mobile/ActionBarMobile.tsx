@@ -3,10 +3,17 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { 
+  BottomSheet, 
+  BottomSheetContent, 
+  BottomSheetHeader, 
+  BottomSheetBody, 
+  BottomSheetFooter,
+  BottomSheetTitle 
+} from '@/components/ui/bottom-sheet'
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
-import { Search, Filter, X, Home, Bell, Lock } from 'lucide-react'
+import { Search, Filter, Home, Bell, Lock } from 'lucide-react'
 import { useLocation } from 'wouter'
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -69,20 +76,13 @@ export function ActionBarMobile() {
 
   return (
     <>
-      {/* Search Popover */}
-      {showSearchPopover && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-75" onClick={() => setShowSearchPopover(false)}>
-          <div 
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 border"
-            style={{ 
-              backgroundColor: 'var(--card-bg)',
-              borderColor: 'var(--card-border)',
-              width: 'calc(100vw - 32px)', // full width minus padding
-              maxWidth: '400px',
-              zIndex: 60
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
+      {/* Search BottomSheet */}
+      <BottomSheet open={showSearchPopover} onOpenChange={setShowSearchPopover}>
+        <BottomSheetContent>
+          <BottomSheetHeader>
+            <BottomSheetTitle>Buscar</BottomSheetTitle>
+          </BottomSheetHeader>
+          <BottomSheetBody>
             <div className="flex items-center gap-2">
               <Search className="h-5 w-5" style={{ color: 'var(--main-sidebar-fg)' }} />
               <Input
@@ -97,136 +97,86 @@ export function ActionBarMobile() {
                   color: 'var(--input-text)'
                 }}
               />
+            </div>
+          </BottomSheetBody>
+        </BottomSheetContent>
+      </BottomSheet>
+
+      {/* Filter BottomSheet */}
+      {filterConfig && (
+        <BottomSheet open={showFilterPopover} onOpenChange={setShowFilterPopover}>
+          <BottomSheetContent>
+            <BottomSheetHeader>
+              <BottomSheetTitle>Filtros</BottomSheetTitle>
+            </BottomSheetHeader>
+            <BottomSheetBody>
+              <div className="space-y-4">
+                {filterConfig.filters?.map((filter: any, index: number) => (
+                  <div key={filter.key || index} className="space-y-2">
+                    <Label htmlFor={filter.key} style={{ color: 'var(--main-sidebar-fg)' }}>
+                      {filter.label}
+                    </Label>
+                    <Select value={filter.value || ''} onValueChange={filter.onChange}>
+                      <SelectTrigger 
+                        style={{ 
+                          backgroundColor: 'var(--input-bg)',
+                          borderColor: 'var(--input-border)',
+                          color: 'var(--input-text)'
+                        }}
+                      >
+                        <SelectValue placeholder={filter.placeholder || 'Seleccionar...'} />
+                      </SelectTrigger>
+                      <SelectContent style={{ zIndex: 70 }}>
+                        {filter.allOptionLabel && (
+                          <SelectItem value="all">{filter.allOptionLabel}</SelectItem>
+                        )}
+                        {filter.options?.map((option: any, optIndex: number) => (
+                          <SelectItem key={option.value || optIndex} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ))}
+              </div>
+            </BottomSheetBody>
+            <BottomSheetFooter>
               <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowSearchPopover(false)}
-                className=""
+                variant="default"
+                onClick={() => {
+                  if (filterConfig.onClearFilters) {
+                    filterConfig.onClearFilters();
+                  }
+                  setShowFilterPopover(false);
+                }}
+                className="w-full"
               >
-                <X className="h-4 w-4" />
+                Limpiar Filtros
               </Button>
-            </div>
-          </div>
-        </div>
+            </BottomSheetFooter>
+          </BottomSheetContent>
+        </BottomSheet>
       )}
 
-      {/* Filter Popover */}
-      {showFilterPopover && filterConfig && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-75" onClick={() => setShowFilterPopover(false)}>
-          <div 
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 border"
-            style={{ 
-              backgroundColor: 'var(--card-bg)',
-              borderColor: 'var(--card-border)',
-              width: 'calc(100vw - 32px)',
-              maxWidth: '400px',
-              zIndex: 60
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold" style={{ color: 'var(--main-sidebar-fg)' }}>Filtros</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowFilterPopover(false)}
-                  className=""
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              {filterConfig.filters?.map((filter: any, index: number) => (
-                <div key={filter.key || index} className="space-y-2">
-                  <Label htmlFor={filter.key} style={{ color: 'var(--main-sidebar-fg)' }}>
-                    {filter.label}
-                  </Label>
-                  <Select value={filter.value || ''} onValueChange={filter.onChange}>
-                    <SelectTrigger 
-                      style={{ 
-                        backgroundColor: 'var(--input-bg)',
-                        borderColor: 'var(--input-border)',
-                        color: 'var(--input-text)'
-                      }}
-                    >
-                      <SelectValue placeholder={filter.placeholder || 'Seleccionar...'} />
-                    </SelectTrigger>
-                    <SelectContent style={{ zIndex: 70 }}>
-                      {filter.allOptionLabel && (
-                        <SelectItem value="all">{filter.allOptionLabel}</SelectItem>
-                      )}
-                      {filter.options?.map((option: any, optIndex: number) => (
-                        <SelectItem key={option.value || optIndex} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              ))}
-              
-              {/* Botón Limpiar Filtros */}
-              <div className="pt-2 border-t" style={{ borderColor: 'var(--main-sidebar-border)' }}>
-                <Button
-                  variant="default"
-                  onClick={() => {
-                    // Usar la función de limpiar filtros de la configuración
-                    if (filterConfig.onClearFilters) {
-                      filterConfig.onClearFilters();
-                    }
-                    setShowFilterPopover(false);
-                  }}
-                  className="w-full"
-                >
-                  Limpiar Filtros
-                </Button>
+      {/* Notifications BottomSheet */}
+      <BottomSheet open={showNotificationsPopover} onOpenChange={setShowNotificationsPopover}>
+        <BottomSheetContent>
+          <BottomSheetHeader>
+            <BottomSheetTitle>Notificaciones</BottomSheetTitle>
+          </BottomSheetHeader>
+          <BottomSheetBody>
+            <div className="py-8 text-center">
+              <div className="flex flex-col items-center gap-2">
+                <Bell className="h-8 w-8 text-gray-400" />
+                <p style={{ color: 'var(--main-sidebar-fg)' }} className="text-sm">
+                  Sin notificaciones
+                </p>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Notifications Popover */}
-      {showNotificationsPopover && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-75" onClick={() => setShowNotificationsPopover(false)}>
-          <div 
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 border"
-            style={{ 
-              backgroundColor: 'var(--card-bg)',
-              borderColor: 'var(--card-border)',
-              width: 'calc(100vw - 32px)',
-              maxWidth: '400px',
-              zIndex: 60
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold" style={{ color: 'var(--main-sidebar-fg)' }}>Notificaciones</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowNotificationsPopover(false)}
-                  className=""
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              {/* Empty state */}
-              <div className="py-8 text-center">
-                <div className="flex flex-col items-center gap-2">
-                  <Bell className="h-8 w-8 text-gray-400" />
-                  <p style={{ color: 'var(--main-sidebar-fg)' }} className="text-sm">
-                    Sin notificaciones
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+          </BottomSheetBody>
+        </BottomSheetContent>
+      </BottomSheet>
 
       {/* Action Bar */}
       <div 
@@ -273,7 +223,6 @@ export function ActionBarMobile() {
               feature="max_projects" 
               current={projects.length}
               functionName="Crear Proyecto"
-              badgeOnly={true}
             >
               <button
                 onClick={actions.create.onClick}

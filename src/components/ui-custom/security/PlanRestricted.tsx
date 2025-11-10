@@ -1,10 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { useLocation } from "wouter";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { 
+  BottomSheet, 
+  BottomSheetContent, 
+  BottomSheetHeader, 
+  BottomSheetTitle,
+  BottomSheetBody,
+  BottomSheetFooter
+} from '@/components/ui/bottom-sheet';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Lock } from "lucide-react";
@@ -12,6 +20,7 @@ import { usePlanFeatures } from "@/hooks/usePlanFeatures";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from "@/stores/projectContext";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
+import { useMobile } from '@/hooks/use-mobile';
 
 interface PlanRestrictedProps {
   feature?: string;
@@ -37,6 +46,8 @@ export function PlanRestricted({
   const isAdmin = useIsAdmin();
   const { selectedProjectId } = useProjectContext();
   const [, setLocation] = useLocation();
+  const isMobile = useMobile();
+  const [open, setOpen] = useState(false);
 
   // Determinar si está restringido
   let isRestricted = false;
@@ -141,6 +152,92 @@ export function PlanRestricted({
 
   // VERSIÓN SMALL: Badge pequeño con solo candado
   if (size === 'small') {
+    // MOBILE: Usar BottomSheet
+    if (isMobile) {
+      return (
+        <>
+          <div 
+            className="relative inline-flex cursor-pointer overflow-visible"
+            onClick={() => setOpen(true)}
+          >
+            {/* Contenido deshabilitado */}
+            <div className="opacity-60 pointer-events-none">
+              {React.cloneElement(children as React.ReactElement, {
+                disabled: true,
+                className: `${(children as React.ReactElement).props.className || ''} cursor-pointer`,
+              })}
+            </div>
+            
+            {/* Badge pequeño - DENTRO del contenedor */}
+            <Badge 
+              className="absolute top-2 right-2 text-[10px] px-1.5 py-0.5 h-5 cursor-pointer border-0 shadow-lg"
+              style={{ 
+                backgroundColor: planBgColor,
+                color: 'white'
+              }}
+            >
+              <Lock className="w-3 h-3" />
+            </Badge>
+          </div>
+          
+          <BottomSheet open={open} onOpenChange={setOpen}>
+            <BottomSheetContent>
+              <BottomSheetHeader>
+                <BottomSheetTitle>Función de Plan {planName}</BottomSheetTitle>
+              </BottomSheetHeader>
+              <BottomSheetBody>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div 
+                      className="p-2 rounded-lg"
+                      style={{ 
+                        backgroundColor: `${planBgColor}20`,
+                      }}
+                    >
+                      <Lock 
+                        className="w-5 h-5" 
+                        style={{ color: planBgColor }}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-muted-foreground">
+                        {feature 
+                          ? `Esta función requiere el plan ${planName}. Tu plan actual: ${currentPlan}.`
+                          : `Esta función no está disponible en tu plan actual.`
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {current !== undefined && feature && (
+                    <div className="text-sm text-muted-foreground border-t pt-3">
+                      Has alcanzado el límite de tu plan: {current} / {limit(feature)}
+                    </div>
+                  )}
+                </div>
+              </BottomSheetBody>
+              <BottomSheetFooter>
+                <Button 
+                  className="w-full"
+                  style={{ 
+                    backgroundColor: planBgColor,
+                    color: 'white'
+                  }}
+                  onClick={() => {
+                    setOpen(false);
+                    setLocation('/pricing');
+                  }}
+                >
+                  Ver Planes
+                </Button>
+              </BottomSheetFooter>
+            </BottomSheetContent>
+          </BottomSheet>
+        </>
+      );
+    }
+    
+    // DESKTOP: Mantener Popover actual
     return (
       <Popover>
         <PopoverTrigger asChild>
