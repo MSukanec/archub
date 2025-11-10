@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -7,9 +10,15 @@ import { FormModalHeader } from '../../form/FormModalHeader';
 import { FormModalFooter } from '../../form/FormModalFooter';
 import { FormModalLayout } from '../../form/FormModalLayout';
 import { useGlobalModalStore } from '../../form/useGlobalModalStore';
-import { Table } from '@/components/ui-custom/tables-and-trees/Table';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
 import { Users } from 'lucide-react';
+
+const clientSchema = z.object({
+  contactId: z.string().min(1, 'Debe seleccionar un contacto'),
+});
+
+type ClientFormData = z.infer<typeof clientSchema>;
 
 interface ProjectClientModalProps {
   projectId?: string;
@@ -26,17 +35,31 @@ export function ProjectClientModal({ projectId, onClose }: ProjectClientModalPro
   const organizationId = userData?.organization?.id;
 
   // Query to get available contacts
-  const { data: contacts = [], isLoading: isLoadingContacts } = useQuery<any[]>({
+  const { data: contacts = [] } = useQuery<any[]>({
     queryKey: [`/api/contacts?organization_id=${organizationId}`],
     enabled: !!organizationId,
   });
 
+  const form = useForm<ClientFormData>({
+    resolver: zodResolver(clientSchema),
+    defaultValues: {
+      contactId: '',
+    },
+  });
+
+  // Reset form when modal opens
+  useEffect(() => {
+    form.reset({
+      contactId: '',
+    });
+  }, [form]);
+
   const addClientMutation = useMutation({
-    mutationFn: async (contactId: string) => {
+    mutationFn: async (data: ClientFormData) => {
       if (!organizationId || !projectId) throw new Error('Missing organization or project ID');
 
       return await apiRequest('POST', `/api/projects/${projectId}/clients`, {
-        client_id: contactId,
+        client_id: data.contactId,
         organization_id: organizationId,
         unit: null,
       });
@@ -59,14 +82,15 @@ export function ProjectClientModal({ projectId, onClose }: ProjectClientModalPro
   });
 
   const handleClose = () => {
+    form.reset();
     closeModal();
     onClose();
   };
 
-  const handleContactClick = async (contact: any) => {
+  const handleSubmit = async (data: ClientFormData) => {
     setIsLoading(true);
     try {
-      await addClientMutation.mutateAsync(contact.id);
+      await addClientMutation.mutateAsync(data);
     } catch (error) {
       // Error handling is done in mutation onError
     } finally {
@@ -74,53 +98,38 @@ export function ProjectClientModal({ projectId, onClose }: ProjectClientModalPro
     }
   };
 
-  // Table columns
-  const columns = [
-    {
-      key: 'avatar',
-      label: '',
-      width: '60px',
-      sortable: false,
-      render: (contact: any) => (
-        <Avatar className="h-8 w-8">
-          <AvatarFallback>
-            {contact.first_name?.[0]}{contact.last_name?.[0]}
-          </AvatarFallback>
-        </Avatar>
-      ),
-    },
-    {
-      key: 'first_name',
-      label: 'Nombre',
-      sortable: true,
-    },
-    {
-      key: 'last_name',
-      label: 'Apellido',
-      sortable: true,
-    },
-    {
-      key: 'email',
-      label: 'Email',
-      sortable: true,
-    },
-  ];
+  // Convert contacts to ComboBox options
+  const contactOptions = contacts.map(contact => ({
+    value: contact.id,
+    label: `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || contact.email,
+  }));
 
   const editPanel = (
-    <div className="space-y-4">
-      <Table
-        columns={columns}
-        data={contacts}
-        isLoading={isLoadingContacts || isLoading}
-        onRowClick={handleContactClick}
-        emptyStateConfig={{
-          icon: <Users className="h-12 w-12 text-muted-foreground" />,
-          title: 'No hay contactos disponibles',
-          description: 'Crea contactos en tu organización para agregarlos como clientes',
-        }}
-        className="cursor-pointer"
-      />
-    </div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="contactId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Contacto</FormLabel>
+              <FormControl>
+                <ComboBox
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  options={contactOptions}
+                  placeholder="Seleccionar contacto..."
+                  searchPlaceholder="Buscar contacto..."
+                  emptyMessage="No se encontraron contactos."
+                  className="w-full"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
   );
 
   const headerContent = (
@@ -135,7 +144,10 @@ export function ProjectClientModal({ projectId, onClose }: ProjectClientModalPro
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
+      rightLabel="Agregar"
+      onRightClick={form.handleSubmit(handleSubmit)}
       showLoadingSpinner={isLoading}
+      submitDisabled={isLoading}
     />
   );
 
@@ -146,7 +158,6 @@ export function ProjectClientModal({ projectId, onClose }: ProjectClientModalPro
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={handleClose}
-      isEditing={true}
     />
   );
 }
