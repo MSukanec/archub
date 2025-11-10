@@ -460,7 +460,12 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="accessibility-notes">Notas de Accesibilidad</Label>
+          <div className="flex items-center justify-between gap-4">
+            <Label htmlFor="accessibility-notes">Notas de Accesibilidad</Label>
+            <p className="text-xs text-muted-foreground">
+              Información sobre acceso al sitio, estacionamiento, restricciones de horario, etc.
+            </p>
+          </div>
           <Textarea 
             id="accessibility-notes"
             placeholder="Ej: Acceso por calle lateral, estacionamiento disponible en la esquina, horario de entregas de 8 a 18hs"
@@ -469,9 +474,6 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
             rows={3}
             data-testid="textarea-accessibility-notes"
           />
-          <p className="text-xs text-muted-foreground">
-            Información sobre acceso al sitio, estacionamiento, restricciones de horario, etc.
-          </p>
         </div>
       </div>
     </div>
