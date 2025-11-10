@@ -6,6 +6,7 @@ import { useProjectContext } from '@/stores/projectContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { BottomSheet, BottomSheetContent, BottomSheetHeader, BottomSheetTitle, BottomSheetBody } from '@/components/ui/bottom-sheet';
@@ -23,6 +24,7 @@ export default function ProjectData() {
   const { setSidebarContext } = useNavigationStore();
   const { selectedProjectId } = useProjectContext();
   const { toast } = useToast();
+  const { data: userData } = useCurrentUser();
   const { setActions, setShowActionBar, clearActions } = useActionBarMobile();
   const isMobile = useMobile();
   const [, navigate] = useLocation();
@@ -294,13 +296,6 @@ Generado desde Seencel`);
     </Button>
   ) : null;
 
-  // Get organization ID from user data
-  const { data: userData } = useQuery({
-    queryKey: ['/api/current-user'],
-  });
-
-  const organizationId = userData?.organization?.id;
-
   const headerProps = {
     icon: FileText,
     title: 'Datos Básicos',
@@ -308,7 +303,7 @@ Generado desde Seencel`);
     tabs: headerTabs,
     onTabChange: (tabId: string) => setActiveTab(tabId),
     actions: shareButton ? [shareButton] : addClientButton ? [addClientButton] : undefined,
-    organizationId,
+    organizationId: userData?.organization?.id,
     showMembers: true
   };
 
