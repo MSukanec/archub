@@ -56,7 +56,10 @@ export function RightSidebar() {
   const [match, params] = useRoute('/learning/courses/:courseSlug');
   
   // Check if we're on the course PLAYER tab specifically (not just any course page)
-  const isOnCoursePlayerTab = match && !!params?.courseSlug && location.includes('tab=Reproductor');
+  // Note: useLocation() only returns pathname, need window.location.search for query params
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentTab = urlParams.get('tab');
+  const isOnCoursePlayerTab = match && !!params?.courseSlug && currentTab === 'Reproductor';
   const courseSlug = isOnCoursePlayerTab ? params?.courseSlug : null;
 
   // Get current lesson from stores
@@ -201,6 +204,22 @@ export function RightSidebar() {
   // In Learner mode, only show the sidebar on the Player tab
   // In other modes, always show it (for AI button)
   const shouldShowSidebar = userMode === 'learner' ? isOnCoursePlayerTab : true;
+
+  // Debug logging
+  if (userMode === 'learner') {
+    console.log('=== RightSidebar Debug (Learner Mode) ===');
+    console.log('location:', location);
+    console.log('window.location.href:', window.location.href);
+    console.log('window.location.search:', window.location.search);
+    console.log('currentTab:', currentTab);
+    console.log('match:', match);
+    console.log('params:', params);
+    console.log('isOnCoursePlayerTab:', isOnCoursePlayerTab);
+    console.log('shouldShowSidebar:', shouldShowSidebar);
+    console.log('courseSlug:', courseSlug);
+    console.log('course:', course);
+    console.log('modules.length:', modules.length);
+  }
 
   if (!shouldShowSidebar) {
     return null;
