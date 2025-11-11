@@ -500,6 +500,7 @@ export function LeftSidebar() {
                     <SidebarIconButton
                       icon={<CircleHelp className="h-5 w-5" />}
                       onClick={() => setHelpPopoverOpen(!helpPopoverOpen)}
+                      badge={unreadSupportCount}
                       title="Ayuda"
                       testId="button-help-left"
                     />
@@ -543,8 +544,11 @@ export function LeftSidebar() {
                       <Headphones className="h-4 w-4" />
                       <span>Soporte</span>
                       {unreadSupportCount > 0 && (
-                        <span className="ml-auto bg-primary text-white text-xs rounded-full h-5 min-w-[20px] flex items-center justify-center px-1.5">
-                          {unreadSupportCount}
+                        <span 
+                          className="ml-auto text-white text-xs rounded-full h-5 min-w-[20px] flex items-center justify-center px-1.5 font-bold border-0"
+                          style={{ backgroundColor: 'var(--accent)' }}
+                        >
+                          {unreadSupportCount > 99 ? '99+' : unreadSupportCount}
                         </span>
                       )}
                     </button>
