@@ -201,7 +201,7 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="space-y-8">
       {/* Perfil Section */}
       <div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
