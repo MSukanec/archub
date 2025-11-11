@@ -8,11 +8,13 @@ import { cn } from "@/lib/utils";
 import { useProjectContext } from '@/stores/projectContext';
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
+import { useRightSidebarStore } from "@/stores/rightSidebarStore";
 import { supabase } from '@/lib/supabase';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useUnreadSupportMessages } from '@/hooks/use-unread-support-messages';
+import { useUnreadUserSupportMessages } from '@/hooks/use-unread-user-support-messages';
 import ButtonSidebar from "../desktop-layout-classic/ButtonSidebar";
 import { SidebarIconButton } from "../desktop/SidebarIconButton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -50,7 +52,8 @@ import {
   TrendingUp,
   MapPin,
   LogOut,
-  Bell
+  Bell,
+  CircleHelp
 } from "lucide-react";
 import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -74,15 +77,21 @@ export function LeftSidebar() {
   const { selectedProjectId, currentOrganizationId, setSelectedProject, setCurrentOrganization } = useProjectContext();
   const { sidebarLevel, setSidebarLevel } = useNavigationStore();
   const { isDocked, isHovered, setHovered, setDocked } = useSidebarStore();
+  const { openSupport } = useRightSidebarStore();
   const { toast } = useToast();
   
-  // Contador de mensajes sin leer (solo para admins)
-  const { data: unreadCount = 0 } = useUnreadSupportMessages();
-  
-  // Estado para popover de notificaciones
-  const [notificationPopoverOpen, setNotificationPopoverOpen] = useState(false);
-  const [notificationUnreadCount, setNotificationUnreadCount] = useState(0);
+  // Usuario ID
   const userId = userData?.user?.id;
+  
+  // Contador de mensajes sin leer
+  const { data: unreadCount = 0 } = useUnreadSupportMessages();
+  const { data: unreadSupportCountUser = 0 } = useUnreadUserSupportMessages(userId);
+  const unreadSupportCount = isAdmin ? unreadCount : unreadSupportCountUser;
+  
+  // Estado para popovers
+  const [notificationPopoverOpen, setNotificationPopoverOpen] = useState(false);
+  const [helpPopoverOpen, setHelpPopoverOpen] = useState(false);
+  const [notificationUnreadCount, setNotificationUnreadCount] = useState(0);
   
   // Estados simples
   const isExpanded = isDocked || isHovered;
@@ -335,6 +344,60 @@ export function LeftSidebar() {
                   testId="sidebar-button-administration"
                 />
               )}
+
+              {/* Botón de Ayuda con Popover */}
+              <Popover open={helpPopoverOpen} onOpenChange={setHelpPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <div>
+                    <SidebarIconButton
+                      icon={<CircleHelp className="h-5 w-5" />}
+                      onClick={() => setHelpPopoverOpen(!helpPopoverOpen)}
+                      title="Ayuda"
+                      testId="button-help-left"
+                    />
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent 
+                  side="right" 
+                  align="end"
+                  className="w-[200px] p-2"
+                  sideOffset={8}
+                  alignOffset={0}
+                >
+                  <div className="flex flex-col gap-1">
+                    {/* Botón Comunidad Discord */}
+                    <button
+                      onClick={() => {
+                        window.open('https://discord.com/channels/868615664070443008', '_blank');
+                        setHelpPopoverOpen(false);
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent/10 transition-colors text-left"
+                      data-testid="button-discord-help"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      <span>Comunidad Discord</span>
+                    </button>
+                    
+                    {/* Botón Soporte */}
+                    <button
+                      onClick={() => {
+                        openSupport();
+                        setHelpPopoverOpen(false);
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent/10 transition-colors text-left relative"
+                      data-testid="button-support-help"
+                    >
+                      <Headphones className="h-4 w-4" />
+                      <span>Soporte</span>
+                      {unreadSupportCount > 0 && (
+                        <span className="ml-auto bg-primary text-white text-xs rounded-full h-5 min-w-[20px] flex items-center justify-center px-1.5">
+                          {unreadSupportCount}
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                </PopoverContent>
+              </Popover>
 
               {/* Botón de Notificaciones con Popover */}
               <Popover open={notificationPopoverOpen} onOpenChange={setNotificationPopoverOpen}>

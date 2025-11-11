@@ -6,13 +6,14 @@
  * - Panel de notificaciones integrado en el sidebar
  */
 
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { AIPanel } from "@/components/ai/AIPanel";
 import { SupportPanel } from "@/components/support/SupportPanel";
 import { SidebarIconButton } from "../desktop/SidebarIconButton";
-import { Sparkles, Headphones, MessageCircle } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useThemeStore } from "@/stores/themeStore";
+import { useRightSidebarStore } from "@/stores/rightSidebarStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useUnreadSupportMessages } from '@/hooks/use-unread-support-messages';
@@ -28,8 +29,8 @@ export function RightSidebar() {
   const userFullName = userData?.user?.full_name || userData?.user?.first_name || 'Usuario';
   const userAvatarUrl = userData?.user?.avatar_url;
   
-  // Estado para expansión del sidebar - separado para AI y soporte
-  const [activePanel, setActivePanel] = useState<'ai' | 'support' | null>(null);
+  // Estado para expansión del sidebar usando Zustand store
+  const { activePanel, setActivePanel, togglePanel } = useRightSidebarStore();
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Contador de mensajes sin leer
@@ -110,7 +111,7 @@ export function RightSidebar() {
       closeTimeoutRef.current = null;
     }
     // Toggle: si ya está abierto, lo cierra; si está cerrado, lo abre
-    setActivePanel(activePanel === panel ? null : panel);
+    togglePanel(panel);
     
     // Si se abre el panel de soporte, invalidar inmediatamente el contador
     if (panel === 'support' && activePanel !== 'support') {
@@ -190,27 +191,6 @@ export function RightSidebar() {
               />
 
             </div>
-          </div>
-
-          {/* SECCIÓN INFERIOR: Botones de Ayuda y Discord */}
-          <div className="pt-3 pb-3 flex flex-col gap-[2px] items-center">
-            {/* Ayuda/Soporte */}
-            <SidebarIconButton
-              icon={<Headphones className="h-5 w-5" />}
-              isActive={activePanel === 'support'}
-              onClick={() => handlePanelClick('support')}
-              badge={unreadSupportCount}
-              title="Ayuda y soporte"
-              testId="button-help"
-            />
-
-            {/* Comunidad Discord */}
-            <SidebarIconButton
-              icon={<MessageCircle className="h-5 w-5" />}
-              onClick={() => window.open('https://discord.com/channels/868615664070443008', '_blank')}
-              title="Comunidad Discord"
-              testId="button-discord"
-            />
           </div>
 
         </aside>
