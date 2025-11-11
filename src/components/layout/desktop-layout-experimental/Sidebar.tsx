@@ -210,11 +210,10 @@ export function Sidebar() {
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
-          {/* SIDEBAR IZQUIERDO - CONTEXTOS (siempre visible, 50px) */}
-          <div className="bg-[var(--main-sidebar-bg)] w-[50px] h-full rounded-lg">
-            <aside className="grid h-full grid-rows-[1fr_auto]">
-              {/* SECCIÓN SUPERIOR: Botones de contexto con scroll */}
-              <div className="px-0 pt-6 overflow-y-auto">
+          {/* SIDEBAR IZQUIERDO - CONTEXTOS (siempre visible, 50px, altura total) */}
+          <div className="bg-[var(--main-sidebar-bg)] w-[50px] rounded-lg flex flex-col" style={{ height: 'calc(100vh - 8px)' }}>
+            {/* SECCIÓN: Botones de contexto con scroll */}
+            <div className="px-0 pt-6 pb-6 overflow-y-auto flex-1">
                 <div className="flex flex-col gap-[2px] items-center">
                   {/* Logo */}
                   <div className="h-[50px] flex items-center justify-center w-8 mb-3">
@@ -344,21 +343,6 @@ export function Sidebar() {
                   )}
                 </div>
               </div>
-
-              {/* SECCIÓN INFERIOR: Botón de anclaje */}
-              <div className="pt-6 pb-6 flex flex-col gap-[2px] items-center">
-                <button
-                  onClick={handleDockToggle}
-                  className="h-10 w-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center justify-center group"
-                >
-                  {isDocked ? (
-                    <PanelLeftClose className="h-5 w-5 text-[var(--main-sidebar-fg)] group-hover:text-[var(--accent)]" />
-                  ) : (
-                    <PanelLeftOpen className="h-5 w-5 text-[var(--main-sidebar-fg)] group-hover:text-[var(--accent)]" />
-                  )}
-                </button>
-              </div>
-            </aside>
           </div>
 
           {/* SIDEBAR DERECHO - NAVEGACIÓN ESPECÍFICA (240px, aparece en hover) */}
@@ -407,6 +391,18 @@ export function Sidebar() {
                     button
                   );
                 })}
+              </div>
+
+              {/* Botón de anclaje en la parte inferior */}
+              <div className="mt-6 flex flex-col gap-[2px]">
+                <ButtonSidebar
+                  icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
+                  label={isDocked ? "Desanclar" : "Anclar"}
+                  isActive={false}
+                  isExpanded={true}
+                  onClick={handleDockToggle}
+                  variant="secondary"
+                />
               </div>
             </div>
           )}
