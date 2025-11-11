@@ -10,6 +10,35 @@ export default function Privacy() {
   useEffect(() => {
     document.title = "Política de Privacidad - Seencel";
     
+    // Set meta tags for SEO
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute("content", "Política de privacidad de Seencel. Información sobre cómo recopilamos, usamos, compartimos y protegemos tus datos personales. Cumplimiento con Google OAuth y normativas de privacidad.");
+    } else {
+      const meta = document.createElement("meta");
+      meta.name = "description";
+      meta.content = "Política de privacidad de Seencel. Información sobre cómo recopilamos, usamos, compartimos y protegemos tus datos personales. Cumplimiento con Google OAuth y normativas de privacidad.";
+      document.head.appendChild(meta);
+    }
+
+    // Open Graph tags
+    const setMetaTag = (property: string, content: string) => {
+      let tag = document.querySelector(`meta[property="${property}"]`);
+      if (tag) {
+        tag.setAttribute("content", content);
+      } else {
+        tag = document.createElement("meta");
+        tag.setAttribute("property", property);
+        tag.setAttribute("content", content);
+        document.head.appendChild(tag);
+      }
+    };
+
+    setMetaTag("og:title", "Política de Privacidad - Seencel");
+    setMetaTag("og:description", "Información sobre cómo Seencel protege tus datos personales y cumple con normativas de privacidad.");
+    setMetaTag("og:type", "website");
+    setMetaTag("og:url", window.location.href);
+
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 400);
 
