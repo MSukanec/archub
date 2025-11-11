@@ -56,7 +56,9 @@ import {
   LogOut,
   Bell,
   CircleHelp,
-  Globe
+  Globe,
+  Ruler,
+  ShoppingCart
 } from "lucide-react";
 import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -398,14 +400,37 @@ export function LeftSidebar() {
                       },
                       {
                         id: 'organization' as const,
-                        icon: <Building className="h-5 w-5" />,
+                        icon: <Users className="h-5 w-5" />,
                         onClick: () => setSidebarLevel('organization'),
                         shouldRender: () => true,
                       },
                       {
-                        id: 'project' as const,
-                        icon: <FolderOpen className="h-5 w-5" />,
-                        onClick: () => setSidebarLevel('project'),
+                        id: 'spacer' as const,
+                        icon: <div />,
+                        onClick: () => {},
+                        shouldRender: () => true,
+                        isSpacer: true,
+                      },
+                      {
+                        id: 'design' as const,
+                        icon: <Ruler className="h-5 w-5" />,
+                        testId: 'button-sidebar-design',
+                        onClick: () => setSidebarLevel('design'),
+                        shouldRender: () => hasProjects && !!selectedProjectId, // Solo si hay proyectos
+                        wrapper: (children: React.ReactNode) => (
+                          <PlanRestricted reason="coming_soon">{children}</PlanRestricted>
+                        ),
+                      },
+                      {
+                        id: 'construction' as const,
+                        icon: <Building className="h-5 w-5" />,
+                        onClick: () => setSidebarLevel('construction'),
+                        shouldRender: () => hasProjects && !!selectedProjectId, // Solo si hay proyectos
+                      },
+                      {
+                        id: 'commercialization' as const,
+                        icon: <ShoppingCart className="h-5 w-5" />,
+                        onClick: () => setSidebarLevel('commercialization'),
                         shouldRender: () => hasProjects && !!selectedProjectId, // Solo si hay proyectos
                       },
                       {
@@ -462,6 +487,11 @@ export function LeftSidebar() {
                         return true;
                       })
                       .map((button) => {
+                        // Renderizar spacer vacío
+                        if ((button as any).isSpacer) {
+                          return <div key={button.id} className="h-[32px] w-full" />;
+                        }
+                        
                         const buttonElement = (
                           <SidebarIconButton
                             icon={button.icon}
