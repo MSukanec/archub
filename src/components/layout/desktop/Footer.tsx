@@ -45,15 +45,13 @@ export function Footer({ scrollContainerRef }: FooterProps) {
             >
               Inicio
             </Link>
-            <a 
+            <Link 
               href="/privacy" 
-              target="_blank" 
-              rel="noopener noreferrer"
               className="hover:text-foreground transition-colors"
               data-testid="link-footer-privacy"
             >
               Privacidad
-            </a>
+            </Link>
           </div>
         </div>
       </div>

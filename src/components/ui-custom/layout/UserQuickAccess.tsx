@@ -18,7 +18,7 @@ import { useProjectContext } from "@/stores/projectContext";
 import { useProjectsLite } from "@/hooks/use-projects-lite";
 import { useAuthStore } from "@/stores/authStore";
 import { cn } from "@/lib/utils";
-import { Building2, FolderOpen, User, ChevronDown, LogOut, ArrowUpRight } from "lucide-react";
+import { Building2, FolderOpen, User, ChevronDown, LogOut, ArrowUpRight, Home } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -128,6 +128,11 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
 
   const handleGoToPricing = () => {
     navigate('/pricing');
+    setIsOpen(false);
+  };
+
+  const handleGoToLanding = () => {
+    navigate('/');
     setIsOpen(false);
   };
 
@@ -360,6 +365,18 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
                 </Button>
               </div>
 
+              {/* Landing Page Button */}
+              <button
+                onClick={handleGoToLanding}
+                className="w-full px-4 py-3 flex items-center gap-2.5 hover:bg-accent/10 transition-colors border-t border-border group"
+                data-testid="button-go-to-landing"
+              >
+                <Home className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors" />
+                <span className="text-sm text-foreground group-hover:text-accent transition-colors">
+                  Página de Inicio
+                </span>
+              </button>
+
               {/* Logout Button */}
               <button
                 onClick={handleLogout}
@@ -368,7 +385,7 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
               >
                 <LogOut className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors" />
                 <span className="text-sm text-foreground group-hover:text-accent transition-colors">
-                  Logout
+                  Cerrar sesión
                 </span>
               </button>
             </div>
