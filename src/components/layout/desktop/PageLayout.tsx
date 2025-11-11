@@ -44,6 +44,7 @@ import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
 import { type WidthProp, resolveWidthMode, getContainerClasses, getHeaderPaddingClasses, getContentPaddingClasses } from "./layoutWidth";
+import { Footer } from "./Footer";
 
 // Mapeo de rutas a nombres e iconos de páginas (exactamente como en el sidebar)
 const PAGE_CONFIG: Record<string, { name: string; icon: any }> = {
@@ -223,6 +224,9 @@ export function PageLayout({
   // Estado y refs para animación de tabs
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const [underlineStyle, setUnderlineStyle] = useState<{ width: number; left: number }>({ width: 0, left: 0 });
+  
+  // Ref para el contenedor de scroll (para el Footer)
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const handleHeaderSearchChange = (value: string) => {
     setSearchInputValue(value);
@@ -289,7 +293,7 @@ export function PageLayout({
   return (
     <div className="flex flex-col min-h-0">
       {/* Page Content - HEADER Y CONTENIDO juntos para que se muevan con scroll */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden">
         <div style={{ backgroundColor: "var(--layout-bg)" }}>
           <div className={(() => {
             const mode = resolveWidthMode(wide);
@@ -637,6 +641,9 @@ export function PageLayout({
         })()}>
           {children}
         </div>
+        
+        {/* Footer - appears after scroll */}
+        <Footer scrollContainerRef={scrollContainerRef} />
       </div>
     </div>
   );

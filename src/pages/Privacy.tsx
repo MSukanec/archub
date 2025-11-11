@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Footer } from "@/components/layout/desktop/Footer";
 
 export default function Privacy() {
   const [activeSection, setActiveSection] = useState("about");
@@ -730,24 +731,8 @@ export default function Privacy() {
         </Button>
       )}
 
-      {/* Footer */}
-      <footer className="border-t py-8 mt-12">
-        <div className="container mx-auto px-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <img 
-                src="/Seencel512.png" 
-                alt="Seencel" 
-                className="h-6 w-6 object-contain"
-              />
-              <span className="font-semibold">Seencel</span>
-            </div>
-            <div className="text-sm text-muted-foreground">
-              © 2025 Seencel. Todos los derechos reservados.
-            </div>
-          </div>
-        </div>
-      </footer>
+      {/* Footer - Reusable Component */}
+      <Footer />
     </div>
   );
 }
