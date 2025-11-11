@@ -55,9 +55,9 @@ export function RightSidebar() {
   const [location] = useLocation();
   const [match, params] = useRoute('/learning/courses/:courseSlug');
   
-  // Check if we're on a course page (any tab)
-  const isOnCoursePage = match && !!params?.courseSlug;
-  const courseSlug = isOnCoursePage ? params?.courseSlug : null;
+  // Check if we're on the course PLAYER tab specifically (not just any course page)
+  const isOnCoursePlayerTab = match && !!params?.courseSlug && location.includes('tab=Reproductor');
+  const courseSlug = isOnCoursePlayerTab ? params?.courseSlug : null;
 
   // Get current lesson from stores
   const { currentLessonId: sidebarLessonId, setCurrentLesson } = useCourseSidebarStore();
@@ -80,7 +80,7 @@ export function RightSidebar() {
       if (error) throw error;
       return data;
     },
-    enabled: !!courseSlug && !!supabase && isOnCoursePage
+    enabled: !!courseSlug && !!supabase && isOnCoursePlayerTab
   });
 
   // Fetch course modules using real course ID
@@ -98,7 +98,7 @@ export function RightSidebar() {
       if (error) throw error;
       return data || [];
     },
-    enabled: !!course?.id && !!supabase && isOnCoursePage
+    enabled: !!course?.id && !!supabase && isOnCoursePlayerTab
   });
 
   // Fetch course lessons
@@ -118,7 +118,7 @@ export function RightSidebar() {
       if (error) throw error;
       return data || [];
     },
-    enabled: !!course?.id && !!supabase && modules.length > 0 && isOnCoursePage
+    enabled: !!course?.id && !!supabase && modules.length > 0 && isOnCoursePlayerTab
   });
 
   // Fetch progress for all lessons
@@ -140,7 +140,7 @@ export function RightSidebar() {
       if (!res.ok) return [];
       return res.json();
     },
-    enabled: !!course?.id && isOnCoursePage
+    enabled: !!course?.id && isOnCoursePlayerTab
   });
 
   // Create progress map
@@ -194,8 +194,8 @@ export function RightSidebar() {
     }
   };
 
-  // Determine if we should show course content
-  const showCourseContent = userMode === 'learner' && isOnCoursePage && modules.length > 0;
+  // Determine if we should show course content (only in Player tab)
+  const showCourseContent = userMode === 'learner' && isOnCoursePlayerTab && modules.length > 0;
   const isExpanded = showCourseContent ? (isDocked || isHovered) : (activePanel !== null);
 
   return (
