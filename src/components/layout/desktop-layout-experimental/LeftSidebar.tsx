@@ -46,13 +46,14 @@ import {
   BarChart3,
   Folder,
   TrendingUp,
-  MapPin
+  MapPin,
+  LogOut
 } from "lucide-react";
 import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
-import { UserQuickAccess } from "@/components/ui-custom/layout/UserQuickAccess";
+import { useAuthStore } from "@/stores/authStore";
 
 interface SidebarItem {
   id: string;
@@ -180,6 +181,11 @@ export function LeftSidebar() {
         { id: 'courses', label: 'Cursos', icon: GraduationCap, href: '/learning/courses' },
         { id: 'community', label: 'Comunidad Discord', icon: MessageCircle, href: 'https://discord.com/channels/868615664070443008' },
       ];
+    } else if (sidebarLevel === 'user') {
+      return [
+        { id: 'profile', label: 'Mi Perfil', icon: User, href: '/profile' },
+        { id: 'landing', label: 'Página de Inicio', icon: Home, href: '/' },
+      ];
     }
     
     return [];
@@ -199,7 +205,18 @@ export function LeftSidebar() {
       case 'community': return 'Comunidad';
       case 'learning': return 'Capacitaciones';
       case 'admin': return 'Administración';
+      case 'user': return 'Usuario';
       default: return '';
+    }
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await useAuthStore.getState().logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
     }
   };
 
@@ -284,10 +301,24 @@ export function LeftSidebar() {
               </div>
 
             {/* SECCIÓN INFERIOR: Avatar del usuario */}
-            <div className="px-0 pb-3 flex flex-col gap-[2px] items-center">
-              <div className="h-[50px] w-8 flex items-center justify-center">
-                <UserQuickAccess />
-              </div>
+            <div className="px-0 pt-3 pb-3 flex flex-col gap-[2px] items-center">
+              <button
+                onClick={() => setSidebarLevel('user')}
+                className={cn(
+                  "h-8 w-8 rounded-lg cursor-pointer transition-colors flex items-center justify-center relative",
+                  "hover:bg-[var(--main-sidebar-button-hover-bg)]",
+                  sidebarLevel === 'user' && "bg-[var(--main-sidebar-button-active-bg)]"
+                )}
+                title="Configuración de usuario"
+                data-testid="button-user-menu"
+              >
+                <Avatar className="h-7 w-7">
+                  <AvatarImage src={userData?.user?.avatar_url} />
+                  <AvatarFallback className="text-xs bg-accent text-white">
+                    {userData?.user?.first_name?.[0] || userData?.user?.email?.[0] || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </button>
             </div>
           </div>
 
@@ -339,17 +370,33 @@ export function LeftSidebar() {
                 })}
               </div>
 
-              {/* Botón de anclaje en la parte inferior */}
-              <div className="mt-6 flex flex-col gap-[2px]">
-                <ButtonSidebar
-                  icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
-                  label={isDocked ? "Desanclar" : "Anclar"}
-                  isActive={false}
-                  isExpanded={true}
-                  onClick={handleDockToggle}
-                  variant="secondary"
-                />
-              </div>
+              {/* Botón de Cerrar Sesión (solo en nivel user) */}
+              {sidebarLevel === 'user' && (
+                <div className="mt-6 flex flex-col gap-[2px]">
+                  <ButtonSidebar
+                    icon={<LogOut className="w-[18px] h-[18px]" />}
+                    label="Cerrar Sesión"
+                    isActive={false}
+                    isExpanded={true}
+                    onClick={handleLogout}
+                    variant="secondary"
+                  />
+                </div>
+              )}
+
+              {/* Botón de anclaje en la parte inferior (no mostrar en nivel user) */}
+              {sidebarLevel !== 'user' && (
+                <div className="mt-6 flex flex-col gap-[2px]">
+                  <ButtonSidebar
+                    icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
+                    label={isDocked ? "Desanclar" : "Anclar"}
+                    isActive={false}
+                    isExpanded={true}
+                    onClick={handleDockToggle}
+                    variant="secondary"
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
