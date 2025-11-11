@@ -1,1 +1,1 @@
-export * from "../desktop-rounded/layoutWidth";
+export * from "../desktop-layout-classic/layoutWidth";

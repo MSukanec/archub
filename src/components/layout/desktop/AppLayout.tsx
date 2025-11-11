@@ -1,1 +1,1 @@
-export * from "../desktop-rounded/AppLayout";
+export * from "../desktop-layout-classic/AppLayout";

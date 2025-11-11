@@ -1,1 +1,1 @@
-export * from "../desktop-rounded/Footer";
+export * from "../desktop-layout-classic/Footer";

@@ -1,1 +1,1 @@
-export * from "../desktop-rounded/ActionBar";
+export * from "../desktop-layout-classic/ActionBar";

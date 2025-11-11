@@ -1,1 +1,1 @@
-export * from "../desktop-rounded/OrganizationSelectorButton";
+export * from "../desktop-layout-classic/OrganizationSelectorButton";

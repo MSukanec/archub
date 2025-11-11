@@ -1,1 +1,1 @@
-export * from "../desktop-rounded/ProjectSelectorButton";
+export * from "../desktop-layout-classic/ProjectSelectorButton";
