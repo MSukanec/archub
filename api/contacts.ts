@@ -39,7 +39,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ error: error.message || "Failed to fetch contacts" });
     }
     
-    return res.status(200).json({ contacts: data || [] });
+    return res.status(200).json(data || []);
   } catch (error: any) {
     console.error('Error in contacts handler:', error);
     return res.status(500).json({ error: error.message || "Failed to fetch contacts" });
