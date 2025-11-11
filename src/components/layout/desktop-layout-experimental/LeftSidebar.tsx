@@ -265,6 +265,63 @@ export function LeftSidebar() {
     };
   }, [userId]);
 
+  // 🔥 SUPABASE REALTIME - Suscripción para mensajes de soporte (para badges)
+  useEffect(() => {
+    if (!supabase || !userId) return;
+
+    let channel: any = null;
+
+    const setupRealtimeSubscription = async () => {
+      // Obtener el user_id de la tabla users
+      const { data: userData } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', userId)
+        .single();
+
+      if (!userData) return;
+
+      const dbUserId = userData.id;
+
+      // Crear canal único para este usuario/admin
+      const channelName = isAdmin ? 'admin_support_badge' : `user_support_badge_${dbUserId}`;
+      
+      channel = supabase
+        .channel(channelName)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'support_messages',
+            ...(isAdmin ? {} : { filter: `user_id=eq.${dbUserId}` }) // Admin escucha todo, usuario solo sus mensajes
+          },
+          (payload) => {
+            console.log('🔥 Support badge Realtime update:', payload);
+            
+            if (isAdmin) {
+              // Admin: invalidar contador Y conversaciones
+              queryClient.invalidateQueries({ queryKey: ['unread-support-messages-count'] });
+              queryClient.invalidateQueries({ queryKey: ['admin-support-conversations'] });
+            } else {
+              // Usuario: invalidar contador Y mensajes
+              queryClient.invalidateQueries({ queryKey: ['unread-user-support-messages-count', userId] });
+              queryClient.invalidateQueries({ queryKey: ['support-messages', userId] });
+            }
+          }
+        )
+        .subscribe();
+    };
+
+    setupRealtimeSubscription();
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [userId, isAdmin]);
+
   return (
     <div className="flex flex-row h-full">
       {/* WRAPPER CON FRAME EFFECT */}

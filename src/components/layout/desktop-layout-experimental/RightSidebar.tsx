@@ -6,25 +6,18 @@
  * - Panel de notificaciones integrado en el sidebar
  */
 
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { cn } from "@/lib/utils";
 import { AIPanel } from "@/components/ai/AIPanel";
-import { SupportPanel } from "@/components/support/SupportPanel";
 import { SidebarIconButton } from "../desktop/SidebarIconButton";
 import { Sparkles, PanelLeftClose } from "lucide-react";
 import { useThemeStore } from "@/stores/themeStore";
 import { useRightSidebarStore } from "@/stores/rightSidebarStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useIsAdmin } from "@/hooks/use-admin-permissions";
-import { useUnreadSupportMessages } from '@/hooks/use-unread-support-messages';
-import { useUnreadUserSupportMessages } from '@/hooks/use-unread-user-support-messages';
-import { queryClient } from '@/lib/queryClient';
-import { supabase } from '@/lib/supabase';
 
 export function RightSidebar() {
   const { isDark, toggleTheme } = useThemeStore();
   const { data: userData } = useCurrentUser();
-  const isAdmin = useIsAdmin();
   const userId = userData?.user?.id;
   const userFullName = userData?.user?.full_name || userData?.user?.first_name || 'Usuario';
   const userAvatarUrl = userData?.user?.avatar_url;
@@ -33,92 +26,19 @@ export function RightSidebar() {
   const { activePanel, setActivePanel, togglePanel } = useRightSidebarStore();
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Contador de mensajes sin leer
-  // Para admins: cuenta mensajes de usuarios sin leer
-  const { data: unreadSupportCountAdmin = 0 } = useUnreadSupportMessages();
-  // Para usuarios: cuenta mensajes de admin sin leer
-  const { data: unreadSupportCountUser = 0 } = useUnreadUserSupportMessages(userId);
-  
-  // Usar el contador apropiado según el rol
-  const unreadSupportCount = isAdmin ? unreadSupportCountAdmin : unreadSupportCountUser;
-
   const handleToggleTheme = async () => {
     const userId = userData?.user?.id;
     const preferencesId = userData?.preferences?.id;
     await toggleTheme(userId, preferencesId);
   };
 
-  // 🔥 SUPABASE REALTIME - Suscripción para mensajes de soporte
-  useEffect(() => {
-    if (!supabase || !userId) return;
-
-    let channel: any = null;
-
-    const setupRealtimeSubscription = async () => {
-      // Obtener el user_id de la tabla users
-      const { data: userData } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_id', userId)
-        .single();
-
-      if (!userData) return;
-
-      const dbUserId = userData.id;
-
-      // Crear canal único para este usuario/admin
-      const channelName = isAdmin ? 'admin_support_badge' : `user_support_badge_${dbUserId}`;
-      
-      channel = supabase
-        .channel(channelName)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'support_messages',
-            ...(isAdmin ? {} : { filter: `user_id=eq.${dbUserId}` }) // Admin escucha todo, usuario solo sus mensajes
-          },
-          (payload) => {
-            console.log('🔥 Support badge Realtime update:', payload);
-            
-            if (isAdmin) {
-              // Admin: invalidar contador Y conversaciones
-              queryClient.invalidateQueries({ queryKey: ['unread-support-messages-count'] });
-              queryClient.invalidateQueries({ queryKey: ['admin-support-conversations'] });
-            } else {
-              // Usuario: invalidar contador Y mensajes
-              queryClient.invalidateQueries({ queryKey: ['unread-user-support-messages-count', userId] });
-              queryClient.invalidateQueries({ queryKey: ['support-messages', userId] });
-            }
-          }
-        )
-        .subscribe();
-    };
-
-    setupRealtimeSubscription();
-
-    return () => {
-      if (channel) {
-        supabase.removeChannel(channel);
-      }
-    };
-  }, [userId, isAdmin]);
-
-  const handlePanelClick = (panel: 'ai' | 'support') => {
+  const handlePanelClick = (panel: 'ai') => {
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
       closeTimeoutRef.current = null;
     }
     // Toggle: si ya está abierto, lo cierra; si está cerrado, lo abre
     togglePanel(panel);
-    
-    // Si se abre el panel de soporte, invalidar inmediatamente el contador
-    if (panel === 'support' && activePanel !== 'support') {
-      // Forzar actualización inmediata del contador de mensajes no leídos
-      queryClient.invalidateQueries({ queryKey: ['unread-user-support-messages-count', userId] });
-      queryClient.invalidateQueries({ queryKey: ['unread-support-messages-count'] });
-    }
   };
 
   const handleMouseLeave = () => {
@@ -147,13 +67,13 @@ export function RightSidebar() {
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
-          {/* PANEL EXPANDIBLE - Cambia según el panel activo (aparece a la izquierda) */}
+          {/* PANEL EXPANDIBLE - Panel de IA (aparece a la izquierda) */}
           {isExpanded && userId && (
             <div className="w-[350px] h-full px-[9px] pt-6 pb-6 flex flex-col">
               {/* Título del panel con botón de cerrar */}
               <div className="mb-6 flex items-center justify-between px-2">
                 <h2 className="text-lg font-semibold text-[var(--main-sidebar-fg)]">
-                  {activePanel === 'ai' ? 'Asistente IA' : 'Soporte'}
+                  Asistente IA
                 </h2>
                 {/* Botón de cerrar (equivalente al botón de anclar) */}
                 <button
@@ -168,23 +88,12 @@ export function RightSidebar() {
 
               {/* Contenido del panel */}
               <div className="flex-1 overflow-hidden">
-                {activePanel === 'ai' && (
-                  <AIPanel
-                    userId={userId}
-                    userFullName={userFullName}
-                    userAvatarUrl={userAvatarUrl}
-                    onClose={() => setActivePanel(null)}
-                  />
-                )}
-                
-                {activePanel === 'support' && (
-                  <SupportPanel
-                    userId={userId}
-                    userFullName={userFullName}
-                    userAvatarUrl={userAvatarUrl}
-                    onClose={() => setActivePanel(null)}
-                  />
-                )}
+                <AIPanel
+                  userId={userId}
+                  userFullName={userFullName}
+                  userAvatarUrl={userAvatarUrl}
+                  onClose={() => setActivePanel(null)}
+                />
               </div>
             </div>
           )}
