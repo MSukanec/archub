@@ -236,8 +236,70 @@ export function LeftSidebar() {
 
   const navigationItems = getNavigationItems();
 
+  // SIDEBAR DOCK MUTATION - Save sidebar_docked state to backend with optimistic updates
+  const saveSidebarDockedMutation = useMutation({
+    onMutate: async (dockedState: boolean) => {
+      const previousState = isDocked;
+      setDocked(dockedState);
+      return { previousState };
+    },
+    mutationFn: async (dockedState: boolean) => {
+      if (!supabase || !userData?.user?.id) {
+        throw new Error('Required data not available');
+      }
+      
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.access_token) {
+        throw new Error('No se pudo obtener el token de autenticación');
+      }
+      
+      const response = await fetch('/api/user/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          user_id: userData.user.id,
+          sidebar_docked: dockedState,
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+      
+      return dockedState;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+    },
+    onError: (error, variables, context) => {
+      console.error('Error saving sidebar docked state:', error);
+      if (context?.previousState !== undefined) {
+        setDocked(context.previousState);
+      }
+      toast({
+        title: "Error",
+        description: "No se pudo guardar la preferencia del sidebar",
+        variant: "destructive",
+      });
+    }
+  });
+
   const handleDockToggle = () => {
-    setDocked(!isDocked);
+    if (!userData?.user?.id) {
+      toast({
+        title: "Error",
+        description: "Por favor espera a que se carguen tus datos",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const newDockedState = !isDocked;
+    saveSidebarDockedMutation.mutate(newDockedState);
   };
 
   // Helper to get context title
@@ -683,14 +745,14 @@ export function LeftSidebar() {
                 {sidebarLevel !== 'user' && (
                   <button
                     onClick={handleDockToggle}
-                    className="h-6 w-6 flex items-center justify-center rounded-md hover:bg-[var(--main-sidebar-button-hover-bg)] transition-colors"
+                    className="h-6 w-6 flex items-center justify-center rounded-md transition-colors group"
                     title={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
                     data-testid="button-dock-toggle"
                   >
                     {isDocked ? (
-                      <PanelLeftClose className="w-4 h-4 text-[var(--main-sidebar-fg)]" />
+                      <PanelLeftClose className="w-4 h-4 text-[var(--main-sidebar-fg)] group-hover:text-black dark:group-hover:text-black transition-colors" />
                     ) : (
-                      <PanelLeftOpen className="w-4 h-4 text-[var(--main-sidebar-fg)]" />
+                      <PanelLeftOpen className="w-4 h-4 text-[var(--main-sidebar-fg)] group-hover:text-black dark:group-hover:text-black transition-colors" />
                     )}
                   </button>
                 )}

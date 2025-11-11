@@ -19,7 +19,7 @@ interface ProfilePreferencesProps {
 export function ProfilePreferences({ user }: ProfilePreferencesProps) {
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
-  const { setDocked: setMainSidebarDocked } = useSidebarStore()
+  const { isDocked: sidebarDockedFromStore, setDocked: setMainSidebarDocked } = useSidebarStore()
   const { isDark, setTheme } = useThemeStore()
   
   const [sidebarDocked, setSidebarDocked] = useState(false)
@@ -106,6 +106,11 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
     setSidebarDocked(value)
     setMainSidebarDocked(value)
   }
+
+  // Sync local state with store state (for when sidebar button toggles)
+  useEffect(() => {
+    setSidebarDocked(sidebarDockedFromStore)
+  }, [sidebarDockedFromStore])
 
   // Load settings data
   useEffect(() => {
