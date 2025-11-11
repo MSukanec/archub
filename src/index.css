@@ -62,6 +62,11 @@
   --layout-text: hsl(0, 0%, 40%);
   --layout-border: hsl(0, 0%, 40%);
 
+  /* Content */
+  --content-bg: hsl(0, 0%, 96%); /* Fondo sólido para páginas generales */
+  --content-gradient-from: hsl(0, 0%, 96%); /* Inicio del degradado para páginas de proyecto */
+  --content-gradient-to: hsl(76, 40%, 94%); /* Fin del degradado para páginas de proyecto */
+
   /* Header */
   --header-bg: hsl(0, 0%, 100%);
   --header-fg: hsl(0, 0%, 40%);
@@ -159,9 +164,9 @@
   --accent-foreground-hsl: 0 0% 100%;
   --accent-foreground: hsl(0, 0%, 100%);
   
-  /* Gradient colors - using accent for dynamic theming */
-  --gradient-from-light: hsl(0, 0%, 96%);
-  --gradient-to-light: hsl(76, 40%, 94%);
+  /* Gradient colors - DEPRECATED: Use --content-gradient-from/to instead */
+  --gradient-from-light: var(--content-gradient-from);
+  --gradient-to-light: var(--content-gradient-to);
   
   --destructive: hsl(0, 84%, 60%);
   --destructive-text: hsl(0, 0%, 100%);
@@ -289,6 +294,11 @@
   --layout-text: hsl(0, 0%, 90%);
   --layout-border: hsl(0, 0%, 20%);
 
+  /* Content */
+  --content-bg: hsl(0, 0%, 20%); /* Fondo sólido para páginas generales */
+  --content-gradient-from: hsl(0, 0%, 20%); /* Inicio del degradado para páginas de proyecto */
+  --content-gradient-to: hsl(76, 30%, 15%); /* Fin del degradado para páginas de proyecto */
+
   /* Header */
   --header-bg: hsl(0, 0%, 12%);
   --header-fg: hsl(0, 0%, 90%);
@@ -376,9 +386,9 @@
   --accent-foreground-hsl: 0 0% 100%;
   --accent-text: hsl(0, 0%, 100%);
   
-  /* Gradient colors - using accent for dynamic theming */
-  --gradient-from-dark: hsl(0, 0%, 20%);
-  --gradient-to-dark: hsl(76, 30%, 15%);
+  /* Gradient colors - DEPRECATED: Use --content-gradient-from/to instead */
+  --gradient-from-dark: var(--content-gradient-from);
+  --gradient-to-dark: var(--content-gradient-to);
   
   --destructive: hsl(0, 84%, 65%);
   --destructive-text: hsl(0, 0%, 100%);
