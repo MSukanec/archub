@@ -211,7 +211,7 @@ export function Sidebar() {
           onMouseLeave={() => setHovered(false)}
         >
           {/* SIDEBAR IZQUIERDO - CONTEXTOS (siempre visible, 50px, altura total) */}
-          <div className="bg-[var(--main-sidebar-bg)] w-[50px] rounded-lg flex flex-col" style={{ height: 'calc(100vh - 8px)' }}>
+          <div className="bg-[var(--main-sidebar-bg)] w-[50px] h-full rounded-lg flex flex-col">
             {/* SECCIÓN: Botones de contexto con scroll */}
             <div className="px-0 pt-6 pb-6 overflow-y-auto flex-1">
                 <div className="flex flex-col gap-[2px] items-center">
