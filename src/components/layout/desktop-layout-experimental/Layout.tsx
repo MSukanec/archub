@@ -240,7 +240,7 @@ function LayoutContent({
         /* Desktop View - Sidebar + MainHeader + Content + RightSidebar */
         <div className="flex-1 flex min-h-0">
           {/* Sidebar - Full height with padding */}
-          <div className="flex-shrink-0 p-2">
+          <div className="flex-shrink-0 p-1">
             <Sidebar />
           </div>
 
@@ -251,7 +251,7 @@ function LayoutContent({
 
             {/* Page Content with rounded corners and framing effect */}
             <div className={`flex-1 flex min-h-0 relative ${isDocked ? 'gap-3' : ''}`}>
-              <div className={`flex-1 ${isCourseSidebarVisible ? '' : ''} py-2 overflow-x-hidden`}>
+              <div className={`flex-1 ${isCourseSidebarVisible ? '' : ''} py-1 overflow-x-hidden`}>
                 <main
                   className={`h-full flex flex-col rounded-lg overflow-hidden ${!isDocked ? 'w-full' : ''}`}
                   style={{
@@ -307,7 +307,7 @@ function LayoutContent({
 
               {/* Course Sidebar - Right side, only visible when activated */}
               {isCourseSidebarVisible && !isMobile && (
-                <div className="flex-shrink-0 p-2">
+                <div className="flex-shrink-0 p-1">
                   <div className="h-full rounded-lg overflow-hidden">
                     <CourseSidebar
                       modules={modules}
@@ -321,7 +321,7 @@ function LayoutContent({
           </div>
 
           {/* Right Sidebar - Fixed width, always visible */}
-          <div className="flex-shrink-0 p-2">
+          <div className="flex-shrink-0 p-1">
             <RightSidebar />
           </div>
 

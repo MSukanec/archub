@@ -294,7 +294,7 @@ export function PageLayout({
     <div className="flex flex-col min-h-0">
       {/* Page Content - HEADER Y CONTENIDO juntos para que se muevan con scroll */}
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden">
-        <div style={{ backgroundColor: "var(--layout-bg)" }}>
+        <div style={{ backgroundColor: "var(--header-bg)" }}>
           <div className={(() => {
             const mode = resolveWidthMode(wide);
             return `${getContainerClasses(mode)} ${getHeaderPaddingClasses(mode)} pt-0`;
