@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { formatDateRange } from '../../utils/responseFormatter';
+import { formatDateRange } from '../../utils/responseFormatter.js';
 
 /**
  * Obtiene la lista de proyectos de una organización con información básica.

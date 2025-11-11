@@ -11,9 +11,9 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
-import { getChatSystemPrompt } from "../systemPrompt";
-import { runAIPipeline, enrichSystemPrompt, cacheAIResult, getPipelineMetrics } from "../orchestrator/pipeline";
-import type { AIContext } from "../orchestrator/types";
+import { getChatSystemPrompt } from "../systemPrompt.js";
+import { runAIPipeline, enrichSystemPrompt, cacheAIResult, getPipelineMetrics } from "../orchestrator/pipeline.js";
+import type { AIContext } from "../orchestrator/types.js";
 
 /**
  * Parámetros para la función getChatHandler

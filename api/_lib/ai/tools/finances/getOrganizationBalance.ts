@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { formatCurrency } from '../../utils/responseFormatter';
-import { convertCurrency } from '../../utils/currencyConverter';
-import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder';
+import { formatCurrency } from '../../utils/responseFormatter.js';
+import { convertCurrency } from '../../utils/currencyConverter.js';
+import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder.js';
 
 /**
  * Calcula el balance general de la organización sumando todos los movimientos

@@ -1,6 +1,6 @@
 // api/_lib/handlers/organization/rejectInvitation.ts
 import { SupabaseClient } from "@supabase/supabase-js";
-import { HttpError } from "../../auth-helpers";
+import { HttpError } from "../../auth-helpers.js";
 
 export async function rejectInvitation(
   supabase: SupabaseClient,

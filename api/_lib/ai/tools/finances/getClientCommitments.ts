@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { formatCurrency } from '../../utils/responseFormatter';
-import { convertCurrency } from '../../utils/currencyConverter';
+import { formatCurrency } from '../../utils/responseFormatter.js';
+import { convertCurrency } from '../../utils/currencyConverter.js';
 
 /**
  * Obtiene los compromisos de pago de clientes y calcula cuánto han pagado vs cuánto falta.

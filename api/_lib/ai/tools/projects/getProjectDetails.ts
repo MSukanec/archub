@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { formatDateRange } from '../../utils/responseFormatter';
+import { formatDateRange } from '../../utils/responseFormatter.js';
 
 /**
  * Obtiene información detallada de un proyecto específico.

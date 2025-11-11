@@ -5,7 +5,7 @@
  * Performance: reduce 90% del tiempo en preguntas repetidas.
  */
 
-import type { CacheEntry } from './types';
+import type { CacheEntry } from './types.js';
 import crypto from 'crypto';
 
 class AICache {

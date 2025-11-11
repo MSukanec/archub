@@ -9,10 +9,10 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Entity, AIContext } from './types';
-import { textIncludes, normalizeText } from '../utils/textNormalizer';
-import { generateEntityVariants, synonymRegistry } from './entitySynonyms';
-import { aiCache } from './cache';
+import type { Entity, AIContext } from './types.js';
+import { textIncludes, normalizeText } from '../utils/textNormalizer.js';
+import { generateEntityVariants, synonymRegistry } from './entitySynonyms.js';
+import { aiCache } from './cache.js';
 
 export interface EntitySearchResult {
   entity: Entity;

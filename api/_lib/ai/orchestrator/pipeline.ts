@@ -13,12 +13,12 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { AIContext, PipelineContext, Intent, QueryPlan, AIResponse } from './types';
-import { normalizeText } from '../utils/textNormalizer';
-import { expandWithSynonyms } from './entitySynonyms';
-import { aiCache } from './cache';
-import { resolveEntities } from './entityResolver';
-import { classifyIntent, suggestToolForIntent, validateIntent } from './intentClassifier';
+import type { AIContext, PipelineContext, Intent, QueryPlan, AIResponse } from './types.js';
+import { normalizeText } from '../utils/textNormalizer.js';
+import { expandWithSynonyms } from './entitySynonyms.js';
+import { aiCache } from './cache.js';
+import { resolveEntities } from './entityResolver.js';
+import { classifyIntent, suggestToolForIntent, validateIntent } from './intentClassifier.js';
 
 /**
  * Ejecuta el pipeline completo de razonamiento de IA

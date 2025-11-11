@@ -5,7 +5,7 @@
  * Este sistema permite que la IA entienda "Macho" = "Machónico", "plata" = "dinero", etc.
  */
 
-import type { EntitySynonym } from './types';
+import type { EntitySynonym } from './types.js';
 
 /**
  * Sinónimos de términos financieros comunes

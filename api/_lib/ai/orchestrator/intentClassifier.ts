@@ -8,9 +8,9 @@
  * - Metadata de herramientas disponibles
  */
 
-import type { Intent, Entity, IntentPattern } from './types';
-import { extractKeyTerms, expandWithSynonyms } from './entitySynonyms';
-import { parseDateExpression } from '../utils/dateParser';
+import type { Intent, Entity, IntentPattern } from './types.js';
+import { extractKeyTerms, expandWithSynonyms } from './entitySynonyms.js';
+import { parseDateExpression } from '../utils/dateParser.js';
 
 /**
  * Patrones de intenciones con keywords asociadas y prioridad
