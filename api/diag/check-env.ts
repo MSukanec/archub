@@ -20,7 +20,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Test importing auth helpers
     try {
-      const { extractToken, requireUser } = await import('../../lib/auth-helpers');
+      const { extractToken, requireUser } = await import('../_lib/auth-helpers');
       diagnostics.imports.authHelpers = '✅ Import successful';
     } catch (err: any) {
       diagnostics.imports.authHelpers = `❌ ${err.message}`;
@@ -29,7 +29,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Test importing handlers
     try {
-      const { getOrganizationMembers } = await import('../../lib/handlers/organization/getOrganizationMembers');
+      const { getOrganizationMembers } = await import('../_lib/handlers/organization/getOrganizationMembers');
       diagnostics.imports.handlers = '✅ Import successful';
     } catch (err: any) {
       diagnostics.imports.handlers = `❌ ${err.message}`;
