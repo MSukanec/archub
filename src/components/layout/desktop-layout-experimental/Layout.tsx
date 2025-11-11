@@ -21,6 +21,7 @@ import { useMobile } from "@/hooks/use-mobile";
 import { HeaderMobile } from "@/components/layout/mobile/HeaderMobile";
 import { CourseSidebar } from "@/components/layout/CourseSidebar";
 import { useProjectAccentColor } from "@/hooks/use-project-accent-color";
+import { useContentBackground } from "@/hooks/use-content-background";
 import { FloatingAIChat } from "@/components/ui-custom/layout/FloatingAIChat";
 import { FloatingCourseLessons } from "@/components/ui-custom/layout/FloatingCourseLessons";
 import { InvitationModal } from "@/components/invitations/InvitationModal";
@@ -106,6 +107,9 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   // Hook para color dinámico del accent basado en el proyecto activo
   useProjectAccentColor();
   
+  // Hook para determinar el fondo del contenido (sólido vs degradado)
+  const contentBackground = useContentBackground();
+  
   // Determinar si debería mostrarse el FloatingAIChat
   // ALLOWLIST approach - funciona en DESKTOP y MOBILE
   const shouldShowAIChat = (() => {
@@ -168,6 +172,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       lessons={lessons}
       currentLessonId={currentLessonId}
       shouldShowAIChat={shouldShowAIChat}
+      contentBackground={contentBackground}
     />
   );
 }
@@ -185,7 +190,8 @@ function LayoutContent({
   modules,
   lessons,
   currentLessonId,
-  shouldShowAIChat
+  shouldShowAIChat,
+  contentBackground
 }: any) {
   // TEMPORALMENTE DESHABILITADO - GlobalAnnouncement
   // const { hasActiveAnnouncement } = useAnnouncementBanner();
@@ -228,9 +234,7 @@ function LayoutContent({
           <main
             className={`transition-all duration-300 ease-in-out px-4 py-3 pb-12 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
             style={{
-              background: isDark 
-                ? 'linear-gradient(to bottom, var(--gradient-from-dark), var(--gradient-to-dark))'
-                : 'linear-gradient(to bottom, var(--gradient-from-light), var(--gradient-to-light))'
+              background: contentBackground
             }}
           >
             {children}
@@ -255,9 +259,7 @@ function LayoutContent({
                 <main
                   className={`h-full flex flex-col rounded-lg overflow-hidden ${!isDocked ? 'w-full' : ''}`}
                   style={{
-                    background: isDark 
-                      ? 'linear-gradient(to bottom, var(--gradient-from-dark), var(--gradient-to-dark))'
-                      : 'linear-gradient(to bottom, var(--gradient-from-light), var(--gradient-to-light))'
+                    background: contentBackground
                   }}
                 >
                 {headerProps ? (
