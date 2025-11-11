@@ -337,7 +337,7 @@ export function LeftSidebar() {
             <div className="px-0 pt-3 overflow-y-auto flex-1">
                 <div className="flex flex-col gap-[2px] items-center">
                   {/* Logo */}
-                  <div className="h-[50px] flex items-center justify-center w-8 mb-3">
+                  <div className="h-[32px] flex items-center justify-center w-8">
                     <img 
                       src="/Seencel512.png" 
                       alt="Seencel Logo" 
