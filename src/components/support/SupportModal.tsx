@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useState, useRef, type KeyboardEvent } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { ArrowUp, ExternalLink } from 'lucide-react';
@@ -236,23 +236,21 @@ export function SupportModal({ open, onOpenChange, userId, userFullName, userAva
       <DialogContent className="max-w-2xl h-[80vh] flex flex-col p-0">
         <DialogHeader className="px-6 pt-6 pb-4">
           <DialogTitle>Soporte</DialogTitle>
+          <DialogDescription>
+            Contacta con nuestro equipo para ayuda, soporte o feedback.
+          </DialogDescription>
           
-          {/* Información de soporte */}
-          <div className="text-sm text-muted-foreground space-y-2 pt-2">
-            <p>Contacta con nuestro equipo para ayuda, soporte o feedback.</p>
-            
-            {/* Link a Discord */}
-            <a
-              href={DISCORD_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-primary hover:underline transition-colors"
-              data-testid="link-discord-support"
-            >
-              <span>Únete a nuestra comunidad Discord</span>
-              <ExternalLink className="h-3 w-3" />
-            </a>
-          </div>
+          {/* Link a Discord */}
+          <a
+            href={DISCORD_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline transition-colors mt-2"
+            data-testid="link-discord-support"
+          >
+            <span>Únete a nuestra comunidad Discord</span>
+            <ExternalLink className="h-3 w-3" />
+          </a>
         </DialogHeader>
         
         <Separator />
