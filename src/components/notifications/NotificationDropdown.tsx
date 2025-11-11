@@ -75,7 +75,7 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
     <div className="flex flex-col">
       <div className="p-4 pb-3">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-sm !text-white">Notificaciones</h3>
+          <h3 className="font-semibold text-sm">Notificaciones</h3>
         </div>
         {unreadNotifications.length > 0 && (
           <Button
@@ -91,7 +91,7 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
         )}
       </div>
       
-      <Separator className="bg-[var(--main-sidebar-fg)] opacity-20" />
+      <Separator />
 
       <div className={cn(!hasNotifications && "max-h-32", hasNotifications && "max-h-[280px]")}>
         {loading ? (
@@ -104,7 +104,7 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
           </div>
         ) : (
           <ScrollArea className="h-full">
-            <div className="divide-y divide-[var(--main-sidebar-fg)]/20">
+            <div className="divide-y divide-border">
               {displayNotifications.map((notification) => {
                 const isUnread = !notification.read_at;
                 const timeAgo = notification.notifications?.created_at
@@ -119,9 +119,8 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
                     className={cn(
-                      'w-full text-left p-3 transition-colors',
-                      isUnread && 'bg-primary/5',
-                      'hover:text-white'
+                      'w-full text-left p-3 transition-colors hover:bg-accent/10',
+                      isUnread && 'bg-accent/5'
                     )}
                     data-testid={`notification-${notification.id}`}
                   >
@@ -152,18 +151,20 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
       {/* Botón "Ver todas" al final */}
       {hasNotifications && (
         <>
-          <Separator className="bg-[var(--main-sidebar-fg)] opacity-20" />
+          <Separator />
           <div className="p-3">
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => {
                 navigate('/notifications');
                 onClose();
               }}
-              className="w-full text-center text-sm font-medium text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors"
+              className="w-full h-8 text-xs font-medium"
               data-testid="button-view-all"
             >
               Ver todas
-            </button>
+            </Button>
           </div>
         </>
       )}

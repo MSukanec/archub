@@ -352,7 +352,7 @@ export function LeftSidebar() {
                 <PopoverContent 
                   side="right" 
                   align="start"
-                  className="w-[380px] p-0 bg-[#1a1a1a] border-[#2a2a2a]"
+                  className="w-[380px] p-0"
                   sideOffset={8}
                 >
                   {userId && (
