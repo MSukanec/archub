@@ -139,61 +139,54 @@ export function RightSidebar() {
   const isExpanded = activePanel !== null;
 
   return (
-    <div 
-      className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-l border-[var(--main-sidebar-border)] transition-all duration-200 ease-in-out h-full flex flex-row justify-end rounded-lg overflow-hidden"
-      style={{
-        width: isExpanded ? '400px' : '50px'
-      }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      {/* PANEL EXPANDIBLE - Cambia según el panel activo */}
-      {isExpanded && userId && (
-        <div className="w-[350px] border-r border-[var(--main-sidebar-border)] h-full overflow-hidden">
-          {activePanel === 'ai' && (
-            <div className="px-3 h-full">
-              <AIPanel
-                userId={userId}
-                userFullName={userFullName}
-                userAvatarUrl={userAvatarUrl}
-                onClose={() => setActivePanel(null)}
-              />
-            </div>
-          )}
-          
-          {activePanel === 'support' && (
-            <div className="px-3 h-full">
-              <SupportPanel
-                userId={userId}
-                userFullName={userFullName}
-                userAvatarUrl={userAvatarUrl}
-                onClose={() => setActivePanel(null)}
-              />
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* COLUMNA DE BOTONES - Siempre visible, 50px, pegada a la derecha */}
-      <div className="w-[50px] h-full flex-shrink-0">
-        <aside className="grid h-full grid-rows-[1fr_auto] w-[50px]">
-          {/* SECCIÓN SUPERIOR: Botones principales */}
-          <div className="px-0 pt-3 overflow-y-auto">
-            <div className="flex flex-col gap-[2px] items-center">
+    <div className="flex flex-row h-full">
+      {/* WRAPPER CON FRAME EFFECT */}
+      <div className="h-full p-1 rounded-lg bg-[var(--content-bg)]">
+        <div 
+          className="flex flex-row h-full"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          {/* PANEL EXPANDIBLE - Cambia según el panel activo (aparece a la izquierda) */}
+          {isExpanded && userId && (
+            <div className="w-[350px] h-full px-[9px] pt-6 pb-6 flex flex-col overflow-hidden">
+              {activePanel === 'ai' && (
+                <AIPanel
+                  userId={userId}
+                  userFullName={userFullName}
+                  userAvatarUrl={userAvatarUrl}
+                  onClose={() => setActivePanel(null)}
+                />
+              )}
               
-              {/* Botón de IA - CON ICONO BRILLANTE */}
-              <SidebarIconButton
-                icon={<Sparkles className="h-5 w-5 ai-icon-sparkle" />}
-                isActive={activePanel === 'ai'}
-                onClick={() => handlePanelClick('ai')}
-                title="Asistente IA"
-                testId="button-ai"
-              />
+              {activePanel === 'support' && (
+                <SupportPanel
+                  userId={userId}
+                  userFullName={userFullName}
+                  userAvatarUrl={userAvatarUrl}
+                  onClose={() => setActivePanel(null)}
+                />
+              )}
+            </div>
+          )}
 
+          {/* SIDEBAR DERECHO - BOTONES (siempre visible, 50px, altura total) */}
+          <div className="bg-[var(--main-sidebar-bg)] w-[50px] h-full rounded-lg flex flex-col">
+            {/* SECCIÓN SUPERIOR: Botones principales */}
+            <div className="px-0 pt-3 overflow-y-auto flex-1">
+              <div className="flex flex-col gap-[2px] items-center">
+                {/* Botón de IA - CON ICONO BRILLANTE */}
+                <SidebarIconButton
+                  icon={<Sparkles className="h-5 w-5 ai-icon-sparkle" />}
+                  isActive={activePanel === 'ai'}
+                  onClick={() => handlePanelClick('ai')}
+                  title="Asistente IA"
+                  testId="button-ai"
+                />
+              </div>
             </div>
           </div>
-
-        </aside>
+        </div>
       </div>
     </div>
   );
