@@ -201,9 +201,9 @@ export function RightSidebar() {
   const showCourseContent = userMode === 'learner' && isOnCoursePlayerTab && modules.length > 0;
   const isExpanded = showCourseContent ? (isDocked || isHovered) : (activePanel !== null);
 
-  // In Learner mode, only show the sidebar on the Player tab
-  // In other modes, always show it (for AI button)
-  const shouldShowSidebar = userMode === 'learner' ? isOnCoursePlayerTab : true;
+  // 🔒 Por ahora, SOLO mostrar el sidebar en la tab Reproductor (en cualquier modo)
+  // Esto oculta el botón de IA en todos los demás lugares
+  const shouldShowSidebar = isOnCoursePlayerTab;
 
   if (!shouldShowSidebar) {
     return null;
