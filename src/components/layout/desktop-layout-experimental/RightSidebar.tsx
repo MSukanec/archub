@@ -198,6 +198,14 @@ export function RightSidebar() {
   const showCourseContent = userMode === 'learner' && isOnCoursePlayerTab && modules.length > 0;
   const isExpanded = showCourseContent ? (isDocked || isHovered) : (activePanel !== null);
 
+  // In Learner mode, only show the sidebar on the Player tab
+  // In other modes, always show it (for AI button)
+  const shouldShowSidebar = userMode === 'learner' ? isOnCoursePlayerTab : true;
+
+  if (!shouldShowSidebar) {
+    return null;
+  }
+
   return (
     <div className="flex flex-row h-full">
       {/* WRAPPER CON FRAME EFFECT */}
