@@ -593,7 +593,7 @@ export function LeftSidebar() {
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={userData?.user?.avatar_url} />
-                      <AvatarFallback className="text-sm font-semibold bg-accent text-white">
+                      <AvatarFallback className="text-xs font-semibold uppercase bg-accent text-white border-0">
                         {userData?.user?.first_name?.[0] || userData?.user?.email?.[0] || 'U'}
                       </AvatarFallback>
                     </Avatar>
