@@ -435,7 +435,7 @@ export function LeftSidebar() {
                         id: 'learner-discord' as const,
                         icon: <SiDiscord className="h-5 w-5" />, // Icono de Discord
                         testId: 'button-sidebar-learning-discord',
-                        onClick: () => window.open('https://discord.gg/seencel', '_blank'),
+                        onClick: () => window.open('https://discord.gg/aHxTsPZ4', '_blank'),
                         isActive: false,
                       },
                     ];
