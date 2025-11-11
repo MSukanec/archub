@@ -206,7 +206,7 @@ export function Sidebar() {
       {/* WRAPPER CON FRAME EFFECT */}
       <div className="h-full p-1 rounded-lg bg-[var(--content-bg)]">
         <div 
-          className="flex flex-row"
+          className="flex flex-row h-full"
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
