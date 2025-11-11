@@ -235,20 +235,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "User not found" });
       }
       
-      // Get the invitation and verify it belongs to the current user
+      // Get the invitation (without status filter to handle idempotency)
       const { data: invitation, error: invError } = await authenticatedSupabase
         .from('organization_invitations')
         .select('id, organization_id, role_id, user_id, status')
         .eq('id', invitationId)
         .eq('user_id', dbUser.id)
-        .eq('status', 'pending')
         .maybeSingle();
       
       if (invError || !invitation) {
-        return res.status(404).json({ error: "Invitation not found or already processed" });
+        return res.status(404).json({ error: "Invitation not found" });
       }
       
-      // Create organization member
+      // If already accepted, check if member exists (idempotency)
+      if (invitation.status === 'accepted') {
+        const { data: existingMember } = await authenticatedSupabase
+          .from('organization_members')
+          .select('id')
+          .eq('user_id', dbUser.id)
+          .eq('organization_id', invitation.organization_id)
+          .eq('is_active', true)
+          .maybeSingle();
+        
+        if (existingMember) {
+          return res.json({ success: true });
+        }
+      } else if (invitation.status !== 'pending') {
+        return res.status(400).json({ error: "Invitation already processed" });
+      }
+      
+      // Check for existing membership
+      const { data: existingMember } = await authenticatedSupabase
+        .from('organization_members')
+        .select('id')
+        .eq('user_id', dbUser.id)
+        .eq('organization_id', invitation.organization_id)
+        .maybeSingle();
+      
+      if (existingMember) {
+        // Just mark as accepted
+        await authenticatedSupabase
+          .from('organization_invitations')
+          .update({ 
+            status: 'accepted',
+            accepted_at: new Date().toISOString()
+          })
+          .eq('id', invitationId);
+        
+        return res.json({ success: true });
+      }
+      
+      // Update status FIRST (prevents duplicate accepts)
+      const { error: updateError } = await authenticatedSupabase
+        .from('organization_invitations')
+        .update({ 
+          status: 'accepted',
+          accepted_at: new Date().toISOString()
+        })
+        .eq('id', invitationId)
+        .eq('status', 'pending');
+      
+      if (updateError) {
+        console.error('Error updating invitation status:', updateError);
+        return res.status(500).json({ error: 'Failed to update invitation status' });
+      }
+      
+      // Create member AFTER status update
       const { error: memberError } = await authenticatedSupabase
         .from('organization_members')
         .insert({
@@ -260,20 +312,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (memberError) {
         console.error('Error creating organization member:', memberError);
-        return res.status(500).json({ error: 'Failed to create organization member' });
-      }
-      
-      // Update invitation status to accepted
-      const { error: updateError } = await authenticatedSupabase
-        .from('organization_invitations')
-        .update({ 
-          status: 'accepted',
-          accepted_at: new Date().toISOString()
-        })
-        .eq('id', invitationId);
-      
-      if (updateError) {
-        console.error('Error updating invitation status:', updateError);
+        return res.status(500).json({ error: 'Failed to create organization member. Please contact support.' });
       }
       
       res.json({ success: true });
