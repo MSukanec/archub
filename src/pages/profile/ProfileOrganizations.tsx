@@ -206,7 +206,7 @@ export function OrganizationList() {
   const isMobile = useMobile()
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
 
       {/* Lista de organizaciones */}
       <div className={isMobile ? "space-y-2" : "space-y-2"}>
