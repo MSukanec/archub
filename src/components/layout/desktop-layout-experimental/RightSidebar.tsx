@@ -205,22 +205,6 @@ export function RightSidebar() {
   // In other modes, always show it (for AI button)
   const shouldShowSidebar = userMode === 'learner' ? isOnCoursePlayerTab : true;
 
-  // Debug logging
-  if (userMode === 'learner') {
-    console.log('=== RightSidebar Debug (Learner Mode) ===');
-    console.log('location:', location);
-    console.log('window.location.href:', window.location.href);
-    console.log('window.location.search:', window.location.search);
-    console.log('currentTab:', currentTab);
-    console.log('match:', match);
-    console.log('params:', params);
-    console.log('isOnCoursePlayerTab:', isOnCoursePlayerTab);
-    console.log('shouldShowSidebar:', shouldShowSidebar);
-    console.log('courseSlug:', courseSlug);
-    console.log('course:', course);
-    console.log('modules.length:', modules.length);
-  }
-
   if (!shouldShowSidebar) {
     return null;
   }
@@ -353,23 +337,6 @@ export function RightSidebar() {
                         );
                       })}
                     </div>
-                  </div>
-
-                  {/* Control de Anclar */}
-                  <div className="pt-3 pb-3 px-4 border-t border-[var(--main-sidebar-border)]">
-                    <button
-                      onClick={() => setIsDocked(!isDocked)}
-                      className="w-full h-10 px-3 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group"
-                    >
-                      {isDocked ? (
-                        <PanelRightClose className="w-[18px] h-[18px] text-[var(--main-sidebar-fg)] group-hover:text-white" />
-                      ) : (
-                        <PanelRightOpen className="w-[18px] h-[18px] text-[var(--main-sidebar-fg)] group-hover:text-white" />
-                      )}
-                      <span className="ml-3 text-sm text-[var(--main-sidebar-fg)] group-hover:text-white">
-                        {isDocked ? "Desanclar" : "Anclar"}
-                      </span>
-                    </button>
                   </div>
                 </div>
               ) : (
