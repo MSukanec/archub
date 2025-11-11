@@ -320,22 +320,22 @@ export function LeftSidebar() {
                       testId="button-sidebar-community"
                     />
                   </PlanRestricted>
-
-                  {/* Botón Administración - solo si es admin */}
-                  {isAdmin && (
-                    <SidebarIconButton
-                      icon={<Crown className="h-5 w-5" />}
-                      isActive={sidebarLevel === 'admin'}
-                      onClick={() => setSidebarLevel('admin')}
-                      badge={unreadCount}
-                      testId="sidebar-button-administration"
-                    />
-                  )}
                 </div>
               </div>
 
-            {/* SECCIÓN INFERIOR: Notificaciones y Avatar del usuario */}
+            {/* SECCIÓN INFERIOR: Administración, Notificaciones y Avatar del usuario */}
             <div className="px-0 pt-3 pb-3 flex flex-col gap-[2px] items-center">
+              {/* Botón Administración - solo si es admin */}
+              {isAdmin && (
+                <SidebarIconButton
+                  icon={<Crown className="h-5 w-5" />}
+                  isActive={sidebarLevel === 'admin'}
+                  onClick={() => setSidebarLevel('admin')}
+                  badge={unreadCount}
+                  testId="sidebar-button-administration"
+                />
+              )}
+
               {/* Botón de Notificaciones con Popover */}
               <Popover open={notificationPopoverOpen} onOpenChange={setNotificationPopoverOpen}>
                 <PopoverTrigger asChild>
