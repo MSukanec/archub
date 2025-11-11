@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ExpandableAvatarGroup } from "@/components/ui-custom/ExpandableAvatarGroup";
+import { ProjectSelectorButton } from "./ProjectSelectorButton";
 
 interface Tab {
   id: string;
@@ -31,6 +32,7 @@ interface HeaderProps {
   selector?: React.ReactNode; // Nuevo: selector de proyecto/organización
   organizationId?: string; // Nuevo: ID de la organización para mostrar miembros
   showMembers?: boolean; // Nuevo: si mostrar o no los miembros
+  showProjectSelector?: boolean; // Nuevo: si mostrar el selector de proyectos
 }
 
 export function Header({ 
@@ -42,7 +44,8 @@ export function Header({
   className, 
   selector,
   organizationId,
-  showMembers = true
+  showMembers = true,
+  showProjectSelector = false
 }: HeaderProps) {
   return (
     <div className={cn(
@@ -76,10 +79,15 @@ export function Header({
             </div>
           </div>
 
-          {/* Right: Expandable Avatar Group */}
-          {showMembers && organizationId && (
-            <ExpandableAvatarGroup organizationId={organizationId} />
-          )}
+          {/* Right: Expandable Avatar Group + Project Selector */}
+          <div className="flex items-center gap-3">
+            {showMembers && organizationId && (
+              <ExpandableAvatarGroup organizationId={organizationId} />
+            )}
+            {showProjectSelector && (
+              <ProjectSelectorButton />
+            )}
+          </div>
         </div>
 
         {/* Fila Inferior: Tabs a la izquierda, Acciones a la derecha */}
