@@ -20,17 +20,13 @@ export function SidebarIconButton({
   testId,
   className,
 }: SidebarIconButtonProps) {
-  const baseColor = isActive ? 'var(--accent)' : 'var(--main-sidebar-fg)';
-  
   const enhancedIcon = isValidElement(icon)
     ? cloneElement(icon, {
-        className: cn(icon.props.className, "sidebar-icon-managed transition-colors"),
-        style: {
-          ...((icon.props as any).style || {}),
-          color: baseColor,
-          stroke: 'currentColor',
-          fill: 'currentColor',
-        },
+        className: cn(
+          icon.props.className,
+          "sidebar-icon-managed transition-colors",
+          isActive ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]"
+        ),
       } as any)
     : icon;
 
@@ -40,7 +36,7 @@ export function SidebarIconButton({
       title={title}
       data-testid={testId}
       className={cn(
-        "h-8 w-8 rounded-md cursor-pointer transition-colors flex items-center justify-center group relative",
+        "h-8 w-8 rounded-lg cursor-pointer transition-colors flex items-center justify-center group relative",
         "hover:bg-[var(--main-sidebar-button-hover-bg)]",
         isActive && "bg-[var(--main-sidebar-button-active-bg)]",
         className

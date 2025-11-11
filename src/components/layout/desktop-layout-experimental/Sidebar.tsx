@@ -214,7 +214,7 @@ export function Sidebar() {
           {/* SIDEBAR IZQUIERDO - CONTEXTOS (siempre visible, 50px, altura total) */}
           <div className="bg-[var(--main-sidebar-bg)] w-[50px] h-full rounded-lg flex flex-col">
             {/* SECCIÓN: Botones de contexto con scroll */}
-            <div className="px-0 pt-6 pb-6 overflow-y-auto flex-1">
+            <div className="px-0 pt-3 pb-3 overflow-y-auto flex-1">
                 <div className="flex flex-col gap-[2px] items-center">
                   {/* Logo */}
                   <div className="h-[50px] flex items-center justify-center w-8 mb-3">

@@ -15,7 +15,7 @@ import { SupportPanel } from "@/components/support/SupportPanel";
 import { SidebarIconButton } from "../desktop/SidebarIconButton";
 import { Bell, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Moon, Sun, Headphones, PanelRightClose, MessageCircle } from "lucide-react";
+import { Moon, Sun, Headphones, MessageCircle } from "lucide-react";
 import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
@@ -220,7 +220,7 @@ export function RightSidebar() {
       <div className="w-[50px] h-full flex-shrink-0">
         <aside className="grid h-full grid-rows-[1fr_auto] w-[50px]">
           {/* SECCIÓN SUPERIOR: Botones principales */}
-          <div className="px-0 pt-6 overflow-y-auto">
+          <div className="px-0 pt-3 overflow-y-auto">
             <div className="flex flex-col gap-[2px] items-center">
               
               {/* Avatar del Usuario - Altura igual al logo del sidebar izquierdo */}
@@ -253,8 +253,8 @@ export function RightSidebar() {
             </div>
           </div>
 
-          {/* SECCIÓN INFERIOR: Botones de Ayuda, Discord y Anclar */}
-          <div className="pt-6 pb-6 flex flex-col gap-[2px] items-center">
+          {/* SECCIÓN INFERIOR: Botones de Ayuda y Discord */}
+          <div className="pt-3 pb-3 flex flex-col gap-[2px] items-center">
             {/* Ayuda/Soporte */}
             <SidebarIconButton
               icon={<Headphones className="h-5 w-5" />}
@@ -271,14 +271,6 @@ export function RightSidebar() {
               onClick={() => window.open('https://discord.com/channels/868615664070443008', '_blank')}
               title="Comunidad Discord"
               testId="button-discord"
-            />
-
-            {/* Botón de Anclar/Desanclar (sin función por ahora) */}
-            <SidebarIconButton
-              icon={<PanelRightClose className="h-5 w-5" />}
-              onClick={() => console.log('Botón de anclar clickeado (sin función)')}
-              title="Anclar sidebar"
-              testId="button-dock-right"
             />
           </div>
 
