@@ -53,7 +53,8 @@ import {
   MapPin,
   LogOut,
   Bell,
-  CircleHelp
+  CircleHelp,
+  Globe
 } from "lucide-react";
 import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -345,6 +346,9 @@ export function LeftSidebar() {
                     />
                   </div>
 
+                  {/* Espacio vacío del tamaño de un botón */}
+                  <div className="h-[32px] w-full" />
+
                   {/* Botón Inicio */}
                   <SidebarIconButton
                     icon={<Home className="h-5 w-5" />}
@@ -355,6 +359,16 @@ export function LeftSidebar() {
                     }}
                     testId="button-sidebar-home"
                   />
+
+                  {/* Botón Comunidad */}
+                  <PlanRestricted reason="coming_soon">
+                    <SidebarIconButton
+                      icon={<Globe className="h-5 w-5" />}
+                      isActive={sidebarLevel === 'community'}
+                      onClick={() => setSidebarLevel('community')}
+                      testId="button-sidebar-community"
+                    />
+                  </PlanRestricted>
 
                   {/* Botón Organización */}
                   <SidebarIconButton
@@ -378,16 +392,6 @@ export function LeftSidebar() {
                     isActive={sidebarLevel === 'learning'}
                     onClick={() => setSidebarLevel('learning')}
                   />
-
-                  {/* Botón Comunidad */}
-                  <PlanRestricted reason="coming_soon">
-                    <SidebarIconButton
-                      icon={<Users className="h-5 w-5" />}
-                      isActive={sidebarLevel === 'community'}
-                      onClick={() => setSidebarLevel('community')}
-                      testId="button-sidebar-community"
-                    />
-                  </PlanRestricted>
                 </div>
               </div>
 
