@@ -325,11 +325,26 @@ export function LeftSidebar() {
           {/* SIDEBAR DERECHO - NAVEGACIÓN ESPECÍFICA (240px, aparece en hover) */}
           {isHovered && sidebarLevel !== 'general' && (
             <div className="w-[240px] h-full px-[9px] pt-6 pb-6 flex flex-col">
-              {/* Título del contexto */}
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold text-[var(--main-sidebar-fg)] px-2">
+              {/* Título del contexto con botón de anclar */}
+              <div className="mb-6 flex items-center justify-between px-2">
+                <h2 className="text-lg font-semibold text-[var(--main-sidebar-fg)]">
                   {getContextTitle()}
                 </h2>
+                {/* Botón de anclar inline - solo icono (no mostrar en nivel user) */}
+                {sidebarLevel !== 'user' && (
+                  <button
+                    onClick={handleDockToggle}
+                    className="h-6 w-6 flex items-center justify-center rounded-md hover:bg-[var(--main-sidebar-button-hover-bg)] transition-colors"
+                    title={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
+                    data-testid="button-dock-toggle"
+                  >
+                    {isDocked ? (
+                      <PanelLeftClose className="w-4 h-4 text-[var(--main-sidebar-fg)]" />
+                    ) : (
+                      <PanelLeftOpen className="w-4 h-4 text-[var(--main-sidebar-fg)]" />
+                    )}
+                  </button>
+                )}
               </div>
 
               {/* Botones de navegación */}
@@ -410,20 +425,6 @@ export function LeftSidebar() {
                   })
                 )}
               </div>
-
-              {/* Botón de anclaje en la parte inferior (no mostrar en nivel user) */}
-              {sidebarLevel !== 'user' && (
-                <div className="mt-6 flex flex-col gap-[2px]">
-                  <ButtonSidebar
-                    icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
-                    label={isDocked ? "Desanclar" : "Anclar"}
-                    isActive={false}
-                    isExpanded={true}
-                    onClick={handleDockToggle}
-                    variant="secondary"
-                  />
-                </div>
-              )}
             </div>
           )}
         </div>
