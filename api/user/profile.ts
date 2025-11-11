@@ -31,6 +31,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       phone_e164,
       sidebar_docked,
       theme,
+      layout,
     } = req.body;
 
     // Validate that we're updating the correct user
@@ -86,6 +87,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let preferencesUpdates: any = {};
     if (sidebar_docked !== undefined) preferencesUpdates.sidebar_docked = sidebar_docked;
     if (theme !== undefined) preferencesUpdates.theme = theme;
+    if (layout !== undefined) preferencesUpdates.layout = layout;
 
     if (Object.keys(preferencesUpdates).length > 0) {
       // Check if preferences row exists (NO .single())
