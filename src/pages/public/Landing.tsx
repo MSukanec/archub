@@ -500,7 +500,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="py-12" style={{ borderTop: '1px solid var(--layout-border)' }}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center space-x-2">
               <img 
                 src="/Seencel512.png" 
@@ -509,8 +509,19 @@ export default function Landing() {
               />
               <span className="font-bold">Seencel</span>
             </div>
-            <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              © 2025 Seencel. Plataforma integral para arquitectura y construcción.
+            <div className="flex items-center gap-6">
+              <a
+                href="/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm hover:underline"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                Política de Privacidad
+              </a>
+              <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                © 2025 Seencel
+              </div>
             </div>
           </div>
         </div>

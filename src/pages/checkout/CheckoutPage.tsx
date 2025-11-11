@@ -1941,9 +1941,10 @@ Titular: Matias Esteban Sukanec`;
                           </a>{" "}
                           y{" "}
                           <a
-                            href="#"
+                            href="/privacy"
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="text-accent hover:underline"
-                            onClick={(e) => e.preventDefault()}
                           >
                             Políticas de Privacidad
                           </a>
