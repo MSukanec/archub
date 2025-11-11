@@ -5,7 +5,7 @@ import { RightSidebar } from "./RightSidebar";
 // Header removed - now handled by sidebar
 // import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
-import { PageLayout } from "../desktop-layout-classic/PageLayout";
+import { PageLayout } from "./PageLayout";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -29,7 +29,7 @@ import { usePendingInvitations } from "@/hooks/use-pending-invitations";
 // TEMPORALMENTE DESHABILITADO - GlobalAnnouncement no se usa por ahora
 // import { GlobalAnnouncement, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, AnnouncementProvider } from "@/components/ui-custom/layout/GlobalAnnouncement";
 import { useLocation } from "wouter";
-import { type WidthProp, resolveWidthMode, getContainerClasses, getContentPaddingClasses } from "../desktop-layout-classic/layoutWidth";
+import { type WidthProp, resolveWidthMode, getContainerClasses, getContentPaddingClasses } from "./layoutWidth";
 
 interface Tab {
   id: string;
@@ -251,9 +251,9 @@ function LayoutContent({
 
             {/* Page Content with rounded corners and framing effect */}
             <div className={`flex-1 flex min-h-0 relative ${isDocked ? 'gap-3' : ''}`}>
-              <div className={`flex-1 ${isCourseSidebarVisible ? '' : ''} pt-3 pb-3 overflow-x-hidden`}>
+              <div className={`flex-1 ${isCourseSidebarVisible ? '' : ''} pt-1 pb-1 overflow-x-hidden`}>
                 <main
-                  className={`h-full flex flex-col rounded-2xl overflow-hidden ${!isDocked ? 'w-full' : ''}`}
+                  className={`h-full flex flex-col rounded-sm overflow-hidden ${!isDocked ? 'w-full' : ''}`}
                   style={{
                     background: isDark 
                       ? 'linear-gradient(to bottom, var(--gradient-from-dark), var(--gradient-to-dark))'
@@ -296,7 +296,7 @@ function LayoutContent({
                   <div
                     className={(() => {
                       const mode = resolveWidthMode(wide);
-                      return `${getContainerClasses(mode)} ${getContentPaddingClasses(mode)} pt-3 pb-6 min-h-0`;
+                      return `${getContainerClasses(mode)} ${getContentPaddingClasses(mode)} pt-1 pb-2 min-h-0`;
                     })()}
                   >
                     {children}
@@ -307,8 +307,8 @@ function LayoutContent({
 
               {/* Course Sidebar - Right side, only visible when activated */}
               {isCourseSidebarVisible && !isMobile && (
-                <div className="flex-shrink-0 pr-3 pb-3">
-                  <div className="h-full rounded-2xl overflow-hidden">
+                <div className="flex-shrink-0 pr-3 pb-1">
+                  <div className="h-full rounded-sm overflow-hidden">
                     <CourseSidebar
                       modules={modules}
                       lessons={lessons}
