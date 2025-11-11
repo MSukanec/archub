@@ -207,7 +207,7 @@ function LayoutContent({
       {/* <GlobalAnnouncement /> */}
       
       <div 
-        className={isMobile ? "min-h-screen flex flex-col" : "h-screen flex flex-col overflow-hidden"}
+        className={isMobile ? "min-h-screen flex flex-col" : "h-full flex flex-col overflow-hidden"}
         // TEMPORALMENTE DESHABILITADO - Padding dinámico del announcement
         // style={{
         //   paddingTop: hasActiveAnnouncement ? `${ANNOUNCEMENT_HEIGHT}px` : '0',
