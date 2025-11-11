@@ -344,6 +344,7 @@ export default function Budgets() {
     icon: CheckSquare,
     organizationId,
     showMembers: true,
+    showProjectSelector: true,
     tabs: tabs,
     activeTab: activeTab,
     onTabChange: setActiveTab,

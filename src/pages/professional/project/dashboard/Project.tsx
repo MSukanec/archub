@@ -19,7 +19,8 @@ export default function Project() {
     title: "Resumen de Proyecto",
     icon: Info,
     organizationId: currentOrganizationId,
-    showMembers: true
+    showMembers: true,
+    showProjectSelector: true
   }
 
   return (

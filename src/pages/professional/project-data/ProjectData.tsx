@@ -304,7 +304,8 @@ Generado desde Seencel`);
     onTabChange: (tabId: string) => setActiveTab(tabId),
     actions: shareButton ? [shareButton] : addClientButton ? [addClientButton] : undefined,
     organizationId: userData?.organization?.id,
-    showMembers: true
+    showMembers: true,
+    showProjectSelector: true
   };
 
   const renderTabContent = () => {
