@@ -219,7 +219,7 @@ function LayoutContent({
           style={{
             backgroundColor: isMobile
               ? "var(--layout-mobile-bg)"
-              : "var(--main-sidebar-bg)",
+              : "var(--layout-bg)",
           }}
         >
         {/* Mobile View - Unchanged */}
