@@ -1,9 +1,4 @@
 {
-  "functions": {
-    "api/**/*.ts": {
-      "includeFiles": "lib/**"
-    }
-  },
   "rewrites": [
     { "source": "/current-user", "destination": "/api/current-user" },
     { "source": "/api/current-user", "destination": "/api/current-user" },

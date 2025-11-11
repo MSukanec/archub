@@ -1,6 +1,6 @@
 // api/contacts.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { extractToken, getUserFromToken } from "../lib/auth-helpers";
+import { extractToken, getUserFromToken } from "./_lib/auth-helpers";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {

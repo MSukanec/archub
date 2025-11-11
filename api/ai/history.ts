@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { extractToken, getUserFromToken } from "../../lib/auth-helpers";
-import { getHistoryHandler } from "../../lib/ai/serverless/historyHandler";
+import { extractToken, getUserFromToken } from "../_lib/auth-helpers";
+import { getHistoryHandler } from "../_lib/ai/serverless/historyHandler";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // 1. Verificar método GET

@@ -1,7 +1,7 @@
 // api/ai/chat.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { extractToken, getUserFromToken } from "../../lib/auth-helpers";
-import { getChatHandler } from "../../lib/ai/serverless/chatHandler";
+import { extractToken, getUserFromToken } from "../_lib/auth-helpers";
+import { getChatHandler } from "../_lib/ai/serverless/chatHandler";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
