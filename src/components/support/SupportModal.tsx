@@ -3,14 +3,14 @@
  * 
  * Modal Dialog para contactar con administradores:
  * - Contacto directo con el equipo de soporte
- * - Opción para unirse a la comunidad Discord
  * - Historial de mensajes persistente
+ * - Mensajes en tiempo real con Supabase Realtime
  */
 
 import { useEffect, useState, useRef, type KeyboardEvent } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { ArrowUp, ExternalLink, Headphones } from 'lucide-react';
+import { ArrowUp, Headphones } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -18,6 +18,7 @@ import { queryClient } from '@/lib/queryClient';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
+import { formatTime } from '@/lib/date-utils';
 
 interface SupportMessage {
   sender: 'user' | 'admin';
@@ -32,8 +33,6 @@ interface SupportModalProps {
   userFullName: string;
   userAvatarUrl?: string;
 }
-
-const DISCORD_LINK = 'https://discord.com/channels/868615664070443008';
 
 export function SupportModal({ open, onOpenChange, userId, userFullName, userAvatarUrl }: SupportModalProps) {
   const [inputValue, setInputValue] = useState("");
@@ -224,29 +223,17 @@ export function SupportModal({ open, onOpenChange, userId, userFullName, userAva
   const headerContent = (
     <FormModalHeader
       title="Soporte"
-      description="Contacta con nuestro equipo para ayuda, soporte o feedback."
+      description="Contacta con nuestro equipo para ayuda o feedback"
       icon={Headphones}
-      rightActions={
-        <a
-          href={DISCORD_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-xs text-primary hover:underline transition-colors"
-          data-testid="link-discord-support"
-        >
-          <span>Comunidad Discord</span>
-          <ExternalLink className="h-3 w-3" />
-        </a>
-      }
     />
   );
 
   // CONTENIDO DEL CHAT
   const editPanel = (
-    <div className="flex flex-col h-[calc(80vh-180px)]">
+    <div className="flex flex-col h-[calc(80vh-180px)] bg-[var(--content-bg)]">
       {isLoadingHistory ? (
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-sm text-muted-foreground">Cargando...</div>
+          <div className="text-sm text-[var(--text-muted)]">Cargando...</div>
         </div>
       ) : hasMessages ? (
         <ScrollArea className="flex-1 px-4" ref={scrollAreaRef}>
@@ -255,21 +242,21 @@ export function SupportModal({ open, onOpenChange, userId, userFullName, userAva
               <div
                 key={index}
                 className={cn(
-                  "flex gap-3",
+                  "flex gap-3 items-start",
                   message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'
                 )}
               >
                 {/* Avatar */}
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0 mt-1">
                   {message.sender === 'user' ? (
-                    <Avatar className="h-8 w-8">
+                    <Avatar className="h-9 w-9 border-2 border-primary/20 shadow-sm">
                       <AvatarImage src={userAvatarUrl} alt={userFullName} />
-                      <AvatarFallback className="bg-primary text-white text-xs">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
                         {userInitial}
                       </AvatarFallback>
                     </Avatar>
                   ) : (
-                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center p-1">
+                    <div className="h-9 w-9 rounded-full bg-[var(--accent)]/10 border-2 border-[var(--accent)]/20 flex items-center justify-center p-1.5 shadow-sm">
                       <img 
                         src="/Seencel512.png" 
                         alt="Seencel" 
@@ -279,16 +266,32 @@ export function SupportModal({ open, onOpenChange, userId, userFullName, userAva
                   )}
                 </div>
 
-                {/* Burbuja de mensaje */}
-                <div
-                  className={cn(
-                    "rounded-lg px-4 py-2 max-w-[75%]",
-                    message.sender === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted'
-                  )}
-                >
-                  <div className="text-sm whitespace-pre-wrap">{message.message}</div>
+                {/* Contenedor de burbuja + timestamp */}
+                <div className={cn(
+                  "flex flex-col max-w-[75%]",
+                  message.sender === 'user' ? 'items-end' : 'items-start'
+                )}>
+                  {/* Burbuja de mensaje */}
+                  <div
+                    className={cn(
+                      "rounded-xl px-4 py-2.5 shadow-sm",
+                      message.sender === 'user'
+                        ? 'bg-primary text-primary-foreground border border-primary/20'
+                        : 'bg-card text-card-foreground border border-[var(--card-border)]'
+                    )}
+                  >
+                    <div className="text-sm whitespace-pre-wrap leading-relaxed">
+                      {message.message}
+                    </div>
+                  </div>
+                  
+                  {/* Timestamp */}
+                  <div className={cn(
+                    "text-xs text-[var(--text-muted)] mt-1 px-1",
+                    message.sender === 'user' ? 'text-right' : 'text-left'
+                  )}>
+                    {formatTime(message.created_at)}
+                  </div>
                 </div>
               </div>
             ))}
@@ -296,17 +299,17 @@ export function SupportModal({ open, onOpenChange, userId, userFullName, userAva
         </ScrollArea>
       ) : (
         <div className="flex-1 px-4 py-8 flex flex-col items-center justify-center text-center">
-          <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center p-3 mb-4">
+          <div className="h-16 w-16 rounded-full bg-[var(--accent)]/10 border-2 border-[var(--accent)]/20 flex items-center justify-center p-3 mb-4 shadow-sm">
             <img 
               src="/Seencel512.png" 
               alt="Seencel" 
               className="w-full h-full object-contain"
             />
           </div>
-          <h2 className="text-lg font-semibold mb-2">
+          <h2 className="text-lg font-semibold text-[var(--card-fg)] mb-2">
             ¿Necesitas ayuda?
           </h2>
-          <p className="text-sm text-muted-foreground mb-4">
+          <p className="text-sm text-[var(--text-muted)] mb-4">
             Envía un mensaje y nuestro equipo te responderá lo antes posible.
           </p>
         </div>
