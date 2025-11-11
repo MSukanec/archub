@@ -103,6 +103,9 @@ export function LeftSidebar() {
   const { data: projectsLite = [] } = useProjectsLite(currentOrganizationId || undefined);
   const { data: currentProject } = useProject(selectedProjectId || undefined);
   const currentProjectName = currentProject?.name || "Seleccionar Proyecto";
+  
+  // Helper to check if there are projects available
+  const hasProjects = projectsLite.length > 0;
 
   // PROJECT CHANGE MUTATION
   const selectProjectMutation = useMutation({
@@ -147,6 +150,22 @@ export function LeftSidebar() {
   const handleProjectChange = (projectId: string) => {
     selectProjectMutation.mutate(projectId);
   };
+  
+  // AUTO-SELECT FIRST PROJECT: If organization has projects but none selected, auto-select the first one
+  useEffect(() => {
+    // Only run if:
+    // 1. We have projects available
+    // 2. No project is currently selected
+    // 3. Not currently mutating
+    // 4. User data is available
+    if (hasProjects && !selectedProjectId && !selectProjectMutation.isPending && userData?.user?.id) {
+      const firstProject = projectsLite[0];
+      if (firstProject) {
+        console.log('🔧 Auto-selecting first project:', firstProject.name);
+        selectProjectMutation.mutate(firstProject.id);
+      }
+    }
+  }, [hasProjects, selectedProjectId, selectProjectMutation.isPending, projectsLite, userData?.user?.id]);
 
   // Navegación según el nivel del sidebar
   const getNavigationItems = (): SidebarItem[] => {
@@ -377,8 +396,8 @@ export function LeftSidebar() {
                     onClick={() => setSidebarLevel('organization')}
                   />
 
-                  {/* Botón Proyecto */}
-                  {selectedProjectId && (
+                  {/* Botón Proyecto - solo visible si hay proyectos */}
+                  {hasProjects && selectedProjectId && (
                     <SidebarIconButton
                       icon={<FolderOpen className="h-5 w-5" />}
                       isActive={sidebarLevel === 'project'}
@@ -577,10 +596,10 @@ export function LeftSidebar() {
                     <ButtonSidebar
                       icon={<Settings className="w-[18px] h-[18px]" />}
                       label="Cambiar Modo"
-                      isActive={location === '/profile/preferences'}
+                      isActive={location === '/select-mode'}
                       isExpanded={true}
-                      onClick={() => navigate('/profile/preferences')}
-                      href="/profile/preferences"
+                      onClick={() => navigate('/select-mode')}
+                      href="/select-mode"
                       variant="secondary"
                     />
                     
