@@ -641,9 +641,6 @@ export function PageLayout({
         })()}>
           {children}
         </div>
-        
-        {/* Footer - appears after scroll */}
-        <Footer scrollContainerRef={scrollContainerRef} />
       </div>
     </div>
   );
