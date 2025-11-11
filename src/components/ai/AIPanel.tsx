@@ -231,7 +231,7 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
             {/* Indicador de carga - aparece arriba de todo (mensaje más nuevo) */}
             {isSending && (
               <div className="flex gap-3">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
+                <div className="h-8 w-8 rounded-full bg-[var(--accent)] flex items-center justify-center">
                   <Sparkles className="h-4 w-4 text-white" />
                 </div>
                 <div className="rounded-lg px-4 py-2 bg-[var(--main-sidebar-button-hover-bg)] text-white">
@@ -263,7 +263,7 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
                       </AvatarFallback>
                     </Avatar>
                   ) : (
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
+                    <div className="h-8 w-8 rounded-full bg-[var(--accent)] flex items-center justify-center">
                       <Sparkles className="h-4 w-4 text-white" />
                     </div>
                   )}
@@ -275,7 +275,7 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
                     "rounded-lg px-4 py-2 max-w-[75%]",
                     message.role === 'user'
                       ? 'bg-[var(--accent)] text-white'
-                      : 'bg-[var(--main-sidebar-button-hover-bg)] text-white'
+                      : 'bg-[var(--main-sidebar-button-hover-bg)] text-[var(--main-sidebar-fg)]'
                   )}
                 >
                   <div className="text-sm">
@@ -295,12 +295,12 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
         <div className="flex-1 px-4 py-6 flex flex-col">
           <div className="flex flex-col items-center justify-center flex-1">
             {/* Avatar IA */}
-            <div className="h-16 w-16 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center mb-4">
+            <div className="h-16 w-16 rounded-full bg-[var(--accent)] flex items-center justify-center mb-4">
               <Sparkles className="h-8 w-8 text-white" />
             </div>
 
             {/* Saludo */}
-            <h2 className="text-xl font-semibold !text-white mb-1">
+            <h2 className="text-xl font-semibold text-[var(--main-sidebar-fg)] mb-1">
               Hola {userFullName.split(' ')[0] || 'Usuario'}
             </h2>
             <p className="text-sm text-muted-foreground mb-6">
@@ -314,7 +314,7 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
                   key={index}
                   onClick={() => handleIdeaClick(idea)}
                   disabled={isSending}
-                  className="w-full text-left px-4 py-2 rounded-full border border-white !text-white text-xs leading-relaxed hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full text-left px-4 py-2 rounded-full border border-[var(--main-sidebar-fg)] text-[var(--main-sidebar-fg)] text-xs leading-relaxed hover:bg-[var(--main-sidebar-button-hover-bg)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   data-testid={`button-ai-idea-${index}`}
                 >
                   {idea}
@@ -326,7 +326,7 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
       )}
 
       {/* INPUT - Siempre al fondo */}
-      <Separator className="bg-[var(--main-sidebar-fg)] opacity-20" />
+      <Separator />
       <div className="p-4 pb-3">
         <div className="relative flex items-center gap-2 rounded-lg bg-[var(--main-sidebar-button-hover-bg)] px-3 py-1.5">
           <textarea
@@ -339,7 +339,7 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
             rows={1}
             className={cn(
               "flex-1 resize-none bg-transparent",
-              "text-sm leading-5 text-white placeholder:text-muted-foreground",
+              "text-sm leading-5 text-[var(--main-sidebar-fg)] placeholder:text-muted-foreground",
               "focus:outline-none",
               "disabled:cursor-not-allowed disabled:opacity-50",
               "max-h-[120px] overflow-y-auto"

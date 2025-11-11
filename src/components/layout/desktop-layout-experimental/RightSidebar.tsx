@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { AIPanel } from "@/components/ai/AIPanel";
 import { SupportPanel } from "@/components/support/SupportPanel";
 import { SidebarIconButton } from "../desktop/SidebarIconButton";
-import { Sparkles } from "lucide-react";
+import { Sparkles, PanelLeftClose } from "lucide-react";
 import { useThemeStore } from "@/stores/themeStore";
 import { useRightSidebarStore } from "@/stores/rightSidebarStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -149,24 +149,43 @@ export function RightSidebar() {
         >
           {/* PANEL EXPANDIBLE - Cambia según el panel activo (aparece a la izquierda) */}
           {isExpanded && userId && (
-            <div className="w-[350px] h-full px-[9px] pt-6 pb-6 flex flex-col overflow-hidden">
-              {activePanel === 'ai' && (
-                <AIPanel
-                  userId={userId}
-                  userFullName={userFullName}
-                  userAvatarUrl={userAvatarUrl}
-                  onClose={() => setActivePanel(null)}
-                />
-              )}
-              
-              {activePanel === 'support' && (
-                <SupportPanel
-                  userId={userId}
-                  userFullName={userFullName}
-                  userAvatarUrl={userAvatarUrl}
-                  onClose={() => setActivePanel(null)}
-                />
-              )}
+            <div className="w-[350px] h-full px-[9px] pt-6 pb-6 flex flex-col">
+              {/* Título del panel con botón de cerrar */}
+              <div className="mb-6 flex items-center justify-between px-2">
+                <h2 className="text-lg font-semibold text-[var(--main-sidebar-fg)]">
+                  {activePanel === 'ai' ? 'Asistente IA' : 'Soporte'}
+                </h2>
+                {/* Botón de cerrar (equivalente al botón de anclar) */}
+                <button
+                  onClick={() => setActivePanel(null)}
+                  className="h-6 w-6 flex items-center justify-center rounded-md hover:bg-[var(--main-sidebar-button-hover-bg)] transition-colors"
+                  title="Cerrar panel"
+                  data-testid="button-close-panel"
+                >
+                  <PanelLeftClose className="w-4 h-4 text-[var(--main-sidebar-fg)]" />
+                </button>
+              </div>
+
+              {/* Contenido del panel */}
+              <div className="flex-1 overflow-hidden">
+                {activePanel === 'ai' && (
+                  <AIPanel
+                    userId={userId}
+                    userFullName={userFullName}
+                    userAvatarUrl={userAvatarUrl}
+                    onClose={() => setActivePanel(null)}
+                  />
+                )}
+                
+                {activePanel === 'support' && (
+                  <SupportPanel
+                    userId={userId}
+                    userFullName={userFullName}
+                    userAvatarUrl={userAvatarUrl}
+                    onClose={() => setActivePanel(null)}
+                  />
+                )}
+              </div>
             </div>
           )}
 
