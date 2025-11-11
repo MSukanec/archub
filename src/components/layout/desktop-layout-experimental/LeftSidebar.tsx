@@ -351,9 +351,10 @@ export function LeftSidebar() {
                 </PopoverTrigger>
                 <PopoverContent 
                   side="right" 
-                  align="start"
+                  align="end"
                   className="w-[380px] p-0"
                   sideOffset={8}
+                  alignOffset={0}
                 >
                   {userId && (
                     <NotificationDropdown
