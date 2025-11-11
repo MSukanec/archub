@@ -312,7 +312,7 @@ export function LeftSidebar() {
                 title="Configuración de usuario"
                 data-testid="button-user-menu"
               >
-                <Avatar className="h-7 w-7">
+                <Avatar className="h-7 w-7 border-0">
                   <AvatarImage src={userData?.user?.avatar_url} />
                   <AvatarFallback className="text-xs bg-accent text-white">
                     {userData?.user?.first_name?.[0] || userData?.user?.email?.[0] || 'U'}
@@ -334,55 +334,82 @@ export function LeftSidebar() {
 
               {/* Botones de navegación */}
               <div className="flex flex-col gap-[2px] flex-1 overflow-y-auto">
-                {navigationItems.map((item) => {
-                  if (item.adminOnly && !isAdmin) return null;
-                  
-                  const isActive = location === item.href;
-                  const isExternalLink = item.href.startsWith('http');
-                  
-                  const button = (
+                {sidebarLevel === 'user' ? (
+                  // Renderizado especial para el nivel user con separador
+                  <>
+                    {/* Mi Perfil */}
                     <ButtonSidebar
-                      key={item.id}
-                      icon={<item.icon className="w-[18px] h-[18px]" />}
-                      label={item.label}
-                      isActive={isActive}
+                      icon={<User className="w-[18px] h-[18px]" />}
+                      label="Mi Perfil"
+                      isActive={location === '/profile'}
                       isExpanded={true}
-                      onClick={() => {
-                        if (isExternalLink) {
-                          window.open(item.href, '_blank', 'noopener,noreferrer');
-                        } else {
-                          navigate(item.href);
-                        }
-                      }}
-                      href={item.href}
+                      onClick={() => navigate('/profile')}
+                      href="/profile"
                       variant="secondary"
-                      badgeCount={item.id === 'support' && isAdmin ? unreadCount : undefined}
                     />
-                  );
-                  
-                  return item.restricted ? (
-                    <PlanRestricted key={item.id} reason={item.restricted}>
-                      {button}
-                    </PlanRestricted>
-                  ) : (
-                    button
-                  );
-                })}
+                    
+                    {/* Separador */}
+                    <div className="my-2 mx-2 border-t border-[var(--main-sidebar-border)]"></div>
+                    
+                    {/* Página de Inicio */}
+                    <ButtonSidebar
+                      icon={<Home className="w-[18px] h-[18px]" />}
+                      label="Página de Inicio"
+                      isActive={location === '/'}
+                      isExpanded={true}
+                      onClick={() => navigate('/')}
+                      href="/"
+                      variant="secondary"
+                    />
+                    
+                    {/* Cerrar Sesión */}
+                    <ButtonSidebar
+                      icon={<LogOut className="w-[18px] h-[18px]" />}
+                      label="Cerrar Sesión"
+                      isActive={false}
+                      isExpanded={true}
+                      onClick={handleLogout}
+                      variant="secondary"
+                    />
+                  </>
+                ) : (
+                  // Renderizado normal para otros niveles
+                  navigationItems.map((item) => {
+                    if (item.adminOnly && !isAdmin) return null;
+                    
+                    const isActive = location === item.href;
+                    const isExternalLink = item.href.startsWith('http');
+                    
+                    const button = (
+                      <ButtonSidebar
+                        key={item.id}
+                        icon={<item.icon className="w-[18px] h-[18px]" />}
+                        label={item.label}
+                        isActive={isActive}
+                        isExpanded={true}
+                        onClick={() => {
+                          if (isExternalLink) {
+                            window.open(item.href, '_blank', 'noopener,noreferrer');
+                          } else {
+                            navigate(item.href);
+                          }
+                        }}
+                        href={item.href}
+                        variant="secondary"
+                        badgeCount={item.id === 'support' && isAdmin ? unreadCount : undefined}
+                      />
+                    );
+                    
+                    return item.restricted ? (
+                      <PlanRestricted key={item.id} reason={item.restricted}>
+                        {button}
+                      </PlanRestricted>
+                    ) : (
+                      button
+                    );
+                  })
+                )}
               </div>
-
-              {/* Botón de Cerrar Sesión (solo en nivel user) */}
-              {sidebarLevel === 'user' && (
-                <div className="mt-6 flex flex-col gap-[2px]">
-                  <ButtonSidebar
-                    icon={<LogOut className="w-[18px] h-[18px]" />}
-                    label="Cerrar Sesión"
-                    isActive={false}
-                    isExpanded={true}
-                    onClick={handleLogout}
-                    variant="secondary"
-                  />
-                </div>
-              )}
 
               {/* Botón de anclaje en la parte inferior (no mostrar en nivel user) */}
               {sidebarLevel !== 'user' && (
