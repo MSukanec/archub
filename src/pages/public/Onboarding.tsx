@@ -81,12 +81,12 @@ export default function Onboarding() {
 
       if (userDataError) throw userDataError;
 
-      // Update user_preferences table - always set to professional mode
+      // Update user_preferences table - do NOT set user_type here, user will choose in SelectMode
       const { error: preferencesError } = await supabase
         .from('user_preferences')
         .update({
           theme: formData.theme,
-          last_user_type: 'professional', // Always set to professional by default
+          // Don't set last_user_type here - user must select mode in SelectMode page
           onboarding_completed: true,
           updated_at: new Date().toISOString(),
         })
@@ -137,16 +137,16 @@ export default function Onboarding() {
       });
     },
     onSuccess: () => {
-      // Set bypass flags for immediate access
-      localStorage.setItem('onboarding_bypass', 'true');
-      localStorage.setItem('onboarding_bypass_user_id', userData?.user?.id || '');
+      // Don't set bypass flags yet - user needs to complete mode selection first
       
-      // Set sidebar to general level (hub mode)
-      setSidebarLevel('general');
-      
-      // Navigate directly to Home page
-      navigate('/home');
+      // Navigate to SelectMode page for user to choose their mode
+      navigate('/select-mode');
       resetOnboarding();
+      
+      // Reset completing flag after a short delay
+      setTimeout(() => {
+        setCompletingOnboarding(false);
+      }, 100);
     },
     onError: (error) => {
       console.error('Error saving onboarding data:', error);

@@ -79,6 +79,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     // CASE 3: Check onboarding status FIRST (before any redirects)
     const onboardingCompleted = userData.preferences?.onboarding_completed;
     const hasPersonalData = userData.user_data?.first_name && userData.user_data?.last_name;
+    const hasSelectedMode = userData.preferences?.last_user_type;
     
     // Check bypass flag
     const onboardingBypass = localStorage.getItem('onboarding_bypass') === 'true';
@@ -108,10 +109,10 @@ export function AuthGuard({ children }: AuthGuardProps) {
       return;
     }
 
-    // Check if user needs onboarding
-    const needsOnboarding = !onboardingCompleted || !hasPersonalData;
+    // Check if user needs basic onboarding (personal data)
+    const needsBasicOnboarding = !onboardingCompleted || !hasPersonalData;
     
-    if (needsOnboarding && !isOnboardingRoute) {
+    if (needsBasicOnboarding && !isOnboardingRoute) {
       // Redirect to onboarding
       if (lastNavigationRef.current !== '/onboarding') {
         lastNavigationRef.current = '/onboarding';
@@ -120,7 +121,19 @@ export function AuthGuard({ children }: AuthGuardProps) {
       return;
     }
     
-    // User doesn't need onboarding, reset tracking
+    // CASE 4: Check if user needs to select mode (after basic onboarding is complete)
+    const needsModeSelection = onboardingCompleted && hasPersonalData && !hasSelectedMode;
+    
+    if (needsModeSelection && location !== '/select-mode') {
+      // Redirect to mode selection
+      if (lastNavigationRef.current !== '/select-mode') {
+        lastNavigationRef.current = '/select-mode';
+        navigate('/select-mode');
+      }
+      return;
+    }
+    
+    // User doesn't need onboarding or mode selection, reset tracking
     lastNavigationRef.current = null;
     
     // CASE 4: Redirect authenticated users away from public routes (only after onboarding check passes)
