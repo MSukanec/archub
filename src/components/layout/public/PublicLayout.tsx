@@ -12,10 +12,18 @@ interface SEOProps {
 interface PublicLayoutProps {
   children: React.ReactNode;
   headerRightContent?: React.ReactNode;
+  headerNavigation?: Array<{ label: string; href: string }>;
+  headerActions?: React.ReactNode;
   seo?: SEOProps;
 }
 
-export function PublicLayout({ children, headerRightContent, seo }: PublicLayoutProps) {
+export function PublicLayout({ 
+  children, 
+  headerRightContent, 
+  headerNavigation,
+  headerActions,
+  seo 
+}: PublicLayoutProps) {
   useEffect(() => {
     if (!seo) return;
 
@@ -102,7 +110,11 @@ export function PublicLayout({ children, headerRightContent, seo }: PublicLayout
 
   return (
     <div className="min-h-screen bg-background">
-      <PublicHeader rightContent={headerRightContent} />
+      <PublicHeader 
+        rightContent={headerRightContent}
+        navigation={headerNavigation}
+        actions={headerActions}
+      />
       <div className="container mx-auto px-6 py-12">
         {children}
       </div>

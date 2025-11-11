@@ -24,6 +24,7 @@ import {
   Package
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
+import { PublicLayout } from "@/components/layout/public/PublicLayout";
 
 const coreFeatures = [
   {
@@ -148,183 +149,107 @@ export default function Landing() {
     return name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
   };
 
-  return (
-    <div className="min-h-screen dark" style={{ 
-      backgroundColor: 'var(--layout-bg)', 
-      color: 'var(--text-default)' 
-    }}>
-      {/* Header */}
-      <header style={{ borderBottom: '1px solid var(--layout-border)' }}>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-8">
-              <div className="flex items-center space-x-2">
-                <img 
-                  src="/Seencel512.png" 
-                  alt="Seencel" 
-                  className="h-8 w-8 object-contain"
-                />
-                <span className="text-xl font-bold">Seencel</span>
-              </div>
-              
-              <nav className="hidden md:flex items-center space-x-6">
-                <a 
-                  href="#features" 
-                  className="text-sm transition-colors hover:opacity-80"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  Características
-                </a>
-                <a 
-                  href="#capabilities" 
-                  className="text-sm transition-colors hover:opacity-80"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  Capacidades
-                </a>
-              </nav>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              {!loading && (
-                user ? (
-                  <div className="flex items-center space-x-3">
-                    <Link href="/home">
-                      <Button 
-                        size="sm" 
-                        className="h-8 px-3"
-                        style={{ 
-                          backgroundColor: 'var(--accent)', 
-                          color: 'var(--accent-text)',
-                          border: 'none'
-                        }}
-                      >
-                        Ingresar
-                      </Button>
-                    </Link>
-
-                    <div className="flex items-center space-x-2 group relative">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={user.user_metadata?.avatar_url} />
-                        <AvatarFallback 
-                          className="text-xs"
-                          style={{ 
-                            backgroundColor: 'var(--card-bg)', 
-                            color: 'var(--text-default)' 
-                          }}
-                        >
-                          {getUserInitials(user)}
-                        </AvatarFallback>
-                      </Avatar>
-                      
-                      <div className="hidden group-hover:block absolute top-full right-0 mt-2 w-48 py-2 rounded-md shadow-lg z-50"
-                           style={{ 
-                             backgroundColor: 'var(--popover-bg)', 
-                             border: '1px solid var(--layout-border)' 
-                           }}>
-                        <button
-                          onClick={logout}
-                          className="flex items-center w-full px-4 py-2 text-sm hover:opacity-80"
-                          style={{ color: 'var(--text-default)' }}
-                        >
-                          <LogOut className="h-4 w-4 mr-2" />
-                          Cerrar sesión
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-3">
-                    <Link href="/login">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-8 px-3"
-                        style={{ 
-                          backgroundColor: 'var(--button-ghost-bg)',
-                          color: 'var(--button-ghost-text)',
-                          border: 'none'
-                        }}
-                      >
-                        Iniciar Sesión
-                      </Button>
-                    </Link>
-                    
-                    <Link href="/register">
-                      <Button 
-                        size="sm" 
-                        className="h-8 px-3"
-                        style={{ 
-                          backgroundColor: 'var(--accent)', 
-                          color: 'var(--accent-text)',
-                          border: 'none'
-                        }}
-                      >
-                        Comenzar Gratis
-                      </Button>
-                    </Link>
-                  </div>
-                )
-              )}
+  const renderHeaderActions = () => {
+    return !loading && (
+      user ? (
+        <div className="flex items-center space-x-3">
+          <Link href="/home">
+            <Button size="sm" className="h-8 px-3">
+              Ingresar
+            </Button>
+          </Link>
+          <div className="flex items-center space-x-2 group relative">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={user.user_metadata?.avatar_url} />
+              <AvatarFallback className="text-xs bg-card">
+                {getUserInitials(user)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="hidden group-hover:block absolute top-full right-0 mt-2 w-48 py-2 rounded-md shadow-lg z-50 bg-popover border">
+              <button
+                onClick={logout}
+                className="flex items-center w-full px-4 py-2 text-sm hover:opacity-80"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Cerrar sesión
+              </button>
             </div>
           </div>
         </div>
-      </header>
+      ) : (
+        <div className="flex items-center space-x-3">
+          <Link href="/login">
+            <Button variant="ghost" size="sm" className="h-8 px-3">
+              Iniciar Sesión
+            </Button>
+          </Link>
+          <Link href="/register">
+            <Button size="sm" className="h-8 px-3">
+              Comenzar Gratis
+            </Button>
+          </Link>
+        </div>
+      )
+    );
+  };
+
+  return (
+    <PublicLayout
+      headerNavigation={[
+        { label: "Características", href: "#features" },
+        { label: "Capacidades", href: "#capabilities" }
+      ]}
+      headerActions={renderHeaderActions()}
+    >
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
-        <div className="text-center max-w-5xl mx-auto">
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-8 leading-tight">
-            La plataforma integral para{" "}
-            <span style={{ color: 'var(--accent)' }}>
-              arquitectura y construcción
-            </span>
-          </h1>
-          
-          <p className="text-xl mb-12 max-w-4xl mx-auto leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-            Gestiona todo el ciclo de vida de tus proyectos: desde diseño y planificación, 
-            pasando por ventas y marketing, hasta construcción y entrega. Con IA integrada, 
-            capacitación continua y conexión con las herramientas que ya usas.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <Link href="/register">
-              <Button 
-                size="lg" 
-                className="px-8 py-4 text-lg font-medium"
-                style={{ 
-                  backgroundColor: 'var(--accent)', 
-                  color: 'var(--accent-text)',
-                  border: 'none'
-                }}
-              >
-                Comenzar Gratis
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-          </div>
+      <section className="pt-20 pb-16 -mx-6">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-5xl mx-auto">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-8 leading-tight">
+              La plataforma integral para{" "}
+              <span className="text-primary">
+                arquitectura y construcción
+              </span>
+            </h1>
+            
+            <p className="text-xl mb-12 max-w-4xl mx-auto leading-relaxed text-muted-foreground">
+              Gestiona todo el ciclo de vida de tus proyectos: desde diseño y planificación, 
+              pasando por ventas y marketing, hasta construcción y entrega. Con IA integrada, 
+              capacitación continua y conexión con las herramientas que ya usas.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+              <Link href="/register">
+                <Button size="lg" className="px-8 py-4 text-lg font-medium">
+                  Comenzar Gratis
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
 
-          {/* Real Benefits */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-12" style={{ borderTop: '1px solid var(--layout-border)' }}>
-            <div className="text-center">
-              <CheckCircle className="h-8 w-8 mx-auto mb-3" style={{ color: 'var(--accent)' }} />
-              <div className="font-semibold">Setup en minutos</div>
-              <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                Onboarding guiado para empezar rápidamente
+            {/* Real Benefits */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-12 border-t">
+              <div className="text-center">
+                <CheckCircle className="h-8 w-8 mx-auto mb-3 text-primary" />
+                <div className="font-semibold">Setup en minutos</div>
+                <div className="text-sm text-muted-foreground">
+                  Onboarding guiado para empezar rápidamente
+                </div>
               </div>
-            </div>
-            <div className="text-center">
-              <Shield className="h-8 w-8 mx-auto mb-3" style={{ color: 'var(--accent)' }} />
-              <div className="font-semibold">Datos seguros</div>
-              <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                Respaldos automáticos y acceso controlado
+              <div className="text-center">
+                <Shield className="h-8 w-8 mx-auto mb-3 text-primary" />
+                <div className="font-semibold">Datos seguros</div>
+                <div className="text-sm text-muted-foreground">
+                  Respaldos automáticos y acceso controlado
+                </div>
               </div>
-            </div>
-            <div className="text-center">
-              <Users className="h-8 w-8 mx-auto mb-3" style={{ color: 'var(--accent)' }} />
-              <div className="font-semibold">Multi-organización</div>
-              <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                Gestiona múltiples empresas desde una cuenta
+              <div className="text-center">
+                <Users className="h-8 w-8 mx-auto mb-3 text-primary" />
+                <div className="font-semibold">Multi-organización</div>
+                <div className="text-sm text-muted-foreground">
+                  Gestiona múltiples empresas desde una cuenta
+                </div>
               </div>
             </div>
           </div>
@@ -332,13 +257,13 @@ export default function Landing() {
       </section>
 
       {/* Core Features Section */}
-      <section id="features" className="py-20" style={{ backgroundColor: 'var(--card-bg)' }}>
+      <section id="features" className="py-20 bg-card -mx-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl sm:text-5xl font-bold mb-6">
               Herramientas de última generación
             </h2>
-            <p className="text-xl max-w-3xl mx-auto" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-xl max-w-3xl mx-auto text-muted-foreground">
               IA, capacitación, integraciones y gestión completa del ciclo de vida de tus proyectos
             </p>
           </div>
@@ -347,22 +272,17 @@ export default function Landing() {
             {coreFeatures.map((feature, index) => (
               <div 
                 key={index} 
-                className="group p-8 rounded-lg transition-all duration-200 hover:scale-105"
-                style={{ 
-                  backgroundColor: 'var(--layout-bg)', 
-                  border: '1px solid var(--card-border)' 
-                }}
+                className="group p-8 rounded-lg transition-all duration-200 hover:scale-105 bg-background border"
               >
                 <div className="mb-6">
                   <feature.icon 
-                    className="h-12 w-12 group-hover:scale-110 transition-transform duration-200" 
-                    style={{ color: 'var(--accent)' }} 
+                    className="h-12 w-12 group-hover:scale-110 transition-transform duration-200 text-primary" 
                   />
                 </div>
-                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-default)' }}>
+                <h3 className="text-xl font-semibold mb-4">
                   {feature.title}
                 </h3>
-                <p className="leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                <p className="leading-relaxed text-muted-foreground">
                   {feature.description}
                 </p>
               </div>
@@ -372,13 +292,13 @@ export default function Landing() {
       </section>
 
       {/* Detailed Capabilities */}
-      <section id="capabilities" className="py-20">
+      <section id="capabilities" className="py-20 -mx-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl sm:text-5xl font-bold mb-6">
               Potencia completa para profesionales
             </h2>
-            <p className="text-xl max-w-3xl mx-auto" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-xl max-w-3xl mx-auto text-muted-foreground">
               Desde diseño hasta entrega, pasando por ventas y construcción. Todo en un solo lugar.
             </p>
           </div>
@@ -387,23 +307,16 @@ export default function Landing() {
             {capabilities.map((capability, index) => (
               <div 
                 key={index} 
-                className="p-6 rounded-lg"
-                style={{ 
-                  backgroundColor: 'var(--card-bg)', 
-                  border: '1px solid var(--card-border)' 
-                }}
+                className="p-6 rounded-lg bg-card border"
               >
-                <h3 className="text-lg font-semibold mb-4 pb-2" style={{ 
-                  color: 'var(--accent)',
-                  borderBottom: '2px solid var(--accent)'
-                }}>
+                <h3 className="text-lg font-semibold mb-4 pb-2 text-primary border-b-2 border-primary">
                   {capability.category}
                 </h3>
                 <ul className="space-y-3">
                   {capability.features.map((feature, featureIndex) => (
                     <li key={featureIndex} className="flex items-start">
-                      <CheckCircle className="h-4 w-4 mt-0.5 mr-3 flex-shrink-0" style={{ color: 'var(--accent)' }} />
-                      <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                      <CheckCircle className="h-4 w-4 mt-0.5 mr-3 flex-shrink-0 text-primary" />
+                      <span className="text-sm text-muted-foreground">
                         {feature}
                       </span>
                     </li>
@@ -416,47 +329,44 @@ export default function Landing() {
       </section>
 
       {/* How it Works */}
-      <section className="py-20" style={{ backgroundColor: 'var(--card-bg)' }}>
+      <section className="py-20 bg-card -mx-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl sm:text-5xl font-bold mb-6">
               Cómo funciona
             </h2>
-            <p className="text-xl max-w-3xl mx-auto" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-xl max-w-3xl mx-auto text-muted-foreground">
               Desde la configuración inicial hasta la gestión diaria de tus proyectos
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-12">
             <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center" 
-                   style={{ backgroundColor: 'var(--accent)' }}>
-                <ClipboardList className="h-8 w-8" style={{ color: 'var(--accent-text)' }} />
+              <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center bg-primary">
+                <ClipboardList className="h-8 w-8 text-primary-foreground" />
               </div>
               <h3 className="text-xl font-semibold mb-4">1. Configura tu organización</h3>
-              <p style={{ color: 'var(--text-muted)' }}>
+              <p className="text-muted-foreground">
                 Crea tu perfil, agrega miembros del equipo y configura tu espacio de trabajo en minutos.
               </p>
             </div>
             
             <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center" 
-                   style={{ backgroundColor: 'var(--accent)' }}>
-                <Folder className="h-8 w-8" style={{ color: 'var(--accent-text)' }} />
+              <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center bg-primary">
+                <Folder className="h-8 w-8 text-primary-foreground" />
               </div>
               <h3 className="text-xl font-semibold mb-4">2. Gestiona todo el ciclo</h3>
-              <p style={{ color: 'var(--text-muted)' }}>
+              <p className="text-muted-foreground">
                 Desde diseño y ventas, hasta construcción y entrega. Presupuestos, cronogramas, equipos y documentación técnica.
               </p>
             </div>
             
             <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center" 
-                   style={{ backgroundColor: 'var(--accent)' }}>
-                <Sparkles className="h-8 w-8" style={{ color: 'var(--accent-text)' }} />
+              <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center bg-primary">
+                <Sparkles className="h-8 w-8 text-primary-foreground" />
               </div>
               <h3 className="text-xl font-semibold mb-4">3. Potencia con IA</h3>
-              <p style={{ color: 'var(--text-muted)' }}>
+              <p className="text-muted-foreground">
                 Tu copilot inteligente analiza finanzas, responde consultas y te ayuda a tomar mejores decisiones.
               </p>
             </div>
@@ -465,67 +375,29 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20">
+      <section className="py-20 -mx-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-4xl mx-auto">
             <h2 className="text-4xl sm:text-5xl font-bold mb-6">
               Lleva tus proyectos al siguiente nivel
             </h2>
-            <p className="text-xl mb-12" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-xl mb-12 text-muted-foreground">
               Únete a profesionales que ya transforman su forma de trabajar con IA, capacitación e integraciones
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/register">
-                <Button 
-                  size="lg" 
-                  className="px-8 py-4 text-lg font-medium"
-                  style={{ 
-                    backgroundColor: 'var(--accent)', 
-                    color: 'var(--accent-text)',
-                    border: 'none'
-                  }}
-                >
+                <Button size="lg" className="px-8 py-4 text-lg font-medium">
                   Crear Cuenta Gratuita
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              <span className="text-sm text-muted-foreground">
                 Sin compromisos • Configuración inmediata
               </span>
             </div>
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="py-12" style={{ borderTop: '1px solid var(--layout-border)' }}>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center space-x-2">
-              <img 
-                src="/Seencel512.png" 
-                alt="Seencel" 
-                className="h-8 w-8 object-contain"
-              />
-              <span className="font-bold">Seencel</span>
-            </div>
-            <div className="flex items-center gap-6">
-              <a
-                href="/privacy"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm hover:underline"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                Política de Privacidad
-              </a>
-              <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                © 2025 Seencel
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </PublicLayout>
   );
 }
