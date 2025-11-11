@@ -53,11 +53,11 @@ export function RightSidebar() {
   
   // Get current location
   const [location] = useLocation();
-  const [match, params] = useRoute('/learning/courses/:courseId');
+  const [match, params] = useRoute('/learning/courses/:courseSlug');
   
-  // Check if we're on a course player page
-  const isOnCoursePlayer = match && location.includes('tab=Reproductor');
-  const courseId = isOnCoursePlayer ? params?.courseId : null;
+  // Check if we're on a course page (any tab)
+  const isOnCoursePage = match && !!params?.courseSlug;
+  const courseSlug = isOnCoursePage ? params?.courseSlug : null;
 
   // Get current lesson from stores
   const { currentLessonId: sidebarLessonId, setCurrentLesson } = useCourseSidebarStore();
@@ -65,29 +65,47 @@ export function RightSidebar() {
   const goToLesson = useCoursePlayerStore(s => s.goToLesson);
   const activeLessonId = storeLessonId || sidebarLessonId || null;
 
-  // Fetch course modules
-  const { data: modules = [] } = useQuery({
-    queryKey: ['course-modules', courseId],
+  // Fetch course by slug to get real ID
+  const { data: course } = useQuery({
+    queryKey: ['course', courseSlug],
     queryFn: async () => {
-      if (!courseId || !supabase) return [];
+      if (!courseSlug || !supabase) return null;
+      
+      const { data, error } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('slug', courseSlug)
+        .single();
+        
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!courseSlug && !!supabase && isOnCoursePage
+  });
+
+  // Fetch course modules using real course ID
+  const { data: modules = [] } = useQuery({
+    queryKey: ['course-modules', course?.id],
+    queryFn: async () => {
+      if (!course?.id || !supabase) return [];
       
       const { data, error } = await supabase
         .from('course_modules')
         .select('*')
-        .eq('course_id', courseId)
+        .eq('course_id', course.id)
         .order('sort_index', { ascending: true });
         
       if (error) throw error;
       return data || [];
     },
-    enabled: !!courseId && !!supabase && isOnCoursePlayer
+    enabled: !!course?.id && !!supabase && isOnCoursePage
   });
 
   // Fetch course lessons
   const { data: lessons = [] } = useQuery({
-    queryKey: ['course-lessons-full', courseId],
+    queryKey: ['course-lessons-full', course?.id],
     queryFn: async () => {
-      if (!courseId || !supabase || modules.length === 0) return [];
+      if (!course?.id || !supabase || modules.length === 0) return [];
       
       const moduleIds = modules.map(m => m.id);
       
@@ -95,22 +113,24 @@ export function RightSidebar() {
         .from('course_lessons')
         .select('id, module_id, title, vimeo_video_id, duration_sec, free_preview, sort_index, is_active')
         .in('module_id', moduleIds)
-        .order('sort_index', { ascending: true });
+        .order('sort_index', { ascending: true});
         
       if (error) throw error;
       return data || [];
     },
-    enabled: !!courseId && !!supabase && modules.length > 0 && isOnCoursePlayer
+    enabled: !!course?.id && !!supabase && modules.length > 0 && isOnCoursePage
   });
 
   // Fetch progress for all lessons
   const { data: progressData } = useQuery<any[]>({
-    queryKey: ['/api/courses', courseId, 'progress'],
+    queryKey: ['/api/courses', course?.id, 'progress'],
     queryFn: async () => {
+      if (!course?.id) return [];
+      
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return [];
       
-      const res = await fetch(`/api/courses/${courseId}/progress`, {
+      const res = await fetch(`/api/courses/${course.id}/progress`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         },
@@ -120,7 +140,7 @@ export function RightSidebar() {
       if (!res.ok) return [];
       return res.json();
     },
-    enabled: !!courseId && isOnCoursePlayer
+    enabled: !!course?.id && isOnCoursePage
   });
 
   // Create progress map
@@ -175,7 +195,7 @@ export function RightSidebar() {
   };
 
   // Determine if we should show course content
-  const showCourseContent = userMode === 'learner' && isOnCoursePlayer && modules.length > 0;
+  const showCourseContent = userMode === 'learner' && isOnCoursePage && modules.length > 0;
   const isExpanded = showCourseContent ? (isDocked || isHovered) : (activePanel !== null);
 
   return (

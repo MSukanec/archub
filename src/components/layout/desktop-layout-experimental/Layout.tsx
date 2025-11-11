@@ -9,6 +9,7 @@ import { PageLayout } from "./PageLayout";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useUserMode } from "@/hooks/use-user-mode";
 import {
   useSidebarStore,
   useSecondarySidebarStore,
@@ -97,6 +98,7 @@ interface LayoutProps {
 export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { isDark, setTheme } = useThemeStore();
   const { data } = useCurrentUser();
+  const userMode = useUserMode();
   const { showActionBar } = useActionBarMobile();
   const isMobile = useMobile();
   const { isDocked, isHovered } = useSidebarStore();
@@ -173,6 +175,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       currentLessonId={currentLessonId}
       shouldShowAIChat={shouldShowAIChat}
       contentBackground={contentBackground}
+      userMode={userMode}
     />
   );
 }
@@ -191,7 +194,8 @@ function LayoutContent({
   lessons,
   currentLessonId,
   shouldShowAIChat,
-  contentBackground
+  contentBackground,
+  userMode
 }: any) {
   // TEMPORALMENTE DESHABILITADO - GlobalAnnouncement
   // const { hasActiveAnnouncement } = useAnnouncementBanner();
@@ -307,8 +311,9 @@ function LayoutContent({
               </main>
               </div>
 
-              {/* Course Sidebar - Right side, only visible when activated */}
-              {isCourseSidebarVisible && !isMobile && (
+              {/* Course Sidebar - Right side, only visible when activated 
+                  EN MODO LEARNER: El RightSidebar maneja esto, no renderizar el sidebar viejo */}
+              {isCourseSidebarVisible && !isMobile && userMode !== 'learner' && (
                 <div className="flex-shrink-0 p-1">
                   <div className="h-full rounded-lg overflow-hidden">
                     <CourseSidebar
