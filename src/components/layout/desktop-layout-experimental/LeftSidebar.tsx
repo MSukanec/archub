@@ -573,6 +573,17 @@ export function LeftSidebar() {
                       variant="secondary"
                     />
                     
+                    {/* Cambiar Modo */}
+                    <ButtonSidebar
+                      icon={<Settings className="w-[18px] h-[18px]" />}
+                      label="Cambiar Modo"
+                      isActive={location === '/profile/preferences'}
+                      isExpanded={true}
+                      onClick={() => navigate('/profile/preferences')}
+                      href="/profile/preferences"
+                      variant="secondary"
+                    />
+                    
                     {/* Cerrar Sesión */}
                     <ButtonSidebar
                       icon={<LogOut className="w-[18px] h-[18px]" />}
