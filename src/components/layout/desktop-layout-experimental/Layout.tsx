@@ -65,6 +65,7 @@ interface LayoutProps {
     // Members display
     organizationId?: string;
     showMembers?: boolean;
+    showProjectSelector?: boolean;
     action?: {
       icon?: React.ComponentType<any>;
       label: string;
@@ -273,6 +274,7 @@ function LayoutContent({
                     description={headerProps.description}
                     organizationId={headerProps.organizationId}
                     showMembers={headerProps.showMembers}
+                    showProjectSelector={headerProps.showProjectSelector}
                     tabs={headerProps.tabs?.map((tab: Tab) => ({
                       id: tab.id,
                       label: tab.label,

@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/popover";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 import { ExpandableAvatarGroup } from "@/components/ui-custom/ExpandableAvatarGroup";
+import { ProjectSelectorButton } from "../desktop/ProjectSelectorButton";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
@@ -130,6 +131,7 @@ interface PageLayoutProps {
   // Members display
   organizationId?: string;
   showMembers?: boolean;
+  showProjectSelector?: boolean;
   
   // Sistema de tabs
   tabs?: Tab[];
@@ -190,6 +192,7 @@ export function PageLayout({
   selector,
   organizationId,
   showMembers = true,
+  showProjectSelector = false,
   tabs = [],
   onTabChange,
   showHeaderSearch = false,
@@ -348,13 +351,17 @@ export function PageLayout({
             </div>
           </div>
 
-          {/* Right side: Members or Selector */}
-          <div className="flex items-center">
-            {showMembers && organizationId ? (
+          {/* Right side: Members and/or Project Selector */}
+          <div className="flex items-center gap-3">
+            {showMembers && organizationId && (
               <ExpandableAvatarGroup organizationId={organizationId} />
-            ) : selector ? (
+            )}
+            {showProjectSelector && (
+              <ProjectSelectorButton />
+            )}
+            {!showMembers && !showProjectSelector && selector && (
               selector
-            ) : null}
+            )}
           </div>
         </div>
 

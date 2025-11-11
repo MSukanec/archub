@@ -360,10 +360,7 @@ export function PageLayout({
               <ExpandableAvatarGroup organizationId={organizationId} />
             )}
             {showProjectSelector && (
-              <>
-                {console.log('✅ Rendering ProjectSelectorButton')}
-                <ProjectSelectorButton />
-              </>
+              <ProjectSelectorButton />
             )}
             {!showMembers && !showProjectSelector && selector && (
               selector
