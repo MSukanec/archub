@@ -62,8 +62,17 @@
   --layout-text: hsl(0, 0%, 40%);
   --layout-border: hsl(0, 0%, 40%);
 
+  /* Content */
+  --content-bg: hsl(0, 50%, 50%); /* Desktop - fondo oscuro que rodea todo */
+  --layout-mobile-bg: hsl(0, 0%, 96%); /* Mobile - fondo claro */
+  --layout-text: hsl(0, 0%, 40%);
+  --layout-border: hsl(0, 0%, 40%);
+
+
+  
+
   /* Header */
-  --header-bg: hsl(0, 0%, 10%);
+  --header-bg: hsl(0, 0%, 100%);
   --header-fg: hsl(0, 0%, 40%);
   --header-border: hsl(0, 0%, 88%);
   --header-button-bg: transparent;
