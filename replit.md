@@ -17,6 +17,7 @@ Preferred communication style: Simple, everyday language.
 - **Home Page UX Flow**: Minimalist AI welcome interface with dynamic greetings and quick action buttons.
 - **Auto-Save System**: Centralized debounced auto-save hook with intelligent initial-load detection, using TanStack Query `isSuccess` flags to prevent false saves during data hydration.
 - **Content Theming System**: Unified CSS theming layer with `--content-bg` for solid backgrounds and `--content-gradient-from/to` for gradient backgrounds. The `useContentBackground` hook automatically switches between solid backgrounds for general pages and gradient backgrounds for project pages (routes starting with `/project/`), providing theme-aware styling in both classic and experimental layouts.
+- **Sidebar Button Component**: Reusable `SidebarIconButton` component (32x32px buttons with 20x20px icons, rounded-md) used across both experimental layout sidebars (left context sidebar and right user sidebar) with intelligent accent colorization system, badge support, and inline style injection to ensure consistent hover/active states across all icons including animated ones.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui, Tailwind CSS, Zustand, Wouter, TanStack Query.

@@ -1037,6 +1037,13 @@ input[type="number"] {
   }
 }
 
+/* Sidebar icon color management */
+.group:hover .sidebar-icon-managed {
+  color: var(--accent) !important;
+  stroke: currentColor !important;
+  fill: currentColor !important;
+}
+
 /* Clase para el icono brillante con curva bezier suave */
 .ai-icon-sparkle {
   animation: 

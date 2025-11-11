@@ -14,6 +14,7 @@ import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useUnreadSupportMessages } from '@/hooks/use-unread-support-messages';
 import ButtonSidebar from "../desktop-layout-classic/ButtonSidebar";
+import { SidebarIconButton } from "../desktop/SidebarIconButton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { 
   Settings, 
@@ -225,57 +226,33 @@ export function Sidebar() {
                   </div>
 
                   {/* Botón Inicio */}
-                  <button
+                  <SidebarIconButton
+                    icon={<Home className="h-5 w-5" />}
+                    isActive={sidebarLevel === 'general'}
                     onClick={() => {
                       setSidebarLevel('general');
                       navigate('/home');
                     }}
-                    className={cn(
-                      "h-10 w-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center justify-center group",
-                      sidebarLevel === 'general' && "bg-[var(--main-sidebar-button-active-bg)]"
-                    )}
-                    data-testid="button-sidebar-home"
-                  >
-                    <Home className={cn(
-                      "h-5 w-5 transition-colors",
-                      sidebarLevel === 'general' ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
-                      "group-hover:text-[var(--accent)]"
-                    )} />
-                  </button>
+                    testId="button-sidebar-home"
+                  />
 
                   {/* Divisor */}
                   <div className="my-3 w-8 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
 
                   {/* Botón Organización */}
-                  <button
+                  <SidebarIconButton
+                    icon={<Building className="h-5 w-5" />}
+                    isActive={sidebarLevel === 'organization'}
                     onClick={() => setSidebarLevel('organization')}
-                    className={cn(
-                      "h-10 w-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center justify-center group",
-                      sidebarLevel === 'organization' && "bg-[var(--main-sidebar-button-active-bg)]"
-                    )}
-                  >
-                    <Building className={cn(
-                      "h-5 w-5 transition-colors",
-                      sidebarLevel === 'organization' ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
-                      "group-hover:text-[var(--accent)]"
-                    )} />
-                  </button>
+                  />
 
                   {/* Botón Proyecto */}
                   {selectedProjectId && (
-                    <button
+                    <SidebarIconButton
+                      icon={<FolderOpen className="h-5 w-5" />}
+                      isActive={sidebarLevel === 'project'}
                       onClick={() => setSidebarLevel('project')}
-                      className={cn(
-                        "h-10 w-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center justify-center group",
-                        sidebarLevel === 'project' && "bg-[var(--main-sidebar-button-active-bg)]"
-                      )}
-                    >
-                      <FolderOpen className={cn(
-                        "h-5 w-5 transition-colors",
-                        sidebarLevel === 'project' ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
-                        "group-hover:text-[var(--accent)]"
-                      )} />
-                    </button>
+                    />
                   )}
 
                   {/* Divisor */}
@@ -283,63 +260,30 @@ export function Sidebar() {
 
                   {/* Botón Comunidad */}
                   <PlanRestricted reason="coming_soon">
-                    <button
+                    <SidebarIconButton
+                      icon={<Users className="h-5 w-5" />}
+                      isActive={sidebarLevel === 'community'}
                       onClick={() => setSidebarLevel('community')}
-                      className={cn(
-                        "h-10 w-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center justify-center group",
-                        sidebarLevel === 'community' && "bg-[var(--main-sidebar-button-active-bg)]"
-                      )}
-                      data-testid="button-sidebar-community"
-                    >
-                      <Users className={cn(
-                        "h-5 w-5 transition-colors",
-                        sidebarLevel === 'community' ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
-                        "group-hover:text-[var(--accent)]"
-                      )} />
-                    </button>
+                      testId="button-sidebar-community"
+                    />
                   </PlanRestricted>
 
                   {/* Botón Capacitaciones */}
-                  <button
+                  <SidebarIconButton
+                    icon={<GraduationCap className="h-5 w-5" />}
+                    isActive={sidebarLevel === 'learning'}
                     onClick={() => setSidebarLevel('learning')}
-                    className={cn(
-                      "h-10 w-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center justify-center group",
-                      sidebarLevel === 'learning' && "bg-[var(--main-sidebar-button-active-bg)]"
-                    )}
-                  >
-                    <GraduationCap className={cn(
-                      "h-5 w-5 transition-colors",
-                      sidebarLevel === 'learning' ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
-                      "group-hover:text-[var(--accent)]"
-                    )} />
-                  </button>
+                  />
 
                   {/* Botón Administración - solo si es admin */}
                   {isAdmin && (
-                    <button
+                    <SidebarIconButton
+                      icon={<Crown className="h-5 w-5" />}
+                      isActive={sidebarLevel === 'admin'}
                       onClick={() => setSidebarLevel('admin')}
-                      className={cn(
-                        "h-10 w-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center justify-center group relative",
-                        sidebarLevel === 'admin' && "bg-[var(--main-sidebar-button-active-bg)]"
-                      )}
-                      data-testid="sidebar-button-administration"
-                    >
-                      <Crown className={cn(
-                        "h-5 w-5 transition-colors",
-                        sidebarLevel === 'admin' ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
-                        "group-hover:text-[var(--accent)]"
-                      )} />
-                      {/* Badge con total de notificaciones de admin */}
-                      {unreadCount > 0 && (
-                        <span 
-                          className="absolute -top-1 -right-1 h-4 min-w-[16px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold text-white border-0"
-                          style={{ backgroundColor: 'var(--accent)' }}
-                          data-testid="badge-admin-total"
-                        >
-                          {unreadCount > 99 ? '99+' : unreadCount}
-                        </span>
-                      )}
-                    </button>
+                      badge={unreadCount}
+                      testId="sidebar-button-administration"
+                    />
                   )}
                 </div>
               </div>

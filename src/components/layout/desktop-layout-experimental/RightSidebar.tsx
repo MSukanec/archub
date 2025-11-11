@@ -12,6 +12,7 @@ import { UserQuickAccess } from "@/components/ui-custom/layout/UserQuickAccess";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { AIPanel } from "@/components/ai/AIPanel";
 import { SupportPanel } from "@/components/support/SupportPanel";
+import { SidebarIconButton } from "../desktop/SidebarIconButton";
 import { Bell, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Moon, Sun, Headphones, PanelRightClose, MessageCircle } from "lucide-react";
@@ -230,116 +231,55 @@ export function RightSidebar() {
               {/* Espacio después del avatar - igual al logo */}
               <div className="h-3"></div>
 
-              {/* Botón de Notificaciones - altura h-10 - CON CLICK */}
-              <button
-                className={cn(
-                  "relative h-10 w-8 rounded-md flex items-center justify-center transition-colors",
-                  "hover:bg-[var(--main-sidebar-button-hover-bg)]",
-                  "text-[var(--main-sidebar-fg)] hover:text-white",
-                  activePanel === 'notifications' && "bg-[var(--main-sidebar-button-hover-bg)] text-white"
-                )}
-                title="Notificaciones"
-                data-testid="button-notifications"
+              {/* Botón de Notificaciones */}
+              <SidebarIconButton
+                icon={<Bell className="h-5 w-5" />}
+                isActive={activePanel === 'notifications'}
                 onClick={() => handlePanelClick('notifications')}
-              >
-                <div className="h-8 w-8 flex items-center justify-center relative">
-                  <Bell className="h-[18px] w-[18px]" />
-                  {unreadCount > 0 && (
-                    <span 
-                      className="absolute top-0 right-0 h-4 min-w-[16px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold text-white border-0"
-                      style={{ backgroundColor: 'var(--accent)', transform: 'translate(25%, -25%)' }}
-                      data-testid="badge-unread-count"
-                    >
-                      {unreadCount > 99 ? '99+' : unreadCount}
-                    </span>
-                  )}
-                </div>
-              </button>
+                badge={unreadCount}
+                title="Notificaciones"
+                testId="button-notifications"
+              />
 
-              {/* Botón de IA - altura h-10 - CON CLICK - CON ICONO BRILLANTE */}
-              <button
-                className={cn(
-                  "relative h-10 w-8 rounded-md flex items-center justify-center transition-all duration-600",
-                  "hover:bg-[var(--main-sidebar-button-hover-bg)]",
-                  activePanel === 'ai' && "bg-[var(--main-sidebar-button-hover-bg)]"
-                )}
-                title="Asistente IA"
-                data-testid="button-ai"
+              {/* Botón de IA - CON ICONO BRILLANTE */}
+              <SidebarIconButton
+                icon={<Sparkles className="h-5 w-5 ai-icon-sparkle" />}
+                isActive={activePanel === 'ai'}
                 onClick={() => handlePanelClick('ai')}
-              >
-                <Sparkles 
-                  className="h-[18px] w-[18px] ai-icon-sparkle"
-                  style={{ color: 'var(--accent)' }}
-                />
-              </button>
+                title="Asistente IA"
+                testId="button-ai"
+              />
 
             </div>
           </div>
 
           {/* SECCIÓN INFERIOR: Botones de Ayuda, Discord y Anclar */}
           <div className="pt-6 pb-6 flex flex-col gap-[2px] items-center">
-            {/* Ayuda/Soporte - CON CLICK */}
-            <button
-              className={cn(
-                "h-10 w-8 rounded-md flex items-center justify-center transition-colors",
-                "hover:bg-[var(--main-sidebar-button-hover-bg)]",
-                "text-[var(--main-sidebar-fg)] hover:text-white",
-                activePanel === 'support' && "bg-[var(--main-sidebar-button-hover-bg)] text-white"
-              )}
-              title="Ayuda y soporte"
-              data-testid="button-help"
+            {/* Ayuda/Soporte */}
+            <SidebarIconButton
+              icon={<Headphones className="h-5 w-5" />}
+              isActive={activePanel === 'support'}
               onClick={() => handlePanelClick('support')}
-            >
-              <div className="h-8 w-8 flex items-center justify-center relative">
-                <Headphones className="h-[18px] w-[18px]" />
-                {unreadSupportCount > 0 && (
-                  <span 
-                    className="absolute top-0 right-0 h-4 min-w-[16px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold text-white border-0"
-                    style={{ backgroundColor: 'var(--accent)', transform: 'translate(25%, -25%)' }}
-                    data-testid="badge-unread-support"
-                  >
-                    {unreadSupportCount > 99 ? '99+' : unreadSupportCount}
-                  </span>
-                )}
-              </div>
-            </button>
+              badge={unreadSupportCount}
+              title="Ayuda y soporte"
+              testId="button-help"
+            />
 
             {/* Comunidad Discord */}
-            <button
-              className={cn(
-                "h-10 w-8 rounded-md flex items-center justify-center transition-colors",
-                "hover:bg-[var(--main-sidebar-button-hover-bg)]",
-                "text-[var(--main-sidebar-fg)] hover:text-white"
-              )}
+            <SidebarIconButton
+              icon={<MessageCircle className="h-5 w-5" />}
+              onClick={() => window.open('https://discord.com/channels/868615664070443008', '_blank')}
               title="Comunidad Discord"
-              data-testid="button-discord"
-              onClick={() => {
-                window.open('https://discord.com/channels/868615664070443008', '_blank');
-              }}
-            >
-              <div className="h-8 w-8 flex items-center justify-center">
-                <MessageCircle className="h-[18px] w-[18px]" />
-              </div>
-            </button>
+              testId="button-discord"
+            />
 
             {/* Botón de Anclar/Desanclar (sin función por ahora) */}
-            <button
-              className={cn(
-                "h-10 w-8 rounded-md flex items-center justify-center transition-colors",
-                "hover:bg-[var(--main-sidebar-button-hover-bg)]",
-                "text-[var(--main-sidebar-fg)] hover:text-white"
-              )}
+            <SidebarIconButton
+              icon={<PanelRightClose className="h-5 w-5" />}
+              onClick={() => console.log('Botón de anclar clickeado (sin función)')}
               title="Anclar sidebar"
-              data-testid="button-dock-right"
-              onClick={() => {
-                // Sin función por ahora
-                console.log('Botón de anclar clickeado (sin función)');
-              }}
-            >
-              <div className="h-8 w-8 flex items-center justify-center">
-                <PanelRightClose className="w-[18px] h-[18px]" />
-              </div>
-            </button>
+              testId="button-dock-right"
+            />
           </div>
 
         </aside>
