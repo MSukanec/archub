@@ -238,6 +238,7 @@ export function PageLayout({
     onHeaderSearchChange?.(value);
   };
 
+
   const hasTabs = tabs.length > 0;
   
   // Determinar si hay botones de acción para mostrar en la segunda fila
@@ -359,7 +360,10 @@ export function PageLayout({
               <ExpandableAvatarGroup organizationId={organizationId} />
             )}
             {showProjectSelector && (
-              <ProjectSelectorButton />
+              <>
+                {console.log('✅ Rendering ProjectSelectorButton')}
+                <ProjectSelectorButton />
+              </>
             )}
             {!showMembers && !showProjectSelector && selector && (
               selector
