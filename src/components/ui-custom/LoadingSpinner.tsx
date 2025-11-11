@@ -24,7 +24,7 @@ export function LoadingSpinner({ size = 'md', fullScreen = false }: LoadingSpinn
         }}
       />
       <img 
-        src="/Seencel512.png" 
+        src="/Seencel512_b.png" 
         alt="Seencel" 
         className={`${logoSize} absolute`}
       />

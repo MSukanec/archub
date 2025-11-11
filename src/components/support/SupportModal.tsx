@@ -258,7 +258,7 @@ export function SupportModal({ open, onOpenChange, userId, userFullName, userAva
                   ) : (
                     <div className="h-9 w-9 rounded-full bg-[var(--accent)]/10 border-2 border-[var(--accent)]/20 flex items-center justify-center p-1.5 shadow-sm">
                       <img 
-                        src="/Seencel512.png" 
+                        src="/Seencel512_b.png" 
                         alt="Seencel" 
                         className="w-full h-full object-contain"
                       />
@@ -301,7 +301,7 @@ export function SupportModal({ open, onOpenChange, userId, userFullName, userAva
         <div className="flex-1 px-4 py-8 flex flex-col items-center justify-center text-center">
           <div className="h-16 w-16 rounded-full bg-[var(--accent)]/10 border-2 border-[var(--accent)]/20 flex items-center justify-center p-3 mb-4 shadow-sm">
             <img 
-              src="/Seencel512.png" 
+              src="/Seencel512_b.png" 
               alt="Seencel" 
               className="w-full h-full object-contain"
             />

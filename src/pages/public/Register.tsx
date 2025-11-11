@@ -28,7 +28,7 @@ export default function Register() {
           {/* Logo */}
           <div className="flex justify-center">
             <img 
-              src="/Seencel512.png" 
+              src="/Seencel512_b.png" 
               alt="Seencel Logo" 
               className="w-32 h-32 object-contain"
             />
@@ -64,7 +64,7 @@ export default function Register() {
             <div className="flex items-center justify-between gap-4 mb-8">
               <div className="flex items-center gap-3">
                 <img 
-                  src="/Seencel512.png" 
+                  src="/Seencel512_b.png" 
                   alt="Seencel Logo" 
                   className="w-10 h-10 object-contain"
                 />

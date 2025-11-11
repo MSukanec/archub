@@ -286,7 +286,7 @@ export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: S
                   ) : (
                     <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center p-1">
                       <img 
-                        src="/Seencel512.png" 
+                        src="/Seencel512_b.png" 
                         alt="Seencel" 
                         className="w-full h-full object-contain"
                       />
@@ -315,7 +315,7 @@ export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: S
           {/* Logo Seencel */}
           <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center p-3 mb-4">
             <img 
-              src="/Seencel512.png" 
+              src="/Seencel512_b.png" 
               alt="Seencel" 
               className="w-full h-full object-contain"
             />

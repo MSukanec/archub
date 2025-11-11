@@ -336,7 +336,7 @@ const AdminSupportTicketsTab = () => {
                       ) : (
                         <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center p-1">
                           <img 
-                            src="/Seencel512.png" 
+                            src="/Seencel512_b.png" 
                             alt="Admin" 
                             className="w-full h-full object-contain"
                           />

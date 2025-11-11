@@ -31,7 +31,7 @@ export function Footer({ scrollContainerRef }: FooterProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <img 
-              src="/Seencel512.png" 
+              src="/Seencel512_b.png" 
               alt="Seencel" 
               className="h-6 w-6 object-contain"
             />

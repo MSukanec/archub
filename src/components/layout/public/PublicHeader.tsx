@@ -13,7 +13,7 @@ export function PublicHeader({ rightContent, navigation, actions }: PublicHeader
         <div className="flex items-center space-x-8">
           <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer">
             <img 
-              src="/Seencel512.png" 
+              src="/Seencel512_b.png" 
               alt="Seencel" 
               className="h-7 w-7 object-contain"
             />
