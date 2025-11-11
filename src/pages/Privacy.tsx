@@ -2,67 +2,13 @@ import { useEffect, useState } from "react";
 import { ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Footer } from "@/components/layout/desktop/Footer";
+import { PublicLayout } from "@/components/layout/public/PublicLayout";
 
 export default function Privacy() {
   const [activeSection, setActiveSection] = useState("about");
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
-    // Save original values to restore on cleanup
-    const originalTitle = document.title;
-    let metaDescription = document.querySelector('meta[name="description"]');
-    const originalDescription = metaDescription?.getAttribute("content") || "";
-    
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    const originalOgTitle = ogTitle?.getAttribute("content") || "";
-    
-    const ogDescription = document.querySelector('meta[property="og:description"]');
-    const originalOgDescription = ogDescription?.getAttribute("content") || "";
-    
-    const ogType = document.querySelector('meta[property="og:type"]');
-    const originalOgType = ogType?.getAttribute("content") || "";
-    
-    const ogUrl = document.querySelector('meta[property="og:url"]');
-    const originalOgUrl = ogUrl?.getAttribute("content") || "";
-
-    // Track newly created tags for cleanup
-    const createdTags: Element[] = [];
-    
-    // Set Privacy page meta tags
-    document.title = "Política de Privacidad - Seencel";
-    
-    let descriptionWasCreated = false;
-    if (metaDescription) {
-      metaDescription.setAttribute("content", "Política de privacidad de Seencel. Información sobre cómo recopilamos, usamos, compartimos y protegemos tus datos personales. Cumplimiento con Google OAuth y normativas de privacidad.");
-    } else {
-      const meta = document.createElement("meta");
-      meta.name = "description";
-      meta.content = "Política de privacidad de Seencel. Información sobre cómo recopilamos, usamos, compartimos y protegemos tus datos personales. Cumplimiento con Google OAuth y normativas de privacidad.";
-      document.head.appendChild(meta);
-      metaDescription = meta; // Update reference to newly created tag
-      descriptionWasCreated = true;
-    }
-    
-    // Open Graph tags
-    const setMetaTag = (property: string, content: string) => {
-      let tag = document.querySelector(`meta[property="${property}"]`);
-      if (tag) {
-        tag.setAttribute("content", content);
-      } else {
-        tag = document.createElement("meta");
-        tag.setAttribute("property", property);
-        tag.setAttribute("content", content);
-        document.head.appendChild(tag);
-        createdTags.push(tag); // Track newly created tag
-      }
-    };
-
-    setMetaTag("og:title", "Política de Privacidad - Seencel");
-    setMetaTag("og:description", "Información sobre cómo Seencel protege tus datos personales y cumple con normativas de privacidad.");
-    setMetaTag("og:type", "website");
-    setMetaTag("og:url", window.location.href);
-
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 400);
 
@@ -81,40 +27,8 @@ export default function Privacy() {
 
     window.addEventListener("scroll", handleScroll);
     
-    // Cleanup: restore original meta tags
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      
-      document.title = originalTitle;
-      
-      // Restore or remove meta description
-      if (metaDescription) {
-        if (descriptionWasCreated) {
-          metaDescription.remove();
-        } else {
-          metaDescription.setAttribute("content", originalDescription);
-        }
-      }
-      
-      // Always restore OG tags to their original values (even if empty)
-      if (ogTitle) {
-        ogTitle.setAttribute("content", originalOgTitle);
-      }
-      
-      if (ogDescription) {
-        ogDescription.setAttribute("content", originalOgDescription);
-      }
-      
-      if (ogType) {
-        ogType.setAttribute("content", originalOgType);
-      }
-      
-      if (ogUrl) {
-        ogUrl.setAttribute("content", originalOgUrl);
-      }
-      
-      // Remove any tags that were created (didn't exist before)
-      createdTags.forEach(tag => tag.remove());
     };
   }, []);
 
@@ -148,27 +62,16 @@ export default function Privacy() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <img 
-              src="/Seencel512.png" 
-              alt="Seencel" 
-              className="h-7 w-7 object-contain"
-            />
-            <span className="font-bold text-lg">Seencel</span>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            Última actualización: Noviembre 2025
-          </div>
-        </div>
-      </header>
-
-      {/* Content */}
-      <div className="container mx-auto px-6 py-12">
-        <div className="flex gap-12 relative">
+    <PublicLayout 
+      headerRightContent="Última actualización: Noviembre 2025"
+      seo={{
+        title: "Política de Privacidad - Seencel",
+        description: "Política de privacidad de Seencel. Información sobre cómo recopilamos, usamos, compartimos y protegemos tus datos personales. Cumplimiento con Google OAuth y normativas de privacidad.",
+        ogTitle: "Política de Privacidad - Seencel",
+        ogDescription: "Información sobre cómo Seencel protege tus datos personales y cumple con normativas de privacidad."
+      }}
+    >
+      <div className="flex gap-12 relative">
           {/* Main Content */}
           <main className="flex-1 max-w-3xl">
             <div className="space-y-12">
@@ -716,7 +619,6 @@ export default function Privacy() {
               </nav>
             </div>
           </aside>
-        </div>
       </div>
 
       {/* Scroll to Top Button */}
@@ -730,9 +632,6 @@ export default function Privacy() {
           <ArrowUp className="h-5 w-5" />
         </Button>
       )}
-
-      {/* Footer - Reusable Component */}
-      <Footer />
-    </div>
+    </PublicLayout>
   );
 }
