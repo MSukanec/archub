@@ -1,1 +1,1 @@
-export * from "../desktop-rounded/RightSidebar";
+export * from "../desktop-layout-classic/RightSidebar";

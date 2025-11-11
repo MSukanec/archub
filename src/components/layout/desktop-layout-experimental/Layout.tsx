@@ -5,7 +5,7 @@ import { RightSidebar } from "./RightSidebar";
 // Header removed - now handled by sidebar
 // import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
-import { PageLayout } from "../desktop-rounded/PageLayout";
+import { PageLayout } from "../desktop-layout-classic/PageLayout";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -29,7 +29,7 @@ import { usePendingInvitations } from "@/hooks/use-pending-invitations";
 // TEMPORALMENTE DESHABILITADO - GlobalAnnouncement no se usa por ahora
 // import { GlobalAnnouncement, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, AnnouncementProvider } from "@/components/ui-custom/layout/GlobalAnnouncement";
 import { useLocation } from "wouter";
-import { type WidthProp, resolveWidthMode, getContainerClasses, getContentPaddingClasses } from "../desktop-rounded/layoutWidth";
+import { type WidthProp, resolveWidthMode, getContainerClasses, getContentPaddingClasses } from "../desktop-layout-classic/layoutWidth";
 
 interface Tab {
   id: string;

@@ -13,7 +13,7 @@ import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useUnreadSupportMessages } from '@/hooks/use-unread-support-messages';
-import ButtonSidebar from "../desktop-rounded/ButtonSidebar";
+import ButtonSidebar from "../desktop-layout-classic/ButtonSidebar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { 
   Settings, 
