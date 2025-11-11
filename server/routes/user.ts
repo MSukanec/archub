@@ -208,7 +208,8 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
         country,
         phone_e164,
         theme,
-        sidebar_docked
+        sidebar_docked,
+        layout
       } = req.body;
 
       if (!user_id) {
@@ -273,7 +274,7 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
       }
 
       // Update user_preferences table
-      if (theme !== undefined || sidebar_docked !== undefined) {
+      if (theme !== undefined || sidebar_docked !== undefined || layout !== undefined) {
         const { data: existingPrefs } = await authenticatedSupabase
           .from('user_preferences')
           .select('id')
@@ -283,6 +284,7 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
         const prefsData: any = {};
         if (theme !== undefined) prefsData.theme = theme;
         if (sidebar_docked !== undefined) prefsData.sidebar_docked = sidebar_docked;
+        if (layout !== undefined) prefsData.layout = layout;
 
         if (existingPrefs) {
           const { error } = await authenticatedSupabase

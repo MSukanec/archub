@@ -22,11 +22,13 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
   const { isDark, setTheme } = useThemeStore()
   
   const [sidebarDocked, setSidebarDocked] = useState(false)
+  const [layoutStyle, setLayoutStyle] = useState<'rounded' | 'flat'>('rounded')
 
   // Settings data object for debounced auto-save
   const settingsData = {
     sidebarDocked,
-    theme: isDark ? 'dark' : 'light'
+    theme: isDark ? 'dark' : 'light',
+    layout: layoutStyle
   }
 
   // Auto-save mutation for settings data
@@ -36,7 +38,8 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
       
       // Use the server endpoint to update preferences
       if (data.sidebarDocked !== userData?.preferences?.sidebar_docked ||
-          data.theme !== userData?.preferences?.theme) {
+          data.theme !== userData?.preferences?.theme ||
+          data.layout !== userData?.preferences?.layout) {
         
         // Get the auth token from Supabase session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
@@ -54,6 +57,7 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
             user_id: userData?.user?.id,
             sidebar_docked: data.sidebarDocked,
             theme: data.theme,
+            layout: data.layout,
           }),
         })
         
@@ -98,6 +102,8 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
       setSidebarDocked(userData.preferences.sidebar_docked || false)
       // Set theme from user preferences
       setTheme(userData.preferences.theme === 'dark')
+      // Set layout from user preferences
+      setLayoutStyle(userData.preferences.layout || 'rounded')
     }
   }, [userData?.preferences, setTheme])
 
@@ -152,6 +158,20 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
               <Switch
                 checked={sidebarDocked}
                 onCheckedChange={handleSidebarDockedChange}
+              />
+            </div>
+
+            {/* Layout Style */}
+            <div className="flex items-center justify-between py-2">
+              <div className="space-y-0.5">
+                <Label className="text-sm font-medium">Layout Flat</Label>
+                <div className="text-xs text-muted-foreground">
+                  Cambiar entre diseño redondeado y plano
+                </div>
+              </div>
+              <Switch
+                checked={layoutStyle === 'flat'}
+                onCheckedChange={(checked) => setLayoutStyle(checked ? 'flat' : 'rounded')}
               />
             </div>
           </div>
