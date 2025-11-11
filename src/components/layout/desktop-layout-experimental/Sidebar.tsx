@@ -189,357 +189,147 @@ export function Sidebar() {
     setDocked(!isDocked);
   };
 
+  // Helper to get context title
+  const getContextTitle = () => {
+    switch (sidebarLevel) {
+      case 'organization': return 'Organización';
+      case 'project': return 'Proyecto';
+      case 'community': return 'Comunidad';
+      case 'learning': return 'Capacitaciones';
+      case 'admin': return 'Administración';
+      default: return '';
+    }
+  };
+
   return (
     <div className="flex flex-row h-full">
       {/* WRAPPER CON FRAME EFFECT */}
       <div className="h-full p-1 rounded-lg bg-[var(--content-bg)]">
-        {/* SIDEBAR PRINCIPAL */}
         <div 
-          className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-10 overflow-hidden relative h-full rounded-lg"
-          style={{
-            width: isDocked 
-              ? '240px' 
-              : (isHovered ? '240px' : '50px')
-          }}
+          className="flex flex-row"
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
-        <aside 
-          className={cn(
-            "grid h-full grid-rows-[1fr_auto]",
-            isExpanded ? "w-60" : "w-[50px]"
-          )}
-        >
-          {/* SECCIÓN SUPERIOR: Navegación principal con scroll */}
-          <div className="px-0 pt-6 overflow-y-auto">
-            {sidebarLevel === 'general' ? (
-              /* SIDEBAR GENERAL - HUB CENTRAL */
-              <div className={cn(
-                "flex flex-col gap-[2px]",
-                isExpanded ? "px-[9px]" : "items-center"
-              )}>
-                {/* Logo - altura igual al MainHeader para alineación perfecta */}
-                <button
-                  onClick={() => navigate('/home')}
-                  className={cn(
-                    "h-[50px] rounded-md cursor-pointer transition-colors flex items-center group overflow-hidden",
-                    isExpanded ? "w-full" : "w-8"
-                  )}
-                >
-                  {/* Logo siempre en la misma posición */}
-                  <div className="flex items-center justify-center w-8 flex-shrink-0">
+          {/* SIDEBAR IZQUIERDO - CONTEXTOS (siempre visible, 50px) */}
+          <div className="bg-[var(--main-sidebar-bg)] w-[50px] h-full rounded-lg">
+            <aside className="grid h-full grid-rows-[1fr_auto]">
+              {/* SECCIÓN SUPERIOR: Botones de contexto con scroll */}
+              <div className="px-0 pt-6 overflow-y-auto">
+                <div className="flex flex-col gap-[2px] items-center">
+                  {/* Logo */}
+                  <div className="h-[50px] flex items-center justify-center w-8 mb-3">
                     <img 
                       src="/Seencel512.png" 
                       alt="Seencel Logo" 
                       className="h-8 w-auto object-contain"
                     />
                   </div>
-                  
-                  {/* Texto que aparece cuando se expande */}
-                  {isExpanded && (
-                    <div className="flex items-center overflow-hidden min-w-0 ml-3">
-                      <span className="text-lg font-normal text-[var(--main-sidebar-fg)] group-hover:text-white truncate">
-                        Seencel
-                      </span>
-                    </div>
-                  )}
-                </button>
-                
-                {/* Espacio después del logo */}
-                <div className="h-3"></div>
-                
-                {/* Botón Inicio */}
-                <button
-                  onClick={() => {
-                    navigate('/home');
-                  }}
-                  className={cn(
-                    "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
-                    isExpanded ? "w-full" : "w-8",
-                    location === '/home' && "bg-[var(--main-sidebar-button-active-bg)]"
-                  )}
-                  data-testid="button-sidebar-home"
-                >
-                  <div className="flex items-center justify-center w-8 flex-shrink-0">
-                    <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                      <Home className={cn(
-                        "h-4 w-4 transition-colors",
-                        location === '/home' ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
-                        "group-hover:text-[var(--accent)]"
-                      )} />
-                    </div>
-                  </div>
-                  {isExpanded && (
-                    <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
-                      <span className={cn(
-                        "text-sm font-medium truncate text-left",
-                        location === '/home' ? "text-white" : "text-[var(--main-sidebar-fg)]",
-                        "group-hover:text-white"
-                      )}>
-                        Inicio
-                      </span>
-                      <span className={cn(
-                        "text-xs truncate text-left",
-                        location === '/home' ? "text-white opacity-100" : "text-[var(--main-sidebar-fg)] opacity-60",
-                        "group-hover:text-white group-hover:opacity-100"
-                      )}>
-                        Página principal
-                      </span>
-                    </div>
-                  )}
-                </button>
 
-                {/* Divisor "Profesionales" */}
-                <div className="my-3 h-[12px] flex items-center justify-center w-full">
-                  {isExpanded ? (
-                    <div className="flex items-center gap-2 w-full">
-                      <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                      <span className="text-[10px] font-medium text-[var(--main-sidebar-fg)] opacity-60 px-1 leading-none">
-                        Profesionales
-                      </span>
-                      <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                    </div>
-                  ) : (
-                    <div className="w-8 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                  )}
-                </div>
-                
-                {/* Botón Organización */}
-                <button
-                  onClick={() => {
-                    setSidebarLevel('organization');
-                    navigate('/organization/dashboard');
-                  }}
-                  className={cn(
-                    "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
-                    isExpanded ? "w-full" : "w-8",
-                    (location.startsWith('/organization') || location.startsWith('/contacts') || location.startsWith('/movements') || location.startsWith('/finances') || location.startsWith('/analysis')) && "bg-[var(--main-sidebar-button-active-bg)]"
-                  )}
-                >
-                  <div className="flex items-center justify-center w-8 flex-shrink-0">
-                    <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                      <Building className={cn(
-                        "h-4 w-4 transition-colors",
-                        (location.startsWith('/organization') || location.startsWith('/contacts') || location.startsWith('/movements') || location.startsWith('/finances') || location.startsWith('/analysis')) ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
-                        "group-hover:text-[var(--accent)]"
-                      )} />
-                    </div>
-                  </div>
-                  {isExpanded && (
-                    <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
-                      <span className={cn(
-                        "text-sm font-medium truncate text-left",
-                        (location.startsWith('/organization') || location.startsWith('/contacts') || location.startsWith('/movements') || location.startsWith('/finances') || location.startsWith('/analysis')) ? "text-white" : "text-[var(--main-sidebar-fg)]",
-                        "group-hover:text-white"
-                      )}>
-                        Organización
-                      </span>
-                      <span className={cn(
-                        "text-xs truncate text-left",
-                        (location.startsWith('/organization') || location.startsWith('/contacts') || location.startsWith('/movements') || location.startsWith('/finances') || location.startsWith('/analysis')) ? "text-white opacity-100" : "text-[var(--main-sidebar-fg)] opacity-60",
-                        "group-hover:text-white group-hover:opacity-100"
-                      )}>
-                        Gestión empresarial
-                      </span>
-                    </div>
-                  )}
-                </button>
-
-                {/* Botón Proyecto */}
-                <button
-                  onClick={() => {
-                    if (projectsLite.length === 0) {
-                      toast({
-                        title: "No hay proyectos creados",
-                        description: "Crea un proyecto primero desde Organización",
-                        variant: "destructive"
-                      });
-                      return;
-                    }
-                    if (!selectedProjectId) {
-                      toast({
-                        title: "No hay proyecto seleccionado",
-                        description: "Selecciona un proyecto primero",
-                        variant: "destructive"
-                      });
-                      return;
-                    }
-                    setSidebarLevel('project');
-                    navigate('/project/dashboard');
-                  }}
-                  disabled={projectsLite.length === 0}
-                  className={cn(
-                    "h-10 rounded-md transition-colors flex items-center group overflow-hidden",
-                    isExpanded ? "w-full" : "w-8",
-                    projectsLite.length === 0 
-                      ? "opacity-50 cursor-not-allowed" 
-                      : "cursor-pointer hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white",
-                    (location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients')) && "bg-[var(--main-sidebar-button-active-bg)]"
-                  )}
-                >
-                  <div className="flex items-center justify-center w-8 flex-shrink-0">
-                    <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                      <FolderOpen className={cn(
-                        "h-4 w-4 transition-colors",
-                        projectsLite.length === 0 
-                          ? "text-[var(--main-sidebar-fg)] opacity-50"
-                          : (location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients')) 
-                            ? "text-[var(--accent)]" 
-                            : "text-[var(--main-sidebar-fg)]",
-                        projectsLite.length > 0 && "group-hover:text-[var(--accent)]"
-                      )} />
-                    </div>
-                  </div>
-                  {isExpanded && (
-                    <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
-                      <span className={cn(
-                        "text-sm font-medium truncate text-left",
-                        projectsLite.length === 0
-                          ? "text-[var(--main-sidebar-fg)] opacity-50"
-                          : (location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients')) 
-                            ? "text-white" 
-                            : "text-[var(--main-sidebar-fg)]",
-                        projectsLite.length > 0 && "group-hover:text-white"
-                      )}>
-                        Proyecto
-                      </span>
-                      <span className={cn(
-                        "text-xs truncate text-left",
-                        projectsLite.length === 0
-                          ? "text-[var(--main-sidebar-fg)] opacity-30"
-                          : (location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients')) 
-                            ? "text-white opacity-100" 
-                            : "text-[var(--main-sidebar-fg)] opacity-60",
-                        projectsLite.length > 0 && "group-hover:text-white group-hover:opacity-100"
-                      )}>
-                        {projectsLite.length === 0 ? "Crea un proyecto primero" : "Gestión de obras"}
-                      </span>
-                    </div>
-                  )}
-                </button>
-
-                {/* Divisor "Comunidad" */}
-                <div className="my-3 h-[12px] flex items-center justify-center w-full">
-                  {isExpanded ? (
-                    <div className="flex items-center gap-2 w-full">
-                      <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                      <span className="text-[10px] font-medium text-[var(--main-sidebar-fg)] opacity-60 px-1 leading-none">
-                        Comunidad
-                      </span>
-                      <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                    </div>
-                  ) : (
-                    <div className="w-8 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                  )}
-                </div>
-
-                {/* Botón Comunidad */}
-                <PlanRestricted reason="coming_soon">
+                  {/* Botón Inicio */}
                   <button
                     onClick={() => {
-                      setSidebarLevel('community');
-                      navigate('/community/dashboard');
+                      setSidebarLevel('general');
+                      navigate('/home');
                     }}
                     className={cn(
-                      "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
-                      isExpanded ? "w-full" : "w-8",
-                      location.startsWith('/community') && "bg-[var(--main-sidebar-button-active-bg)]"
+                      "h-10 w-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center justify-center group",
+                      sidebarLevel === 'general' && "bg-[var(--main-sidebar-button-active-bg)]"
                     )}
-                    data-testid="button-sidebar-community"
+                    data-testid="button-sidebar-home"
                   >
-                    <div className="flex items-center justify-center w-8 flex-shrink-0">
-                      <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                        <Users className={cn(
-                          "h-4 w-4 transition-colors",
-                          location.startsWith('/community') ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
-                          "group-hover:text-[var(--accent)]"
-                        )} />
-                      </div>
-                    </div>
-                    {isExpanded && (
-                      <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
-                        <span className={cn(
-                          "text-sm font-medium truncate text-left",
-                          location.startsWith('/community') ? "text-white" : "text-[var(--main-sidebar-fg)]",
-                          "group-hover:text-white"
-                        )}>
-                          Comunidad
-                        </span>
-                        <span className={cn(
-                          "text-xs truncate text-left",
-                          location.startsWith('/community') ? "text-white opacity-100" : "text-[var(--main-sidebar-fg)] opacity-60",
-                          "group-hover:text-white group-hover:opacity-100"
-                        )}>
-                          Conecta y comparte
-                        </span>
-                      </div>
-                    )}
+                    <Home className={cn(
+                      "h-5 w-5 transition-colors",
+                      sidebarLevel === 'general' ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
+                      "group-hover:text-[var(--accent)]"
+                    )} />
                   </button>
-                </PlanRestricted>
 
-                {/* Botón Capacitaciones */}
-                <button
-                  onClick={() => {
-                    setSidebarLevel('learning');
-                    navigate('/learning/dashboard');
-                  }}
-                  className={cn(
-                    "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
-                    isExpanded ? "w-full" : "w-8",
-                    location.startsWith('/learning') && "bg-[var(--main-sidebar-button-active-bg)]"
-                  )}
-                >
-                  <div className="flex items-center justify-center w-8 flex-shrink-0">
-                    <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                      <GraduationCap className={cn(
-                        "h-4 w-4 transition-colors",
-                        location.startsWith('/learning') ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
+                  {/* Divisor */}
+                  <div className="my-3 w-8 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+
+                  {/* Botón Organización */}
+                  <button
+                    onClick={() => setSidebarLevel('organization')}
+                    className={cn(
+                      "h-10 w-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center justify-center group",
+                      sidebarLevel === 'organization' && "bg-[var(--main-sidebar-button-active-bg)]"
+                    )}
+                  >
+                    <Building className={cn(
+                      "h-5 w-5 transition-colors",
+                      sidebarLevel === 'organization' ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
+                      "group-hover:text-[var(--accent)]"
+                    )} />
+                  </button>
+
+                  {/* Botón Proyecto */}
+                  {selectedProjectId && (
+                    <button
+                      onClick={() => setSidebarLevel('project')}
+                      className={cn(
+                        "h-10 w-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center justify-center group",
+                        sidebarLevel === 'project' && "bg-[var(--main-sidebar-button-active-bg)]"
+                      )}
+                    >
+                      <FolderOpen className={cn(
+                        "h-5 w-5 transition-colors",
+                        sidebarLevel === 'project' ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
                         "group-hover:text-[var(--accent)]"
                       )} />
-                    </div>
-                  </div>
-                  {isExpanded && (
-                    <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
-                      <span className={cn(
-                        "text-sm font-medium truncate text-left",
-                        location.startsWith('/learning') ? "text-white" : "text-[var(--main-sidebar-fg)]",
-                        "group-hover:text-white"
-                      )}>
-                        Capacitaciones
-                      </span>
-                      <span className={cn(
-                        "text-xs truncate text-left",
-                        location.startsWith('/learning') ? "text-white opacity-100" : "text-[var(--main-sidebar-fg)] opacity-60",
-                        "group-hover:text-white group-hover:opacity-100"
-                      )}>
-                        Cursos y formación
-                      </span>
-                    </div>
+                    </button>
                   )}
-                </button>
 
-                {/* Botón Administración - solo si es admin */}
-                {isAdmin && (
+                  {/* Divisor */}
+                  <div className="my-3 w-8 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+
+                  {/* Botón Comunidad */}
+                  <PlanRestricted reason="coming_soon">
+                    <button
+                      onClick={() => setSidebarLevel('community')}
+                      className={cn(
+                        "h-10 w-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center justify-center group",
+                        sidebarLevel === 'community' && "bg-[var(--main-sidebar-button-active-bg)]"
+                      )}
+                      data-testid="button-sidebar-community"
+                    >
+                      <Users className={cn(
+                        "h-5 w-5 transition-colors",
+                        sidebarLevel === 'community' ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
+                        "group-hover:text-[var(--accent)]"
+                      )} />
+                    </button>
+                  </PlanRestricted>
+
+                  {/* Botón Capacitaciones */}
                   <button
-                    onClick={() => {
-                      setSidebarLevel('admin');
-                      navigate('/admin/dashboard');
-                    }}
+                    onClick={() => setSidebarLevel('learning')}
                     className={cn(
-                      "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
-                      isExpanded ? "w-full" : "w-8",
-                      location.startsWith('/admin') && "bg-[var(--main-sidebar-button-active-bg)]"
+                      "h-10 w-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center justify-center group",
+                      sidebarLevel === 'learning' && "bg-[var(--main-sidebar-button-active-bg)]"
                     )}
-                    data-testid="sidebar-button-administration"
                   >
-                    <div className="flex items-center justify-center w-8 flex-shrink-0 relative">
-                      <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                        <Crown className={cn(
-                          "h-4 w-4 transition-colors",
-                          location.startsWith('/admin') ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
-                          "group-hover:text-[var(--accent)]"
-                        )} />
-                      </div>
+                    <GraduationCap className={cn(
+                      "h-5 w-5 transition-colors",
+                      sidebarLevel === 'learning' ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
+                      "group-hover:text-[var(--accent)]"
+                    )} />
+                  </button>
+
+                  {/* Botón Administración - solo si es admin */}
+                  {isAdmin && (
+                    <button
+                      onClick={() => setSidebarLevel('admin')}
+                      className={cn(
+                        "h-10 w-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center justify-center group relative",
+                        sidebarLevel === 'admin' && "bg-[var(--main-sidebar-button-active-bg)]"
+                      )}
+                      data-testid="sidebar-button-administration"
+                    >
+                      <Crown className={cn(
+                        "h-5 w-5 transition-colors",
+                        sidebarLevel === 'admin' ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]",
+                        "group-hover:text-[var(--accent)]"
+                      )} />
                       {/* Badge con total de notificaciones de admin */}
                       {unreadCount > 0 && (
                         <span 
@@ -550,347 +340,77 @@ export function Sidebar() {
                           {unreadCount > 99 ? '99+' : unreadCount}
                         </span>
                       )}
-                    </div>
-                    {isExpanded && (
-                      <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
-                        <span className={cn(
-                          "text-sm font-medium truncate text-left",
-                          location.startsWith('/admin') ? "text-white" : "text-[var(--main-sidebar-fg)]",
-                          "group-hover:text-white"
-                        )}>
-                          Administración
-                        </span>
-                        <span className={cn(
-                          "text-xs truncate text-left",
-                          location.startsWith('/admin') ? "text-white opacity-100" : "text-[var(--main-sidebar-fg)] opacity-60",
-                          "group-hover:text-white group-hover:opacity-100"
-                        )}>
-                          Panel de control
-                        </span>
-                      </div>
-                    )}
-                  </button>
-                )}
-              </div>
-            ) : (
-              /* SIDEBARS ESPECÍFICOS */
-              <div className={cn(
-                "flex flex-col gap-[2px]",
-                isExpanded ? "px-[9px]" : "items-center"
-              )}>
-                {/* Logo - altura igual al MainHeader para alineación perfecta */}
-                <button
-                  onClick={() => {
-                    setSidebarLevel('general');
-                    navigate('/home');
-                  }}
-                  className={cn(
-                    "h-[50px] rounded-md cursor-pointer transition-colors flex items-center group overflow-hidden",
-                    isExpanded ? "w-full justify-between" : "w-8"
+                    </button>
                   )}
+                </div>
+              </div>
+
+              {/* SECCIÓN INFERIOR: Botón de anclaje */}
+              <div className="pt-6 pb-6 flex flex-col gap-[2px] items-center">
+                <button
+                  onClick={handleDockToggle}
+                  className="h-10 w-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center justify-center group"
                 >
-                  <div className="flex items-center overflow-hidden">
-                    {/* Logo siempre en la misma posición */}
-                    <div className="flex items-center justify-center w-8 flex-shrink-0">
-                      <img 
-                        src="/Seencel512.png" 
-                        alt="Seencel Logo" 
-                        className="h-8 w-auto object-contain"
-                      />
-                    </div>
-                    
-                    {/* Texto que aparece cuando se expande - Nombre de la sección */}
-                    {isExpanded && (
-                      <div className="flex items-center overflow-hidden min-w-0 ml-3">
-                        <span className="text-lg font-normal text-[var(--main-sidebar-fg)] group-hover:text-white truncate">
-                          {sidebarLevel === 'organization' ? 'Organización' :
-                           sidebarLevel === 'project' ? 'Proyecto' :
-                           sidebarLevel === 'community' ? 'Comunidad' :
-                           sidebarLevel === 'learning' ? 'Capacitaciones' :
-                           sidebarLevel === 'admin' ? 'Administración' : 'Seencel'}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Icono de volver - solo se muestra cuando está expandido */}
-                  {isExpanded && (
-                    <ArrowLeft className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 flex-shrink-0" />
+                  {isDocked ? (
+                    <PanelLeftClose className="h-5 w-5 text-[var(--main-sidebar-fg)] group-hover:text-[var(--accent)]" />
+                  ) : (
+                    <PanelLeftOpen className="h-5 w-5 text-[var(--main-sidebar-fg)] group-hover:text-[var(--accent)]" />
                   )}
                 </button>
-                
-                {/* Espacio después del logo */}
-                <div className="h-3"></div>
-
-                {/* {/* Selector de Organización - solo en sidebar de organización */}
-                {/* {sidebarLevel === 'organization' && (
-                  <div className="h-16 flex items-center justify-center mb-2">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <button
-                          className={cn(
-                            "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
-                            isExpanded ? "w-full" : "w-8"
-                          )}
-                        >
-                          {/* Icono siempre centrado */}
-                          {/* <div className="flex items-center justify-center w-8 flex-shrink-0">
-                            <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                              <Building className="h-4 w-4" style={{ color: 'var(--accent)' }} />
-                            </div>
-                          </div> */}
-                          
-                          {/* Texto que aparece cuando se expande */}
-                          {/* {isExpanded && (
-                            <div className="flex flex-1 items-center justify-between overflow-hidden min-w-0 ml-3">
-                              <div className="flex flex-col justify-center overflow-hidden min-w-0">
-                                <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
-                                  {userData?.organization?.name || "Sin organización"}
-                                </span>
-                                <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 truncate text-left">
-                                  Cambiar organización
-                                </span>
-                              </div>
-                              <ChevronDown className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 flex-shrink-0 ml-2" />
-                            </div>
-                          )}
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent 
-                        side="right" 
-                        align="start"
-                        className="w-64 p-2"
-                      >
-                        <div className="space-y-1">
-                          <div className="px-2 py-1.5">
-                            <p className="text-xs font-semibold text-muted-foreground">Organizaciones</p>
-                          </div>
-                          {!userData?.organizations || userData.organizations.length === 0 ? (
-                            <div className="px-2 py-4 text-center">
-                              <p className="text-sm text-muted-foreground">No hay organizaciones disponibles</p>
-                            </div>
-                          ) : (
-                            userData.organizations.map((org: any) => (
-                              <button
-                                key={org.id}
-                                onClick={() => {
-                                  setCurrentOrganization(org.id);
-                                  queryClient.invalidateQueries({ queryKey: ['current-user'] });
-                                  queryClient.invalidateQueries({ queryKey: ['projects'] });
-                                }}
-                                className={cn(
-                                  "w-full px-2 py-2 text-left text-sm rounded-md transition-colors",
-                                  org.id === currentOrganizationId
-                                    ? "bg-accent/10 text-accent font-medium"
-                                    : "hover:bg-accent/5"
-                                )}
-                              >
-                                {org.name}
-                              </button>
-                            ))
-                          )}
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                )} */}
-                
-                {/* {/* Selector de Proyecto - solo en sidebar de proyecto */}
-                {/* {sidebarLevel === 'project' && (
-                  <div className="h-16 flex items-center justify-center mb-2">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <button
-                          className={cn(
-                            "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
-                            isExpanded ? "w-full" : "w-8"
-                          )}
-                        >
-                          {/* Icono siempre centrado */}
-                          {/* <div className="flex items-center justify-center w-8 flex-shrink-0">
-                            <div className="h-8 w-8 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
-                              <FolderOpen className="h-4 w-4" style={{ color: 'var(--accent)' }} />
-                            </div>
-                          </div> */}
-                          
-                          {/* Texto que aparece cuando se expande */}
-                          {/* {isExpanded && (
-                            <div className="flex flex-1 items-center justify-between overflow-hidden min-w-0 ml-3">
-                              <div className="flex flex-col justify-center overflow-hidden min-w-0">
-                                <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
-                                  {currentProjectName}
-                                </span>
-                                <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 truncate text-left">
-                                  Cambiar proyecto
-                                </span>
-                              </div>
-                              <ChevronDown className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 flex-shrink-0 ml-2" />
-                            </div>
-                          )}
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent 
-                        side="right" 
-                        align="start"
-                        className="w-64 p-2"
-                      >
-                        <div className="space-y-1">
-                          <div className="px-2 py-1.5">
-                            <p className="text-xs font-semibold text-muted-foreground">Proyectos</p>
-                          </div>
-                          {projectsLite.length === 0 ? (
-                            <div className="px-2 py-4 text-center">
-                              <p className="text-sm text-muted-foreground">No hay proyectos disponibles</p>
-                            </div>
-                          ) : (
-                            projectsLite.map((project) => (
-                              <button
-                                key={project.id}
-                                onClick={() => handleProjectChange(project.id)}
-                                className={cn(
-                                  "w-full px-2 py-2 text-left text-sm rounded-md transition-colors",
-                                  project.id === selectedProjectId
-                                    ? "bg-accent/10 text-accent font-medium"
-                                    : "hover:bg-accent/5"
-                                )}
-                              >
-                                {project.name}
-                              </button>
-                            ))
-                          )}
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                )} */}
-                
-                {navigationItems.map((item, index) => {
-                if (item.adminOnly && !isAdmin) return null;
-                
-                const isActive = location === item.href;
-                // Configuración de divisores con texto
-                const getDividerInfo = () => {
-                  if (sidebarLevel === 'organization') {
-                    if (item.id === 'dashboard') return { show: true, text: 'Gestión' };
-                    if (item.id === 'analysis') return { show: true, text: 'Finanzas' };
-                    if (item.id === 'activity') return { show: true, text: 'Organización' };
-                  } else if (sidebarLevel === 'project') {
-                    if (item.id === 'basic-data') return { show: true, text: 'Dirección y Construcción' };
-                    if (item.id === 'logs') return { show: true, text: 'Comercialización' };
-                  } else if (sidebarLevel === 'learning') {
-                    if (item.id === 'dashboard') return { show: true, text: 'Capacitaciones' };
-                  } else if (sidebarLevel === 'admin') {
-                    if (item.id === 'community') return { show: true, text: 'Administración' };
-                    if (item.id === 'general') return { show: true, text: 'Construcción' };
-                  }
-                  return { show: false, text: '' };
-                };
-
-                const dividerInfo = getDividerInfo();
-                
-                // Botón con o sin restricción
-                const isExternalLink = item.href.startsWith('http');
-                const button = (
-                  <ButtonSidebar
-                    icon={<item.icon className="w-[18px] h-[18px]" />}
-                    label={item.label}
-                    isActive={isActive}
-                    isExpanded={isExpanded}
-                    onClick={() => {
-                      if (isExternalLink) {
-                        window.open(item.href, '_blank', 'noopener,noreferrer');
-                      } else {
-                        navigate(item.href);
-                      }
-                    }}
-                    href={item.href}
-                    variant="secondary"
-                    badgeCount={item.id === 'support' && isAdmin ? unreadCount : undefined}
-                  />
-                );
-                
-                return (
-                  <div key={item.id}>
-                    {item.restricted ? (
-                      <PlanRestricted reason={item.restricted}>
-                        {button}
-                      </PlanRestricted>
-                    ) : (
-                      button
-                    )}
-                    {dividerInfo.show && (
-                      <div className="my-3 h-[12px] flex items-center justify-center w-full">
-                        {isExpanded ? (
-                          // Divisor con texto cuando está expandido
-                          <div className="flex items-center gap-2 w-full">
-                            <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                            <span className="text-[10px] font-medium text-[var(--main-sidebar-fg)] opacity-60 px-1 leading-none">
-                              {dividerInfo.text}
-                            </span>
-                            <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                          </div>
-                        ) : (
-                          // Línea simple cuando está colapsado - centrada en los 32px del botón
-                          <div className="w-8 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            )}
-          </div>
-
-          {/* SECCIÓN INFERIOR: Controles y Avatar (siempre pegados al fondo) */}
-          <div className={cn(
-            "pt-6 pb-6 flex flex-col gap-[2px]",
-            isExpanded ? "px-[9px]" : "items-center"
-          )}>
-            {/* Botón de Anclar */}
-            <ButtonSidebar
-              icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
-              label={isDocked ? "Desanclar" : "Anclar"}
-              isActive={false}
-              isExpanded={isExpanded}
-              onClick={handleDockToggle}
-              variant="secondary"
-            />
-
-            {/* Notificaciones - Ahora está en el header */}
-            {/* <NotificationBell isExpanded={isExpanded} /> */}
-
-            {/* Avatar del Usuario - Ahora está en el header */}
-            {/* <button
-              className={cn(
-                "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
-                isExpanded ? "w-full" : "w-8"
-              )}
-              onClick={() => navigate('/profile')}
-            >
-              <div className="flex items-center justify-center w-8 flex-shrink-0">
-                <Avatar className="h-8 w-8 flex-shrink-0 ring-0 border-0">
-                  <AvatarFallback className="bg-[var(--accent)] text-white text-sm font-semibold border-0">
-                    {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
               </div>
-              
-              {isExpanded && (
-                <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
-                  <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
-                    {userData?.user?.full_name || 'Usuario'}
-                  </span>
-                  <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 truncate text-left">
-                    Ver perfil
-                  </span>
-                </div>
-              )}
-            </button> */}
+            </aside>
           </div>
 
-        </aside>
-      </div>
+          {/* SIDEBAR DERECHO - NAVEGACIÓN ESPECÍFICA (240px, aparece en hover) */}
+          {isHovered && sidebarLevel !== 'general' && (
+            <div className="w-[240px] h-full px-[9px] pt-6 pb-6 flex flex-col">
+              {/* Título del contexto */}
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold text-[var(--main-sidebar-fg)] px-2">
+                  {getContextTitle()}
+                </h2>
+              </div>
+
+              {/* Botones de navegación */}
+              <div className="flex flex-col gap-[2px] flex-1 overflow-y-auto">
+                {navigationItems.map((item) => {
+                  if (item.adminOnly && !isAdmin) return null;
+                  
+                  const isActive = location === item.href;
+                  const isExternalLink = item.href.startsWith('http');
+                  
+                  const button = (
+                    <ButtonSidebar
+                      key={item.id}
+                      icon={<item.icon className="w-[18px] h-[18px]" />}
+                      label={item.label}
+                      isActive={isActive}
+                      isExpanded={true}
+                      onClick={() => {
+                        if (isExternalLink) {
+                          window.open(item.href, '_blank', 'noopener,noreferrer');
+                        } else {
+                          navigate(item.href);
+                        }
+                      }}
+                      href={item.href}
+                      variant="secondary"
+                      badgeCount={item.id === 'support' && isAdmin ? unreadCount : undefined}
+                    />
+                  );
+                  
+                  return item.restricted ? (
+                    <PlanRestricted key={item.id} reason={item.restricted}>
+                      {button}
+                    </PlanRestricted>
+                  ) : (
+                    button
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
