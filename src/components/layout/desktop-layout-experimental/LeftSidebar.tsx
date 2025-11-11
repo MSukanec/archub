@@ -96,6 +96,7 @@ export function LeftSidebar() {
   // Estado para popovers y modals
   const [notificationPopoverOpen, setNotificationPopoverOpen] = useState(false);
   const [helpPopoverOpen, setHelpPopoverOpen] = useState(false);
+  const [userPopoverOpen, setUserPopoverOpen] = useState(false);
   const [supportModalOpen, setSupportModalOpen] = useState(false);
   const [notificationUnreadCount, setNotificationUnreadCount] = useState(0);
   
@@ -463,14 +464,17 @@ export function LeftSidebar() {
                       .map((button) => {
                         const buttonElement = (
                           <SidebarIconButton
-                            key={button.id}
                             icon={button.icon}
                             isActive={sidebarLevel === button.id}
                             onClick={button.onClick}
                             testId={button.testId}
                           />
                         );
-                        return button.wrapper ? button.wrapper(buttonElement) : buttonElement;
+                        
+                        if (button.wrapper) {
+                          return <div key={button.id}>{button.wrapper(buttonElement)}</div>;
+                        }
+                        return <div key={button.id}>{buttonElement}</div>;
                       });
                   })()}
                 </div>
@@ -578,24 +582,90 @@ export function LeftSidebar() {
                 </PopoverContent>
               </Popover>
 
-              {/* Avatar del usuario */}
-              <button
-                onClick={() => setSidebarLevel('user')}
-                className={cn(
-                  "h-8 w-8 rounded-lg cursor-pointer transition-colors flex items-center justify-center relative",
-                  "hover:bg-[var(--main-sidebar-button-hover-bg)]",
-                  sidebarLevel === 'user' && "bg-[var(--main-sidebar-button-active-bg)]"
-                )}
-                title="Configuración de usuario"
-                data-testid="button-user-menu"
-              >
-                <Avatar className="h-7 w-7" style={{ border: 'none', outline: 'none' }}>
-                  <AvatarImage src={userData?.user?.avatar_url} />
-                  <AvatarFallback className="text-xs bg-accent text-white" style={{ border: 'none' }}>
-                    {userData?.user?.first_name?.[0] || userData?.user?.email?.[0] || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-              </button>
+              {/* Avatar del usuario con Popover */}
+              <Popover open={userPopoverOpen} onOpenChange={setUserPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <div>
+                    <SidebarIconButton
+                      icon={
+                        <Avatar className="h-5 w-5" style={{ border: 'none', outline: 'none' }}>
+                          <AvatarImage src={userData?.user?.avatar_url} />
+                          <AvatarFallback className="text-xs bg-accent text-white" style={{ border: 'none' }}>
+                            {userData?.user?.first_name?.[0] || userData?.user?.email?.[0] || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                      }
+                      onClick={() => setUserPopoverOpen(!userPopoverOpen)}
+                      title="Menú de usuario"
+                      testId="button-user-menu"
+                    />
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent 
+                  side="right" 
+                  align="end"
+                  className="w-[200px] p-2"
+                  sideOffset={8}
+                  alignOffset={0}
+                >
+                  <div className="flex flex-col gap-1">
+                    {/* Mi Perfil */}
+                    <button
+                      onClick={() => {
+                        navigate('/profile');
+                        setUserPopoverOpen(false);
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent/10 transition-colors text-left"
+                      data-testid="button-profile"
+                    >
+                      <User className="h-4 w-4" />
+                      <span>Mi Perfil</span>
+                    </button>
+                    
+                    {/* Página de Inicio */}
+                    <button
+                      onClick={() => {
+                        navigate('/');
+                        setUserPopoverOpen(false);
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent/10 transition-colors text-left"
+                      data-testid="button-home"
+                    >
+                      <Home className="h-4 w-4" />
+                      <span>Página de Inicio</span>
+                    </button>
+                    
+                    {/* Cambiar Modo */}
+                    <button
+                      onClick={() => {
+                        navigate('/select-mode');
+                        setUserPopoverOpen(false);
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent/10 transition-colors text-left"
+                      data-testid="button-change-mode"
+                    >
+                      <Settings className="h-4 w-4" />
+                      <span>Cambiar Modo</span>
+                    </button>
+                    
+                    {/* Separador */}
+                    <div className="h-px bg-border my-1" />
+                    
+                    {/* Cerrar Sesión */}
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setUserPopoverOpen(false);
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-destructive/10 text-destructive transition-colors text-left"
+                      data-testid="button-logout"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Cerrar Sesión</span>
+                    </button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
