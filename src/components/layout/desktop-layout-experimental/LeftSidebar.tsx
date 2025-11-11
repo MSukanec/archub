@@ -312,9 +312,9 @@ export function LeftSidebar() {
                 title="Configuración de usuario"
                 data-testid="button-user-menu"
               >
-                <Avatar className="h-7 w-7 border-0">
+                <Avatar className="h-7 w-7" style={{ border: 'none', outline: 'none' }}>
                   <AvatarImage src={userData?.user?.avatar_url} />
-                  <AvatarFallback className="text-xs bg-accent text-white">
+                  <AvatarFallback className="text-xs bg-accent text-white" style={{ border: 'none' }}>
                     {userData?.user?.first_name?.[0] || userData?.user?.email?.[0] || 'U'}
                   </AvatarFallback>
                 </Avatar>
@@ -348,8 +348,8 @@ export function LeftSidebar() {
                       variant="secondary"
                     />
                     
-                    {/* Separador */}
-                    <div className="my-2 mx-2 border-t border-[var(--main-sidebar-border)]"></div>
+                    {/* Espacio vacío simulando un botón */}
+                    <div className="h-9"></div>
                     
                     {/* Página de Inicio */}
                     <ButtonSidebar
