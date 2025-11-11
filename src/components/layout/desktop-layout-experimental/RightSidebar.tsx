@@ -6,22 +6,17 @@
  * - Panel de notificaciones integrado en el sidebar
  */
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { AIPanel } from "@/components/ai/AIPanel";
 import { SupportPanel } from "@/components/support/SupportPanel";
 import { SidebarIconButton } from "../desktop/SidebarIconButton";
-import { Bell, Sparkles } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Moon, Sun, Headphones, MessageCircle } from "lucide-react";
+import { Sparkles, Headphones, MessageCircle } from "lucide-react";
 import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
-import { getUnreadCount, subscribeUserNotifications } from '@/lib/notifications';
 import { useUnreadSupportMessages } from '@/hooks/use-unread-support-messages';
 import { useUnreadUserSupportMessages } from '@/hooks/use-unread-user-support-messages';
-import { useEffect } from 'react';
 import { queryClient } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 
@@ -33,9 +28,8 @@ export function RightSidebar() {
   const userFullName = userData?.user?.full_name || userData?.user?.first_name || 'Usuario';
   const userAvatarUrl = userData?.user?.avatar_url;
   
-  // Estado para expansión del sidebar - separado para notificaciones, AI y soporte
-  const [activePanel, setActivePanel] = useState<'notifications' | 'ai' | 'support' | null>(null);
-  const [unreadCount, setUnreadCount] = useState(0);
+  // Estado para expansión del sidebar - separado para AI y soporte
+  const [activePanel, setActivePanel] = useState<'ai' | 'support' | null>(null);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Contador de mensajes sin leer
@@ -52,32 +46,6 @@ export function RightSidebar() {
     const preferencesId = userData?.preferences?.id;
     await toggleTheme(userId, preferencesId);
   };
-
-  // Fetch unread count
-  const fetchUnreadCount = async () => {
-    if (!userId) return;
-    
-    try {
-      const count = await getUnreadCount(userId);
-      setUnreadCount(count);
-    } catch (error) {
-      console.error('Error fetching unread count:', error);
-    }
-  };
-
-  useEffect(() => {
-    if (!userId) return;
-
-    fetchUnreadCount();
-
-    const unsubscribe = subscribeUserNotifications(userId, () => {
-      fetchUnreadCount();
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [userId]);
 
   // 🔥 SUPABASE REALTIME - Suscripción para mensajes de soporte
   useEffect(() => {
@@ -136,7 +104,7 @@ export function RightSidebar() {
     };
   }, [userId, isAdmin]);
 
-  const handlePanelClick = (panel: 'notifications' | 'ai' | 'support') => {
+  const handlePanelClick = (panel: 'ai' | 'support') => {
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
       closeTimeoutRef.current = null;
@@ -181,16 +149,6 @@ export function RightSidebar() {
       {/* PANEL EXPANDIBLE - Cambia según el panel activo */}
       {isExpanded && userId && (
         <div className="w-[350px] border-r border-[var(--main-sidebar-border)] h-full overflow-hidden">
-          {activePanel === 'notifications' && (
-            <div className="px-3 h-full">
-              <NotificationDropdown
-                userId={userId}
-                onRefresh={fetchUnreadCount}
-                onClose={() => setActivePanel(null)}
-              />
-            </div>
-          )}
-          
           {activePanel === 'ai' && (
             <div className="px-3 h-full">
               <AIPanel
@@ -222,16 +180,6 @@ export function RightSidebar() {
           <div className="px-0 pt-3 overflow-y-auto">
             <div className="flex flex-col gap-[2px] items-center">
               
-              {/* Botón de Notificaciones */}
-              <SidebarIconButton
-                icon={<Bell className="h-5 w-5" />}
-                isActive={activePanel === 'notifications'}
-                onClick={() => handlePanelClick('notifications')}
-                badge={unreadCount}
-                title="Notificaciones"
-                testId="button-notifications"
-              />
-
               {/* Botón de IA - CON ICONO BRILLANTE */}
               <SidebarIconButton
                 icon={<Sparkles className="h-5 w-5 ai-icon-sparkle" />}

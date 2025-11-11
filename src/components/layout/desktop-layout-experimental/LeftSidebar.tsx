@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
@@ -16,6 +16,8 @@ import { useUnreadSupportMessages } from '@/hooks/use-unread-support-messages';
 import ButtonSidebar from "../desktop-layout-classic/ButtonSidebar";
 import { SidebarIconButton } from "../desktop/SidebarIconButton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
+import { getUnreadCount, subscribeUserNotifications } from '@/lib/notifications';
 import { 
   Settings, 
   Home,
@@ -47,7 +49,8 @@ import {
   Folder,
   TrendingUp,
   MapPin,
-  LogOut
+  LogOut,
+  Bell
 } from "lucide-react";
 import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -75,6 +78,11 @@ export function LeftSidebar() {
   
   // Contador de mensajes sin leer (solo para admins)
   const { data: unreadCount = 0 } = useUnreadSupportMessages();
+  
+  // Estado para popover de notificaciones
+  const [notificationPopoverOpen, setNotificationPopoverOpen] = useState(false);
+  const [notificationUnreadCount, setNotificationUnreadCount] = useState(0);
+  const userId = userData?.user?.id;
   
   // Estados simples
   const isExpanded = isDocked || isHovered;
@@ -220,6 +228,32 @@ export function LeftSidebar() {
     }
   };
 
+  // Fetch notification unread count
+  const fetchNotificationUnreadCount = async () => {
+    if (!userId) return;
+    
+    try {
+      const count = await getUnreadCount(userId);
+      setNotificationUnreadCount(count);
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (!userId) return;
+
+    fetchNotificationUnreadCount();
+
+    const unsubscribe = subscribeUserNotifications(userId, () => {
+      fetchNotificationUnreadCount();
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [userId]);
+
   return (
     <div className="flex flex-row h-full">
       {/* WRAPPER CON FRAME EFFECT */}
@@ -300,8 +334,38 @@ export function LeftSidebar() {
                 </div>
               </div>
 
-            {/* SECCIÓN INFERIOR: Avatar del usuario */}
+            {/* SECCIÓN INFERIOR: Notificaciones y Avatar del usuario */}
             <div className="px-0 pt-3 pb-3 flex flex-col gap-[2px] items-center">
+              {/* Botón de Notificaciones con Popover */}
+              <Popover open={notificationPopoverOpen} onOpenChange={setNotificationPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <div>
+                    <SidebarIconButton
+                      icon={<Bell className="h-5 w-5" />}
+                      onClick={() => setNotificationPopoverOpen(!notificationPopoverOpen)}
+                      badge={notificationUnreadCount}
+                      title="Notificaciones"
+                      testId="button-notifications-left"
+                    />
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent 
+                  side="right" 
+                  align="start"
+                  className="w-[380px] p-0 bg-[#1a1a1a] border-[#2a2a2a]"
+                  sideOffset={8}
+                >
+                  {userId && (
+                    <NotificationDropdown
+                      userId={userId}
+                      onRefresh={fetchNotificationUnreadCount}
+                      onClose={() => setNotificationPopoverOpen(false)}
+                    />
+                  )}
+                </PopoverContent>
+              </Popover>
+
+              {/* Avatar del usuario */}
               <button
                 onClick={() => setSidebarLevel('user')}
                 className={cn(
