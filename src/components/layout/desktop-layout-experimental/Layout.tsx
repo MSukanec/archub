@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 // import { SecondarySidebar } from "./SecondarySidebar";
-import { Sidebar } from "./Sidebar";
+import { LeftSidebar } from "./LeftSidebar";
 import { RightSidebar } from "./RightSidebar";
 // Header removed - now handled by sidebar
 // import { PrimarySidebar } from "./PrimarySidebar";
@@ -245,7 +245,7 @@ function LayoutContent({
         <div className="flex-1 flex min-h-0">
           {/* Sidebar - Full height with padding */}
           <div className="flex-shrink-0 p-1">
-            <Sidebar />
+            <LeftSidebar />
           </div>
 
           {/* Main Content Area - MainHeader + Page Content */}

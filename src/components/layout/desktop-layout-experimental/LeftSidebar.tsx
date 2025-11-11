@@ -62,7 +62,7 @@ interface SidebarItem {
   restricted?: "coming_soon" | string;
 }
 
-export function Sidebar() {
+export function LeftSidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const isAdmin = useIsAdmin();
@@ -236,9 +236,6 @@ export function Sidebar() {
                     testId="button-sidebar-home"
                   />
 
-                  {/* Divisor */}
-                  <div className="my-3 w-8 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-
                   {/* Botón Organización */}
                   <SidebarIconButton
                     icon={<Building className="h-5 w-5" />}
@@ -254,9 +251,6 @@ export function Sidebar() {
                       onClick={() => setSidebarLevel('project')}
                     />
                   )}
-
-                  {/* Divisor */}
-                  <div className="my-3 w-8 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
 
                   {/* Botón Comunidad */}
                   <PlanRestricted reason="coming_soon">
