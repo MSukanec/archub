@@ -8,10 +8,30 @@ export default function Privacy() {
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
+    // Save original values to restore on cleanup
+    const originalTitle = document.title;
+    let metaDescription = document.querySelector('meta[name="description"]');
+    const originalDescription = metaDescription?.getAttribute("content") || "";
+    
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    const originalOgTitle = ogTitle?.getAttribute("content") || "";
+    
+    const ogDescription = document.querySelector('meta[property="og:description"]');
+    const originalOgDescription = ogDescription?.getAttribute("content") || "";
+    
+    const ogType = document.querySelector('meta[property="og:type"]');
+    const originalOgType = ogType?.getAttribute("content") || "";
+    
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    const originalOgUrl = ogUrl?.getAttribute("content") || "";
+
+    // Track newly created tags for cleanup
+    const createdTags: Element[] = [];
+    
+    // Set Privacy page meta tags
     document.title = "Política de Privacidad - Seencel";
     
-    // Set meta tags for SEO
-    const metaDescription = document.querySelector('meta[name="description"]');
+    let descriptionWasCreated = false;
     if (metaDescription) {
       metaDescription.setAttribute("content", "Política de privacidad de Seencel. Información sobre cómo recopilamos, usamos, compartimos y protegemos tus datos personales. Cumplimiento con Google OAuth y normativas de privacidad.");
     } else {
@@ -19,8 +39,10 @@ export default function Privacy() {
       meta.name = "description";
       meta.content = "Política de privacidad de Seencel. Información sobre cómo recopilamos, usamos, compartimos y protegemos tus datos personales. Cumplimiento con Google OAuth y normativas de privacidad.";
       document.head.appendChild(meta);
+      metaDescription = meta; // Update reference to newly created tag
+      descriptionWasCreated = true;
     }
-
+    
     // Open Graph tags
     const setMetaTag = (property: string, content: string) => {
       let tag = document.querySelector(`meta[property="${property}"]`);
@@ -31,6 +53,7 @@ export default function Privacy() {
         tag.setAttribute("property", property);
         tag.setAttribute("content", content);
         document.head.appendChild(tag);
+        createdTags.push(tag); // Track newly created tag
       }
     };
 
@@ -56,7 +79,42 @@ export default function Privacy() {
     };
 
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    
+    // Cleanup: restore original meta tags
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      
+      document.title = originalTitle;
+      
+      // Restore or remove meta description
+      if (metaDescription) {
+        if (descriptionWasCreated) {
+          metaDescription.remove();
+        } else {
+          metaDescription.setAttribute("content", originalDescription);
+        }
+      }
+      
+      // Always restore OG tags to their original values (even if empty)
+      if (ogTitle) {
+        ogTitle.setAttribute("content", originalOgTitle);
+      }
+      
+      if (ogDescription) {
+        ogDescription.setAttribute("content", originalOgDescription);
+      }
+      
+      if (ogType) {
+        ogType.setAttribute("content", originalOgType);
+      }
+      
+      if (ogUrl) {
+        ogUrl.setAttribute("content", originalOgUrl);
+      }
+      
+      // Remove any tags that were created (didn't exist before)
+      createdTags.forEach(tag => tag.remove());
+    };
   }, []);
 
   const scrollToTop = () => {
