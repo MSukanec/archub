@@ -8,7 +8,6 @@
 
 import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { UserQuickAccess } from "@/components/ui-custom/layout/UserQuickAccess";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { AIPanel } from "@/components/ai/AIPanel";
 import { SupportPanel } from "@/components/support/SupportPanel";
@@ -223,14 +222,6 @@ export function RightSidebar() {
           <div className="px-0 pt-3 overflow-y-auto">
             <div className="flex flex-col gap-[2px] items-center">
               
-              {/* Avatar del Usuario - Altura igual al logo del sidebar izquierdo */}
-              <div className="h-[50px] w-8 flex items-center justify-center">
-                <UserQuickAccess />
-              </div>
-
-              {/* Espacio después del avatar - igual al logo */}
-              <div className="h-3"></div>
-
               {/* Botón de Notificaciones */}
               <SidebarIconButton
                 icon={<Bell className="h-5 w-5" />}

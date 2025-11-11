@@ -52,6 +52,7 @@ import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { UserQuickAccess } from "@/components/ui-custom/layout/UserQuickAccess";
 
 interface SidebarItem {
   id: string;
@@ -214,7 +215,7 @@ export function LeftSidebar() {
           {/* SIDEBAR IZQUIERDO - CONTEXTOS (siempre visible, 50px, altura total) */}
           <div className="bg-[var(--main-sidebar-bg)] w-[50px] h-full rounded-lg flex flex-col">
             {/* SECCIÓN: Botones de contexto con scroll */}
-            <div className="px-0 pt-3 pb-3 overflow-y-auto flex-1">
+            <div className="px-0 pt-3 overflow-y-auto flex-1">
                 <div className="flex flex-col gap-[2px] items-center">
                   {/* Logo */}
                   <div className="h-[50px] flex items-center justify-center w-8 mb-3">
@@ -252,6 +253,13 @@ export function LeftSidebar() {
                     />
                   )}
 
+                  {/* Botón Capacitaciones */}
+                  <SidebarIconButton
+                    icon={<GraduationCap className="h-5 w-5" />}
+                    isActive={sidebarLevel === 'learning'}
+                    onClick={() => setSidebarLevel('learning')}
+                  />
+
                   {/* Botón Comunidad */}
                   <PlanRestricted reason="coming_soon">
                     <SidebarIconButton
@@ -261,13 +269,6 @@ export function LeftSidebar() {
                       testId="button-sidebar-community"
                     />
                   </PlanRestricted>
-
-                  {/* Botón Capacitaciones */}
-                  <SidebarIconButton
-                    icon={<GraduationCap className="h-5 w-5" />}
-                    isActive={sidebarLevel === 'learning'}
-                    onClick={() => setSidebarLevel('learning')}
-                  />
 
                   {/* Botón Administración - solo si es admin */}
                   {isAdmin && (
@@ -281,6 +282,13 @@ export function LeftSidebar() {
                   )}
                 </div>
               </div>
+
+            {/* SECCIÓN INFERIOR: Avatar del usuario */}
+            <div className="px-0 pb-3 flex flex-col gap-[2px] items-center">
+              <div className="h-[50px] w-8 flex items-center justify-center">
+                <UserQuickAccess />
+              </div>
+            </div>
           </div>
 
           {/* SIDEBAR DERECHO - NAVEGACIÓN ESPECÍFICA (240px, aparece en hover) */}
