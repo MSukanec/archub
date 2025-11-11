@@ -193,7 +193,7 @@ export function Sidebar() {
     <div className="flex flex-row h-full">
       {/* SIDEBAR PRINCIPAL */}
       <div 
-        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-10 overflow-hidden relative h-full rounded-md"
+        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-10 overflow-hidden relative h-full rounded-lg"
         style={{
           width: isDocked 
             ? '240px' 

@@ -171,7 +171,7 @@ export function RightSidebar() {
 
   return (
     <div 
-      className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-l border-[var(--main-sidebar-border)] transition-all duration-200 ease-in-out h-screen flex flex-row justify-end"
+      className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-l border-[var(--main-sidebar-border)] transition-all duration-200 ease-in-out h-full flex flex-row justify-end rounded-lg overflow-hidden"
       style={{
         width: isExpanded ? '400px' : '50px'
       }}
@@ -180,7 +180,7 @@ export function RightSidebar() {
     >
       {/* PANEL EXPANDIBLE - Cambia según el panel activo */}
       {isExpanded && userId && (
-        <div className="w-[350px] border-r border-[var(--main-sidebar-border)] h-screen overflow-hidden">
+        <div className="w-[350px] border-r border-[var(--main-sidebar-border)] h-full overflow-hidden">
           {activePanel === 'notifications' && (
             <div className="px-3 h-full">
               <NotificationDropdown
@@ -216,8 +216,8 @@ export function RightSidebar() {
       )}
 
       {/* COLUMNA DE BOTONES - Siempre visible, 50px, pegada a la derecha */}
-      <div className="w-[50px] h-screen flex-shrink-0">
-        <aside className="grid h-screen grid-rows-[1fr_auto] w-[50px]">
+      <div className="w-[50px] h-full flex-shrink-0">
+        <aside className="grid h-full grid-rows-[1fr_auto] w-[50px]">
           {/* SECCIÓN SUPERIOR: Botones principales */}
           <div className="px-0 pt-6 overflow-y-auto">
             <div className="flex flex-col gap-[2px] items-center">
