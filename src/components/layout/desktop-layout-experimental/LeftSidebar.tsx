@@ -419,50 +419,30 @@ export function LeftSidebar() {
                     const learnerDirectButtons = [
                       {
                         id: 'learner-dashboard' as const,
-                        icon: <BarChart3 className="h-5 w-5" />,
+                        icon: <Home className="h-5 w-5" />, // Icono de casita
                         testId: 'button-sidebar-learning-dashboard',
                         onClick: () => navigate('/learning/dashboard'),
                         isActive: location === '/learning/dashboard',
                       },
                       {
                         id: 'learner-courses' as const,
-                        icon: <BookOpen className="h-5 w-5" />,
+                        icon: <GraduationCap className="h-5 w-5" />, // Icono de gorrito
                         testId: 'button-sidebar-learning-courses',
                         onClick: () => navigate('/learning/courses'),
                         isActive: location === '/learning/courses',
                       },
                       {
                         id: 'learner-discord' as const,
-                        icon: <SiDiscord className="h-5 w-5" />,
+                        icon: <SiDiscord className="h-5 w-5" />, // Icono de Discord
                         testId: 'button-sidebar-learning-discord',
                         onClick: () => window.open('https://discord.gg/seencel', '_blank'),
                         isActive: false,
                       },
                     ];
 
-                    // Si es modo learner, usar botones directos en lugar del botón learning
+                    // Si es modo learner, mostrar SOLO los 3 botones directos (sin submenu)
                     if (userMode === 'learner') {
-                      const baseButtons = contextButtons
-                        .filter((button) => {
-                          if (isButtonExcluded(userMode, button.id)) return false;
-                          if (!button.shouldRender()) return false;
-                          return true;
-                        })
-                        .map((button) => {
-                          const buttonElement = (
-                            <SidebarIconButton
-                              key={button.id}
-                              icon={button.icon}
-                              isActive={sidebarLevel === button.id}
-                              onClick={button.onClick}
-                              testId={button.testId}
-                            />
-                          );
-                          return button.wrapper ? button.wrapper(buttonElement) : buttonElement;
-                        });
-
-                      // Agregar botones directos de learner
-                      const learnerButtons = learnerDirectButtons.map((button) => (
+                      return learnerDirectButtons.map((button) => (
                         <SidebarIconButton
                           key={button.id}
                           icon={button.icon}
@@ -471,8 +451,6 @@ export function LeftSidebar() {
                           testId={button.testId}
                         />
                       ));
-
-                      return [...baseButtons, ...learnerButtons];
                     }
 
                     // Para otros modos, usar el sistema normal

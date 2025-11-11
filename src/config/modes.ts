@@ -27,8 +27,8 @@ export const modeConfigs: Record<UserMode, ModeConfig> = {
   // Modo CAPACITACIONES - Solo acceso a learning
   learner: {
     leftSidebar: {
-      allowedContexts: ['general', 'learning', 'user'],
-      excludedButtons: ['organization', 'project', 'community'], // Sin organización, proyecto ni comunidad
+      allowedContexts: ['learning', 'user'], // Sin contexto general
+      excludedButtons: ['general', 'organization', 'project', 'community'], // Solo botones directos de learning
     }
   },
 
