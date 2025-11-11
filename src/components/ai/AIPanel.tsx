@@ -209,16 +209,7 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      {/* HEADER */}
-      <div className="p-4 pb-3">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-sm !text-white">Asistente IA</h3>
-        </div>
-      </div>
-      
-      <Separator className="bg-[var(--main-sidebar-fg)] opacity-20" />
-
+    <div className="flex flex-col h-full">
       {/* CONTENIDO */}
       {isLoadingHistory ? (
         <div className="flex-1 flex items-center justify-center">
