@@ -1,5 +1,6 @@
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Settings, UserCircle, Palette, Shield, Monitor } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -22,7 +23,7 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
   const { isDark, setTheme } = useThemeStore()
   
   const [sidebarDocked, setSidebarDocked] = useState(false)
-  const [layoutStyle, setLayoutStyle] = useState<'rounded' | 'flat'>('rounded')
+  const [layoutStyle, setLayoutStyle] = useState<'classic' | 'experimental'>('classic')
 
   // Settings data object for debounced auto-save
   const settingsData = {
@@ -103,7 +104,7 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
       // Set theme from user preferences
       setTheme(userData.preferences.theme === 'dark')
       // Set layout from user preferences
-      setLayoutStyle(userData.preferences.layout || 'rounded')
+      setLayoutStyle(userData.preferences.layout || 'classic')
     }
   }, [userData?.preferences, setTheme])
 
@@ -164,15 +165,23 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
             {/* Layout Style */}
             <div className="flex items-center justify-between py-2">
               <div className="space-y-0.5">
-                <Label className="text-sm font-medium">Layout Flat</Label>
+                <Label className="text-sm font-medium">Estilo de diseño</Label>
                 <div className="text-xs text-muted-foreground">
-                  Cambiar entre diseño redondeado y plano
+                  Selecciona el estilo visual de la aplicación
                 </div>
               </div>
-              <Switch
-                checked={layoutStyle === 'flat'}
-                onCheckedChange={(checked) => setLayoutStyle(checked ? 'flat' : 'rounded')}
-              />
+              <Select
+                value={layoutStyle}
+                onValueChange={(value: 'classic' | 'experimental') => setLayoutStyle(value)}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="classic">Classic</SelectItem>
+                  <SelectItem value="experimental">Experimental</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
