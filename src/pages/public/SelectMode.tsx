@@ -23,35 +23,35 @@ interface ModeOption {
 const modeOptions: ModeOption[] = [
   {
     type: "professional",
-    title: "Profesional",
+    title: "Profesionales y Constructoras",
     description: "Gestiona proyectos completos con equipos, presupuestos y documentación técnica profesional",
     icon: Briefcase,
     available: true,
   },
   {
     type: "learner",
-    title: "Capacitaciones",
+    title: "Cursos y Capacitaciones",
     description: "Accede a cursos especializados y recursos de formación para el desarrollo profesional",
     icon: GraduationCap,
     available: true,
   },
   {
     type: "provider",
-    title: "Proveedores",
+    title: "Fabricantes y Proveedores",
     description: "Administra catálogo de productos, cotizaciones y seguimiento de entregas a obras",
     icon: Package,
     available: false,
   },
   {
     type: "worker",
-    title: "Contratistas",
+    title: "Mano de Obra y Contratistas",
     description: "Registra avances, reporta incidencias y coordina tareas con el equipo del proyecto",
     icon: HardHat,
     available: false,
   },
   {
     type: "visitor",
-    title: "Visitantes",
+    title: "Visitantes y Clientes",
     description: "Explora las funcionalidades de la plataforma sin comprometerte con datos reales",
     icon: UserCircle2,
     available: false,
@@ -198,8 +198,8 @@ export default function SelectMode() {
                 <div className="p-6 relative">
                   {/* Badge */}
                   <Badge 
-                    variant="outline" 
-                    className="mb-4 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                    className="mb-4 border-0 text-white"
+                    style={{ backgroundColor: 'var(--accent)' }}
                   >
                     Disponible
                   </Badge>
@@ -223,7 +223,7 @@ export default function SelectMode() {
 
                   {/* Action Button */}
                   <Button 
-                    variant="outline" 
+                    variant="default" 
                     className="w-full group"
                     disabled={isLoading}
                   >
