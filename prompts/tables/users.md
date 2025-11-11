@@ -59,8 +59,6 @@ create table public.user_organization_preferences (
   constraint user_organization_preferences_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
 ) TABLESPACE pg_default;
 
---------------- TABLA USER_PREFERENCES:
-
 create table public.user_preferences (
   id uuid not null default gen_random_uuid (),
   user_id uuid not null,
@@ -74,6 +72,7 @@ create table public.user_preferences (
   home_checklist jsonb not null default '{"create_contact": false, "create_project": false, "create_movement": false}'::jsonb,
   home_banner_dismissed boolean not null default false,
   last_home_seen_at timestamp with time zone not null default now(),
+  layout text null,
   constraint user_preferences_pkey primary key (id),
   constraint user_preferences_user_id_key unique (user_id),
   constraint user_preferences_last_organization_id_fkey foreign KEY (last_organization_id) references organizations (id) on delete set null,
