@@ -7,13 +7,17 @@ import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Lock } from "lucide-react";
+import { Loader2, Lock, GraduationCap, Briefcase, Package, HardHat, UserCircle2, ArrowRight } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface ModeOption {
   type: 'professional' | 'learner' | 'provider' | 'worker' | 'visitor';
   title: string;
   description: string;
-  number: string;
+  icon: typeof Briefcase;
+  available: boolean;
 }
 
 const modeOptions: ModeOption[] = [
@@ -21,31 +25,36 @@ const modeOptions: ModeOption[] = [
     type: "professional",
     title: "Profesional",
     description: "Gestiona proyectos completos con equipos, presupuestos y documentación técnica profesional",
-    number: "01",
+    icon: Briefcase,
+    available: true,
   },
   {
     type: "learner",
     title: "Capacitaciones",
     description: "Accede a cursos especializados y recursos de formación para el desarrollo profesional",
-    number: "02",
+    icon: GraduationCap,
+    available: true,
   },
   {
     type: "provider",
     title: "Proveedores",
     description: "Administra catálogo de productos, cotizaciones y seguimiento de entregas a obras",
-    number: "03",
+    icon: Package,
+    available: false,
   },
   {
     type: "worker",
     title: "Contratistas",
     description: "Registra avances, reporta incidencias y coordina tareas con el equipo del proyecto",
-    number: "04",
+    icon: HardHat,
+    available: false,
   },
   {
     type: "visitor",
     title: "Visitantes",
     description: "Explora las funcionalidades de la plataforma sin comprometerte con datos reales",
-    number: "05",
+    icon: UserCircle2,
+    available: false,
   }
 ];
 
@@ -58,13 +67,12 @@ export default function SelectMode() {
   const [selectedMode, setSelectedMode] = useState<string | null>(null);
   const [hasFinished, setHasFinished] = useState(false);
 
-  // Mutation for updating user type
   const updateUserTypeMutation = useMutation({
     mutationFn: async (userType: string) => {
       if (!userData?.user?.id) throw new Error('Usuario no encontrado');
       if (!supabase) throw new Error('Supabase no está configurado');
 
-      const { error, data } = await supabase
+      const { error } = await supabase
         .from('user_preferences')
         .update({
           last_user_type: userType,
@@ -147,132 +155,145 @@ export default function SelectMode() {
     updateUserTypeMutation.mutate(modeType);
   };
 
+  const availableModes = modeOptions.filter(m => m.available);
+  const upcomingModes = modeOptions.filter(m => !m.available);
+
   return (
-    <div className="flex min-h-screen w-full">
-      {modeOptions.map((mode, index) => {
-        const isSelected = selectedMode === mode.type;
-        const isAvailable = mode.type === 'professional' || mode.type === 'learner';
-        const isLoading = updateUserTypeMutation.isPending && isSelected;
-        
-        return (
-          <div
-            key={mode.type}
-            onClick={() => handleModeSelect(mode.type, isAvailable)}
-            className={`
-              flex-1 flex flex-col items-center justify-between
-              transition-all duration-500 ease-in-out
-              cursor-pointer
-              relative overflow-hidden
-              px-8 py-16
-              ${isAvailable 
-                ? 'hover:bg-[#1a1a1a]' 
-                : 'hover:bg-muted/30'
-              }
-              bg-background
-              ${isSelected ? 'bg-[#1a1a1a]' : ''}
-              ${!isAvailable ? 'opacity-60' : ''}
-              group
-            `}
-            data-testid={`mode-select-${mode.type}`}
-          >
-            {/* Number at top with accent color */}
-            <div className="w-full flex justify-center">
-              <span className={`
-                text-sm font-light tracking-wider
-                transition-all duration-500
-                ${isAvailable 
-                  ? 'text-muted-foreground group-hover:text-[var(--accent)]' 
-                  : 'text-muted-foreground'
-                }
-                ${isSelected ? 'text-[var(--accent)]' : ''}
-              `}>
-                {mode.number}
-              </span>
-            </div>
+    <div className="min-h-screen bg-background flex items-center justify-center p-6 md:p-12">
+      <div className="w-full max-w-6xl">
+        {/* Header Section */}
+        <div className="text-center mb-12 space-y-3">
+          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
+            Selecciona tu modo de trabajo
+          </h1>
+          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
+            Elige cómo deseas usar Seencel. Podrás cambiar de modo en cualquier momento desde tu perfil.
+          </p>
+        </div>
 
-            {/* Center spacer */}
-            <div className="flex-1" />
-
-            {/* Title and Description at bottom - all at same height */}
-            <div className={`
-              w-full flex flex-col items-center relative
-              transition-all duration-500
-              ${isAvailable ? 'group-hover:-translate-y-8' : ''}
-              ${isSelected ? '-translate-y-8' : ''}
-            `}>
-              {/* Title - changes to white on hover */}
-              <h2 className={`
-                text-2xl font-medium text-center
-                transition-all duration-500
-                text-foreground
-                ${isAvailable 
-                  ? 'group-hover:!text-white group-hover:scale-105' 
-                  : ''
-                }
-                ${isSelected ? '!text-white scale-105' : ''}
-              `}>
-                {mode.title}
-              </h2>
-
-              {/* Description - only visible on hover, below title, light gray - ABSOLUTE so it doesn't take space */}
-              <p className={`
-                absolute top-full mt-3 left-1/2 transform -translate-x-1/2
-                text-sm text-center leading-relaxed max-w-[280px] w-full px-4
-                transition-all duration-500
-                text-gray-400
-                ${isAvailable 
-                  ? 'opacity-0 group-hover:opacity-100' 
-                  : 'opacity-0'
-                }
-                ${isSelected ? 'opacity-100' : ''}
-              `}>
-                {mode.description}
-              </p>
-
-              {/* Status indicators - ABSOLUTE so it doesn't take space */}
-              {!isAvailable && (
-                <div className={`
-                  absolute top-full mt-3 left-1/2 transform -translate-x-1/2
-                  flex items-center gap-2 text-sm text-muted-foreground
-                  transition-all duration-500
-                  opacity-0 group-hover:opacity-100
-                `}>
-                  <Lock className="h-4 w-4" />
-                  <span>Próximamente</span>
+        {/* Available Modes Grid - 2 columns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          {availableModes.map((mode) => {
+            const isSelected = selectedMode === mode.type;
+            const isLoading = updateUserTypeMutation.isPending && isSelected;
+            const Icon = mode.icon;
+            
+            return (
+              <Card
+                key={mode.type}
+                onClick={() => handleModeSelect(mode.type, mode.available)}
+                className={`
+                  relative overflow-hidden cursor-pointer transition-all duration-300
+                  hover:border-foreground/40 hover:shadow-lg
+                  ${isSelected ? 'border-foreground shadow-lg' : 'border-border'}
+                  ${isLoading ? 'opacity-50 pointer-events-none' : ''}
+                `}
+                data-testid={`mode-select-${mode.type}`}
+              >
+                {/* Background decoration */}
+                <div className="absolute top-0 right-0 w-32 h-32 opacity-5">
+                  <Icon className="w-full h-full" strokeWidth={1} />
                 </div>
-              )}
 
-              {isLoading && (
-                <div className="absolute top-full mt-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 text-sm text-white">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Guardando...</span>
+                <div className="p-6 relative">
+                  {/* Badge */}
+                  <Badge 
+                    variant="outline" 
+                    className="mb-4 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                  >
+                    Disponible
+                  </Badge>
+
+                  {/* Icon */}
+                  <div className="mb-4">
+                    <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                      <Icon className="w-6 h-6 text-foreground" strokeWidth={1.5} />
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <h2 className="text-2xl font-semibold mb-2">
+                    {mode.title}
+                  </h2>
+
+                  {/* Description */}
+                  <p className="text-muted-foreground leading-relaxed mb-6">
+                    {mode.description}
+                  </p>
+
+                  {/* Action Button */}
+                  <Button 
+                    variant="outline" 
+                    className="w-full group"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Guardando...
+                      </>
+                    ) : (
+                      <>
+                        Seleccionar
+                        <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                      </>
+                    )}
+                  </Button>
                 </div>
-              )}
-            </div>
+              </Card>
+            );
+          })}
+        </div>
 
-            {/* Vertical separator */}
-            {index < modeOptions.length - 1 && (
-              <div className={`
-                absolute right-0 top-0 bottom-0 w-px
-                transition-opacity duration-500
-                ${isAvailable ? 'bg-border/20 group-hover:bg-white/10' : 'bg-border/10'}
-              `} />
-            )}
+        {/* Upcoming Modes Grid - 3 columns */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {upcomingModes.map((mode) => {
+            const Icon = mode.icon;
+            
+            return (
+              <Card
+                key={mode.type}
+                onClick={() => handleModeSelect(mode.type, mode.available)}
+                className="relative overflow-hidden cursor-not-allowed opacity-60 border-border transition-all duration-300 hover:opacity-70"
+                data-testid={`mode-select-${mode.type}`}
+              >
+                {/* Background decoration */}
+                <div className="absolute top-0 right-0 w-24 h-24 opacity-5">
+                  <Icon className="w-full h-full" strokeWidth={1} />
+                </div>
 
-            {/* Top line decoration */}
-            <div className={`
-              absolute top-0 left-1/2 transform -translate-x-1/2
-              w-12 h-px
-              transition-all duration-500
-              ${isAvailable 
-                ? 'bg-border/30 group-hover:bg-[var(--accent)] group-hover:w-24' 
-                : 'bg-border/20'
-              }
-              ${isSelected ? 'bg-[var(--accent)] w-24' : ''}
-            `} />
-          </div>
-        );
-      })}
+                <div className="p-6 relative">
+                  {/* Badge */}
+                  <Badge 
+                    variant="outline" 
+                    className="mb-4 border-muted-foreground/30"
+                  >
+                    <Lock className="w-3 h-3 mr-1" />
+                    Próximamente
+                  </Badge>
+
+                  {/* Icon */}
+                  <div className="mb-4">
+                    <div className="w-12 h-12 rounded-lg bg-muted/50 flex items-center justify-center">
+                      <Icon className="w-6 h-6 text-muted-foreground" strokeWidth={1.5} />
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <h2 className="text-xl font-semibold mb-2">
+                    {mode.title}
+                  </h2>
+
+                  {/* Description */}
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    {mode.description}
+                  </p>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
