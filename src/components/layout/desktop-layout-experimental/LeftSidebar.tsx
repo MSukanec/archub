@@ -4,6 +4,8 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useProjectsLite } from "@/hooks/use-projects-lite";
 import { useProject } from "@/hooks/use-projects";
+import { useUserMode } from "@/hooks/use-user-mode";
+import { isButtonExcluded } from "@/config/modes";
 import { cn } from "@/lib/utils";
 import { useProjectContext } from '@/stores/projectContext';
 import { useSidebarStore } from "@/stores/sidebarStore";
@@ -75,6 +77,7 @@ export function LeftSidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const isAdmin = useIsAdmin();
+  const userMode = useUserMode(); // Obtener el modo de uso actual
   const { selectedProjectId, currentOrganizationId, setSelectedProject, setCurrentOrganization } = useProjectContext();
   const { sidebarLevel, setSidebarLevel } = useNavigationStore();
   const { isDocked, isHovered, setHovered, setDocked } = useSidebarStore();
@@ -368,49 +371,74 @@ export function LeftSidebar() {
                   {/* Espacio vacío del tamaño de un botón */}
                   <div className="h-[32px] w-full" />
 
-                  {/* Botón Inicio */}
-                  <SidebarIconButton
-                    icon={<Home className="h-5 w-5" />}
-                    isActive={sidebarLevel === 'general'}
-                    onClick={() => {
-                      setSidebarLevel('general');
-                      navigate('/home');
-                    }}
-                    testId="button-sidebar-home"
-                  />
+                  {/* BOTONES DE CONTEXTO - Renderizados según el modo del usuario */}
+                  {(() => {
+                    // Descriptor de botones de contexto con sus configuraciones
+                    const contextButtons = [
+                      {
+                        id: 'general' as const,
+                        icon: <Home className="h-5 w-5" />,
+                        testId: 'button-sidebar-home',
+                        onClick: () => {
+                          setSidebarLevel('general');
+                          navigate('/home');
+                        },
+                        shouldRender: () => true, // Siempre visible
+                      },
+                      {
+                        id: 'community' as const,
+                        icon: <Globe className="h-5 w-5" />,
+                        testId: 'button-sidebar-community',
+                        onClick: () => setSidebarLevel('community'),
+                        shouldRender: () => true,
+                        wrapper: (children: React.ReactNode) => (
+                          <PlanRestricted reason="coming_soon">{children}</PlanRestricted>
+                        ),
+                      },
+                      {
+                        id: 'organization' as const,
+                        icon: <Building className="h-5 w-5" />,
+                        onClick: () => setSidebarLevel('organization'),
+                        shouldRender: () => true,
+                      },
+                      {
+                        id: 'project' as const,
+                        icon: <FolderOpen className="h-5 w-5" />,
+                        onClick: () => setSidebarLevel('project'),
+                        shouldRender: () => hasProjects && !!selectedProjectId, // Solo si hay proyectos
+                      },
+                      {
+                        id: 'learning' as const,
+                        icon: <GraduationCap className="h-5 w-5" />,
+                        onClick: () => setSidebarLevel('learning'),
+                        shouldRender: () => true,
+                      },
+                    ];
 
-                  {/* Botón Comunidad */}
-                  <PlanRestricted reason="coming_soon">
-                    <SidebarIconButton
-                      icon={<Globe className="h-5 w-5" />}
-                      isActive={sidebarLevel === 'community'}
-                      onClick={() => setSidebarLevel('community')}
-                      testId="button-sidebar-community"
-                    />
-                  </PlanRestricted>
+                    // Filtrar y renderizar botones permitidos según el modo
+                    return contextButtons
+                      .filter((button) => {
+                        // Excluir botones no permitidos por el modo
+                        if (isButtonExcluded(userMode, button.id)) return false;
+                        // Verificar condiciones específicas del botón
+                        if (!button.shouldRender()) return false;
+                        return true;
+                      })
+                      .map((button) => {
+                        const buttonElement = (
+                          <SidebarIconButton
+                            key={button.id}
+                            icon={button.icon}
+                            isActive={sidebarLevel === button.id}
+                            onClick={button.onClick}
+                            testId={button.testId}
+                          />
+                        );
 
-                  {/* Botón Organización */}
-                  <SidebarIconButton
-                    icon={<Building className="h-5 w-5" />}
-                    isActive={sidebarLevel === 'organization'}
-                    onClick={() => setSidebarLevel('organization')}
-                  />
-
-                  {/* Botón Proyecto - solo visible si hay proyectos */}
-                  {hasProjects && selectedProjectId && (
-                    <SidebarIconButton
-                      icon={<FolderOpen className="h-5 w-5" />}
-                      isActive={sidebarLevel === 'project'}
-                      onClick={() => setSidebarLevel('project')}
-                    />
-                  )}
-
-                  {/* Botón Capacitaciones */}
-                  <SidebarIconButton
-                    icon={<GraduationCap className="h-5 w-5" />}
-                    isActive={sidebarLevel === 'learning'}
-                    onClick={() => setSidebarLevel('learning')}
-                  />
+                        // Aplicar wrapper si existe (ej: PlanRestricted)
+                        return button.wrapper ? button.wrapper(buttonElement) : buttonElement;
+                      });
+                  })()}
                 </div>
               </div>
 
