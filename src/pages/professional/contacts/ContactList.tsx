@@ -86,55 +86,77 @@ export default function ContactList({
       sortType: "string" as const,
       render: (contact: any) => {
         const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || '—'
-        // Limpiar número de teléfono para WhatsApp y llamadas
-        const cleanPhone = contact.phone?.replace(/[\s\-\(\)]/g, '') || ''
         
         return (
-          <div className="space-y-0.5">
-            <div className="font-semibold text-sm">
-              {fullName}
-            </div>
-            {contact.email && (
-              <a 
-                href={`mailto:${contact.email}`}
-                className="text-xs text-muted-foreground hover:text-accent hover:underline transition-colors cursor-pointer block"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {contact.email}
-              </a>
-            )}
-            {contact.phone && (
-              <Popover>
-                <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <button className="text-xs text-muted-foreground hover:text-accent hover:underline transition-colors cursor-pointer text-left">
-                    {contact.phone}
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-2" align="start">
-                  <div className="flex flex-col gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="justify-start gap-2 h-8"
-                      onClick={() => window.location.href = `tel:${cleanPhone}`}
-                    >
-                      <Phone className="h-4 w-4" />
-                      Llamar
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="justify-start gap-2 h-8 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950"
-                      onClick={() => window.open(`https://wa.me/${cleanPhone}`, '_blank')}
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      WhatsApp
-                    </Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            )}
+          <div className="font-semibold text-sm">
+            {fullName}
           </div>
+        )
+      }
+    },
+    {
+      key: "email" as const,
+      label: "Email",
+      sortable: true,
+      sortType: "string" as const,
+      render: (contact: any) => {
+        if (!contact.email) {
+          return <span className="text-sm text-muted-foreground">—</span>
+        }
+        
+        return (
+          <a 
+            href={`mailto:${contact.email}`}
+            className="text-sm text-foreground hover:text-accent hover:underline transition-colors cursor-pointer"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {contact.email}
+          </a>
+        )
+      }
+    },
+    {
+      key: "phone" as const,
+      label: "Teléfono",
+      sortable: true,
+      sortType: "string" as const,
+      render: (contact: any) => {
+        if (!contact.phone) {
+          return <span className="text-sm text-muted-foreground">—</span>
+        }
+        
+        const cleanPhone = contact.phone.replace(/[\s\-\(\)]/g, '')
+        
+        return (
+          <Popover>
+            <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
+              <button className="text-sm text-foreground hover:text-accent hover:underline transition-colors cursor-pointer text-left">
+                {contact.phone}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-2" align="start">
+              <div className="flex flex-col gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="justify-start gap-2 h-8"
+                  onClick={() => window.location.href = `tel:${cleanPhone}`}
+                >
+                  <Phone className="h-4 w-4" />
+                  Llamar
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="justify-start gap-2 h-8 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950"
+                  onClick={() => window.open(`https://wa.me/${cleanPhone}`, '_blank')}
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  WhatsApp
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         )
       }
     },
