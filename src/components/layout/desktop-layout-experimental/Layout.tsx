@@ -239,8 +239,8 @@ function LayoutContent({
       ) : (
         /* Desktop View - Sidebar + MainHeader + Content + RightSidebar */
         <div className="flex-1 flex min-h-0">
-          {/* Sidebar - Full height */}
-          <div className="flex-shrink-0">
+          {/* Sidebar - Full height with padding */}
+          <div className="flex-shrink-0 pl-3 pt-1 pb-1">
             <Sidebar />
           </div>
 
@@ -253,7 +253,7 @@ function LayoutContent({
             <div className={`flex-1 flex min-h-0 relative ${isDocked ? 'gap-3' : ''}`}>
               <div className={`flex-1 ${isCourseSidebarVisible ? '' : ''} pt-1 pb-1 overflow-x-hidden`}>
                 <main
-                  className={`h-full flex flex-col rounded-sm overflow-hidden ${!isDocked ? 'w-full' : ''}`}
+                  className={`h-full flex flex-col rounded-md overflow-hidden ${!isDocked ? 'w-full' : ''}`}
                   style={{
                     background: isDark 
                       ? 'linear-gradient(to bottom, var(--gradient-from-dark), var(--gradient-to-dark))'
@@ -308,7 +308,7 @@ function LayoutContent({
               {/* Course Sidebar - Right side, only visible when activated */}
               {isCourseSidebarVisible && !isMobile && (
                 <div className="flex-shrink-0 pr-3 pb-1">
-                  <div className="h-full rounded-sm overflow-hidden">
+                  <div className="h-full rounded-md overflow-hidden">
                     <CourseSidebar
                       modules={modules}
                       lessons={lessons}
