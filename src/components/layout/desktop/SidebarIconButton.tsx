@@ -25,7 +25,7 @@ export function SidebarIconButton({
         className: cn(
           icon.props.className,
           "sidebar-icon-managed transition-colors",
-          isActive ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]"
+          isActive ? "text-[var(--main-sidebar-button-active-icon-fg)]" : "text-[var(--main-sidebar-fg)]"
         ),
       } as any)
     : icon;
