@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import { useProjectContext } from '@/stores/projectContext';
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
-import { useRightSidebarStore } from "@/stores/rightSidebarStore";
 import { supabase } from '@/lib/supabase';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
@@ -19,6 +18,7 @@ import ButtonSidebar from "../desktop-layout-classic/ButtonSidebar";
 import { SidebarIconButton } from "../desktop/SidebarIconButton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
+import { SupportModal } from "@/components/support/SupportModal";
 import { getUnreadCount, subscribeUserNotifications } from '@/lib/notifications';
 import { 
   Settings, 
@@ -77,20 +77,22 @@ export function LeftSidebar() {
   const { selectedProjectId, currentOrganizationId, setSelectedProject, setCurrentOrganization } = useProjectContext();
   const { sidebarLevel, setSidebarLevel } = useNavigationStore();
   const { isDocked, isHovered, setHovered, setDocked } = useSidebarStore();
-  const { openSupport } = useRightSidebarStore();
   const { toast } = useToast();
   
   // Usuario ID
   const userId = userData?.user?.id;
+  const userFullName = userData?.user?.full_name || userData?.user?.first_name || 'Usuario';
+  const userAvatarUrl = userData?.user?.avatar_url;
   
   // Contador de mensajes sin leer
   const { data: unreadCount = 0 } = useUnreadSupportMessages();
   const { data: unreadSupportCountUser = 0 } = useUnreadUserSupportMessages(userId);
   const unreadSupportCount = isAdmin ? unreadCount : unreadSupportCountUser;
   
-  // Estado para popovers
+  // Estado para popovers y modals
   const [notificationPopoverOpen, setNotificationPopoverOpen] = useState(false);
   const [helpPopoverOpen, setHelpPopoverOpen] = useState(false);
+  const [supportModalOpen, setSupportModalOpen] = useState(false);
   const [notificationUnreadCount, setNotificationUnreadCount] = useState(0);
   
   // Estados simples
@@ -381,8 +383,13 @@ export function LeftSidebar() {
                     {/* Botón Soporte */}
                     <button
                       onClick={() => {
-                        openSupport();
+                        setSupportModalOpen(true);
                         setHelpPopoverOpen(false);
+                        // Invalidar contador de mensajes no leídos al abrir
+                        if (userId) {
+                          queryClient.invalidateQueries({ queryKey: ['unread-user-support-messages-count', userId] });
+                          queryClient.invalidateQueries({ queryKey: ['unread-support-messages-count'] });
+                        }
                       }}
                       className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent/10 transition-colors text-left relative"
                       data-testid="button-support-help"
@@ -557,6 +564,17 @@ export function LeftSidebar() {
           )}
         </div>
       </div>
+
+      {/* SUPPORT MODAL */}
+      {userId && (
+        <SupportModal
+          open={supportModalOpen}
+          onOpenChange={setSupportModalOpen}
+          userId={userId}
+          userFullName={userFullName}
+          userAvatarUrl={userAvatarUrl}
+        />
+      )}
     </div>
   );
 }
