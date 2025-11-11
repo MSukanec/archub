@@ -37,10 +37,13 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
     mutationFn: async (data: typeof settingsData) => {
       console.log('Saving settings data:', data)
       
+      // Check if layout is changing
+      const layoutChanged = data.layout !== userData?.preferences?.layout
+      
       // Use the server endpoint to update preferences
       if (data.sidebarDocked !== userData?.preferences?.sidebar_docked ||
           data.theme !== userData?.preferences?.theme ||
-          data.layout !== userData?.preferences?.layout) {
+          layoutChanged) {
         
         // Get the auth token from Supabase session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
@@ -68,11 +71,18 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
         }
       }
       
-      return data
+      return { data, layoutChanged }
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       console.log('Settings auto-save completed successfully')
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
+      
+      // If layout changed, reload the page to apply the new layout
+      if (result.layoutChanged) {
+        setTimeout(() => {
+          window.location.reload()
+        }, 500)
+      }
     },
     onError: (error) => {
       console.error('Settings auto-save error:', error)
