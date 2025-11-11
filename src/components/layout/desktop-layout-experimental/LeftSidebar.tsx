@@ -585,21 +585,19 @@ export function LeftSidebar() {
               {/* Avatar del usuario con Popover */}
               <Popover open={userPopoverOpen} onOpenChange={setUserPopoverOpen}>
                 <PopoverTrigger asChild>
-                  <div>
-                    <SidebarIconButton
-                      icon={
-                        <Avatar className="h-5 w-5" style={{ border: 'none', outline: 'none' }}>
-                          <AvatarImage src={userData?.user?.avatar_url} />
-                          <AvatarFallback className="text-xs bg-accent text-white" style={{ border: 'none' }}>
-                            {userData?.user?.first_name?.[0] || userData?.user?.email?.[0] || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                      }
-                      onClick={() => setUserPopoverOpen(!userPopoverOpen)}
-                      title="Menú de usuario"
-                      testId="button-user-menu"
-                    />
-                  </div>
+                  <button
+                    onClick={() => setUserPopoverOpen(!userPopoverOpen)}
+                    className="group relative cursor-pointer transition-all duration-200 hover:scale-105"
+                    data-testid="button-user-menu"
+                    title="Menú de usuario"
+                  >
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={userData?.user?.avatar_url} />
+                      <AvatarFallback className="text-sm font-semibold bg-accent text-white">
+                        {userData?.user?.first_name?.[0] || userData?.user?.email?.[0] || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
                 </PopoverTrigger>
                 <PopoverContent 
                   side="right" 
