@@ -161,7 +161,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Format: user_id|plan_id|organization_id|billing_period (~118 chars)
     const custom_id = `${user_id}|${productId}|${organization_id}|${billing_period}`;
 
-    const return_url = `${returnBase}/organization/billing?payment=success`;
+    const return_url = `${returnBase}/api/paypal/capture-subscription`;
     const cancel_url = `${returnBase}/organization/billing?payment=cancelled`;
 
     const body = {
