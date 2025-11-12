@@ -255,7 +255,10 @@ export function LeftSidebar() {
           type: 'section' as const,
           title: userFullName,
           items: [
+            { id: 'user-basic-data', label: 'Datos Básicos', icon: User, href: '/settings/user-basic-data' },
+            { id: 'user-preferences', label: 'Preferencias', icon: Settings, href: '/settings/user-preferences' },
             { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/settings/billing' },
+            { id: 'user-organizations', label: 'Organizaciones', icon: Building, href: '/settings/user-organizations' },
             { id: 'notifications', label: 'Notificaciones', icon: Bell, href: '/settings/notifications' },
           ]
         }
@@ -737,7 +740,8 @@ export function LeftSidebar() {
                     {/* Mi Perfil */}
                     <button
                       onClick={() => {
-                        navigate('/profile');
+                        setSidebarLevel('settings');
+                        navigate('/settings/user-basic-data');
                         setUserPopoverOpen(false);
                       }}
                       className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent/10 transition-colors text-left"
