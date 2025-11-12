@@ -89,7 +89,9 @@ export const plans = pgTable("plans", {
   name: text("name").notNull().unique(),
   slug: text("slug").notNull().unique(),
   features: jsonb("features"),
-  price: numeric("price", { precision: 10, scale: 2 }),
+  price: numeric("price", { precision: 10, scale: 2 }), // Deprecated - mantener para compatibilidad
+  monthly_amount: numeric("monthly_amount", { precision: 10, scale: 2 }),
+  annual_amount: numeric("annual_amount", { precision: 10, scale: 2 }),
   is_active: boolean("is_active").default(true),
   billing_type: text("billing_type").default("per_user"),
 });
@@ -100,6 +102,28 @@ export const insertPlanSchema = createInsertSchema(plans).omit({
 
 export type Plan = typeof plans.$inferSelect;
 export type InsertPlan = z.infer<typeof insertPlanSchema>;
+
+// Exchange Rates Table
+export const exchangeRates = pgTable('exchange_rates', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  fromCurrency: text('from_currency').notNull(),
+  toCurrency: text('to_currency').notNull(),
+  rate: numeric('rate', { precision: 12, scale: 6 }).notNull(),
+  isActive: boolean('is_active').default(true).notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  uniquePair: unique().on(table.fromCurrency, table.toCurrency),
+}));
+
+export const insertExchangeRateSchema = createInsertSchema(exchangeRates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type ExchangeRate = typeof exchangeRates.$inferSelect;
+export type InsertExchangeRate = z.infer<typeof insertExchangeRateSchema>;
 
 // Organizations Table
 export const organizations = pgTable("organizations", {
