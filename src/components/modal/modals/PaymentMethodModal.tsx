@@ -269,7 +269,7 @@ export default function PaymentMethodModal({
       
       // DIAGNÓSTICO: Para probar con endpoint fake, descomentar esta línea y comentar la de abajo:
       // const mpUrl = `${API_BASE}/api/diag/fake-mp`;
-      const mpUrl = `${API_BASE}/api/mp/create-preference`;
+      const mpUrl = `${API_BASE}/api/mp/create-course-preference`;
       
       console.log("[MP] URL completa:", mpUrl);
       
@@ -365,7 +365,8 @@ export default function PaymentMethodModal({
       const requestBody = {
         user_id: userRecord.id,
         course_slug: courseSlug,
-        amount_usd: finalAmount,
+        months: priceData?.months || 12,
+        ...(appliedCoupon && { code: appliedCoupon.code }),
         description,
       };
 
@@ -375,7 +376,7 @@ export default function PaymentMethodModal({
       console.log("[PayPal] API_BASE:", API_BASE);
       console.log("[PayPal] VITE_API_BASE:", import.meta.env.VITE_API_BASE);
       
-      const paypalUrl = `${API_BASE}/api/paypal/create-order`;
+      const paypalUrl = `${API_BASE}/api/paypal/create-course-order`;
       console.log("[PayPal] URL completa:", paypalUrl);
       
       const res = await fetchWithTimeout(

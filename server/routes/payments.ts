@@ -796,7 +796,30 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
   // PayPal Integration Routes
   // ============================================
 
-  // POST /api/paypal/create-order
+  // POST /api/paypal/create-course-order - Proxy to Vercel function
+  app.post("/api/paypal/create-course-order", async (req, res) => {
+    try {
+      const handler = await import('../../api/paypal/create-course-order.js');
+      await handler.default(req as any, res as any);
+    } catch (error: any) {
+      console.error("[PayPal create-course-order] Error:", error);
+      res.status(500).json({ ok: false, error: error.message || String(error) });
+    }
+  });
+
+  // POST /api/paypal/create-subscription-order - Proxy to Vercel function
+  app.post("/api/paypal/create-subscription-order", async (req, res) => {
+    try {
+      const handler = await import('../../api/paypal/create-subscription-order.js');
+      await handler.default(req as any, res as any);
+    } catch (error: any) {
+      console.error("[PayPal create-subscription-order] Error:", error);
+      res.status(500).json({ ok: false, error: error.message || String(error) });
+    }
+  });
+
+  // DEPRECATED - Use create-course-order or create-subscription-order instead
+  // POST /api/paypal/create-order (LEGACY UNIFIED ENDPOINT)
   app.post("/api/paypal/create-order", async (req, res) => {
     // CORS headers
     res.setHeader("Access-Control-Allow-Origin", "*");

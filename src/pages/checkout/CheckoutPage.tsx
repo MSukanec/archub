@@ -449,7 +449,7 @@ export default function CheckoutPage() {
       console.log("[MP] Creando preferencia…", requestBody);
 
       const API_BASE = getApiBase();
-      const mpUrl = `${API_BASE}/api/mp/create-preference`;
+      const mpUrl = `${API_BASE}/api/mp/create-course-preference`;
 
       const res = await fetchWithTimeout(
         mpUrl,
@@ -586,7 +586,8 @@ export default function CheckoutPage() {
       const requestBody = {
         user_id: userRecord.id,
         course_slug: courseSlug,
-        amount_usd: finalAmount,
+        months: priceData?.months || 12,
+        ...(appliedCoupon && { code: appliedCoupon.code }),
         description,
         ...(billing && { billing }),
       };
@@ -594,7 +595,7 @@ export default function CheckoutPage() {
       console.log("[PayPal] Creando orden…", requestBody);
 
       const API_BASE = getApiBase();
-      const paypalUrl = `${API_BASE}/api/paypal/create-order`;
+      const paypalUrl = `${API_BASE}/api/paypal/create-course-order`;
 
       const res = await fetchWithTimeout(
         paypalUrl,
