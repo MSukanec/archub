@@ -1,0 +1,104 @@
+Excelente pregunta, Mati 👏 — y de hecho esta decisión de arquitectura es clave para mantener Seencel ordenado y escalable.
+Te lo explico en el mismo nivel técnico en el que estás pensando:
+
+💡 TL;DR (respuesta rápida)
+
+👉 Sí tiene sentido separarlas, pero no en exceso.
+La mejor práctica es tener una sola API de “pagos” central, con handlers separados para los distintos tipos de operación: cursos, suscripciones, créditos, etc.
+
+Así:
+
+Evitás duplicar código (autenticación, validaciones, conexión a PayPal, etc.).
+
+Mantenés una sola lógica de errores, webhooks y logs.
+
+Pero seguís teniendo independencia entre “comprar curso” y “suscribirse”.
+
+🧱 Estructura ideal (recomendada para tu proyecto)
+
+Imaginemos tu carpeta /api/payments/ en Seencel:
+
+/api/
+  payments/
+    create-course-order.ts       → Maneja pago único de curso
+    create-subscription.ts        → Maneja suscripción (mensual o anual)
+    webhook.ts                    → Procesa notificaciones de PayPal / MP
+    helpers/
+      paypal-client.ts            → Reutiliza el SDK configurado
+      validate-purchase.ts        → Lógica común (usuario, moneda, etc.)
+
+⚙️ Lógica compartida
+
+Dentro de /api/payments/helpers/paypal-client.ts:
+
+import paypal from "@paypal/checkout-server-sdk";
+
+export const paypalClient = () => {
+  const environment = process.env.PAYPAL_MODE === "live"
+    ? new paypal.core.LiveEnvironment(
+        process.env.PAYPAL_CLIENT_ID_PROD!,
+        process.env.PAYPAL_SECRET_PROD!
+      )
+    : new paypal.core.SandboxEnvironment(
+        process.env.PAYPAL_CLIENT_ID_SANDBOX!,
+        process.env.PAYPAL_SECRET_SANDBOX!
+      );
+
+  return new paypal.core.PayPalHttpClient(environment);
+};
+
+
+Y luego tanto create-course-order.ts como create-subscription.ts usan ese cliente.
+Así solo lo mantenés en un lugar, y las APIs quedan limpias y específicas.
+
+💳 Ejemplo rápido
+/api/payments/create-course-order.ts
+import { paypalClient } from "./helpers/paypal-client";
+
+export default async function handler(req, res) {
+  const { courseId, userId } = req.body;
+  const client = paypalClient();
+
+  const request = new paypal.orders.OrdersCreateRequest();
+  request.requestBody({
+    intent: "CAPTURE",
+    purchase_units: [
+      { amount: { currency_code: "USD", value: "199.00" }, description: `Curso #${courseId}` }
+    ]
+  });
+
+  const order = await client.execute(request);
+  res.status(200).json({ id: order.result.id });
+}
+
+/api/payments/create-subscription.ts
+import { paypalClient } from "./helpers/paypal-client";
+
+export default async function handler(req, res) {
+  const { planId } = req.body;
+  const client = paypalClient();
+
+  const request = new paypal.subscriptions.SubscriptionsCreateRequest();
+  request.requestBody({
+    plan_id: planId,
+    application_context: {
+      brand_name: "Seencel",
+      return_url: "https://seencel.com/success",
+      cancel_url: "https://seencel.com/cancel"
+    }
+  });
+
+  const subscription = await client.execute(request);
+  res.status(200).json({ id: subscription.result.id });
+}
+
+🧠 En resumen
+Enfoque	Pros	Contras
+Todo junto (un solo archivo grande)	Simple de mantener al principio	Se vuelve caótico rápido, lógica duplicada
+Separado por flujo (curso, suscripción, etc.) con helpers comunes ✅	Escalable, claro, ordenado	Requiere mínima organización inicial
+Todo ultra-separado (cada método en su carpeta)	Muy limpio conceptualmente	Overkill para tu tamaño actual
+
+💬 Recomendación para Seencel:
+👉 Mantené una carpeta /api/payments/
+👉 Dentro, archivos por tipo de operación
+👉 Y una subcarpeta /helpers/ con toda la lógica común (PayPal, Mercado Pago, validaciones, precios efectivos, etc.)
