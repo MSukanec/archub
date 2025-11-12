@@ -11,6 +11,8 @@ import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { CreditCard, Download, ArrowUpCircle, Inbox } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import { InvoicePDF } from '@/components/pdf/InvoicePDF';
 
 interface OrganizationSubscription {
   id: string;
@@ -95,6 +97,23 @@ const Billing = () => {
     enabled: !!currentOrganizationId && !!supabase,
   });
 
+  const { data: organization } = useQuery<{ name: string; logo_url: string | null }>({
+    queryKey: ['organization', currentOrganizationId],
+    queryFn: async () => {
+      if (!supabase || !currentOrganizationId) throw new Error('Missing required data');
+
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('name, logo_url')
+        .eq('id', currentOrganizationId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!currentOrganizationId && !!supabase,
+  });
+
   const planName = subscription?.plans?.name || 'Free';
   const planSlug = subscription?.plans?.slug || 'free';
   const billingPeriod = subscription?.billing_period === 'monthly' ? 'mes' : 'año';
@@ -110,15 +129,41 @@ const Billing = () => {
       label: 'Factura',
       width: '25%',
       render: (payment: Payment) => (
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-sm">
-              #{payment.provider_payment_id?.slice(0, 12) || payment.id.slice(0, 12)}
-            </span>
-            <Badge variant="secondary" className="text-xs bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400">
-              Pagado
-            </Badge>
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-sm">
+                #{payment.provider_payment_id?.slice(0, 12) || payment.id.slice(0, 12)}
+              </span>
+              <Badge variant="secondary" className="text-xs bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400">
+                Pagado
+              </Badge>
+            </div>
           </div>
+          {organization && (
+            <PDFDownloadLink
+              document={
+                <InvoicePDF
+                  payment={payment}
+                  subscription={subscription}
+                  organization={organization}
+                />
+              }
+              fileName={`factura-${payment.provider_payment_id?.slice(0, 12) || payment.id.slice(0, 12)}.pdf`}
+            >
+              {({ loading }) => (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 w-8 p-0"
+                  disabled={loading}
+                  data-testid={`button-download-invoice-${payment.id}`}
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              )}
+            </PDFDownloadLink>
+          )}
         </div>
       ),
     },
