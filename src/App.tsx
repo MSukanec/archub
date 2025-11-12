@@ -90,6 +90,7 @@ const CourseList = lazy(() => import("@/pages/learning/courses/CourseList"));
 const CourseView = lazy(() => import("@/pages/learning/courses/CourseView"));
 const PaymentReturn = lazy(() => import("@/pages/learning/PaymentReturn"));
 const CheckoutPage = lazy(() => import("@/pages/checkout/CheckoutPage"));
+const SubscriptionCheckout = lazy(() => import("@/pages/checkout/SubscriptionCheckout"));
 
 // Notifications
 import Notifications from "@/pages/Notifications";
@@ -225,6 +226,11 @@ function Router() {
         <Route path="/checkout">
           <Suspense fallback={<LazyLoadFallback />}>
             <CheckoutPage />
+          </Suspense>
+        </Route>
+        <Route path="/subscription/checkout">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <SubscriptionCheckout />
           </Suspense>
         </Route>
 

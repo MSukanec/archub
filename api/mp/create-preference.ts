@@ -112,7 +112,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     let productId: string;
     let productTitle: string;
+    let productSlug: string;
+    let productDescription: string;
     let unit_price: number;
+    let accessMonths: number;
     let couponData: any = null;
 
     // ==================== FLUJO PARA SUSCRIPCIONES ====================
@@ -190,6 +193,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       productId = plan.id;
       productTitle = `Plan ${plan.name} - ${billing_period === 'monthly' ? 'Mensual' : 'Anual'}`;
+      productSlug = plan_slug;
+      productDescription = `Suscripción ${billing_period === 'monthly' ? 'mensual' : 'anual'} al plan ${plan.name}`;
+      accessMonths = billing_period === 'monthly' ? 1 : 12;
 
       // NO hay cupones para suscripciones en el MVP
       if (code && code.trim()) {
@@ -251,6 +257,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       productId = course.id;
       productTitle = course.title;
+      productSlug = course.slug;
+      productDescription = course.short_description || course.title;
+      accessMonths = chosen.months || months;
 
       // Validar cupón si se proporcionó (server-side validation)
       if (code && code.trim()) {
@@ -316,6 +325,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         discount: validationResult.discount,
         final_price: unit_price
       });
+      }
     }
 
     // Obtener datos del usuario
@@ -347,22 +357,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .json({ ok: false, error: "MP_ACCESS_TOKEN no configurado correctamente" });
     }
 
-    // Usar custom_id en base64 (igual que PayPal)
-    // SIMPLIFICADO: No enviar info de cupón a MP para evitar rechazo
+    // Construir customData según tipo de producto
     const customData: any = {
       user_id,
-      course_slug: course.slug,
-      months: chosen.months || months,
+      product_type,
     };
 
-    // Guardar info del cupón SOLO en metadata (no en external_reference)
-    const couponMetadata = couponData ? {
-      coupon_code: code.trim().toUpperCase(),
-      coupon_id: couponData.coupon_id,
-      discount: couponData.discount,
-      list_price: chosen.amount,
-      final_price: unit_price,
-    } : null;
+    if (product_type === 'subscription') {
+      customData.plan_slug = plan_slug;
+      customData.organization_id = organization_id;
+      customData.billing_period = billing_period;
+    } else {
+      customData.course_slug = course_slug;
+      customData.months = accessMonths;
+      if (couponData) {
+        customData.coupon_code = code.trim().toUpperCase();
+        customData.coupon_id = couponData.coupon_id;
+      }
+    }
 
     const custom_id = Buffer.from(JSON.stringify(customData)).toString('base64');
 
@@ -378,13 +390,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // (porque el webhook debe ir al servidor público accesible desde MP)
     const webhookBase = process.env.CHECKOUT_RETURN_URL_BASE || requestOrigin;
     
+    // Construir back_urls según tipo de producto
+    let backUrls: any;
+    if (product_type === 'subscription') {
+      backUrls = {
+        success: `${returnBase}/organization/billing?payment=success`,
+        failure: `${returnBase}/organization/billing?payment=failed`,
+        pending: `${returnBase}/organization/billing?payment=pending`,
+      };
+    } else {
+      backUrls = {
+        success: `${returnBase}/api/mp/success-handler?course_slug=${productSlug}`,
+        failure: `${returnBase}/learning/courses/${productSlug}?payment=failed`,
+        pending: `${returnBase}/learning/courses/${productSlug}?payment=pending`,
+      };
+    }
+
     const prefBody: any = {
       items: [
         {
-          id: course.slug,
-          category_id: "services", // Categoría de Mercado Pago para servicios/educación
-          title: course.title,
-          description: course.short_description || course.title,
+          id: productSlug,
+          category_id: "services",
+          title: productTitle,
+          description: productDescription,
           quantity: 1,
           unit_price,
           currency_id: currency,
@@ -397,30 +425,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         last_name 
       },
       notification_url: `${webhookBase}/api/mp/webhook?secret=${MP_WEBHOOK_SECRET}`,
-      back_urls: {
-        success: `${returnBase}/api/mp/success-handler?course_slug=${course.slug}`,
-        failure: `${returnBase}/learning/courses/${course.slug}?payment=failed`,
-        pending: `${returnBase}/learning/courses/${course.slug}?payment=pending`,
-      },
+      back_urls: backUrls,
       auto_return: "approved",
       binary_mode: true,
       statement_descriptor: "SEENCEL",
     };
 
-    // SIEMPRE agregar metadata IDÉNTICA (con o sin cupón)
-    // NO mencionar descuentos para evitar detección de MP
-    prefBody.metadata = {
-      user_id,
-      course_slug: course.slug,
-      months: chosen.months || months,
-    };
+    // Construir metadata según tipo de producto
+    if (product_type === 'subscription') {
+      prefBody.metadata = {
+        user_id,
+        product_type,
+        plan_slug,
+        organization_id,
+        billing_period,
+      };
+    } else {
+      prefBody.metadata = {
+        user_id,
+        product_type,
+        course_slug,
+        months: accessMonths,
+      };
+    }
     
     // Info del cupón se guardará en external_reference (base64) solo para nuestro webhook
     // MP no puede leerlo porque está encodeado
 
     console.log("[MP create-preference] Creando preferencia para:", { 
       user_id, 
-      course_slug, 
+      product_type,
+      productSlug,
       unit_price, 
       currency,
       hasCoupon: !!couponData,

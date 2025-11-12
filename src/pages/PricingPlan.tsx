@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Layout } from "@/components/layout/desktop/Layout";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { Card } from "@/components/ui/card";
@@ -12,6 +13,7 @@ import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
 interface Plan {
   id: string;
   name: string;
+  slug: string;
   price: number;
   features: any;
   billing_type: string;
@@ -21,6 +23,7 @@ type BillingPeriod = 'monthly' | 'annual';
 type SelectedPlan = 'free' | 'pro' | 'teams';
 
 export default function PricingPlan() {
+  const [, setLocation] = useLocation();
   const { setSidebarLevel } = useNavigationStore();
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('annual');
   const [selectedPlanForComparison, setSelectedPlanForComparison] = useState<SelectedPlan>('pro');
@@ -436,7 +439,7 @@ export default function PricingPlan() {
                         : ""
                     )}
                     variant={isPopular ? "default" : "secondary"}
-                    disabled={plan.name.toLowerCase() === 'pro' || plan.name.toLowerCase() === 'teams'}
+                    onClick={() => setLocation(`/subscription/checkout?plan=${plan.slug}&billing=${billingPeriod}`)}
                     data-testid={`button-select-plan-${plan.name.toLowerCase()}`}
                   >
                     {billingPeriod === 'annual' ? 'Ser Fundador' : 'Comenzar ahora'}
