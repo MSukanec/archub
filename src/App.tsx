@@ -64,6 +64,7 @@ const AdminAdmin = lazy(() => import("@/pages/admin/administration/AdminAdmin"))
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
 const AdminSupport = lazy(() => import("@/pages/admin/support/AdminSupport"));
 const AdminPayments = lazy(() => import("@/pages/admin/payments/AdminPayments"));
+const AdminSubscriptions = lazy(() => import("@/pages/admin/subscriptions/AdminSubscriptions"));
 const AdminCosts = lazy(() => import("@/pages/admin/costs/AdminCosts"));
 const AdminTasks = lazy(() => import("@/pages/admin/tasks/AdminTasks"));
 const AdminGeneral = lazy(() => import("@/pages/admin/general/AdminGeneral"));
@@ -278,6 +279,13 @@ function Router() {
           <Suspense fallback={<LazyLoadFallback />}>
             <AuthAdmin>
               <AdminPayments />
+            </AuthAdmin>
+          </Suspense>
+        </Route>
+        <Route path="/admin/subscriptions">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <AuthAdmin>
+              <AdminSubscriptions />
             </AuthAdmin>
           </Suspense>
         </Route>
