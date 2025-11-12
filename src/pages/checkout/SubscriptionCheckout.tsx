@@ -175,8 +175,8 @@ export default function SubscriptionCheckout() {
         setPhone(fromE164(userData.user_data.phone_e164));
       }
 
-      if (userData.user_data?.organization_id) {
-        setOrganizationId(userData.user_data.organization_id);
+      if (userData.organization?.id) {
+        setOrganizationId(userData.organization.id);
       }
     }
   }, [userData]);
