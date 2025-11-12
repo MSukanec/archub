@@ -102,6 +102,9 @@ import Home from "@/pages/Home";
 // Pricing
 import PricingPlan from "@/pages/PricingPlan";
 
+// Settings Pages
+import Billing from "@/pages/settings/Billing";
+
 
 
 
@@ -202,6 +205,9 @@ function Router() {
         <Route path="/community/dashboard" component={Community} />
         <Route path="/community/map" component={CommunityMap} />
         <Route path="/community" component={Community} />
+
+        {/* Settings Routes */}
+        <Route path="/settings/billing" component={Billing} />
         
         {/* Learning Routes - Lazy Loaded (incluye reproductor Vimeo pesado) */}
         <Route path="/learning/dashboard">
