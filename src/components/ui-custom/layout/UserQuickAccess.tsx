@@ -13,12 +13,13 @@ import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from "@/stores/projectContext";
 import { useProjectsLite } from "@/hooks/use-projects-lite";
 import { useAuthStore } from "@/stores/authStore";
 import { cn } from "@/lib/utils";
-import { Building2, FolderOpen, User, ChevronDown, LogOut, ArrowUpRight, Home } from "lucide-react";
+import { Building2, FolderOpen, User, ChevronDown, LogOut, ArrowUpRight, Home, CreditCard } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -45,6 +46,21 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
 
   const currentOrg = organizations.find(o => o.id === currentOrganizationId);
   const currentProject = projectsLite.find(p => p.id === selectedProjectId);
+
+  const getPlanBadgeClass = (planSlug: string | undefined) => {
+    switch (planSlug?.toLowerCase()) {
+      case 'free':
+        return 'bg-[hsl(76,100%,40%)] text-white hover:bg-[hsl(76,100%,40%)]/90';
+      case 'pro':
+        return 'bg-[hsl(213,100%,33%)] text-white hover:bg-[hsl(213,100%,33%)]/90';
+      case 'teams':
+        return 'bg-[hsl(271,76%,53%)] text-white hover:bg-[hsl(271,76%,53%)]/90';
+      case 'enterprise':
+        return 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700';
+      default:
+        return 'bg-accent text-accent-foreground';
+    }
+  };
 
   // Determinar si se deben mostrar los selectores de organización y proyecto
   // NO mostrar en páginas de capacitaciones ni perfil (en cualquier parte de la ruta)
@@ -128,6 +144,11 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
 
   const handleGoToPricing = () => {
     navigate('/pricing');
+    setIsOpen(false);
+  };
+
+  const handleGoToSubscriptions = () => {
+    navigate('/admin/subscriptions');
     setIsOpen(false);
   };
 
@@ -350,17 +371,20 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
             <div className="border-t border-border">
               {/* Plan Information */}
               <div className="px-4 py-3 flex items-center justify-between hover:bg-accent/5 transition-colors">
-                <p className="text-sm font-medium text-foreground">
-                  {userData?.plan?.name || 'Free Plan'}
-                </p>
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-4 w-4 text-muted-foreground" />
+                  <Badge className={getPlanBadgeClass(userData?.organizations?.[0]?.plan?.slug)}>
+                    {userData?.organizations?.[0]?.plan?.slug?.toUpperCase() || 'FREE'}
+                  </Badge>
+                </div>
                 <Button
                   variant="default"
                   size="sm"
                   className="h-7 px-3 text-xs font-medium flex-shrink-0"
-                  onClick={handleGoToPricing}
-                  data-testid="button-upgrade-plan"
+                  onClick={handleGoToSubscriptions}
+                  data-testid="button-manage-subscription"
                 >
-                  Upgrade
+                  {userData?.organizations?.[0]?.plan?.slug === 'free' ? 'Upgrade' : 'Gestionar'}
                   <ArrowUpRight className="h-3 w-3 ml-1" />
                 </Button>
               </div>

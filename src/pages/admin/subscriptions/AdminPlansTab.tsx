@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
-import { Inbox, Search, Bell } from 'lucide-react';
+import { Inbox, Search, Bell, Edit, Trash2 } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
 import { useMobile } from '@/hooks/use-mobile';
@@ -36,7 +36,7 @@ const AdminPlansTab = () => {
     if (isMobile && mobileSearchValue !== searchValue) {
       setSearchValue(mobileSearchValue);
     }
-  }, [mobileSearchValue, isMobile, searchValue]);
+  }, [mobileSearchValue, isMobile]);
 
   const { data: plans = [], isLoading } = useQuery<Plan[]>({
     queryKey: ['plans'],
@@ -105,6 +105,14 @@ const AdminPlansTab = () => {
 
   const handleRowClick = (plan: Plan) => {
     openModal('plan', { plan, isEditing: true });
+  };
+
+  const handleEdit = (plan: Plan) => {
+    openModal('plan', { plan, isEditing: true });
+  };
+
+  const handleDelete = (plan: Plan) => {
+    console.log('Delete plan:', plan.id);
   };
 
   const columns = [
@@ -181,6 +189,19 @@ const AdminPlansTab = () => {
         data={filteredPlans}
         isLoading={isLoading}
         onRowClick={handleRowClick}
+        rowActions={(plan: Plan) => [
+          {
+            icon: Edit,
+            label: 'Editar',
+            onClick: () => handleEdit(plan)
+          },
+          {
+            icon: Trash2,
+            label: 'Eliminar',
+            onClick: () => handleDelete(plan),
+            variant: 'destructive' as const
+          }
+        ]}
         emptyStateConfig={{
           icon: <Inbox />,
           title: isLoading ? 'Cargando...' : 'No hay planes configurados',

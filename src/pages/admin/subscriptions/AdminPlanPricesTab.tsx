@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
-import { Inbox, Search, Bell } from 'lucide-react';
+import { Inbox, Search, Bell, Edit, Trash2 } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
 import { useMobile } from '@/hooks/use-mobile';
@@ -41,7 +41,7 @@ const AdminPlanPricesTab = () => {
     if (isMobile && mobileSearchValue !== searchValue) {
       setSearchValue(mobileSearchValue);
     }
-  }, [mobileSearchValue, isMobile, searchValue]);
+  }, [mobileSearchValue, isMobile]);
 
   const { data: planPrices = [], isLoading } = useQuery<PlanPrice[]>({
     queryKey: ['plan-prices'],
@@ -121,10 +121,18 @@ const AdminPlanPricesTab = () => {
         }
       });
     }
-  }, [isMobile, setFilterConfig, setSearchValue, setMobileSearchValue]);
+  }, [isMobile, setFilterConfig]);
 
   const handleRowClick = (planPrice: PlanPrice) => {
     openModal('plan-price', { planPrice, isEditing: true });
+  };
+
+  const handleEdit = (planPrice: PlanPrice) => {
+    openModal('plan-price', { planPrice, isEditing: true });
+  };
+
+  const handleDelete = (planPrice: PlanPrice) => {
+    console.log('Delete plan price:', planPrice.id);
   };
 
   const formatCurrency = (amount: number, currencyCode: string) => {
@@ -221,6 +229,19 @@ const AdminPlanPricesTab = () => {
         data={filteredPlanPrices}
         isLoading={isLoading}
         onRowClick={handleRowClick}
+        rowActions={(price: PlanPrice) => [
+          {
+            icon: Edit,
+            label: 'Editar',
+            onClick: () => handleEdit(price)
+          },
+          {
+            icon: Trash2,
+            label: 'Eliminar',
+            onClick: () => handleDelete(price),
+            variant: 'destructive' as const
+          }
+        ]}
         emptyStateConfig={{
           icon: <Inbox />,
           title: isLoading ? 'Cargando...' : 'No hay precios de planes configurados',
