@@ -122,16 +122,7 @@ const Billing = () => {
 
   const cancelSubscriptionMutation = useMutation({
     mutationFn: async (subscriptionId: string) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('No authenticated session');
-
-      return await apiRequest(`/api/subscriptions/${subscriptionId}/cancel`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-      });
+      return await apiRequest('POST', `/api/subscriptions/${subscriptionId}/cancel`);
     },
     onSuccess: () => {
       toast({
@@ -195,7 +186,7 @@ const Billing = () => {
               document={
                 <InvoicePDF
                   payment={payment}
-                  subscription={subscription}
+                  subscription={subscription ?? null}
                   organization={organization}
                 />
               }
@@ -251,8 +242,12 @@ const Billing = () => {
       width: '20%',
       render: (payment: Payment) => (
         <div className="flex items-center gap-2">
-          <CreditCard className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm capitalize">
+          <img 
+            src={payment.provider === 'paypal' ? '/Paypal_2014_logo.png' : '/MercadoPago_logo.png'}
+            alt={payment.provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
+            className="h-4 w-auto object-contain"
+          />
+          <span className="text-sm">
             {payment.provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
           </span>
         </div>
@@ -322,7 +317,7 @@ const Billing = () => {
                     </Button>
                   ) : isActive && (
                     <Button 
-                      variant="destructive" 
+                      variant="secondary" 
                       className="w-full" 
                       onClick={() => setShowCancelDialog(true)}
                       data-testid="button-cancel-subscription"
@@ -351,25 +346,23 @@ const Billing = () => {
                   No hay método de pago configurado para el plan Free
                 </div>
               ) : payments.length > 0 ? (
-                <>
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-16 rounded-md bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                      <CreditCard className="h-5 w-5 text-white" />
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-16 rounded-md bg-white dark:bg-gray-800 border border-border flex items-center justify-center p-1">
+                    <img 
+                      src={payments[0].provider === 'paypal' ? '/Paypal_2014_logo.png' : '/MercadoPago_logo.png'}
+                      alt={payments[0].provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium text-sm">
+                      {payments[0].provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
                     </div>
-                    <div className="flex-1">
-                      <div className="font-medium text-sm">
-                        {payments[0].provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {payments[0].payer_email}
-                      </div>
+                    <div className="text-xs text-muted-foreground">
+                      {payments[0].payer_email}
                     </div>
                   </div>
-
-                  <Button variant="outline" className="w-full" data-testid="button-edit-payment">
-                    Editar
-                  </Button>
-                </>
+                </div>
               ) : (
                 <div className="text-sm text-muted-foreground">
                   No hay métodos de pago registrados
