@@ -183,8 +183,8 @@ export function LeftSidebar() {
         { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts' },
         { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis' },
         { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements' },
-        { id: 'capital', label: 'Capital', icon: TrendingUp, href: '/finances/capital' },
-        { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/finances/general-costs' },
+        { id: 'capital', label: 'Capital', icon: TrendingUp, href: '/finances/capital', restricted: 'coming_soon' },
+        { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/finances/general-costs', restricted: 'coming_soon' },
         { id: 'activity', label: 'Actividad', icon: Activity, href: '/organization/activity', restricted: 'coming_soon' },
         { id: 'preferences', label: 'Preferencias', icon: Settings, href: '/organization/preferences' },
       ];
