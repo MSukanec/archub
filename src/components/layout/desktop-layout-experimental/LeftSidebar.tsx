@@ -458,7 +458,12 @@ export function LeftSidebar() {
                         id: 'community' as const,
                         icon: <Globe className="h-5 w-5" />,
                         testId: 'button-sidebar-community',
-                        onClick: () => setSidebarLevel('community'),
+                        onClick: () => {
+                          // Early return guard: prevent state mutation for restricted users
+                          if (!isAdmin) return;
+                          setSidebarLevel('community');
+                          navigate('/community/dashboard');
+                        },
                         shouldRender: () => true,
                         wrapper: (children: React.ReactNode) => (
                           <PlanRestricted reason="coming_soon">{children}</PlanRestricted>
@@ -467,19 +472,28 @@ export function LeftSidebar() {
                       {
                         id: 'organization' as const,
                         icon: <Building className="h-5 w-5" />,
-                        onClick: () => setSidebarLevel('organization'),
+                        onClick: () => {
+                          setSidebarLevel('organization');
+                          navigate('/organization/dashboard');
+                        },
                         shouldRender: () => true,
                       },
                       {
                         id: 'project' as const,
                         icon: <FolderOpen className="h-5 w-5" />,
-                        onClick: () => setSidebarLevel('project'),
+                        onClick: () => {
+                          setSidebarLevel('project');
+                          navigate('/project/dashboard');
+                        },
                         shouldRender: () => hasProjects && !!selectedProjectId, // Solo si hay proyectos
                       },
                       {
                         id: 'learning' as const,
                         icon: <GraduationCap className="h-5 w-5" />,
-                        onClick: () => setSidebarLevel('learning'),
+                        onClick: () => {
+                          setSidebarLevel('learning');
+                          navigate('/learning/dashboard');
+                        },
                         shouldRender: () => true,
                       },
                     ];
@@ -555,7 +569,10 @@ export function LeftSidebar() {
                 <SidebarIconButton
                   icon={<Crown className="h-5 w-5" />}
                   isActive={sidebarLevel === 'admin'}
-                  onClick={() => setSidebarLevel('admin')}
+                  onClick={() => {
+                    setSidebarLevel('admin');
+                    navigate('/admin/dashboard');
+                  }}
                   badge={unreadCount}
                   testId="sidebar-button-administration"
                 />
@@ -565,7 +582,10 @@ export function LeftSidebar() {
               <SidebarIconButton
                 icon={<Settings className="h-5 w-5" />}
                 isActive={sidebarLevel === 'settings'}
-                onClick={() => setSidebarLevel('settings')}
+                onClick={() => {
+                  setSidebarLevel('settings');
+                  navigate('/settings/billing');
+                }}
                 title="Ajustes"
                 testId="sidebar-button-settings"
               />
