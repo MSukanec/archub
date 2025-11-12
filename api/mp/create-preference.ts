@@ -141,7 +141,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       // Verificar que es admin
       const roleName = (membership.roles as any)?.name?.toLowerCase();
-      if (roleName !== 'admin' && roleName !== 'owner') {
+      const validAdminRoles = ['admin', 'owner', 'administrador'];
+      if (!validAdminRoles.includes(roleName)) {
         console.error('[MP create-preference] User is not admin:', { roleName });
         return res
           .setHeader("Access-Control-Allow-Origin", "*")
