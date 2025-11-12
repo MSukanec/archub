@@ -136,6 +136,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         provider_payment_id: providerPaymentId,
         user_id: userId,
         course_id: courseId,
+        product_id: courseId,
+        product_type: 'course',
         amount: amountValue ? parseFloat(amountValue) : null,
         currency: currencyCode || 'USD',
         status: 'completed',
