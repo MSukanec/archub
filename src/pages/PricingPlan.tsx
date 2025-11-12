@@ -14,7 +14,8 @@ interface Plan {
   id: string;
   name: string;
   slug: string;
-  price: number;
+  monthly_amount: number;
+  annual_amount: number;
   features: any;
   billing_type: string;
 }
@@ -40,16 +41,45 @@ export default function PricingPlan() {
       try {
         const { data, error } = await supabase
           .from('plans')
-          .select('*')
+          .select(`
+            id,
+            name,
+            slug,
+            features,
+            billing_type,
+            is_active,
+            plan_prices!inner (
+              monthly_amount,
+              annual_amount
+            )
+          `)
           .eq('is_active', true)
-          .order('price', { ascending: true, nullsFirst: true });
+          .eq('plan_prices.currency_code', 'USD')
+          .eq('plan_prices.is_active', true);
 
         if (error) throw error;
         
-        const mainPlans = (data || []).filter(p => 
+        const transformedData = (data || []).map(plan => ({
+          id: plan.id,
+          name: plan.name,
+          slug: plan.slug,
+          features: plan.features,
+          billing_type: plan.billing_type,
+          monthly_amount: plan.plan_prices[0]?.monthly_amount || 0,
+          annual_amount: plan.plan_prices[0]?.annual_amount || 0
+        }));
+        
+        const sortedData = transformedData.sort((a, b) => {
+          if (a.monthly_amount === null && b.monthly_amount === null) return 0;
+          if (a.monthly_amount === null) return -1;
+          if (b.monthly_amount === null) return 1;
+          return a.monthly_amount - b.monthly_amount;
+        });
+        
+        const mainPlans = sortedData.filter(p => 
           ['free', 'pro', 'teams'].includes(p.name.toLowerCase())
         );
-        const enterprise = (data || []).find(p => p.name.toLowerCase() === 'enterprise');
+        const enterprise = sortedData.find(p => p.name.toLowerCase() === 'enterprise');
         
         setPlans(mainPlans);
         setEnterprisePlan(enterprise || null);
@@ -63,20 +93,18 @@ export default function PricingPlan() {
     fetchPlans();
   }, []);
 
-  const getPlanPrice = (price: number | null) => {
-    if (!price) return null;
+  const getPlanPrice = (monthlyAmount: number, annualAmount: number) => {
     if (billingPeriod === 'annual') {
-      return (price * 12 * 0.8).toFixed(2);
+      return annualAmount.toFixed(2);
     }
-    return price.toFixed(2);
+    return monthlyAmount.toFixed(2);
   };
 
-  const getMonthlyEquivalent = (price: number | null) => {
-    if (!price) return null;
+  const getMonthlyEquivalent = (monthlyAmount: number, annualAmount: number) => {
     if (billingPeriod === 'annual') {
-      return (price * 0.8).toFixed(2);
+      return (annualAmount / 12).toFixed(2);
     }
-    return price.toFixed(2);
+    return monthlyAmount.toFixed(2);
   };
 
   const getPlanConfig = (planName: string) => {
@@ -343,8 +371,8 @@ export default function PricingPlan() {
           {plans.map((plan) => {
             const config = getPlanConfig(plan.name);
             const Icon = config.icon;
-            const monthlyPrice = getMonthlyEquivalent(plan.price);
-            const totalPrice = getPlanPrice(plan.price);
+            const monthlyPrice = getMonthlyEquivalent(plan.monthly_amount, plan.annual_amount);
+            const totalPrice = getPlanPrice(plan.monthly_amount, plan.annual_amount);
             const isPopular = plan.name.toLowerCase() === 'pro';
 
             return (

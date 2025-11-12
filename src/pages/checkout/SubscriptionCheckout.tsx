@@ -57,10 +57,11 @@ interface PlanData {
 interface PlanPrice {
   id: string;
   plan_id: string;
-  billing_period: string;
-  price: number;
-  currency: string;
+  currency_code: string;
+  monthly_amount: number;
+  annual_amount: number;
   provider: string;
+  is_active: boolean;
 }
 
 export default function SubscriptionCheckout() {
@@ -150,8 +151,9 @@ export default function SubscriptionCheckout() {
           .from("plan_prices")
           .select("*")
           .eq("plan_id", planData.id)
-          .eq("billing_period", billingPeriod)
           .eq("provider", currentProvider)
+          .eq("currency_code", currentCurrency)
+          .eq("is_active", true)
           .maybeSingle();
 
         if (error) {
@@ -171,7 +173,7 @@ export default function SubscriptionCheckout() {
 
       loadPrice();
     }
-  }, [planData, currentProvider, billingPeriod, toast]);
+  }, [planData, currentProvider, billingPeriod, currentCurrency, toast]);
 
   useEffect(() => {
     if (userData) {
@@ -450,7 +452,11 @@ export default function SubscriptionCheckout() {
         throw new Error("No se encontró la organización del usuario");
       }
 
-      if (!priceData?.price || priceData.price <= 0) {
+      const currentAmount = billingPeriod === 'annual' 
+        ? priceData?.annual_amount 
+        : priceData?.monthly_amount;
+
+      if (!currentAmount || currentAmount <= 0) {
         throw new Error("Precio inválido");
       }
 
@@ -462,7 +468,7 @@ export default function SubscriptionCheckout() {
         plan_slug: planSlug,
         organization_id: organizationId,
         billing_period: billingPeriod,
-        amount_usd: priceData.price,
+        amount_usd: currentAmount,
         description,
         ...(billing && { billing }),
       };
@@ -659,7 +665,9 @@ export default function SubscriptionCheckout() {
     }
   };
 
-  const finalPrice = priceData?.price || 0;
+  const finalPrice = billingPeriod === 'annual' 
+    ? (priceData?.annual_amount || 0)
+    : (priceData?.monthly_amount || 0);
 
   if (!planSlug) {
     return null;
