@@ -3,7 +3,7 @@ import { create } from 'zustand'
 type SidebarContext = 'organization' | 'project' | 'design' | 'construction' | 'finances' | 'commercialization' | 'postsale' | 'organizations' | 'admin' | 'recursos' | 'perfil' | 'learning'
 
 // Nuevo tipo para los niveles del sidebar
-type SidebarLevel = 'general' | 'organization' | 'project' | 'construction' | 'finances' | 'library' | 'provider' | 'admin' | 'community' | 'learning' | 'user'
+type SidebarLevel = 'general' | 'organization' | 'project' | 'construction' | 'finances' | 'library' | 'provider' | 'admin' | 'community' | 'learning' | 'user' | 'settings'
 
 interface NavigationState {
   currentSidebarContext: SidebarContext
