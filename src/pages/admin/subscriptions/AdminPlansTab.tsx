@@ -8,6 +8,14 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
 import { useMobile } from '@/hooks/use-mobile';
 
+interface PlanPrice {
+  currency_code: string;
+  monthly_amount: number;
+  annual_amount: number;
+  provider: string | null;
+  is_active: boolean;
+}
+
 interface Plan {
   id: string;
   name: string;
@@ -15,6 +23,7 @@ interface Plan {
   is_active: boolean;
   billing_type: string;
   features: any;
+  plan_prices: PlanPrice[];
 }
 
 const AdminPlansTab = () => {
@@ -45,7 +54,21 @@ const AdminPlansTab = () => {
 
       const { data, error } = await supabase
         .from('plans')
-        .select('id, name, slug, is_active, billing_type, features')
+        .select(`
+          id, 
+          name, 
+          slug, 
+          is_active, 
+          billing_type, 
+          features,
+          plan_prices(
+            currency_code, 
+            monthly_amount, 
+            annual_amount, 
+            provider, 
+            is_active
+          )
+        `)
         .order('name');
 
       if (error) throw error;
@@ -129,7 +152,7 @@ const AdminPlansTab = () => {
     {
       key: 'slug',
       label: 'Slug',
-      width: '20%',
+      width: '15%',
       render: (plan: Plan) => (
         <span className="text-sm text-muted-foreground font-mono">
           {plan.slug}
@@ -137,9 +160,51 @@ const AdminPlansTab = () => {
       ),
     },
     {
+      key: 'pricing',
+      label: 'Precios',
+      width: '24%',
+      render: (plan: Plan) => {
+        const activePrices = plan.plan_prices?.filter(p => p.is_active) || [];
+        
+        if (activePrices.length === 0) {
+          return <span className="text-xs text-muted-foreground">Sin precios configurados</span>;
+        }
+
+        // Prioritize USD, then first available
+        const usdPrice = activePrices.find(p => p.currency_code === 'USD');
+        const primaryPrice = usdPrice || activePrices[0];
+        const otherPrices = activePrices.filter(p => p !== primaryPrice);
+
+        return (
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs font-mono">
+                {primaryPrice.currency_code}
+              </Badge>
+              <span className="text-xs font-medium">
+                ${parseFloat(primaryPrice.monthly_amount.toString()).toFixed(2)}/mes
+              </span>
+              <span className="text-xs text-muted-foreground">
+                ${parseFloat(primaryPrice.annual_amount.toString()).toFixed(2)}/año
+              </span>
+            </div>
+            {otherPrices.length > 0 && (
+              <div className="flex gap-1">
+                {otherPrices.map(price => (
+                  <Badge key={price.currency_code} variant="secondary" className="text-[10px] font-mono">
+                    {price.currency_code}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      },
+    },
+    {
       key: 'billing_type',
-      label: 'Tipo de Facturación',
-      width: '20%',
+      label: 'Facturación',
+      width: '13%',
       render: (plan: Plan) => {
         const billingTypeLabels: Record<string, string> = {
           'per_user': 'Por Usuario',
@@ -155,7 +220,7 @@ const AdminPlansTab = () => {
     {
       key: 'features',
       label: 'Features',
-      width: '23%',
+      width: '16%',
       render: (plan: Plan) => {
         const featureCount = Array.isArray(plan.features) 
           ? plan.features.length 
@@ -170,7 +235,7 @@ const AdminPlansTab = () => {
     {
       key: 'status',
       label: 'Estado',
-      width: '12%',
+      width: '11%',
       render: (plan: Plan) => (
         <Badge 
           variant={plan.is_active ? "default" : "secondary"}
