@@ -195,24 +195,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const host = req.headers['x-forwarded-host'] || req.headers.host;
     const returnBase = `${protocol}://${host}`;
 
-    // Generate unique invoice_id (PayPal requires uniqueness for each transaction)
-    const uniqueInvoiceId = `course:${productId};user:${user_id};ts:${Date.now()}`;
+    // Generate unique invoice_id (PayPal max 127 chars)
+    // Use shortened UUIDs (first 8 chars) for logging/debug only
+    const shortCourseId = productId.substring(0, 8);
+    const shortUserId = user_id.substring(0, 8);
+    const timestamp = Date.now();
     
-    // Custom ID con metadata (base64) para nuestro webhook
-    const customData: any = {
-      user_id,
-      product_type: 'course',
-      course_slug: course_slug,
-      course_id: productId,
-    };
-
-    // Include coupon metadata if coupon was applied
-    if (couponData) {
-      customData.coupon_code = code.trim().toUpperCase();
-      customData.coupon_id = couponData.coupon_id;
-    }
-
-    const custom_id = Buffer.from(JSON.stringify(customData)).toString('base64');
+    // Format: c:UUID;u:UUID;ts:TIMESTAMP (~42 chars without coupon)
+    const uniqueInvoiceId = couponData 
+      ? `c:${shortCourseId};u:${shortUserId};cpn:${code.trim().substring(0, 8)};ts:${timestamp}`
+      : `c:${shortCourseId};u:${shortUserId};ts:${timestamp}`;
+    
+    // Custom ID with FULL UUIDs in pipe-delimited format (PayPal max 127 chars)
+    // Format without coupon: user_id|course_id (~73 chars)
+    // Format with coupon: user_id|course_id|coupon_code|coupon_id (~120 chars max)
+    const custom_id = couponData
+      ? `${user_id}|${productId}|${code.trim().toUpperCase()}|${couponData.coupon_id}`
+      : `${user_id}|${productId}`;
 
     const return_url = `${returnBase}/api/paypal/capture-and-redirect?course_slug=${productSlug}`;
     const cancel_url = `${returnBase}/learning/courses`;

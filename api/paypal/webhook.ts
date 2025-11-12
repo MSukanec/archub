@@ -102,6 +102,7 @@ function parseInvoiceId(invoiceId: string) {
       'ts': 'timestamp',
       'p': 'plan_id',
       'c': 'course',
+      'cpn': 'coupon',
     };
     
     const mappedKey = keyMapping[k] || k;
@@ -345,22 +346,49 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Try to decode custom_id first (contains full UUIDs)
     if (custom_id_raw) {
       try {
-        // New pipe-delimited format: user_id|plan_id|organization_id|billing_period
+        // New pipe-delimited format
         if (custom_id_raw.includes('|')) {
           const parts = custom_id_raw.split('|');
           
-          if (parts.length >= 3) {
+          // Subscription format: user_id|plan_id|organization_id|billing_period (4 parts)
+          if (parts.length === 4 && (parts[3] === 'monthly' || parts[3] === 'annual')) {
             user_hint = parts[0] || null;
             plan_id = parts[1] || null;
             organization_id = parts[2] || null;
-            billing_period = (parts[3] === 'monthly' || parts[3] === 'annual') ? parts[3] : null;
+            billing_period = parts[3];
             product_type = 'subscription';
             
-            console.log('[PayPal webhook] ✅ Decoded custom_id (pipe format):', {
+            console.log('[PayPal webhook] ✅ Decoded custom_id (subscription pipe format):', {
               user_hint,
               plan_id,
               organization_id,
               billing_period,
+              product_type
+            });
+          }
+          // Course format with coupon: user_id|course_id|coupon_code|coupon_id (4 parts)
+          else if (parts.length === 4) {
+            user_hint = parts[0] || null;
+            course_hint = parts[1] || null;
+            product_type = 'course';
+            
+            console.log('[PayPal webhook] ✅ Decoded custom_id (course pipe format with coupon):', {
+              user_hint,
+              course_hint,
+              coupon_code: parts[2],
+              coupon_id: parts[3],
+              product_type
+            });
+          }
+          // Course format without coupon: user_id|course_id (2 parts)
+          else if (parts.length === 2) {
+            user_hint = parts[0] || null;
+            course_hint = parts[1] || null;
+            product_type = 'course';
+            
+            console.log('[PayPal webhook] ✅ Decoded custom_id (course pipe format):', {
+              user_hint,
+              course_hint,
               product_type
             });
           }
