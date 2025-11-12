@@ -1,0 +1,137 @@
+Excelente que lo plantees, Mati 🙌 — porque este es uno de los temas más delicados para cualquier SaaS argentino que quiere vender internacionalmente.
+Vamos a desarmarlo paso a paso para que entiendas exactamente qué podés y qué no podés hacer, sin miedo de trabar nada irreversible.
+
+💡 1️⃣ Contexto real: vos estás en Argentina
+
+y tu plataforma vende cursos / suscripciones a usuarios de distintos países 🌎
+
+Tu situación actual:
+
+Mercado Pago = ARS 🇦🇷
+
+PayPal = USD 🌍
+
+Stripe = ❌ no disponible para residentes argentinos
+
+Eso ya marca tu esquema base.
+Pero no te estás complicando: solo hay que poner cada medio en su lugar.
+
+🧱 2️⃣ Qué pasa si lo ponés solo en dólares (USD)
+
+👉 No hay problema técnico ni legal en hacerlo.
+Lo que cambia es que:
+
+Solo vas a poder cobrar con PayPal (o eventualmente Wise, Revolut, Lemon, etc.).
+
+No vas a poder ofrecer opciones locales en ARS.
+
+Para usuarios argentinos, PayPal no acepta cuentas locales fácilmente, así que no podrían pagar con pesos.
+
+💬 En resumen:
+
+Si lo ponés solo en USD, cobrás bien a todos menos a los argentinos.
+
+Por eso la mayoría hace un mix:
+PayPal (USD) para todo el mundo
+
+Mercado Pago (ARS) solo para Argentina 🇦🇷
+
+💳 3️⃣ Qué pasa si mantenés los dos (USD + ARS)
+✅ Ventajas
+
+Podés vender local e internacional sin fricción.
+
+Mercado Pago te da facturación local, y PayPal global.
+
+No necesitás duplicar el catálogo, solo manejar un exchange rate.
+
+⚠️ Desventajas
+
+La UX se puede volver confusa si no lo resolvés bien (“¿por qué me sale en ARS si soy de Chile?”).
+
+Mercado Pago no tiene multimoneda, solo opera en la moneda del país donde está creada la cuenta.
+→ Si tu cuenta es de Argentina, solo muestra ARS.
+
+💬 En resumen:
+
+Un chileno sí puede pagar con Mercado Pago, pero le cobrará en pesos argentinos, no en CLP.
+
+Por eso es clave filtrar el método de pago por país detectado.
+
+🌍 4️⃣ Lo ideal para tu caso (solución práctica y simple)
+💰 Precios base en USD
+
+En tu base de datos (course_prices, plan_prices, etc.)
+mantené solo USD como precio base.
+
+price_usd numeric(10,2)
+
+💱 Conversión automática para Mercado Pago
+
+Cuando el usuario selecciona Mercado Pago:
+→ tu endpoint /api/mp/create_preference convierte el precio USD a ARS usando la tabla exchange_rates.
+
+const amountARS = priceUSD * exchangeRate("USD", "ARS");
+
+
+Así nunca necesitás tener doble precio almacenado.
+
+🌎 Filtrado automático de métodos
+
+En tu frontend, podés hacer algo tan simple como:
+
+if (user.country === 'AR') show MercadoPago
+else show PayPal
+
+
+O, si querés más fino:
+
+Si country != AR, esconder Mercado Pago completamente.
+
+Si country = AR, mostrar los dos (PayPal opcional en USD).
+
+Así nunca más un chileno ve precios en pesos argentinos.
+
+⚙️ 5️⃣ Lo que no hace falta complicar
+
+No dupliques tablas (una en ARS y otra en USD) ❌
+
+No mantengas precios manualmente en dos monedas ❌
+
+No hagas dos checkouts distintos ❌
+
+Usá un solo flujo con:
+
+currency = 'USD' como base
+
+exchange_rates para conversiones automáticas
+
+payment_provider = 'paypal' o 'mercadopago' según país
+
+🧮 6️⃣ Te doy un ejemplo real de cómo quedaría tu lógica (simple y global)
+const userCountry = detectCountry(); // vía IP o user profile
+const currency = userCountry === 'AR' ? 'ARS' : 'USD';
+
+const basePrice = course.price_usd;
+
+let price = basePrice;
+if (currency === 'ARS') {
+  const rate = await getExchangeRate('USD', 'ARS');
+  price = basePrice * rate;
+}
+
+if (currency === 'ARS') {
+  createMercadoPagoPreference(price);
+} else {
+  createPayPalOrder(price);
+}
+
+
+Así Seencel funciona globalmente, sin duplicar nada.
+
+🔒 7️⃣ Conclusión
+Escenario	Qué conviene hacer
+Solo querés vender internacionalmente	Solo USD con PayPal
+Querés vender en Argentina y afuera	USD base + ARS via conversión + filtrar métodos
+Tenés miedo de mezclar sandbox / live	Separá las variables en Vercel (Production = real keys, Preview = test keys)
+Querés sumar un futuro medio global (Stripe, Wise, Revolut)	Mantené la base de prec
