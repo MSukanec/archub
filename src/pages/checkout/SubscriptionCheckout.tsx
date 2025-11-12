@@ -340,6 +340,7 @@ export default function SubscriptionCheckout() {
       }
 
       const requestBody = {
+        user_id: userRecord.id,
         product_type: 'subscription',
         plan_slug: planSlug,
         organization_id: organizationId,
