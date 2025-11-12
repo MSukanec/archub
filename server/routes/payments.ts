@@ -1042,6 +1042,36 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
     }
   });
 
+  // GET /api/paypal/capture-subscription - Proxy to Vercel function
+  app.get("/api/paypal/capture-subscription", async (req, res) => {
+    try {
+      const handler = await import('../../api/paypal/capture-subscription');
+      await handler.default(req as any, res as any);
+    } catch (error: any) {
+      console.error('[PayPal capture-subscription proxy] Error:', error);
+      return res.status(500).send(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Error - Seencel</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: system-ui; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #f5f5f5;">
+            <div style="text-align: center; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <h1 style="color: #dc2626;">⚠️ Error</h1>
+              <p>Hubo un problema al procesar tu suscripción.</p>
+              <p style="color: #6b7280; font-size: 0.875rem; margin-top: 1rem;">${String(error?.message || error)}</p>
+              <p style="margin-top: 1rem;">
+                <a href="/organization/billing" style="color: #2563eb; text-decoration: none;">Volver a Facturación</a>
+              </p>
+            </div>
+          </body>
+        </html>
+      `);
+    }
+  });
+
   // POST /api/paypal/webhook - DEPRECATED
   // El webhook real está en Supabase Edge Function `paypal_webhook`
   app.post("/api/paypal/webhook", async (req, res) => {
