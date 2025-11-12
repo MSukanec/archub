@@ -132,9 +132,33 @@ function extractMetadata(obj: any): {
   };
 }
 
-/** Si external_reference = "user|slug|months" lo parseamos */
+/** Decodifica external_reference (puede ser base64 JSON o formato legacy "user|slug|months") */
 function parseExtRef(ext?: string | null) {
   if (!ext) return {};
+  
+  // Intentar decodificar como base64 JSON (nuevo formato para suscripciones)
+  try {
+    const decoded = Buffer.from(ext, 'base64').toString('utf-8');
+    const parsed = JSON.parse(decoded);
+    
+    // Si es un objeto válido, retornarlo
+    if (typeof parsed === 'object' && parsed !== null) {
+      console.log('[webhook/parseExtRef] ✅ Decoded base64 JSON:', parsed);
+      return {
+        user_id: parsed.user_id || null,
+        course_slug: parsed.course_slug || null,
+        months: parsed.months || null,
+        product_type: parsed.product_type || null,
+        plan_slug: parsed.plan_slug || null,
+        organization_id: parsed.organization_id || null,
+        billing_period: parsed.billing_period || null,
+      };
+    }
+  } catch (e) {
+    // No es base64 JSON, intentar formato legacy
+  }
+  
+  // Formato legacy: "user|slug|months"
   const [u, s, m] = String(ext).split("|");
   return {
     user_id: u || null,
@@ -417,11 +441,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const amount = Number(pay?.transaction_amount ?? 0);
       const currency = String(pay?.currency_id ?? "ARS");
 
-      const productType = md.product_type || 'course';
-      const organizationId = md.organization_id;
+      const productType = md.product_type || fromExt.product_type || 'course';
+      const organizationId = md.organization_id || fromExt.organization_id;
       const planIdFromMetadata = md.plan_id;
-      const planSlug = md.plan_slug;
-      const billingPeriod = md.billing_period;
+      const planSlug = md.plan_slug || fromExt.plan_slug;
+      const billingPeriod = md.billing_period || fromExt.billing_period;
 
       // Log detallado para pagos no aprobados
       if (status !== "approved") {
@@ -552,11 +576,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         mo?.items?.[0]?.category_id ??
         null;
 
-      const productType = md.product_type || 'course';
-      const organizationId = md.organization_id;
+      const productType = md.product_type || fromExt.product_type || 'course';
+      const organizationId = md.organization_id || fromExt.organization_id;
       const planIdFromMetadata = md.plan_id;
-      const planSlug = md.plan_slug;
-      const billingPeriod = md.billing_period;
+      const planSlug = md.plan_slug || fromExt.plan_slug;
+      const billingPeriod = md.billing_period || fromExt.billing_period;
 
       // Log detallado del merchant_order
       console.log(`[MP webhook] 📦 Merchant Order recibida:`);
