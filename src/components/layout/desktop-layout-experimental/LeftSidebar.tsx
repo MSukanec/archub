@@ -234,6 +234,8 @@ export function LeftSidebar() {
       return [
         { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/settings/billing' },
         { id: 'members', label: 'Miembros', icon: Users, href: '/settings/members' },
+        { id: 'finances', label: 'Finanzas', icon: Wallet, href: '/settings/finances' },
+        { id: 'organization-basic-data', label: 'Datos Básicos', icon: Building, href: '/settings/organization-basic-data' },
         { id: 'notifications', label: 'Notificaciones', icon: Bell, href: '/notifications' },
       ];
     }
