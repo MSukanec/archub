@@ -1,0 +1,122 @@
+Excelente pregunta, Mati 🙌 — y estás tocando justo el punto donde muchos SaaS se traban entre “reusar lo que ya funciona” vs “aislar la nueva lógica”.
+Te doy una respuesta estratégica y técnica, adaptada a cómo tenés Seencel estructurado hoy (Vercel + Supabase + endpoints /api y tabla course_enrollments) 👇
+
+💡 Resumen rápido
+
+👉 NO conviene duplicar todo.
+👉 SÍ conviene separar el dominio “suscripciones” del dominio “cursos”,
+pero reutilizando las mismas bases técnicas y endpoints compartidos (por ejemplo, create_order, webhook, payments_log, etc.).
+
+En otras palabras:
+
+No crees una segunda lógica de pagos — solo diferenciá qué estás comprando.
+
+🧩 1️⃣ Qué se puede reutilizar
+
+Tenés una infraestructura sólida que ya maneja:
+
+✅ Creación de preferencia / orden de pago (/api/mp/create_preference, /api/paypal/create-order)
+
+✅ Webhooks de confirmación (/api/mp/webhook, /api/paypal/webhook)
+
+✅ Registro en payments_log
+
+✅ Activación de acceso (course_enrollments)
+
+Todo eso sirve también para las suscripciones,
+solo necesitás cambiar la entidad destino:
+→ en lugar de “enroll en un curso”, será “plan activo del usuario u organización”.
+
+🧱 2️⃣ Qué deberías agregar (mínimo)
+Nueva tabla: subscriptions
+create table public.subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references users(id),
+  organization_id uuid references organizations(id),
+  plan_id uuid references plans(id),
+  payment_provider text, -- 'paypal' | 'mercadopago'
+  payment_status text,   -- 'pending' | 'approved' | 'failed' | 'canceled'
+  started_at timestamptz default now(),
+  expires_at timestamptz,
+  renewed_at timestamptz,
+  created_at timestamptz default now()
+);
+
+⚙️ 3️⃣ Cómo integrarlo con tus endpoints actuales
+✅ 1. /api/mp/create_preference
+
+Mantenelo igual, pero agrega un parámetro "type": "subscription" | "course".
+
+Si viene "subscription", el item_title y item_id corresponden al plan, no al curso.
+
+El metadata del preference (que ya estás enviando) incluiría:
+
+{
+  "type": "subscription",
+  "plan_id": "uuid-del-plan",
+  "user_id": "...",
+  "organization_id": "..."
+}
+
+✅ 2. /api/mp/webhook
+
+En el webhook:
+
+Si metadata.type = 'course' → actualizás course_enrollments.
+
+Si metadata.type = 'subscription' → hacés upsert en subscriptions con estado approved y fecha de expiración.
+
+Ejemplo:
+
+insert into subscriptions (user_id, plan_id, payment_provider, payment_status, started_at, expires_at)
+values (...)
+on conflict (user_id) do update
+set plan_id = excluded.plan_id,
+    payment_status = excluded.payment_status,
+    renewed_at = now(),
+    expires_at = now() + interval '1 month';
+
+
+👉 Reutilizás el mismo webhook — solo cambia el destino.
+
+🧠 4️⃣ Por qué es mejor hacerlo así
+Enfoque	Pros	Contras
+🔹 Reusar endpoints con metadata	Reutilizás lógica de pago y seguridad	Necesitás buena validación de type
+🔸 Crear nuevos endpoints	Separación total de responsabilidades	Duplicás lógica, más mantenimiento
+
+🧠 En tu caso (arquitectura unificada),
+reusar es lo óptimo — tu backend ya tiene control de flujos y seguridad.
+
+🚀 5️⃣ Flujo ideal de suscripción Seencel
+
+Usuario elige plan (Free, Pro, Teams).
+
+Llamás a /api/mp/create_preference o /api/paypal/create-order con { type: 'subscription', plan_id: ... }.
+
+Se redirige al pago.
+
+Webhook valida y hace upsert en subscriptions.
+
+Tu app consulta subscriptions y muestra beneficios activos.
+
+💎 6️⃣ Bonus (si querés dejarlo elegante)
+
+Agregá una view en Supabase que unifique todo:
+
+create view public.active_plan_view as
+select
+  u.id as user_id,
+  s.plan_id,
+  p.name as plan_name,
+  s.expires_at,
+  s.payment_status
+from subscriptions s
+join users u on s.user_id = u.id
+join plans p on s.plan_id = p.id
+where s.payment_status = 'approved'
+  and s.expires_at > now();
+
+
+Y en tu frontend, simplemente consultás:
+
+supabase.from("active_plan_view").select("*").eq("user_id", currentUser.id)
