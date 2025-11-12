@@ -91,7 +91,21 @@ function parseInvoiceId(invoiceId: string) {
   if (!invoiceId) return out;
   for (const part of invoiceId.split(";")) {
     const [k, v] = part.split(":").map((s) => s.trim());
-    if (k && v) out[k] = v;
+    if (!k || !v) continue;
+    
+    // Map shortened keys to full keys for backward compatibility
+    const keyMapping: Record<string, string> = {
+      'sub': 'subscription',
+      'u': 'user',
+      'o': 'organization_id',
+      'bp': 'billing_period',
+      'ts': 'timestamp',
+      'p': 'plan_id',
+      'c': 'course',
+    };
+    
+    const mappedKey = keyMapping[k] || k;
+    out[mappedKey] = v;
   }
   return out;
 }
@@ -307,6 +321,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     let order_id = extractOrderId(json);
     let invoice_id = json?.resource?.purchase_units?.[0]?.invoice_id ?? null;
+    let custom_id_raw = json?.resource?.purchase_units?.[0]?.custom_id ?? null;
+    
     if (!invoice_id && order_id) {
       invoice_id = await fetchOrderInvoiceId(order_id);
     }
@@ -326,7 +342,78 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let billing_period: 'monthly' | 'annual' | null = null;
     let months: number | null = null;
 
-    if (invoice_id) {
+    // Try to decode custom_id first (contains full UUIDs)
+    if (custom_id_raw) {
+      try {
+        // New pipe-delimited format: user_id|plan_id|organization_id|billing_period
+        if (custom_id_raw.includes('|')) {
+          const parts = custom_id_raw.split('|');
+          
+          if (parts.length >= 3) {
+            user_hint = parts[0] || null;
+            plan_id = parts[1] || null;
+            organization_id = parts[2] || null;
+            billing_period = (parts[3] === 'monthly' || parts[3] === 'annual') ? parts[3] : null;
+            product_type = 'subscription';
+            
+            console.log('[PayPal webhook] ✅ Decoded custom_id (pipe format):', {
+              user_hint,
+              plan_id,
+              organization_id,
+              billing_period,
+              product_type
+            });
+          }
+        }
+        // Old base64 JSON format (backward compatibility)
+        else {
+          const decoded = Buffer.from(custom_id_raw, 'base64').toString('utf8');
+          const customData = JSON.parse(decoded);
+          
+          // New format with shortened keys
+          if (customData.u || customData.t) {
+            user_hint = customData.u ?? null;
+            product_type = customData.t ?? null;
+            plan_slug = customData.ps ?? null;
+            plan_id = customData.p ?? null;
+            organization_id = customData.o ?? null;
+            billing_period = customData.bp ?? null;
+            course_hint = customData.c ?? null;
+            
+            console.log('[PayPal webhook] ✅ Decoded custom_id (base64 new):', {
+              user_hint,
+              product_type,
+              organization_id,
+              plan_id,
+              billing_period
+            });
+          }
+          // Old format with full keys
+          else if (customData.user_id || customData.product_type) {
+            user_hint = customData.user_id ?? null;
+            course_hint = customData.course_id ?? null;
+            product_type = customData.product_type ?? null;
+            plan_slug = customData.plan_slug ?? null;
+            plan_id = customData.plan_id ?? null;
+            organization_id = customData.organization_id ?? null;
+            billing_period = customData.billing_period ?? null;
+            
+            console.log('[PayPal webhook] ✅ Decoded custom_id (base64 old):', {
+              user_hint,
+              product_type,
+              organization_id,
+              plan_id,
+              billing_period
+            });
+          }
+        }
+      } catch (e) {
+        console.error('[PayPal webhook] ⚠️ Failed to decode custom_id, falling back to invoice_id:', e);
+      }
+    }
+
+    // Fallback to invoice_id if custom_id didn't provide data
+    if (!user_hint && !organization_id && invoice_id) {
       const parsed = parseInvoiceId(invoice_id);
       user_hint = parsed.user ?? null;
       course_hint = parsed.course ?? null;
@@ -340,6 +427,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (bp === 'monthly' || bp === 'annual') {
         billing_period = bp;
       }
+      
+      console.log('[PayPal webhook] ℹ️ Using invoice_id metadata (legacy)');
     }
 
     console.log(`[PayPal webhook] 📦 Metadata extracted:`, {

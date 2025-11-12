@@ -147,19 +147,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const host = req.headers['x-forwarded-host'] || req.headers.host;
     const returnBase = `${protocol}://${host}`;
 
-    // Generate unique invoice_id (PayPal requires uniqueness for each transaction)
-    const uniqueInvoiceId = `subscription:${productId};user:${user_id};org:${organization_id};ts:${Date.now()}`;
+    // Generate unique invoice_id (PayPal max 127 chars)
+    // Use shortened UUIDs (first 8 chars) for logging/debug only
+    const shortPlanId = productId.substring(0, 8);
+    const shortUserId = user_id.substring(0, 8);
+    const shortOrgId = organization_id.substring(0, 8);
+    const timestamp = Date.now();
     
-    // Custom ID con metadata (base64) para nuestro webhook
-    const customData = {
-      user_id,
-      product_type: 'subscription',
-      plan_slug,
-      plan_id: productId,
-      organization_id,
-      billing_period,
-    };
-    const custom_id = Buffer.from(JSON.stringify(customData)).toString('base64');
+    // Format: sub:UUID;u:UUID;o:UUID;bp:VALUE;ts:TIMESTAMP (~62 chars)
+    const uniqueInvoiceId = `sub:${shortPlanId};u:${shortUserId};o:${shortOrgId};bp:${billing_period};ts:${timestamp}`;
+    
+    // Custom ID with FULL UUIDs in pipe-delimited format (PayPal max 127 chars)
+    // Format: user_id|plan_id|organization_id|billing_period (~118 chars)
+    const custom_id = `${user_id}|${productId}|${organization_id}|${billing_period}`;
 
     const return_url = `${returnBase}/organization/billing?payment=success`;
     const cancel_url = `${returnBase}/organization/billing?payment=cancelled`;
