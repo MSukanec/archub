@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { Check, X, Crown, CreditCard, Folder, HardDrive, Users, Briefcase, Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 interface Plan {
   id: string;
@@ -31,6 +32,10 @@ export default function PricingPlan() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [enterprisePlan, setEnterprisePlan] = useState<Plan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const { data: userData } = useCurrentUser();
+  const userPlanName = userData?.organization?.plan?.name;
+  const isAuthenticated = !!userData?.user?.id;
 
   useEffect(() => {
     setSidebarLevel('general');
@@ -289,49 +294,51 @@ export default function PricingPlan() {
     <Layout headerProps={headerProps}>
       <div className="max-w-7xl mx-auto space-y-16 py-12 px-4">
         
-        {/* Banner Fundador */}
-        <Card className="border border-accent/20 bg-gradient-to-r from-background via-accent/[0.03] to-background">
-          <div className="p-6 flex items-start gap-4">
-            <div className="p-2.5 bg-accent/10 rounded-lg flex-shrink-0">
-              <Crown className="h-5 w-5 text-accent" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h3 className="text-base font-semibold text-[var(--text-default)]">
-                  Oferta de Lanzamiento: Conviértete en Fundador
-                </h3>
-                <Badge className="bg-accent text-accent-foreground text-xs">
-                  Limitado
-                </Badge>
+        {/* Banner Fundador - solo si facturación es anual */}
+        {billingPeriod === 'annual' && (
+          <Card className="border border-accent/20 bg-gradient-to-r from-background via-accent/[0.03] to-background">
+            <div className="p-6 flex items-start gap-4">
+              <div className="p-2.5 bg-accent/10 rounded-lg flex-shrink-0">
+                <Crown className="h-5 w-5 text-accent" />
               </div>
-              <p className="text-sm text-[var(--text-muted)] mb-4">
-                Suscripción <strong>ANUAL</strong> incluye beneficios exclusivos de por vida:
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-[var(--text-muted)]">
-                <div className="flex items-center gap-2">
-                  <Check className="h-3.5 w-3.5 text-accent flex-shrink-0" />
-                  <span>Badge de "Fundador" en tu perfil</span>
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h3 className="text-base font-semibold text-[var(--text-default)]">
+                    Oferta de Lanzamiento: Conviértete en Fundador
+                  </h3>
+                  <Badge className="bg-accent text-accent-foreground text-xs">
+                    Limitado
+                  </Badge>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Check className="h-3.5 w-3.5 text-accent flex-shrink-0" />
-                  <span>Acceso anticipado a nuevas funcionalidades</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="h-3.5 w-3.5 text-accent flex-shrink-0" />
-                  <span>Grupo privado de Fundadores</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="h-3.5 w-3.5 text-accent flex-shrink-0" />
-                  <span>10% descuento en renovaciones</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="h-3.5 w-3.5 text-accent flex-shrink-0" />
-                  <span>20% descuento en suscripciones a cursos</span>
+                <p className="text-sm text-[var(--text-muted)] mb-4">
+                  Suscripción <strong>ANUAL</strong> incluye beneficios exclusivos de por vida:
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-[var(--text-muted)]">
+                  <div className="flex items-center gap-2">
+                    <Check className="h-3.5 w-3.5 text-accent flex-shrink-0" />
+                    <span>Badge de "Fundador" en tu perfil</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-3.5 w-3.5 text-accent flex-shrink-0" />
+                    <span>Acceso anticipado a nuevas funcionalidades</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-3.5 w-3.5 text-accent flex-shrink-0" />
+                    <span>Grupo privado de Fundadores</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-3.5 w-3.5 text-accent flex-shrink-0" />
+                    <span>10% descuento en renovaciones</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-3.5 w-3.5 text-accent flex-shrink-0" />
+                    <span>20% descuento en suscripciones a cursos</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        )}
 
         {/* Selector Mensual/Anual */}
         <div className="flex justify-center">
@@ -374,6 +381,8 @@ export default function PricingPlan() {
             const monthlyPrice = getMonthlyEquivalent(plan.monthly_amount, plan.annual_amount);
             const totalPrice = getPlanPrice(plan.monthly_amount, plan.annual_amount);
             const isPopular = plan.name.toLowerCase() === 'pro';
+            const isCurrentPlan = plan.name.toLowerCase() === userPlanName?.toLowerCase();
+            const isFree = plan.name.toLowerCase() === 'free';
 
             return (
               <div
@@ -389,6 +398,14 @@ export default function PricingPlan() {
                   <div className="absolute top-4 right-4 z-10">
                     <Badge className="bg-accent text-accent-foreground text-[9px] font-bold px-3 py-1 uppercase">
                       Más Popular
+                    </Badge>
+                  </div>
+                )}
+                
+                {isCurrentPlan && isAuthenticated && (
+                  <div className="absolute top-4 left-4 z-10">
+                    <Badge className="bg-green-500 text-white text-[9px] font-bold px-3 py-1 uppercase">
+                      Plan Actual
                     </Badge>
                   </div>
                 )}
@@ -420,41 +437,54 @@ export default function PricingPlan() {
 
                   {/* Precio */}
                   <div className="py-2">
-                    <div className="flex items-baseline gap-1">
-                      <span className={cn(
-                        "text-sm",
-                        isPopular ? "text-gray-400" : "text-[var(--text-muted)]"
-                      )}>
-                        USD
-                      </span>
-                      <span className={cn(
-                        "text-5xl font-bold tracking-tight",
-                        isPopular ? "text-white" : "text-[var(--text-default)]"
-                      )}>
-                        {monthlyPrice?.split('.')[0]}
-                      </span>
-                      <span className={cn(
-                        "text-lg",
-                        isPopular ? "text-gray-400" : "text-[var(--text-muted)]"
-                      )}>
-                        /mes
-                      </span>
-                    </div>
-                    {billingPeriod === 'annual' && (
-                      <div className={cn(
-                        "text-xs mt-1",
-                        isPopular ? "text-gray-500" : "text-[var(--text-muted)]"
-                      )}>
-                        USD {totalPrice} al año
+                    {isFree ? (
+                      <div className="flex items-baseline gap-1">
+                        <span className={cn(
+                          "text-5xl font-bold tracking-tight",
+                          isPopular ? "text-white" : "text-[var(--text-default)]"
+                        )}>
+                          Gratis
+                        </span>
                       </div>
-                    )}
-                    {plan.billing_type === 'per_user' && plan.name.toLowerCase() === 'teams' && (
-                      <div className={cn(
-                        "text-xs mt-0.5",
-                        isPopular ? "text-gray-500" : "text-[var(--text-muted)]"
-                      )}>
-                        Por usuario/asiento
-                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-baseline gap-1">
+                          <span className={cn(
+                            "text-sm",
+                            isPopular ? "text-gray-400" : "text-[var(--text-muted)]"
+                          )}>
+                            USD
+                          </span>
+                          <span className={cn(
+                            "text-5xl font-bold tracking-tight",
+                            isPopular ? "text-white" : "text-[var(--text-default)]"
+                          )}>
+                            {monthlyPrice?.split('.')[0]}
+                          </span>
+                          <span className={cn(
+                            "text-lg",
+                            isPopular ? "text-gray-400" : "text-[var(--text-muted)]"
+                          )}>
+                            /mes
+                          </span>
+                        </div>
+                        {billingPeriod === 'annual' && (
+                          <div className={cn(
+                            "text-xs mt-1",
+                            isPopular ? "text-gray-500" : "text-[var(--text-muted)]"
+                          )}>
+                            USD {totalPrice} al año
+                          </div>
+                        )}
+                        {plan.billing_type === 'per_user' && plan.name.toLowerCase() === 'teams' && (
+                          <div className={cn(
+                            "text-xs mt-0.5",
+                            isPopular ? "text-gray-500" : "text-[var(--text-muted)]"
+                          )}>
+                            Por usuario/asiento
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
 
@@ -462,15 +492,38 @@ export default function PricingPlan() {
                   <Button
                     className={cn(
                       "w-full h-11 font-medium rounded-lg",
-                      isPopular 
+                      isPopular && !isCurrentPlan
                         ? "bg-accent text-accent-foreground hover:bg-accent/90" 
                         : ""
                     )}
-                    variant={isPopular ? "default" : "secondary"}
-                    onClick={() => setLocation(`/subscription/checkout?plan=${plan.slug}&billing=${billingPeriod}`)}
+                    variant={
+                      isCurrentPlan 
+                        ? "outline" 
+                        : isPopular 
+                          ? "default" 
+                          : "secondary"
+                    }
+                    onClick={() => {
+                      if (!isCurrentPlan) {
+                        setLocation(`/subscription/checkout?plan=${plan.slug}&billing=${billingPeriod}`)
+                      }
+                    }}
+                    disabled={isCurrentPlan && isAuthenticated}
                     data-testid={`button-select-plan-${plan.name.toLowerCase()}`}
                   >
-                    {billingPeriod === 'annual' ? 'Ser Fundador' : 'Comenzar ahora'}
+                    {isAuthenticated ? (
+                      isCurrentPlan ? (
+                        'Plan Actual'
+                      ) : isFree ? (
+                        'Cambiar a Free'
+                      ) : billingPeriod === 'annual' ? (
+                        'Suscribirse Anualmente'
+                      ) : (
+                        'Suscribirse Mensualmente'
+                      )
+                    ) : (
+                      billingPeriod === 'annual' ? 'Ser Fundador' : 'Comenzar ahora'
+                    )}
                   </Button>
 
                   {/* Límites */}
