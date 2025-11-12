@@ -26,12 +26,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { 
       user_id, 
       course_slug,
-      description = "Seencel course purchase"
+      description = "Seencel course purchase",
+      code
     } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
     console.log('[PayPal create-course-order] Request received:', {
       user_id,
-      course_slug
+      course_slug,
+      hasCouponCode: !!code,
+      couponCode: code ? code.trim() : null
     });
 
     if (!user_id || !course_slug) {
@@ -41,7 +44,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .json({ ok: false, error: "Missing user_id or course_slug" });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Extract auth token from header for authenticated RPC calls
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.replace(/^Bearer\s+/i, "");
+    
+    if (!token) {
+      return res
+        .setHeader("Access-Control-Allow-Origin", "*")
+        .status(401)
+        .json({ ok: false, error: "Missing authorization token" });
+    }
+    
+    // Create authenticated client for RPC
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } }
+    });
 
     // Resolve course_id from course_slug
     const { data: course, error: courseError } = await supabase
@@ -76,7 +93,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Prefer provider-specific price, fallback to 'any'
     const chosenPrice = coursePrices.find((p: any) => p.provider === "paypal") ?? coursePrices[0];
-    const amount = Number(chosenPrice.amount);
+    let amount = Number(chosenPrice.amount);
 
     if (!Number.isFinite(amount) || amount <= 0) {
       return res
@@ -89,12 +106,85 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const productTitle = course.title;
     const productSlug = course.slug;
     const productDescription = course.short_description || course.title;
+    let couponData: any = null;
+
+    // Validate coupon if provided
+    if (code && code.trim()) {
+      console.log('[PayPal create-course-order] Validating coupon:', {
+        code: code.trim(),
+        user_id,
+        course_id: course.id,
+        price: amount,
+        currency: 'USD'
+      });
+
+      const { data: validationResult, error: couponError } = await supabase.rpc('validate_coupon', {
+        p_code: code.trim(),
+        p_course_id: course.id,
+        p_price: amount,
+        p_currency: 'USD'
+      });
+
+      if (couponError) {
+        console.error('[PayPal create-course-order] Error validating coupon:', couponError);
+        return res
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .status(400)
+          .json({ ok: false, error: "Error validating coupon", details: couponError.message });
+      }
+
+      if (!validationResult || !validationResult.ok) {
+        console.error('[PayPal create-course-order] Invalid coupon:', {
+          code: code.trim(),
+          reason: validationResult?.reason,
+          validationResult
+        });
+        return res
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .status(400)
+          .json({ 
+            ok: false,
+            error: "Invalid coupon", 
+            reason: validationResult?.reason || 'UNKNOWN'
+          });
+      }
+
+      // Valid coupon - apply discount
+      couponData = validationResult;
+      const finalPrice = Number(validationResult.final_price);
+      
+      // If coupon gives 100% discount, return special response for free enrollment
+      if (!Number.isFinite(finalPrice) || finalPrice <= 0) {
+        console.log('[PayPal create-course-order] 100% discount coupon - free enrollment:', {
+          code: code.trim(),
+          coupon_id: validationResult.coupon_id
+        });
+        return res
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .status(200)
+          .json({ 
+            ok: true,
+            free_enrollment: true,
+            coupon_code: code.trim(),
+            coupon_id: validationResult.coupon_id
+          });
+      }
+      
+      amount = finalPrice;
+      console.log('[PayPal create-course-order] Coupon applied:', {
+        code: code.trim(),
+        discount: validationResult.discount,
+        final_price: amount
+      });
+    }
 
     console.log('[PayPal create-course-order] Course resolved with server-side pricing:', {
       course_id: course.id,
       course_title: course.title,
       amount,
-      provider: chosenPrice.provider
+      provider: chosenPrice.provider,
+      hasCoupon: !!couponData,
+      couponCode: couponData ? code.trim() : null
     });
 
     const base = paypalBase();
@@ -109,12 +199,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const uniqueInvoiceId = `course:${productId};user:${user_id};ts:${Date.now()}`;
     
     // Custom ID con metadata (base64) para nuestro webhook
-    const customData = {
+    const customData: any = {
       user_id,
       product_type: 'course',
       course_slug: course_slug,
       course_id: productId,
     };
+
+    // Include coupon metadata if coupon was applied
+    if (couponData) {
+      customData.coupon_code = code.trim().toUpperCase();
+      customData.coupon_id = couponData.coupon_id;
+    }
+
     const custom_id = Buffer.from(JSON.stringify(customData)).toString('base64');
 
     const return_url = `${returnBase}/api/paypal/capture-and-redirect?course_slug=${productSlug}`;

@@ -350,22 +350,12 @@ export default function PaymentMethodModal({
         throw new Error("No se pudo obtener el ID del usuario");
       }
 
-      const finalAmount = appliedCoupon
-        ? appliedCoupon.final_price
-        : priceData?.amount
-          ? Number(priceData.amount)
-          : undefined;
-      if (!finalAmount || finalAmount <= 0) {
-        throw new Error("Precio inválido");
-      }
-
       const courseTitle = (priceData as any)?.courses?.title || courseSlug;
       const description = `${courseTitle} - Suscripción Anual`;
 
       const requestBody = {
         user_id: userRecord.id,
         course_slug: courseSlug,
-        months: priceData?.months || 12,
         ...(appliedCoupon && { code: appliedCoupon.code }),
         description,
       };
@@ -383,7 +373,10 @@ export default function PaymentMethodModal({
         paypalUrl,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+          },
           body: JSON.stringify(requestBody),
         },
         15000 // timeout de 15 segundos
@@ -406,6 +399,39 @@ export default function PaymentMethodModal({
       if (!res.ok || !payload?.ok) {
         console.error("[PayPal] Error al crear orden:", payload);
         throw new Error(payload?.error || `HTTP ${res.status}`);
+      }
+
+      // Si el cupón da 100% descuento, usar flujo de inscripción gratuita
+      if (payload.free_enrollment && appliedCoupon) {
+        console.log("[PayPal] Cupón da acceso gratuito, usando free-enroll...");
+        
+        const freeEnrollResponse = await fetch(`${API_BASE}/api/checkout/free-enroll`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            courseSlug,
+            code: appliedCoupon.code,
+          }),
+        });
+
+        const freeEnrollData = await freeEnrollResponse.json();
+        if (!freeEnrollResponse.ok) {
+          console.error("Error al inscribir con cupón 100%:", freeEnrollData);
+          throw new Error(freeEnrollData?.error || "No se pudo completar la inscripción");
+        }
+
+        toast({
+          title: "¡Inscripción exitosa!",
+          description: "Te inscribiste correctamente al curso. Ya podés acceder al contenido.",
+        });
+
+        setTimeout(() => {
+          window.location.assign(`/learning/courses/${courseSlug}`);
+        }, 1500);
+        return;
       }
 
       const paypal_order = payload.order;
