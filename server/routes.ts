@@ -393,18 +393,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Mercado Pago Integration Routes (Proxies)
   // ============================================
 
-  // DEPRECATED - Use create-course-preference or create-subscription-preference instead
-  // POST /api/mp/create-preference - Proxy to Vercel function (LEGACY UNIFIED ENDPOINT)
-  app.post("/api/mp/create-preference", async (req, res) => {
-    try {
-      const handler = await import('../api/mp/create-preference.js');
-      await handler.default(req as any, res as any);
-    } catch (error: any) {
-      console.error("[MP create-preference] Error:", error);
-      res.status(500).json({ ok: false, error: error.message || String(error) });
-    }
-  });
-
   // POST /api/mp/create-course-preference - Proxy to Vercel function
   app.post("/api/mp/create-course-preference", async (req, res) => {
     try {
