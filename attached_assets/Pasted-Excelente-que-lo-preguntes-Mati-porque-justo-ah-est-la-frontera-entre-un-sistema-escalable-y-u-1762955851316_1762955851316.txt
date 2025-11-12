@@ -1,0 +1,107 @@
+Excelente que lo preguntes, Mati 💡
+porque justo ahí está la frontera entre un sistema escalable y un sistema “duplicado con cinta adhesiva” 😅
+
+Te explico sin vueltas:
+👉 El checkout puede y debería reutilizar el mismo flujo base,
+pero con una capa visual y lógica distinta cuando el type = 'subscription'.
+
+En otras palabras:
+
+No hagas otro endpoint ni otro sistema de pago,
+pero sí creá una experiencia de checkout diferente (UX/UI) para que el usuario entienda que está contratando un plan, no un curso.
+
+💳 1️⃣ Cómo separarlo mentalmente
+Elemento	Cursos	Suscripciones
+Objetivo	Pago único / acceso vitalicio	Pago recurrente / acceso temporal
+UX copy	“Comprar curso”	“Suscribirme al plan”
+Backend	course_enrollments	subscriptions
+Lógica de renovación	No aplica	Upsert + fecha expiración
+Integración API	/api/mp/create_preference (reutilizado)	/api/mp/create_preference (con type='subscription')
+
+Entonces:
+💡 Backend igual → Frontend diferente.
+
+🧩 2️⃣ Cómo hacerlo en la práctica (paso a paso)
+1. Reutilizá tu endpoint actual
+
+Tu /api/mp/create_preference y /api/paypal/create-order ya hacen todo bien.
+Solo agregales la capacidad de recibir:
+
+{
+  "type": "subscription",
+  "plan_id": "...",
+  "user_id": "...",
+  "organization_id": "..."
+}
+
+
+Y generar el item:
+
+title: `Plan ${plan.name} - Seencel`,
+quantity: 1,
+unit_price: plan.price_usd,
+
+2. Creá un checkout visual distinto
+
+Un nuevo componente, por ejemplo:
+components/checkout/SubscriptionCheckout.tsx
+
+🧠 Visualmente se parece a tu checkout de cursos,
+pero con estos cambios:
+
+No muestra “curso”, sino “Plan seleccionado: Pro / Teams / Free”.
+
+Indica duración (“Renovación mensual automática”).
+
+Texto de botón: Suscribirme (no Comprar).
+
+Mostrar beneficios o comparativa de planes.
+
+Muestra el logo del método (PayPal / Mercado Pago).
+
+👉 El backend no necesita duplicarse, pero el mensaje y expectativa del usuario sí.
+
+3. En tu frontend principal
+
+Cuando el usuario elige un plan, redirigís según tipo:
+
+if (type === 'course') navigate('/checkout/course?id=' + courseId)
+else if (type === 'subscription') navigate('/checkout/plan?id=' + planId)
+
+
+Ambos usan el mismo endpoint final de pago,
+pero con distinta “carátula”.
+
+⚙️ 3️⃣ Beneficios de hacerlo así
+Ventaja	Descripción
+🚀 Mantenimiento	Solo hay un endpoint y webhook
+🧠 Claridad	El usuario entiende qué está pagando
+💰 Escalabilidad	Si más adelante vendés plantillas, talleres o IA tokens → solo agregás nuevos “types”
+🔒 Seguridad	Mantenés un flujo de pago controlado y auditado
+🎨 Flexibilidad	Podés personalizar UX por tipo sin romper el core
+💡 4️⃣ A futuro (cuando quieras simplificar aún más)
+
+Podés hacer que tu checkout sea un único componente genérico:
+
+<Checkout type="subscription" item={plan} />
+
+
+y que internamente elija layout + endpoint según type.
+
+Así todo queda centralizado:
+
+/api/payments/create
+
+/api/payments/webhook
+
+payments_log (con type)
+
+destination_table (según tipo)
+
+✅ En resumen
+Qué hacés	Cómo
+Endpoint	Reutilizás el de cursos
+Webhook	Reutilizás el de cursos con metadata.type
+Checkout visual	Nuevo componente “Suscripción”
+Lógica de registro	Nueva tabla subscriptions
+UX copy	Diferente (suscribirse vs comprar)
