@@ -83,6 +83,46 @@ export const insertUserPreferencesSchema = createInsertSchema(user_preferences).
   last_organization_id: true,
 });
 
+// Plans Table
+export const plans = pgTable("plans", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull().unique(),
+  slug: text("slug").notNull().unique(),
+  features: jsonb("features"),
+  price: numeric("price", { precision: 10, scale: 2 }),
+  is_active: boolean("is_active").default(true),
+  billing_type: text("billing_type").default("per_user"),
+});
+
+export const insertPlanSchema = createInsertSchema(plans).omit({
+  id: true,
+});
+
+export type Plan = typeof plans.$inferSelect;
+export type InsertPlan = z.infer<typeof insertPlanSchema>;
+
+// Organizations Table
+export const organizations = pgTable("organizations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  name: text("name").notNull(),
+  created_by: uuid("created_by").notNull(),
+  is_active: boolean("is_active").default(true),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  plan_id: uuid("plan_id"),
+  is_system: boolean("is_system").default(false),
+  logo_url: text("logo_url"),
+});
+
+export const insertOrganizationSchema = createInsertSchema(organizations).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export type Organization = typeof organizations.$inferSelect;
+export type InsertOrganization = z.infer<typeof insertOrganizationSchema>;
+
 // Roles Table
 export const roles = pgTable("roles", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -1031,6 +1071,46 @@ export const insertBankTransferPaymentSchema = createInsertSchema(bank_transfer_
   updated_at: true,
 });
 
+// Plan Prices Table
+export const plan_prices = pgTable("plan_prices", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  plan_id: uuid("plan_id").notNull(),
+  currency_code: text("currency_code").notNull(),
+  monthly_amount: numeric("monthly_amount", { precision: 10, scale: 2 }).notNull(),
+  annual_amount: numeric("annual_amount", { precision: 10, scale: 2 }).notNull(),
+  provider: text("provider").default("any"),
+  is_active: boolean("is_active").default(true),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export const insertPlanPriceSchema = createInsertSchema(plan_prices).omit({
+  id: true,
+  created_at: true,
+});
+
+// Organization Subscriptions Table
+export const organization_subscriptions = pgTable("organization_subscriptions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organization_id: uuid("organization_id").notNull(),
+  plan_id: uuid("plan_id").notNull(),
+  payment_id: uuid("payment_id"),
+  status: text("status").notNull().default("active"),
+  billing_period: text("billing_period").notNull(),
+  started_at: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
+  expires_at: timestamp("expires_at", { withTimezone: true }).notNull(),
+  cancelled_at: timestamp("cancelled_at", { withTimezone: true }),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: text("currency").notNull(),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const insertOrganizationSubscriptionSchema = createInsertSchema(organization_subscriptions).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
 // Types for payments
 export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
@@ -1038,6 +1118,10 @@ export type PaymentEvent = typeof payment_events.$inferSelect;
 export type InsertPaymentEvent = z.infer<typeof insertPaymentEventSchema>;
 export type BankTransferPayment = typeof bank_transfer_payments.$inferSelect;
 export type InsertBankTransferPayment = z.infer<typeof insertBankTransferPaymentSchema>;
+export type PlanPrice = typeof plan_prices.$inferSelect;
+export type InsertPlanPrice = z.infer<typeof insertPlanPriceSchema>;
+export type OrganizationSubscription = typeof organization_subscriptions.$inferSelect;
+export type InsertOrganizationSubscription = z.infer<typeof insertOrganizationSubscriptionSchema>;
 
 // Global Announcements Table
 export const global_announcements = pgTable("global_announcements", {

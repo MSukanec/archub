@@ -44,22 +44,53 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { user_id, course_slug, currency = "ARS", months = 12, code } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    const { 
+      user_id, 
+      product_type = 'course',
+      course_slug, 
+      plan_slug,
+      organization_id,
+      billing_period,
+      currency = "ARS", 
+      months = 12, 
+      code 
+    } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
     console.log('[MP create-preference] Request received:', {
       user_id,
+      product_type,
       course_slug,
+      plan_slug,
+      organization_id,
+      billing_period,
       currency,
       months,
       hasCouponCode: !!code,
       couponCode: code ? code.trim() : null
     });
 
-    if (!user_id || !course_slug) {
+    // Validar parámetros según tipo de producto
+    if (!user_id) {
       return res
         .setHeader("Access-Control-Allow-Origin", "*")
         .status(400)
-        .json({ ok: false, error: "Faltan user_id o course_slug" });
+        .json({ ok: false, error: "Falta user_id" });
+    }
+
+    if (product_type === 'subscription') {
+      if (!plan_slug || !organization_id || !billing_period) {
+        return res
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .status(400)
+          .json({ ok: false, error: "Para suscripciones se requiere plan_slug, organization_id y billing_period" });
+      }
+    } else {
+      if (!course_slug) {
+        return res
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .status(400)
+          .json({ ok: false, error: "Falta course_slug" });
+      }
     }
 
     // Extract auth token from header for authenticated RPC calls
@@ -74,61 +105,155 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .json({ ok: false, error: "Missing authorization token" });
     }
     
-    // Create authenticated client for RPC (needed for validate_coupon which uses auth.uid())
+    // Create authenticated client for RPC (needed for validate_coupon RPC which uses auth.uid())
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       global: { headers: { Authorization: `Bearer ${token}` } }
     });
 
-    // Obtener curso
-    const { data: course, error: courseError } = await supabase
-      .from("courses")
-      .select("id, title, slug, short_description, is_active")
-      .eq("slug", course_slug)
-      .single();
-
-    if (courseError || !course?.is_active) {
-      return res
-        .setHeader("Access-Control-Allow-Origin", "*")
-        .status(404)
-        .json({ ok: false, error: "Curso no encontrado o inactivo" });
-    }
-
-    // Obtener precio
-    const { data: priceRows, error: priceError } = await supabase
-      .from("course_prices")
-      .select("amount, currency_code, provider, is_active, months")
-      .eq("course_id", course.id)
-      .eq("currency_code", currency)
-      .in("provider", ["mercadopago", "any"])
-      .eq("is_active", true);
-
-    if (priceError) {
-      return res
-        .setHeader("Access-Control-Allow-Origin", "*")
-        .status(500)
-        .json({ ok: false, error: "Error leyendo precios", details: priceError });
-    }
-
-    const chosen = priceRows?.find((r) => r.provider === "mercadopago") ?? priceRows?.[0];
-    if (!chosen) {
-      return res
-        .setHeader("Access-Control-Allow-Origin", "*")
-        .status(400)
-        .json({ ok: false, error: "No hay precio activo para ese curso + moneda" });
-    }
-
-    let unit_price = Number(chosen.amount);
-    if (!Number.isFinite(unit_price) || unit_price <= 0) {
-      return res
-        .setHeader("Access-Control-Allow-Origin", "*")
-        .status(500)
-        .json({ ok: false, error: "Precio inválido" });
-    }
-
+    let productId: string;
+    let productTitle: string;
+    let unit_price: number;
     let couponData: any = null;
 
-    // Validar cupón si se proporcionó (server-side validation)
-    if (code && code.trim()) {
+    // ==================== FLUJO PARA SUSCRIPCIONES ====================
+    if (product_type === 'subscription') {
+      console.log('[MP create-preference] Processing subscription...');
+
+      // CRÍTICO: Verificar que el usuario pertenece a la organización y es admin
+      const { data: membership, error: memberError } = await supabase
+        .from("organization_members")
+        .select("id, role_id, roles!inner(name)")
+        .eq("organization_id", organization_id)
+        .eq("user_id", user_id)
+        .eq("is_active", true)
+        .single();
+
+      if (memberError || !membership) {
+        console.error('[MP create-preference] User not member of organization:', memberError);
+        return res
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .status(403)
+          .json({ ok: false, error: "No tienes permisos para modificar esta organización" });
+      }
+
+      // Verificar que es admin
+      const roleName = (membership.roles as any)?.name?.toLowerCase();
+      if (roleName !== 'admin' && roleName !== 'owner') {
+        console.error('[MP create-preference] User is not admin:', { roleName });
+        return res
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .status(403)
+          .json({ ok: false, error: "Solo los administradores pueden upgradear el plan de la organización" });
+      }
+
+      // Obtener plan
+      const { data: plan, error: planError } = await supabase
+        .from("plans")
+        .select("id, name, slug, is_active")
+        .eq("slug", plan_slug)
+        .eq("is_active", true)
+        .single();
+
+      if (planError || !plan) {
+        return res
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .status(404)
+          .json({ ok: false, error: "Plan no encontrado o inactivo" });
+      }
+
+      // Obtener precio del plan
+      const { data: planPrices, error: priceError } = await supabase
+        .from("plan_prices")
+        .select("monthly_amount, annual_amount, currency_code, provider")
+        .eq("plan_id", plan.id)
+        .eq("currency_code", currency)
+        .in("provider", ["mercadopago", "any"])
+        .eq("is_active", true);
+
+      if (priceError || !planPrices || planPrices.length === 0) {
+        return res
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .status(404)
+          .json({ ok: false, error: "Precio no encontrado para este plan" });
+      }
+
+      const chosenPrice = planPrices.find((p: any) => p.provider === "mercadopago") ?? planPrices[0];
+      const amount = billing_period === 'monthly' ? chosenPrice.monthly_amount : chosenPrice.annual_amount;
+
+      unit_price = Number(amount);
+      if (!Number.isFinite(unit_price) || unit_price <= 0) {
+        return res
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .status(500)
+          .json({ ok: false, error: "Precio inválido" });
+      }
+
+      productId = plan.id;
+      productTitle = `Plan ${plan.name} - ${billing_period === 'monthly' ? 'Mensual' : 'Anual'}`;
+
+      // NO hay cupones para suscripciones en el MVP
+      if (code && code.trim()) {
+        return res
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .status(400)
+          .json({ ok: false, error: "Los cupones no están disponibles para suscripciones en este momento" });
+      }
+
+    // ==================== FLUJO PARA CURSOS (EXISTENTE) ====================
+    } else {
+      console.log('[MP create-preference] Processing course...');
+
+      // Obtener curso
+      const { data: course, error: courseError } = await supabase
+        .from("courses")
+        .select("id, title, slug, short_description, is_active")
+        .eq("slug", course_slug)
+        .single();
+
+      if (courseError || !course?.is_active) {
+        return res
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .status(404)
+          .json({ ok: false, error: "Curso no encontrado o inactivo" });
+      }
+
+      // Obtener precio
+      const { data: priceRows, error: priceError } = await supabase
+        .from("course_prices")
+        .select("amount, currency_code, provider, is_active, months")
+        .eq("course_id", course.id)
+        .eq("currency_code", currency)
+        .in("provider", ["mercadopago", "any"])
+        .eq("is_active", true);
+
+      if (priceError) {
+        return res
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .status(500)
+          .json({ ok: false, error: "Error leyendo precios", details: priceError });
+      }
+
+      const chosen = priceRows?.find((r) => r.provider === "mercadopago") ?? priceRows?.[0];
+      if (!chosen) {
+        return res
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .status(400)
+          .json({ ok: false, error: "No hay precio activo para ese curso + moneda" });
+      }
+
+      unit_price = Number(chosen.amount);
+      if (!Number.isFinite(unit_price) || unit_price <= 0) {
+        return res
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .status(500)
+          .json({ ok: false, error: "Precio inválido" });
+      }
+
+      productId = course.id;
+      productTitle = course.title;
+
+      // Validar cupón si se proporcionó (server-side validation)
+      if (code && code.trim()) {
       console.log('[MP create-preference] Validando cupón:', {
         code: code.trim(),
         user_id,

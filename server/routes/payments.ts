@@ -170,6 +170,120 @@ async function enrollUserInCourse(user_id: string, course_id: string, months: nu
   return data;
 }
 
+async function getPlanPrice(plan_slug: string, billing_period: 'monthly' | 'annual', provider: string, currency: string) {
+  console.log('💰 [getPlanPrice] Getting plan price...', { plan_slug, billing_period, provider, currency });
+  
+  // Primero obtener el plan por slug
+  const { data: plan, error: planError } = await getAdminClient()
+    .from('plans')
+    .select('id, name, slug')
+    .eq('slug', plan_slug)
+    .eq('is_active', true)
+    .single();
+  
+  if (planError || !plan) {
+    console.error('❌ [getPlanPrice] Plan not found:', planError);
+    throw new Error(`Plan no encontrado: ${plan_slug}`);
+  }
+  
+  // Obtener precios con provider específico PRIMERO, sino fallback a 'any'
+  const { data: priceRows, error: priceError } = await getAdminClient()
+    .from('plan_prices')
+    .select('monthly_amount, annual_amount, currency_code, provider')
+    .eq('plan_id', plan.id)
+    .eq('currency_code', currency)
+    .in('provider', [provider, 'any'])
+    .eq('is_active', true);
+  
+  if (priceError || !priceRows || priceRows.length === 0) {
+    console.error('❌ [getPlanPrice] Price not found:', priceError);
+    throw new Error(`Precio no encontrado para plan ${plan_slug} (${provider}, ${currency}, ${billing_period})`);
+  }
+  
+  // Preferir provider específico, sino usar 'any'
+  const priceData = priceRows.find(p => p.provider === provider) ?? priceRows[0];
+  const amount = billing_period === 'monthly' ? priceData.monthly_amount : priceData.annual_amount;
+  
+  console.log('✅ [getPlanPrice] Price found:', { plan, amount, billing_period, currency });
+  
+  return {
+    plan_id: plan.id,
+    plan_name: plan.name,
+    currency: priceData.currency_code,
+    amount: String(amount)
+  };
+}
+
+async function upgradeOrganizationPlan(params: {
+  organization_id: string;
+  plan_id: string;
+  billing_period: 'monthly' | 'annual';
+  payment_id: string;
+  amount: number;
+  currency: string;
+}) {
+  console.log('🏢 [upgradeOrganizationPlan] Starting upgrade...', params);
+  
+  // 1. Cancelar suscripción activa anterior (si existe)
+  const { error: cancelError } = await getAdminClient()
+    .from('organization_subscriptions')
+    .update({ 
+      status: 'expired', 
+      cancelled_at: new Date().toISOString() 
+    })
+    .eq('organization_id', params.organization_id)
+    .eq('status', 'active');
+  
+  if (cancelError) {
+    console.error('⚠️ [upgradeOrganizationPlan] Error cancelling previous subscription:', cancelError);
+  }
+  
+  // 2. Calcular expires_at
+  const expiresAt = new Date();
+  if (params.billing_period === 'monthly') {
+    expiresAt.setMonth(expiresAt.getMonth() + 1);
+  } else {
+    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+  }
+  
+  // 3. Crear nueva suscripción activa
+  const { data: subscription, error: subError } = await getAdminClient()
+    .from('organization_subscriptions')
+    .insert({
+      organization_id: params.organization_id,
+      plan_id: params.plan_id,
+      payment_id: params.payment_id,
+      status: 'active',
+      billing_period: params.billing_period,
+      started_at: new Date().toISOString(),
+      expires_at: expiresAt.toISOString(),
+      amount: params.amount,
+      currency: params.currency,
+    })
+    .select()
+    .single();
+  
+  if (subError) {
+    console.error('❌ [upgradeOrganizationPlan] ERROR creating subscription:', subError);
+    throw subError;
+  }
+  
+  // 4. Actualizar organizations.plan_id
+  const { error: orgError } = await getAdminClient()
+    .from('organizations')
+    .update({ plan_id: params.plan_id })
+    .eq('id', params.organization_id);
+  
+  if (orgError) {
+    console.error('❌ [upgradeOrganizationPlan] ERROR updating organization:', orgError);
+    throw orgError;
+  }
+  
+  console.log('✅ [upgradeOrganizationPlan] Success! Subscription created:', subscription);
+  
+  return subscription;
+}
+
 // ==================== PAYMENT ROUTES ====================
 
 export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
