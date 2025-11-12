@@ -73,6 +73,14 @@ interface SidebarItem {
   restricted?: "coming_soon" | string;
 }
 
+interface SidebarSection {
+  type: 'section';
+  title: string;
+  items: SidebarItem[];
+}
+
+type NavigationItem = SidebarItem | SidebarSection;
+
 export function LeftSidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
@@ -171,8 +179,11 @@ export function LeftSidebar() {
     }
   }, [hasProjects, selectedProjectId, selectProjectMutation.isPending, projectsLite, userData?.user?.id]);
 
+  // Organización y usuario para settings sections
+  const organizationName = userData?.organization?.name || 'Organización';
+
   // Navegación según el nivel del sidebar
-  const getNavigationItems = (): SidebarItem[] => {
+  const getNavigationItems = (): NavigationItem[] => {
     if (sidebarLevel === 'general') {
       // Sidebar general - hub central
       return [];
@@ -231,11 +242,23 @@ export function LeftSidebar() {
       ];
     } else if (sidebarLevel === 'settings') {
       return [
-        { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/settings/billing' },
-        { id: 'members', label: 'Miembros', icon: Users, href: '/settings/members' },
-        { id: 'finances', label: 'Finanzas', icon: Wallet, href: '/settings/finances' },
-        { id: 'organization-basic-data', label: 'Datos Básicos', icon: Building, href: '/settings/organization-basic-data' },
-        { id: 'notifications', label: 'Notificaciones', icon: Bell, href: '/notifications' },
+        {
+          type: 'section' as const,
+          title: organizationName,
+          items: [
+            { id: 'members', label: 'Miembros', icon: Users, href: '/settings/members' },
+            { id: 'finances', label: 'Finanzas', icon: Wallet, href: '/settings/finances' },
+          ]
+        },
+        {
+          type: 'section' as const,
+          title: userFullName,
+          items: [
+            { id: 'organization-basic-data', label: 'Datos Básicos', icon: Building, href: '/settings/organization-basic-data' },
+            { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/settings/billing' },
+            { id: 'notifications', label: 'Notificaciones', icon: Bell, href: '/notifications' },
+          ]
+        }
       ];
     }
     
@@ -847,13 +870,56 @@ export function LeftSidebar() {
                       variant="secondary"
                     />
                   </>
+                ) : sidebarLevel === 'settings' ? (
+                  // Renderizado especial para settings con secciones
+                  <>
+                    {navigationItems.map((navItem, sectionIndex) => {
+                      if ('type' in navItem && navItem.type === 'section') {
+                        return (
+                          <div key={sectionIndex}>
+                            {/* Encabezado de sección - solo visible cuando está expandido */}
+                            {isExpanded && (
+                              <div className="px-2 pt-3 pb-2">
+                                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                                  {navItem.title}
+                                </h3>
+                              </div>
+                            )}
+                            
+                            {/* Items de la sección */}
+                            {navItem.items.map((item) => (
+                              <ButtonSidebar
+                                key={item.id}
+                                icon={<item.icon className="w-[18px] h-[18px]" />}
+                                label={item.label}
+                                isActive={location === item.href}
+                                isExpanded={isExpanded}
+                                onClick={() => navigate(item.href)}
+                                href={item.href}
+                                variant="secondary"
+                              />
+                            ))}
+                            
+                            {/* Espacio entre secciones (solo si no es la última y está expandido) */}
+                            {sectionIndex < navigationItems.length - 1 && isExpanded && (
+                              <div className="h-6"></div>
+                            )}
+                          </div>
+                        );
+                      }
+                      return null;
+                    })}
+                  </>
                 ) : (
                   // Renderizado normal para otros niveles
-                  navigationItems.map((item) => {
+                  navigationItems.map((navItem) => {
+                    if ('type' in navItem) return null;
+                    
+                    const item = navItem as SidebarItem;
                     if (item.adminOnly && !isAdmin) return null;
                     
                     const isActive = location === item.href;
-                    const isExternalLink = item.href.startsWith('http');
+                    const isExternalLink = item.href?.startsWith('http') || false;
                     
                     const button = (
                       <ButtonSidebar
