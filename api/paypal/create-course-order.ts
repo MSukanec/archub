@@ -46,9 +46,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Extract auth token from header for authenticated RPC calls
     const authHeader = req.headers.authorization;
-    const token = authHeader?.replace(/^Bearer\s+/i, "");
+    const authToken = authHeader?.replace(/^Bearer\s+/i, "");
     
-    if (!token) {
+    if (!authToken) {
       return res
         .setHeader("Access-Control-Allow-Origin", "*")
         .status(401)
@@ -57,7 +57,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     // Create authenticated client for RPC
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      global: { headers: { Authorization: `Bearer ${token}` } }
+      global: { headers: { Authorization: `Bearer ${authToken}` } }
     });
 
     // Resolve course_id from course_slug
