@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useProjectContext } from '@/stores/projectContext';
 import { useNavigationStore } from '@/stores/navigationStore';
@@ -8,11 +8,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
-import { CreditCard, Download, ArrowUpCircle, Inbox } from 'lucide-react';
+import { CreditCard, Download, ArrowUpCircle, Inbox, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { InvoicePDF } from '@/components/pdf/InvoicePDF';
+import { CancelSubscriptionDialog } from '@/components/ui-custom/CancelSubscriptionDialog';
+import { useToast } from '@/hooks/use-toast';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { queryClient, apiRequest } from '@/lib/queryClient';
 
 interface OrganizationSubscription {
   id: string;
@@ -44,6 +48,9 @@ interface Payment {
 const Billing = () => {
   const { currentOrganizationId } = useProjectContext();
   const { setSidebarLevel } = useNavigationStore();
+  const { toast } = useToast();
+  const { data: userData } = useCurrentUser();
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   useEffect(() => {
     setSidebarLevel('settings');
@@ -68,7 +75,6 @@ const Billing = () => {
           plans(name, slug)
         `)
         .eq('organization_id', currentOrganizationId)
-        .eq('status', 'active')
         .order('started_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -114,14 +120,58 @@ const Billing = () => {
     enabled: !!currentOrganizationId && !!supabase,
   });
 
+  const cancelSubscriptionMutation = useMutation({
+    mutationFn: async (subscriptionId: string) => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No authenticated session');
+
+      return await apiRequest(`/api/subscriptions/${subscriptionId}/cancel`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Suscripción cancelada',
+        description: 'Tu suscripción ha sido cancelada. Mantendrás acceso hasta la fecha de expiración.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['current-subscription', currentOrganizationId] });
+      queryClient.invalidateQueries({ queryKey: ['subscription-payments', currentOrganizationId] });
+      setShowCancelDialog(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo cancelar la suscripción',
+        variant: 'destructive',
+      });
+    },
+  });
+
   const planName = subscription?.plans?.name || 'Free';
   const planSlug = subscription?.plans?.slug || 'free';
   const billingPeriod = subscription?.billing_period === 'monthly' ? 'mes' : 'año';
   const amount = subscription?.amount || 0;
   const currency = subscription?.currency || 'USD';
   const expiresAt = subscription?.expires_at;
+  const subscriptionStatus = subscription?.status || 'free';
 
   const isFreePlan = planSlug === 'free';
+  const isCancelled = subscriptionStatus === 'cancelled';
+  const isActive = subscriptionStatus === 'active';
+
+  const getStatusBadge = () => {
+    if (isCancelled) {
+      return <Badge variant="destructive" className="text-xs">Cancelada</Badge>;
+    }
+    if (isActive) {
+      return <Badge variant="default" className="text-xs bg-green-600 dark:bg-green-700">Activa</Badge>;
+    }
+    return <Badge variant="outline" className="text-xs">Free</Badge>;
+  };
 
   const columns = [
     {
@@ -239,23 +289,46 @@ const Billing = () => {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Plan:</span>
-                      <Badge variant="outline">{planName}</Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">{planName}</Badge>
+                        {getStatusBadge()}
+                      </div>
                     </div>
                     
                     {expiresAt && !isFreePlan && (
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Próxima renovación:</span>
+                        <span className="text-muted-foreground">
+                          {isCancelled ? 'Expira el:' : 'Próxima renovación:'}
+                        </span>
                         <span className="font-medium">
                           {format(new Date(expiresAt), 'dd MMM yyyy', { locale: es })}
                         </span>
                       </div>
                     )}
+
+                    {isCancelled && (
+                      <div className="bg-muted p-3 rounded-lg">
+                        <p className="text-xs text-muted-foreground">
+                          Tu suscripción está cancelada. Mantendrás acceso a las funciones premium hasta la fecha de expiración.
+                        </p>
+                      </div>
+                    )}
                   </div>
 
-                  {isFreePlan && (
+                  {isFreePlan ? (
                     <Button className="w-full" data-testid="button-upgrade-plan">
                       <ArrowUpCircle className="w-4 h-4 mr-2" />
                       Mejorar Plan
+                    </Button>
+                  ) : isActive && (
+                    <Button 
+                      variant="destructive" 
+                      className="w-full" 
+                      onClick={() => setShowCancelDialog(true)}
+                      data-testid="button-cancel-subscription"
+                    >
+                      <XCircle className="w-4 h-4 mr-2" />
+                      Cancelar Suscripción
                     </Button>
                   )}
                 </>
@@ -334,6 +407,19 @@ const Billing = () => {
           </CardContent>
         </Card>
       </div>
+
+      <CancelSubscriptionDialog
+        open={showCancelDialog}
+        onOpenChange={setShowCancelDialog}
+        onConfirm={() => {
+          if (subscription?.id) {
+            cancelSubscriptionMutation.mutate(subscription.id);
+          }
+        }}
+        loading={cancelSubscriptionMutation.isPending}
+        planName={planName}
+        expiresAt={expiresAt}
+      />
     </Layout>
   );
 };
