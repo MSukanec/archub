@@ -351,7 +351,7 @@ export default function SubscriptionCheckout() {
       console.log("[MP] Creando preferencia de suscripción…", requestBody);
 
       const API_BASE = getApiBase();
-      const mpUrl = `${API_BASE}/api/mp/create-preference`;
+      const mpUrl = `${API_BASE}/api/mp/create-subscription-preference`;
 
       const res = await fetchWithTimeout(
         mpUrl,
@@ -456,7 +456,7 @@ export default function SubscriptionCheckout() {
 
       const billing = getBillingData();
       const requestBody = {
-        product_type: 'subscription',
+        user_id: userRecord.id,
         plan_slug: planSlug,
         organization_id: organizationId,
         billing_period: billingPeriod,
@@ -468,7 +468,7 @@ export default function SubscriptionCheckout() {
       console.log("[PayPal] Creando orden de suscripción…", requestBody);
 
       const API_BASE = getApiBase();
-      const paypalUrl = `${API_BASE}/api/paypal/create-order`;
+      const paypalUrl = `${API_BASE}/api/paypal/create-subscription-order`;
 
       const res = await fetchWithTimeout(
         paypalUrl,

@@ -148,10 +148,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           .json({ ok: false, error: "Solo los administradores pueden upgradear el plan de la organización" });
       }
 
-      // Obtener plan con precios directos
+      // Obtener plan
       const { data: plan, error: planError } = await supabase
         .from("plans")
-        .select("id, name, slug, is_active, monthly_amount, annual_amount")
+        .select("id, name, slug, is_active")
         .eq("slug", plan_slug)
         .eq("is_active", true)
         .single();
@@ -163,54 +163,42 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           .json({ ok: false, error: "Plan no encontrado o inactivo" });
       }
 
-      // Obtener precio base en USD desde la tabla plans
-      const baseAmountUSD = billing_period === 'monthly' 
-        ? parseFloat(plan.monthly_amount) 
-        : parseFloat(plan.annual_amount);
+      // SECURITY: Get price from plan_prices table (same as PayPal endpoint)
+      const { data: planPrices, error: priceError } = await supabase
+        .from("plan_prices")
+        .select("monthly_amount, annual_amount, currency_code, provider")
+        .eq("plan_id", plan.id)
+        .eq("currency_code", currency)
+        .in("provider", ["mercadopago", "any"])
+        .eq("is_active", true);
 
-      if (!Number.isFinite(baseAmountUSD) || baseAmountUSD <= 0) {
+      if (priceError || !planPrices || planPrices.length === 0) {
+        console.error('[MP create-preference] Price not found:', priceError);
         return res
           .setHeader("Access-Control-Allow-Origin", "*")
-          .status(500)
-          .json({ ok: false, error: "Precio inválido en el plan" });
+          .status(404)
+          .json({ ok: false, error: `Precio no encontrado para este plan (MercadoPago/${currency})` });
       }
 
-      // Si la moneda es ARS, obtener el tipo de cambio
-      let finalAmount = baseAmountUSD;
-      if (currency === 'ARS') {
-        const { data: exchangeRate, error: rateError } = await supabase
-          .from("exchange_rates")
-          .select("rate")
-          .eq("from_currency", "USD")
-          .eq("to_currency", "ARS")
-          .eq("is_active", true)
-          .single();
+      // Prefer provider-specific price, fallback to 'any'
+      const chosenPrice = planPrices.find((p: any) => p.provider === "mercadopago") ?? planPrices[0];
+      const priceAmount = billing_period === 'monthly' ? chosenPrice.monthly_amount : chosenPrice.annual_amount;
 
-        if (rateError || !exchangeRate) {
-          console.error('[MP create-preference] Error loading exchange rate:', rateError);
-          return res
-            .setHeader("Access-Control-Allow-Origin", "*")
-            .status(500)
-            .json({ ok: false, error: "No se pudo obtener el tipo de cambio USD/ARS" });
-        }
-
-        const rate = parseFloat(exchangeRate.rate);
-        finalAmount = baseAmountUSD * rate;
-        
-        console.log('[MP create-preference] Conversión USD a ARS:', {
-          baseAmountUSD,
-          rate,
-          finalAmountARS: finalAmount
-        });
-      }
-
-      unit_price = Number(finalAmount);
+      unit_price = Number(priceAmount);
       if (!Number.isFinite(unit_price) || unit_price <= 0) {
         return res
           .setHeader("Access-Control-Allow-Origin", "*")
           .status(500)
-          .json({ ok: false, error: "Precio inválido después de conversión" });
+          .json({ ok: false, error: "Precio inválido en plan_prices" });
       }
+
+      console.log('[MP create-preference] Price from plan_prices:', {
+        plan_id: plan.id,
+        billing_period,
+        currency,
+        unit_price,
+        provider: chosenPrice.provider
+      });
 
       productId = plan.id;
       productTitle = `Plan ${plan.name} - ${billing_period === 'monthly' ? 'Mensual' : 'Anual'}`;

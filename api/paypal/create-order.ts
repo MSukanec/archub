@@ -30,7 +30,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       plan_slug,
       organization_id,
       billing_period,
-      amount_usd,
       description = "Seencel purchase"
     } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
@@ -40,8 +39,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       course_slug,
       plan_slug,
       organization_id,
-      billing_period,
-      amount_usd
+      billing_period
     });
 
     // Validar parámetros según tipo de producto
@@ -163,7 +161,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         organization_id
       });
 
-    // ==================== FLUJO PARA CURSOS (EXISTENTE MEJORADO) ====================
+    // ==================== FLUJO PARA CURSOS ====================
     } else {
       console.log('[PayPal create-order] Processing course...');
 
@@ -181,21 +179,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           .json({ ok: false, error: "Course not found" });
       }
 
-      // Si se proporciona amount_usd, usarlo (para mantener retrocompatibilidad)
-      // En el futuro, el frontend debería obtener el precio de course_prices
-      if (!amount_usd) {
+      // SECURITY: Get price from database (course_prices table), NOT from client
+      const { data: coursePrices, error: priceError } = await supabase
+        .from("course_prices")
+        .select("amount, currency_code, provider")
+        .eq("course_id", course.id)
+        .eq("currency_code", "USD")
+        .in("provider", ["paypal", "any"])
+        .eq("is_active", true);
+
+      if (priceError || !coursePrices || coursePrices.length === 0) {
+        console.error('[PayPal create-order] Price not found:', priceError);
         return res
           .setHeader("Access-Control-Allow-Origin", "*")
-          .status(400)
-          .json({ ok: false, error: "Missing amount_usd for course purchase" });
+          .status(404)
+          .json({ ok: false, error: "Price not found for this course (PayPal/USD)" });
       }
 
-      amount = Number(amount_usd);
+      // Prefer provider-specific price, fallback to 'any'
+      const chosenPrice = coursePrices.find((p: any) => p.provider === "paypal") ?? coursePrices[0];
+      amount = Number(chosenPrice.amount);
+
       if (!Number.isFinite(amount) || amount <= 0) {
         return res
           .setHeader("Access-Control-Allow-Origin", "*")
-          .status(400)
-          .json({ ok: false, error: "Invalid amount_usd" });
+          .status(500)
+          .json({ ok: false, error: "Invalid price" });
       }
 
       productId = course.id;
@@ -203,10 +212,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       productSlug = course.slug;
       productDescription = course.short_description || course.title;
 
-      console.log('[PayPal create-order] Course order:', {
+      console.log('[PayPal create-order] Course order with server-side pricing:', {
         course_id: course.id,
         course_title: course.title,
-        amount
+        amount,
+        provider: chosenPrice.provider
       });
     }
 
