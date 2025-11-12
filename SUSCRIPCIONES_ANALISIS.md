@@ -1,295 +1,593 @@
-# 📋 Análisis del Sistema de Suscripciones - Organizaciones PRO y TEAMS
+# 📋 Análisis COMPLETO del Sistema de Suscripciones - Organizaciones
 
 **Fecha**: 12 de Noviembre, 2025  
-**Objetivo**: Lanzar mañana con funcionalidad básica de suscripciones
+**Objetivo**: Lanzar mañana con funcionalidad básica de suscripciones  
+**Última actualización**: Con todas las tablas de Supabase
 
 ---
 
-## ✅ LO QUE YA TENEMOS
+## 📊 ESTRUCTURA DE BASE DE DATOS ACTUAL
 
-### 1. **Base de Datos**
-- ✅ Tabla `plans` (ya existe en Supabase)
-- ✅ Tabla `organizations` con campo `plan` (ya existe)
-- ✅ Tabla `payments` con soporte para:
-  - `product_type`: 'course' | 'subscription' | 'plan'
-  - `organization_id`: Para vincular pagos a organizaciones
-  - `product_id`: Para referenciar el plan
-- ✅ Tabla `payment_events` para webhooks
-- ✅ Tabla `bank_transfer_payments` para transferencias
+### ✅ Tablas Existentes y Su Rol
 
-### 2. **Frontend - UI de Pricing**
-✅ **`src/pages/PricingPlan.tsx`** - Página completa de precios con:
-- 4 Planes: FREE, PRO, TEAMS, ENTERPRISE
-- Selector Mensual/Anual con descuento del 20%
-- Cards de planes con features y límites detallados
-- Tabla de comparación exhaustiva
-- Banner de "Oferta Fundador" para anuales
-- **❌ PROBLEMA**: Los botones están DESHABILITADOS
-  ```tsx
-  disabled={plan.name.toLowerCase() === 'pro' || plan.name.toLowerCase() === 'teams'}
-  ```
-
-### 3. **Seguridad y Restricciones**
-✅ **`src/hooks/usePlanFeatures.ts`** - Lógica completa de features por plan:
-- Función `can(feature)`: Verifica si el plan permite una feature
-- Función `limit(feature)`: Devuelve límites numéricos
-- Límites ya definidos: `max_projects`, `max_members`, `max_storage_gb`
-
-✅ **`src/components/ui-custom/security/PlanRestricted.tsx`**:
-- Componente que bloquea features según el plan
-- UI con badges y popovers para upgrade
-- Integrado con navegación a `/pricing`
-
-### 4. **Checkout de Cursos (REUTILIZABLE)**
-✅ **`src/pages/checkout/CheckoutPage.tsx`** - Checkout completo con:
-- Tres métodos de pago:
-  1. **MercadoPago** (ARS)
-  2. **PayPal** (USD)
-  3. **Transferencia Bancaria** (con descuento 5%)
-- Cupones con descuentos
-- Facturación opcional
-- Upload de comprobantes
-- Manejo de sesión y usuario
-
-### 5. **Backend - Pagos**
-✅ **`server/routes/payments.ts`** con endpoints:
-- `POST /api/checkout/mp/create` - MercadoPago
-- `POST /api/paypal/create-order` - PayPal
-- `POST /api/webhooks/mp` - Webhook MercadoPago
-- `POST /api/paypal/webhook` - Webhook PayPal
-- `POST /api/checkout/free-enroll` - Inscripciones gratis (100% cupón)
-- Funciones helper: `enrollUserInCourse()`, `logPayPalPayment()`, etc.
-
-### 6. **Integración con Proveedores**
-✅ Variables de entorno necesarias (ya configuradas):
-- `MP_ACCESS_TOKEN` (MercadoPago)
-- `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET`
-- `PAYPAL_BASE_URL`
+#### **1. ORGANIZATIONS** (Core)
+```sql
+- id (uuid, PK)
+- name (text)
+- created_by (uuid, FK users)
+- plan_id (uuid, FK plans) ← CLAVE: Vincula al plan actual
+- is_active (boolean)
+- is_system (boolean)
+- logo_url (text)
+- created_at, updated_at
+```
+**Estado**: ✅ Lista para suscripciones
 
 ---
 
-## ❌ LO QUE FALTA PARA LANZAR
+#### **2. PLANS** (Catálogo de Planes)
+```sql
+- id (uuid, PK)
+- name (text, UNIQUE) ← 'Free', 'Pro', 'Teams', 'Enterprise'
+- features (jsonb) ← Definición completa de límites y permisos
+- price (numeric) ← Precio base (probablemente mensual)
+- is_active (boolean)
+- billing_type (text) ← 'per_user', 'flat', etc.
+```
+**Estado**: ✅ Lista, pero necesitamos verificar:
+- ¿Tiene columnas `price_monthly` y `price_annual`?
+- ¿O solo `price` y se calcula anual = price * 12 * 0.8?
 
-### 1. **Página de Checkout para Suscripciones** 🔴 CRÍTICO
-Necesitamos: **`src/pages/checkout/SubscriptionCheckoutPage.tsx`**
+**PENDIENTE**: Verificar si necesitamos tabla `plan_prices` similar a `course_prices`
 
-**Reutilizar de CheckoutPage.tsx**:
-- ✅ Selector de método de pago
-- ✅ Formulario de datos básicos
-- ✅ Facturación opcional
-- ✅ Términos y condiciones
-- ✅ Lógica de cupones
+---
 
-**CAMBIOS específicos para suscripciones**:
-- Recibir `plan_slug` en query params (ej: `?plan=pro&billing=annual`)
-- Cargar precio desde tabla `plans` (no `course_prices`)
-- Metadata diferente en los pagos:
-  ```js
-  {
-    organization_id: currentOrganizationId,
-    plan_id: plan.id,
-    billing_period: 'monthly' | 'annual',
-    product_type: 'subscription'
-  }
-  ```
+#### **3. PAYMENTS** (Registro de Pagos)
+```sql
+- id (uuid, PK)
+- provider (text) ← 'mercadopago', 'paypal', 'bank_transfer'
+- provider_payment_id (text)
+- user_id (uuid, FK users) ← Usuario que pagó
+- course_id (uuid, nullable) ← Para pagos de cursos
+- product_type (text) ← 'course' | 'subscription' | 'plan' ← 🎯 CLAVE
+- product_id (uuid) ← ID del plan o curso
+- organization_id (uuid) ← 🎯 Para suscripciones de org
+- approved_at (timestamp)
+- metadata (jsonb) ← Datos adicionales
+- amount (numeric)
+- currency (text)
+- status (text) ← 'completed', 'pending', 'failed'
+- created_at
+```
+**Estado**: ✅ ✅ ¡PERFECTA! Ya soporta suscripciones
+- Columna `product_type` para diferenciar
+- Columna `organization_id` para vincular
+- Columna `metadata` para billing_period, etc.
 
-### 2. **Backend - Endpoints de Suscripciones** 🔴 CRÍTICO
+---
 
-**Nuevos endpoints en `server/routes/payments.ts`**:
+#### **4. PAYMENT_EVENTS** (Webhooks)
+```sql
+- id (uuid, PK)
+- provider (text)
+- provider_event_id (text)
+- provider_event_type (text)
+- status (text)
+- raw_payload (jsonb)
+- raw_headers (jsonb)
+- order_id (text)
+- custom_id (text)
+- user_hint (text)
+- course_hint (text)
+- provider_payment_id (text)
+- amount, currency
+- created_at
+```
+**Estado**: ✅ Lista para recibir webhooks de suscripciones
 
-```typescript
-// MercadoPago para suscripciones
-POST /api/checkout/subscription/mp/create
-- body: { plan_slug, organization_id, billing_period }
-- Crear preference con metadata de suscripción
+---
 
-// PayPal para suscripciones
-POST /api/paypal/subscription/create-order
-- Similar pero para PayPal
+#### **5. BANK_TRANSFER_PAYMENTS** (Transferencias)
+```sql
+- id (uuid, PK)
+- order_id (uuid)
+- user_id (uuid, FK users)
+- course_id (uuid, nullable)
+- payment_id (uuid, FK payments)
+- amount, currency
+- receipt_url (text)
+- payer_name, payer_note
+- status ('pending', 'approved', 'rejected')
+- reviewed_by, reviewed_at, review_reason
+- discount_percent (default 5%)
+- discount_amount
+- created_at, updated_at
+```
+**Estado**: ⚠️ Funciona para cursos, PUEDE funcionar para suscripciones
+- `course_id` es nullable, así que no hay problema
+- El `payment_id` vincula a `payments` que tiene `organization_id`
 
-// Transferencia para suscripciones
-POST /api/checkout/subscription/transfer/create
-- Similar lógica de transferencia
+**PENDIENTE**: Decidir si agregar `organization_id` directo aquí también
 
-// Webhook handler modificado
-- Detectar product_type === 'subscription'
-- En lugar de enrollUserInCourse(), llamar upgradeOrganizationPlan()
+---
+
+#### **6. BILLING_PROFILES** (Datos Facturación)
+```sql
+- id (uuid, PK)
+- user_id (uuid, FK users, UNIQUE)
+- is_company (boolean)
+- full_name, company_name
+- tax_id
+- country_id (FK countries)
+- address_line1, city, postcode
+- created_at, updated_at
+```
+**Estado**: ✅ Lista, vinculada a usuarios
+- Para suscripciones, usamos billing_profile del admin que paga
+
+---
+
+#### **7. COURSE_ENROLLMENTS** (Solo referencia)
+```sql
+- user_id, course_id (UNIQUE)
+- status ('active', 'expired', etc.)
+- started_at, expires_at ← Concepto reutilizable
+```
+**Aprendizaje**: Similar a lo que necesitamos para suscripciones
+
+---
+
+### 📊 Vista: ORGANIZATION_BILLING_SUMMARY
+
+```sql
+Columnas:
+- organization_id (uuid)
+- organization_name (text)
+- plan_name (text)
+- price (numeric)
+- billing_type (text)
+- active_members (bigint)
+- monthly_cost (numeric) ← CALCULADO: price * members si billing_type='per_user'
 ```
 
-**Nueva función helper**:
-```typescript
-async function upgradeOrganizationPlan(
-  organization_id: string, 
-  plan_id: string, 
-  billing_period: 'monthly' | 'annual'
-) {
-  // 1. Actualizar organizations.plan_id
-  // 2. Calcular expires_at (1 mes o 12 meses)
-  // 3. Guardar en nueva tabla organization_subscriptions
-  // 4. Invalidar caché del usuario
-}
+**Estado**: ✅ ✅ ¡SÚPER ÚTIL!
+- Ya calcula el costo mensual
+- Cuenta miembros activos
+- Perfecto para dashboard de facturación
+
+---
+
+### 📊 Vista: COURSE_ACTIVE_PRICES (Referencia)
+Similar a lo que podríamos necesitar para planes:
+```sql
+- course_id
+- currency_code ('ARS', 'USD', 'EUR')
+- amount
+- provider ('mercadopago', 'paypal', 'any')
 ```
 
-### 3. **Tabla de Base de Datos** 🔴 CRÍTICO
+---
 
-**Nueva tabla**: `organization_subscriptions`
+## ❌ LO QUE FALTA EN BASE DE DATOS
+
+### 🔴 CRÍTICO: Tabla `ORGANIZATION_SUBSCRIPTIONS`
+
+Necesitamos un **historial** de suscripciones para:
+- Saber cuándo expira el plan actual
+- Tracking de renovaciones
+- Cancelaciones
+- Historial de cambios de plan
+
 ```sql
 CREATE TABLE organization_subscriptions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID REFERENCES organizations(id) NOT NULL,
   plan_id UUID REFERENCES plans(id) NOT NULL,
-  status TEXT NOT NULL DEFAULT 'active', -- active, cancelled, expired
-  billing_period TEXT NOT NULL, -- monthly, annual
+  payment_id UUID REFERENCES payments(id), -- Vincula al pago que activó
+  
+  status TEXT NOT NULL DEFAULT 'active', -- 'active', 'expired', 'cancelled'
+  billing_period TEXT NOT NULL, -- 'monthly', 'annual'
+  
   started_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
   cancelled_at TIMESTAMP WITH TIME ZONE,
-  payment_id UUID REFERENCES payments(id),
+  
+  amount NUMERIC(10,2) NOT NULL,
+  currency TEXT NOT NULL DEFAULT 'USD',
+  
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   
-  -- Índices
-  UNIQUE(organization_id, status) WHERE status = 'active'
+  -- Constraint: Solo una suscripción activa por organización
+  CONSTRAINT org_subscriptions_unique_active 
+    UNIQUE(organization_id) 
+    WHERE status = 'active'
+);
+
+CREATE INDEX idx_org_subs_org ON organization_subscriptions(organization_id);
+CREATE INDEX idx_org_subs_status ON organization_subscriptions(status);
+CREATE INDEX idx_org_subs_expires ON organization_subscriptions(expires_at);
+```
+
+**Razón**: 
+- `organizations.plan_id` solo dice el plan actual
+- No sabemos CUÁNDO expira
+- No hay historial
+
+---
+
+### 🟡 OPCIONAL: Tabla `PLAN_PRICES`
+
+Similar a `course_prices`, para múltiples monedas:
+
+```sql
+CREATE TABLE plan_prices (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  plan_id UUID REFERENCES plans(id) NOT NULL,
+  currency_code TEXT NOT NULL CHECK (currency_code IN ('ARS', 'USD', 'EUR')),
+  monthly_amount NUMERIC(10,2) NOT NULL,
+  annual_amount NUMERIC(10,2) NOT NULL,
+  provider TEXT DEFAULT 'any',
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  
+  CONSTRAINT plan_prices_unique 
+    UNIQUE(plan_id, currency_code, provider)
 );
 ```
 
-### 4. **Vincular Botones en PricingPlan.tsx** 🟡 IMPORTANTE
+**Alternativa simple** (recomendada para MVP):
+- Agregar columnas a `plans`:
+  - `price_monthly_usd`, `price_annual_usd`
+  - `price_monthly_ars`, `price_annual_ars`
+- O simplemente: `price_annual = price_monthly * 12 * 0.8`
 
-Modificar `/src/pages/PricingPlan.tsx`:
+---
+
+## ✅ LO QUE YA TENEMOS - FRONTEND
+
+### 1. **Página de Pricing** ✅
+- **Archivo**: `src/pages/PricingPlan.tsx`
+- **Features**:
+  - 4 planes: FREE, PRO, TEAMS, ENTERPRISE
+  - Toggle Mensual/Anual con descuento 20%
+  - Comparación completa de features
+  - Banner "Oferta Fundador"
+  
+**PROBLEMA**: Botones deshabilitados para Pro/Teams
+```tsx
+disabled={plan.name.toLowerCase() === 'pro' || plan.name.toLowerCase() === 'teams'}
+```
+
+---
+
+### 2. **Sistema de Restricciones** ✅
+- **Archivo**: `src/hooks/usePlanFeatures.ts`
+  - `can(feature)`: Verifica permisos
+  - `limit(feature)`: Devuelve límites numéricos
+  - Lee desde `organization.plan.features`
+
+- **Archivo**: `src/components/ui-custom/security/PlanRestricted.tsx`
+  - Bloquea UI con overlay
+  - Muestra badge "Requiere Plan Pro/Teams"
+  - Redirige a `/pricing`
+
+---
+
+### 3. **Checkout de Cursos** ✅ (REUTILIZABLE)
+- **Archivo**: `src/pages/checkout/CheckoutPage.tsx`
+- **Providers**:
+  - MercadoPago (ARS)
+  - PayPal (USD)
+  - Transferencia Bancaria (+5% descuento)
+- **Features**:
+  - Cupones
+  - Facturación opcional
+  - Upload de comprobantes
+  - Validación de sesión
+
+**Plan**: Duplicar como `SubscriptionCheckoutPage.tsx`
+
+---
+
+## ✅ LO QUE YA TENEMOS - BACKEND
+
+### 1. **Endpoints de Pagos** ✅
+- **Archivo**: `server/routes/payments.ts`
+
+**Endpoints actuales**:
+```typescript
+POST /api/checkout/mp/create          // MercadoPago cursos
+POST /api/paypal/create-order         // PayPal cursos
+POST /api/checkout/free-enroll        // Cupón 100%
+POST /api/webhooks/mp                 // Webhook MP
+POST /api/paypal/webhook              // Webhook PayPal
+POST /api/checkout/transfer/create    // Transferencia bancaria
+```
+
+**Helpers existentes**:
+- `enrollUserInCourse()` ← Similar a lo que necesitamos
+- `logPayPalPayment()`
+- `createBankTransferOrder()`
+
+---
+
+## ❌ LO QUE FALTA - FRONTEND
+
+### 🔴 1. Página de Checkout Suscripciones
+**Crear**: `src/pages/checkout/SubscriptionCheckoutPage.tsx`
+
+**Diferencias vs CheckoutPage**:
+- URL params: `?plan=pro&billing=annual`
+- Cargar precio desde `plans` (no `course_prices`)
+- Metadata:
+  ```js
+  {
+    product_type: 'subscription',
+    organization_id: currentOrgId,
+    plan_id: planId,
+    billing_period: 'monthly' | 'annual'
+  }
+  ```
+
+---
+
+### 🟡 2. Vincular Botones de Pricing
+**Modificar**: `src/pages/PricingPlan.tsx`
 
 ```tsx
 <Button
   onClick={() => {
-    if (plan.name.toLowerCase() === 'free') {
-      // Free plan - solo navegar a dashboard
+    if (plan.name === 'Free') {
       navigate('/organization/dashboard');
     } else {
-      // Pro/Teams - ir a checkout
-      const billing = billingPeriod; // 'monthly' o 'annual'
-      navigate(`/checkout/subscription?plan=${plan.name.toLowerCase()}&billing=${billing}`);
+      navigate(
+        `/checkout/subscription?plan=${plan.slug}&billing=${billingPeriod}`
+      );
     }
   }}
-  disabled={false} // QUITAR el disabled!
+  disabled={false} // QUITAR disabled
 >
   {billingPeriod === 'annual' ? 'Ser Fundador' : 'Comenzar ahora'}
 </Button>
 ```
 
-### 5. **Flujo de Upgrade desde Organización** 🟡 IMPORTANTE
+---
 
-**Opción 1**: Agregar botón "Upgrade Plan" en `OrganizationPreferences`
-**Opción 2**: Detectar límite alcanzado y mostrar modal
+### 🟡 3. Dashboard de Suscripción
+**Ubicación sugerida**: `src/pages/organization/OrganizationBilling.tsx`
 
-Ejemplo:
-```tsx
-// En cualquier lugar donde se alcance límite
-if (currentProjects >= maxProjects) {
-  showUpgradeModal({
-    title: "Límite de proyectos alcanzado",
-    message: `Has alcanzado el límite de ${maxProjects} proyectos del plan ${currentPlan}`,
-    requiredPlan: "Pro",
-    ctaText: "Upgrade a Pro"
+**Mostrar**:
+- Plan actual
+- Próxima fecha de renovación (`expires_at`)
+- Costo mensual (usar vista `ORGANIZATION_BILLING_SUMMARY`)
+- Botón "Upgrade Plan"
+- Historial de pagos
+
+---
+
+## ❌ LO QUE FALTA - BACKEND
+
+### 🔴 1. Endpoints Nuevos
+**Archivo**: `server/routes/payments.ts`
+
+```typescript
+// MercadoPago Suscripciones
+POST /api/checkout/subscription/mp/create
+Body: { plan_slug, organization_id, billing_period }
+
+// PayPal Suscripciones  
+POST /api/paypal/subscription/create-order
+Body: { plan_slug, organization_id, billing_period }
+
+// Transferencia Suscripciones
+POST /api/checkout/subscription/transfer/create
+Body: { plan_slug, organization_id, billing_period, ... }
+```
+
+---
+
+### 🔴 2. Función Helper: `upgradeOrganizationPlan()`
+
+```typescript
+async function upgradeOrganizationPlan(params: {
+  organization_id: string;
+  plan_id: string;
+  billing_period: 'monthly' | 'annual';
+  payment_id: string;
+  amount: number;
+  currency: string;
+}) {
+  // 1. Cancelar suscripción activa anterior (si existe)
+  await db
+    .update(organization_subscriptions)
+    .set({ status: 'cancelled', cancelled_at: new Date() })
+    .where(
+      and(
+        eq(organization_subscriptions.organization_id, params.organization_id),
+        eq(organization_subscriptions.status, 'active')
+      )
+    );
+
+  // 2. Calcular expires_at
+  const expiresAt = new Date();
+  if (params.billing_period === 'monthly') {
+    expiresAt.setMonth(expiresAt.getMonth() + 1);
+  } else {
+    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+  }
+
+  // 3. Crear nueva suscripción activa
+  await db.insert(organization_subscriptions).values({
+    organization_id: params.organization_id,
+    plan_id: params.plan_id,
+    payment_id: params.payment_id,
+    status: 'active',
+    billing_period: params.billing_period,
+    expires_at: expiresAt,
+    amount: params.amount,
+    currency: params.currency,
   });
+
+  // 4. Actualizar organizations.plan_id
+  await db
+    .update(organizations)
+    .set({ plan_id: params.plan_id })
+    .where(eq(organizations.id, params.organization_id));
+
+  // 5. Crear notificación para el admin
+  // ... código de notificación
+
+  return { success: true };
 }
 ```
 
-### 6. **Tabla de Precios de Planes** 🟢 MENOR
+---
 
-Asegurar que existe tabla `plan_prices` o usar directamente `plans.price`:
+### 🔴 3. Modificar Webhooks
+**Archivos**: Handlers de MP y PayPal
 
-```sql
--- Verificar que la tabla plans tiene:
-SELECT id, name, price, billing_type, currency, is_active, features 
-FROM plans 
-WHERE is_active = true;
-```
+**Detectar tipo de producto**:
+```typescript
+// En el webhook
+const payment = await db
+  .select()
+  .from(payments)
+  .where(eq(payments.provider_payment_id, webhookPaymentId))
+  .limit(1);
 
-Si no existe `currency` en `plans`, agregar:
-```sql
-ALTER TABLE plans ADD COLUMN currency TEXT DEFAULT 'USD';
-ALTER TABLE plans ADD COLUMN price_monthly NUMERIC(10,2);
-ALTER TABLE plans ADD COLUMN price_annual NUMERIC(10,2);
+if (payment.product_type === 'subscription') {
+  // Llamar a upgradeOrganizationPlan()
+  await upgradeOrganizationPlan({
+    organization_id: payment.organization_id,
+    plan_id: payment.product_id,
+    billing_period: payment.metadata.billing_period,
+    payment_id: payment.id,
+    amount: payment.amount,
+    currency: payment.currency,
+  });
+} else if (payment.product_type === 'course') {
+  // Llamar a enrollUserInCourse() (existente)
+  await enrollUserInCourse(...);
+}
 ```
 
 ---
 
-## 🎯 PLAN DE ACCIÓN PARA HOY
+## 🎯 PLAN DE ACCIÓN (Orden Sugerido)
 
-### Fase 1: Backend (2-3 horas)
-1. ✅ Crear tabla `organization_subscriptions`
-2. ✅ Implementar función `upgradeOrganizationPlan()`
-3. ✅ Crear endpoint `POST /api/checkout/subscription/mp/create`
-4. ✅ Crear endpoint `POST /api/paypal/subscription/create-order`
-5. ✅ Modificar webhooks para detectar `product_type === 'subscription'`
-
-### Fase 2: Frontend (2-3 horas)
-6. ✅ Crear `SubscriptionCheckoutPage.tsx` (copiar y adaptar CheckoutPage)
-7. ✅ Modificar botones en `PricingPlan.tsx` para navegación
-8. ✅ Agregar ruta en `App.tsx`: `/checkout/subscription`
-
-### Fase 3: Testing (1 hora)
-9. ✅ Probar flujo completo con MercadoPago sandbox
-10. ✅ Probar flujo completo con PayPal sandbox
-11. ✅ Verificar que la organización se upgradea correctamente
-
-### Fase 4: Polish (30 min)
-12. ✅ Agregar botón "Upgrade Plan" en OrganizationPreferences
-13. ✅ Agregar modal de límite alcanzado
-14. ✅ Testing final
+### ✅ PASO 1: Base de Datos (30 min)
+1. Crear tabla `organization_subscriptions`
+2. Verificar columnas en `plans` (price_monthly, price_annual)
+3. Agregar `organization_id` a `bank_transfer_payments` (opcional)
 
 ---
 
-## 🚀 DECISIONES DE DISEÑO SUGERIDAS
+### ✅ PASO 2: Backend - Helper (1 hora)
+4. Implementar función `upgradeOrganizationPlan()`
+5. Agregar a `shared/schema.ts` el schema de `organization_subscriptions`
 
-### Simplificaciones para el MVP de mañana:
+---
 
-1. **No renovación automática**: 
-   - Por ahora, las suscripciones expiran y el usuario debe renovar manualmente
+### ✅ PASO 3: Backend - Endpoints (2 horas)
+6. Endpoint MercadoPago suscripciones
+7. Endpoint PayPal suscripciones
+8. Endpoint Transferencia suscripciones
+9. Modificar webhooks para detectar `product_type === 'subscription'`
+
+---
+
+### ✅ PASO 4: Frontend - Checkout (2 horas)
+10. Crear `SubscriptionCheckoutPage.tsx` (copiar CheckoutPage)
+11. Adaptar para recibir `plan` en query params
+12. Cambiar lógica de precio (de course_prices a plans)
+13. Agregar ruta en `App.tsx`
+
+---
+
+### ✅ PASO 5: Frontend - Pricing (30 min)
+14. Habilitar botones en `PricingPlan.tsx`
+15. Vincular navegación a checkout
+
+---
+
+### ✅ PASO 6: Testing (1 hora)
+16. Probar flujo MercadoPago sandbox
+17. Probar flujo PayPal sandbox
+18. Verificar actualización de `organizations.plan_id`
+19. Verificar creación en `organization_subscriptions`
+
+---
+
+### ⭐ PASO 7: Extras (Post-MVP)
+20. Dashboard de facturación (usar `ORGANIZATION_BILLING_SUMMARY`)
+21. Botón "Upgrade Plan" en OrganizationPreferences
+22. Email de confirmación
+23. Notificaciones de expiración
+
+---
+
+## 💡 DECISIONES DE DISEÑO
+
+### Para el MVP de Mañana:
+
+1. **NO renovación automática**
    - Evita complejidad de recurring payments
+   - Usuario renueva manualmente
 
-2. **Un plan activo por organización**:
-   - UNIQUE constraint en `organization_subscriptions` donde `status='active'`
-   - Simplifica la lógica
+2. **Un plan activo por organización**
+   - UNIQUE constraint en suscripciones donde `status='active'`
 
-3. **No downgrades automáticos**:
-   - Si expira, la org vuelve a FREE pero no pierde datos
-   - Se bloquean features pero todo se mantiene
+3. **No downgrades automáticos**
+   - Si expira, vuelve a FREE
+   - Se bloquean features pero no se pierden datos
 
-4. **Reutilizar checkout de cursos al 100%**:
-   - Misma UI, mismo flujo, solo cambia metadata
-   - Ahorra mucho tiempo de desarrollo
+4. **Reutilizar checkout al 100%**
+   - Misma UI, solo cambia metadata
 
----
+5. **No cupones en suscripciones**
+   - Simplifica MVP
+   - Se puede agregar después
 
-## 📝 NOTAS ADICIONALES
-
-### Cupones para Suscripciones
-- La tabla `coupons` actual está ligada a `course_id`
-- Para suscripciones, necesitaríamos `plan_id` nullable
-- **DECISIÓN**: Por ahora, NO cupones en suscripciones (simplifica)
-- Se puede agregar después
-
-### Facturación
-- Ya existe `billing_profiles` para usuarios
-- Para organizaciones, podría ser el perfil del admin
-- **DECISIÓN**: Usar billing_profile del usuario que paga
-
-### Roles y Permisos
-- Solo el admin de la organización puede upgradear
-- **DECISIÓN**: Por ahora, cualquier miembro puede ver pricing pero solo admin puede pagar
+6. **Precios hardcodeados o simples**
+   - `price_annual = price_monthly * 12 * 0.8`
+   - O usar tabla `plan_prices` si ya existe
 
 ---
 
-## ✨ EXTRAS (Post-Lanzamiento)
+## 📝 PREGUNTAS PARA EL USUARIO
 
-Si sobra tiempo o para futuras iteraciones:
-- Dashboard de suscripción en OrganizationPreferences
-- Email de confirmación de pago
-- Email de recordatorio de expiración
-- Renovación automática (recurring)
-- Historial de pagos en la organización
-- Facturas automáticas (PDF)
-- Downgrades con prorata
+1. **¿La tabla `plans` tiene columnas separadas para precio mensual y anual?**
+   - O calculamos: annual = monthly * 12 * 0.8
+
+2. **¿Necesitamos soporte multi-moneda en planes?**
+   - Igual que cursos (ARS para MP, USD para PayPal)
+   - O solo USD
+
+3. **¿El descuento 5% de transferencia aplica también a suscripciones?**
+
+4. **¿Solo el admin puede upgradear el plan?**
+   - O cualquier miembro de la org
+
+5. **¿Necesitamos dashboard de facturación para este lanzamiento?**
+   - O solo el checkout
 
 ---
 
-**¿Qué necesitas que empiece a implementar primero?**
+## ✨ TABLA DE COMPATIBILIDAD
+
+| Feature | Cursos | Suscripciones | Estado |
+|---------|--------|---------------|--------|
+| MercadoPago | ✅ | 🔴 Falta endpoint | 80% listo |
+| PayPal | ✅ | 🔴 Falta endpoint | 80% listo |
+| Transferencia | ✅ | 🔴 Falta endpoint | 80% listo |
+| Webhooks | ✅ | 🔴 Falta detección | 90% listo |
+| Tabla payments | ✅ | ✅ Ya soporta | 100% |
+| Cupones | ✅ | ❌ No en MVP | 0% |
+| Facturación | ✅ | ✅ Reutilizar | 100% |
+| UI Checkout | ✅ | 🔴 Falta página | 5% |
+| Historial | ✅ enrollments | 🔴 Falta tabla subs | 0% |
+
+---
+
+**¿Por dónde empezamos?** 🚀
