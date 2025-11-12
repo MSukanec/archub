@@ -19,7 +19,7 @@ interface PlanPrice {
   plans: {
     id: string;
     name: string;
-  };
+  } | null;
 }
 
 const AdminPlanPricesTab = () => {

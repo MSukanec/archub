@@ -360,16 +360,16 @@ export function PlanPriceFormModal({ modalData, onClose }: PlanPriceFormModalPro
       onLeftClick={handleClose}
       rightLabel={planPrice ? 'Guardar Cambios' : 'Crear Precio'}
       onRightClick={form.handleSubmit(onSubmit)}
-      isRightLoading={isLoading}
-      isRightDisabled={isLoading}
+      isSubmitting={isLoading}
+      submitDisabled={isLoading}
     />
   );
 
   return (
     <FormModalLayout
-      header={headerContent}
-      body={editPanel}
-      footer={footerContent}
+      headerContent={headerContent}
+      editPanel={editPanel}
+      footerContent={footerContent}
       onClose={handleClose}
     />
   );

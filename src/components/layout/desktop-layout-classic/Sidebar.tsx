@@ -159,6 +159,7 @@ export function Sidebar() {
         { id: 'dashboard', label: 'Analytics', icon: BarChart3, href: '/admin/dashboard' },
         { id: 'administration', label: 'Administración', icon: Settings, href: '/admin/administration' },
         { id: 'support', label: 'Soporte', icon: Headphones, href: '/admin/support' },
+        { id: 'subscriptions', label: 'Suscripciones', icon: CreditCard, href: '/admin/subscriptions' },
         { id: 'payments', label: 'Pagos', icon: Wallet, href: '/admin/payments' },
         { id: 'courses', label: 'Cursos', icon: BookOpen, href: '/admin/courses' },
         { id: 'layout', label: 'Layout', icon: Layers, href: '/admin/layout' },
