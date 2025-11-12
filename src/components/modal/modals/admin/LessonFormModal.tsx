@@ -454,11 +454,13 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
 
   return (
     <FormModalLayout
+      columns={1}
+      viewPanel={<div></div>}
       editPanel={editContent}
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={handleClose}
-      columns={1}
+      isEditing={true}
     />
   );
 }

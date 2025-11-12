@@ -23,6 +23,102 @@
 
 ---
 
+## ⚠️ REGLA CRÍTICA: isEditing en FormModalLayout
+
+**SIEMPRE** que uses `FormModalLayout` para un modal de formulario CRUD (crear/editar), DEBES incluir `isEditing={true}`.
+
+### ❌ ERROR COMÚN - Modal vacío:
+
+```typescript
+return (
+  <FormModalLayout
+    headerContent={headerContent}
+    editPanel={editPanel}      // ← Tienes editPanel
+    footerContent={footerContent}
+    onClose={handleClose}
+    // ❌ FALTA isEditing={true}
+  />
+);
+```
+
+### ✅ CORRECTO - Modal muestra formulario:
+
+```typescript
+return (
+  <FormModalLayout
+    columns={1}
+    viewPanel={<div></div>}
+    editPanel={editPanel}
+    headerContent={headerContent}
+    footerContent={footerContent}
+    onClose={handleClose}
+    isEditing={true}           // ← OBLIGATORIO para mostrar editPanel
+  />
+);
+```
+
+### ¿Por qué es necesario?
+
+`FormModalLayout` tiene dos modos:
+- `isEditing={false}` (default): Muestra `viewPanel` (para visualización)
+- `isEditing={true}`: Muestra `editPanel` (para formularios)
+
+Si omites `isEditing={true}`, el modal usa el default (`false`), intenta mostrar `viewPanel`, y como no lo pasaste, el modal queda vacío.
+
+### Patrón completo para modales CRUD:
+
+```typescript
+export function MiFormModal({ modalData, onClose }: MiFormModalProps) {
+  // ... setup del formulario ...
+  
+  const editPanel = (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Campos del formulario */}
+      </form>
+    </Form>
+  );
+
+  const headerContent = (
+    <FormModalHeader 
+      title={isEditing ? 'Editar' : 'Nuevo'}
+      description="Descripción"
+      icon={MiIcono}
+    />
+  );
+
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={handleClose}
+      rightLabel={isEditing ? 'Guardar' : 'Crear'}
+      onRightClick={form.handleSubmit(onSubmit)}
+      isSubmitting={isLoading}
+    />
+  );
+
+  return (
+    <FormModalLayout
+      columns={1}
+      viewPanel={<div></div>}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      onClose={handleClose}
+      isEditing={true}           // ← SIEMPRE INCLUIR
+    />
+  );
+}
+```
+
+### Referencias de modales correctos:
+- `src/components/modal/modals/admin/AnnouncementFormModal.tsx`
+- `src/components/modal/modals/admin/PaymentFormModal.tsx`
+- `src/components/modal/modals/admin/PlanFormModal.tsx` (después de este fix)
+- `src/components/modal/modals/admin/PlanPriceFormModal.tsx` (después de este fix)
+
+---
+
 ## 📋 Patrón Completo de Modal (Copy-Paste Template)
 
 ```typescript

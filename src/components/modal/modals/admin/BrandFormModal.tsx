@@ -136,6 +136,7 @@ export function BrandFormModal({ modalData, onClose }: BrandFormModalProps) {
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
+      isEditing={true}
     />
   )
 }

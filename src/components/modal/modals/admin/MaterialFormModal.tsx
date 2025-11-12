@@ -366,6 +366,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
+      isEditing={true}
     />
   )
 }

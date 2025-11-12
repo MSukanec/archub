@@ -342,10 +342,13 @@ export function PlanFormModal({ modalData, onClose }: PlanFormModalProps) {
 
   return (
     <FormModalLayout
-      headerContent={headerContent}
+      columns={1}
+      viewPanel={<div></div>}
       editPanel={editPanel}
+      headerContent={headerContent}
       footerContent={footerContent}
       onClose={handleClose}
+      isEditing={true}
     />
   );
 }

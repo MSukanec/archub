@@ -204,6 +204,7 @@ export function MaterialCategoryFormModal({ modalData, onClose }: MaterialCatego
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
+      isEditing={true}
     />
   )
 }

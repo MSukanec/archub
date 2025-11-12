@@ -274,7 +274,7 @@ export function UserFormModal({ modalData, onClose }: UserFormModalProps) {
       onLeftClick={handleClose}
       rightLabel="Guardar Cambios"
       onRightClick={form.handleSubmit(onSubmit)}
-      isRightLoading={isLoading || updateUserMutation.isPending}
+      isSubmitting={isLoading || updateUserMutation.isPending}
     />
   );
 
@@ -286,6 +286,7 @@ export function UserFormModal({ modalData, onClose }: UserFormModalProps) {
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={handleClose}
+      isEditing={true}
     />
   );
 }
