@@ -80,6 +80,7 @@ import BankTransferReceiptModal from '../modals/admin/BankTransferReceiptModal';
 import { AnnouncementFormModal } from '../modals/admin/AnnouncementFormModal';
 import { PaymentFormModal } from '../modals/admin/PaymentFormModal';
 import { SupportConversationStartModal } from '../modals/admin/SupportConversationStartModal';
+import { PlanFormModal } from '../modals/admin/PlanFormModal';
 import { PlanPriceFormModal } from '../modals/admin/PlanPriceFormModal';
 
 export function ModalFactory() {
@@ -273,6 +274,8 @@ export function ModalFactory() {
       return <PaymentFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'support-conversation-start':
       return <SupportConversationStartModal modalData={data || undefined} onClose={closeModal} />;
+    case 'plan':
+      return <PlanFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'plan-price':
       return <PlanPriceFormModal modalData={data || undefined} onClose={closeModal} />;
     default:

@@ -45,6 +45,7 @@ Preferred communication style: Simple, everyday language.
 - **Project Data Management**: Organized project information into logical tabs (Basic Data, Location, Client) with Google Maps integration for enriched location data management and an auto-save system.
 - **Mobile Action Bar**: Fully functional mobile action bars for Project Data and Project Management sections with dynamic filtering and shared state.
 - **Project Client Management**: Tab-based interface using Table.tsx for managing project clients with add/edit/delete functionality via API endpoints `/api/projects/:projectId/clients`.
+- **Subscription System**: Complete organization subscription management with FREE, PRO, TEAMS, and ENTERPRISE plans. Admin interface with two tabs: "Planes" for managing plan definitions (name, slug, features, billing_type, is_active) and "Precios" for managing multi-currency pricing (plan_prices table with monthly_amount, annual_amount, currency_code, provider). The legacy `price` field in the `plans` table is deprecated and should not be used; all pricing now managed through the `plan_prices` table which supports multiple currencies (ARS, USD, EUR) and payment providers (MercadoPago, PayPal).
 
 ### System Design Choices
 - **Backend Modular Architecture**: Modularized domain-specific route modules.

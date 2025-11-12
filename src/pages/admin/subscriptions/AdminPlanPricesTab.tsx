@@ -41,7 +41,7 @@ const AdminPlanPricesTab = () => {
     if (isMobile && mobileSearchValue !== searchValue) {
       setSearchValue(mobileSearchValue);
     }
-  }, [mobileSearchValue, isMobile]);
+  }, [mobileSearchValue, isMobile, searchValue]);
 
   const { data: planPrices = [], isLoading } = useQuery<PlanPrice[]>({
     queryKey: ['plan-prices'],
@@ -121,7 +121,7 @@ const AdminPlanPricesTab = () => {
         }
       });
     }
-  }, [isMobile]);
+  }, [isMobile, setFilterConfig, setSearchValue, setMobileSearchValue]);
 
   const handleRowClick = (planPrice: PlanPrice) => {
     openModal('plan-price', { planPrice, isEditing: true });
@@ -223,8 +223,8 @@ const AdminPlanPricesTab = () => {
         onRowClick={handleRowClick}
         emptyStateConfig={{
           icon: <Inbox />,
-          title: isLoading ? 'Cargando...' : 'No hay precios configurados',
-          description: 'No se han configurado precios para los planes de suscripción.',
+          title: isLoading ? 'Cargando...' : 'No hay precios de planes configurados',
+          description: 'Configura precios en diferentes monedas y proveedores para tus planes de suscripción.',
           actionButton: {
             label: 'Nuevo Precio',
             onClick: () => openModal('plan-price', {})
