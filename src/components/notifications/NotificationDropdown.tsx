@@ -157,7 +157,7 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
               variant="ghost"
               size="sm"
               onClick={() => {
-                navigate('/notifications');
+                navigate('/settings/notifications');
                 onClose();
               }}
               className="w-full h-8 text-xs font-medium"

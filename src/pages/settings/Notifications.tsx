@@ -214,6 +214,8 @@ export default function Notifications() {
     icon: Bell,
     title: "Notificaciones",
     pageTitle: "Notificaciones",
+    subtitle: "Centro de Notificaciones",
+    description: "Consulta todas tus notificaciones y mantente al día con las actualizaciones importantes.",
     actions: unreadNotifications.length > 0 ? [
       <Button
         key="mark-all-read"

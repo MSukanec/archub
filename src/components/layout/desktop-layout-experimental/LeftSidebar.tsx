@@ -246,6 +246,7 @@ export function LeftSidebar() {
           type: 'section' as const,
           title: organizationName,
           items: [
+            { id: 'organization-basic-data', label: 'Datos Básicos', icon: Building, href: '/settings/organization-basic-data' },
             { id: 'members', label: 'Miembros', icon: Users, href: '/settings/members' },
             { id: 'finances', label: 'Finanzas', icon: Wallet, href: '/settings/finances' },
           ]
@@ -254,9 +255,8 @@ export function LeftSidebar() {
           type: 'section' as const,
           title: userFullName,
           items: [
-            { id: 'organization-basic-data', label: 'Datos Básicos', icon: Building, href: '/settings/organization-basic-data' },
             { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/settings/billing' },
-            { id: 'notifications', label: 'Notificaciones', icon: Bell, href: '/notifications' },
+            { id: 'notifications', label: 'Notificaciones', icon: Bell, href: '/settings/notifications' },
           ]
         }
       ];

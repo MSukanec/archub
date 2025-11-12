@@ -212,6 +212,7 @@ function Router() {
         <Route path="/settings/members" component={Members} />
         <Route path="/settings/finances" component={Finances} />
         <Route path="/settings/organization-basic-data" component={OrganizationBasicData} />
+        <Route path="/settings/notifications" component={Notifications} />
         
         {/* Learning Routes - Lazy Loaded (incluye reproductor Vimeo pesado) */}
         <Route path="/learning/dashboard">

@@ -257,6 +257,8 @@ const Billing = () => {
   const headerProps = {
     title: "Facturación",
     icon: CreditCard,
+    subtitle: "Suscripción y Pagos",
+    description: "Gestiona tu plan de suscripción, consulta tu historial de pagos y descarga facturas.",
   };
 
   return (
