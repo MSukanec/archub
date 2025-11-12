@@ -13,10 +13,10 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { InvoicePDF } from '@/components/pdf/InvoicePDF';
-import { CancelSubscriptionDialog } from '@/components/ui-custom/CancelSubscriptionDialog';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { queryClient, apiRequest } from '@/lib/queryClient';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 interface OrganizationSubscription {
   id: string;
@@ -50,7 +50,7 @@ const Billing = () => {
   const { setSidebarLevel } = useNavigationStore();
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
-  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const { openModal } = useGlobalModalStore();
 
   useEffect(() => {
     setSidebarLevel('settings');
@@ -131,7 +131,6 @@ const Billing = () => {
       });
       queryClient.invalidateQueries({ queryKey: ['current-subscription', currentOrganizationId] });
       queryClient.invalidateQueries({ queryKey: ['subscription-payments', currentOrganizationId] });
-      setShowCancelDialog(false);
     },
     onError: (error: any) => {
       toast({
@@ -319,7 +318,21 @@ const Billing = () => {
                     <Button 
                       variant="secondary" 
                       className="w-full" 
-                      onClick={() => setShowCancelDialog(true)}
+                      onClick={() => {
+                        openModal('delete-confirmation', {
+                          mode: 'dangerous',
+                          title: 'Cancelar Suscripción',
+                          description: `¿Estás seguro que deseas cancelar tu suscripción al plan ${planName}? Mantendrás acceso hasta ${expiresAt ? format(new Date(expiresAt), 'dd MMM yyyy', { locale: es }) : 'el final del período de facturación'}. Después de esa fecha, tu plan volverá a Free.`,
+                          itemName: 'CANCELAR',
+                          destructiveActionText: 'Cancelar Suscripción',
+                          onConfirm: () => {
+                            if (subscription?.id) {
+                              cancelSubscriptionMutation.mutate(subscription.id);
+                            }
+                          },
+                          isLoading: cancelSubscriptionMutation.isPending
+                        });
+                      }}
                       data-testid="button-cancel-subscription"
                     >
                       <XCircle className="w-4 h-4 mr-2" />
@@ -400,19 +413,6 @@ const Billing = () => {
           </CardContent>
         </Card>
       </div>
-
-      <CancelSubscriptionDialog
-        open={showCancelDialog}
-        onOpenChange={setShowCancelDialog}
-        onConfirm={() => {
-          if (subscription?.id) {
-            cancelSubscriptionMutation.mutate(subscription.id);
-          }
-        }}
-        loading={cancelSubscriptionMutation.isPending}
-        planName={planName}
-        expiresAt={expiresAt}
-      />
     </Layout>
   );
 };
