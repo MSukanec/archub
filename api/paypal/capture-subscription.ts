@@ -109,6 +109,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Process subscription if we have all data and payment is completed
     if (userId && planId && organizationId && billingPeriod && status === 'COMPLETED' && providerPaymentId) {
       
+      // Log payment event for auditing
+      await supabase.from('payment_events').insert({
+        provider: 'paypal',
+        provider_event_id: providerPaymentId,
+        provider_event_type: 'PAYMENT.CAPTURE.COMPLETED',
+        status: 'PROCESSED',
+        raw_payload: captureData,
+        order_id: orderId,
+        custom_id: customId,
+        user_hint: userId,
+        provider_payment_id: providerPaymentId,
+        amount: amountValue ? parseFloat(amountValue) : null,
+        currency: currencyCode,
+      });
+      
+      console.log('[PayPal capture-subscription] ✅ Payment event logged');
+      
       // Check if payment already exists (idempotency)
       const { data: existingPayment } = await supabase
         .from('payments')
