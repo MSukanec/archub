@@ -123,6 +123,10 @@ interface TableProps<T = any> {
     title: string;
     description?: React.ReactNode;
     action?: React.ReactNode;
+    actionButton?: {
+      label: string;
+      onClick: () => void;
+    };
   };
   isLoading?: boolean;
   className?: string;
@@ -1015,7 +1019,14 @@ export function Table<T = any>({
                   icon={emptyStateConfig.icon}
                   title={emptyStateConfig.title}
                   description={emptyStateConfig.description}
-                  action={emptyStateConfig.action}
+                  action={
+                    emptyStateConfig.action || 
+                    (emptyStateConfig.actionButton ? (
+                      <Button onClick={emptyStateConfig.actionButton.onClick}>
+                        {emptyStateConfig.actionButton.label}
+                      </Button>
+                    ) : undefined)
+                  }
                 />
               </div>
             ) : emptyState ? (
@@ -1329,7 +1340,14 @@ export function Table<T = any>({
                 icon={emptyStateConfig.icon}
                 title={emptyStateConfig.title}
                 description={emptyStateConfig.description}
-                action={emptyStateConfig.action}
+                action={
+                  emptyStateConfig.action || 
+                  (emptyStateConfig.actionButton ? (
+                    <Button onClick={emptyStateConfig.actionButton.onClick}>
+                      {emptyStateConfig.actionButton.label}
+                    </Button>
+                  ) : undefined)
+                }
               />
             </div>
           ) : emptyState ? (

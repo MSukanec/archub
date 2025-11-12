@@ -300,6 +300,85 @@ export default function MyPage() {
 
 ---
 
+## 6.1. Botones de Acción en Empty States
+
+### 🔘 REGLA CRÍTICA: Consistencia entre Header y Empty State
+
+**SIEMPRE** que una página tenga un botón de acción en el header (crear, agregar, nuevo), el empty state de la tabla DEBE tener el mismo botón de acción.
+
+### ✅ CORRECTO: actionButton en emptyStateConfig
+
+```typescript
+const handleCreateItem = () => {
+  openModal('item', {});
+};
+
+const headerProps = {
+  title: "Items",
+  icon: Package,
+  actions: [
+    <Button 
+      key="create-item"
+      onClick={handleCreateItem}
+      className="h-8 px-3 text-xs"
+    >
+      <Plus className="w-4 h-4 mr-1" />
+      Nuevo Item
+    </Button>
+  ]
+};
+
+// En el componente Tab/Tabla
+<Table
+  columns={columns}
+  data={items}
+  onRowClick={handleRowClick}
+  emptyStateConfig={{
+    icon: <Inbox />,
+    title: 'No hay items',
+    description: 'No se han creado items todavía',
+    actionButton: {
+      label: 'Nuevo Item',
+      onClick: handleCreateItem  // ← MISMA función que el header
+    }
+  }}
+/>
+```
+
+### ❌ INCORRECTO: Empty state sin actionButton
+
+```typescript
+// ❌ MAL - Header tiene botón pero empty state no lo tiene
+const headerProps = {
+  actions: [
+    <Button onClick={handleCreateItem}>Nuevo Item</Button>
+  ]
+};
+
+<Table
+  emptyStateConfig={{
+    icon: <Inbox />,
+    title: 'No hay items',
+    description: 'No se han creado items todavía'
+    // ❌ Falta actionButton!
+  }}
+/>
+```
+
+### Reglas importantes:
+
+1. ✅ **SIEMPRE** usa la **MISMA función** en el header y en el empty state
+2. ✅ El `label` del actionButton debe coincidir con el texto del botón del header
+3. ✅ Si el header tiene botón de acción, el empty state también debe tenerlo
+4. ❌ **NUNCA** dejes el empty state sin actionButton si existe un botón crear/agregar en el header
+
+### Ejemplos de Referencia:
+
+- **AdminPlanPricesTab.tsx** - Usa actionButton con la misma función que el header
+- **AdminPaymentsTab.tsx** - actionButton en empty state del tab de pagos
+
+---
+
 ## 7. Importaciones Comunes
 
 ```typescript
@@ -425,6 +504,23 @@ const headerProps = {
 
 ### ❌ ERROR 5: No seguir el patrón de páginas existentes
 **SIEMPRE mira páginas similares existentes antes de crear una nueva**
+
+### ❌ ERROR 6: Wrapper extra en página principal
+Las páginas admin NO deben tener un wrapper `<div className="space-y-6">` adicional. Solo el componente tab debe tener el wrapper.
+
+```typescript
+// ❌ MAL - Wrapper extra
+<Layout wide headerProps={headerProps}>
+  <div className="space-y-6">
+    {activeTab === 'tab1' && <Tab1Component />}
+  </div>
+</Layout>
+
+// ✅ BIEN - Sin wrapper extra
+<Layout wide headerProps={headerProps}>
+  {activeTab === 'tab1' && <Tab1Component />}
+</Layout>
+```
 
 ---
 

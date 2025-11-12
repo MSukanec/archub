@@ -224,7 +224,11 @@ const AdminPlanPricesTab = () => {
         emptyStateConfig={{
           icon: <Inbox />,
           title: isLoading ? 'Cargando...' : 'No hay precios configurados',
-          description: 'No se han configurado precios para los planes de suscripción.'
+          description: 'No se han configurado precios para los planes de suscripción.',
+          actionButton: {
+            label: 'Nuevo Precio',
+            onClick: () => openModal('plan-price', {})
+          }
         }}
       />
     </div>

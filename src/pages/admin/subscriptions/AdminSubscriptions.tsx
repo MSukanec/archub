@@ -49,9 +49,7 @@ const AdminSubscriptions = () => {
 
   return (
     <Layout wide headerProps={headerProps}>
-      <div className="space-y-6">
-        {activeTab === 'prices' && <AdminPlanPricesTab />}
-      </div>
+      {activeTab === 'prices' && <AdminPlanPricesTab />}
     </Layout>
   );
 };
