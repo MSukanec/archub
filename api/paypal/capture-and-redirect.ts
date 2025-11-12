@@ -77,28 +77,57 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const status = captureData.status;
     const captureObj = captureData?.purchase_units?.[0]?.payments?.captures?.[0];
     const invoiceId = captureObj?.invoice_id || null;
+    const customId = captureObj?.custom_id || null;
     const providerPaymentId = captureObj?.id || null;
     const amountValue = captureObj?.amount?.value || null;
     const currencyCode = captureObj?.amount?.currency_code || null;
 
-    console.log('[PayPal capture-and-redirect] Order ID:', orderId, 'Status:', status, 'Invoice ID:', invoiceId);
+    console.log('[PayPal capture-and-redirect] Order ID:', orderId, 'Status:', status, 'Invoice ID:', invoiceId, 'Custom ID:', customId);
 
-    // Parse invoice_id: "user:UUID;course:UUID"
     let userId: string | null = null;
     let courseId: string | null = null;
     
-    if (invoiceId) {
+    // Priority 1: Parse custom_id (pipe-delimited format with full UUIDs)
+    if (customId) {
       try {
-        const parts = invoiceId.split(';');
-        for (const part of parts) {
-          const [key, value] = part.split(':');
-          if (key === 'user') userId = value;
-          if (key === 'course') courseId = value;
+        // Course format: user_id|course_id or user_id|course_id|coupon_code|coupon_id
+        if (customId.includes('|')) {
+          const parts = customId.split('|');
+          userId = parts[0] || null;
+          courseId = parts[1] || null;
+          
+          console.log('[PayPal capture-and-redirect] ✅ Parsed from custom_id (pipe format):', { userId, courseId });
         }
-        
-        console.log('[PayPal capture-and-redirect] Parsed invoice_id:', { userId, courseId });
+        // Old base64 format (backward compatibility)
+        else {
+          const decoded = Buffer.from(customId, 'base64').toString('utf8');
+          const data = JSON.parse(decoded);
+          userId = data.user_id || data.u || null;
+          courseId = data.course_id || data.c || null;
+          
+          console.log('[PayPal capture-and-redirect] ✅ Parsed from custom_id (base64):', { userId, courseId });
+        }
       } catch (e) {
-        console.error('[PayPal capture-and-redirect] Error parsing invoice_id:', e);
+        console.error('[PayPal capture-and-redirect] Error parsing custom_id:', e);
+      }
+    }
+    
+    // Priority 2: Fallback to invoice_id if custom_id didn't provide data
+    if (!userId || !courseId) {
+      if (invoiceId) {
+        try {
+          const parts = invoiceId.split(';');
+          for (const part of parts) {
+            const [key, value] = part.split(':');
+            // Support both old (user/course) and new (u/c) formats
+            if (key === 'user' || key === 'u') userId = value;
+            if (key === 'course' || key === 'c') courseId = value;
+          }
+          
+          console.log('[PayPal capture-and-redirect] ℹ️ Parsed from invoice_id (fallback):', { userId, courseId });
+        } catch (e) {
+          console.error('[PayPal capture-and-redirect] Error parsing invoice_id:', e);
+        }
       }
     }
     
