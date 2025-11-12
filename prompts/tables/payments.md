@@ -405,6 +405,38 @@ create table public.plan_prices (
   )
 ) TABLESPACE pg_default;
 
+Tabla ORGANIZATION_SUBSCRIPTIONS:
+
+create table public.organization_subscriptions (
+  id uuid not null default gen_random_uuid (),
+  organization_id uuid not null,
+  plan_id uuid not null,
+  payment_id uuid null,
+  status text not null default 'active'::text,
+  billing_period text not null,
+  started_at timestamp with time zone not null default now(),
+  expires_at timestamp with time zone not null,
+  cancelled_at timestamp with time zone null,
+  amount numeric(10, 2) not null,
+  currency text not null,
+  created_at timestamp with time zone null default now(),
+  updated_at timestamp with time zone null default now(),
+  constraint organization_subscriptions_pkey primary key (id),
+  constraint organization_subscriptions_organization_id_fkey foreign KEY (organization_id) references organizations (id),
+  constraint organization_subscriptions_payment_id_fkey foreign KEY (payment_id) references payments (id),
+  constraint organization_subscriptions_plan_id_fkey foreign KEY (plan_id) references plans (id),
+  constraint organization_subscriptions_billing_period_check check (
+    (
+      billing_period = any (array['monthly'::text, 'annual'::text])
+    )
+  )
+) TABLESPACE pg_default;
+
+create unique INDEX IF not exists org_subscriptions_unique_active on public.organization_subscriptions using btree (organization_id) TABLESPACE pg_default
+where
+  (status = 'active'::text);
+
+
 Vista ORGANIZATION_BILLING_SUMMARY:
 
 [
