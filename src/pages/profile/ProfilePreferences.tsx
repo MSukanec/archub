@@ -1,6 +1,5 @@
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Settings, UserCircle, Palette, Shield, Monitor } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -23,13 +22,11 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
   const { isDark, setTheme } = useThemeStore()
   
   const [sidebarDocked, setSidebarDocked] = useState(false)
-  const [layoutStyle, setLayoutStyle] = useState<'classic' | 'experimental'>('classic')
 
   // Settings data object for debounced auto-save
   const settingsData = {
     sidebarDocked,
-    theme: isDark ? 'dark' : 'light',
-    layout: layoutStyle
+    theme: isDark ? 'dark' : 'light'
   }
 
   // Auto-save mutation for settings data
@@ -37,13 +34,9 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
     mutationFn: async (data: typeof settingsData) => {
       console.log('Saving settings data:', data)
       
-      // Check if layout is changing
-      const layoutChanged = data.layout !== userData?.preferences?.layout
-      
       // Use the server endpoint to update preferences
       if (data.sidebarDocked !== userData?.preferences?.sidebar_docked ||
-          data.theme !== userData?.preferences?.theme ||
-          layoutChanged) {
+          data.theme !== userData?.preferences?.theme) {
         
         // Get the auth token from Supabase session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
@@ -61,7 +54,6 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
             user_id: userData?.user?.id,
             sidebar_docked: data.sidebarDocked,
             theme: data.theme,
-            layout: data.layout,
           }),
         })
         
@@ -71,18 +63,11 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
         }
       }
       
-      return { data, layoutChanged }
+      return { data }
     },
-    onSuccess: (result) => {
+    onSuccess: () => {
       console.log('Settings auto-save completed successfully')
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
-      
-      // If layout changed, reload the page to apply the new layout
-      if (result.layoutChanged) {
-        setTimeout(() => {
-          window.location.reload()
-        }, 500)
-      }
     },
     onError: (error) => {
       console.error('Settings auto-save error:', error)
@@ -118,8 +103,6 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
       setSidebarDocked(userData.preferences.sidebar_docked || false)
       // Set theme from user preferences
       setTheme(userData.preferences.theme === 'dark')
-      // Set layout from user preferences
-      setLayoutStyle(userData.preferences.layout || 'classic')
     }
   }, [userData?.preferences, setTheme])
 
@@ -175,28 +158,6 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
                 checked={sidebarDocked}
                 onCheckedChange={handleSidebarDockedChange}
               />
-            </div>
-
-            {/* Layout Style */}
-            <div className="flex items-center justify-between py-2">
-              <div className="space-y-0.5">
-                <Label className="text-sm font-medium">Estilo de diseño</Label>
-                <div className="text-xs text-muted-foreground">
-                  Selecciona el estilo visual de la aplicación
-                </div>
-              </div>
-              <Select
-                value={layoutStyle}
-                onValueChange={(value: 'classic' | 'experimental') => setLayoutStyle(value)}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="classic">Classic</SelectItem>
-                  <SelectItem value="experimental">Experimental</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
         </div>
