@@ -230,6 +230,10 @@ export function LeftSidebar() {
         { id: 'profile', label: 'Mi Perfil', icon: User, href: '/profile' },
         { id: 'landing', label: 'Página de Inicio', icon: Home, href: '/' },
       ];
+    } else if (sidebarLevel === 'settings') {
+      return [
+        { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/settings/billing' },
+      ];
     }
     
     return [];
@@ -312,6 +316,7 @@ export function LeftSidebar() {
       case 'learning': return 'Capacitaciones';
       case 'admin': return 'Administración';
       case 'user': return 'Usuario';
+      case 'settings': return 'Ajustes';
       default: return '';
     }
   };
@@ -555,6 +560,15 @@ export function LeftSidebar() {
                   testId="sidebar-button-administration"
                 />
               )}
+
+              {/* Botón de Ajustes */}
+              <SidebarIconButton
+                icon={<Settings className="h-5 w-5" />}
+                isActive={sidebarLevel === 'settings'}
+                onClick={() => setSidebarLevel('settings')}
+                title="Ajustes"
+                testId="sidebar-button-settings"
+              />
 
               {/* Botón de Ayuda con Popover */}
               <Popover open={helpPopoverOpen} onOpenChange={setHelpPopoverOpen}>
