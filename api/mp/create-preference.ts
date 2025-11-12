@@ -12,9 +12,7 @@ const isTestMode = MP_MODE === "test";
 const MP_ACCESS_TOKEN = isTestMode 
   ? process.env.MP_ACCESS_TOKEN_TEST! 
   : process.env.MP_ACCESS_TOKEN!;
-const MP_WEBHOOK_SECRET = isTestMode
-  ? (process.env.MP_WEBHOOK_SECRET_TEST || "")
-  : (process.env.MP_WEBHOOK_SECRET || "");
+const MP_WEBHOOK_SECRET = process.env.MP_WEBHOOK_SECRET || "";
 
 console.log(`[MP create-preference] Modo: ${isTestMode ? '🧪 TEST' : '💰 PRODUCCIÓN'}`);
 
