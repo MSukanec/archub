@@ -54,6 +54,7 @@ Preferred communication style: Simple, everyday language.
 - **Personnel Module Organization**: Reorganized into modular components.
 - **Personnel Assignment Modal Optimization**: Enhanced with real-time search filtering and optimized loading.
 - **AI Code Architecture**: Dual-location AI code structure to support both development (Express) and production (Vercel serverless). The authoritative AI implementation lives in `api/_lib/ai/` for Vercel bundling. A mirror copy exists in `src/ai/` for Vite HMR compatibility during development. All AI-related changes must be made in `api/_lib/ai/`.
+- **Payment Endpoints Architecture** (November 2025): Refactored from unified endpoints to product-specific endpoints for better separation of concerns. New architecture: 4 domain-specific endpoints (`/api/paypal/create-course-order`, `/api/paypal/create-subscription-order`, `/api/mp/create-course-preference`, `/api/mp/create-subscription-preference`) with shared utility helpers. All endpoints enforce server-side pricing from `course_prices` and `plan_prices` tables (no client-controlled amounts). Both PayPal and MercadoPago support discount coupons for courses with server-side validation via Supabase RPC. Legacy unified endpoints (`/api/paypal/create-order`, `/api/mp/create-preference`) are deprecated but remain functional for backward compatibility.
 
 ## External Dependencies
 - **Supabase**: Authentication.
