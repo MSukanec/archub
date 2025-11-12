@@ -104,6 +104,7 @@ import PricingPlan from "@/pages/PricingPlan";
 
 // Settings Pages
 import Billing from "@/pages/settings/Billing";
+import Members from "@/pages/settings/Members";
 
 
 
@@ -208,6 +209,7 @@ function Router() {
 
         {/* Settings Routes */}
         <Route path="/settings/billing" component={Billing} />
+        <Route path="/settings/members" component={Members} />
         
         {/* Learning Routes - Lazy Loaded (incluye reproductor Vimeo pesado) */}
         <Route path="/learning/dashboard">
