@@ -384,6 +384,27 @@ create table public.user_notifications (
 
 create index IF not exists user_notifications_user_idx on public.user_notifications using btree (user_id, read_at) TABLESPACE pg_default;
 
+Tabla PLAN_PRICES:
+
+create table public.plan_prices (
+  id uuid not null default gen_random_uuid (),
+  plan_id uuid not null,
+  currency_code text not null,
+  monthly_amount numeric(10, 2) not null,
+  annual_amount numeric(10, 2) not null,
+  provider text null default 'any'::text,
+  is_active boolean null default true,
+  created_at timestamp with time zone null default now(),
+  constraint plan_prices_pkey primary key (id),
+  constraint plan_prices_unique unique (plan_id, currency_code, provider),
+  constraint plan_prices_plan_id_fkey foreign KEY (plan_id) references plans (id),
+  constraint plan_prices_currency_code_check check (
+    (
+      currency_code = any (array['ARS'::text, 'USD'::text, 'EUR'::text])
+    )
+  )
+) TABLESPACE pg_default;
+
 Vista ORGANIZATION_BILLING_SUMMARY:
 
 [
