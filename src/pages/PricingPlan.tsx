@@ -46,21 +46,8 @@ export default function PricingPlan() {
       try {
         const { data, error } = await supabase
           .from('plans')
-          .select(`
-            id,
-            name,
-            slug,
-            features,
-            billing_type,
-            is_active,
-            plan_prices!inner (
-              monthly_amount,
-              annual_amount
-            )
-          `)
-          .eq('is_active', true)
-          .eq('plan_prices.currency_code', 'USD')
-          .eq('plan_prices.is_active', true);
+          .select('id, name, slug, features, billing_type, is_active, monthly_amount, annual_amount')
+          .eq('is_active', true);
 
         if (error) throw error;
         
@@ -70,8 +57,8 @@ export default function PricingPlan() {
           slug: plan.slug,
           features: plan.features,
           billing_type: plan.billing_type,
-          monthly_amount: plan.plan_prices[0]?.monthly_amount || 0,
-          annual_amount: plan.plan_prices[0]?.annual_amount || 0
+          monthly_amount: parseFloat(plan.monthly_amount) || 0,
+          annual_amount: parseFloat(plan.annual_amount) || 0
         }));
         
         const sortedData = transformedData.sort((a, b) => {
@@ -459,7 +446,7 @@ export default function PricingPlan() {
                             "text-5xl font-bold tracking-tight",
                             isPopular ? "text-white" : "text-[var(--text-default)]"
                           )}>
-                            {monthlyPrice?.split('.')[0]}
+                            {monthlyPrice}
                           </span>
                           <span className={cn(
                             "text-lg",

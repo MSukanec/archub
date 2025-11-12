@@ -52,16 +52,8 @@ interface PlanData {
   name: string;
   slug: string;
   features: any;
-}
-
-interface PlanPrice {
-  id: string;
-  plan_id: string;
-  currency_code: string;
-  monthly_amount: number;
-  annual_amount: number;
-  provider: string;
-  is_active: boolean;
+  monthly_amount: string;
+  annual_amount: string;
 }
 
 export default function SubscriptionCheckout() {
@@ -93,7 +85,7 @@ export default function SubscriptionCheckout() {
   const currentCurrency = selectedMethod === "paypal" ? "USD" : "ARS";
 
   const [planData, setPlanData] = useState<PlanData | null>(null);
-  const [priceData, setPriceData] = useState<PlanPrice | null>(null);
+  const [exchangeRate, setExchangeRate] = useState<number>(1);
   const [priceLoading, setPriceLoading] = useState(true);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
 
@@ -120,9 +112,10 @@ export default function SubscriptionCheckout() {
   useEffect(() => {
     if (planSlug) {
       const loadPlanData = async () => {
+        setPriceLoading(true);
         const { data, error } = await supabase
           .from("plans")
-          .select("*")
+          .select("id, name, slug, features, monthly_amount, annual_amount")
           .eq("slug", planSlug)
           .single();
 
@@ -133,10 +126,12 @@ export default function SubscriptionCheckout() {
             description: "No se pudo cargar el plan",
             variant: "destructive",
           });
+          setPriceLoading(false);
           return;
         }
 
         setPlanData(data);
+        setPriceLoading(false);
       };
 
       loadPlanData();
@@ -144,36 +139,30 @@ export default function SubscriptionCheckout() {
   }, [planSlug, toast]);
 
   useEffect(() => {
-    if (planData && currentProvider && billingPeriod) {
-      const loadPrice = async () => {
-        setPriceLoading(true);
+    if (selectedMethod === 'mercadopago') {
+      const loadExchangeRate = async () => {
         const { data, error } = await supabase
-          .from("plan_prices")
-          .select("*")
-          .eq("plan_id", planData.id)
-          .eq("provider", currentProvider)
-          .eq("currency_code", currentCurrency)
+          .from("exchange_rates")
+          .select("rate")
+          .eq("from_currency", "USD")
+          .eq("to_currency", "ARS")
           .eq("is_active", true)
-          .maybeSingle();
+          .single();
 
         if (error) {
-          console.error("Error loading price:", error);
-          toast({
-            title: "Error",
-            description: "No se pudo cargar el precio del plan",
-            variant: "destructive",
-          });
-          setPriceLoading(false);
+          console.error("Error loading exchange rate:", error);
+          setExchangeRate(1500);
           return;
         }
 
-        setPriceData(data);
-        setPriceLoading(false);
+        setExchangeRate(parseFloat(data.rate));
       };
 
-      loadPrice();
+      loadExchangeRate();
+    } else {
+      setExchangeRate(1);
     }
-  }, [planData, currentProvider, billingPeriod, currentCurrency, toast]);
+  }, [selectedMethod]);
 
   useEffect(() => {
     if (userData) {
@@ -452,13 +441,15 @@ export default function SubscriptionCheckout() {
         throw new Error("No se encontró la organización del usuario");
       }
 
-      const currentAmount = billingPeriod === 'annual' 
-        ? priceData?.annual_amount 
-        : priceData?.monthly_amount;
+      const baseAmount = billingPeriod === 'annual' 
+        ? parseFloat(planData?.annual_amount || '0')
+        : parseFloat(planData?.monthly_amount || '0');
 
-      if (!currentAmount || currentAmount <= 0) {
+      if (!baseAmount || baseAmount <= 0) {
         throw new Error("Precio inválido");
       }
+
+      const currentAmount = baseAmount;
 
       const description = `Suscripción ${planData?.name || planSlug} - ${billingPeriod === 'annual' ? 'Anual' : 'Mensual'}`;
 
@@ -665,9 +656,30 @@ export default function SubscriptionCheckout() {
     }
   };
 
-  const finalPrice = billingPeriod === 'annual' 
-    ? (priceData?.annual_amount || 0)
-    : (priceData?.monthly_amount || 0);
+  const calculatePrice = useMemo(() => {
+    if (!planData) return { amount: '0.00', currency: 'USD', numericAmount: 0 };
+    
+    const basePrice = billingPeriod === 'annual' 
+      ? parseFloat(planData.annual_amount) 
+      : parseFloat(planData.monthly_amount);
+    
+    if (selectedMethod === 'mercadopago') {
+      const arsAmount = basePrice * exchangeRate;
+      return {
+        amount: arsAmount.toFixed(2),
+        currency: 'ARS',
+        numericAmount: arsAmount
+      };
+    }
+    
+    return {
+      amount: basePrice.toFixed(2),
+      currency: 'USD',
+      numericAmount: basePrice
+    };
+  }, [planData, billingPeriod, selectedMethod, exchangeRate]);
+
+  const finalPrice = calculatePrice.numericAmount;
 
   if (!planSlug) {
     return null;
@@ -1081,7 +1093,7 @@ export default function SubscriptionCheckout() {
                       <span className="text-lg font-semibold">Total</span>
                       <div className="text-right">
                         <p className="text-2xl font-bold">
-                          {currentCurrency} ${finalPrice.toLocaleString("es-AR")}
+                          {calculatePrice.currency} ${parseFloat(calculatePrice.amount).toLocaleString("es-AR")}
                         </p>
                         {selectedMethod && (
                           <p className="text-xs text-muted-foreground mt-1">
