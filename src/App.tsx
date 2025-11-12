@@ -105,6 +105,8 @@ import PricingPlan from "@/pages/PricingPlan";
 // Settings Pages
 import Billing from "@/pages/settings/Billing";
 import Members from "@/pages/settings/Members";
+import Finances from "@/pages/settings/Finances";
+import OrganizationBasicData from "@/pages/settings/OrganizationBasicData";
 
 
 
@@ -210,6 +212,8 @@ function Router() {
         {/* Settings Routes */}
         <Route path="/settings/billing" component={Billing} />
         <Route path="/settings/members" component={Members} />
+        <Route path="/settings/finances" component={Finances} />
+        <Route path="/settings/organization-basic-data" component={OrganizationBasicData} />
         
         {/* Learning Routes - Lazy Loaded (incluye reproductor Vimeo pesado) */}
         <Route path="/learning/dashboard">
