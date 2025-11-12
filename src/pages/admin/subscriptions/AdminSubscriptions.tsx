@@ -4,11 +4,12 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { Button } from '@/components/ui/button';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import AdminSubscriptionsTab from './AdminSubscriptionsTab';
 import AdminPlansTab from './AdminPlansTab';
 import AdminPlanPricesTab from './AdminPlanPricesTab';
 
 const AdminSubscriptions = () => {
-  const [activeTab, setActiveTab] = useState('plans');
+  const [activeTab, setActiveTab] = useState('subscriptions');
   const { setSidebarLevel, sidebarLevel } = useNavigationStore();
   const { openModal } = useGlobalModalStore();
 
@@ -30,6 +31,11 @@ const AdminSubscriptions = () => {
     title: "Suscripciones",
     icon: CreditCard,
     tabs: [
+      {
+        id: 'subscriptions',
+        label: 'Suscripciones',
+        isActive: activeTab === 'subscriptions'
+      },
       {
         id: 'plans',
         label: 'Planes',
@@ -70,6 +76,7 @@ const AdminSubscriptions = () => {
 
   return (
     <Layout wide headerProps={headerProps}>
+      {activeTab === 'subscriptions' && <AdminSubscriptionsTab />}
       {activeTab === 'plans' && <AdminPlansTab />}
       {activeTab === 'prices' && <AdminPlanPricesTab />}
     </Layout>
