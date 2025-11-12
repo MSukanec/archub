@@ -232,7 +232,7 @@ export default function Notifications() {
 
   if (notifications.length === 0) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout wide={false} headerProps={headerProps}>
         <EmptyState
           icon={<Bell className="w-8 h-8 text-muted-foreground" />}
           title="No tienes notificaciones"
@@ -243,7 +243,7 @@ export default function Notifications() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout wide={false} headerProps={headerProps}>
       <Table
         data={notifications}
         columns={columns}
