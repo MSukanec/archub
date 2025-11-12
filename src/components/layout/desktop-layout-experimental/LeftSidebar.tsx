@@ -233,6 +233,7 @@ export function LeftSidebar() {
     } else if (sidebarLevel === 'settings') {
       return [
         { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/settings/billing' },
+        { id: 'notifications', label: 'Notificaciones', icon: Bell, href: '/notifications' },
       ];
     }
     

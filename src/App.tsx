@@ -94,7 +94,7 @@ const CheckoutPage = lazy(() => import("@/pages/checkout/CheckoutPage"));
 const SubscriptionCheckout = lazy(() => import("@/pages/checkout/SubscriptionCheckout"));
 
 // Notifications
-import Notifications from "@/pages/Notifications";
+import Notifications from "@/pages/settings/Notifications";
 
 // Home
 import Home from "@/pages/Home";
