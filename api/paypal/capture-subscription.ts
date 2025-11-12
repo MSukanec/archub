@@ -127,6 +127,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           .insert({
             provider: 'paypal',
             provider_payment_id: providerPaymentId,
+            user_id: userId,
             organization_id: organizationId,
             product_id: planId,
             product_type: 'subscription',
