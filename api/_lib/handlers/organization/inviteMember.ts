@@ -69,7 +69,7 @@ export async function inviteMember(
       .from("users")
       .select("id, auth_id")
       .eq("email", email.toLowerCase())
-      .single();
+      .maybeSingle();
 
     // Si el usuario existe, verificar que no sea ya miembro
     if (existingUser) {
@@ -78,7 +78,7 @@ export async function inviteMember(
         .select("id")
         .eq("user_id", existingUser.id)
         .eq("organization_id", organizationId)
-        .single();
+        .maybeSingle();
 
       if (existingMembership) {
         return {
@@ -110,7 +110,7 @@ export async function inviteMember(
       .select("id")
       .eq("user_id", userId)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     // Crear la invitación
     const { data: invitationData, error: invitationError } = await supabaseAdmin
