@@ -197,6 +197,10 @@ export async function createCoursePreference(req: VercelRequest): Promise<Create
         product_type: 'course',
         course_slug,
         months: accessMonths,
+        ...(couponData && {
+          coupon_code: code.trim().toUpperCase(),
+          coupon_id: couponData.coupon_id,
+        }),
       }
     };
 

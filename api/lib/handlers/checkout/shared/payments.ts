@@ -10,13 +10,15 @@ export type PaymentData = {
   productType?: string | null;
   organizationId?: string | null;
   productId?: string | null;
+  couponCode?: string | null;
+  couponId?: string | null;
 };
 
 export async function insertPayment(
   supabase: SupabaseClient,
   provider: "mercadopago" | "paypal",
   data: PaymentData
-): Promise<void> {
+): Promise<{ inserted: boolean; error?: string }> {
   const paymentData: any = {
     provider,
     provider_payment_id: data.providerPaymentId,
@@ -38,15 +40,26 @@ export async function insertPayment(
     paymentData.product_id = data.productId;
   }
 
+  // Add coupon info if present (for both courses and subscriptions)
+  if (data.couponCode) {
+    paymentData.coupon_code = data.couponCode;
+  }
+  if (data.couponId) {
+    paymentData.coupon_id = data.couponId;
+  }
+
   const { error } = await supabase.from("payments").insert(paymentData);
 
   if (error) {
     if (error.code === '23505') {
       console.log('[payments] ⚠️ Payment ya existe (ignorado)');
+      return { inserted: false }; // Duplicate, not inserted
     } else {
       console.error("[payments] payments insert error:", error);
+      return { inserted: false, error: error.message };
     }
   } else {
     console.log("[payments] ✅ payment insertado", data.productType === 'subscription' ? '(subscription)' : '(course)');
+    return { inserted: true }; // Successfully inserted
   }
 }

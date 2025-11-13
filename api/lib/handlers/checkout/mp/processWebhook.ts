@@ -5,6 +5,7 @@ import { insertPayment } from "../shared/payments.js";
 import { upsertEnrollment } from "../shared/enrollments.js";
 import { upgradeOrganizationPlan } from "../shared/subscriptions.js";
 import { getCourseIdBySlug, getPlanIdBySlug } from "../shared/helpers.js";
+import { markCouponAsUsed } from "../shared/coupons.js";
 import { getMPPayment, getMPMerchantOrder } from "./api.js";
 import { extractMetadata, decodeExternalReference } from "./encoding.js";
 import { MP_WEBHOOK_SECRET } from "./config.js";
@@ -98,6 +99,8 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
       const planIdFromMetadata = md.plan_id;
       const planSlug = md.plan_slug || fromExt.plan_slug;
       const billingPeriod = md.billing_period || fromExt.billing_period;
+      const couponCode = md.coupon_code || fromExt.coupon_code || null;
+      const couponId = md.coupon_id || fromExt.coupon_id || null;
 
       // CRITICAL: Convert auth_id to public.users.id (required for both courses AND subscriptions)
       let publicUserId: string | null = null;
@@ -212,7 +215,7 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
 
           if (publicUserId && course_id) {
             // Insert payment (course) - using publicUserId from public.users table
-            await insertPayment(supabase, "mercadopago", {
+            const paymentResult = await insertPayment(supabase, "mercadopago", {
               providerPaymentId: providerPaymentId,
               userId: publicUserId,
               courseId: course_id,
@@ -220,7 +223,18 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
               currency: currency,
               status: "completed",
               productType: 'course',
+              couponCode: couponCode,
+              couponId: couponId,
             });
+
+            // IDEMPOTENT: Only mark coupon as used if payment was NEWLY inserted (not duplicate)
+            if (paymentResult.inserted && couponId) {
+              console.log(`[MP webhook] 🎟️ Marking coupon as used: ${couponCode} (${couponId})`);
+              const couponResult = await markCouponAsUsed(supabase, couponId);
+              if (!couponResult.success) {
+                console.error(`[MP webhook] ⚠️ Failed to mark coupon as used:`, couponResult.error);
+              }
+            }
 
             // Upsert enrollment - using publicUserId
             await upsertEnrollment(supabase, publicUserId, course_id, effectiveMonths);
@@ -258,6 +272,8 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
       const planIdFromMetadata = md.plan_id;
       const planSlug = md.plan_slug || fromExt.plan_slug;
       const billingPeriod = md.billing_period || fromExt.billing_period;
+      const couponCode = md.coupon_code || fromExt.coupon_code || null;
+      const couponId = md.coupon_id || fromExt.coupon_id || null;
 
       // CRITICAL: Convert auth_id to public.users.id (required for both courses AND subscriptions - merchant_order)
       let moPublicUserId: string | null = null;
@@ -378,7 +394,7 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
             if (resolvedSlug) course_id = await getCourseIdBySlug(supabase, resolvedSlug);
 
             if (moPublicUserId && course_id) {
-              await insertPayment(supabase, "mercadopago", {
+              const paymentResult = await insertPayment(supabase, "mercadopago", {
                 providerPaymentId: providerPaymentId,
                 userId: moPublicUserId,
                 courseId: course_id,
@@ -386,7 +402,18 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
                 currency: "ARS",
                 status: "completed",
                 productType: 'course',
+                couponCode: couponCode,
+                couponId: couponId,
               });
+
+              // IDEMPOTENT: Only mark coupon as used if payment was NEWLY inserted
+              if (paymentResult.inserted && couponId) {
+                console.log(`[MP webhook] 🎟️ Marking coupon as used (MO): ${couponCode} (${couponId})`);
+                const couponResult = await markCouponAsUsed(supabase, couponId);
+                if (!couponResult.success) {
+                  console.error(`[MP webhook] ⚠️ Failed to mark coupon as used (MO):`, couponResult.error);
+                }
+              }
 
               await upsertEnrollment(supabase, moPublicUserId, course_id, effectiveMonths);
 

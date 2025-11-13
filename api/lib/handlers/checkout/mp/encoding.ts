@@ -56,6 +56,8 @@ export function extractMetadata(obj: any): {
   plan_id?: string | null;
   plan_slug?: string | null;
   billing_period?: 'monthly' | 'annual' | null;
+  coupon_code?: string | null;
+  coupon_id?: string | null;
 } {
   const md = obj?.metadata || obj?.additional_info || {};
   const months =
@@ -79,6 +81,8 @@ export function extractMetadata(obj: any): {
   const plan_id = md?.plan_id || null;
   const plan_slug = md?.plan_slug || null;
   const billing_period = md?.billing_period || null;
+  const coupon_code = md?.coupon_code || null;
+  const coupon_id = md?.coupon_id || null;
 
   return {
     user_id: user_id ? String(user_id) : null,
@@ -90,5 +94,7 @@ export function extractMetadata(obj: any): {
     plan_id: plan_id ? String(plan_id) : null,
     plan_slug: plan_slug ? String(plan_slug) : null,
     billing_period: billing_period === 'monthly' || billing_period === 'annual' ? billing_period : null,
+    coupon_code: coupon_code ? String(coupon_code) : null,
+    coupon_id: coupon_id ? String(coupon_id) : null,
   };
 }

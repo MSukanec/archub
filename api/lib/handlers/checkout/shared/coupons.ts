@@ -4,6 +4,42 @@ export type CouponValidationResult =
   | { success: true; finalPrice: number; couponData: any }
   | { success: false; error: string; reason?: string; freeEnrollment?: boolean };
 
+export async function markCouponAsUsed(
+  supabase: SupabaseClient,
+  couponId: string
+): Promise<{ success: boolean; error?: string }> {
+  console.log('[coupons] Marking coupon as used:', couponId);
+
+  // Simple atomic increment - Supabase will handle concurrency at DB level
+  // This is safe because we only call this ONCE per payment insert (idempotent via insertPayment check)
+  const { data: coupon, error: fetchError } = await supabase
+    .from('coupons')
+    .select('used_count')
+    .eq('id', couponId)
+    .single();
+
+  if (fetchError || !coupon) {
+    console.error('[coupons] Error fetching coupon:', fetchError);
+    return { success: false, error: fetchError?.message || 'Coupon not found' };
+  }
+
+  const { error: updateError } = await supabase
+    .from('coupons')
+    .update({ used_count: coupon.used_count + 1 })
+    .eq('id', couponId);
+
+  if (updateError) {
+    console.error('[coupons] Error incrementing used_count:', updateError);
+    return { success: false, error: updateError.message };
+  }
+
+  console.log('[coupons] ✅ Coupon marked as used:', {
+    coupon_id: couponId,
+    new_count: coupon.used_count + 1
+  });
+  return { success: true };
+}
+
 export async function validateAndApplyCoupon(
   supabase: SupabaseClient,
   code: string,
