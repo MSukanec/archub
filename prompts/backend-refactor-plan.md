@@ -160,7 +160,7 @@ export function registerContactRoutes(app: Express, deps: RoutesDeps) {
 
 ---
 
-### Dominio 2: **Projects** (0/4 endpoints refactorizados)
+### Dominio 3: **Projects** (0/4 endpoints refactorizados)
 
 **Endpoints actuales** ❌:
 - `/api/projects.ts` (100 líneas - crear proyecto)
@@ -184,15 +184,31 @@ export function registerContactRoutes(app: Express, deps: RoutesDeps) {
 
 ---
 
-### Dominio 3: **Contacts** (0/1 endpoint refactorizado)
+### Dominio 2: **Contacts** ✅ (1/1 endpoint refactorizado)
 
-**Endpoints actuales** ❌:
-- `/api/contacts.ts` (138 líneas - query súper complejo con enrichment)
+**Handler creado** ✅:
+- `handlers/contacts/getContacts.ts` (141 líneas - lógica compleja de enrichment)
 
-**Handlers a crear**:
-- `handlers/contacts/getContacts.ts` (lógica de enrichment)
+**Endpoints refactorizados** ✅:
+- `/api/contacts.ts` (48 líneas wrapper, reducido de 138)
 
-**Estimado**: 1.5 horas
+**Express routes refactorizadas** ✅:
+- `server/routes/contacts.ts` GET /api/contacts (51 líneas, reducido de 148)
+
+**Lógica de enrichment preservada**:
+- ✅ Query 1: Basic contacts
+- ✅ Query 2: Linked users info (usuarios Seencel vinculados)
+- ✅ Query 3: Contact type links (many-to-many)
+- ✅ Query 4: Contact types details
+- ✅ Query 5: Attachments count
+- ✅ Maps optimization (linkedUsersMap, contactTypesMap, etc.)
+- ✅ Current user filtering
+- ✅ Enrichment con linked_user, contact_types, attachments_count
+
+**Bug arreglado**:
+- ✅ Status code 400 → 500 para errores del handler en endpoint Vercel
+
+**Tiempo real**: 1.5 horas
 
 ---
 
@@ -515,7 +531,7 @@ Domain: _____________
 
 - [ ] **Fase 0: Seguridad** (PENDIENTE - CRÍTICO)
 - [x] **Fase 1: Organization** (6/6 endpoints - 100%)
-- [ ] **Fase 2: Contacts** (0%)
+- [x] **Fase 2: Contacts** (1/1 endpoint - 100%)
 - [ ] **Fase 3: Community** (0%)
 - [ ] **Fase 4: Projects** (0%)
 - [ ] **Fase 5: Payments** (0%)
@@ -523,7 +539,7 @@ Domain: _____________
 - [x] **Fase 7: Admin** (11/11 endpoints - 100%)
 - [ ] **Fase 8: Personnel** (0%)
 
-**Progreso total**: ~35% (21 de ~60 endpoints)
+**Progreso total**: ~38% (22 de ~60 endpoints)
 
 ---
 
@@ -565,5 +581,5 @@ try {
 ---
 
 **Última actualización**: 2025-11-13  
-**Versión**: 1.2  
-**Estado**: 2 dominios completados - Admin (11 endpoints, 7 handlers) + Organization (6 endpoints, 5 handlers, 3 bugs críticos arreglados)
+**Versión**: 1.3  
+**Estado**: 3 dominios completados - Admin (11 endpoints, 7 handlers) + Organization (6 endpoints, 5 handlers) + Contacts (1 endpoint, lógica compleja de enrichment)
