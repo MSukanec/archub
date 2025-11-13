@@ -10,6 +10,8 @@ import { Check, X, Crown, CreditCard, Folder, HardDrive, Users, Briefcase, Bot }
 import { cn } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { DowngradeModal } from "@/components/modals/DowngradeModal";
+import { useQuery } from "@tanstack/react-query";
 
 interface Plan {
   id: string;
@@ -32,10 +34,18 @@ export default function PricingPlan() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [enterprisePlan, setEnterprisePlan] = useState<Plan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [downgradeModalOpen, setDowngradeModalOpen] = useState(false);
+  const [selectedDowngradePlan, setSelectedDowngradePlan] = useState<Plan | null>(null);
   
   const { data: userData } = useCurrentUser();
   const userPlanName = userData?.organization?.plan?.name;
   const isAuthenticated = !!userData?.user?.id;
+
+  // Fetch current subscription info
+  const { data: currentSubscription } = useQuery({
+    queryKey: ['/api/subscriptions/current'],
+    enabled: isAuthenticated
+  });
   
   // Plan hierarchy: FREE < PRO < TEAMS < ENTERPRISE
   const getPlanLevel = (planName: string): number => {
@@ -527,7 +537,14 @@ export default function PricingPlan() {
                           : "secondary"
                     }
                     onClick={() => {
-                      if (!isCurrentPlan && !isTeams) {
+                      if (isCurrentPlan || isTeams) return;
+                      
+                      if (isDowngrade) {
+                        // Open downgrade modal
+                        setSelectedDowngradePlan(plan);
+                        setDowngradeModalOpen(true);
+                      } else {
+                        // Go to checkout for upgrades
                         setLocation(`/subscription/checkout?plan=${plan.slug}&billing=${billingPeriod}`)
                       }
                     }}
@@ -955,6 +972,24 @@ export default function PricingPlan() {
           </div>
         </Card>
       </div>
+
+      {/* Downgrade Modal */}
+      {selectedDowngradePlan && (
+        <DowngradeModal
+          isOpen={downgradeModalOpen}
+          onClose={() => {
+            setDowngradeModalOpen(false);
+            setSelectedDowngradePlan(null);
+          }}
+          currentPlan={{
+            name: userPlanName || '',
+            slug: userData?.organization?.plan?.slug || ''
+          }}
+          targetPlan={selectedDowngradePlan}
+          subscriptionEndDate={(currentSubscription as any)?.expires_at}
+          isManualPlan={!currentSubscription}
+        />
+      )}
     </Layout>
   );
 }
