@@ -97,12 +97,12 @@ export function registerSubscriptionRoutes(app: Express, deps: RouteDeps): void 
       const organizationId = userPrefs.last_organization_id;
 
       // Get current active subscription
+      // Note: scheduled_downgrade_plan_id may not exist yet in database
       const { data: subscription, error: subError } = await authenticatedSupabase
         .from('organization_subscriptions')
         .select(`
           *,
-          plan:plans!plan_id(id, name, slug, features, monthly_amount, annual_amount, billing_type),
-          scheduled_plan:plans!scheduled_downgrade_plan_id(id, name, slug, features, monthly_amount, annual_amount, billing_type)
+          plan:plans!plan_id(id, name, slug, features, monthly_amount, annual_amount, billing_type)
         `)
         .eq('organization_id', organizationId)
         .eq('status', 'active')
@@ -114,6 +114,19 @@ export function registerSubscriptionRoutes(app: Express, deps: RouteDeps): void 
       if (subError) {
         console.error('Error fetching subscription:', subError);
         return res.status(500).json({ error: 'Failed to fetch subscription' });
+      }
+
+      // If subscription exists and has scheduled_downgrade_plan_id, fetch the scheduled plan
+      if (subscription && subscription.scheduled_downgrade_plan_id) {
+        const { data: scheduledPlan } = await authenticatedSupabase
+          .from('plans')
+          .select('id, name, slug, features, monthly_amount, annual_amount, billing_type')
+          .eq('id', subscription.scheduled_downgrade_plan_id)
+          .maybeSingle();
+        
+        if (scheduledPlan) {
+          subscription.scheduled_plan = scheduledPlan;
+        }
       }
 
       res.json(subscription || null);

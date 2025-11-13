@@ -105,6 +105,7 @@ const Billing = () => {
     queryFn: async () => {
       if (!supabase || !currentOrganizationId) throw new Error('Missing required data');
 
+      // Note: scheduled_downgrade_plan_id may not exist yet in database
       const { data, error} = await supabase
         .from('organization_subscriptions')
         .select(`
@@ -116,9 +117,7 @@ const Billing = () => {
           expires_at,
           amount,
           currency,
-          scheduled_downgrade_plan_id,
-          plans!plan_id(name, slug),
-          scheduled_downgrade_plan:plans!scheduled_downgrade_plan_id(name, slug)
+          plans!plan_id(name, slug)
         `)
         .eq('organization_id', currentOrganizationId)
         .eq('status', 'active')
@@ -128,6 +127,37 @@ const Billing = () => {
         .maybeSingle();
 
       if (error) throw error;
+      
+      // Try to add scheduled_downgrade_plan_id if it exists
+      // This will fail gracefully if column doesn't exist yet
+      if (data) {
+        try {
+          const { data: fullData } = await supabase
+            .from('organization_subscriptions')
+            .select('scheduled_downgrade_plan_id')
+            .eq('id', data.id)
+            .maybeSingle();
+          
+          if (fullData?.scheduled_downgrade_plan_id) {
+            (data as any).scheduled_downgrade_plan_id = fullData.scheduled_downgrade_plan_id;
+            
+            // Fetch the scheduled downgrade plan details
+            const { data: scheduledPlan } = await supabase
+              .from('plans')
+              .select('name, slug')
+              .eq('id', fullData.scheduled_downgrade_plan_id)
+              .maybeSingle();
+            
+            if (scheduledPlan) {
+              (data as any).scheduled_downgrade_plan = scheduledPlan;
+            }
+          }
+        } catch (err) {
+          // Column doesn't exist yet - ignore error
+          console.log('Note: scheduled_downgrade_plan_id column not yet in database');
+        }
+      }
+      
       return data as any;
     },
     enabled: !!currentOrganizationId && !!supabase,
