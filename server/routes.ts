@@ -462,7 +462,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GET /api/mp/success-handler - Verify payment and enroll
   app.get("/api/mp/success-handler", async (req, res) => {
     try {
-      const handler = await import('../api/mp/success-handler.js');
+      const handler = await import('../api/checkout/mp/success-handler.js');
       await handler.default(req as any, res as any);
     } catch (error: any) {
       console.error("[MP success-handler] Error:", error);

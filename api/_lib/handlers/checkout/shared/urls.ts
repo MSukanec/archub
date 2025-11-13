@@ -29,7 +29,7 @@ export function buildCourseBackUrls(
 ): CourseBackUrls {
   if (provider === "mp") {
     return {
-      success: `${returnBase}/api/mp/success-handler?course_slug=${courseSlug}`,
+      success: `${returnBase}/api/checkout/mp/success-handler?course_slug=${courseSlug}`,
       failure: `${returnBase}/learning/courses/${courseSlug}?payment=failed`,
       pending: `${returnBase}/learning/courses/${courseSlug}?payment=pending`,
     };

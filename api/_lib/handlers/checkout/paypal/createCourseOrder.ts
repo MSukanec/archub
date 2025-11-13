@@ -233,7 +233,7 @@ export async function createCourseOrder(
       ? `${user_id}|${productId}|${code.trim().toUpperCase()}|${couponData.coupon_id}`
       : `${user_id}|${productId}`;
 
-    const return_url = `${returnBase}/api/paypal/capture-and-redirect?course_slug=${productSlug}`;
+    const return_url = `${returnBase}/api/checkout/paypal/capture-and-redirect?course_slug=${productSlug}`;
     const cancel_url = `${returnBase}/learning/courses`;
 
     const orderBody = {

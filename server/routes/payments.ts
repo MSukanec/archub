@@ -1015,7 +1015,7 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
   // GET /api/paypal/capture-and-redirect - Proxy to Vercel function
   app.get("/api/paypal/capture-and-redirect", async (req, res) => {
     try {
-      const handler = await import('../../api/paypal/capture-and-redirect');
+      const handler = await import('../../api/checkout/paypal/capture-and-redirect');
       await handler.default(req as any, res as any);
     } catch (error: any) {
       console.error('[PayPal capture-and-redirect proxy] Error:', error);

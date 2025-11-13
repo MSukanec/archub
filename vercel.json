@@ -38,16 +38,15 @@
     { "source": "/api/webhooks/mercadopago", "destination": "/api/webhooks/mercadopago" },
     
     { "source": "/api/mp/create-preference", "destination": "/api/mp/create-preference" },
-    { "source": "/api/mp/success-handler", "destination": "/api/mp/success-handler" },
+    { "source": "/api/mp/success-handler", "destination": "/api/checkout/mp/success-handler" },
     { "source": "/api/mp/webhook", "destination": "/api/mp/webhook" },
     
     { "source": "/api/paypal/create-order", "destination": "/api/paypal/create-order" },
     { "source": "/api/paypal/capture-order", "destination": "/api/paypal/capture-order" },
-    { "source": "/api/paypal/capture-and-redirect", "destination": "/api/paypal/capture-and-redirect" },
+    { "source": "/api/paypal/capture-and-redirect", "destination": "/api/checkout/paypal/capture-and-redirect" },
     { "source": "/api/paypal/webhook", "destination": "/api/paypal/webhook" },
     
     { "source": "/api/diag/ping", "destination": "/api/diag/ping" },
-    { "source": "/api/diag/fake-mp", "destination": "/api/diag/fake-mp" },
     { "source": "/api/diag/check-env", "destination": "/api/diag/check-env" },
     
     { "source": "/api/user/enrollments", "destination": "/api/user/enrollments" },
