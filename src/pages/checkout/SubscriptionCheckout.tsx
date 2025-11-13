@@ -59,7 +59,7 @@ interface PlanData {
 export default function SubscriptionCheckout() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const { setSidebarContext, setSidebarLevel, sidebarLevel, currentSidebarContext } = useNavigationStore();
+  const { setSidebarLevel, sidebarLevel } = useNavigationStore();
 
   const params = new URLSearchParams(window.location.search);
   const planSlug = params.get("plan") || "";
@@ -69,17 +69,14 @@ export default function SubscriptionCheckout() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const previousContext = currentSidebarContext;
     const previousLevel = sidebarLevel;
     
-    setSidebarContext('general');
     setSidebarLevel('general');
 
     return () => {
-      setSidebarContext(previousContext);
       setSidebarLevel(previousLevel);
     };
-  }, [setSidebarContext, setSidebarLevel]);
+  }, [setSidebarLevel]);
 
   const currentProvider = selectedMethod === "paypal" ? "paypal" : "mercadopago";
   const currentCurrency = selectedMethod === "paypal" ? "USD" : "ARS";
@@ -217,7 +214,7 @@ export default function SubscriptionCheckout() {
 
   useEffect(() => {
     if (!planSlug) {
-      navigate("/pricing");
+      navigate("/settings/pricing-plan");
     }
   }, [planSlug, navigate]);
 
@@ -695,7 +692,7 @@ export default function SubscriptionCheckout() {
         key="back"
         variant="ghost"
         size="sm"
-        onClick={() => navigate("/pricing")}
+        onClick={() => navigate("/settings/pricing-plan")}
         className="gap-2"
         data-testid="button-back-to-pricing"
       >

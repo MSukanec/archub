@@ -226,7 +226,7 @@ export function PlanRestricted({
                   }}
                   onClick={() => {
                     setOpen(false);
-                    setLocation('/pricing');
+                    setLocation('/settings/pricing-plan');
                   }}
                 >
                   Ver Planes
@@ -310,7 +310,7 @@ export function PlanRestricted({
                   color: 'white'
                 }}
                 onClick={() => {
-                  setLocation('/pricing');
+                  setLocation('/settings/pricing-plan');
                 }}
               >
                 Ver Planes
@@ -362,7 +362,7 @@ export function PlanRestricted({
             size="sm"
             className="bg-white text-gray-900 hover:bg-gray-100 border-0 font-medium shadow-sm"
             onClick={() => {
-              setLocation('/pricing');
+              setLocation('/settings/pricing-plan');
             }}
           >
             Ver Planes

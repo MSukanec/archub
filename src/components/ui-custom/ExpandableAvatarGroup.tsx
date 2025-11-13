@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Users } from "lucide-react";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
+import { useNavigationStore } from "@/stores/navigationStore";
 import { cn } from "@/lib/utils";
 
 interface ExpandableAvatarGroupProps {
@@ -19,6 +20,7 @@ export function ExpandableAvatarGroup({
 }: ExpandableAvatarGroupProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [, setLocation] = useLocation();
+  const { setSidebarLevel } = useNavigationStore();
   const { data: members = [], isLoading } = useOrganizationMembers(organizationId);
 
   if (isLoading || !members.length) {
@@ -102,7 +104,10 @@ export function ExpandableAvatarGroup({
           variant="default"
           size="sm"
           className="w-full bg-foreground hover:bg-foreground/90 text-background"
-          onClick={() => setLocation("/organization/preferences?tab=miembros")}
+          onClick={() => {
+            setSidebarLevel('settings');
+            setLocation("/settings/members");
+          }}
           data-testid="button-view-members"
         >
           <Users className="h-4 w-4 mr-2" />

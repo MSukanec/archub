@@ -98,10 +98,8 @@ import Notifications from "@/pages/settings/Notifications";
 // Home
 import Home from "@/pages/Home";
 
-// Pricing
-import PricingPlan from "@/pages/PricingPlan";
-
 // Settings Pages
+import PricingPlan from "@/pages/settings/PricingPlan";
 import Billing from "@/pages/settings/Billing";
 import Members from "@/pages/settings/Members";
 import Finances from "@/pages/settings/Finances";
@@ -149,9 +147,6 @@ function Router() {
 
         {/* Home - Main landing page after onboarding */}
         <Route path="/home" component={Home} />
-
-        {/* Pricing - Plans and pricing page */}
-        <Route path="/pricing" component={PricingPlan} />
 
         {/* Main Dashboard - Independent dashboard */}
         <Route path="/dashboard" component={OrganizationDashboard} />
@@ -217,10 +212,14 @@ function Router() {
         <Route path="/settings/finances" component={Finances} />
         <Route path="/settings/organization-basic-data" component={OrganizationBasicData} />
         <Route path="/settings/organization-activity" component={OrganizationActivity} />
+        <Route path="/settings/pricing-plan" component={PricingPlan} />
         <Route path="/settings/notifications" component={Notifications} />
         <Route path="/settings/user-basic-data" component={UserBasicData} />
         <Route path="/settings/user-preferences" component={UserPreferences} />
         <Route path="/settings/user-organizations" component={UserOrganizations} />
+        
+        {/* Legacy pricing route - redirect to settings */}
+        <Route path="/pricing-plan" component={PricingPlan} />
         
         {/* Learning Routes - Lazy Loaded (incluye reproductor Vimeo pesado) */}
         <Route path="/learning/dashboard">

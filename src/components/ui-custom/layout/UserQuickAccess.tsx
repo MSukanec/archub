@@ -143,7 +143,7 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
   };
 
   const handleGoToPricing = () => {
-    navigate('/pricing');
+    navigate('/settings/pricing-plan');
     setIsOpen(false);
   };
 

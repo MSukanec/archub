@@ -38,7 +38,7 @@ export default function PricingPlan() {
   const isAuthenticated = !!userData?.user?.id;
 
   useEffect(() => {
-    setSidebarLevel('general');
+    setSidebarLevel('settings');
   }, [setSidebarLevel]);
 
   useEffect(() => {

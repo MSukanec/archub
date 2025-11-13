@@ -329,7 +329,7 @@ const Billing = () => {
                   {isFreePlan ? (
                     <Button 
                       className="w-full" 
-                      onClick={() => setLocation('/pricing-plan')}
+                      onClick={() => setLocation('/settings/pricing-plan')}
                       data-testid="button-upgrade-plan"
                     >
                       <ArrowUpCircle className="w-4 h-4 mr-2" />

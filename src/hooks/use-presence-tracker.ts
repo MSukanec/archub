@@ -11,7 +11,8 @@ function mapRouteToView(path: string): string {
   // Rutas específicas primero
   if (path === '/home') return 'home';
   if (path === '/') return 'landing';
-  if (path === '/pricing') return 'pricing';
+  if (path === '/pricing-plan') return 'pricing';
+  if (path === '/settings/pricing-plan') return 'pricing';
   if (path === '/profile') return 'profile';
   
   // Organization routes
