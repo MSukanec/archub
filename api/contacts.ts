@@ -38,7 +38,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (result.success) {
       return res.status(200).json(result.data);
     } else {
-      return res.status(400).json({ error: result.error });
+      return res.status(500).json({ error: result.error });
     }
 
   } catch (error: any) {
