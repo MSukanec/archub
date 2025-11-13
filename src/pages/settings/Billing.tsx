@@ -30,10 +30,15 @@ interface OrganizationSubscription {
   expires_at: string;
   amount: number;
   currency: string;
+  scheduled_downgrade_plan_id?: string | null;
   plans: {
     name: string;
     slug: string;
   };
+  scheduled_downgrade_plan?: {
+    name: string;
+    slug: string;
+  } | null;
 }
 
 interface Payment {
@@ -109,7 +114,9 @@ const Billing = () => {
           expires_at,
           amount,
           currency,
-          plans(name, slug)
+          scheduled_downgrade_plan_id,
+          plans!organization_subscriptions_plan_id_fkey(name, slug),
+          scheduled_downgrade_plan:plans!organization_subscriptions_scheduled_downgrade_plan_id_fkey(name, slug)
         `)
         .eq('organization_id', currentOrganizationId)
         .eq('status', 'active')
@@ -351,6 +358,19 @@ const Billing = () => {
                     <div className="bg-muted p-3 rounded-lg">
                       <p className="text-xs text-muted-foreground">
                         Tu suscripción está cancelada. Mantendrás acceso a las funciones premium hasta la fecha de expiración.
+                      </p>
+                    </div>
+                  )}
+
+                  {subscription?.scheduled_downgrade_plan && (
+                    <div className="bg-orange-100 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 p-3 rounded-lg">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge variant="outline" className="text-xs bg-orange-200 dark:bg-orange-900 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-700">
+                          Cambio Programado
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-orange-700 dark:text-orange-400">
+                        Tu plan cambiará a <strong>{subscription.scheduled_downgrade_plan.name}</strong> el {expiresAt ? format(new Date(expiresAt), 'dd MMM yyyy', { locale: es }) : 'final del período de facturación'}.
                       </p>
                     </div>
                   )}
