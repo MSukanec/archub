@@ -650,17 +650,14 @@ export default function CheckoutPage() {
         return;
       }
 
-      const paypal_order = payload.order;
-      const approvalLink = paypal_order?.links?.find(
-        (link: any) => link.rel === "approve"
-      );
-      if (!approvalLink?.href) {
-        console.error("[PayPal] Order sin approval link:", paypal_order);
+      const approvalUrl = payload.approval_url;
+      if (!approvalUrl) {
+        console.error("[PayPal] No approval URL in payload:", payload);
         throw new Error("No se recibió la URL de aprobación de PayPal");
       }
 
-      console.log("[PayPal] Redirigiendo a:", approvalLink.href);
-      window.location.assign(approvalLink.href);
+      console.log("[PayPal] Redirigiendo a:", approvalUrl);
+      window.location.assign(approvalUrl);
     } catch (error: any) {
       toast({
         title: "Error al procesar el pago con PayPal",
