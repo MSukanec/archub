@@ -1,3 +1,4 @@
+import React from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { apiRequest } from '@/lib/queryClient'
@@ -23,8 +24,14 @@ interface ProjectClient {
     id: string;
     first_name: string;
     last_name: string;
+    full_name: string;
     email: string;
     phone?: string;
+    company_name?: string;
+    linked_user?: {
+      id: string;
+      avatar_url?: string;
+    } | null;
   } | null;
 }
 
@@ -41,10 +48,21 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   const activeProjectId = projectId || selectedProjectId
 
   // Query to get project clients
-  const { data: projectClients = [], isLoading } = useQuery<ProjectClient[]>({
+  const { data: projectClientsRaw = [], isLoading } = useQuery<ProjectClient[]>({
     queryKey: [`/api/projects/${activeProjectId}/clients?organization_id=${organizationId}`],
     enabled: !!activeProjectId && !!organizationId
   });
+
+  // Sort clients A-Z by full name
+  const projectClients = React.useMemo(() => {
+    return [...projectClientsRaw].sort((a, b) => {
+      const nameA = (a.contacts?.company_name || a.contacts?.full_name || 
+                    `${a.contacts?.first_name || ''} ${a.contacts?.last_name || ''}`.trim()).toLowerCase();
+      const nameB = (b.contacts?.company_name || b.contacts?.full_name || 
+                    `${b.contacts?.first_name || ''} ${b.contacts?.last_name || ''}`.trim()).toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+  }, [projectClientsRaw]);
 
   // Delete mutation
   const deleteClientMutation = useMutation({
@@ -138,25 +156,32 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       label: '',
       width: '60px',
       sortable: false,
-      render: (client: ProjectClient) => (
-        <Avatar className="h-8 w-8">
-          <AvatarFallback>
-            {client.contacts?.first_name?.[0]}{client.contacts?.last_name?.[0]}
-          </AvatarFallback>
-        </Avatar>
-      ),
+      render: (client: ProjectClient) => {
+        const avatarUrl = client.contacts?.linked_user?.avatar_url;
+        const initials = client.contacts?.first_name?.[0] && client.contacts?.last_name?.[0]
+          ? `${client.contacts.first_name[0]}${client.contacts.last_name[0]}`
+          : client.contacts?.first_name?.[0] || '?';
+        
+        return (
+          <Avatar className="h-8 w-8">
+            {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
+            <AvatarFallback>
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+        );
+      },
     },
     {
-      key: 'first_name',
-      label: 'Nombre',
+      key: 'full_name',
+      label: 'Nombre Completo',
       sortable: true,
-      render: (client: ProjectClient) => client.contacts?.first_name || '-',
-    },
-    {
-      key: 'last_name',
-      label: 'Apellido',
-      sortable: true,
-      render: (client: ProjectClient) => client.contacts?.last_name || '-',
+      render: (client: ProjectClient) => {
+        const displayName = client.contacts?.company_name || 
+                           client.contacts?.full_name || 
+                           `${client.contacts?.first_name || ''} ${client.contacts?.last_name || ''}`.trim();
+        return displayName || '-';
+      },
     },
     {
       key: 'unit',

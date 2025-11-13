@@ -274,7 +274,11 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
             full_name,
             email,
             phone,
-            company_name
+            company_name,
+            linked_user:users!linked_user_id (
+              id,
+              avatar_url
+            )
           ),
           currency:currencies!currency_id (
             id,
@@ -336,7 +340,11 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
             full_name,
             email,
             phone,
-            company_name
+            company_name,
+            linked_user:users!linked_user_id (
+              id,
+              avatar_url
+            )
           ),
           currency:currencies!currency_id (
             id,
