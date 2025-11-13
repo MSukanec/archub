@@ -67,8 +67,9 @@ export function extractMetadata(obj: any): {
         ? Number(obj.months)
         : null;
 
-  const user_id =
-    md?.user_id || obj?.user_id || obj?.payer?.id || obj?.client_id || null;
+  // ⚠️ CRITICAL: Don't use payer/client fallback - those are MercadoPago IDs, not auth UUIDs
+  // For merchant_order, metadata is NOT reliable - use external_reference instead
+  const user_id = md?.user_id || obj?.user_id || null;
 
   const course_slug =
     md?.course_slug || obj?.course_slug || obj?.items?.[0]?.category_id || null;
