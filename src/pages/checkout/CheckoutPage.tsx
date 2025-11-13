@@ -1420,7 +1420,7 @@ Titular: Matias Esteban Sukanec`;
                     >
                       {paymentMethodsOrder.map((method) => {
                         if (method === "mercadopago") {
-                          const isMPBlocked = !!appliedCoupon;
+                          const isMPBlocked = false; // 🧪 TEMPORAL: Habilitado para pruebas con cupones
                           return (
                             <div
                               key="mercadopago"
@@ -1997,8 +1997,9 @@ Titular: Matias Esteban Sukanec`;
                         loading || 
                         priceLoading || 
                         !acceptTerms || 
-                        !acceptCommunications ||
-                        (!!appliedCoupon && selectedMethod === "mercadopago")
+                        !acceptCommunications
+                        // 🧪 TEMPORAL: Cupones habilitados con MP para pruebas
+                        // || (!!appliedCoupon && selectedMethod === "mercadopago")
                       }
                       className="w-full h-12 text-base font-medium mt-6"
                       data-testid="button-continue-payment"
@@ -2007,11 +2008,6 @@ Titular: Matias Esteban Sukanec`;
                         <>
                           <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                           Procesando...
-                        </>
-                      ) : (appliedCoupon && selectedMethod === "mercadopago") ? (
-                        <>
-                          <X className="h-5 w-5 mr-2" />
-                          Mercado Pago no disponible con cupones
                         </>
                       ) : !selectedMethod ? (
                         "Seleccioná un método de pago"
