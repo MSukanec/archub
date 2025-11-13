@@ -183,6 +183,8 @@ export function Clients() {
     ),
     tabs: headerTabs,
     onTabChange: setActiveTab,
+    organizationId: userData?.organization?.id,
+    showMembers: true,
     ...(activeTab === "list" && {
       actionButton: {
         label: "Agregar Cliente",
