@@ -1076,7 +1076,7 @@ export function Table<T = any>({
                   <div
                     key={getItemId(item)}
                     className={cn(
-                      "group relative grid gap-2 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
+                      "group relative grid gap-2 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-sm hover:bg-[var(--table-row-hover-bg)] transition-colors",
                       index < groupRows.length - 1 ? "border-b border-[var(--table-row-border)]" : "",
                       getRowClassName?.(item),
                     )}
@@ -1100,7 +1100,7 @@ export function Table<T = any>({
                         <div
                           key={String(column.key)}
                           className={cn(
-                            "text-xs flex items-center",
+                            "text-sm flex items-center",
                             isNumericColumn ? "justify-end" : "justify-start",
                             mode === "budget" && "text-[var(--table-row-fg)]",
                             mode === "construction" && "text-[var(--table-row-fg)]"
@@ -1205,7 +1205,7 @@ export function Table<T = any>({
                   
                   <div
                     className={cn(
-                      "group relative grid gap-2 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
+                      "group relative grid gap-2 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-sm hover:bg-[var(--table-row-hover-bg)] transition-colors",
                       index < paginatedData.length - 1
                         ? "border-b border-[var(--table-row-border)]"
                         : "",
@@ -1232,7 +1232,7 @@ export function Table<T = any>({
                     <div
                       key={String(column.key)}
                       className={cn(
-                        "text-xs flex items-center",
+                        "text-sm flex items-center",
                         isNumericColumn ? "justify-end" : "justify-start"
                       )}
                     >
