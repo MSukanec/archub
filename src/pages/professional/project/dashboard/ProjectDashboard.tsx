@@ -2,10 +2,7 @@ import { useEffect } from "react";
 import { 
   Building2, 
   Clock, 
-  Calendar, 
-  Users,
-  Calculator,
-  BookOpen
+  Calendar
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -15,8 +12,7 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useProjects } from '@/hooks/use-projects';
 import { useCurrentUser } from '@/hooks/use-current-user';
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui/stat-card';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card';
 import { Badge } from '@/components/ui/badge';
 
 export default function ProjectDashboard() {
@@ -134,42 +130,6 @@ export default function ProjectDashboard() {
         </div>
       </div>
 
-      {/* Cómputo y Presupuesto Card */}
-      <Card className="card-accent-border card-accent-bg">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Calculator className="w-5 h-5 icon-accent" />
-              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-                Cómputo y Presupuesto
-              </p>
-            </div>
-            <Badge variant="outline" className="text-xs">
-              Próximamente
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Presupuesto Total</p>
-              <p className="text-2xl font-bold text-foreground">-</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Ejecutado</p>
-              <p className="text-2xl font-bold text-foreground">-</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">% Avance</p>
-              <p className="text-2xl font-bold text-foreground">-</p>
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground mt-4">
-            El módulo de Cómputo y Presupuesto estará disponible próximamente con análisis detallado de costos y avance financiero.
-          </p>
-        </CardContent>
-      </Card>
-
       {/* KPIs Grid - 4 columnas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* 1. Mano de Obra */}
@@ -206,75 +166,6 @@ export default function ProjectDashboard() {
           <StatCardTitle showArrow={false}>Subcontratos</StatCardTitle>
           <StatCardValue>-</StatCardValue>
           <StatCardMeta>Próximamente</StatCardMeta>
-        </StatCard>
-      </div>
-
-      {/* Bitácora y Clientes Grid - 2 columnas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Bitácora Card */}
-        <StatCard 
-          href="/construction/logs"
-          onClick={() => setSidebarLevel('project')}
-          data-testid="stat-card-bitacora"
-        >
-          <StatCardContent>
-            <div className="flex items-center gap-2 mb-3">
-              <BookOpen className="w-5 h-5 icon-accent" />
-              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-                Bitácora de Obra
-              </p>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Entradas totales</span>
-                <span className="text-lg font-semibold">-</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Última entrada</span>
-                <span className="text-lg font-semibold">-</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Pendientes</span>
-                <span className="text-lg font-semibold">-</span>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground mt-4">
-              Registra y consulta todas las actividades diarias del proyecto.
-            </p>
-          </StatCardContent>
-        </StatCard>
-
-        {/* Clientes Card */}
-        <StatCard 
-          href="/clients"
-          onClick={() => setSidebarLevel('general')}
-          data-testid="stat-card-clientes"
-        >
-          <StatCardContent>
-            <div className="flex items-center gap-2 mb-3">
-              <Users className="w-5 h-5 icon-accent" />
-              <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-                Clientes del Proyecto
-              </p>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Clientes activos</span>
-                <span className="text-lg font-semibold">-</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Pagos recibidos</span>
-                <span className="text-lg font-semibold">-</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Pendiente cobro</span>
-                <span className="text-lg font-semibold">-</span>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground mt-4">
-              Gestiona la información y pagos de tus clientes.
-            </p>
-          </StatCardContent>
         </StatCard>
       </div>
 
