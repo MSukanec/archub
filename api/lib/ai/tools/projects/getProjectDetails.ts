@@ -34,12 +34,14 @@ export async function getProjectDetails(
           symbol,
           name
         ),
-        project_data (
+        project_data!left (
           start_date,
-          end_date,
-          project_status,
-          project_priority,
-          assigned_to
+          estimated_end,
+          description,
+          address,
+          city,
+          state,
+          country
         ),
         organization_members!created_by (
           users (
@@ -102,16 +104,10 @@ export async function getProjectDetails(
     response += `📋 Información general:\n`;
     response += `   • Estado: ${project.status || 'Sin estado'}\n`;
     
-    if (projectData?.project_status) {
-      response += `   • Estado del proyecto: ${projectData.project_status}\n`;
-    }
-    
-    if (projectData?.project_priority) {
-      response += `   • Prioridad: ${projectData.project_priority}\n`;
-    }
-    
-    if (project.description) {
-      response += `   • Descripción: ${project.description}\n`;
+    // Fallback: try project_data.description first, then project.description
+    const description = projectData?.description || project.description;
+    if (description) {
+      response += `   • Descripción: ${description}\n`;
     }
     
     if (project.version) {
@@ -120,11 +116,11 @@ export async function getProjectDetails(
     
     response += '\n';
     
-    if (projectData?.start_date || projectData?.end_date) {
+    if (projectData?.start_date || projectData?.estimated_end) {
       response += `📅 Fechas:\n`;
       
-      if (projectData.start_date && projectData.end_date) {
-        response += `   • Período: ${formatDateRange(projectData.start_date, projectData.end_date)}\n`;
+      if (projectData.start_date && projectData.estimated_end) {
+        response += `   • Período: ${formatDateRange(projectData.start_date, projectData.estimated_end)}\n`;
       } else if (projectData.start_date) {
         const startFormatted = new Date(projectData.start_date).toLocaleDateString('es-AR', {
           day: '2-digit',
@@ -132,13 +128,32 @@ export async function getProjectDetails(
           year: 'numeric'
         });
         response += `   • Fecha de inicio: ${startFormatted}\n`;
-      } else if (projectData.end_date) {
-        const endFormatted = new Date(projectData.end_date).toLocaleDateString('es-AR', {
+      } else if (projectData.estimated_end) {
+        const endFormatted = new Date(projectData.estimated_end).toLocaleDateString('es-AR', {
           day: '2-digit',
           month: '2-digit',
           year: 'numeric'
         });
-        response += `   • Fecha de fin: ${endFormatted}\n`;
+        response += `   • Fecha estimada de fin: ${endFormatted}\n`;
+      }
+      
+      response += '\n';
+    }
+    
+    if (projectData?.address || projectData?.city || projectData?.state || projectData?.country) {
+      response += `📍 Ubicación:\n`;
+      
+      if (projectData.address) {
+        response += `   • Dirección: ${projectData.address}\n`;
+      }
+      
+      const locationParts = [];
+      if (projectData.city) locationParts.push(projectData.city);
+      if (projectData.state) locationParts.push(projectData.state);
+      if (projectData.country) locationParts.push(projectData.country);
+      
+      if (locationParts.length > 0) {
+        response += `   • Localidad: ${locationParts.join(', ')}\n`;
       }
       
       response += '\n';

@@ -178,7 +178,7 @@ export async function updateProject(
     // Check if project_data exists
     const { data: existingProjectData, error: checkError } = await supabase
       .from('project_data')
-      .select('id')
+      .select('project_id')
       .eq('project_id', params.projectId)
       .maybeSingle();
 

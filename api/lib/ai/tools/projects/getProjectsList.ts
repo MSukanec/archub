@@ -24,12 +24,9 @@ export async function getProjectsList(
         status,
         description,
         created_at,
-        project_data (
+        project_data!left (
           start_date,
-          end_date,
-          project_status,
-          project_priority,
-          assigned_to
+          estimated_end
         )
       `)
       .eq('organization_id', organizationId)
@@ -68,17 +65,9 @@ export async function getProjectsList(
       response += `${index + 1}. ${project.name}\n`;
       response += `   • Estado: ${project.status || 'Sin estado'}\n`;
       
-      if (projectData?.project_status) {
-        response += `   • Estado del proyecto: ${projectData.project_status}\n`;
-      }
-      
-      if (projectData?.project_priority) {
-        response += `   • Prioridad: ${projectData.project_priority}\n`;
-      }
-      
-      if (projectData?.start_date || projectData?.end_date) {
-        if (projectData.start_date && projectData.end_date) {
-          response += `   • Período: ${formatDateRange(projectData.start_date, projectData.end_date)}\n`;
+      if (projectData?.start_date || projectData?.estimated_end) {
+        if (projectData.start_date && projectData.estimated_end) {
+          response += `   • Período: ${formatDateRange(projectData.start_date, projectData.estimated_end)}\n`;
         } else if (projectData.start_date) {
           const startFormatted = new Date(projectData.start_date).toLocaleDateString('es-AR', {
             day: '2-digit',
@@ -86,13 +75,13 @@ export async function getProjectsList(
             year: 'numeric'
           });
           response += `   • Fecha de inicio: ${startFormatted}\n`;
-        } else if (projectData.end_date) {
-          const endFormatted = new Date(projectData.end_date).toLocaleDateString('es-AR', {
+        } else if (projectData.estimated_end) {
+          const endFormatted = new Date(projectData.estimated_end).toLocaleDateString('es-AR', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'
           });
-          response += `   • Fecha de fin: ${endFormatted}\n`;
+          response += `   • Fecha estimada de fin: ${endFormatted}\n`;
         }
       }
       
