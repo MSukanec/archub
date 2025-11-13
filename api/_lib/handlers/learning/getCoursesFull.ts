@@ -73,6 +73,16 @@ export async function getCoursesFull(
       return { success: false, error: 'Failed to fetch courses' };
     }
 
+    if (enrollmentsResult.error) {
+      console.error('Error fetching enrollments:', enrollmentsResult.error);
+      return { success: false, error: 'Failed to fetch enrollments' };
+    }
+
+    if (progressResult.error) {
+      console.error('Error fetching progress:', progressResult.error);
+      return { success: false, error: 'Failed to fetch progress' };
+    }
+
     // Flatten enrollment data
     const enrollments = (enrollmentsResult.data || []).map((e: any) => ({
       ...e,

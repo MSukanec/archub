@@ -222,10 +222,15 @@ export async function getDashboardFast(
     }
 
     // BULK QUERY 1: Get enrollments with course info
-    const { data: enrollments } = await supabase
+    const { data: enrollments, error: enrollmentsError } = await supabase
       .from('course_enrollments')
       .select('course_id, courses!inner(id, title, slug)')
       .eq('user_id', dbUser.id);
+
+    if (enrollmentsError) {
+      console.error('Error fetching enrollments:', enrollmentsError);
+      return { success: false, error: 'Failed to fetch enrollments' };
+    }
 
     if (!enrollments || enrollments.length === 0) {
       return {
@@ -244,10 +249,15 @@ export async function getDashboardFast(
     const courseIds = enrollments.map(e => e.course_id);
 
     // BULK QUERY 2: Get ALL modules for these courses (NO JOINS)
-    const { data: modules } = await supabase
+    const { data: modules, error: modulesError } = await supabase
       .from('course_modules')
       .select('id, course_id, title')
       .in('course_id', courseIds);
+
+    if (modulesError) {
+      console.error('Error fetching modules:', modulesError);
+      return { success: false, error: 'Failed to fetch modules' };
+    }
 
     if (!modules || modules.length === 0) {
       return {
@@ -266,11 +276,16 @@ export async function getDashboardFast(
     const moduleIds = modules.map(m => m.id);
 
     // BULK QUERY 3: Get ALL lessons for these modules (NO JOINS)
-    const { data: lessons } = await supabase
+    const { data: lessons, error: lessonsError } = await supabase
       .from('course_lessons')
       .select('id, module_id, title, duration_sec, is_active')
       .in('module_id', moduleIds)
       .eq('is_active', true);
+
+    if (lessonsError) {
+      console.error('Error fetching lessons:', lessonsError);
+      return { success: false, error: 'Failed to fetch lessons' };
+    }
 
     if (!lessons || lessons.length === 0) {
       return {
@@ -289,11 +304,16 @@ export async function getDashboardFast(
     const lessonIds = lessons.map(l => l.id);
 
     // BULK QUERY 4: Get progress for ALL lessons (NO JOINS)
-    const { data: progressData } = await supabase
+    const { data: progressData, error: progressError } = await supabase
       .from('course_lesson_progress')
       .select('lesson_id, is_completed, completed_at, last_position_sec')
       .eq('user_id', dbUser.id)
       .in('lesson_id', lessonIds);
+
+    if (progressError) {
+      console.error('Error fetching progress:', progressError);
+      return { success: false, error: 'Failed to fetch progress' };
+    }
 
     // Build lookup Maps for in-memory combination
     const { moduleMap, lessonMap, progressMap } = buildLookupMaps(modules, lessons, progressData || []);
