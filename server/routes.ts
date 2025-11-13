@@ -15,6 +15,7 @@ import { registerContactRoutes } from './routes/contacts';
 import { registerAIRoutes } from './routes/ai';
 import { registerSupportRoutes } from './routes/support';
 import { registerPersonnelRoutes } from './routes/personnel';
+import { registerSubscriptionRoutes } from './routes/subscriptions';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get shared dependencies
@@ -55,6 +56,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register support routes (support messages)
   registerSupportRoutes(app, deps);
+
+  // Register subscription routes (current subscription, schedule downgrade)
+  registerSubscriptionRoutes(app, deps);
 
   // ============================================
   // Community Routes (Proxy to Vercel functions)
