@@ -1,7 +1,7 @@
 // api/community/organizations.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { neon } from '@neondatabase/serverless';
-import { extractToken, requireUser } from '../_lib/auth-helpers.js';
+import { extractToken, requireUser, HttpError } from '../_lib/auth-helpers.js';
 import { getOrganizations } from '../_lib/handlers/community/getOrganizations.js';
 
 const sql = neon(process.env.DATABASE_URL!);
@@ -26,6 +26,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   } catch (error: any) {
     console.error('Error in community organizations endpoint:', error);
+    if (error instanceof HttpError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
     return res.status(500).json({ 
       error: error.message || 'Internal server error'
     });
