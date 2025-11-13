@@ -12,7 +12,7 @@ export async function getCoursePrice(
 ): Promise<CoursePriceResult> {
   const { data: course, error: courseError } = await supabase
     .from("courses")
-    .select("id, title, slug, short_description, is_active")
+    .select("price, is_active")
     .eq("slug", courseSlug)
     .single();
 
@@ -20,33 +20,34 @@ export async function getCoursePrice(
     return { success: false, error: "Curso no encontrado o inactivo" };
   }
 
-  const { data: priceRows, error: priceError } = await supabase
-    .from("course_prices")
-    .select("amount, currency_code, provider, is_active, months")
-    .eq("course_id", course.id)
-    .eq("currency_code", currency)
-    .in("provider", [provider, "any"])
-    .eq("is_active", true);
+  let price = Number(course.price);
 
-  if (priceError) {
-    return { success: false, error: "Error leyendo precios", details: priceError };
-  }
-
-  const chosen = priceRows?.find((r) => r.provider === provider) ?? priceRows?.[0];
-  if (!chosen) {
-    return { success: false, error: "No hay precio activo para ese curso + moneda" };
-  }
-
-  const price = Number(chosen.amount);
   if (!Number.isFinite(price) || price <= 0) {
     return { success: false, error: "Precio inválido" };
+  }
+
+  // If currency is ARS, convert using exchange_rates
+  if (currency === 'ARS') {
+    const { data: exchangeRate, error: exchangeError } = await supabase
+      .from("exchange_rates")
+      .select("rate")
+      .eq("from_currency", "USD")
+      .eq("to_currency", "ARS")
+      .eq("is_active", true)
+      .single();
+
+    if (exchangeError || !exchangeRate) {
+      return { success: false, error: "Tasa de cambio no disponible", details: exchangeError };
+    }
+
+    price = price * Number(exchangeRate.rate);
   }
 
   return { 
     success: true, 
     price, 
-    months: chosen.months || 12,
-    provider: chosen.provider
+    months: 12,
+    provider
   };
 }
 
@@ -63,7 +64,7 @@ export async function getPlanPrice(
 ): Promise<PlanPriceResult> {
   const { data: plan, error: planError } = await supabase
     .from("plans")
-    .select("id, name, slug, is_active")
+    .select("monthly_amount, annual_amount, is_active")
     .eq("slug", planSlug)
     .eq("is_active", true)
     .single();
@@ -72,35 +73,39 @@ export async function getPlanPrice(
     return { success: false, error: "Plan no encontrado o inactivo" };
   }
 
-  const { data: planPrices, error: priceError } = await supabase
-    .from("plan_prices")
-    .select("monthly_amount, annual_amount, currency_code, provider")
-    .eq("plan_id", plan.id)
-    .eq("currency_code", currency)
-    .in("provider", [provider, "any"])
-    .eq("is_active", true);
+  const priceAmount = billingPeriod === 'monthly' 
+    ? plan.monthly_amount 
+    : plan.annual_amount;
 
-  if (priceError || !planPrices || planPrices.length === 0) {
-    return { 
-      success: false, 
-      error: `Precio no encontrado para este plan (${provider}/${currency})`,
-      details: priceError 
-    };
+  let price = Number(priceAmount);
+  if (!Number.isFinite(price) || price <= 0) {
+    return { success: false, error: "Precio inválido" };
   }
 
-  const chosenPrice = planPrices.find((p: any) => p.provider === provider) ?? planPrices[0];
-  const priceAmount = billingPeriod === 'monthly' 
-    ? chosenPrice.monthly_amount 
-    : chosenPrice.annual_amount;
+  // If currency is ARS, convert using exchange_rates
+  if (currency === 'ARS') {
+    const { data: exchangeRate, error: exchangeError } = await supabase
+      .from("exchange_rates")
+      .select("rate")
+      .eq("from_currency", "USD")
+      .eq("to_currency", "ARS")
+      .eq("is_active", true)
+      .single();
 
-  const price = Number(priceAmount);
-  if (!Number.isFinite(price) || price <= 0) {
-    return { success: false, error: "Precio inválido en plan_prices" };
+    if (exchangeError || !exchangeRate) {
+      return { 
+        success: false, 
+        error: "Tasa de cambio no disponible",
+        details: exchangeError 
+      };
+    }
+
+    price = price * Number(exchangeRate.rate);
   }
 
   return { 
     success: true, 
     price,
-    provider: chosenPrice.provider
+    provider
   };
 }

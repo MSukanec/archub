@@ -82,10 +82,10 @@ export async function createSubscriptionOrder(
       };
     }
 
-    // Obtener plan
+    // Obtener plan con precios en USD
     const { data: plan, error: planError } = await supabase
       .from("plans")
-      .select("id, name, slug, is_active")
+      .select("id, name, slug, is_active, monthly_amount, annual_amount")
       .eq("slug", plan_slug)
       .eq("is_active", true)
       .single();
@@ -98,32 +98,20 @@ export async function createSubscriptionOrder(
       };
     }
 
-    // Obtener precio del plan para PayPal en USD
-    const { data: planPrices, error: priceError } = await supabase
-      .from("plan_prices")
-      .select("monthly_amount, annual_amount, currency_code, provider")
-      .eq("plan_id", plan.id)
-      .eq("currency_code", "USD")
-      .in("provider", ["paypal", "any"])
-      .eq("is_active", true);
-
-    if (priceError || !planPrices || planPrices.length === 0) {
-      return {
-        success: false,
-        error: "Price not found for this plan (PayPal/USD)",
-        status: 404,
-      };
-    }
-
-    const chosenPrice =
-      planPrices.find((p: any) => p.provider === "paypal") ?? planPrices[0];
+    // SECURITY: Get price from plans table (USD base)
     const priceAmount =
       billing_period === "monthly"
-        ? chosenPrice.monthly_amount
-        : chosenPrice.annual_amount;
+        ? plan.monthly_amount
+        : plan.annual_amount;
 
     const amount = Number(priceAmount);
     if (!Number.isFinite(amount) || amount <= 0) {
+      console.error('[PayPal create-subscription-order] Invalid price:', {
+        plan_slug,
+        billing_period,
+        monthly_amount: plan.monthly_amount,
+        annual_amount: plan.annual_amount
+      });
       return {
         success: false,
         error: "Invalid price",

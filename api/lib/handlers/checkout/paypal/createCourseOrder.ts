@@ -180,7 +180,7 @@ export async function createCourseOrder(
         course_id: course.id,
         course_title: course.title,
         amount,
-        provider: chosenPrice.provider,
+        currency: "USD",
         hasCoupon: !!couponData,
         couponCode: couponData ? code.trim() : null,
       }

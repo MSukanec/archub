@@ -69,10 +69,10 @@ export async function createSubscriptionPreference(req: VercelRequest): Promise<
       };
     }
 
-    // 6. Obtener plan
+    // 6. Obtener plan con precios en USD
     const { data: plan, error: planError } = await supabase
       .from("plans")
-      .select("id, name, slug, is_active")
+      .select("id, name, slug, is_active, monthly_amount, annual_amount")
       .eq("slug", plan_slug)
       .eq("is_active", true)
       .single();
@@ -81,40 +81,51 @@ export async function createSubscriptionPreference(req: VercelRequest): Promise<
       return { success: false, error: "Plan no encontrado o inactivo", status: 404 };
     }
 
-    // 7. SECURITY: Get price from plan_prices table (same as PayPal endpoint)
-    const { data: planPrices, error: priceError } = await supabase
-      .from("plan_prices")
-      .select("monthly_amount, annual_amount, currency_code, provider")
-      .eq("plan_id", plan.id)
-      .eq("currency_code", currency)
-      .in("provider", ["mercadopago", "any"])
-      .eq("is_active", true);
+    // 7. SECURITY: Get price from plans table (USD base) and convert if needed
+    const priceAmount = billing_period === 'monthly' ? plan.monthly_amount : plan.annual_amount;
+    let unit_price = Number(priceAmount);
 
-    if (priceError || !planPrices || planPrices.length === 0) {
-      console.error('[MP create-subscription-preference] Price not found:', priceError);
-      return { 
-        success: false, 
-        error: `Precio no encontrado para este plan (MercadoPago/${currency})`, 
-        status: 404 
-      };
-    }
-
-    // Prefer provider-specific price, fallback to 'any'
-    const chosenPrice = planPrices.find((p: any) => p.provider === "mercadopago") ?? planPrices[0];
-    const priceAmount = billing_period === 'monthly' ? chosenPrice.monthly_amount : chosenPrice.annual_amount;
-
-    const unit_price = Number(priceAmount);
     if (!Number.isFinite(unit_price) || unit_price <= 0) {
-      return { success: false, error: "Precio inválido en plan_prices", status: 500 };
+      console.error('[MP create-subscription-preference] Invalid price:', {
+        plan_slug,
+        billing_period,
+        monthly_amount: plan.monthly_amount,
+        annual_amount: plan.annual_amount
+      });
+      return { success: false, error: "Precio inválido", status: 500 };
     }
 
-    console.log('[MP create-subscription-preference] Price from plan_prices:', {
-      plan_id: plan.id,
-      billing_period,
-      currency,
-      unit_price,
-      provider: chosenPrice.provider
-    });
+    // Si la moneda es ARS, convertir usando exchange_rates
+    if (currency === 'ARS') {
+      const { data: exchangeRate, error: exchangeError } = await supabase
+        .from("exchange_rates")
+        .select("rate")
+        .eq("from_currency", "USD")
+        .eq("to_currency", "ARS")
+        .eq("is_active", true)
+        .single();
+
+      if (exchangeError || !exchangeRate) {
+        console.error('[MP create-subscription-preference] Exchange rate not found:', exchangeError);
+        return { success: false, error: "Tasa de cambio no disponible", status: 500 };
+      }
+
+      unit_price = unit_price * Number(exchangeRate.rate);
+      console.log('[MP create-subscription-preference] Price converted:', {
+        plan_id: plan.id,
+        billing_period,
+        usd_price: priceAmount,
+        exchange_rate: exchangeRate.rate,
+        ars_price: unit_price
+      });
+    } else {
+      console.log('[MP create-subscription-preference] Price (no conversion):', {
+        plan_id: plan.id,
+        billing_period,
+        currency,
+        unit_price
+      });
+    }
 
     const productId = plan.id;
     const productTitle = `Plan ${plan.name} - ${billing_period === 'monthly' ? 'Mensual' : 'Anual'}`;
