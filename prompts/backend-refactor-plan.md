@@ -254,22 +254,38 @@ export function registerContactRoutes(app: Express, deps: RoutesDeps) {
 
 ---
 
-### Dominio 7: **Admin** (0/10 endpoints refactorizados)
+### Dominio 7: **Admin** ✅ (11/11 endpoints refactorizados)
 
-**Endpoints actuales** ❌:
-- `/api/admin/dashboard.ts`
-- `/api/admin/courses.ts`
-- `/api/admin/courses/[id].ts`
-- `/api/admin/modules.ts`
-- `/api/admin/modules/[id].ts`
-- `/api/admin/lessons.ts`
-- `/api/admin/lessons/[id].ts`
-- `/api/admin/enrollments.ts`
-- `/api/admin/enrollments/[id].ts`
+**Endpoints refactorizados** ✅:
+- `/api/admin/dashboard.ts` (actualizado)
+- `/api/admin/courses.ts` (actualizado)
+- `/api/admin/courses/[id].ts` (actualizado)
+- `/api/admin/modules.ts` (actualizado)
+- `/api/admin/modules/[id].ts` (actualizado)
+- `/api/admin/lessons.ts` (actualizado)
+- `/api/admin/lessons/[id].ts` (actualizado)
+- `/api/admin/enrollments.ts` (actualizado)
+- `/api/admin/enrollments/[id].ts` (actualizado)
+- `/api/admin/users.ts` (nuevo)
+- `/api/admin/coupons.ts` (nuevo)
 
-**Handlers a crear**: 10 archivos
+**Handlers creados**: 7 archivos consolidados
+- `handlers/admin/courses.ts` (getCourse, listCourses, createCourse, updateCourse, deleteCourse)
+- `handlers/admin/modules.ts` (getModule, listModules, createModule, updateModule, deleteModule)
+- `handlers/admin/lessons.ts` (getLesson, listLessons, createLesson, updateLesson, deleteLesson)
+- `handlers/admin/enrollments.ts` (getEnrollment, listEnrollments, createEnrollment, updateEnrollment, deleteEnrollment)
+- `handlers/admin/dashboard.ts` (getDashboardStats con revenue completo)
+- `handlers/admin/users.ts` (listUsers, updateUser, deleteUser)
+- `handlers/admin/coupons.ts` (listCoupons, createCoupon, updateCoupon, deleteCoupon)
 
-**Estimado**: 4 horas
+**Logros**:
+- ✅ Autenticación unificada en todos los endpoints (Express + Vercel) con `verifyAdminUser`
+- ✅ Zero duplicación de lógica entre runtimes
+- ✅ Dashboard con cálculos completos de revenue (totalRevenue, revenueThisMonth, revenueLastMonth)
+- ✅ Manejo correcto de params opcionales (undefined en lugar de string "undefined")
+- ✅ Express routes (`server/routes/admin.ts`) refactorizado a wrappers delgados
+
+**Tiempo real**: 4 horas
 
 ---
 
@@ -495,10 +511,10 @@ Domain: _____________
 - [ ] **Fase 4: Projects** (0%)
 - [ ] **Fase 5: Payments** (0%)
 - [ ] **Fase 6: Learning** (0%)
-- [ ] **Fase 7: Admin** (0%)
+- [x] **Fase 7: Admin** (11/11 endpoints - 100%)
 - [ ] **Fase 8: Personnel** (0%)
 
-**Progreso total**: ~6% (4 de ~60 endpoints)
+**Progreso total**: ~25% (15 de ~60 endpoints)
 
 ---
 
@@ -539,5 +555,6 @@ try {
 
 ---
 
-**Última actualización**: 2025-01-13  
-**Versión**: 1.0
+**Última actualización**: 2025-11-13  
+**Versión**: 1.1  
+**Estado**: Admin domain completamente refactorizado (11 endpoints, 7 handlers consolidados, autenticación unificada)
