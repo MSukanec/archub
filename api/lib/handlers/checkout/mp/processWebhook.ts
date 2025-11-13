@@ -99,6 +99,29 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
       const planSlug = md.plan_slug || fromExt.plan_slug;
       const billingPeriod = md.billing_period || fromExt.billing_period;
 
+      // CRITICAL: Convert auth_id to public.users.id for course payments
+      let publicUserId: string | null = null;
+      if (resolvedUserId && productType === 'course') {
+        const { data: userProfile, error: profileError } = await supabase
+          .from("users")
+          .select("id")
+          .eq("auth_id", resolvedUserId)
+          .maybeSingle();
+
+        if (profileError || !userProfile) {
+          console.error('[MP webhook] ❌ Failed to resolve auth_id to user_id:', {
+            auth_id: resolvedUserId,
+            error: profileError
+          });
+        } else {
+          publicUserId = userProfile.id;
+          console.log('[MP webhook] ✅ Resolved auth_id to user_id:', {
+            auth_id: resolvedUserId,
+            user_id: publicUserId
+          });
+        }
+      }
+
       // Log detallado para pagos no aprobados
       if (status !== "approved") {
         console.log(`[MP webhook] ❌ Pago rechazado/pendiente:`);
@@ -186,11 +209,11 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
           let course_id: string | null = null;
           if (resolvedSlug) course_id = await getCourseIdBySlug(supabase, resolvedSlug);
 
-          if (resolvedUserId && course_id) {
-            // Insert payment (course)
+          if (publicUserId && course_id) {
+            // Insert payment (course) - using publicUserId from public.users table
             await insertPayment(supabase, "mercadopago", {
               providerPaymentId: providerPaymentId,
-              userId: resolvedUserId,
+              userId: publicUserId,
               courseId: course_id,
               amount: amount || null,
               currency: currency,
@@ -198,12 +221,17 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
               productType: 'course',
             });
 
-            // Upsert enrollment
-            await upsertEnrollment(supabase, resolvedUserId, course_id, effectiveMonths);
+            // Upsert enrollment - using publicUserId
+            await upsertEnrollment(supabase, publicUserId, course_id, effectiveMonths);
 
             console.log(`[MP webhook] ✅ Course enrollment processed successfully`);
           } else {
-            console.error(`[MP webhook] ❌ Missing course data:`, { resolvedUserId, course_id, resolvedSlug });
+            console.error(`[MP webhook] ❌ Missing course data:`, { 
+              auth_id: resolvedUserId, 
+              publicUserId, 
+              course_id, 
+              resolvedSlug 
+            });
           }
         }
       }
@@ -229,6 +257,29 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
       const planIdFromMetadata = md.plan_id;
       const planSlug = md.plan_slug || fromExt.plan_slug;
       const billingPeriod = md.billing_period || fromExt.billing_period;
+
+      // CRITICAL: Convert auth_id to public.users.id for course payments (merchant_order)
+      let moPublicUserId: string | null = null;
+      if (resolvedUserId && productType === 'course') {
+        const { data: userProfile, error: profileError } = await supabase
+          .from("users")
+          .select("id")
+          .eq("auth_id", resolvedUserId)
+          .maybeSingle();
+
+        if (profileError || !userProfile) {
+          console.error('[MP webhook] ❌ Failed to resolve auth_id to user_id (MO):', {
+            auth_id: resolvedUserId,
+            error: profileError
+          });
+        } else {
+          moPublicUserId = userProfile.id;
+          console.log('[MP webhook] ✅ Resolved auth_id to user_id (MO):', {
+            auth_id: resolvedUserId,
+            user_id: moPublicUserId
+          });
+        }
+      }
 
       // Log detallado del merchant_order
       console.log(`[MP webhook] 📦 Merchant Order recibida:`);
@@ -324,10 +375,10 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
             let course_id: string | null = null;
             if (resolvedSlug) course_id = await getCourseIdBySlug(supabase, resolvedSlug);
 
-            if (resolvedUserId && course_id) {
+            if (moPublicUserId && course_id) {
               await insertPayment(supabase, "mercadopago", {
                 providerPaymentId: providerPaymentId,
-                userId: resolvedUserId,
+                userId: moPublicUserId,
                 courseId: course_id,
                 amount: amount || null,
                 currency: "ARS",
@@ -335,11 +386,16 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
                 productType: 'course',
               });
 
-              await upsertEnrollment(supabase, resolvedUserId, course_id, effectiveMonths);
+              await upsertEnrollment(supabase, moPublicUserId, course_id, effectiveMonths);
 
               console.log(`[MP webhook] ✅ Course merchant order processed successfully`);
             } else {
-              console.error(`[MP webhook] ❌ Missing course data in merchant order:`, { resolvedUserId, course_id, resolvedSlug });
+              console.error(`[MP webhook] ❌ Missing course data in merchant order:`, { 
+                auth_id: resolvedUserId, 
+                moPublicUserId, 
+                course_id, 
+                resolvedSlug 
+              });
             }
           }
         }
