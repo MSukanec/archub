@@ -2,6 +2,14 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { processWebhook } from "../lib/handlers/checkout/mp/processWebhook.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // 🔍 DEBUG: Log EVERYTHING that arrives
+  console.log('═══════════════════════════════════════════════════');
+  console.log('🔔 [MP WEBHOOK] New request received');
+  console.log('  Method:', req.method);
+  console.log('  Query params:', JSON.stringify(req.query));
+  console.log('  Body (raw):', JSON.stringify(req.body));
+  console.log('═══════════════════════════════════════════════════');
+
   if (req.method === "OPTIONS") {
     return res
       .status(204)
@@ -25,8 +33,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const result = await processWebhook(req);
 
   if (!result.success) {
+    console.log('❌ [MP WEBHOOK] Processing failed:', result.error);
     return res.status(200).json({ ok: true, ignored: result.error });
   }
 
+  console.log('✅ [MP WEBHOOK] Processing successful:', result.processed, result.id);
   return res.status(200).json({ ok: true, processed: result.processed, id: result.id });
 }
