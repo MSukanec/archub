@@ -9,7 +9,9 @@ import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/componen
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
-import { CreditCard, Download, ArrowUpCircle, Inbox, XCircle } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { CreditCard, Download, ArrowUpCircle, Inbox, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -98,7 +100,7 @@ const Billing = () => {
     }
   }, [currentOrganizationId, toast]);
 
-  const { data: subscription, isLoading: subscriptionLoading } = useQuery<OrganizationSubscription | null>({
+  const { data: subscription, isLoading: subscriptionLoading, error: subscriptionError, refetch: refetchSubscription } = useQuery<OrganizationSubscription | null>({
     queryKey: ['current-subscription', currentOrganizationId],
     queryFn: async () => {
       if (!supabase || !currentOrganizationId) throw new Error('Missing required data');
@@ -115,11 +117,12 @@ const Billing = () => {
           amount,
           currency,
           scheduled_downgrade_plan_id,
-          plans!organization_subscriptions_plan_id_fkey(name, slug),
-          scheduled_downgrade_plan:plans!organization_subscriptions_scheduled_downgrade_plan_id_fkey(name, slug)
+          plans!plan_id(name, slug),
+          scheduled_downgrade_plan:plans!scheduled_downgrade_plan_id(name, slug)
         `)
         .eq('organization_id', currentOrganizationId)
         .eq('status', 'active')
+        .gt('expires_at', new Date().toISOString())
         .order('started_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -130,7 +133,7 @@ const Billing = () => {
     enabled: !!currentOrganizationId && !!supabase,
   });
 
-  const { data: payments = [], isLoading: paymentsLoading } = useQuery<Payment[]>({
+  const { data: payments = [], isLoading: paymentsLoading, error: paymentsError, refetch: refetchPayments } = useQuery<Payment[]>({
     queryKey: ['subscription-payments', currentOrganizationId],
     queryFn: async () => {
       if (!supabase || !currentOrganizationId) throw new Error('Missing required data');
@@ -319,6 +322,46 @@ const Billing = () => {
   return (
     <Layout wide={false} headerProps={headerProps}>
       <div className="space-y-6">
+        {subscriptionError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error al cargar la suscripción</AlertTitle>
+            <AlertDescription className="flex items-center justify-between">
+              <span>No se pudo cargar la información de tu suscripción. Por favor, intenta nuevamente.</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => refetchSubscription()}
+                className="ml-4"
+                data-testid="button-retry-subscription"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Reintentar
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {paymentsError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error al cargar pagos</AlertTitle>
+            <AlertDescription className="flex items-center justify-between">
+              <span>No se pudo cargar el historial de pagos. Por favor, intenta nuevamente.</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => refetchPayments()}
+                className="ml-4"
+                data-testid="button-retry-payments"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Reintentar
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <StatCard>
             <div className="flex items-center justify-between mb-4">
@@ -334,7 +377,12 @@ const Billing = () => {
             </CardDescription>
             
             {subscriptionLoading ? (
-              <div className="text-sm text-muted-foreground">Cargando...</div>
+              <div className="space-y-4">
+                <Skeleton className="h-12 w-32" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-10 w-full" />
+              </div>
             ) : (
               <>
                 <div className="flex items-baseline gap-2 mb-4">
@@ -362,7 +410,7 @@ const Billing = () => {
                     </div>
                   )}
 
-                  {subscription?.scheduled_downgrade_plan && (
+                  {subscription?.scheduled_downgrade_plan_id && subscription?.scheduled_downgrade_plan && (
                     <div className="bg-orange-100 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 p-3 rounded-lg">
                       <div className="flex items-center gap-2 mb-1">
                         <Badge variant="outline" className="text-xs bg-orange-200 dark:bg-orange-900 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-700">
@@ -370,7 +418,7 @@ const Billing = () => {
                         </Badge>
                       </div>
                       <p className="text-xs text-orange-700 dark:text-orange-400">
-                        Tu plan cambiará a <strong>{subscription.scheduled_downgrade_plan.name}</strong> el {expiresAt ? format(new Date(expiresAt), 'dd MMM yyyy', { locale: es }) : 'final del período de facturación'}.
+                        Tu plan cambiará a <strong>{subscription.scheduled_downgrade_plan.name}</strong> {expiresAt ? `el ${format(new Date(expiresAt), 'dd MMM yyyy', { locale: es })}` : 'al final del ciclo actual'}.
                       </p>
                     </div>
                   )}
@@ -427,8 +475,11 @@ const Billing = () => {
               Administra tu información de pago
             </CardDescription>
             
-            {subscriptionLoading ? (
-              <div className="text-sm text-muted-foreground">Cargando...</div>
+            {subscriptionLoading || paymentsLoading ? (
+              <div className="space-y-3">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
             ) : isFreePlan ? (
               <div className="text-sm text-muted-foreground">
                 No hay método de pago configurado para el plan Free
