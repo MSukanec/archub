@@ -6,9 +6,26 @@ export type AdminCheckResult =
 
 export async function verifyAdminRoleForOrganization(
   supabase: SupabaseClient,
-  userId: string,
+  authUserId: string,
   organizationId: string
 ): Promise<AdminCheckResult> {
+  // CRITICAL: Convert auth_id to public.users.id first
+  const { data: userProfile, error: profileError } = await supabase
+    .from("users")
+    .select("id")
+    .eq("auth_id", authUserId)
+    .single();
+
+  if (profileError || !userProfile) {
+    console.error('[permissions] User profile not found:', profileError);
+    return { 
+      success: false, 
+      error: "Perfil de usuario no encontrado" 
+    };
+  }
+
+  const userId = userProfile.id;
+
   const { data: membership, error: memberError } = await supabase
     .from("organization_members")
     .select("id, role_id, roles!inner(name)")
@@ -18,7 +35,12 @@ export async function verifyAdminRoleForOrganization(
     .single();
 
   if (memberError || !membership) {
-    console.error('[permissions] User not member of organization:', memberError);
+    console.error('[permissions] User not member of organization:', { 
+      authUserId, 
+      userId, 
+      organizationId, 
+      error: memberError 
+    });
     return { 
       success: false, 
       error: "No tienes permisos para modificar esta organización" 
