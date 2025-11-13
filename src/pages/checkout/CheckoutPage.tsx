@@ -824,7 +824,7 @@ Titular: Matias Esteban Sukanec`;
       const base64Data = await base64Promise;
 
       const API_BASE = getApiBase();
-      const response = await fetch(`${API_BASE}/api/bank-transfer/upload`, {
+      const response = await fetchWithTimeout(`${API_BASE}/api/bank-transfer/upload`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -835,7 +835,7 @@ Titular: Matias Esteban Sukanec`;
           file_name: receiptFile.name,
           file_data: base64Data,
         }),
-      });
+      }, 30000); // 30 segundos timeout
 
       const data = await response.json();
 
