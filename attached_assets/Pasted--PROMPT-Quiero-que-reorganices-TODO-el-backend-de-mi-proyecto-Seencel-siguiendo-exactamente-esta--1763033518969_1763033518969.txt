@@ -1,0 +1,200 @@
+🟦 PROMPT
+
+Quiero que reorganices TODO el backend de mi proyecto Seencel siguiendo exactamente esta arquitectura profesional:
+
+🔥 1. OBJETIVO GENERAL
+
+Unificar backend, eliminar duplicadores, limpiar rutas, normalizar imports y asegurar que tanto Express (desarrollo) como Vercel serverless (producción) usen LA MISMA LÓGICA.
+
+🔥 2. ESTRUCTURA FINAL QUE DEBE QUEDAR
+📁 /api/ (Vercel serverless)
+
+Cada archivo dentro de /api/*.ts es un endpoint serverless.
+
+Todos estos endpoints deben ser wrappers que llaman a lógica compartida.
+
+NO colocar lógica pesada dentro de ellos.
+
+📁 /api/_lib/handlers/
+
+Crear esta carpeta si no existe.
+
+Toda la lógica de negocio debe ir acá:
+
+organization-members
+
+projects
+
+contacts
+
+payments (PayPal y MercadoPago)
+
+tasks
+
+movements
+
+design phases
+
+everything else
+
+Estos handlers deben ser framework-agnostic, es decir:
+
+No deben depender de Express
+
+No deben depender de Vercel
+
+Solo deben recibir parámetros (body, user, orgId)
+
+Solo deben retornar objetos planos { success, data, error }
+
+📁 /server/routes.ts (Express para Replit)
+
+NO debe contener NINGUNA lógica de negocio.
+
+SOLO deben ser wrappers como:
+
+app.post("/api/projects/create", async (req, res) => {
+  const result = await handleCreateProject(req.body, supabaseAdmin);
+  return res.json(result);
+});
+
+
+Cada ruta debe llamar a su handler correspondiente en /api/_lib/handlers/.
+
+No debe haber endpoints que existan EN EXPRESS y NO existan en /api.
+
+🔥 3. QUÉ COSAS HAY QUE ELIMINAR
+
+Eliminar o migrar:
+
+❌ Lógica duplicada en server/routes.ts
+
+Todo lo que tenga lógica debe ser movido a handlers.
+
+❌ Archivos viejos en /api/lib o /lib
+
+Migrar todo a /api/_lib/.
+
+❌ Consultas directas en React usando service_role
+
+Ningún archivo frontend debe usar serviceRole o supabaseAdmin.
+
+❌ API legacy en formato Next.js (POST(), GET())
+
+Ningún archivo /api/*.ts debe tener sintaxis Next.js.
+
+🔥 4. FORMATO OBLIGATORIO PARA ENDPOINTS SERVERLESS
+
+Cada archivo /api/*.ts debe seguir exactamente este formato:
+
+import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { handleXYZ } from "./_lib/handlers/xyz";
+import { supabaseAdmin } from "./_lib/supabase-admin"; // si lo necesita
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method Not Allowed" });
+  }
+
+  const result = await handleXYZ(req.body);
+  return res.status(result.status || 200).json(result);
+}
+
+
+No debe usar:
+
+export async function POST
+
+NextResponse
+
+Tipos Next.js
+
+🔥 5. FORMATO OBLIGATORIO PARA HANDLERS
+
+Todos los handlers deben seguir este patrón:
+
+export async function handleCreateProject(params, supabase) {
+  try {
+    // lógica pura + validaciones
+    // supabase queries
+    return { success: true, data };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+🔥 6. IMPORTS
+En /api/*.ts:
+
+Usar:
+
+import { handleXYZ } from "./_lib/handlers/xyz.js";
+
+En server/routes.ts:
+
+Usar:
+
+import { handleXYZ } from "../api/_lib/handlers/xyz.js";
+
+En handlers:
+
+Imports internos siempre con .js al final.
+
+🔥 7. WEBHOOKS
+
+Todos los webhooks (PayPal, MercadoPago) deben:
+
+Vivir bajo /api/payments/...
+
+Usar exclusvamente supabaseAdmin
+
+Ser serverless, no Express
+
+🔥 8. SERVICE ROLE
+
+Solo permitir service role en:
+
+Webhooks
+
+Operaciones automáticas
+
+Migraciones o mantenimiento
+
+Eliminar serviceRole del frontend.
+
+🔥 9. RUTAS DEV VS PROD
+
+Express (Replit) debe imitar EXACTAMENTE las rutas serverless.
+
+Si existe /api/contacts/create en serverless → debe existir la misma ruta en Express.
+
+Si no existe en serverless → eliminar de Express.
+
+🔥 10. TAREAS
+
+Necesito que hagas todo esto:
+
+✅ 1. Reorganizar archivos en carpetas correctas
+✅ 2. Actualizar todos los imports
+✅ 3. Migrar toda lógica a /api/_lib/handlers/
+✅ 4. Simplificar /server/routes.ts
+✅ 5. Eliminar duplicados
+✅ 6. Validar que Express y Vercel usen la misma API
+✅ 7. Asegurar que todos los endpoints compilen
+✅ 8. Asegurar que todo esté escrito en TypeScript válido
+✅ 9. Asegurar que Vercel transpile todo sin problemas
+✅ 10. Probar mínimamente desde consola las rutas principales
+
+Al final, dejame un resumen de:
+
+qué archivos moviste
+
+qué endpoints quedaron
+
+qué endpoints eliminaste
+
+qué handlers creaste
+
+qué lógica fue unificada
+
+qué lógica quedó obsoleta
