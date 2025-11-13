@@ -102,3 +102,51 @@ export async function requireUser(token: string | null): Promise<{
 
   return user;
 }
+
+/**
+ * Verifies that the user has admin access
+ * Throws HttpError if user is not authenticated or not an admin
+ * @returns The authenticated user from Supabase Auth
+ */
+export async function verifyAdminUser(authHeader: string | undefined) {
+  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !serviceKey) {
+    throw new HttpError(500, "Missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY");
+  }
+
+  const token = extractToken(authHeader);
+  
+  if (!token) {
+    throw new HttpError(401, "No authorization token provided");
+  }
+
+  // Use service role client to verify admin status
+  const supabase = createClient(url, serviceKey, {
+    auth: { persistSession: false },
+  });
+
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  
+  if (error || !user) {
+    throw new HttpError(401, "Invalid or expired token");
+  }
+
+  const { data: adminCheck, error: adminError } = await supabase
+    .from('admin_users')
+    .select('auth_id')
+    .eq('auth_id', user.id)
+    .maybeSingle();
+
+  if (adminError) {
+    console.error('Error checking admin permissions:', adminError);
+    throw new HttpError(500, "Error verifying admin permissions");
+  }
+
+  if (!adminCheck) {
+    throw new HttpError(403, "Forbidden: Admin access required");
+  }
+
+  return user;
+}
