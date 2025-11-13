@@ -46,9 +46,6 @@
     { "source": "/api/paypal/capture-and-redirect", "destination": "/api/checkout/paypal/capture-and-redirect" },
     { "source": "/api/paypal/webhook", "destination": "/api/paypal/webhook" },
     
-    { "source": "/api/diag/ping", "destination": "/api/diag/ping" },
-    { "source": "/api/diag/check-env", "destination": "/api/diag/check-env" },
-    
     { "source": "/api/user/enrollments", "destination": "/api/user/enrollments" },
     { "source": "/api/user/all-progress", "destination": "/api/user/all-progress" },
     
