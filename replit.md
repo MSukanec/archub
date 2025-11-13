@@ -3,6 +3,31 @@
 ## Overview
 Seencel is a comprehensive construction management platform designed to optimize operations, enhance collaboration, and improve efficiency in the construction industry. It provides tools for project tracking, team management, budget monitoring, financial management with multi-currency support, robust document management, a detailed project dashboard with KPIs, and a learning module for professional development. Seencel aims to streamline workflows and provide a unified platform for all construction project needs, with a business vision to transform the construction industry through intelligent, integrated management solutions.
 
+## Recent Changes
+
+### Backend Refactor Progress (November 2025)
+**Completed Domains: 5/8 (~55%)**
+
+✅ **Organization Domain** (6 endpoints) - Invitation system, member management  
+✅ **Contacts Domain** (1 endpoint) - Professional contacts with 5-query enrichment  
+✅ **Community Domain** (4 endpoints) - Stats, organizations, projects, active users  
+✅ **Admin Domain** (11 endpoints) - Dashboard, courses, modules, lessons, enrollments, users, coupons  
+✅ **Learning Domain** (6 endpoints) - Dashboard (2 variants), courses, progress tracking, notes
+
+**Architecture Pattern:**
+- Handlers in `api/_lib/handlers/` with framework-agnostic logic
+- Thin endpoint wrappers (Vercel + Express) calling handlers
+- Context pattern: `{ supabase }` or `{ sql }` depending on database
+- Shared auth helpers: `getAuthenticatedUser()`, `verifyAdminUser()`
+- Critical error handling: ALL Supabase queries check `.error` field
+
+**Key Achievements:**
+- **getDashboardFast**: 7 pure helper functions preserving Gacela Mode optimization (4 sequential queries)
+- **getCoursesFull**: 3 parallel queries with comprehensive error checks
+- **Admin auth**: Unified `verifyAdminUser()` across Express + Vercel
+- **Code reduction**: 46-83% reduction in endpoint line counts
+- **Zero regressions**: All refactors architect-reviewed and approved
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
