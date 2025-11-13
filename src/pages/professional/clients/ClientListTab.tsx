@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { Link, useLocation } from 'wouter'
 
-interface ProjectClientTabProps {
+interface ClientListTabProps {
   projectId?: string;
 }
 
@@ -28,7 +28,7 @@ interface ProjectClient {
   } | null;
 }
 
-export default function ProjectClientTab({ projectId }: ProjectClientTabProps) {
+export default function ClientListTab({ projectId }: ClientListTabProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();

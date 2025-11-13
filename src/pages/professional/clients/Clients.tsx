@@ -5,6 +5,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { supabase } from '@/lib/supabase'
+import ClientListTab from './ClientListTab'
 import { ClientObligations } from './ClientObligations'
 import { ClientPaymentPlans } from './ClientPaymentPlans'
 import { ClientPayments } from './ClientPayments'
@@ -14,7 +15,7 @@ import { useMobile } from '@/hooks/use-mobile'
 import { useLocation } from 'wouter'
 
 export function Clients() {
-  const [activeTab, setActiveTab] = useState("obligations")
+  const [activeTab, setActiveTab] = useState("list")
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
   const { setSidebarContext } = useNavigationStore()
@@ -131,6 +132,11 @@ export function Clients() {
   // Crear tabs para el header
   const headerTabs = [
     {
+      id: "list",
+      label: "Lista de Clientes",
+      isActive: activeTab === "list"
+    },
+    {
       id: "obligations",
       label: "Compromisos de Pago",
       isActive: activeTab === "obligations"
@@ -152,6 +158,16 @@ export function Clients() {
     icon: Users,
     tabs: headerTabs,
     onTabChange: setActiveTab,
+    ...(activeTab === "list" && {
+      actionButton: {
+        label: "Agregar Cliente",
+        icon: Plus,
+        onClick: () => openModal('project-client', {
+          projectId,
+          organizationId
+        })
+      }
+    }),
     ...(activeTab === "obligations" && {
       actionButton: {
         label: "Nuevo Compromiso",
@@ -199,6 +215,12 @@ export function Clients() {
   return (
     <Layout headerProps={headerProps} wide={true}>
       <div className="space-y-4">
+        {activeTab === "list" && (
+          <ClientListTab 
+            projectId={projectId}
+          />
+        )}
+
         {activeTab === "obligations" && (
           <ClientObligations 
             projectId={projectId}

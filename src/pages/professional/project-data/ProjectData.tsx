@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { FileText, Share2, Copy, MessageCircle, Mail, MapPin, Home, Bell, Users, Plus } from 'lucide-react';
+import { FileText, Share2, Copy, MessageCircle, Mail, MapPin, Home, Bell } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useProjectContext } from '@/stores/projectContext';
@@ -16,7 +16,6 @@ import { useLocation } from 'wouter';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import ProjectBasicDataTab from './ProjectBasicDataTab';
 import ProjectLocationTab from './ProjectLocationTab';
-import ProjectClientTab from './ProjectClientTab';
 
 export default function ProjectData() {
   const [activeTab, setActiveTab] = useState('basic');
@@ -195,7 +194,7 @@ Generado desde Seencel`);
         variant: 'primary' as const
       };
     }
-    // Datos Básicos and Cliente tabs don't have action buttons (only home + notifications)
+    // Datos Básicos tab doesn't have action button (only home + notifications)
 
     setActions(actions);
     setShowActionBar(true);
@@ -216,11 +215,6 @@ Generado desde Seencel`);
       id: 'location',
       label: 'Ubicación',
       isActive: activeTab === 'location'
-    },
-    {
-      id: 'client',
-      label: 'Clientes',
-      isActive: activeTab === 'client'
     }
   ];
 
@@ -282,27 +276,13 @@ Generado desde Seencel`);
     </Popover>
   ) : null;
 
-  // Add client button for client tab
-  const addClientButton = activeTab === 'client' ? (
-    <Button 
-      variant="default" 
-      size="sm"
-      className="gap-2"
-      onClick={() => openModal('project-client', { projectId: selectedProjectId })}
-      data-testid="button-add-client-header"
-    >
-      <Plus className="h-4 w-4" />
-      Agregar Cliente
-    </Button>
-  ) : null;
-
   const headerProps = {
     icon: FileText,
     title: 'Datos Básicos',
-    description: 'Información general del proyecto, datos del cliente y ubicación',
+    description: 'Información general del proyecto y ubicación',
     tabs: headerTabs,
     onTabChange: (tabId: string) => setActiveTab(tabId),
-    actions: shareButton ? [shareButton] : addClientButton ? [addClientButton] : undefined,
+    actions: shareButton ? [shareButton] : undefined,
     organizationId: userData?.organization?.id,
     showMembers: true,
     showProjectSelector: true
@@ -314,8 +294,6 @@ Generado desde Seencel`);
         return <ProjectBasicDataTab />;
       case 'location':
         return <ProjectLocationTab />;
-      case 'client':
-        return <ProjectClientTab />;
       default:
         return <ProjectBasicDataTab />;
     }
