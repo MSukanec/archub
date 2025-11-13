@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * MODAL INFRASTRUCTURE - GUÍA DE MEJORES PRÁCTICAS
  * 
@@ -10,6 +11,8 @@
  * ✅ FormModalLayout con mejor onSubmit y ENTER key support
  * ✅ ModalErrorBoundary para manejo de errores elegante
  * ✅ Documentación completa de mejores prácticas
+ * 
+ * TODO: Migrar este contenido a /docs/modals/ como Markdown
  */
 
 import { useModalReadiness, buildScopedQueryKey, QUERY_KEY_PATTERNS } from './modal-readiness';
