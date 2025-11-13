@@ -76,7 +76,14 @@ export async function getMPPayment(id: string): Promise<any> {
   });
   
   if (!r.ok) {
-    throw new Error(`getMPPayment ${id} -> ${r.status}`);
+    const errorBody = await r.text();
+    console.error(`[MP API] getMPPayment failed:`, {
+      payment_id: id,
+      status: r.status,
+      statusText: r.statusText,
+      body: errorBody
+    });
+    throw new Error(`getMPPayment ${id} -> ${r.status}: ${r.statusText}`);
   }
   
   return r.json();
@@ -88,7 +95,14 @@ export async function getMPMerchantOrder(id: string): Promise<any> {
   });
   
   if (!r.ok) {
-    throw new Error(`getMPMerchantOrder ${id} -> ${r.status}`);
+    const errorBody = await r.text();
+    console.error(`[MP API] getMPMerchantOrder failed:`, {
+      order_id: id,
+      status: r.status,
+      statusText: r.statusText,
+      body: errorBody
+    });
+    throw new Error(`getMPMerchantOrder ${id} -> ${r.status}: ${r.statusText}`);
   }
   
   return r.json();
