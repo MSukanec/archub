@@ -185,6 +185,7 @@ export function Clients() {
     onTabChange: setActiveTab,
     organizationId: userData?.organization?.id,
     showMembers: true,
+    showProjectSelector: true,
     ...(activeTab === "list" && {
       actionButton: {
         label: "Agregar Cliente",
