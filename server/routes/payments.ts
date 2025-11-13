@@ -426,7 +426,7 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         course_slug: course.slug,
         user_id: profile.id,
         user_auth_id: user.id,
-        list_price: priceData.amount,
+        list_price: priceInARS,
         final_price: finalPrice
       };
 
@@ -605,7 +605,7 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
           expires_at: expiresAt.toISOString(),
           payment_method: 'coupon_100',
           amount_paid: 0,
-          currency: priceData?.currency_code || 'ARS'
+          currency: 'ARS'
         });
 
       if (enrollmentError) {
