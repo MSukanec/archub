@@ -72,7 +72,7 @@ export async function createProject(
         organization_id: params.organization_id,
         name: params.name,
         status: params.status || 'active',
-        created_by: authResult.user.id,
+        created_by: orgAccessResult.memberId,
         created_at: new Date().toISOString(),
         is_active: true,
         color: params.color || '#84cc16',

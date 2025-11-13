@@ -62,7 +62,7 @@ export async function ensureAuth(ctx: ProjectsContext): Promise<{ success: true;
 export async function ensureOrganizationAccess(
   ctx: ProjectsContext,
   organizationId: string
-): Promise<{ success: true } | { success: false; error: string }> {
+): Promise<{ success: true; memberId: string } | { success: false; error: string }> {
   const authResult = await ensureAuth(ctx);
   
   if (!authResult.success) {
@@ -85,7 +85,7 @@ export async function ensureOrganizationAccess(
     return { success: false, error: 'Forbidden: User does not have access to this organization' };
   }
 
-  return { success: true };
+  return { success: true, memberId: membership.id };
 }
 
 export async function getProjectById(
