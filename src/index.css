@@ -297,7 +297,7 @@
   /* Content */
   --content-bg: hsl(0, 0%, 20%); /* Fondo sólido para páginas generales */
   --content-gradient-from: hsl(0, 0%, 20%); /* Inicio del degradado para páginas de proyecto */
-  --content-gradient-to: hsl(76, 30%, 15%); /* Fin del degradado para páginas de proyecto */
+  --content-gradient-to: hsl(0, 0%, 15%); /* Fin del degradado para páginas de proyecto */
 
   /* Header */
   --header-bg: hsl(0, 0%, 20%);
