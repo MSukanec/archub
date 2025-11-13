@@ -4,8 +4,6 @@ import { neon } from '@neondatabase/serverless';
 import { extractToken, requireUser, HttpError } from '../_lib/auth-helpers.js';
 import { getOrganizations } from '../_lib/handlers/community/getOrganizations.js';
 
-const sql = neon(process.env.DATABASE_URL!);
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -15,6 +13,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const token = extractToken(req.headers.authorization);
     await requireUser(token);
 
+    if (!process.env.DATABASE_URL) {
+      return res.status(500).json({ error: 'DATABASE_URL not configured' });
+    }
+
+    const sql = neon(process.env.DATABASE_URL);
     const ctx = { sql };
     const result = await getOrganizations(ctx);
 
