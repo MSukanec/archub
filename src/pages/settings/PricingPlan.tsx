@@ -496,15 +496,15 @@ export default function PricingPlan() {
                         setLocation(`/subscription/checkout?plan=${plan.slug}&billing=${billingPeriod}`)
                       }
                     }}
-                    disabled={(isCurrentPlan && isAuthenticated) || isTeams}
+                    disabled={isCurrentPlan || isTeams}
                     data-testid={`button-select-plan-${plan.name.toLowerCase()}`}
                   >
                     {isTeams ? (
                       'Próximamente'
+                    ) : isCurrentPlan ? (
+                      'Tu Plan Actual'
                     ) : isAuthenticated ? (
-                      isCurrentPlan ? (
-                        'Plan Actual'
-                      ) : isFree ? (
+                      isFree ? (
                         'Cambiar a Free'
                       ) : billingPeriod === 'annual' ? (
                         'Suscribirse Anualmente'

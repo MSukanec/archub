@@ -226,6 +226,7 @@
   --plan-free-bg: hsl(76, 100%, 40%);
   --plan-pro-bg: hsl(213, 100%, 33%);
   --plan-teams-bg: hsl(271, 76%, 53%);
+  --plan-enterprise-bg: hsl(215, 16%, 47%);
 
   /* Borders and Rings */
   --border-default: hsl(240, 6%, 90%);
@@ -263,6 +264,10 @@
 
 .plan-card-teams {
   background-color: var(--plan-teams-bg) !important;
+}
+
+.plan-card-enterprise {
+  background-color: var(--plan-enterprise-bg) !important;
 }
 
 /* Global checkbox styling with accent color */
@@ -436,6 +441,7 @@
   --plan-free-bg: hsl(76, 100%, 40%);
   --plan-pro-bg: hsl(213, 100%, 33%);
   --plan-teams-bg: hsl(271, 76%, 53%);
+  --plan-enterprise-bg: hsl(215, 16%, 47%);
 
 
 

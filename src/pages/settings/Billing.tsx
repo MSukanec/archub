@@ -12,6 +12,7 @@ import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { CreditCard, Download, ArrowUpCircle, Inbox, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { InvoicePDF } from '@/components/pdf/InvoicePDF';
 import { useToast } from '@/hooks/use-toast';
@@ -384,8 +385,10 @@ const Billing = () => {
                   
                   {getNextPlan() && (
                     <Button 
-                      className="w-full" 
-                      variant={isFreePlan ? "default" : "outline"}
+                      className={cn(
+                        "w-full text-white",
+                        `plan-card-${getNextPlan()?.slug}`
+                      )}
                       onClick={() => setLocation('/settings/pricing-plan')}
                       data-testid="button-upgrade-plan"
                     >
