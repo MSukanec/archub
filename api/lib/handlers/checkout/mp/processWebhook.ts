@@ -192,8 +192,9 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
               productId: resolvedPlanId,
             });
 
-            // Upgrade organization plan - use payment UUID, not provider_payment_id
-            if (subPaymentResult.paymentId) {
+            // IDEMPOTENT: Only upgrade organization plan if payment was NEWLY inserted
+            if (subPaymentResult.inserted && subPaymentResult.paymentId) {
+              console.log(`[MP webhook] 🔄 Upgrading organization plan (FIRST-TIME payment processing)`);
               await upgradeOrganizationPlan(supabase, {
                 organizationId: organizationId,
                 planId: resolvedPlanId,
@@ -202,6 +203,8 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
                 amount: amount,
                 currency: currency,
               });
+            } else if (!subPaymentResult.inserted) {
+              console.log(`[MP webhook] ⏭️ Skipping organization upgrade (duplicate webhook - payment already processed)`);
             } else {
               console.error(`[MP webhook] ❌ No payment ID returned for subscription`);
             }
@@ -387,8 +390,9 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
                 productId: resolvedPlanId,
               });
 
-              // Upgrade organization plan - use payment UUID, not provider_payment_id
-              if (moSubPaymentResult.paymentId) {
+              // IDEMPOTENT: Only upgrade organization plan if payment was NEWLY inserted
+              if (moSubPaymentResult.inserted && moSubPaymentResult.paymentId) {
+                console.log(`[MP webhook] 🔄 Upgrading organization plan from merchant_order (FIRST-TIME payment processing)`);
                 await upgradeOrganizationPlan(supabase, {
                   organizationId: organizationId,
                   planId: resolvedPlanId,
@@ -397,6 +401,8 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
                   amount: amount,
                   currency: "ARS",
                 });
+              } else if (!moSubPaymentResult.inserted) {
+                console.log(`[MP webhook] ⏭️ Skipping organization upgrade (duplicate merchant_order webhook - payment already processed)`);
               } else {
                 console.error(`[MP webhook] ❌ No payment ID returned for subscription (MO)`);
               }

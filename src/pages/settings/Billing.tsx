@@ -65,6 +65,10 @@ const Billing = () => {
     if (paymentStatus === 'success' && currentOrganizationId) {
       queryClient.invalidateQueries({ queryKey: ['current-subscription', currentOrganizationId] });
       queryClient.invalidateQueries({ queryKey: ['subscription-payments', currentOrganizationId] });
+      queryClient.invalidateQueries({ queryKey: ['organization', currentOrganizationId] });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      
+      queryClient.refetchQueries({ queryKey: ['current-user'], type: 'all' });
       
       toast({
         title: '¡Pago exitoso!',
@@ -93,7 +97,7 @@ const Billing = () => {
     queryFn: async () => {
       if (!supabase || !currentOrganizationId) throw new Error('Missing required data');
 
-      const { data, error } = await supabase
+      const { data, error} = await supabase
         .from('organization_subscriptions')
         .select(`
           id,
@@ -107,6 +111,7 @@ const Billing = () => {
           plans(name, slug)
         `)
         .eq('organization_id', currentOrganizationId)
+        .eq('status', 'active')
         .order('started_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -135,19 +140,19 @@ const Billing = () => {
     enabled: !!currentOrganizationId && !!supabase,
   });
 
-  const { data: organization } = useQuery<{ name: string; logo_url: string | null }>({
+  const { data: organization } = useQuery<{ name: string; logo_url: string | null; plan_id: string | null; plans: { name: string; slug: string } | null }>({
     queryKey: ['organization', currentOrganizationId],
     queryFn: async () => {
       if (!supabase || !currentOrganizationId) throw new Error('Missing required data');
 
       const { data, error } = await supabase
         .from('organizations')
-        .select('name, logo_url')
+        .select('name, logo_url, plan_id, plans(name, slug)')
         .eq('id', currentOrganizationId)
         .single();
 
       if (error) throw error;
-      return data;
+      return data as any;
     },
     enabled: !!currentOrganizationId && !!supabase,
   });
@@ -173,8 +178,8 @@ const Billing = () => {
     },
   });
 
-  const planName = subscription?.plans?.name || 'Free';
-  const planSlug = subscription?.plans?.slug || 'free';
+  const planName = organization?.plans?.name || subscription?.plans?.name || 'Free';
+  const planSlug = organization?.plans?.slug || subscription?.plans?.slug || 'free';
   const billingPeriod = subscription?.billing_period === 'monthly' ? 'mes' : 'año';
   const amount = subscription?.amount || 0;
   const currency = subscription?.currency || 'USD';
