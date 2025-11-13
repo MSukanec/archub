@@ -37,6 +37,17 @@ export default function PricingPlan() {
   const userPlanName = userData?.organization?.plan?.name;
   const isAuthenticated = !!userData?.user?.id;
   
+  // Plan hierarchy: FREE < PRO < TEAMS < ENTERPRISE
+  const getPlanLevel = (planName: string): number => {
+    const levels: Record<string, number> = {
+      'free': 1,
+      'pro': 2,
+      'teams': 3,
+      'enterprise': 4
+    };
+    return levels[planName.toLowerCase()] || 0;
+  };
+  
   console.log('🔍 PricingPlan Debug FULL userData:', {
     userData: userData,
     organization: userData?.organization,
@@ -381,10 +392,18 @@ export default function PricingPlan() {
             const isFree = plan.name.toLowerCase() === 'free';
             const isTeams = plan.name.toLowerCase() === 'teams';
             
+            // Determinar si es upgrade o downgrade
+            const currentPlanLevel = userPlanName ? getPlanLevel(userPlanName) : 0;
+            const thisPlanLevel = getPlanLevel(plan.name);
+            const isUpgrade = thisPlanLevel > currentPlanLevel;
+            const isDowngrade = thisPlanLevel < currentPlanLevel;
+            
             console.log(`🎯 Plan ${plan.name}:`, {
               planNameLower: plan.name.toLowerCase(),
               userPlanNameLower: userPlanName?.toLowerCase(),
               isCurrentPlan,
+              isUpgrade,
+              isDowngrade,
               isAuthenticated
             });
 
@@ -520,7 +539,9 @@ export default function PricingPlan() {
                     ) : isCurrentPlan ? (
                       'Tu Plan Actual'
                     ) : isAuthenticated ? (
-                      isFree ? (
+                      isDowngrade ? (
+                        `Cambiar a ${plan.name}`
+                      ) : isFree ? (
                         'Cambiar a Free'
                       ) : billingPeriod === 'annual' ? (
                         'Suscribirse Anualmente'
