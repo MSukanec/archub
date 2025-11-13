@@ -6,25 +6,28 @@ Seencel is a comprehensive construction management platform designed to optimize
 ## Recent Changes
 
 ### Backend Refactor Progress (November 2025)
-**Completed Domains: 5/8 (~55%)**
+**Completed Domains: 6/8 (~68%)**
 
 ✅ **Organization Domain** (6 endpoints) - Invitation system, member management  
 ✅ **Contacts Domain** (1 endpoint) - Professional contacts with 5-query enrichment  
 ✅ **Community Domain** (4 endpoints) - Stats, organizations, projects, active users  
 ✅ **Admin Domain** (11 endpoints) - Dashboard, courses, modules, lessons, enrollments, users, coupons  
-✅ **Learning Domain** (6 endpoints) - Dashboard (2 variants), courses, progress tracking, notes
+✅ **Learning Domain** (6 endpoints) - Dashboard (2 variants), courses, progress tracking, notes  
+✅ **Projects Domain** (12 endpoints) - Projects CRUD, budgets, budget items with complete security layer
 
 **Architecture Pattern:**
 - Handlers in `api/_lib/handlers/` with framework-agnostic logic
 - Thin endpoint wrappers (Vercel + Express) calling handlers
 - Context pattern: `{ supabase }` or `{ sql }` depending on database
-- Shared auth helpers: `getAuthenticatedUser()`, `verifyAdminUser()`
+- Shared auth helpers: `getAuthenticatedUser()`, `verifyAdminUser()`, `ensureAuth()`, `ensureOrganizationAccess()`
 - Critical error handling: ALL Supabase queries check `.error` field
+- Security layer: ALL mutation handlers validate auth + org membership before executing
 
 **Key Achievements:**
 - **getDashboardFast**: 7 pure helper functions preserving Gacela Mode optimization (4 sequential queries)
 - **getCoursesFull**: 3 parallel queries with comprehensive error checks
 - **Admin auth**: Unified `verifyAdminUser()` across Express + Vercel
+- **Projects security**: Complete auth + org access enforcement across 12 handlers with derived created_by
 - **Code reduction**: 46-83% reduction in endpoint line counts
 - **Zero regressions**: All refactors architect-reviewed and approved
 

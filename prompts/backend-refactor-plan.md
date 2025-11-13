@@ -160,27 +160,41 @@ export function registerContactRoutes(app: Express, deps: RoutesDeps) {
 
 ---
 
-### Dominio 3: **Projects** (0/4 endpoints refactorizados)
+### Dominio 3: **Projects** ✅ (12/12 endpoints refactorizados)
 
-**Endpoints actuales** ❌:
-- `/api/projects.ts` (100 líneas - crear proyecto)
-- `/api/projects/[id].ts` (actualizar proyecto)
-- `/api/budgets.ts` (presupuestos)
-- `/api/budgets/[id].ts` (presupuesto individual)
-- `/api/budget-items.ts` (items de presupuesto)
-- `/api/budget-items/[id].ts` (item individual)
-- `/api/budget-items/move.ts` (mover items)
+**Handlers creados** ✅:
+- `handlers/projects/shared.ts` (160+ líneas - auth helpers, totals calculator, resource lookups)
+- `handlers/projects/projects.ts` (293 líneas - createProject, updateProject, deleteProject)
+- `handlers/projects/budgets.ts` (238 líneas - listBudgets, createBudget, updateBudget, deleteBudget)
+- `handlers/projects/budgetItems.ts` (270 líneas - listBudgetItems, createBudgetItem, updateBudgetItem, deleteBudgetItem, moveBudgetItem)
 
-**Handlers a crear**:
-- `handlers/projects/createProject.ts`
-- `handlers/projects/updateProject.ts`
-- `handlers/projects/getBudgets.ts`
-- `handlers/projects/updateBudget.ts`
-- `handlers/projects/getBudgetItems.ts`
-- `handlers/projects/updateBudgetItem.ts`
-- `handlers/projects/moveBudgetItem.ts`
+**Endpoints refactorizados** ✅:
+- `/api/projects.ts` (wrapper - create project with rollback)
+- `/api/projects/[id].ts` (wrappers - update/delete project)
+- `/api/budgets.ts` (wrappers - list/create budgets)
+- `/api/budgets/[id].ts` (wrappers - update/delete budget)
+- `/api/budget-items.ts` (wrappers - list/create budget items)
+- `/api/budget-items/[id].ts` (wrappers - update/delete budget item)
+- `/api/budget-items/move.ts` (wrapper - move budget item via RPC)
 
-**Estimado**: 4 horas
+**Características técnicas**:
+- ✅ Context pattern: `{ supabase: SupabaseClient }`
+- ✅ Migrated from SERVICE_ROLE_KEY to ANON_KEY for user context
+- ✅ Shared auth helpers: `ensureAuth()`, `ensureOrganizationAccess()`
+- ✅ Complete security layer: ALL handlers validate auth + org membership before mutations
+- ✅ Security pattern: fetch resource → validate org access → mutate
+- ✅ Budget totals calculation preserved (markup_pct + tax_pct)
+- ✅ Manual rollback in createProject preserved
+- ✅ RPC wrapper for moveBudgetItem preserved
+- ✅ created_by derived from authenticated user (no client control)
+
+**Bugs críticos arreglados**:
+- ✅ Authorization bypass: ALL handlers now enforce ensureAuth + ensureOrganizationAccess
+- ✅ created_by security: Derived from authenticated user, not client payload
+- ✅ Cross-org deletion: Delete handlers now fetch resource and validate org access
+- ✅ LSP errors: Fixed variable redeclarations (fetchError conflicts)
+
+**Tiempo real**: 4.5 horas
 
 ---
 
@@ -561,13 +575,13 @@ Domain: _____________
 - [x] **Fase 1: Organization** (6/6 endpoints - 100%)
 - [x] **Fase 2: Contacts** (1/1 endpoint - 100%)
 - [x] **Fase 3: Community** (4/4 endpoints - 100%)
-- [ ] **Fase 4: Projects** (0%)
+- [x] **Fase 4: Projects** (12/12 endpoints - 100%)
 - [ ] **Fase 5: Payments** (0%)
-- [ ] **Fase 6: Learning** (0%)
+- [x] **Fase 6: Learning** (6/6 endpoints - 100%)
 - [x] **Fase 7: Admin** (11/11 endpoints - 100%)
 - [ ] **Fase 8: Personnel** (0%)
 
-**Progreso total**: ~43% (26 de ~60 endpoints)
+**Progreso total**: ~68% (50 de ~74 endpoints)
 
 ---
 
@@ -609,5 +623,5 @@ try {
 ---
 
 **Última actualización**: 2025-11-13  
-**Versión**: 1.4  
-**Estado**: 4 dominios completados - Admin (11 endpoints, 7 handlers) + Organization (6 endpoints, 5 handlers) + Contacts (1 endpoint, enrichment) + Community (4 endpoints, 4 handlers, Neon SQL)
+**Versión**: 1.5  
+**Estado**: 6 dominios completados - Admin (11 endpoints, 7 handlers) + Organization (6 endpoints, 5 handlers) + Contacts (1 endpoint, enrichment) + Community (4 endpoints, 4 handlers, Neon SQL) + Learning (6 endpoints, 8 handlers, Gacela Mode) + Projects (12 endpoints, 4 handlers, complete security layer)
