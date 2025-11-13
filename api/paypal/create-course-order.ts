@@ -30,9 +30,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
-  return handleCorsHeaders(res).status(200).json({ 
-    ok: true, 
-    order_id: result.orderId, 
-    approval_url: result.approvalUrl 
+  if ('orderId' in result) {
+    return handleCorsHeaders(res).status(200).json({ 
+      ok: true, 
+      order_id: result.orderId, 
+      approval_url: result.approvalUrl 
+    });
+  }
+
+  return handleCorsHeaders(res).status(500).json({
+    ok: false,
+    error: "Unexpected result format"
   });
 }
