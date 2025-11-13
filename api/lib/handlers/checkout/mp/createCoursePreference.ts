@@ -54,10 +54,10 @@ export async function createCoursePreference(req: VercelRequest): Promise<Create
   });
 
   try {
-    // 5. Obtener curso
+    // 5. Obtener curso y precio en USD
     const { data: course, error: courseError } = await supabase
       .from("courses")
-      .select("id, title, slug, short_description, is_active")
+      .select("id, title, slug, short_description, is_active, price")
       .eq("slug", course_slug)
       .single();
 
@@ -65,34 +65,42 @@ export async function createCoursePreference(req: VercelRequest): Promise<Create
       return { success: false, error: "Curso no encontrado o inactivo", status: 404 };
     }
 
-    // 6. Obtener precio
-    const { data: priceRows, error: priceError } = await supabase
-      .from("course_prices")
-      .select("amount, currency_code, provider, is_active, months")
-      .eq("course_id", course.id)
-      .eq("currency_code", currency)
-      .in("provider", ["mercadopago", "any"])
-      .eq("is_active", true);
-
-    if (priceError) {
-      return { success: false, error: "Error leyendo precios", status: 500 };
-    }
-
-    const chosen = priceRows?.find((r) => r.provider === "mercadopago") ?? priceRows?.[0];
-    if (!chosen) {
-      return { success: false, error: "No hay precio activo para ese curso + moneda", status: 400 };
-    }
-
-    let unit_price = Number(chosen.amount);
+    // 6. Obtener precio base en USD y convertir a ARS
+    let unit_price = Number(course.price);
+    
     if (!Number.isFinite(unit_price) || unit_price <= 0) {
+      console.error('[MP create-course-preference] Invalid price:', course.price);
       return { success: false, error: "Precio inválido", status: 500 };
+    }
+
+    // Si la moneda es ARS, convertir usando exchange_rates
+    if (currency === 'ARS') {
+      const { data: exchangeRate, error: exchangeError } = await supabase
+        .from("exchange_rates")
+        .select("rate")
+        .eq("from_currency", "USD")
+        .eq("to_currency", "ARS")
+        .eq("is_active", true)
+        .single();
+
+      if (exchangeError || !exchangeRate) {
+        console.error('[MP create-course-preference] Exchange rate not found:', exchangeError);
+        return { success: false, error: "Tasa de cambio no disponible", status: 500 };
+      }
+
+      unit_price = unit_price * Number(exchangeRate.rate);
+      console.log('[MP create-course-preference] Price converted:', {
+        usd_price: course.price,
+        exchange_rate: exchangeRate.rate,
+        ars_price: unit_price
+      });
     }
 
     const productId = course.id;
     const productTitle = course.title;
     const productSlug = course.slug;
     const productDescription = course.short_description || course.title;
-    const accessMonths = chosen.months || months;
+    const accessMonths = months;
     let couponData: any = null;
 
     // 7. Validar cupón si se proporcionó

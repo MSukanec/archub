@@ -62,10 +62,10 @@ export async function createCourseOrder(
       couponCode: code ? code.trim() : null,
     });
 
-    // Resolve course_id from course_slug
+    // Resolve course_id from course_slug and get price in USD
     const { data: course, error: courseError } = await supabase
       .from("courses")
-      .select("id, title, slug, short_description")
+      .select("id, title, slug, short_description, price")
       .eq("slug", course_slug)
       .single();
 
@@ -77,36 +77,17 @@ export async function createCourseOrder(
       };
     }
 
-    // SECURITY: Get price from database (course_prices table), NOT from client
-    const { data: coursePrices, error: priceError } = await supabase
-      .from("course_prices")
-      .select("amount, currency_code, provider")
-      .eq("course_id", course.id)
-      .eq("currency_code", "USD")
-      .in("provider", ["paypal", "any"])
-      .eq("is_active", true);
+    // SECURITY: Get price from database (courses.price in USD), NOT from client
+    let amount = Number(course.price);
 
-    if (priceError || !coursePrices || coursePrices.length === 0) {
+    if (!Number.isFinite(amount) || amount <= 0) {
       console.error(
-        "[PayPal create-course-order] Price not found:",
-        priceError
+        "[PayPal create-course-order] Invalid price:",
+        course.price
       );
       return {
         success: false,
-        error: "Price not found for this course (PayPal/USD)",
-        status: 404,
-      };
-    }
-
-    // Prefer provider-specific price, fallback to 'any'
-    const chosenPrice =
-      coursePrices.find((p: any) => p.provider === "paypal") ?? coursePrices[0];
-    let amount = Number(chosenPrice.amount);
-
-    if (!Number.isFinite(amount) || amount <= 0) {
-      return {
-        success: false,
-        error: "Invalid price",
+        error: "Invalid price for this course",
         status: 500,
       };
     }

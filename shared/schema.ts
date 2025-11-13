@@ -921,6 +921,7 @@ export const courses = pgTable("courses", {
   created_by: uuid("created_by"),
   created_at: timestamp("created_at").notNull().defaultNow(),
   updated_at: timestamp("updated_at").notNull().defaultNow(),
+  price: numeric("price", { precision: 10, scale: 2 }), // Price in USD (like plans table)
 });
 
 export const course_modules = pgTable("course_modules", {
