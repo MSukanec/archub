@@ -5,6 +5,7 @@ import { useProjectContext } from '@/stores/projectContext';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/stat-card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
@@ -194,18 +195,19 @@ const Billing = () => {
       'free': 'plan-card-free',
       'pro': 'plan-card-pro',
       'teams': 'plan-card-teams',
+      'enterprise': 'plan-card-enterprise',
     };
     return classes[slug.toLowerCase()] || classes['free'];
   };
 
-  const getStatusBadge = () => {
-    if (isCancelled) {
-      return <Badge variant="destructive" className="text-xs">Cancelada</Badge>;
-    }
-    if (isActive) {
-      return <Badge variant="default" className="text-xs bg-green-600 dark:bg-green-700">Activa</Badge>;
-    }
-    return <Badge variant="outline" className="text-xs">Free</Badge>;
+  const getNextPlan = () => {
+    const planHierarchy: Record<string, { slug: string; name: string } | null> = {
+      'free': { slug: 'pro', name: 'PRO' },
+      'pro': { slug: 'teams', name: 'TEAMS' },
+      'teams': { slug: 'enterprise', name: 'ENTERPRISE' },
+      'enterprise': null,
+    };
+    return planHierarchy[planSlug.toLowerCase()] || null;
   };
 
   const columns = [
@@ -310,66 +312,51 @@ const Billing = () => {
     <Layout wide={false} headerProps={headerProps}>
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
+          <StatCard>
+            <div className="flex items-center justify-between mb-4">
               <CardTitle className="text-lg">Plan Actual</CardTitle>
-              <CardDescription>
-                Tu plan de suscripción y detalles de facturación
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {subscriptionLoading ? (
-                <div className="text-sm text-muted-foreground">Cargando...</div>
-              ) : (
-                <>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold">${amount}</span>
-                    <span className="text-muted-foreground">/ {billingPeriod}</span>
-                  </div>
-                  
-                  <div className="space-y-2">
+              <Badge 
+                className={`text-xs text-white ${getPlanBadgeClass(planSlug)}`}
+              >
+                {planName}
+              </Badge>
+            </div>
+            <CardDescription className="mb-4">
+              Tu plan de suscripción y detalles de facturación
+            </CardDescription>
+            
+            {subscriptionLoading ? (
+              <div className="text-sm text-muted-foreground">Cargando...</div>
+            ) : (
+              <>
+                <div className="flex items-baseline gap-2 mb-4">
+                  <span className="text-3xl font-bold">${amount}</span>
+                  <span className="text-muted-foreground">/ {billingPeriod}</span>
+                </div>
+                
+                <div className="space-y-2 mb-4">
+                  {expiresAt && !isFreePlan && (
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Plan Actual:</span>
-                      <div className="flex items-center gap-2">
-                        <Badge 
-                          className={`text-xs text-white ${getPlanBadgeClass(planSlug)}`}
-                        >
-                          {planName}
-                        </Badge>
-                        {getStatusBadge()}
-                      </div>
+                      <span className="text-muted-foreground">
+                        {isCancelled ? 'Expira el:' : 'Próxima renovación:'}
+                      </span>
+                      <span className="font-medium">
+                        {format(new Date(expiresAt), 'dd MMM yyyy', { locale: es })}
+                      </span>
                     </div>
-                    
-                    {expiresAt && !isFreePlan && (
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">
-                          {isCancelled ? 'Expira el:' : 'Próxima renovación:'}
-                        </span>
-                        <span className="font-medium">
-                          {format(new Date(expiresAt), 'dd MMM yyyy', { locale: es })}
-                        </span>
-                      </div>
-                    )}
+                  )}
 
-                    {isCancelled && (
-                      <div className="bg-muted p-3 rounded-lg">
-                        <p className="text-xs text-muted-foreground">
-                          Tu suscripción está cancelada. Mantendrás acceso a las funciones premium hasta la fecha de expiración.
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                  {isCancelled && (
+                    <div className="bg-muted p-3 rounded-lg">
+                      <p className="text-xs text-muted-foreground">
+                        Tu suscripción está cancelada. Mantendrás acceso a las funciones premium hasta la fecha de expiración.
+                      </p>
+                    </div>
+                  )}
+                </div>
 
-                  {isFreePlan ? (
-                    <Button 
-                      className="w-full" 
-                      onClick={() => setLocation('/settings/pricing-plan')}
-                      data-testid="button-upgrade-plan"
-                    >
-                      <ArrowUpCircle className="w-4 h-4 mr-2" />
-                      Mejorar Plan
-                    </Button>
-                  ) : isActive && (
+                <div className="space-y-2">
+                  {isActive && (
                     <Button 
                       variant="secondary" 
                       className="w-full" 
@@ -394,50 +381,59 @@ const Billing = () => {
                       Cancelar Suscripción
                     </Button>
                   )}
-                </>
-              )}
-            </CardContent>
-          </Card>
+                  
+                  {getNextPlan() && (
+                    <Button 
+                      className="w-full" 
+                      variant={isFreePlan ? "default" : "outline"}
+                      onClick={() => setLocation('/settings/pricing-plan')}
+                      data-testid="button-upgrade-plan"
+                    >
+                      <ArrowUpCircle className="w-4 h-4 mr-2" />
+                      {isFreePlan ? 'Mejorar Plan' : `Mejorar a ${getNextPlan()?.name}`}
+                    </Button>
+                  )}
+                </div>
+              </>
+            )}
+          </StatCard>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Método de Pago</CardTitle>
-              <CardDescription>
-                Administra tu información de pago
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {subscriptionLoading ? (
-                <div className="text-sm text-muted-foreground">Cargando...</div>
-              ) : isFreePlan ? (
-                <div className="text-sm text-muted-foreground">
-                  No hay método de pago configurado para el plan Free
+          <StatCard>
+            <CardTitle className="text-lg mb-4">Método de Pago</CardTitle>
+            <CardDescription className="mb-4">
+              Administra tu información de pago
+            </CardDescription>
+            
+            {subscriptionLoading ? (
+              <div className="text-sm text-muted-foreground">Cargando...</div>
+            ) : isFreePlan ? (
+              <div className="text-sm text-muted-foreground">
+                No hay método de pago configurado para el plan Free
+              </div>
+            ) : payments.length > 0 ? (
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-16 rounded-md bg-white dark:bg-gray-800 border border-border flex items-center justify-center p-1">
+                  <img 
+                    src={payments[0].provider === 'paypal' ? '/Paypal_2014_logo.png' : '/MercadoPago_logo.png'}
+                    alt={payments[0].provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
-              ) : payments.length > 0 ? (
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-16 rounded-md bg-white dark:bg-gray-800 border border-border flex items-center justify-center p-1">
-                    <img 
-                      src={payments[0].provider === 'paypal' ? '/Paypal_2014_logo.png' : '/MercadoPago_logo.png'}
-                      alt={payments[0].provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
-                      className="w-full h-full object-contain"
-                    />
+                <div className="flex-1">
+                  <div className="font-medium text-sm">
+                    {payments[0].provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
                   </div>
-                  <div className="flex-1">
-                    <div className="font-medium text-sm">
-                      {payments[0].provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {payments[0].payer_email}
-                    </div>
+                  <div className="text-xs text-muted-foreground">
+                    {payments[0].payer_email}
                   </div>
                 </div>
-              ) : (
-                <div className="text-sm text-muted-foreground">
-                  No hay métodos de pago registrados
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              </div>
+            ) : (
+              <div className="text-sm text-muted-foreground">
+                No hay métodos de pago registrados
+              </div>
+            )}
+          </StatCard>
         </div>
 
         <Card>
