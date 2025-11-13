@@ -1,6 +1,7 @@
-// /api/learning/courses-full.ts
+// api/learning/courses-full.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
+import { getCoursesFull } from "../_lib/handlers/learning/getCoursesFull.js";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -50,81 +51,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .json({ error: "Supabase configuration missing" });
     }
     
-    const authenticatedSupabase = createClient(supabaseUrl, supabaseAnonKey, {
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: `Bearer ${token}` } },
       auth: { persistSession: false }
     });
-    
-    // Get current auth user
-    const { data: { user: authUser }, error: authUserError } = await authenticatedSupabase.auth.getUser();
-    
-    if (authUserError || !authUser) {
-      return res
-        .setHeader("Access-Control-Allow-Origin", "*")
-        .status(401)
-        .json({ error: "Unauthorized" });
-    }
-    
-    // Get user record
-    const { data: userRecord, error: userRecordError } = await authenticatedSupabase
-      .from('users')
-      .select('id')
-      .eq('auth_id', authUser.id)
-      .maybeSingle();
-    
-    if (userRecordError || !userRecord) {
+
+    const ctx = { supabase };
+    const result = await getCoursesFull(ctx);
+
+    if (result.success) {
       return res
         .setHeader("Access-Control-Allow-Origin", "*")
         .status(200)
-        .json({ courses: [], enrollments: [], progress: [] });
-    }
-    
-    // 🚀 Execute ALL queries in parallel for maximum speed
-    const [coursesResult, enrollmentsResult, progressResult] = await Promise.all([
-      // Get all active courses
-      authenticatedSupabase
-        .from('courses')
-        .select('id, slug, title, short_description, cover_url, is_active, visibility')
-        .eq('is_active', true)
-        .neq('visibility', 'draft'),
-      
-      // Get user's enrollments
-      authenticatedSupabase
-        .from('course_enrollments')
-        .select('id, course_id, user_id, status, created_at, updated_at, courses(slug)')
-        .eq('user_id', userRecord.id),
-      
-      // Get user's progress from optimized view
-      authenticatedSupabase
-        .from('course_progress_view')
-        .select('*')
-        .eq('user_id', userRecord.id)
-    ]);
-    
-    if (coursesResult.error) {
-      console.error('[courses-full] Error fetching courses:', coursesResult.error);
+        .json(result.data);
+    } else {
       return res
         .setHeader("Access-Control-Allow-Origin", "*")
         .status(500)
-        .json({ error: 'Failed to fetch courses' });
+        .json({ error: result.error });
     }
-    
-    // Flatten enrollment data
-    const enrollments = (enrollmentsResult.data || []).map((e: any) => ({
-      ...e,
-      course_slug: e.courses?.slug
-    }));
-    
-    return res
-      .setHeader("Access-Control-Allow-Origin", "*")
-      .status(200)
-      .json({
-        courses: coursesResult.data || [],
-        enrollments: enrollments,
-        progress: progressResult.data || []
-      });
+
   } catch (error: any) {
-    console.error('[courses-full] Internal error:', error);
+    console.error('Error in courses-full endpoint:', error);
     return res
       .setHeader("Access-Control-Allow-Origin", "*")
       .status(500)

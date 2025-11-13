@@ -1,8 +1,13 @@
 // api/lessons/[id]/progress.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
+import { updateLessonProgress } from "../../_lib/handlers/learning/updateLessonProgress.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
   try {
     const url = process.env.SUPABASE_URL;
     const anonKey = process.env.SUPABASE_ANON_KEY;
@@ -24,68 +29,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     const lessonId = req.query.id as string;
+    const { progress_pct, last_position_sec, completed_at, is_completed } = req.body;
 
-    if (req.method === "POST") {
-      const { progress_pct, last_position_sec, completed_at, is_completed } = req.body;
+    const ctx = { supabase };
+    const params = {
+      lessonId,
+      progress_pct,
+      last_position_sec,
+      completed_at,
+      is_completed
+    };
+    const result = await updateLessonProgress(ctx, params);
 
-      // Get current user from Supabase Auth
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError || !user) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-      
-      // CRITICAL: Get user from users table by EMAIL (not by id!)
-      // auth.users.id ≠ users.id, must use .ilike() for case-insensitive email matching
-      const { data: existingUser, error: userLookupError } = await supabase
-        .from('users')
-        .select('id')
-        .ilike('email', user.email!)
-        .single();
-      
-      if (userLookupError || !existingUser) {
-        console.error("User not found in users table:", user.email, userLookupError);
-        return res.status(404).json({ error: "User not found in database" });
-      }
-      
-      // Use the CORRECT user_id from users table
-      const dbUserId = existingUser.id;
-      
-      // Upsert progress
-      // Auto-complete when progress >= 95%
-      const normalizedProgress = progress_pct || 0;
-      const shouldAutoComplete = normalizedProgress >= 95;
-      const finalIsCompleted = is_completed !== undefined ? is_completed : shouldAutoComplete;
-      const finalCompletedAt = (finalIsCompleted || shouldAutoComplete) ? (completed_at || new Date().toISOString()) : null;
-      
-      const { data, error } = await supabase
-        .from('course_lesson_progress')
-        .upsert({
-          user_id: dbUserId,
-          lesson_id: lessonId,
-          progress_pct: normalizedProgress,
-          last_position_sec: last_position_sec || 0,
-          completed_at: finalCompletedAt,
-          is_completed: finalIsCompleted,
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id,lesson_id'
-        })
-        .select()
-        .single();
-      
-      if (error) {
-        console.error("Error upserting lesson progress:", error);
-        return res.status(500).json({ error: "Failed to update progress" });
-      }
-      
-      return res.status(200).json(data);
+    if (result.success) {
+      return res.status(200).json(result.data);
     } else {
-      return res.status(405).json({ error: "Method not allowed" });
+      return res.status(500).json({ error: result.error });
     }
 
   } catch (err: any) {
-    console.error("Error updating lesson progress:", err);
+    console.error("Error in lesson progress endpoint:", err);
     return res.status(500).json({ error: "Failed to update progress" });
   }
 }

@@ -1,6 +1,8 @@
 // api/lessons/[id]/notes.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
+import { getLessonNotes } from "../../_lib/handlers/learning/getLessonNotes.js";
+import { createOrUpdateLessonNote } from "../../_lib/handlers/learning/createOrUpdateLessonNote.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -24,102 +26,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     const lessonId = req.query.id as string;
-
-    // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    
-    if (userError || !user) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-    
-    const { data: dbUser } = await supabase
-      .from('users')
-      .select('id')
-      .ilike('email', user.email!)
-      .single();
-    
-    if (!dbUser) {
-      return res.status(404).json({ error: "User not found" });
-    }
+    const ctx = { supabase };
 
     if (req.method === "GET") {
-      const { data: notes, error } = await supabase
-        .from('course_lesson_notes')
-        .select('*')
-        .eq('user_id', dbUser.id)
-        .eq('lesson_id', lessonId)
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error("Error fetching notes:", error);
-        return res.status(500).json({ error: "Failed to fetch notes" });
+      const params = { lessonId };
+      const result = await getLessonNotes(ctx, params);
+
+      if (result.success) {
+        return res.status(200).json(result.data);
+      } else {
+        return res.status(500).json({ error: result.error });
       }
-      
-      return res.status(200).json(notes || []);
 
     } else if (req.method === "POST") {
       const { body, time_sec, is_pinned } = req.body;
-      
-      if (body === undefined || typeof body !== 'string') {
-        return res.status(400).json({ error: "Body must be a string" });
-      }
-      
-      const { data: existingNote } = await supabase
-        .from('course_lesson_notes')
-        .select('*')
-        .eq('user_id', dbUser.id)
-        .eq('lesson_id', lessonId)
-        .is('time_sec', null)
-        .single();
-      
-      let noteData;
-      
-      if (existingNote) {
-        const { data, error } = await supabase
-          .from('course_lesson_notes')
-          .update({
-            body,
-            is_pinned: is_pinned ?? false,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', existingNote.id)
-          .select()
-          .single();
-        
-        if (error) {
-          console.error("Error updating note:", error);
-          return res.status(500).json({ error: "Failed to update note" });
-        }
-        
-        noteData = data;
+      const params = { lessonId, body, time_sec, is_pinned };
+      const result = await createOrUpdateLessonNote(ctx, params);
+
+      if (result.success) {
+        return res.status(200).json(result.data);
       } else {
-        const { data, error } = await supabase
-          .from('course_lesson_notes')
-          .insert({
-            user_id: dbUser.id,
-            lesson_id: lessonId,
-            body,
-            time_sec: time_sec || null,
-            is_pinned: is_pinned ?? false
-          })
-          .select()
-          .single();
-        
-        if (error) {
-          console.error("Error creating note:", error);
-          return res.status(500).json({ error: "Failed to create note" });
+        if (result.error === 'Body must be a string') {
+          return res.status(400).json({ error: result.error });
         }
-        
-        noteData = data;
+        if (result.error === 'User not found') {
+          return res.status(404).json({ error: result.error });
+        }
+        return res.status(500).json({ error: result.error });
       }
-      
-      return res.status(200).json(noteData);
+
     } else {
       return res.status(405).json({ error: "Method not allowed" });
     }
 
   } catch (err: any) {
-    console.error("Error with lesson notes:", err);
+    console.error("Error in lesson notes endpoint:", err);
     return res.status(500).json({ error: "Failed to process notes" });
   }
 }
