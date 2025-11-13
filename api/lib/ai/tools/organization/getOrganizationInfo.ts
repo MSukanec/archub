@@ -35,15 +35,10 @@ export async function getOrganizationInfo(
           id,
           name,
           features,
-          plan_prices!inner(
-            monthly_amount,
-            currency_code
-          )
+          monthly_amount
         )
       `)
       .eq('id', organizationId)
-      .eq('plan.plan_prices.currency_code', 'USD')
-      .eq('plan.plan_prices.is_active', true)
       .single();
 
     if (error) {
@@ -84,9 +79,8 @@ export async function getOrganizationInfo(
     const plan = Array.isArray(organization.plan) ? organization.plan[0] : organization.plan;
     if (plan) {
       response += `   • Plan: ${plan.name}`;
-      const usdPrice = plan.plan_prices?.[0];
-      if (usdPrice && usdPrice.monthly_amount > 0) {
-        response += ` (USD $${usdPrice.monthly_amount}/mes)`;
+      if (plan.monthly_amount && plan.monthly_amount > 0) {
+        response += ` (USD $${plan.monthly_amount}/mes)`;
       }
       response += '\n';
     }

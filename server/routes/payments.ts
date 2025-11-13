@@ -86,18 +86,17 @@ async function paypalFetch(path: string, opts: RequestInit & { accessToken?: str
 
 async function getCoursePriceUSD(course_slug: string) {
   const { data, error } = await getAdminClient()
-    .from('course_prices')
-    .select('currency_code, amount, courses!inner(slug)')
-    .eq('courses.slug', course_slug)
-    .eq('provider', 'paypal')
+    .from('courses')
+    .select('price')
+    .eq('slug', course_slug)
     .eq('is_active', true)
     .single();
   
   if (error || !data) {
-    throw new Error(`Precio no encontrado para ${course_slug} (paypal)`);
+    throw new Error(`Precio no encontrado para ${course_slug}`);
   }
   
-  return { currency: data.currency_code || 'USD', amount: String(data.amount) };
+  return { currency: 'USD', amount: String(data.price) };
 }
 
 async function logPayPalPayment(payload: {
@@ -173,10 +172,10 @@ async function enrollUserInCourse(user_id: string, course_id: string, months: nu
 async function getPlanPrice(plan_slug: string, billing_period: 'monthly' | 'annual', provider: string, currency: string) {
   console.log('💰 [getPlanPrice] Getting plan price...', { plan_slug, billing_period, provider, currency });
   
-  // Primero obtener el plan por slug
+  // Obtener el plan con precios en USD
   const { data: plan, error: planError } = await getAdminClient()
     .from('plans')
-    .select('id, name, slug')
+    .select('id, name, slug, monthly_amount, annual_amount')
     .eq('slug', plan_slug)
     .eq('is_active', true)
     .single();
@@ -186,30 +185,32 @@ async function getPlanPrice(plan_slug: string, billing_period: 'monthly' | 'annu
     throw new Error(`Plan no encontrado: ${plan_slug}`);
   }
   
-  // Obtener precios con provider específico PRIMERO, sino fallback a 'any'
-  const { data: priceRows, error: priceError } = await getAdminClient()
-    .from('plan_prices')
-    .select('monthly_amount, annual_amount, currency_code, provider')
-    .eq('plan_id', plan.id)
-    .eq('currency_code', currency)
-    .in('provider', [provider, 'any'])
-    .eq('is_active', true);
+  let amount = billing_period === 'monthly' ? plan.monthly_amount : plan.annual_amount;
   
-  if (priceError || !priceRows || priceRows.length === 0) {
-    console.error('❌ [getPlanPrice] Price not found:', priceError);
-    throw new Error(`Precio no encontrado para plan ${plan_slug} (${provider}, ${currency}, ${billing_period})`);
+  // Si la moneda es ARS, convertir usando exchange_rates
+  if (currency === 'ARS') {
+    const { data: exchangeRate, error: exchangeError } = await getAdminClient()
+      .from('exchange_rates')
+      .select('rate')
+      .eq('from_currency', 'USD')
+      .eq('to_currency', 'ARS')
+      .eq('is_active', true)
+      .single();
+    
+    if (exchangeError || !exchangeRate) {
+      console.error('❌ [getPlanPrice] Exchange rate not found:', exchangeError);
+      throw new Error('Tasa de cambio no disponible');
+    }
+    
+    amount = amount * Number(exchangeRate.rate);
   }
-  
-  // Preferir provider específico, sino usar 'any'
-  const priceData = priceRows.find(p => p.provider === provider) ?? priceRows[0];
-  const amount = billing_period === 'monthly' ? priceData.monthly_amount : priceData.annual_amount;
   
   console.log('✅ [getPlanPrice] Price found:', { plan, amount, billing_period, currency });
   
   return {
     plan_id: plan.id,
     plan_name: plan.name,
-    currency: priceData.currency_code,
+    currency: currency,
     amount: String(amount)
   };
 }
@@ -350,24 +351,34 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         return res.status(404).json({ error: "Course not found" });
       }
 
-      // Get course price
-      const { data: priceData, error: priceError } = await supabase
-        .from('course_prices')
-        .select('*')
-        .eq('course_id', course.id)
-        .eq('currency_code', 'ARS')
-        .or(`provider.eq.mercadopago,provider.eq.any`)
-        .eq('is_active', true)
-        .order('provider', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      // Get course price in USD and convert to ARS
+      const { data: courseData, error: courseDataError } = await supabase
+        .from('courses')
+        .select('price')
+        .eq('id', course.id)
+        .single();
 
-      if (priceError || !priceData) {
-        console.error('Error fetching price:', priceError);
-        return res.status(404).json({ error: "Price not found for this course" });
+      if (courseDataError || !courseData) {
+        console.error('Error fetching course price:', courseDataError);
+        return res.status(404).json({ error: "Course price not found" });
       }
 
-      let finalPrice = priceData.amount;
+      // Convert USD to ARS using exchange_rates
+      const { data: exchangeRate, error: exchangeError } = await supabase
+        .from('exchange_rates')
+        .select('rate')
+        .eq('from_currency', 'USD')
+        .eq('to_currency', 'ARS')
+        .eq('is_active', true)
+        .single();
+
+      if (exchangeError || !exchangeRate) {
+        console.error('Error fetching exchange rate:', exchangeError);
+        return res.status(500).json({ error: "Exchange rate not available" });
+      }
+
+      const priceInARS = Number(courseData.price) * Number(exchangeRate.rate);
+      let finalPrice = priceInARS;
       let couponData: any = null;
 
       // Validate coupon if provided (server-side validation)
@@ -376,8 +387,8 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         const { data: validationResult, error: couponError } = await authenticatedSupabase.rpc('validate_coupon', {
           p_code: code.trim(),
           p_course_id: course.id,
-          p_price: priceData.amount,
-          p_currency: priceData.currency_code
+          p_price: priceInARS,
+          p_currency: 'ARS'
         });
 
         if (couponError) {
@@ -540,23 +551,20 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         return res.status(400).json({ error: "Coupon code required for free enrollment" });
       }
 
-      const { data: priceData } = await supabase
-        .from('course_prices')
-        .select('amount, currency_code')
-        .eq('course_id', course.id)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const { data: courseData } = await supabase
+        .from('courses')
+        .select('price')
+        .eq('id', course.id)
+        .single();
 
-      const coursePrice = priceData?.amount || 0;
+      const coursePrice = courseData?.price || 0;
 
-      // Validate coupon using authenticated client
+      // Validate coupon using authenticated client (assuming USD price, will be converted if needed)
       const { data: validationResult, error: couponError } = await authenticatedSupabase.rpc('validate_coupon', {
         p_code: code.trim(),
         p_course_id: course.id,
         p_price: coursePrice,
-        p_currency: priceData?.currency_code || 'ARS'
+        p_currency: 'USD'
       });
 
       if (couponError || !validationResult || !validationResult.ok) {
@@ -1112,28 +1120,21 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         return res.status(500).json({ error: "Failed to fetch payments" });
       }
       
-      // Now fetch course_price info for each payment via order_id
+      // Now fetch course info for each payment
       const enrichedPayments = await Promise.all(
         (payments || []).map(async (payment) => {
-          // Get course_price_id from checkout_sessions via order_id
-          const { data: session } = await adminClient
-            .from('checkout_sessions')
-            .select('course_price_id')
-            .eq('id', payment.order_id)
-            .maybeSingle();
-          
-          if (!session?.course_price_id) {
-            return { ...payment, course_prices: null };
+          if (!payment.course_id) {
+            return { ...payment, course_info: null };
           }
           
-          // Get course_price details
-          const { data: coursePrice } = await adminClient
-            .from('course_prices')
-            .select('id, amount, currency_code, months, courses(id, title, slug)')
-            .eq('id', session.course_price_id)
+          // Get course details directly
+          const { data: course } = await adminClient
+            .from('courses')
+            .select('id, title, slug, price')
+            .eq('id', payment.course_id)
             .maybeSingle();
           
-          return { ...payment, course_prices: coursePrice };
+          return { ...payment, course_info: course };
         })
       );
       
@@ -1180,29 +1181,6 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
       // ✅ Usamos el course_id que está guardado directamente en bank_transfer_payments
       let courseId = payment.course_id;
       
-      // 🛡️ Fallback: Si course_id es null (registro viejo), buscar desde checkout_sessions
-      if (!courseId && payment.order_id) {
-        console.warn('[approve] course_id is null, attempting fallback from checkout_sessions');
-        const { data: session } = await adminClient
-          .from('checkout_sessions')
-          .select('course_price_id')
-          .eq('id', payment.order_id)
-          .maybeSingle();
-        
-        if (session?.course_price_id) {
-          const { data: coursePrice } = await adminClient
-            .from('course_prices')
-            .select('courses!inner(id)')
-            .eq('id', session.course_price_id)
-            .maybeSingle();
-          
-          if (coursePrice) {
-            courseId = (coursePrice.courses as any)?.id || null;
-            console.log('[approve] Fallback successful, found course_id:', courseId);
-          }
-        }
-      }
-      
       // ⚠️ VALIDATE EARLY: No courseId = fail before any updates
       if (!courseId) {
         console.error('❌ [approve] Missing courseId - cannot approve payment without valid course');
@@ -1212,19 +1190,8 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         });
       }
       
-      // Get months from course_price if available
-      let months: number = 12; // Default 12 months
-      if (payment.course_price_id) {
-        const { data: coursePrice } = await adminClient
-          .from('course_prices')
-          .select('months')
-          .eq('id', payment.course_price_id)
-          .maybeSingle();
-        
-        if (coursePrice) {
-          months = coursePrice.months || 12;
-        }
-      }
+      // Default to 12 months (1 year) for all courses
+      const months: number = 12;
       
       console.log('✅ [approve] Validation passed, proceeding with approval:', {
         courseId,

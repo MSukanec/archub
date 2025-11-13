@@ -207,21 +207,13 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
         console.warn('[bank-transfer/upload] course_id is null, attempting fallback from checkout_sessions');
         const { data: session } = await adminClient
           .from('checkout_sessions')
-          .select('course_price_id')
+          .select('course_id')
           .eq('id', existingPayment.order_id)
           .maybeSingle();
         
-        if (session?.course_price_id) {
-          const { data: coursePrice } = await adminClient
-            .from('course_prices')
-            .select('courses!inner(id)')
-            .eq('id', session.course_price_id)
-            .maybeSingle();
-          
-          if (coursePrice) {
-            courseId = (coursePrice.courses as any)?.id || null;
-            console.log('[bank-transfer/upload] Fallback successful, found course_id:', courseId);
-          }
+        if (session?.course_id) {
+          courseId = session.course_id;
+          console.log('[bank-transfer/upload] Fallback successful, found course_id:', courseId);
         }
       }
       
