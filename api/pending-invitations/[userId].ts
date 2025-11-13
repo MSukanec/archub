@@ -1,6 +1,7 @@
 // api/pending-invitations/[userId].ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
+import { extractToken, requireUser } from "../_lib/auth-helpers";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {
@@ -16,36 +17,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ error: "Missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY" });
     }
 
-    // Extract token
-    const authHeader = req.headers.authorization || "";
-    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-
-    if (!token) {
-      return res.status(401).json({ error: "No authorization token provided" });
-    }
-
-    // Create authenticated Supabase client
-    const supabase = createClient(url, serviceKey, {
-      auth: { persistSession: false },
-      global: { headers: { Authorization: `Bearer ${token}` } },
-    });
-
-    // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-
-    // Get database user
-    const { data: dbUser, error: dbError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('auth_id', user.id)
-      .single();
-
-    if (dbError || !dbUser) {
-      return res.status(404).json({ error: "User not found" });
-    }
+    // Extract and validate user token
+    const token = extractToken(req.headers.authorization);
+    const { userId: authenticatedUserId } = await requireUser(token);
 
     const { userId } = req.query;
     
@@ -54,9 +28,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Verify authenticated user matches requested userId
-    if (dbUser.id !== userId) {
+    if (authenticatedUserId !== userId) {
       return res.status(403).json({ error: "Forbidden" });
     }
+
+    // Create service_role client for database queries (bypasses RLS)
+    const supabase = createClient(url, serviceKey, {
+      auth: { persistSession: false }
+    });
 
     // Query pending invitations
     const { data: invitations, error: invError } = await supabase
