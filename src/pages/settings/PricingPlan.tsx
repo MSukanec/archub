@@ -36,6 +36,12 @@ export default function PricingPlan() {
   const { data: userData } = useCurrentUser();
   const userPlanName = userData?.organization?.plan?.name;
   const isAuthenticated = !!userData?.user?.id;
+  
+  console.log('🔍 PricingPlan Debug:', {
+    userPlanName,
+    organizationPlan: userData?.organization?.plan,
+    isAuthenticated
+  });
 
   useEffect(() => {
     setSidebarLevel('settings');
@@ -371,6 +377,13 @@ export default function PricingPlan() {
             const isCurrentPlan = plan.name.toLowerCase() === userPlanName?.toLowerCase();
             const isFree = plan.name.toLowerCase() === 'free';
             const isTeams = plan.name.toLowerCase() === 'teams';
+            
+            console.log(`🎯 Plan ${plan.name}:`, {
+              planNameLower: plan.name.toLowerCase(),
+              userPlanNameLower: userPlanName?.toLowerCase(),
+              isCurrentPlan,
+              isAuthenticated
+            });
 
             return (
               <div
