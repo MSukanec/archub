@@ -443,6 +443,8 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
           ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`
           : 'http://localhost:5000');
 
+      const mpWebhookSecret = process.env.MP_WEBHOOK_SECRET || '';
+      
       const preferenceData = {
         items: [
           {
@@ -463,7 +465,7 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
           pending: `${appUrl}/learning/payment-return?status=pending&course=${courseSlug}`
         },
         auto_return: 'approved',
-        notification_url: `${appUrl}/api/webhooks/mp`,
+        notification_url: `${appUrl}/api/mp/webhook${mpWebhookSecret ? `?secret=${mpWebhookSecret}` : ''}`,
         metadata: metadata
       };
 
