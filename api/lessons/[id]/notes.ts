@@ -1,8 +1,8 @@
 // api/lessons/[id]/notes.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { getLessonNotes } from "../../_lib/handlers/learning/getLessonNotes.js";
-import { createOrUpdateLessonNote } from "../../_lib/handlers/learning/createOrUpdateLessonNote.js";
+import { getLessonNotes } from "../../lib/handlers/learning/getLessonNotes.js";
+import { createOrUpdateLessonNote } from "../../lib/handlers/learning/createOrUpdateLessonNote.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {

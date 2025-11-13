@@ -1,14 +1,14 @@
 import type { Express } from "express";
 import type { RouteDeps } from './_base';
 import { getAdminClient } from './_base';
-import { verifyAdminUser, HttpError } from '../../api/_lib/auth-helpers.js';
-import { listCourses, getCourse, createCourse, updateCourse, deleteCourse } from '../../api/_lib/handlers/admin/courses.js';
-import { listModules, getModule, createModule, updateModule, deleteModule } from '../../api/_lib/handlers/admin/modules.js';
-import { listLessons, getLesson, createLesson, updateLesson, deleteLesson } from '../../api/_lib/handlers/admin/lessons.js';
-import { listEnrollments, getEnrollment, createEnrollment, updateEnrollment, deleteEnrollment } from '../../api/_lib/handlers/admin/enrollments.js';
-import { getDashboardStats } from '../../api/_lib/handlers/admin/dashboard.js';
-import { listUsers, updateUser } from '../../api/_lib/handlers/admin/users.js';
-import { createCoupon, updateCoupon, deleteCoupon } from '../../api/_lib/handlers/admin/coupons.js';
+import { verifyAdminUser, HttpError } from '../../api/lib/auth-helpers.js';
+import { listCourses, getCourse, createCourse, updateCourse, deleteCourse } from '../../api/lib/handlers/admin/courses.js';
+import { listModules, getModule, createModule, updateModule, deleteModule } from '../../api/lib/handlers/admin/modules.js';
+import { listLessons, getLesson, createLesson, updateLesson, deleteLesson } from '../../api/lib/handlers/admin/lessons.js';
+import { listEnrollments, getEnrollment, createEnrollment, updateEnrollment, deleteEnrollment } from '../../api/lib/handlers/admin/enrollments.js';
+import { getDashboardStats } from '../../api/lib/handlers/admin/dashboard.js';
+import { listUsers, updateUser } from '../../api/lib/handlers/admin/users.js';
+import { createCoupon, updateCoupon, deleteCoupon } from '../../api/lib/handlers/admin/coupons.js';
 
 /**
  * Register all admin-related endpoints

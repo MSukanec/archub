@@ -1,11 +1,11 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { createServiceSupabaseClient } from "../../_lib/handlers/checkout/shared/auth";
-import { capturePayPalOrder } from "../../_lib/handlers/checkout/paypal/api";
-import { logPaymentEvent } from "../../_lib/handlers/checkout/shared/events";
-import { insertPayment } from "../../_lib/handlers/checkout/shared/payments";
-import { upsertEnrollment } from "../../_lib/handlers/checkout/shared/enrollments";
-import { getCourseIdBySlug } from "../../_lib/handlers/checkout/shared/helpers";
-import { decodeInvoiceId, decodeCustomId } from "../../_lib/handlers/checkout/paypal/encoding";
+import { createServiceSupabaseClient } from "../../lib/handlers/checkout/shared/auth";
+import { capturePayPalOrder } from "../../lib/handlers/checkout/paypal/api";
+import { logPaymentEvent } from "../../lib/handlers/checkout/shared/events";
+import { insertPayment } from "../../lib/handlers/checkout/shared/payments";
+import { upsertEnrollment } from "../../lib/handlers/checkout/shared/enrollments";
+import { getCourseIdBySlug } from "../../lib/handlers/checkout/shared/helpers";
+import { decodeInvoiceId, decodeCustomId } from "../../lib/handlers/checkout/paypal/encoding";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {

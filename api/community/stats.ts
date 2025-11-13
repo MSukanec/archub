@@ -1,8 +1,8 @@
 // api/community/stats.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { neon } from '@neondatabase/serverless';
-import { extractToken, requireUser, HttpError } from '../_lib/auth-helpers.js';
-import { getStats } from '../_lib/handlers/community/getStats.js';
+import { extractToken, requireUser, HttpError } from '../lib/auth-helpers.js';
+import { getStats } from '../lib/handlers/community/getStats.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {

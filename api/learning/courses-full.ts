@@ -1,7 +1,7 @@
 // api/learning/courses-full.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { getCoursesFull } from "../_lib/handlers/learning/getCoursesFull.js";
+import { getCoursesFull } from "../lib/handlers/learning/getCoursesFull.js";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

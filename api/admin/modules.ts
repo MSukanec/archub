@@ -1,8 +1,8 @@
 // api/admin/modules.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { verifyAdminUser, HttpError } from "../_lib/auth-helpers.js";
-import { listModules, createModule } from "../_lib/handlers/admin/modules.js";
+import { verifyAdminUser, HttpError } from "../lib/auth-helpers.js";
+import { listModules, createModule } from "../lib/handlers/admin/modules.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {

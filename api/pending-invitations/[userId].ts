@@ -1,7 +1,7 @@
 // api/pending-invitations/[userId].ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { extractToken, requireUser } from "../_lib/auth-helpers";
+import { extractToken, requireUser } from "../lib/auth-helpers";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {

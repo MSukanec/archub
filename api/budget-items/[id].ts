@@ -1,7 +1,7 @@
 // api/budget-items/[id].ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { updateBudgetItem, deleteBudgetItem } from "../_lib/handlers/projects/budgetItems.js";
+import { updateBudgetItem, deleteBudgetItem } from "../lib/handlers/projects/budgetItems.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {

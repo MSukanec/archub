@@ -1,8 +1,8 @@
 // api/community/active-users.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { neon } from '@neondatabase/serverless';
-import { extractToken, requireUser, HttpError } from '../_lib/auth-helpers.js';
-import { getActiveUsers } from '../_lib/handlers/community/getActiveUsers.js';
+import { extractToken, requireUser, HttpError } from '../lib/auth-helpers.js';
+import { getActiveUsers } from '../lib/handlers/community/getActiveUsers.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {

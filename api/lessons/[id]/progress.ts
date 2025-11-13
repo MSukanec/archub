@@ -1,7 +1,7 @@
 // api/lessons/[id]/progress.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { updateLessonProgress } from "../../_lib/handlers/learning/updateLessonProgress.js";
+import { updateLessonProgress } from "../../lib/handlers/learning/updateLessonProgress.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {

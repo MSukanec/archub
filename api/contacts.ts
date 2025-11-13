@@ -1,7 +1,7 @@
 // api/contacts.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { extractToken, getUserFromToken } from "./_lib/auth-helpers.js";
-import { getContacts } from "./_lib/handlers/contacts/getContacts.js";
+import { extractToken, getUserFromToken } from "./lib/auth-helpers.js";
+import { getContacts } from "./lib/handlers/contacts/getContacts.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {

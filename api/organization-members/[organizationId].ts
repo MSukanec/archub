@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { extractToken, getUserFromToken, HttpError } from "../_lib/auth-helpers.js";
-import { getOrganizationMembers } from "../_lib/handlers/organization/getOrganizationMembers.js";
+import { extractToken, getUserFromToken, HttpError } from "../lib/auth-helpers.js";
+import { getOrganizationMembers } from "../lib/handlers/organization/getOrganizationMembers.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {

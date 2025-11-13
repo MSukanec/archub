@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { processWebhook } from "../_lib/handlers/checkout/paypal/processWebhook";
+import { processWebhook } from "../lib/handlers/checkout/paypal/processWebhook";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",

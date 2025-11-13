@@ -1,8 +1,8 @@
 // api/admin/coupons/[id].ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { verifyAdminUser, HttpError } from "../../_lib/auth-helpers.js";
-import { updateCoupon, deleteCoupon } from "../../_lib/handlers/admin/coupons.js";
+import { verifyAdminUser, HttpError } from "../../lib/auth-helpers.js";
+import { updateCoupon, deleteCoupon } from "../../lib/handlers/admin/coupons.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {

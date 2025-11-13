@@ -1,7 +1,7 @@
 // api/ai/home-greeting.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { extractToken, getUserFromToken } from "../_lib/auth-helpers.js";
-import { getHomeGreetingHandler } from "../_lib/ai/serverless/homeGreetingHandler.js";
+import { extractToken, getUserFromToken } from "../lib/auth-helpers.js";
+import { getHomeGreetingHandler } from "../lib/ai/serverless/homeGreetingHandler.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {

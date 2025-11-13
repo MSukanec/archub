@@ -1,7 +1,7 @@
 // api/learning/dashboard-fast.ts - Optimized dashboard endpoint
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { getDashboardFast } from "../_lib/handlers/learning/getDashboardFast.js";
+import { getDashboardFast } from "../lib/handlers/learning/getDashboardFast.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {

@@ -1,7 +1,7 @@
 // api/projects/[id].ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { updateProject, deleteProject } from "../_lib/handlers/projects/projects.js";
+import { updateProject, deleteProject } from "../lib/handlers/projects/projects.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {

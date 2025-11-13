@@ -1,7 +1,7 @@
 // api/learning/dashboard.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { getDashboard } from "../_lib/handlers/learning/getDashboard.js";
+import { getDashboard } from "../lib/handlers/learning/getDashboard.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {

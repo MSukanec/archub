@@ -1,7 +1,7 @@
 // api/invite-member.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { extractToken, getUserFromToken } from "./_lib/auth-helpers.js";
-import { inviteMember } from "./_lib/handlers/organization/inviteMember.js";
+import { extractToken, getUserFromToken } from "./lib/auth-helpers.js";
+import { inviteMember } from "./lib/handlers/organization/inviteMember.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {

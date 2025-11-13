@@ -1,7 +1,7 @@
 // api/projects.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { createProject } from "./_lib/handlers/projects/projects.js";
+import { createProject } from "./lib/handlers/projects/projects.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {

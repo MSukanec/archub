@@ -1,7 +1,7 @@
 // api/courses/[id]/progress.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { getCourseProgress } from "../../_lib/handlers/learning/getCourseProgress.js";
+import { getCourseProgress } from "../../lib/handlers/learning/getCourseProgress.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {

@@ -1,6 +1,6 @@
 // api/user/profile.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { extractToken, getUserFromToken } from "../_lib/auth-helpers.js";
+import { extractToken, getUserFromToken } from "../lib/auth-helpers.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Only allow PATCH requests
