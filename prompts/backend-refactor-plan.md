@@ -135,19 +135,28 @@ export function registerContactRoutes(app: Express, deps: RoutesDeps) {
 
 ## 📊 Inventario de Dominios
 
-### Dominio 1: **Organization** (4/6 endpoints refactorizados)
+### Dominio 1: **Organization** ✅ (6/6 endpoints refactorizados)
 
-**Handlers existentes** ✅:
-- `acceptInvitation.ts`
-- `rejectInvitation.ts`
-- `getOrganizationMembers.ts`
-- `getPendingInvitations.ts`
+**Handlers creados** ✅:
+- `acceptInvitation.ts` (existente)
+- `rejectInvitation.ts` (existente)
+- `getOrganizationMembers.ts` (existente, 72 líneas)
+- `getPendingInvitations.ts` (existente)
+- `inviteMember.ts` (NUEVO, 200 líneas - 3 bugs críticos arreglados)
 
-**Endpoints que FALTAN migrar** ❌:
-- `/api/invite-member.ts` (130 líneas de lógica)
-- `/api/organization-members/[organizationId].ts` (query complejo)
+**Endpoints refactorizados** ✅:
+- `/api/invite-member.ts` (45 líneas wrapper, reducido de 196)
+- `/api/organization-members/[organizationId].ts` (35 líneas wrapper, reducido de 110)
+- `/api/accept-invitation.ts` (ya usando handler)
+- `/api/reject-invitation.ts` (ya usando handler)
+- `/api/pending-invitations/[userId].ts` (ya usando handler)
 
-**Estimado**: 2 horas
+**Bugs críticos arreglados**:
+- ✅ Existing user lookup: `.single()` → `.maybeSingle()` (permite invitar emails nuevos)
+- ✅ Inviter member lookup: `.single()` → `.maybeSingle()` (maneja race conditions)
+- ✅ Existing membership check: `.single()` → `.maybeSingle()` (permite invitar usuarios registrados)
+
+**Tiempo real**: 2 horas
 
 ---
 
@@ -505,7 +514,7 @@ Domain: _____________
 ### ✅ Completados
 
 - [ ] **Fase 0: Seguridad** (PENDIENTE - CRÍTICO)
-- [ ] **Fase 1: Organization** (4/6 endpoints - 66%)
+- [x] **Fase 1: Organization** (6/6 endpoints - 100%)
 - [ ] **Fase 2: Contacts** (0%)
 - [ ] **Fase 3: Community** (0%)
 - [ ] **Fase 4: Projects** (0%)
@@ -514,7 +523,7 @@ Domain: _____________
 - [x] **Fase 7: Admin** (11/11 endpoints - 100%)
 - [ ] **Fase 8: Personnel** (0%)
 
-**Progreso total**: ~25% (15 de ~60 endpoints)
+**Progreso total**: ~35% (21 de ~60 endpoints)
 
 ---
 
@@ -556,5 +565,5 @@ try {
 ---
 
 **Última actualización**: 2025-11-13  
-**Versión**: 1.1  
-**Estado**: Admin domain completamente refactorizado (11 endpoints, 7 handlers consolidados, autenticación unificada)
+**Versión**: 1.2  
+**Estado**: 2 dominios completados - Admin (11 endpoints, 7 handlers) + Organization (6 endpoints, 5 handlers, 3 bugs críticos arreglados)
