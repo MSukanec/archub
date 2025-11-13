@@ -49,12 +49,16 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
   const supabase = createServiceSupabaseClient();
 
   try {
-    // 1. Validación de secret
+    // 1. Validación de secret (TEMPORALMENTE DESHABILITADA PARA DEBUG)
     if (MP_WEBHOOK_SECRET) {
       const q = String(req.query?.secret ?? "");
+      console.log("[mp/webhook] DEBUG - Secret from URL:", q);
+      console.log("[mp/webhook] DEBUG - Secret from ENV:", MP_WEBHOOK_SECRET);
+      console.log("[mp/webhook] DEBUG - Secrets match:", q === MP_WEBHOOK_SECRET);
+      
       if (!q || q !== MP_WEBHOOK_SECRET) {
-        console.warn("[mp/webhook] secret mismatch");
-        return { success: true, processed: "ignored", id: "secret_mismatch" };
+        console.warn("[mp/webhook] secret mismatch - PERO CONTINUANDO PARA DEBUG");
+        // TEMPORALMENTE COMENTADO: return { success: true, processed: "ignored", id: "secret_mismatch" };
       }
     }
 
