@@ -1,5 +1,6 @@
 // api/_lib/handlers/projects/budgetItems.ts
 import type { ProjectsContext } from './shared.js';
+import { ensureAuth, ensureOrganizationAccess } from './shared.js';
 
 export interface ListBudgetItemsParams {
   budgetId: string;
@@ -59,6 +60,16 @@ export async function listBudgetItems(
       return { success: false, error: 'budgetId and organizationId are required' };
     }
 
+    const authResult = await ensureAuth(ctx);
+    if (!authResult.success) {
+      return authResult;
+    }
+
+    const orgAccessResult = await ensureOrganizationAccess(ctx, params.organizationId);
+    if (!orgAccessResult.success) {
+      return orgAccessResult;
+    }
+
     const { data: budgetItems, error } = await supabase
       .from('budget_items_view')
       .select('*, position')
@@ -87,6 +98,18 @@ export async function createBudgetItem(
 ): Promise<CreateBudgetItemResult> {
   try {
     const { supabase } = ctx;
+
+    const authResult = await ensureAuth(ctx);
+    if (!authResult.success) {
+      return authResult;
+    }
+
+    if (params.organization_id) {
+      const orgAccessResult = await ensureOrganizationAccess(ctx, params.organization_id);
+      if (!orgAccessResult.success) {
+        return orgAccessResult;
+      }
+    }
 
     const { data: budgetItem, error } = await supabase
       .from('budget_items')
@@ -120,6 +143,31 @@ export async function updateBudgetItem(
 
     if (!params.itemId) {
       return { success: false, error: 'itemId is required' };
+    }
+
+    const authResult = await ensureAuth(ctx);
+    if (!authResult.success) {
+      return authResult;
+    }
+
+    const { data: existingItem, error: fetchError } = await supabase
+      .from('budget_items')
+      .select('organization_id')
+      .eq('id', params.itemId)
+      .maybeSingle();
+
+    if (fetchError) {
+      console.error('Error fetching budget item:', fetchError);
+      return { success: false, error: 'Failed to fetch budget item' };
+    }
+
+    if (!existingItem) {
+      return { success: false, error: 'Budget item not found' };
+    }
+
+    const orgAccessResult = await ensureOrganizationAccess(ctx, existingItem.organization_id);
+    if (!orgAccessResult.success) {
+      return orgAccessResult;
     }
 
     const { itemId, ...updateData } = params;
@@ -159,6 +207,31 @@ export async function deleteBudgetItem(
       return { success: false, error: 'itemId is required' };
     }
 
+    const authResult = await ensureAuth(ctx);
+    if (!authResult.success) {
+      return authResult;
+    }
+
+    const { data: budgetItem, error: fetchError } = await supabase
+      .from('budget_items')
+      .select('organization_id')
+      .eq('id', params.itemId)
+      .maybeSingle();
+
+    if (fetchError) {
+      console.error('Error fetching budget item:', fetchError);
+      return { success: false, error: 'Failed to fetch budget item' };
+    }
+
+    if (!budgetItem) {
+      return { success: false, error: 'Budget item not found' };
+    }
+
+    const orgAccessResult = await ensureOrganizationAccess(ctx, budgetItem.organization_id);
+    if (!orgAccessResult.success) {
+      return orgAccessResult;
+    }
+
     const { error } = await supabase
       .from('budget_items')
       .delete()
@@ -186,6 +259,31 @@ export async function moveBudgetItem(
 
     if (!params.budgetId || !params.itemId) {
       return { success: false, error: 'budgetId and itemId are required' };
+    }
+
+    const authResult = await ensureAuth(ctx);
+    if (!authResult.success) {
+      return authResult;
+    }
+
+    const { data: budget, error: fetchError } = await supabase
+      .from('budgets')
+      .select('organization_id')
+      .eq('id', params.budgetId)
+      .maybeSingle();
+
+    if (fetchError) {
+      console.error('Error fetching budget:', fetchError);
+      return { success: false, error: 'Failed to fetch budget' };
+    }
+
+    if (!budget) {
+      return { success: false, error: 'Budget not found' };
+    }
+
+    const orgAccessResult = await ensureOrganizationAccess(ctx, budget.organization_id);
+    if (!orgAccessResult.success) {
+      return orgAccessResult;
     }
 
     const { data, error } = await supabase.rpc('budget_item_move', {

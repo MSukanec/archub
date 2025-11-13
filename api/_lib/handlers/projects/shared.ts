@@ -49,6 +49,45 @@ export async function getAuthenticatedUser(ctx: ProjectsContext) {
   return dbUser;
 }
 
+export async function ensureAuth(ctx: ProjectsContext): Promise<{ success: true; user: { id: string; email: string } } | { success: false; error: string }> {
+  const user = await getAuthenticatedUser(ctx);
+  
+  if (!user) {
+    return { success: false, error: 'Unauthorized: User not authenticated' };
+  }
+
+  return { success: true, user };
+}
+
+export async function ensureOrganizationAccess(
+  ctx: ProjectsContext,
+  organizationId: string
+): Promise<{ success: true } | { success: false; error: string }> {
+  const authResult = await ensureAuth(ctx);
+  
+  if (!authResult.success) {
+    return authResult;
+  }
+
+  const { data: membership, error } = await ctx.supabase
+    .from('organization_members')
+    .select('id')
+    .eq('organization_id', organizationId)
+    .eq('user_id', authResult.user.id)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error checking organization membership:', error);
+    return { success: false, error: 'Failed to verify organization access' };
+  }
+
+  if (!membership) {
+    return { success: false, error: 'Forbidden: User does not have access to this organization' };
+  }
+
+  return { success: true };
+}
+
 export async function getProjectById(
   ctx: ProjectsContext,
   projectId: string

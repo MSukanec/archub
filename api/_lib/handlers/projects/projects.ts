@@ -1,11 +1,11 @@
 // api/_lib/handlers/projects/projects.ts
 import type { ProjectsContext } from './shared.js';
+import { ensureAuth, ensureOrganizationAccess } from './shared.js';
 
 export interface CreateProjectParams {
   organization_id: string;
   name: string;
   status?: string;
-  created_by?: string;
   color?: string;
   use_custom_color?: boolean;
   custom_color_h?: number | null;
@@ -55,6 +55,16 @@ export async function createProject(
       return { success: false, error: 'organization_id and name are required' };
     }
 
+    const authResult = await ensureAuth(ctx);
+    if (!authResult.success) {
+      return authResult;
+    }
+
+    const orgAccessResult = await ensureOrganizationAccess(ctx, params.organization_id);
+    if (!orgAccessResult.success) {
+      return orgAccessResult;
+    }
+
     // Create new project
     const { data: newProject, error: projectError } = await supabase
       .from('projects')
@@ -62,7 +72,7 @@ export async function createProject(
         organization_id: params.organization_id,
         name: params.name,
         status: params.status || 'active',
-        created_by: params.created_by,
+        created_by: authResult.user.id,
         created_at: new Date().toISOString(),
         is_active: true,
         color: params.color || '#84cc16',
@@ -120,6 +130,31 @@ export async function updateProject(
 
     if (!params.projectId) {
       return { success: false, error: 'projectId is required' };
+    }
+
+    const authResult = await ensureAuth(ctx);
+    if (!authResult.success) {
+      return authResult;
+    }
+
+    const { data: project, error: projectFetchError } = await supabase
+      .from('projects')
+      .select('organization_id')
+      .eq('id', params.projectId)
+      .maybeSingle();
+
+    if (projectFetchError) {
+      console.error('Error fetching project:', projectFetchError);
+      return { success: false, error: 'Failed to fetch project' };
+    }
+
+    if (!project) {
+      return { success: false, error: 'Project not found' };
+    }
+
+    const orgAccessResult = await ensureOrganizationAccess(ctx, project.organization_id);
+    if (!orgAccessResult.success) {
+      return orgAccessResult;
     }
 
     // Update main project
@@ -186,14 +221,14 @@ export async function updateProject(
     }
 
     // Get updated project
-    const { data: updatedProject, error: fetchError } = await supabase
+    const { data: updatedProject, error: updatedFetchError } = await supabase
       .from('projects')
       .select('*')
       .eq('id', params.projectId)
       .maybeSingle();
 
-    if (fetchError) {
-      console.error('Error fetching updated project:', fetchError);
+    if (updatedFetchError) {
+      console.error('Error fetching updated project:', updatedFetchError);
       return { success: false, error: 'Project updated but failed to fetch result' };
     }
 
@@ -218,6 +253,16 @@ export async function deleteProject(
 
     if (!params.projectId || !params.organizationId) {
       return { success: false, error: 'projectId and organizationId are required' };
+    }
+
+    const authResult = await ensureAuth(ctx);
+    if (!authResult.success) {
+      return authResult;
+    }
+
+    const orgAccessResult = await ensureOrganizationAccess(ctx, params.organizationId);
+    if (!orgAccessResult.success) {
+      return orgAccessResult;
     }
 
     // First delete project_data (if exists)
