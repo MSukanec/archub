@@ -1,0 +1,69 @@
+2025-11-13 20:50:48.051 [info] ═══════════════════════════════════════════════════
+2025-11-13 20:50:48.051 [info] 🔔 [MP WEBHOOK] New request received
+2025-11-13 20:50:48.051 [info] Method: POST
+2025-11-13 20:50:48.051 [info] Query params: {"id":"35552771838","secret":"5bd39be881c81718c5f939eb7e6fe382377ab549198d3c04124673115beaa47c","topic":"merchant_order"}
+2025-11-13 20:50:48.051 [info] Body (raw): {"resource":"https://api.mercadolibre.com/merchant_orders/35552771838","topic":"merchant_order"}
+2025-11-13 20:50:48.051 [info] ═══════════════════════════════════════════════════
+2025-11-13 20:50:48.052 [info] [mp/webhook] DEBUG - Secret from URL: 5bd39be881c81718c5f939eb7e6fe382377ab549198d3c04124673115beaa47c
+2025-11-13 20:50:48.052 [info] [mp/webhook] DEBUG - Secret from ENV: 5bd39be881c81718c5f939eb7e6fe382377ab549198d3c04124673115beaa47c
+2025-11-13 20:50:48.052 [info] [mp/webhook] DEBUG - Secrets match: true
+2025-11-13 20:50:48.090 [info] [MP encoding] ✅ Decoded base64 JSON: {
+  user_id: '7b03cd26-53d4-44e1-8bef-77a5b3fcea24',
+  product_type: 'subscription',
+  plan_slug: 'pro',
+  organization_id: '0bd9950f-e713-47f6-a48d-a95763ee5c42',
+  billing_period: 'annual'
+}
+2025-11-13 20:50:48.318 [info] [MP webhook] ✅ Resolved auth_id to user_id (MO): {
+  auth_id: '7b03cd26-53d4-44e1-8bef-77a5b3fcea24',
+  user_id: 'dc39338d-98be-4847-8301-69456c402da1'
+}
+2025-11-13 20:50:48.318 [info] [MP webhook] 📦 Merchant Order recibida:
+2025-11-13 20:50:48.318 [info] - Order ID: 35552771838
+2025-11-13 20:50:48.318 [info] - Total: 144
+2025-11-13 20:50:48.318 [info] - Order Status: paid
+2025-11-13 20:50:48.318 [info] - Product Type: subscription
+2025-11-13 20:50:48.318 [info] - Plan ID: null
+2025-11-13 20:50:48.318 [info] - Plan Slug: pro
+2025-11-13 20:50:48.318 [info] - Payments: [
+  {
+    "id": 133727365312,
+    "transaction_amount": 144,
+    "total_paid_amount": 144.86,
+    "shipping_cost": 0,
+    "currency_id": "ARS",
+    "status": "approved",
+    "status_detail": "accredited",
+    "operation_type": "regular_payment",
+    "date_approved": "2025-11-13T16:50:47.000-04:00",
+    "date_created": "2025-11-13T16:50:46.000-04:00",
+    "last_modified": "2025-11-13T16:50:47.000-04:00",
+    "amount_refunded": 0
+  }
+]
+2025-11-13 20:50:48.487 [info] [events] ✅ payment_event insertado
+2025-11-13 20:50:48.487 [info] [MP webhook] 🏢 Processing SUBSCRIPTION merchant order
+2025-11-13 20:50:48.487 [info] [MP webhook] 🔍 Resolving plan_id from plan_slug: pro
+2025-11-13 20:50:48.681 [info] [MP webhook] ✅ Resolved plan_id: d0de319e-2b8c-40a5-abb9-3ea6bbf1fc08
+2025-11-13 20:50:48.870 [info] [payments] ⚠️ Payment ya existe (ignorado)
+2025-11-13 20:50:48.870 [info] 🏢 [subscriptions] Starting upgrade... {
+  organizationId: '0bd9950f-e713-47f6-a48d-a95763ee5c42',
+  planId: 'd0de319e-2b8c-40a5-abb9-3ea6bbf1fc08',
+  billingPeriod: 'annual',
+  paymentId: '133727365312',
+  amount: 144,
+  currency: 'ARS'
+}
+2025-11-13 20:50:49.215 [error] ❌ [subscriptions] ERROR creating subscription: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "133727365312"'
+}
+2025-11-13 20:50:49.215 [error] [mp/webhook] error: {
+  code: '22P02',
+  details: null,
+  hint: null,
+  message: 'invalid input syntax for type uuid: "133727365312"'
+}
+2025-11-13 20:50:49.215 [info] ❌ [MP WEBHOOK] Processing failed: invalid input syntax for type uuid: "133727365312"
