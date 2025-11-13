@@ -37,9 +37,12 @@ export default function PricingPlan() {
   const userPlanName = userData?.organization?.plan?.name;
   const isAuthenticated = !!userData?.user?.id;
   
-  console.log('🔍 PricingPlan Debug:', {
+  console.log('🔍 PricingPlan Debug FULL userData:', {
+    userData: userData,
+    organization: userData?.organization,
+    plan: userData?.organization?.plan,
+    planFromTopLevel: userData?.plan,
     userPlanName,
-    organizationPlan: userData?.organization?.plan,
     isAuthenticated
   });
 
