@@ -153,9 +153,33 @@ export function Clients() {
     }
   ]
 
+  const handleContactsLink = () => {
+    // Cleanup mobile action bar before navigation
+    if (isMobile) {
+      clearActions();
+      setShowActionBar(false);
+    }
+    setSidebarContext('organization');
+    navigate('/contacts');
+  };
+
   const headerProps = {
     title: "Clientes",
     icon: Users,
+    description: (
+      <>
+        Gestiona los clientes del proyecto. Antes de ser cliente, debe ser un{' '}
+        <button
+          onClick={handleContactsLink}
+          className="hover:underline font-semibold cursor-pointer"
+          style={{ color: 'var(--accent)' }}
+          data-testid="link-to-contacts"
+        >
+          contacto
+        </button>
+        .
+      </>
+    ),
     tabs: headerTabs,
     onTabChange: setActiveTab,
     ...(activeTab === "list" && {
@@ -204,7 +228,7 @@ export function Clients() {
 
   if (!projectId || !organizationId) {
     return (
-      <Layout headerProps={headerProps} wide={true}>
+      <Layout headerProps={headerProps} wide={false}>
         <div className="flex items-center justify-center h-64">
           <div className="text-sm text-muted-foreground">Selecciona un proyecto para ver los aportes de clientes</div>
         </div>
@@ -213,7 +237,7 @@ export function Clients() {
   }
 
   return (
-    <Layout headerProps={headerProps} wide={true}>
+    <Layout headerProps={headerProps} wide={false}>
       <div className="space-y-4">
         {activeTab === "list" && (
           <ClientListTab 
