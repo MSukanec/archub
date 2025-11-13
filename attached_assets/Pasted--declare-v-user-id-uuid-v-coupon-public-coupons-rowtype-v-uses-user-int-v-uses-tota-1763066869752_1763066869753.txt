@@ -1,0 +1,91 @@
+
+declare
+  v_user_id uuid;
+  v_coupon  public.coupons%rowtype;
+  v_uses_user int;
+  v_uses_total int;
+  v_applicable boolean;
+  v_discount numeric;
+  v_final numeric;
+  v_reason text;
+begin
+  v_user_id := (select id from public.users where auth_id = auth.uid());
+  if v_user_id is null then
+    return jsonb_build_object('ok', false, 'reason', 'UNAUTHENTICATED');
+  end if;
+
+  select * into v_coupon
+  from public.coupons
+  where lower(code) = lower(p_code)
+  limit 1;
+
+  if not found or v_coupon.is_active = false then
+    return jsonb_build_object('ok', false, 'reason', 'NOT_FOUND_OR_INACTIVE');
+  end if;
+
+  if v_coupon.starts_at is not null and now() < v_coupon.starts_at then
+    return jsonb_build_object('ok', false, 'reason', 'NOT_STARTED');
+  end if;
+  if v_coupon.expires_at is not null and now() > v_coupon.expires_at then
+    return jsonb_build_object('ok', false, 'reason', 'EXPIRED');
+  end if;
+
+  if v_coupon.min_order_total is not null and p_price < v_coupon.min_order_total then
+    return jsonb_build_object('ok', false, 'reason', 'MINIMUM_NOT_MET');
+  end if;
+
+  -- alcance
+  if v_coupon.applies_to_all then
+    v_applicable := true;
+  else
+    v_applicable := exists (
+      select 1 from public.coupon_courses cc
+      where cc.coupon_id = v_coupon.id and cc.course_id = p_course_id
+    );
+  end if;
+
+  if not v_applicable then
+    return jsonb_build_object('ok', false, 'reason', 'NOT_APPLICABLE');
+  end if;
+
+  -- límites de uso
+  select count(*) into v_uses_user
+  from public.coupon_redemptions
+  where coupon_id = v_coupon.id and user_id = v_user_id;
+
+  if v_coupon.per_user_limit is not null and v_uses_user >= v_coupon.per_user_limit then
+    return jsonb_build_object('ok', false, 'reason', 'USER_LIMIT_REACHED');
+  end if;
+
+  select count(*) into v_uses_total
+  from public.coupon_redemptions
+  where coupon_id = v_coupon.id;
+
+  if v_coupon.max_redemptions is not null and v_uses_total >= v_coupon.max_redemptions then
+    return jsonb_build_object('ok', false, 'reason', 'GLOBAL_LIMIT_REACHED');
+  end if;
+
+  -- moneda para fixed
+  if v_coupon.type = 'fixed' and v_coupon.currency is not null and v_coupon.currency <> p_currency then
+    return jsonb_build_object('ok', false, 'reason', 'CURRENCY_MISMATCH');
+  end if;
+
+  -- calcular
+  if v_coupon.type = 'percent' then
+    v_discount := round(p_price * (least(v_coupon.amount,100)::numeric / 100.0), 2);
+  else
+    v_discount := least(v_coupon.amount, p_price);
+  end if;
+
+  v_final := greatest(p_price - v_discount, 0);
+
+  return jsonb_build_object(
+    'ok', true,
+    'coupon_id', v_coupon.id,
+    'type', v_coupon.type,
+    'amount', v_coupon.amount,
+    'discount', v_discount,
+    'final_price', v_final,
+    'currency', coalesce(v_coupon.currency, p_currency)
+  );
+end;
