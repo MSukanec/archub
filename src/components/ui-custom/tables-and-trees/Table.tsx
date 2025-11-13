@@ -115,6 +115,7 @@ interface TableProps<T = any> {
     sortable?: boolean; // Por defecto true, usar false para deshabilitarlo
     sortType?: "string" | "number" | "date";
     width?: string; // Nuevo: ancho personalizado (ej: "10%", "100px", etc.)
+    cellClassName?: string; // Nuevo: clases CSS personalizadas para las celdas de esta columna
   }[];
   data: T[];
   emptyState?: React.ReactNode; // DEPRECATED: Usar emptyStateConfig en su lugar
@@ -1103,7 +1104,8 @@ export function Table<T = any>({
                             "text-sm flex items-center",
                             isNumericColumn ? "justify-end" : "justify-start",
                             mode === "budget" && "text-[var(--table-row-fg)]",
-                            mode === "construction" && "text-[var(--table-row-fg)]"
+                            mode === "construction" && "text-[var(--table-row-fg)]",
+                            column.cellClassName
                           )}
                         >
                           {column.render
@@ -1233,7 +1235,8 @@ export function Table<T = any>({
                       key={String(column.key)}
                       className={cn(
                         "text-sm flex items-center",
-                        isNumericColumn ? "justify-end" : "justify-start"
+                        isNumericColumn ? "justify-end" : "justify-start",
+                        column.cellClassName
                       )}
                     >
                       {column.render

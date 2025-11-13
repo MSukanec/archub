@@ -176,6 +176,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       key: 'full_name',
       label: 'Nombre Completo',
       sortable: true,
+      cellClassName: 'font-semibold',
       render: (client: ProjectClient) => {
         const displayName = client.contacts?.company_name || 
                            client.contacts?.full_name || 
