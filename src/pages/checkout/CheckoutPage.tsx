@@ -1997,9 +1997,8 @@ Titular: Matias Esteban Sukanec`;
                         loading || 
                         priceLoading || 
                         !acceptTerms || 
-                        !acceptCommunications
-                        // 🧪 TEMPORAL: Cupones habilitados con MP para pruebas
-                        // || (!!appliedCoupon && selectedMethod === "mercadopago")
+                        !acceptCommunications ||
+                        (!!appliedCoupon && selectedMethod === "mercadopago")
                       }
                       className="w-full h-12 text-base font-medium mt-6"
                       data-testid="button-continue-payment"

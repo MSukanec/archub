@@ -81,6 +81,46 @@ export async function createSubscriptionPreference(req: VercelRequest): Promise<
       return { success: false, error: "Plan no encontrado o inactivo", status: 404 };
     }
 
+    // 6.5. VALIDACIÓN: Prevenir suscripciones duplicadas
+    try {
+      const { data: existingSubscription, error: subCheckError } = await supabase
+        .from("organization_subscriptions")
+        .select("id, status, expires_at")
+        .eq("organization_id", organization_id)
+        .eq("plan_id", plan.id)
+        .in("status", ["active", "trialing", "pending", "cancelled"])
+        .order("started_at", { ascending: false })
+        .maybeSingle();
+
+      if (subCheckError) {
+        console.error('[MP create-subscription-preference] Error checking existing subscription:', subCheckError);
+        return { success: false, error: "Error verificando suscripciones existentes", status: 500 };
+      }
+
+      if (existingSubscription) {
+        const expiresAt = existingSubscription.expires_at ? new Date(existingSubscription.expires_at) : null;
+        const isStillActive = !expiresAt || expiresAt > new Date();
+
+        if (isStillActive) {
+          console.log('[MP create-subscription-preference] Duplicate subscription prevented:', {
+            user_id,
+            organization_id,
+            plan_id: plan.id,
+            existing_status: existingSubscription.status,
+            expires_at: existingSubscription.expires_at
+          });
+          return { 
+            success: false, 
+            error: "Ya tienes una suscripción activa a este plan", 
+            status: 400 
+          };
+        }
+      }
+    } catch (error) {
+      console.error('[MP create-subscription-preference] Unexpected error checking subscriptions:', error);
+      return { success: false, error: "Error inesperado verificando suscripciones", status: 500 };
+    }
+
     // 7. SECURITY: Get price from plans table (USD base) and convert if needed
     const priceAmount = billing_period === 'monthly' ? plan.monthly_amount : plan.annual_amount;
     let unit_price = Number(priceAmount);

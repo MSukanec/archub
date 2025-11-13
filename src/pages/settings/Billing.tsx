@@ -52,11 +52,41 @@ const Billing = () => {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
 
   useEffect(() => {
     setSidebarLevel('settings');
   }, [setSidebarLevel]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paymentStatus = params.get('payment');
+
+    if (paymentStatus === 'success' && currentOrganizationId) {
+      queryClient.invalidateQueries({ queryKey: ['current-subscription', currentOrganizationId] });
+      queryClient.invalidateQueries({ queryKey: ['subscription-payments', currentOrganizationId] });
+      
+      toast({
+        title: '¡Pago exitoso!',
+        description: 'Tu suscripción ha sido activada correctamente.',
+      });
+
+      const url = new URL(window.location.href);
+      url.searchParams.delete('payment');
+      url.searchParams.delete('collection_id');
+      url.searchParams.delete('collection_status');
+      url.searchParams.delete('payment_id');
+      url.searchParams.delete('status');
+      url.searchParams.delete('external_reference');
+      url.searchParams.delete('payment_type');
+      url.searchParams.delete('merchant_order_id');
+      url.searchParams.delete('preference_id');
+      url.searchParams.delete('site_id');
+      url.searchParams.delete('processing_mode');
+      url.searchParams.delete('merchant_account_id');
+      window.history.replaceState({}, '', url.pathname);
+    }
+  }, [currentOrganizationId, toast]);
 
   const { data: subscription, isLoading: subscriptionLoading } = useQuery<OrganizationSubscription | null>({
     queryKey: ['current-subscription', currentOrganizationId],
