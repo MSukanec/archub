@@ -435,10 +435,20 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
         }
       }
 
-      // Solo invalidar la query específica de contactos (sin refetch automático)
+      // Invalidar la query específica de contactos
       await queryClient.refetchQueries({ 
         queryKey: [`/api/contacts?organization_id=${userData?.organization?.id}`],
         type: 'active'
+      });
+      
+      // También invalidar las queries de project clients que incluyen datos de contactos
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey;
+          return Array.isArray(key) && 
+                 typeof key[0] === 'string' && 
+                 key[0].includes('/clients');
+        }
       });
       
       toast({
