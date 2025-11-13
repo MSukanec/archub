@@ -228,11 +228,22 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
             });
 
             // IDEMPOTENT: Only mark coupon as used if payment was NEWLY inserted (not duplicate)
-            if (paymentResult.inserted && couponId) {
-              console.log(`[MP webhook] 🎟️ Marking coupon as used: ${couponCode} (${couponId})`);
-              const couponResult = await markCouponAsUsed(supabase, couponId);
+            if (paymentResult.inserted && couponId && couponCode) {
+              console.log(`[MP webhook] 🎟️ Redeeming coupon: ${couponCode} (${couponId})`);
+              // Calculate amount saved (we need to store original price in metadata for this)
+              // For now, use 0 as placeholder - ideally we'd store original_price in metadata
+              const amountSaved = 0; // TODO: Store original_price in metadata to calculate discount
+              const couponResult = await markCouponAsUsed(
+                supabase, 
+                couponId,
+                publicUserId,
+                course_id,
+                providerPaymentId,
+                amountSaved,
+                currency
+              );
               if (!couponResult.success) {
-                console.error(`[MP webhook] ⚠️ Failed to mark coupon as used:`, couponResult.error);
+                console.error(`[MP webhook] ⚠️ Failed to redeem coupon:`, couponResult.error);
               }
             }
 
@@ -407,11 +418,20 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
               });
 
               // IDEMPOTENT: Only mark coupon as used if payment was NEWLY inserted
-              if (paymentResult.inserted && couponId) {
-                console.log(`[MP webhook] 🎟️ Marking coupon as used (MO): ${couponCode} (${couponId})`);
-                const couponResult = await markCouponAsUsed(supabase, couponId);
+              if (paymentResult.inserted && couponId && couponCode) {
+                console.log(`[MP webhook] 🎟️ Redeeming coupon (MO): ${couponCode} (${couponId})`);
+                const amountSaved = 0; // TODO: Store original_price in metadata to calculate discount
+                const couponResult = await markCouponAsUsed(
+                  supabase,
+                  couponId,
+                  moPublicUserId,
+                  course_id,
+                  providerPaymentId,
+                  amountSaved,
+                  "ARS"
+                );
                 if (!couponResult.success) {
-                  console.error(`[MP webhook] ⚠️ Failed to mark coupon as used (MO):`, couponResult.error);
+                  console.error(`[MP webhook] ⚠️ Failed to redeem coupon (MO):`, couponResult.error);
                 }
               }
 

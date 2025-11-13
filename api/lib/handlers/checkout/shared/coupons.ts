@@ -6,37 +6,39 @@ export type CouponValidationResult =
 
 export async function markCouponAsUsed(
   supabase: SupabaseClient,
-  couponId: string
+  couponId: string,
+  userId: string,
+  courseId: string,
+  orderId: string,
+  amountSaved: number,
+  currency: string
 ): Promise<{ success: boolean; error?: string }> {
-  console.log('[coupons] Marking coupon as used:', couponId);
-
-  // Simple atomic increment - Supabase will handle concurrency at DB level
-  // This is safe because we only call this ONCE per payment insert (idempotent via insertPayment check)
-  const { data: coupon, error: fetchError } = await supabase
-    .from('coupons')
-    .select('used_count')
-    .eq('id', couponId)
-    .single();
-
-  if (fetchError || !coupon) {
-    console.error('[coupons] Error fetching coupon:', fetchError);
-    return { success: false, error: fetchError?.message || 'Coupon not found' };
-  }
-
-  const { error: updateError } = await supabase
-    .from('coupons')
-    .update({ used_count: coupon.used_count + 1 })
-    .eq('id', couponId);
-
-  if (updateError) {
-    console.error('[coupons] Error incrementing used_count:', updateError);
-    return { success: false, error: updateError.message };
-  }
-
-  console.log('[coupons] ✅ Coupon marked as used:', {
+  console.log('[coupons] Redeeming coupon via RPC:', {
     coupon_id: couponId,
-    new_count: coupon.used_count + 1
+    user_id: userId,
+    course_id: courseId,
+    order_id: orderId
   });
+
+  // Use the existing redeem_coupon RPC function which:
+  // 1. Inserts into coupon_redemptions (audit trail)
+  // 2. Increments used_count
+  // This is idempotent-safe because we only call it when payment is NEWLY inserted
+  const { data, error } = await supabase.rpc('redeem_coupon', {
+    p_coupon_id: couponId,
+    p_user_id: userId,
+    p_course_id: courseId,
+    p_order_id: orderId,
+    p_amount_saved: amountSaved,
+    p_currency: currency
+  });
+
+  if (error) {
+    console.error('[coupons] Error redeeming coupon:', error);
+    return { success: false, error: error.message };
+  }
+
+  console.log('[coupons] ✅ Coupon redeemed successfully');
   return { success: true };
 }
 
