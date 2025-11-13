@@ -1,6 +1,45 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, QueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/authStore'
 import { supabase } from '@/lib/supabase'
+
+async function fetchCurrentUser(forceRefresh: boolean = false): Promise<UserData | null> {
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+  
+  if (sessionError || !sessionData?.session?.access_token) {
+    return null
+  }
+  
+  const token = sessionData.session.access_token
+  const url = forceRefresh ? '/api/current-user?refresh=true' : '/api/current-user'
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  })
+
+  if (!response.ok) {
+    return null
+  }
+
+  const userData = await response.json()
+  return userData as UserData || null
+}
+
+export async function refreshCurrentUserCache(queryClient: QueryClient): Promise<void> {
+  try {
+    const freshUserData = await fetchCurrentUser(true)
+    if (freshUserData) {
+      queryClient.setQueryData(['current-user'], freshUserData)
+    } else {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+    }
+  } catch (error) {
+    queryClient.invalidateQueries({ queryKey: ['current-user'] })
+  }
+}
 
 export interface UserData {
   user: {

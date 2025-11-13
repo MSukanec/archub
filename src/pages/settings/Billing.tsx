@@ -14,7 +14,7 @@ import { es } from 'date-fns/locale';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { InvoicePDF } from '@/components/pdf/InvoicePDF';
 import { useToast } from '@/hooks/use-toast';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser, refreshCurrentUserCache } from '@/hooks/use-current-user';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useLocation } from 'wouter';
@@ -63,12 +63,11 @@ const Billing = () => {
     const paymentStatus = params.get('payment');
 
     if (paymentStatus === 'success' && currentOrganizationId) {
-      queryClient.invalidateQueries({ queryKey: ['current-subscription', currentOrganizationId] });
-      queryClient.invalidateQueries({ queryKey: ['subscription-payments', currentOrganizationId] });
-      queryClient.invalidateQueries({ queryKey: ['organization', currentOrganizationId] });
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      
-      queryClient.refetchQueries({ queryKey: ['current-user'], type: 'all' });
+      refreshCurrentUserCache(queryClient).then(() => {
+        queryClient.invalidateQueries({ queryKey: ['current-subscription', currentOrganizationId] });
+        queryClient.invalidateQueries({ queryKey: ['subscription-payments', currentOrganizationId] });
+        queryClient.invalidateQueries({ queryKey: ['organization', currentOrganizationId] });
+      });
       
       toast({
         title: '¡Pago exitoso!',
