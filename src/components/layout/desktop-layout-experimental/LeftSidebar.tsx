@@ -249,7 +249,7 @@ export function LeftSidebar() {
             { id: 'organization-basic-data', label: 'Datos Básicos', icon: Building, href: '/settings/organization-basic-data' },
             { id: 'members', label: 'Miembros', icon: Users, href: '/settings/members' },
             { id: 'finances', label: 'Finanzas', icon: Wallet, href: '/settings/finances' },
-            { id: 'organization-activity', label: 'Actividad', icon: Activity, href: '/settings/organization-activity' },
+            { id: 'organization-activity', label: 'Actividad', icon: Activity, href: '/settings/organization-activity', restricted: 'coming_soon' },
           ]
         },
         {

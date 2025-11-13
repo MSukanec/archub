@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useLocation } from 'wouter';
 
 interface OrganizationSubscription {
   id: string;
@@ -51,6 +52,7 @@ const Billing = () => {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     setSidebarLevel('settings');
@@ -152,6 +154,15 @@ const Billing = () => {
   const isFreePlan = planSlug === 'free';
   const isCancelled = subscriptionStatus === 'cancelled';
   const isActive = subscriptionStatus === 'active';
+
+  const getPlanBadgeClass = (slug: string) => {
+    const classes: Record<string, string> = {
+      'free': 'plan-card-free',
+      'pro': 'plan-card-pro',
+      'teams': 'plan-card-teams',
+    };
+    return classes[slug.toLowerCase()] || classes['free'];
+  };
 
   const getStatusBadge = () => {
     if (isCancelled) {
@@ -284,9 +295,13 @@ const Billing = () => {
                   
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Plan:</span>
+                      <span className="text-muted-foreground">Plan Actual:</span>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline">{planName}</Badge>
+                        <Badge 
+                          className={`text-xs text-white ${getPlanBadgeClass(planSlug)}`}
+                        >
+                          {planName}
+                        </Badge>
                         {getStatusBadge()}
                       </div>
                     </div>
@@ -312,7 +327,11 @@ const Billing = () => {
                   </div>
 
                   {isFreePlan ? (
-                    <Button className="w-full" data-testid="button-upgrade-plan">
+                    <Button 
+                      className="w-full" 
+                      onClick={() => setLocation('/pricing-plan')}
+                      data-testid="button-upgrade-plan"
+                    >
                       <ArrowUpCircle className="w-4 h-4 mr-2" />
                       Mejorar Plan
                     </Button>
