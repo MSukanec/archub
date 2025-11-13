@@ -13,6 +13,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
 import { useLocation } from 'wouter'
+import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
 
 export function Clients() {
   const [activeTab, setActiveTab] = useState("list")
@@ -142,14 +143,14 @@ export function Clients() {
       isActive: activeTab === "obligations"
     },
     {
-      id: "monthly-installments",
-      label: "Plan de Pagos",
-      isActive: activeTab === "monthly-installments"
-    },
-    {
       id: "details",
       label: "Historial de Pagos",
       isActive: activeTab === "details"
+    },
+    {
+      id: "monthly-installments",
+      label: "Plan de Pagos",
+      isActive: activeTab === "monthly-installments"
     }
   ]
 
@@ -252,18 +253,20 @@ export function Clients() {
           />
         )}
 
-        {activeTab === "monthly-installments" && (
-          <ClientPaymentPlans 
-            projectId={projectId}
-            organizationId={organizationId}
-          />
-        )}
-
         {activeTab === "details" && (
           <ClientPayments 
             projectId={projectId}
             organizationId={organizationId}
           />
+        )}
+
+        {activeTab === "monthly-installments" && (
+          <PlanRestricted reason="coming_soon">
+            <ClientPaymentPlans 
+              projectId={projectId}
+              organizationId={organizationId}
+            />
+          </PlanRestricted>
         )}
       </div>
     </Layout>
