@@ -181,7 +181,7 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
             }
             
             // Insert payment (subscription) - userId is REQUIRED even for subscriptions
-            await insertPayment(supabase, "mercadopago", {
+            const subPaymentResult = await insertPayment(supabase, "mercadopago", {
               providerPaymentId: providerPaymentId,
               userId: publicUserId, // ✅ CRITICAL: Required for payments table
               amount: amount || null,
@@ -192,15 +192,19 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
               productId: resolvedPlanId,
             });
 
-            // Upgrade organization plan
-            await upgradeOrganizationPlan(supabase, {
-              organizationId: organizationId,
-              planId: resolvedPlanId,
-              billingPeriod: billingPeriod as 'monthly' | 'annual',
-              paymentId: providerPaymentId,
-              amount: amount,
-              currency: currency,
-            });
+            // Upgrade organization plan - use payment UUID, not provider_payment_id
+            if (subPaymentResult.paymentId) {
+              await upgradeOrganizationPlan(supabase, {
+                organizationId: organizationId,
+                planId: resolvedPlanId,
+                billingPeriod: billingPeriod as 'monthly' | 'annual',
+                paymentId: subPaymentResult.paymentId, // ✅ UUID from payments table
+                amount: amount,
+                currency: currency,
+              });
+            } else {
+              console.error(`[MP webhook] ❌ No payment ID returned for subscription`);
+            }
 
             console.log(`[MP webhook] ✅ Subscription processed successfully`);
           } else {
@@ -372,7 +376,7 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
               }
               
               // Insert payment (subscription) - userId is REQUIRED even for subscriptions
-              await insertPayment(supabase, "mercadopago", {
+              const moSubPaymentResult = await insertPayment(supabase, "mercadopago", {
                 providerPaymentId: providerPaymentId,
                 userId: moPublicUserId, // ✅ CRITICAL: Required for payments table
                 amount: amount || null,
@@ -383,15 +387,19 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
                 productId: resolvedPlanId,
               });
 
-              // Upgrade organization plan
-              await upgradeOrganizationPlan(supabase, {
-                organizationId: organizationId,
-                planId: resolvedPlanId,
-                billingPeriod: billingPeriod as 'monthly' | 'annual',
-                paymentId: providerPaymentId,
-                amount: amount,
-                currency: "ARS",
-              });
+              // Upgrade organization plan - use payment UUID, not provider_payment_id
+              if (moSubPaymentResult.paymentId) {
+                await upgradeOrganizationPlan(supabase, {
+                  organizationId: organizationId,
+                  planId: resolvedPlanId,
+                  billingPeriod: billingPeriod as 'monthly' | 'annual',
+                  paymentId: moSubPaymentResult.paymentId, // ✅ UUID from payments table
+                  amount: amount,
+                  currency: "ARS",
+                });
+              } else {
+                console.error(`[MP webhook] ❌ No payment ID returned for subscription (MO)`);
+              }
 
               console.log(`[MP webhook] ✅ Subscription merchant order processed successfully`);
             } else {
