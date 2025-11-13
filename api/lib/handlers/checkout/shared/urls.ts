@@ -44,8 +44,8 @@ export function buildCourseBackUrls(
 
 export function buildSubscriptionBackUrls(returnBase: string): CourseBackUrls {
   return {
-    success: `${returnBase}/organization/billing?payment=success`,
-    failure: `${returnBase}/organization/billing?payment=failed`,
-    pending: `${returnBase}/organization/billing?payment=pending`,
+    success: `${returnBase}/settings/billing?payment=success`,
+    failure: `${returnBase}/settings/billing?payment=failed`,
+    pending: `${returnBase}/settings/billing?payment=pending`,
   };
 }
