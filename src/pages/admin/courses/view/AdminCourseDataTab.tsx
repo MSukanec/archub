@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useDebouncedAutoSave } from '@/hooks/use-debounced-auto-save';
+import { useDebouncedAutoSave } from '@/components/save/useDebouncedAutoSave';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info, Save } from 'lucide-react';
 
@@ -109,10 +109,16 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
       cover_url: coverUrl,
       price: parseFloat(price) || 0
     },
-    onSave: saveCourseDataMutation.mutate,
-    dependencies: [title, slug, shortDescription, coverUrl, price],
-    initialData: courseData,
-    delay: 1000
+    saveFn: async (dataToSave) => {
+      return new Promise<void>((resolve, reject) => {
+        saveCourseDataMutation.mutate(dataToSave, {
+          onSuccess: () => resolve(),
+          onError: (error) => reject(error)
+        });
+      });
+    },
+    delay: 1000,
+    enabled: !!courseData
   });
 
   return (
