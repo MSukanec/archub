@@ -99,9 +99,9 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
       const planSlug = md.plan_slug || fromExt.plan_slug;
       const billingPeriod = md.billing_period || fromExt.billing_period;
 
-      // CRITICAL: Convert auth_id to public.users.id for course payments
+      // CRITICAL: Convert auth_id to public.users.id (required for both courses AND subscriptions)
       let publicUserId: string | null = null;
-      if (resolvedUserId && productType === 'course') {
+      if (resolvedUserId) {
         const { data: userProfile, error: profileError } = await supabase
           .from("users")
           .select("id")
@@ -177,9 +177,10 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
               return { success: true, processed: "error", id: 'missing_plan_data' };
             }
             
-            // Insert payment (subscription)
+            // Insert payment (subscription) - userId is REQUIRED even for subscriptions
             await insertPayment(supabase, "mercadopago", {
               providerPaymentId: providerPaymentId,
+              userId: publicUserId, // ✅ CRITICAL: Required for payments table
               amount: amount || null,
               currency: currency,
               status: "completed",
@@ -258,9 +259,9 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
       const planSlug = md.plan_slug || fromExt.plan_slug;
       const billingPeriod = md.billing_period || fromExt.billing_period;
 
-      // CRITICAL: Convert auth_id to public.users.id for course payments (merchant_order)
+      // CRITICAL: Convert auth_id to public.users.id (required for both courses AND subscriptions - merchant_order)
       let moPublicUserId: string | null = null;
-      if (resolvedUserId && productType === 'course') {
+      if (resolvedUserId) {
         const { data: userProfile, error: profileError } = await supabase
           .from("users")
           .select("id")
@@ -343,9 +344,10 @@ export async function processWebhook(req: VercelRequest): Promise<ProcessWebhook
                 return { success: true, processed: "error", id: 'missing_plan_data' };
               }
               
-              // Insert payment (subscription)
+              // Insert payment (subscription) - userId is REQUIRED even for subscriptions
               await insertPayment(supabase, "mercadopago", {
                 providerPaymentId: providerPaymentId,
+                userId: moPublicUserId, // ✅ CRITICAL: Required for payments table
                 amount: amount || null,
                 currency: "ARS",
                 status: "completed",
