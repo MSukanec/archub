@@ -974,20 +974,21 @@ export default function PricingPlan() {
       </div>
 
       {/* Downgrade Modal */}
-      {selectedDowngradePlan && (
+      {downgradeModalOpen && selectedDowngradePlan && (
         <DowngradeModal
-          isOpen={downgradeModalOpen}
+          modalData={{
+            currentPlan: {
+              name: userPlanName || '',
+              slug: userData?.organization?.plan?.slug || ''
+            },
+            targetPlan: selectedDowngradePlan,
+            subscriptionEndDate: (currentSubscription as any)?.expires_at,
+            isManualPlan: !currentSubscription
+          }}
           onClose={() => {
             setDowngradeModalOpen(false);
             setSelectedDowngradePlan(null);
           }}
-          currentPlan={{
-            name: userPlanName || '',
-            slug: userData?.organization?.plan?.slug || ''
-          }}
-          targetPlan={selectedDowngradePlan}
-          subscriptionEndDate={(currentSubscription as any)?.expires_at}
-          isManualPlan={!currentSubscription}
         />
       )}
     </Layout>
