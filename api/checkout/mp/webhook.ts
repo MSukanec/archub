@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { handleCorsPreflight, handleCorsHeaders } from "../../lib/handlers/checkout/shared/cors";
-import { processWebhook } from "../../lib/handlers/checkout/mp/processWebhook";
+import { handleCorsPreflight, handleCorsHeaders } from "../../lib/handlers/checkout/shared/cors.js";
+import { processWebhook } from "../../lib/handlers/checkout/mp/processWebhook.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "OPTIONS") {

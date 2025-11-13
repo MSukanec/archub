@@ -1,11 +1,11 @@
 import type { VercelRequest } from "@vercel/node";
-import { getAuthenticatedClient } from "../shared/auth";
-import { validateAndApplyCoupon } from "../shared/coupons";
-import { getUserData } from "../shared/user";
-import { buildURLContext, buildCourseBackUrls } from "../shared/urls";
-import { validateMPToken, logMPMode, MP_WEBHOOK_SECRET } from "./config";
-import { encodeCustomData } from "./encoding";
-import { createMPPreference } from "./api";
+import { getAuthenticatedClient } from "../shared/auth.js";
+import { validateAndApplyCoupon } from "../shared/coupons.js";
+import { getUserData } from "../shared/user.js";
+import { buildURLContext, buildCourseBackUrls } from "../shared/urls.js";
+import { validateMPToken, logMPMode, MP_WEBHOOK_SECRET } from "./config.js";
+import { encodeCustomData } from "./encoding.js";
+import { createMPPreference } from "./api.js";
 
 export type CreateCoursePreferenceResult =
   | { success: true; initPoint: string; preferenceId: string }

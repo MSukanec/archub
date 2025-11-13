@@ -1,4 +1,4 @@
-import { MP_ACCESS_TOKEN } from "./config";
+import { MP_ACCESS_TOKEN } from "./config.js";
 
 export type MPPreferenceBody = {
   items: Array<{

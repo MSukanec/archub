@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { handleCorsPreflight, handleCorsHeaders } from "../../lib/handlers/checkout/shared/cors";
-import { captureSubscriptionOrder } from "../../lib/handlers/checkout/paypal/captureSubscriptionOrder";
+import { handleCorsPreflight, handleCorsHeaders } from "../../lib/handlers/checkout/shared/cors.js";
+import { captureSubscriptionOrder } from "../../lib/handlers/checkout/paypal/captureSubscriptionOrder.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "OPTIONS") {

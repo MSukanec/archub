@@ -1,4 +1,4 @@
-import { PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, PAYPAL_BASE_URL } from "./config";
+import { PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, PAYPAL_BASE_URL } from "./config.js";
 
 let cachedToken: { accessToken: string; expiresAt: number } | null = null;
 

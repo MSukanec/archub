@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { createSubscriptionPreference } from "../lib/handlers/checkout/mp/createSubscriptionPreference";
-import { handleCorsPreflight, handleCorsHeaders } from "../lib/handlers/checkout/shared/cors";
+import { createSubscriptionPreference } from "../lib/handlers/checkout/mp/createSubscriptionPreference.js";
+import { handleCorsPreflight, handleCorsHeaders } from "../lib/handlers/checkout/shared/cors.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "OPTIONS") {

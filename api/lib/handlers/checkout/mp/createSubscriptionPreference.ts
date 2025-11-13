@@ -1,12 +1,12 @@
 import type { VercelRequest } from "@vercel/node";
-import { getAuthenticatedClient } from "../shared/auth";
-import { verifyAdminRoleForOrganization } from "../shared/permissions";
-import { getPlanPrice } from "../shared/pricing";
-import { getUserData } from "../shared/user";
-import { buildURLContext, buildSubscriptionBackUrls } from "../shared/urls";
-import { validateMPToken, logMPMode, MP_WEBHOOK_SECRET } from "./config";
-import { encodeCustomData } from "./encoding";
-import { createMPPreference } from "./api";
+import { getAuthenticatedClient } from "../shared/auth.js";
+import { verifyAdminRoleForOrganization } from "../shared/permissions.js";
+import { getPlanPrice } from "../shared/pricing.js";
+import { getUserData } from "../shared/user.js";
+import { buildURLContext, buildSubscriptionBackUrls } from "../shared/urls.js";
+import { validateMPToken, logMPMode, MP_WEBHOOK_SECRET } from "./config.js";
+import { encodeCustomData } from "./encoding.js";
+import { createMPPreference } from "./api.js";
 
 export type CreateSubscriptionPreferenceResult =
   | { success: true; initPoint: string; preferenceId: string }

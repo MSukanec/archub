@@ -1,9 +1,9 @@
 import type { VercelRequest } from "@vercel/node";
-import { createServiceSupabaseClient } from "../shared/auth";
-import { logPaymentEvent } from "../shared/events";
-import { insertPayment } from "../shared/payments";
-import { upgradeOrganizationPlan } from "../shared/subscriptions";
-import { capturePayPalOrder } from "./api";
+import { createServiceSupabaseClient } from "../shared/auth.js";
+import { logPaymentEvent } from "../shared/events.js";
+import { insertPayment } from "../shared/payments.js";
+import { upgradeOrganizationPlan } from "../shared/subscriptions.js";
+import { capturePayPalOrder } from "./api.js";
 
 export type CaptureSubscriptionOrderResult =
   | { success: true; html: string; upgraded: boolean }

@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { captureSubscriptionOrder } from '../lib/handlers/checkout/paypal/captureSubscriptionOrder';
+import { captureSubscriptionOrder } from '../lib/handlers/checkout/paypal/captureSubscriptionOrder.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const result = await captureSubscriptionOrder(req);

@@ -1,9 +1,9 @@
 import type { VercelRequest } from "@vercel/node";
-import { getAuthenticatedClient } from "../shared/auth";
-import { verifyAdminRoleForOrganization } from "../shared/permissions";
-import { buildURLContext } from "../shared/urls";
-import { logPayPalMode } from "./config";
-import { createPayPalOrder } from "./api";
+import { getAuthenticatedClient } from "../shared/auth.js";
+import { verifyAdminRoleForOrganization } from "../shared/permissions.js";
+import { buildURLContext } from "../shared/urls.js";
+import { logPayPalMode } from "./config.js";
+import { createPayPalOrder } from "./api.js";
 
 export type CreateSubscriptionOrderResult =
   | { success: true; orderId: string; approvalUrl: string; order: any }

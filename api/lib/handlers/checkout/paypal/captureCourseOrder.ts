@@ -1,5 +1,5 @@
 import type { VercelRequest } from "@vercel/node";
-import { capturePayPalOrder } from "./api";
+import { capturePayPalOrder } from "./api.js";
 
 export type CaptureCourseOrderResult =
   | { success: true; capture: any }

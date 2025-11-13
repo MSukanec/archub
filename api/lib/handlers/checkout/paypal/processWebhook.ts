@@ -1,13 +1,13 @@
 import type { VercelRequest } from "@vercel/node";
-import { createServiceSupabaseClient } from "../shared/auth";
-import { logPaymentEvent } from "../shared/events";
-import { insertPayment } from "../shared/payments";
-import { upsertEnrollment } from "../shared/enrollments";
-import { upgradeOrganizationPlan } from "../shared/subscriptions";
-import { getPlanIdBySlug } from "../shared/helpers";
-import { decodeInvoiceId, decodeCustomId } from "./encoding";
-import { getPayPalAccessToken } from "./auth";
-import { PAYPAL_BASE_URL } from "./config";
+import { createServiceSupabaseClient } from "../shared/auth.js";
+import { logPaymentEvent } from "../shared/events.js";
+import { insertPayment } from "../shared/payments.js";
+import { upsertEnrollment } from "../shared/enrollments.js";
+import { upgradeOrganizationPlan } from "../shared/subscriptions.js";
+import { getPlanIdBySlug } from "../shared/helpers.js";
+import { decodeInvoiceId, decodeCustomId } from "./encoding.js";
+import { getPayPalAccessToken } from "./auth.js";
+import { PAYPAL_BASE_URL } from "./config.js";
 
 export type ProcessWebhookResult =
   | { success: true; processed: boolean; eventType: string }

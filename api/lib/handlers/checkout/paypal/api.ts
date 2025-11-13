@@ -1,5 +1,5 @@
-import { getPayPalAccessToken } from "./auth";
-import { PAYPAL_BASE_URL } from "./config";
+import { getPayPalAccessToken } from "./auth.js";
+import { PAYPAL_BASE_URL } from "./config.js";
 
 export type PayPalOrderBody = {
   intent: string;

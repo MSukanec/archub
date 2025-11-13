@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { processWebhook } from "../lib/handlers/checkout/mp/processWebhook";
+import { processWebhook } from "../lib/handlers/checkout/mp/processWebhook.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "OPTIONS") {

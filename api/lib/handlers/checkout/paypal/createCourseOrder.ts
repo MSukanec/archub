@@ -1,11 +1,11 @@
 import type { VercelRequest } from "@vercel/node";
-import { getAuthenticatedClient } from "../shared/auth";
-import { validateAndApplyCoupon } from "../shared/coupons";
-import { getUserData } from "../shared/user";
-import { buildURLContext, buildCourseBackUrls } from "../shared/urls";
-import { logPayPalMode } from "./config";
-import { encodeInvoiceId, encodeCustomId } from "./encoding";
-import { createPayPalOrder } from "./api";
+import { getAuthenticatedClient } from "../shared/auth.js";
+import { validateAndApplyCoupon } from "../shared/coupons.js";
+import { getUserData } from "../shared/user.js";
+import { buildURLContext, buildCourseBackUrls } from "../shared/urls.js";
+import { logPayPalMode } from "./config.js";
+import { encodeInvoiceId, encodeCustomId } from "./encoding.js";
+import { createPayPalOrder } from "./api.js";
 
 export type CreateCourseOrderResult =
   | { success: true; orderId: string; approvalUrl: string; order: any }
