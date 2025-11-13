@@ -370,6 +370,7 @@ export default function PricingPlan() {
             const isPopular = plan.name.toLowerCase() === 'pro';
             const isCurrentPlan = plan.name.toLowerCase() === userPlanName?.toLowerCase();
             const isFree = plan.name.toLowerCase() === 'free';
+            const isTeams = plan.name.toLowerCase() === 'teams';
 
             return (
               <div
@@ -491,14 +492,16 @@ export default function PricingPlan() {
                           : "secondary"
                     }
                     onClick={() => {
-                      if (!isCurrentPlan) {
+                      if (!isCurrentPlan && !isTeams) {
                         setLocation(`/subscription/checkout?plan=${plan.slug}&billing=${billingPeriod}`)
                       }
                     }}
-                    disabled={isCurrentPlan && isAuthenticated}
+                    disabled={(isCurrentPlan && isAuthenticated) || isTeams}
                     data-testid={`button-select-plan-${plan.name.toLowerCase()}`}
                   >
-                    {isAuthenticated ? (
+                    {isTeams ? (
+                      'Próximamente'
+                    ) : isAuthenticated ? (
                       isCurrentPlan ? (
                         'Plan Actual'
                       ) : isFree ? (
