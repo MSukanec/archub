@@ -212,21 +212,30 @@ export function registerContactRoutes(app: Express, deps: RoutesDeps) {
 
 ---
 
-### Dominio 4: **Community** (0/4 endpoints refactorizados)
+### Dominio 4: **Community** ✅ (4/4 endpoints refactorizados)
 
-**Endpoints actuales** ❌:
-- `/api/community/stats.ts` (estadísticas globales)
-- `/api/community/organizations.ts` (organizaciones públicas)
-- `/api/community/projects.ts` (proyectos públicos)
-- `/api/community/active-users.ts` (usuarios activos)
+**Handlers creados** ✅:
+- `handlers/community/getStats.ts` (51 líneas - query con 3 COUNTs)
+- `handlers/community/getOrganizations.ts` (47 líneas - lista organizaciones activas)
+- `handlers/community/getProjects.ts` (95 líneas - query complejo con COALESCE para JSON)
+- `handlers/community/getActiveUsers.ts` (62 líneas - ventana de 5 minutos)
 
-**Handlers a crear**:
-- `handlers/community/getStats.ts`
-- `handlers/community/getOrganizations.ts`
-- `handlers/community/getProjects.ts`
-- `handlers/community/getActiveUsers.ts`
+**Endpoints refactorizados** ✅:
+- `/api/community/stats.ts` (33 líneas wrapper, reducido de 35)
+- `/api/community/organizations.ts` (33 líneas wrapper, reducido de 36)
+- `/api/community/projects.ts` (33 líneas wrapper, reducido de 74)
+- `/api/community/active-users.ts` (33 líneas wrapper, reducido de 41)
 
-**Estimado**: 2.5 horas
+**Características técnicas**:
+- ✅ Usan Neon SQL (no Drizzle) para mantener consistencia con código original
+- ✅ Context pattern: `{ sql: NeonQueryFunction }`
+- ✅ TypeScript interfaces completas para todas las respuestas
+- ✅ Normalización de datos numéricos (stats)
+- ✅ Utility function `getFiveMinutesAgo()` en getActiveUsers
+- ✅ Preserva lógica compleja de COALESCE para lat/lng en projects
+- ✅ Status codes correctos (500 para errores backend)
+
+**Tiempo real**: 1.5 horas
 
 ---
 
@@ -532,14 +541,14 @@ Domain: _____________
 - [ ] **Fase 0: Seguridad** (PENDIENTE - CRÍTICO)
 - [x] **Fase 1: Organization** (6/6 endpoints - 100%)
 - [x] **Fase 2: Contacts** (1/1 endpoint - 100%)
-- [ ] **Fase 3: Community** (0%)
+- [x] **Fase 3: Community** (4/4 endpoints - 100%)
 - [ ] **Fase 4: Projects** (0%)
 - [ ] **Fase 5: Payments** (0%)
 - [ ] **Fase 6: Learning** (0%)
 - [x] **Fase 7: Admin** (11/11 endpoints - 100%)
 - [ ] **Fase 8: Personnel** (0%)
 
-**Progreso total**: ~38% (22 de ~60 endpoints)
+**Progreso total**: ~43% (26 de ~60 endpoints)
 
 ---
 
@@ -581,5 +590,5 @@ try {
 ---
 
 **Última actualización**: 2025-11-13  
-**Versión**: 1.3  
-**Estado**: 3 dominios completados - Admin (11 endpoints, 7 handlers) + Organization (6 endpoints, 5 handlers) + Contacts (1 endpoint, lógica compleja de enrichment)
+**Versión**: 1.4  
+**Estado**: 4 dominios completados - Admin (11 endpoints, 7 handlers) + Organization (6 endpoints, 5 handlers) + Contacts (1 endpoint, enrichment) + Community (4 endpoints, 4 handlers, Neon SQL)
