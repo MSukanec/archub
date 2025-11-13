@@ -7,7 +7,7 @@ import { getCourse, updateCourse, deleteCourse } from "../../_lib/handlers/admin
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     // Verify admin access
-    await verifyAdminUser(req.headers.authorization);
+    await verifyAdminUser(req.headers.authorization ?? "");
 
     // Get service role client (bypasses RLS)
     const url = process.env.SUPABASE_URL;

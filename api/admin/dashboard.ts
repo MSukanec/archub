@@ -1,188 +1,52 @@
 // api/admin/dashboard.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { verifyAdminUser, AuthError } from "./auth-helper";
+import { verifyAdminUser, HttpError } from "../_lib/auth-helpers.js";
+import { getDashboardStats } from "../_lib/handlers/admin/dashboard.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    const authHeader = req.headers.authorization || "";
+    // Verify admin access
+    await verifyAdminUser(req.headers.authorization ?? "");
 
-    try {
-      await verifyAdminUser(authHeader);
-    } catch (error) {
-      if (error instanceof AuthError) {
-        return res.status(error.statusCode).json({ error: error.message });
-      }
-      console.error("Auth error:", error);
-      return res.status(500).json({ error: "Internal error" });
-    }
-
+    // Get service role client (bypasses RLS)
     const url = process.env.SUPABASE_URL;
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!url || !serviceKey) {
-      return res
-        .status(500)
-        .json({ error: "Missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY" });
+      return res.status(500).json({ error: "Missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY" });
     }
 
     const supabase = createClient(url, serviceKey, {
       auth: { persistSession: false },
     });
 
+    const ctx = { supabase };
+
     if (req.method === "GET") {
-      // GET /api/admin/dashboard - Get dashboard statistics
+      // GET /api/admin/dashboard - Get admin dashboard stats
+      const result = await getDashboardStats(ctx);
       
-      // Calculate date ranges
-      const now = new Date();
-      const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const thisMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      const nextMonthEnd = new Date(now.getFullYear(), now.getMonth() + 2, 0);
-      const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
-
-      // Fetch courses
-      const { data: courses, error: coursesError } = await supabase
-        .from('courses')
-        .select('id, is_active');
-
-      console.log('📚 Courses query:', { courses, coursesError });
-
-      const totalCourses = courses?.length || 0;
-      const activeCourses = courses?.filter(c => c.is_active).length || 0;
-
-      // Fetch enrollments
-      const { data: enrollments, error: enrollmentsError } = await supabase
-        .from('course_enrollments')
-        .select('id, status, expires_at, started_at');
-
-      console.log('👥 Enrollments query:', { enrollments, enrollmentsError });
-
-      const totalEnrollments = enrollments?.length || 0;
-      const activeEnrollments = enrollments?.filter(e => 
-        e.status === 'active' && 
-        (!e.expires_at || new Date(e.expires_at) > now)
-      ).length || 0;
-
-      const expiringThisMonth = enrollments?.filter(e => {
-        if (!e.expires_at) return false;
-        const expDate = new Date(e.expires_at);
-        return expDate > now && expDate <= thisMonthEnd;
-      }).length || 0;
-
-      const expiringNextMonth = enrollments?.filter(e => {
-        if (!e.expires_at) return false;
-        const expDate = new Date(e.expires_at);
-        return expDate > thisMonthEnd && expDate <= nextMonthEnd;
-      }).length || 0;
-
-      // Fetch payments
-      const { data: payments, error: paymentsError } = await supabase
-        .from('payments')
-        .select('*');
-
-      console.log('💰 Payments query result (ALL RECORDS):');
-      console.log('  - Error:', JSON.stringify(paymentsError, null, 2));
-      console.log('  - Count:', payments?.length || 0);
-      console.log('  - Raw data:', JSON.stringify(payments, null, 2));
-      
-      const completedPayments = payments?.filter(p => p.status === 'completed') || [];
-      console.log('  - Completed count:', completedPayments.length);
-      console.log('  - Completed data:', JSON.stringify(completedPayments, null, 2));
-
-      const totalRevenue = completedPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-
-      const revenueThisMonth = completedPayments.filter(p => {
-        const date = new Date(p.created_at);
-        return date >= thisMonthStart && date <= thisMonthEnd;
-      }).reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-
-      const revenueLastMonth = completedPayments.filter(p => {
-        const date = new Date(p.created_at);
-        return date >= lastMonthStart && date <= lastMonthEnd;
-      }).reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-
-      // Fetch progress
-      const { data: progress } = await supabase
-        .from('course_lesson_progress')
-        .select('progress_pct');
-
-      const avgCompletionRate = progress?.length 
-        ? progress.reduce((sum, p) => sum + (Number(p.progress_pct) || 0), 0) / progress.length
-        : 0;
-
-      // Fetch recent enrollments
-      const { data: recentEnrollments } = await supabase
-        .from('course_enrollments')
-        .select(`
-          id,
-          started_at,
-          expires_at,
-          status,
-          users!inner(full_name, email),
-          courses!inner(title)
-        `)
-        .order('started_at', { ascending: false })
-        .limit(10);
-
-      // Fetch expiring soon
-      const { data: expiringSoon } = await supabase
-        .from('course_enrollments')
-        .select(`
-          id,
-          started_at,
-          expires_at,
-          status,
-          users!inner(full_name, email),
-          courses!inner(title)
-        `)
-        .not('expires_at', 'is', null)
-        .order('expires_at', { ascending: true })
-        .limit(10);
-
-      const responseData = {
-        stats: {
-          totalCourses,
-          activeCourses,
-          totalEnrollments,
-          activeEnrollments,
-          expiringThisMonth,
-          expiringNextMonth,
-          totalRevenue,
-          revenueThisMonth,
-          revenueLastMonth,
-          avgCompletionRate
-        },
-        recentEnrollments: recentEnrollments || [],
-        expiringSoon: (expiringSoon || []).filter(e => {
-          const expDate = new Date(e.expires_at!);
-          const daysUntilExpiry = Math.floor((expDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-          return daysUntilExpiry > 0 && daysUntilExpiry <= 30;
-        }),
-        _debug: {
-          paymentsError: paymentsError,
-          paymentsCount: payments?.length || 0,
-          paymentsData: payments,
-          completedCount: completedPayments.length,
-          completedData: completedPayments
-        }
-      };
-
-      console.log('📊 Dashboard response:', JSON.stringify(responseData, null, 2));
+      if (!result.success) {
+        return res.status(500).json({ error: result.error });
+      }
 
       // Prevent caching
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
       
-      return res.status(200).json(responseData);
+      return res.status(200).json(result.data);
 
     } else {
       return res.status(405).json({ error: "Method not allowed" });
     }
 
   } catch (err: any) {
-    console.error(err);
+    if (err instanceof HttpError) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+    console.error("Unexpected error:", err);
     return res.status(500).json({ error: "Internal error" });
   }
 }

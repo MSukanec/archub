@@ -1,8 +1,8 @@
-// api/admin/modules.ts
+// api/admin/coupons.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
 import { verifyAdminUser, HttpError } from "../_lib/auth-helpers.js";
-import { listModules, createModule } from "../_lib/handlers/admin/modules.js";
+import { createCoupon } from "../_lib/handlers/admin/coupons.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -23,16 +23,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const ctx = { supabase };
 
-    if (req.method === "GET") {
-      // GET /api/admin/modules - List all modules (optionally filtered by course_id)
-      const result = await listModules(ctx, { course_id: req.query.course_id as string });
-      return result.success 
-        ? res.status(200).json(result.data)
-        : res.status(500).json({ error: result.error });
-
-    } else if (req.method === "POST") {
-      // POST /api/admin/modules - Create new module
-      const result = await createModule(ctx, req.body);
+    if (req.method === "POST") {
+      // POST /api/admin/coupons - Create new coupon
+      const result = await createCoupon(ctx, req.body);
       return result.success 
         ? res.status(200).json(result.data)
         : res.status(500).json({ error: result.error });

@@ -1,8 +1,8 @@
-// api/admin/modules.ts
+// api/admin/users/[id].ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { verifyAdminUser, HttpError } from "../_lib/auth-helpers.js";
-import { listModules, createModule } from "../_lib/handlers/admin/modules.js";
+import { verifyAdminUser, HttpError } from "../../_lib/auth-helpers.js";
+import { updateUser } from "../../_lib/handlers/admin/users.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -22,17 +22,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     const ctx = { supabase };
+    const { id } = req.query;
 
-    if (req.method === "GET") {
-      // GET /api/admin/modules - List all modules (optionally filtered by course_id)
-      const result = await listModules(ctx, { course_id: req.query.course_id as string });
-      return result.success 
-        ? res.status(200).json(result.data)
-        : res.status(500).json({ error: result.error });
+    if (!id || typeof id !== 'string') {
+      return res.status(400).json({ error: "User ID is required" });
+    }
 
-    } else if (req.method === "POST") {
-      // POST /api/admin/modules - Create new module
-      const result = await createModule(ctx, req.body);
+    if (req.method === "PATCH") {
+      // PATCH /api/admin/users/[id] - Update user (deactivate)
+      const result = await updateUser(ctx, { id }, req.body);
       return result.success 
         ? res.status(200).json(result.data)
         : res.status(500).json({ error: result.error });
