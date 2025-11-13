@@ -57,6 +57,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerSupportRoutes(app, deps);
 
   // ============================================
+  // Community Routes (Proxy to Vercel functions)
+  // ============================================
+  
+  app.get("/api/community/stats", async (req, res) => {
+    try {
+      const handler = await import('../api/community/stats');
+      await handler.default(req as any, res as any);
+    } catch (error: any) {
+      console.error("[community/stats] Error:", error);
+      res.status(500).json({ error: error.message || String(error) });
+    }
+  });
+
+  app.get("/api/community/organizations", async (req, res) => {
+    try {
+      const handler = await import('../api/community/organizations');
+      await handler.default(req as any, res as any);
+    } catch (error: any) {
+      console.error("[community/organizations] Error:", error);
+      res.status(500).json({ error: error.message || String(error) });
+    }
+  });
+
+  app.get("/api/community/projects", async (req, res) => {
+    try {
+      const handler = await import('../api/community/projects');
+      await handler.default(req as any, res as any);
+    } catch (error: any) {
+      console.error("[community/projects] Error:", error);
+      res.status(500).json({ error: error.message || String(error) });
+    }
+  });
+
+  app.get("/api/community/active-users", async (req, res) => {
+    try {
+      const handler = await import('../api/community/active-users');
+      await handler.default(req as any, res as any);
+    } catch (error: any) {
+      console.error("[community/active-users] Error:", error);
+      res.status(500).json({ error: error.message || String(error) });
+    }
+  });
+
+  // ============================================
   // Organization Member Invitation (Proxy to Vercel function)
   // ============================================
   
