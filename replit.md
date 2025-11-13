@@ -6,7 +6,7 @@ Seencel is a comprehensive construction management platform designed to optimize
 ## Recent Changes
 
 ### Backend Refactor Progress (November 2025)
-**Completed Domains: 6/8 (~68%)**
+**Completed Domains: 7/8 (~88%)**
 
 ✅ **Organization Domain** (6 endpoints) - Invitation system, member management  
 ✅ **Contacts Domain** (1 endpoint) - Professional contacts with 5-query enrichment  
@@ -14,6 +14,7 @@ Seencel is a comprehensive construction management platform designed to optimize
 ✅ **Admin Domain** (11 endpoints) - Dashboard, courses, modules, lessons, enrollments, users, coupons  
 ✅ **Learning Domain** (6 endpoints) - Dashboard (2 variants), courses, progress tracking, notes  
 ✅ **Projects Domain** (12 endpoints) - Projects CRUD, budgets, budget items with complete security layer
+✅ **Payments Domain** (8 endpoints) - Centralized checkout with MercadoPago and PayPal integration, server-side pricing, critical security fixes
 
 **Architecture Pattern:**
 - Handlers in `api/_lib/handlers/` with framework-agnostic logic
@@ -28,6 +29,7 @@ Seencel is a comprehensive construction management platform designed to optimize
 - **getCoursesFull**: 3 parallel queries with comprehensive error checks
 - **Admin auth**: Unified `verifyAdminUser()` across Express + Vercel
 - **Projects security**: Complete auth + org access enforcement across 12 handlers with derived created_by
+- **Payments refactor**: Eliminated 1,355 LOC of duplication, centralized checkout logic, fixed critical auth vulnerabilities
 - **Code reduction**: 46-83% reduction in endpoint line counts
 - **Zero regressions**: All refactors architect-reviewed and approved
 
@@ -82,7 +84,7 @@ Preferred communication style: Simple, everyday language.
 - **Personnel Module Organization**: Reorganized into modular components.
 - **Personnel Assignment Modal Optimization**: Enhanced with real-time search filtering and optimized loading.
 - **AI Code Architecture**: Dual-location AI code structure to support both development (Express) and production (Vercel serverless). The authoritative AI implementation lives in `api/_lib/ai/` for Vercel bundling. A mirror copy exists in `src/ai/` for Vite HMR compatibility during development. All AI-related changes must be made in `api/_lib/ai/`.
-- **Payment Endpoints Architecture** (November 2025): Refactored from unified endpoints to product-specific endpoints for better separation of concerns. New architecture: 4 domain-specific endpoints (`/api/paypal/create-course-order`, `/api/paypal/create-subscription-order`, `/api/mp/create-course-preference`, `/api/mp/create-subscription-preference`) with shared utility helpers. All endpoints enforce server-side pricing from `course_prices` and `plan_prices` tables (no client-controlled amounts). Both PayPal and MercadoPago support discount coupons for courses with server-side validation via Supabase RPC. Legacy unified endpoints (`/api/paypal/create-order`, `/api/mp/create-preference`) are deprecated but remain functional for backward compatibility.
+- **Payment Endpoints Architecture** (November 2025): Complete refactor of payment domain with centralized checkout architecture. New structure: `/api/checkout/mp/` (3 endpoints) and `/api/checkout/paypal/` (5 endpoints) with 27 shared handlers and helpers (`api/_lib/handlers/checkout/`). Architecture includes: 12 shared helpers (CORS, auth, pricing, permissions, coupons, user, urls, events, payments, enrollments, subscriptions, helpers), 7 provider-specific helpers (MP: config, api, encoding; PayPal: config, auth, api, encoding), and 8 pure handlers. All endpoints enforce critical security validations: (1) server-side pricing from database tables, (2) admin role verification for subscriptions, (3) server-side coupon validation via RPC, (4) test/production mode detection, (5) authentication required with user_id derived from auth token (not request body), (6) idempotent payment processing, (7) webhook secret validation. Legacy routes (`/api/mp/`, `/api/paypal/`) remain functional as thin wrappers for backward compatibility. **Total reduction: 1,355 lines of duplicated code eliminated.**
 
 ## External Dependencies
 - **Supabase**: Authentication.
