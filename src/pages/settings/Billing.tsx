@@ -540,33 +540,23 @@ const Billing = () => {
           </StatCard>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Historial de Facturación</CardTitle>
-            <CardDescription>
-              Descarga tus facturas y revisa el historial de pagos
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table
-              columns={columns}
-              data={payments}
-              isLoading={paymentsLoading}
-              rowActions={(payment: Payment) => [
-                {
-                  icon: Download,
-                  label: 'Descargar',
-                  onClick: () => console.log('Download invoice:', payment.id)
-                }
-              ]}
-              emptyStateConfig={{
-                icon: <Inbox />,
-                title: 'No hay facturas',
-                description: 'Tus facturas aparecerán aquí cuando realices pagos.',
-              }}
-            />
-          </CardContent>
-        </Card>
+        <Table
+          columns={columns}
+          data={payments}
+          isLoading={paymentsLoading}
+          rowActions={(payment: Payment) => [
+            {
+              icon: Download,
+              label: 'Descargar',
+              onClick: () => console.log('Download invoice:', payment.id)
+            }
+          ]}
+          emptyStateConfig={{
+            icon: <Inbox />,
+            title: 'No hay facturas',
+            description: 'Tus facturas aparecerán aquí cuando realices pagos.',
+          }}
+        />
       </div>
     </Layout>
   );

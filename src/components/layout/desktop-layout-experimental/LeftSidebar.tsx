@@ -892,18 +892,28 @@ export function LeftSidebar() {
                             )}
                             
                             {/* Items de la sección */}
-                            {navItem.items.map((item) => (
-                              <ButtonSidebar
-                                key={item.id}
-                                icon={<item.icon className="w-[18px] h-[18px]" />}
-                                label={item.label}
-                                isActive={location === item.href}
-                                isExpanded={isExpanded}
-                                onClick={() => navigate(item.href)}
-                                href={item.href}
-                                variant="secondary"
-                              />
-                            ))}
+                            {navItem.items.map((item) => {
+                              const button = (
+                                <ButtonSidebar
+                                  key={item.id}
+                                  icon={<item.icon className="w-[18px] h-[18px]" />}
+                                  label={item.label}
+                                  isActive={location === item.href}
+                                  isExpanded={isExpanded}
+                                  onClick={() => navigate(item.href)}
+                                  href={item.href}
+                                  variant="secondary"
+                                />
+                              );
+
+                              return item.restricted ? (
+                                <PlanRestricted key={item.id} reason={item.restricted}>
+                                  {button}
+                                </PlanRestricted>
+                              ) : (
+                                button
+                              );
+                            })}
                             
                             {/* Espacio entre secciones (solo si no es la última y está expandido) */}
                             {sectionIndex < navigationItems.length - 1 && isExpanded && (

@@ -97,33 +97,19 @@ export function PlanRestricted({
     if (isAdmin) {
       // Admin bypass: permitir acceso pero con opacidad reducida
       return (
-        <div className="relative inline-flex">
-          <div className="opacity-40">
-            {children}
-          </div>
-          <Badge 
-            className="absolute -top-1 -right-1 text-[9px] px-1.5 py-0 h-4 bg-orange-500 hover:bg-orange-500 border-0"
-          >
-            PRÓX
-          </Badge>
+        <div className="opacity-40">
+          {children}
         </div>
       );
     }
     
-    // Usuario normal: bloquear completamente con badge visible
+    // Usuario normal: bloquear completamente
     return (
-      <div className="relative inline-flex">
-        <div className="opacity-40 pointer-events-none cursor-not-allowed">
-          {React.cloneElement(children as React.ReactElement, {
-            disableHover: true,
-            onClick: undefined
-          })}
-        </div>
-        <Badge 
-          className="absolute -top-1 -right-1 text-[9px] px-1.5 py-0 h-4 bg-orange-500 hover:bg-orange-500 border-0 pointer-events-none"
-        >
-          PRÓX
-        </Badge>
+      <div className="opacity-40 pointer-events-none cursor-not-allowed">
+        {React.cloneElement(children as React.ReactElement, {
+          disableHover: true,
+          onClick: undefined
+        })}
       </div>
     );
   }

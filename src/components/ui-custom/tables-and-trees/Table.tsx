@@ -567,8 +567,8 @@ export function Table<T = any>({
               </Popover>
             )}
 
-            {/* Botón de filtros */}
-            {showFilter && (
+            {/* Botón de filtros - Solo mostrar si hay renderFilterContent configurado */}
+            {showFilter && topBar?.renderFilterContent && (
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -600,7 +600,7 @@ export function Table<T = any>({
                         <span className="text-xs">Limpiar Filtros</span>
                       </Button>
                     )}
-                    {(topBar?.renderFilterContent ?? defaultFilterContent)()}
+                    {topBar.renderFilterContent()}
                   </div>
                 </PopoverContent>
               </Popover>
