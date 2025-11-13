@@ -468,7 +468,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("[MP success-handler] Error:", error);
       res.status(500).send(`
         <!DOCTYPE html>
-        <html><head><title>Error - Archub</title><meta charset="UTF-8"></head>
+        <html><head><title>Error - Seencel</title><meta charset="UTF-8"></head>
         <body style="font-family: system-ui; text-align: center; padding: 2rem;">
           <h1>⚠️ Error</h1>
           <p>Hubo un problema al procesar tu pago: ${error.message}</p>
