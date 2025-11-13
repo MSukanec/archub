@@ -1,6 +1,8 @@
+// api/community/stats.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { neon } from '@neondatabase/serverless';
-import { extractToken, requireUser } from '../_lib/auth-helpers';
+import { extractToken, requireUser } from '../_lib/auth-helpers.js';
+import { getStats } from '../_lib/handlers/community/getStats.js';
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -13,21 +15,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const token = extractToken(req.headers.authorization);
     await requireUser(token);
 
-    const [stats] = await sql`
-      SELECT 
-        (SELECT COUNT(*) FROM organizations) as "totalOrganizations",
-        (SELECT COUNT(*) FROM projects) as "totalProjects",
-        (SELECT COUNT(DISTINCT user_id) FROM organization_members) as "totalMembers"
-    `;
+    const ctx = { sql };
+    const result = await getStats(ctx);
 
-    return res.status(200).json({
-      totalOrganizations: Number(stats.totalOrganizations) || 0,
-      totalProjects: Number(stats.totalProjects) || 0,
-      totalMembers: Number(stats.totalMembers) || 0
-    });
+    if (result.success) {
+      return res.status(200).json(result.data);
+    } else {
+      return res.status(500).json({ error: result.error });
+    }
 
   } catch (error: any) {
-    console.error('Error fetching community stats:', error);
+    console.error('Error in community stats endpoint:', error);
     return res.status(500).json({ 
       error: error.message || 'Internal server error'
     });

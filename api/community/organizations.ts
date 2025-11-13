@@ -1,6 +1,8 @@
+// api/community/organizations.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { neon } from '@neondatabase/serverless';
-import { extractToken, requireUser } from '../_lib/auth-helpers';
+import { extractToken, requireUser } from '../_lib/auth-helpers.js';
+import { getOrganizations } from '../_lib/handlers/community/getOrganizations.js';
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -13,22 +15,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const token = extractToken(req.headers.authorization);
     await requireUser(token);
 
-    const organizations = await sql`
-      SELECT 
-        id,
-        name,
-        logo_url,
-        created_at
-      FROM organizations
-      WHERE is_active = true
-      ORDER BY created_at DESC
-      LIMIT 20
-    `;
+    const ctx = { sql };
+    const result = await getOrganizations(ctx);
 
-    return res.status(200).json(organizations);
+    if (result.success) {
+      return res.status(200).json(result.data);
+    } else {
+      return res.status(500).json({ error: result.error });
+    }
 
   } catch (error: any) {
-    console.error('Error fetching community organizations:', error);
+    console.error('Error in community organizations endpoint:', error);
     return res.status(500).json({ 
       error: error.message || 'Internal server error'
     });

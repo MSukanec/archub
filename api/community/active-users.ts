@@ -1,6 +1,8 @@
+// api/community/active-users.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { neon } from '@neondatabase/serverless';
-import { extractToken, requireUser } from '../_lib/auth-helpers';
+import { extractToken, requireUser } from '../_lib/auth-helpers.js';
+import { getActiveUsers } from '../_lib/handlers/community/getActiveUsers.js';
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -13,27 +15,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const token = extractToken(req.headers.authorization);
     await requireUser(token);
 
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    const ctx = { sql };
+    const result = await getActiveUsers(ctx);
 
-    const activeUsers = await sql`
-      SELECT 
-        u.id,
-        COALESCE(u.full_name, u.first_name, 'Usuario') as name,
-        u.avatar_url,
-        up.last_activity,
-        up.current_page
-      FROM user_presence up
-      JOIN users u ON u.id = up.user_id
-      WHERE up.last_activity >= ${fiveMinutesAgo}
-        AND up.is_online = true
-      ORDER BY up.last_activity DESC
-      LIMIT 50
-    `;
-
-    return res.status(200).json(activeUsers);
+    if (result.success) {
+      return res.status(200).json(result.data);
+    } else {
+      return res.status(500).json({ error: result.error });
+    }
 
   } catch (error: any) {
-    console.error('Error fetching active users:', error);
+    console.error('Error in community active users endpoint:', error);
     return res.status(500).json({ 
       error: error.message || 'Internal server error'
     });
