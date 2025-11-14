@@ -358,7 +358,13 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
       }
 
       if (!financialData || financialData.length === 0) {
-        return res.json([]);
+        return res.json({
+          plan: {
+            slug: planSlug,
+            isMultiCurrency
+          },
+          clients: []
+        });
       }
 
       // Get unique project_client_ids
