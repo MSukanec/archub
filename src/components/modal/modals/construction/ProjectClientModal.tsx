@@ -136,7 +136,7 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
       const payload: any = {
         organization_id: organizationId,
         unit: data.unit || null,
-        client_role_id: data.clientRoleId || null,
+        client_role_id: (data.clientRoleId && data.clientRoleId !== '') ? data.clientRoleId : null,
         status: data.status || 'active',
         is_primary: data.isPrimary === 'yes',
         notes: data.notes || null,
@@ -268,15 +268,12 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {clientRoles.length === 0 ? (
-                    <SelectItem value="_none" disabled>No hay roles disponibles</SelectItem>
-                  ) : (
-                    clientRoles.map((role: any) => (
-                      <SelectItem key={role.id} value={role.id}>
-                        {role.name}
-                      </SelectItem>
-                    ))
-                  )}
+                  <SelectItem value="">Sin rol</SelectItem>
+                  {clientRoles.map((role: any) => (
+                    <SelectItem key={role.id} value={role.id}>
+                      {role.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />
