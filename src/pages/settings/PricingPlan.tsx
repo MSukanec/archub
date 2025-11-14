@@ -46,6 +46,13 @@ export default function PricingPlan() {
     queryKey: ['/api/subscriptions/current'],
     enabled: isAuthenticated
   });
+
+  // Fetch billable members count for Teams plan estimation
+  const organizationId = userData?.organization?.id;
+  const { data: billableMembersData } = useQuery({
+    queryKey: ['/api/billing/next-invoice', organizationId],
+    enabled: isAuthenticated && !!organizationId
+  });
   
   // Plan hierarchy: FREE < PRO < TEAMS < ENTERPRISE
   const getPlanLevel = (planName: string): number => {
@@ -510,12 +517,25 @@ export default function PricingPlan() {
                           </div>
                         )}
                         {plan.billing_type === 'per_user' && plan.name.toLowerCase() === 'teams' && (
-                          <div className={cn(
-                            "text-xs mt-0.5",
-                            isPopular ? "text-gray-500" : "text-[var(--text-muted)]"
-                          )}>
-                            Por usuario/asiento
-                          </div>
+                          <>
+                            <div className={cn(
+                              "text-xs mt-0.5",
+                              isPopular ? "text-gray-500" : "text-[var(--text-muted)]"
+                            )}>
+                              Por usuario/asiento
+                            </div>
+                            {billableMembersData && billableMembersData.seats > 0 && (
+                              <div className={cn(
+                                "text-xs mt-1 font-medium",
+                                isPopular ? "text-gray-400" : "text-[var(--text-muted)]"
+                              )}>
+                                Costo estimado: USD {(billableMembersData.seats * Number(monthlyPrice)).toFixed(2)}/mes
+                                <span className="text-[10px] ml-1">
+                                  ({billableMembersData.seats} miembro{billableMembersData.seats > 1 ? 's' : ''} × ${monthlyPrice})
+                                </span>
+                              </div>
+                            )}
+                          </>
                         )}
                       </>
                     )}

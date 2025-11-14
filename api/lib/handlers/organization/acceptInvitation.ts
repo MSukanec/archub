@@ -1,6 +1,7 @@
 // api/lib/handlers/organization/acceptInvitation.ts
 import { SupabaseClient } from "@supabase/supabase-js";
 import { HttpError } from "../../auth-helpers.js";
+import { registerMemberEvent } from "../../billing/events.js";
 
 export async function acceptInvitation(
   supabase: SupabaseClient,
@@ -84,14 +85,17 @@ export async function acceptInvitation(
   }
 
   // Create organization member AFTER status update
-  const { error: memberError } = await supabase
+  const { data: newMember, error: memberError } = await supabase
     .from('organization_members')
     .insert({
       organization_id: invitation.organization_id,
       user_id: userId,
       role_id: invitation.role_id,
       is_active: true,
-    });
+      is_billable: true,
+    })
+    .select('id, is_billable')
+    .single();
 
   if (memberError) {
     console.error('Error creating organization member:', memberError);
@@ -99,6 +103,17 @@ export async function acceptInvitation(
     // This is a safer failure mode than the reverse
     throw new HttpError(500, 'Failed to create organization member. Please contact support.');
   }
+
+  // Register member_added event for billing
+  await registerMemberEvent(supabase, {
+    organizationId: invitation.organization_id,
+    memberId: newMember.id,
+    userId: userId,
+    eventType: 'member_added',
+    wasBillable: null,
+    isBillable: newMember.is_billable,
+    performedBy: userId,
+  });
 
   return { success: true };
 }

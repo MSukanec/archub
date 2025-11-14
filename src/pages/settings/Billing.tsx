@@ -55,6 +55,16 @@ interface Payment {
   created_at: string;
 }
 
+interface NextInvoice {
+  seats: number;
+  pricePerSeat: number;
+  baseAmount: number;
+  prorationAdjustment: number;
+  totalAmount: number;
+  currency: string;
+  nextBillingDate: string | null;
+}
+
 const Billing = () => {
   const { currentOrganizationId } = useProjectContext();
   const { setSidebarLevel } = useNavigationStore();
@@ -198,6 +208,21 @@ const Billing = () => {
     enabled: !!currentOrganizationId && !!supabase,
   });
 
+  // Calculate plan slug early for conditional queries
+  const planSlug = organization?.plans?.slug || subscription?.plans?.slug || 'free';
+  const isTeamsPlan = planSlug === 'teams';
+
+  // Per-seat billing data (only for Teams plan)
+  const { data: nextInvoice } = useQuery<NextInvoice>({
+    queryKey: ['/api/billing/next-invoice', currentOrganizationId],
+    enabled: !!currentOrganizationId && isTeamsPlan,
+  });
+
+  const { data: billingCycles = [] } = useQuery<any[]>({
+    queryKey: ['/api/billing/cycles', currentOrganizationId],
+    enabled: !!currentOrganizationId && isTeamsPlan,
+  });
+
   const cancelSubscriptionMutation = useMutation({
     mutationFn: async (subscriptionId: string) => {
       return await apiRequest('POST', `/api/subscriptions/${subscriptionId}/cancel`);
@@ -220,7 +245,6 @@ const Billing = () => {
   });
 
   const planName = organization?.plans?.name || subscription?.plans?.name || 'Free';
-  const planSlug = organization?.plans?.slug || subscription?.plans?.slug || 'free';
   const billingPeriod = subscription?.billing_period === 'monthly' ? 'mes' : 'año';
   const amount = subscription?.amount || 0;
   const currency = subscription?.currency || 'USD';
@@ -539,6 +563,104 @@ const Billing = () => {
             )}
           </StatCard>
         </div>
+
+        {/* Per-Seat Billing Section - Only for Teams Plan */}
+        {isTeamsPlan && (
+          <div className="space-y-6">
+            {/* Next Invoice Card */}
+            {nextInvoice && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Próxima Factura Estimada</CardTitle>
+                  <CardDescription>
+                    Resumen de tu próxima facturación basada en tus miembros activos
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-sm text-muted-foreground">Miembros facturables:</span>
+                      <span className="font-medium">{nextInvoice.seats}</span>
+                    </div>
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-sm text-muted-foreground">Precio por asiento:</span>
+                      <span className="font-medium">{nextInvoice.currency} ${nextInvoice.pricePerSeat.toFixed(2)}</span>
+                    </div>
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-sm text-muted-foreground">Monto base:</span>
+                      <span className="font-medium">{nextInvoice.currency} ${nextInvoice.baseAmount.toFixed(2)}</span>
+                    </div>
+                    {nextInvoice.prorationAdjustment !== 0 && (
+                      <div className="flex items-center justify-between py-2">
+                        <span className="text-sm text-muted-foreground">Ajuste de prorrateo:</span>
+                        <span className={cn(
+                          "font-medium",
+                          nextInvoice.prorationAdjustment > 0 ? "text-orange-600" : "text-green-600"
+                        )}>
+                          {nextInvoice.prorationAdjustment > 0 ? '+' : ''}
+                          {nextInvoice.currency} ${nextInvoice.prorationAdjustment.toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between py-2 border-t pt-4">
+                      <span className="font-semibold">Total:</span>
+                      <span className="text-2xl font-bold">{nextInvoice.currency} ${nextInvoice.totalAmount.toFixed(2)}</span>
+                    </div>
+                    {nextInvoice.nextBillingDate && (
+                      <div className="text-sm text-muted-foreground text-center">
+                        Próxima fecha de facturación: {format(new Date(nextInvoice.nextBillingDate), 'dd MMM yyyy', { locale: es })}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Billing Cycles Table */}
+            {billingCycles.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Historial de Ciclos de Facturación</CardTitle>
+                  <CardDescription>
+                    Últimos 12 ciclos de facturación con detalles de asientos
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Período</th>
+                          <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Asientos</th>
+                          <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Monto</th>
+                          <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Estado</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {billingCycles.map((cycle: any) => (
+                          <tr key={cycle.id} className="border-b last:border-0">
+                            <td className="py-3 px-4 text-sm">
+                              {format(new Date(cycle.period_start), 'dd MMM', { locale: es })} - {format(new Date(cycle.period_end), 'dd MMM yyyy', { locale: es })}
+                            </td>
+                            <td className="py-3 px-4 text-sm">{cycle.seats}</td>
+                            <td className="py-3 px-4 text-sm font-medium">
+                              {cycle.currency_code} ${parseFloat(cycle.total_amount).toFixed(2)}
+                            </td>
+                            <td className="py-3 px-4">
+                              <Badge variant={cycle.status === 'paid' ? 'default' : 'secondary'} className="text-xs">
+                                {cycle.status === 'paid' ? 'Pagado' : cycle.status === 'pending' ? 'Pendiente' : 'Cancelado'}
+                              </Badge>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
 
         <Table
           columns={columns}

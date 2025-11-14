@@ -104,8 +104,8 @@ export async function createSubscriptionOrder(
         ? plan.monthly_amount
         : plan.annual_amount;
 
-    const amount = Number(priceAmount);
-    if (!Number.isFinite(amount) || amount <= 0) {
+    const basePrice = Number(priceAmount);
+    if (!Number.isFinite(basePrice) || basePrice <= 0) {
       console.error('[PayPal create-subscription-order] Invalid price:', {
         plan_slug,
         billing_period,
@@ -118,6 +118,21 @@ export async function createSubscriptionOrder(
         status: 500,
       };
     }
+
+    // Para el primer pago de TEAMS, SIEMPRE cobrar 1 seat
+    // Los snapshots en billing_cycles guardarán el conteo real para renovaciones futuras
+    const seats = 1; // Primer pago siempre es solo por el admin
+    const amount = basePrice * seats;
+
+    // NOTA: El conteo real de billable members se hace en upgradeOrganizationPlan
+    // para crear el snapshot correcto en organization_billing_cycles
+    console.log('[PayPal create-subscription-order] Seat calculation:', {
+      plan_id: plan.id,
+      billing_period,
+      base_price_per_seat: basePrice,
+      seats,
+      total_amount: amount
+    });
 
     const productId = plan.id;
     const productTitle = `Plan ${plan.name} - ${billing_period === "monthly" ? "Monthly" : "Annual"}`;

@@ -123,9 +123,9 @@ export async function createSubscriptionPreference(req: VercelRequest): Promise<
 
     // 7. SECURITY: Get price from plans table (USD base) and convert if needed
     const priceAmount = billing_period === 'monthly' ? plan.monthly_amount : plan.annual_amount;
-    let unit_price = Number(priceAmount);
+    let basePrice = Number(priceAmount);
 
-    if (!Number.isFinite(unit_price) || unit_price <= 0) {
+    if (!Number.isFinite(basePrice) || basePrice <= 0) {
       console.error('[MP create-subscription-preference] Invalid price:', {
         plan_slug,
         billing_period,
@@ -134,6 +134,21 @@ export async function createSubscriptionPreference(req: VercelRequest): Promise<
       });
       return { success: false, error: "Precio inválido", status: 500 };
     }
+
+    // 7.5. Para el primer pago de TEAMS, SIEMPRE cobrar 1 seat
+    // Los snapshots en billing_cycles guardarán el conteo real para renovaciones futuras
+    const seats = 1; // Primer pago siempre es solo por el admin
+    let unit_price = basePrice * seats;
+
+    // NOTA: El conteo real de billable members se hace en upgradeOrganizationPlan
+    // para crear el snapshot correcto en organization_billing_cycles
+    console.log('[MP create-subscription-preference] Seat calculation:', {
+      plan_id: plan.id,
+      billing_period,
+      base_price_per_seat: basePrice,
+      seats,
+      total_before_conversion: unit_price
+    });
 
     // Si la moneda es ARS, convertir usando exchange_rates
     if (currency === 'ARS') {
