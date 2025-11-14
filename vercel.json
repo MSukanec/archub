@@ -59,6 +59,10 @@
     { "source": "/api/projects", "destination": "/api/projects" },
     { "source": "/api/projects/:id", "destination": "/api/projects/[id]" },
     
+    { "source": "/api/projects/:projectId/clients/summary", "destination": "/api/projects/[projectId]/clients/summary" },
+    { "source": "/api/projects/:projectId/clients/:clientId", "destination": "/api/projects/[projectId]/clients/[clientId]" },
+    { "source": "/api/projects/:projectId/clients", "destination": "/api/projects/[projectId]/clients/index" },
+    
     { "source": "/api/invite-member", "destination": "/api/invite-member" },
     { "source": "/api/organization-members/:organizationId", "destination": "/api/organization-members/[organizationId]" },
     { "source": "/api/pending-invitations/:userId", "destination": "/api/pending-invitations/[userId]" },
