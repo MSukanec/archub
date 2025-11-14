@@ -56,6 +56,10 @@
     { "source": "/api/client-roles", "destination": "/api/client-roles" },
     { "source": "/api/client-roles/:id", "destination": "/api/client-roles/[id]" },
     
+    { "source": "/api/projects/:projectId/clients", "destination": "/api/project-clients" },
+    { "source": "/api/projects/:projectId/clients/summary", "destination": "/api/project-clients/summary" },
+    { "source": "/api/projects/:projectId/clients/:id", "destination": "/api/project-clients/[id]" },
+    
     { "source": "/api/projects", "destination": "/api/projects" },
     { "source": "/api/projects/:id", "destination": "/api/projects/[id]" },
     
