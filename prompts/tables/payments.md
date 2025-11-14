@@ -483,3 +483,40 @@ execute FUNCTION archub_sync_user_contact ();
 create trigger trigger_create_contact_on_new_member
 after INSERT on organization_members for EACH row
 execute FUNCTION handle_new_org_member_contact ();
+
+---------- Tabla ORGANIZATION_BILLING_CYCLES:
+
+create table public.organization_billing_cycles (
+  id uuid not null default gen_random_uuid (),
+  organization_id uuid not null,
+  subscription_id uuid null,
+  plan_id uuid not null,
+  seats integer not null,
+  amount_per_seat numeric(10, 2) not null,
+  seat_price_source text null,
+  base_amount numeric(10, 2) not null,
+  proration_adjustment numeric(10, 2) null default 0,
+  total_amount numeric(10, 2) not null,
+  billing_period text not null,
+  period_start timestamp with time zone not null,
+  period_end timestamp with time zone not null,
+  paid boolean null default false,
+  status text null default 'pending'::text,
+  payment_provider text null,
+  payment_id text null,
+  currency_code text not null default 'USD'::text,
+  created_at timestamp with time zone null default now(),
+  updated_at timestamp with time zone null default now(),
+  constraint organization_billing_cycles_pkey primary key (id),
+  constraint organization_billing_cycles_organization_id_fkey foreign KEY (organization_id) references organizations (id),
+  constraint organization_billing_cycles_plan_id_fkey foreign KEY (plan_id) references plans (id),
+  constraint organization_billing_cycles_subscription_id_fkey foreign KEY (subscription_id) references organization_subscriptions (id)
+) TABLESPACE pg_default;
+
+create index IF not exists idx_billing_cycles_org on public.organization_billing_cycles using btree (organization_id) TABLESPACE pg_default;
+
+create index IF not exists idx_billing_cycles_subscription on public.organization_billing_cycles using btree (subscription_id) TABLESPACE pg_default;
+
+create index IF not exists idx_billing_cycles_period on public.organization_billing_cycles using btree (period_start, period_end) TABLESPACE pg_default;
+
+create index IF not exists idx_billing_cycles_status on public.organization_billing_cycles using btree (status) TABLESPACE pg_default;

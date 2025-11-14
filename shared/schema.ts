@@ -1138,6 +1138,41 @@ export const insertOrganizationSubscriptionSchema = createInsertSchema(organizat
   updated_at: true,
 });
 
+// Organization Billing Cycles Table
+export const organization_billing_cycles = pgTable("organization_billing_cycles", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organization_id: uuid("organization_id").notNull(),
+  subscription_id: uuid("subscription_id"),
+  plan_id: uuid("plan_id").notNull(),
+  
+  seats: integer("seats").notNull(),
+  amount_per_seat: numeric("amount_per_seat", { precision: 10, scale: 2 }).notNull(),
+  seat_price_source: text("seat_price_source"),
+  
+  base_amount: numeric("base_amount", { precision: 10, scale: 2 }).notNull(),
+  proration_adjustment: numeric("proration_adjustment", { precision: 10, scale: 2 }).default("0"),
+  total_amount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+  
+  billing_period: text("billing_period").notNull(),
+  period_start: timestamp("period_start", { withTimezone: true }).notNull(),
+  period_end: timestamp("period_end", { withTimezone: true }).notNull(),
+  
+  paid: boolean("paid").default(false),
+  status: text("status").default("pending"),
+  payment_provider: text("payment_provider"),
+  payment_id: text("payment_id"),
+  currency_code: text("currency_code").notNull().default("USD"),
+  
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const insertOrganizationBillingCycleSchema = createInsertSchema(organization_billing_cycles).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
 // Types for payments
 export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
@@ -1149,6 +1184,8 @@ export type PlanPrice = typeof plan_prices.$inferSelect;
 export type InsertPlanPrice = z.infer<typeof insertPlanPriceSchema>;
 export type OrganizationSubscription = typeof organization_subscriptions.$inferSelect;
 export type InsertOrganizationSubscription = z.infer<typeof insertOrganizationSubscriptionSchema>;
+export type OrganizationBillingCycle = typeof organization_billing_cycles.$inferSelect;
+export type InsertOrganizationBillingCycle = z.infer<typeof insertOrganizationBillingCycleSchema>;
 
 // Global Announcements Table
 export const global_announcements = pgTable("global_announcements", {
