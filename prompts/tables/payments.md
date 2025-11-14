@@ -520,3 +520,35 @@ create index IF not exists idx_billing_cycles_subscription on public.organizatio
 create index IF not exists idx_billing_cycles_period on public.organization_billing_cycles using btree (period_start, period_end) TABLESPACE pg_default;
 
 create index IF not exists idx_billing_cycles_status on public.organization_billing_cycles using btree (status) TABLESPACE pg_default;
+
+---------- Tabla ORGANIZATION_MEMBER_EVENTS:
+
+create table public.organization_member_events (
+  id uuid not null default gen_random_uuid (),
+  organization_id uuid not null,
+  subscription_id uuid null,
+  member_id uuid not null,
+  user_id uuid null,
+  event_type text not null,
+  was_billable boolean null,
+  is_billable boolean null,
+  event_date timestamp with time zone not null default now(),
+  performed_by uuid null,
+  created_at timestamp with time zone null default now(),
+  constraint organization_member_events_pkey primary key (id),
+  constraint organization_member_events_member_id_fkey foreign KEY (member_id) references organization_members (id) on delete CASCADE,
+  constraint organization_member_events_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint organization_member_events_performed_by_fkey foreign KEY (performed_by) references users (id),
+  constraint organization_member_events_subscription_id_fkey foreign KEY (subscription_id) references organization_subscriptions (id) on delete set null,
+  constraint organization_member_events_user_id_fkey foreign KEY (user_id) references users (id) on delete set null
+) TABLESPACE pg_default;
+
+create index IF not exists idx_member_events_org on public.organization_member_events using btree (organization_id) TABLESPACE pg_default;
+
+create index IF not exists idx_member_events_subscription on public.organization_member_events using btree (subscription_id) TABLESPACE pg_default;
+
+create index IF not exists idx_member_events_member on public.organization_member_events using btree (member_id) TABLESPACE pg_default;
+
+create index IF not exists idx_member_events_date on public.organization_member_events using btree (event_date) TABLESPACE pg_default;
+
+create index IF not exists idx_member_events_type on public.organization_member_events using btree (event_type) TABLESPACE pg_default;
