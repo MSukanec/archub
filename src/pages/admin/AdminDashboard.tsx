@@ -418,8 +418,8 @@ export default function AdminDashboard() {
             </>
           ) : (
             <>
-              <StatCard data-testid="card-active-users">
-                <StatCardTitle showArrow={false}>
+              <StatCard data-testid="card-active-users" href="/admin/administration">
+                <StatCardTitle>
                   <div className="flex items-center gap-2">
                     <Activity className="h-4 w-4" />
                     <span>Usuarios Activos Ahora</span>
