@@ -319,7 +319,7 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
 
       const authenticatedSupabase = createAuthenticatedClient(token);
 
-      // Query the financial overview view
+      // Query the financial overview view (returns multiple rows per client if multi-currency)
       const { data: financialData, error: viewError } = await authenticatedSupabase
         .from('client_financial_overview')
         .select('*')
@@ -335,10 +335,13 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
         return res.json([]);
       }
 
-      // Get project_client_ids to enrich with contact and currency data
-      const projectClientIds = financialData.map((item: any) => item.project_client_id);
+      // Get unique project_client_ids
+      const projectClientIds = Array.from(new Set(financialData.map((item: any) => item.project_client_id)));
 
-      // Enrich with contact (for avatar) and currency data
+      // Get unique currency_ids to fetch currency data
+      const currencyIds = Array.from(new Set(financialData.map((item: any) => item.currency_id).filter(Boolean)));
+
+      // Fetch contact data for avatars
       const { data: enrichedData, error: enrichError } = await authenticatedSupabase
         .from('project_clients')
         .select(`
@@ -356,13 +359,6 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
               id,
               avatar_url
             )
-          ),
-          client_commitments!client_id (
-            currency:currencies!currency_id (
-              id,
-              code,
-              symbol
-            )
           )
         `)
         .in('id', projectClientIds);
@@ -372,32 +368,96 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
         return res.status(500).json({ error: "Failed to enrich client data" });
       }
 
-      // Merge financial data with enriched contact/currency data
-      const mergedData = financialData.map((financial: any) => {
-        const enriched = enrichedData?.find((e: any) => e.id === financial.project_client_id);
-        
-        // Get currency from first commitment (all should be same currency per client)
-        const currency = enriched?.client_commitments?.[0]?.currency || null;
+      // Fetch currency data only if there are currency_ids
+      let currencyData: any[] = [];
+      if (currencyIds.length > 0) {
+        const { data, error: currencyError } = await authenticatedSupabase
+          .from('currencies')
+          .select('id, code, symbol')
+          .in('id', currencyIds);
 
+        if (currencyError) {
+          console.error("Error fetching currency data:", currencyError);
+          return res.status(500).json({ error: "Failed to fetch currency data" });
+        }
+        currencyData = data || [];
+      }
+
+      // Pre-index currencies by ID for O(1) lookup
+      const currencyById = new Map(currencyData?.map((c: any) => [c.id, c]) || []);
+
+      // Pre-index enriched data by project_client_id for O(1) lookup
+      const enrichedById = new Map(enrichedData?.map((e: any) => [e.id, e]) || []);
+
+      // Group financial data by project_client_id
+      const groupedByClient = financialData.reduce((acc: any, row: any) => {
+        const clientId = row.project_client_id;
+        
+        if (!acc[clientId]) {
+          const enriched = enrichedById.get(clientId);
+          
+          acc[clientId] = {
+            id: row.project_client_id, // Frontend expects 'id'
+            project_id: row.project_id,
+            client_id: row.client_id,
+            organization_id: row.organization_id,
+            unit: enriched?.unit || null,
+            contacts: enriched?.contacts || null,
+            role: row.role_id ? {
+              id: row.role_id,
+              name: row.role_name,
+              is_default: row.role_is_default
+            } : null,
+            financialByCurrency: []
+          };
+        }
+
+        // Get currency info using pre-indexed Map
+        const currency = row.currency_id ? currencyById.get(row.currency_id) : null;
+
+        // Add this currency's financial data
+        acc[clientId].financialByCurrency.push({
+          currency: currency || null,
+          total_committed_amount: parseFloat(row.total_committed_amount || 0),
+          total_paid_amount: parseFloat(row.total_paid_amount || 0),
+          balance_due: parseFloat(row.balance_due || 0),
+          next_due_date: row.next_due_date || null,
+          next_due_amount: row.next_due_amount ? parseFloat(row.next_due_amount) : null,
+          last_payment_date: row.last_payment_date || null,
+          total_schedule_items: row.total_schedule_items || 0,
+          schedule_paid: row.schedule_paid || 0,
+          schedule_overdue: row.schedule_overdue || 0,
+        });
+
+        return acc;
+      }, {});
+
+      // Convert to array and add derived sorting fields
+      const mergedData = Object.values(groupedByClient).map((client: any) => {
+        // Calculate totals across all currencies for sorting
+        const total_committed_amount = client.financialByCurrency.reduce(
+          (sum: number, f: any) => sum + f.total_committed_amount, 0
+        );
+        const total_paid_amount = client.financialByCurrency.reduce(
+          (sum: number, f: any) => sum + f.total_paid_amount, 0
+        );
+        const balance_due = client.financialByCurrency.reduce(
+          (sum: number, f: any) => sum + f.balance_due, 0
+        );
+        
+        // Find earliest next due date for sorting
+        const nextDueDates = client.financialByCurrency
+          .filter((f: any) => f.next_due_date)
+          .map((f: any) => new Date(f.next_due_date).getTime());
+        const next_due = nextDueDates.length > 0 ? Math.min(...nextDueDates) : null;
+        
         return {
-          id: financial.project_client_id,
-          project_id: financial.project_id,
-          client_id: financial.client_id,
-          organization_id: financial.organization_id,
-          unit: enriched?.unit || null,
-          contacts: enriched?.contacts || null,
-          financial: {
-            total_committed_amount: parseFloat(financial.total_committed_amount || 0),
-            total_paid_amount: parseFloat(financial.total_paid_amount || 0),
-            balance_due: parseFloat(financial.balance_due || 0),
-            next_due_date: financial.next_due_date || null,
-            next_due_amount: financial.next_due_amount ? parseFloat(financial.next_due_amount) : null,
-            last_payment_date: financial.last_payment_date || null,
-            total_schedule_items: financial.total_schedule_items || 0,
-            schedule_paid: financial.schedule_paid || 0,
-            schedule_overdue: financial.schedule_overdue || 0,
-          },
-          currency: currency,
+          ...client,
+          // Add derived fields for sorting (sums across all currencies)
+          total_committed_amount,
+          total_paid_amount,
+          balance_due,
+          next_due,
         };
       });
 

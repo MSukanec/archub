@@ -18,6 +18,23 @@ interface ClientListTabProps {
   projectId?: string;
 }
 
+interface CurrencyFinancial {
+  currency: {
+    id: string;
+    code: string;
+    symbol: string;
+  } | null;
+  total_committed_amount: number;
+  total_paid_amount: number;
+  balance_due: number;
+  next_due_date: string | null;
+  next_due_amount: number | null;
+  last_payment_date: string | null;
+  total_schedule_items: number;
+  schedule_paid: number;
+  schedule_overdue: number;
+}
+
 interface ProjectClientSummary {
   id: string;
   client_id: string;
@@ -35,19 +52,17 @@ interface ProjectClientSummary {
       avatar_url?: string;
     } | null;
   } | null;
-  financial: {
-    total_committed_amount: number;
-    total_paid_amount: number;
-    balance_due: number;
-    next_due_date: string | null;
-    next_due_amount: number | null;
-    last_payment_date: string | null;
-  };
-  currency: {
+  role: {
     id: string;
-    code: string;
-    symbol: string;
+    name: string;
+    is_default: boolean;
   } | null;
+  financialByCurrency: CurrencyFinancial[];
+  // Derived fields for sorting (sum across all currencies)
+  total_committed_amount: number;
+  total_paid_amount: number;
+  balance_due: number;
+  next_due: number | null;
 }
 
 export default function ClientListTab({ projectId }: ClientListTabProps) {
@@ -154,9 +169,25 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   }
 
   // Helper function to format currency
-  const formatCurrency = (amount: number, currency: ProjectClientSummary['currency']) => {
+  const formatCurrency = (amount: number, currency: CurrencyFinancial['currency']) => {
     if (!currency) return `$${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     return `${currency.symbol}${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  // Helper function to render multi-currency amounts
+  const renderMultiCurrency = (client: ProjectClientSummary, field: keyof Pick<CurrencyFinancial, 'total_committed_amount' | 'total_paid_amount' | 'balance_due'>) => {
+    if (client.financialByCurrency.length === 0) return '-';
+    
+    return (
+      <div className="flex flex-wrap gap-1">
+        {client.financialByCurrency.map((f, index) => (
+          <span key={index} className="whitespace-nowrap">
+            {formatCurrency(f[field], f.currency)}
+            {index < client.financialByCurrency.length - 1 && <span className="mx-1">+</span>}
+          </span>
+        ))}
+      </div>
+    );
   };
 
   // Table columns
@@ -195,32 +226,41 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       },
     },
     {
-      key: 'total_committed',
+      key: 'total_committed_amount',
       label: 'Compromiso total',
       sortable: true,
-      render: (client: ProjectClientSummary) => {
-        const amount = client.financial.total_committed_amount;
-        return amount > 0 ? formatCurrency(amount, client.currency) : '-';
-      },
+      render: (client: ProjectClientSummary) => renderMultiCurrency(client, 'total_committed_amount'),
     },
     {
-      key: 'total_paid',
+      key: 'total_paid_amount',
       label: 'Pagado',
       sortable: true,
-      render: (client: ProjectClientSummary) => {
-        const amount = client.financial.total_paid_amount;
-        return amount > 0 ? formatCurrency(amount, client.currency) : '-';
-      },
+      render: (client: ProjectClientSummary) => renderMultiCurrency(client, 'total_paid_amount'),
     },
     {
       key: 'balance_due',
       label: 'Saldo pendiente',
       sortable: true,
       render: (client: ProjectClientSummary) => {
-        const amount = client.financial.balance_due;
-        if (amount === 0) return '-';
-        const className = amount > 0 ? 'text-orange-600 dark:text-orange-400 font-medium' : 'text-green-600 dark:text-green-400';
-        return <span className={className}>{formatCurrency(amount, client.currency)}</span>;
+        if (client.financialByCurrency.length === 0) return '-';
+        
+        return (
+          <div className="flex flex-wrap gap-1">
+            {client.financialByCurrency.map((f, index) => {
+              const className = f.balance_due > 0 
+                ? 'text-orange-600 dark:text-orange-400 font-medium' 
+                : f.balance_due < 0
+                ? 'text-green-600 dark:text-green-400 font-medium'
+                : '';
+              return (
+                <span key={index} className={className + ' whitespace-nowrap'}>
+                  {formatCurrency(f.balance_due, f.currency)}
+                  {index < client.financialByCurrency.length - 1 && <span className="mx-1 text-muted-foreground">+</span>}
+                </span>
+              );
+            })}
+          </div>
+        );
       },
     },
     {
@@ -228,11 +268,18 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       label: 'Próximo vencimiento',
       sortable: true,
       render: (client: ProjectClientSummary) => {
-        const { next_due_date, next_due_amount } = client.financial;
-        if (!next_due_date) return <span className="text-muted-foreground">Sin vencimientos</span>;
+        // Find the earliest next due date across all currencies
+        const nextDues = client.financialByCurrency
+          .filter(f => f.next_due_date)
+          .sort((a, b) => new Date(a.next_due_date!).getTime() - new Date(b.next_due_date!).getTime());
         
-        const formattedDate = format(new Date(next_due_date), 'dd/MM/yyyy', { locale: es });
-        const formattedAmount = next_due_amount ? formatCurrency(next_due_amount, client.currency) : '';
+        if (nextDues.length === 0) {
+          return <span className="text-muted-foreground">Sin vencimientos</span>;
+        }
+        
+        const earliest = nextDues[0];
+        const formattedDate = format(new Date(earliest.next_due_date!), 'dd/MM/yyyy', { locale: es });
+        const formattedAmount = earliest.next_due_amount ? formatCurrency(earliest.next_due_amount, earliest.currency) : '';
         
         return (
           <div className="flex flex-col">
