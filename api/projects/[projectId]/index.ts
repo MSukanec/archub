@@ -1,7 +1,7 @@
-// api/projects/[id].ts
+// api/projects/[projectId]/index.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { updateProject, deleteProject } from "../lib/handlers/projects/projects.js";
+import { updateProject, deleteProject } from "../../lib/handlers/projects/projects.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -24,7 +24,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
-    const { id: projectId } = req.query;
+    const { projectId } = req.query;
 
     if (!projectId || typeof projectId !== 'string') {
       return res.status(400).json({ error: "Project ID is required" });
@@ -69,7 +69,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
   } catch (err: any) {
-    console.error("Error in /api/projects/[id]:", err);
+    console.error("Error in /api/projects/[projectId]:", err);
     return res.status(500).json({ error: "Internal error", details: err.message });
   }
 }
