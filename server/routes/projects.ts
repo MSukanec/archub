@@ -544,7 +544,12 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
           committed_amount: clientData.committed_amount || null,
           currency_id: clientData.currency_id || null,
           unit: clientData.unit || null,
-          exchange_rate: clientData.exchange_rate || null
+          exchange_rate: clientData.exchange_rate || null,
+          client_role: clientData.client_role || null,
+          status: clientData.status || 'active',
+          is_primary: clientData.is_primary || false,
+          notes: clientData.notes || null,
+          created_by: clientData.created_by || null
         })
         .select(`
           *,
@@ -662,6 +667,18 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
       }
       if (updateData.hasOwnProperty('exchange_rate')) {
         updates.exchange_rate = updateData.exchange_rate || null;
+      }
+      if (updateData.hasOwnProperty('client_role')) {
+        updates.client_role = updateData.client_role || null;
+      }
+      if (updateData.hasOwnProperty('status')) {
+        updates.status = updateData.status || 'active';
+      }
+      if (updateData.hasOwnProperty('is_primary')) {
+        updates.is_primary = updateData.is_primary || false;
+      }
+      if (updateData.hasOwnProperty('notes')) {
+        updates.notes = updateData.notes || null;
       }
 
       // Update project_client

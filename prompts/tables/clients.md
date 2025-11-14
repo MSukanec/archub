@@ -132,12 +132,14 @@ create table public.project_clients (
   notes text null,
   status text not null default 'active'::text,
   client_role_id uuid null,
+  created_by uuid null,
   constraint project_clients_pkey primary key (id),
   constraint project_clients_client_role_id_fkey foreign KEY (client_role_id) references client_roles (id) on delete set null,
+  constraint project_clients_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete RESTRICT,
   constraint project_clients_currency_id_fkey foreign KEY (currency_id) references currencies (id) on delete set null,
-  constraint project_clients_client_id_fkey foreign KEY (client_id) references contacts (id) on delete set null,
-  constraint project_clients_project_id_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
   constraint project_clients_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint project_clients_project_id_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
+  constraint project_clients_client_id_fkey foreign KEY (client_id) references contacts (id) on delete set null,
   constraint project_clients_status_check check (
     (
       status = any (

@@ -7,12 +7,15 @@ import { useLocation } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { supabase } from '@/lib/supabase';
 import { FormModalHeader } from '../../form/FormModalHeader';
 import { FormModalFooter } from '../../form/FormModalFooter';
 import { FormModalLayout } from '../../form/FormModalLayout';
 import { useGlobalModalStore } from '../../form/useGlobalModalStore';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
 import { MiniEmptyState } from '@/components/ui-custom/fields/MiniEmptyState';
 import { Users, UserPlus } from 'lucide-react';
@@ -20,6 +23,10 @@ import { Users, UserPlus } from 'lucide-react';
 const clientSchema = z.object({
   contactId: z.string().min(1, 'Debe seleccionar un contacto'),
   unit: z.string().optional(),
+  clientRole: z.string().optional(),
+  status: z.enum(['active', 'inactive', 'deleted', 'potential', 'rejected', 'completed']).optional(),
+  isPrimary: z.enum(['yes', 'no']).optional(),
+  notes: z.string().optional(),
 });
 
 type ClientFormData = z.infer<typeof clientSchema>;
@@ -42,7 +49,32 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
   const [, setLocation] = useLocation();
 
   const organizationId = userData?.organization?.id;
+  const userId = userData?.user?.id;
   const isEditing = !!clientId;
+
+  // Query to get organization_member_id for created_by field
+  const { data: organizationMember } = useQuery<any>({
+    queryKey: ['organization-member', organizationId, userId],
+    queryFn: async () => {
+      if (!supabase || !organizationId || !userId) return null;
+      
+      const { data, error } = await supabase
+        .from('organization_members')
+        .select('id')
+        .eq('organization_id', organizationId)
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .maybeSingle();
+        
+      if (error) {
+        console.error('Error fetching organization member:', error);
+        return null;
+      }
+      
+      return data;
+    },
+    enabled: !!organizationId && !!userId && !isEditing,
+  });
 
   // Query to get available contacts
   const { data: contacts = [] } = useQuery<any[]>({
@@ -61,6 +93,10 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
     defaultValues: {
       contactId: '',
       unit: '',
+      clientRole: '',
+      status: 'active',
+      isPrimary: 'no',
+      notes: '',
     },
   });
 
@@ -70,11 +106,19 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
       form.reset({
         contactId: existingClient.client_id,
         unit: existingClient.unit || '',
+        clientRole: existingClient.client_role || '',
+        status: existingClient.status || 'active',
+        isPrimary: existingClient.is_primary ? 'yes' : 'no',
+        notes: existingClient.notes || '',
       });
     } else if (!isEditing) {
       form.reset({
         contactId: '',
         unit: '',
+        clientRole: '',
+        status: 'active',
+        isPrimary: 'no',
+        notes: '',
       });
     }
   }, [existingClient, isEditing, form]);
@@ -83,18 +127,25 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
     mutationFn: async (data: ClientFormData) => {
       if (!organizationId || !projectId) throw new Error('Missing organization or project ID');
 
+      const payload: any = {
+        organization_id: organizationId,
+        unit: data.unit || null,
+        client_role: data.clientRole || null,
+        status: data.status || 'active',
+        is_primary: data.isPrimary === 'yes',
+        notes: data.notes || null,
+      };
+
       if (isEditing) {
         // Update existing client
-        return await apiRequest('PATCH', `/api/projects/${projectId}/clients/${clientId}`, {
-          unit: data.unit || null,
-          organization_id: organizationId,
-        });
+        return await apiRequest('PATCH', `/api/projects/${projectId}/clients/${clientId}`, payload);
       } else {
-        // Create new client
+        // Create new client - include client_id and created_by
+        const organizationMemberId = organizationMember?.id;
         return await apiRequest('POST', `/api/projects/${projectId}/clients`, {
+          ...payload,
           client_id: data.contactId,
-          organization_id: organizationId,
-          unit: data.unit || null,
+          created_by: organizationMemberId || null,
         });
       }
     },
@@ -191,6 +242,89 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
                 <Input
                   {...field}
                   placeholder="Ej: Departamento 101, Casa 5, etc."
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="clientRole"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Rol del Cliente (Opcional)</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="Ej: Comprador, Apoderado, Inversor, etc."
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="status"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Estado (Opcional)</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar estado..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="active">Activo</SelectItem>
+                  <SelectItem value="inactive">Inactivo</SelectItem>
+                  <SelectItem value="potential">Potencial</SelectItem>
+                  <SelectItem value="rejected">Rechazado</SelectItem>
+                  <SelectItem value="completed">Completado</SelectItem>
+                  <SelectItem value="deleted">Eliminado</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="isPrimary"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>¿Cliente Principal?</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="yes">Sí</SelectItem>
+                  <SelectItem value="no">No</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notas (Opcional)</FormLabel>
+              <FormControl>
+                <Textarea
+                  {...field}
+                  placeholder="Agregar notas o comentarios adicionales..."
+                  rows={3}
                 />
               </FormControl>
               <FormMessage />
