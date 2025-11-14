@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { extractToken, createAuthenticatedClient } from '../_lib/auth-helpers';
+import { extractToken, createAuthenticatedClient } from '../lib/auth-helpers';
 import { createClientRole } from '../_lib/handlers/clients/createClientRole';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

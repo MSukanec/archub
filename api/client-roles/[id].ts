@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { extractToken, createAuthenticatedClient } from '../_lib/auth-helpers';
+import { extractToken, createAuthenticatedClient } from '../lib/auth-helpers';
 import { updateClientRole } from '../_lib/handlers/clients/updateClientRole';
 import { deleteClientRole } from '../_lib/handlers/clients/deleteClientRole';
 
