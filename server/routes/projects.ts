@@ -342,8 +342,8 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
       const planSlug = orgData?.plan?.slug?.toUpperCase() || 'FREE';
       const isMultiCurrency = planSlug === 'PRO' || planSlug === 'TEAMS' || planSlug === 'ENTERPRISE';
 
-      // Use new view with currency conversion for PRO/TEAMS, old logic for FREE
-      const viewName = isMultiCurrency ? 'client_financial_overview_v2' : 'client_financial_overview';
+      // Use unified view for all plans
+      const viewName = 'client_financial_overview';
 
       // Query the financial overview view
       const { data: financialData, error: viewError } = await authenticatedSupabase
