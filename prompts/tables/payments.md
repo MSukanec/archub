@@ -47,7 +47,7 @@ after
 update on users for EACH row
 execute FUNCTION sync_contact_on_user_update ();
 
-Tabla ORGANIZATIONS:
+---------- Tabla ORGANIZATIONS:
 
 create table public.organizations (
   id uuid not null default gen_random_uuid (),
@@ -75,7 +75,7 @@ create trigger update_organizations_updated_at BEFORE
 update on organizations for EACH row
 execute FUNCTION update_updated_at_column ();
 
-Tabla PLANS:
+---------- Tabla PLANS:
 
 create table public.plans (
   id uuid not null default gen_random_uuid (),
@@ -88,7 +88,7 @@ create table public.plans (
   constraint plans_name_key unique (name)
 ) TABLESPACE pg_default;
 
-Tabla COURSES:
+---------- Tabla COURSES:
 
 create table public.courses (
   id uuid not null default gen_random_uuid (),
@@ -107,7 +107,7 @@ create table public.courses (
   constraint courses_created_by_fkey foreign KEY (created_by) references users (id) on delete set null
 ) TABLESPACE pg_default;
 
-Tabla COURSE_PRICES:
+---------- Tabla COURSE_PRICES:
 
 create table public.course_prices (
   id uuid not null default gen_random_uuid (),
@@ -136,7 +136,7 @@ create table public.course_prices (
   )
 ) TABLESPACE pg_default;
 
-Tabla COURSE_ENROLLMENTS:
+---------- Tabla COURSE_ENROLLMENTS:
 
 create table public.course_enrollments (
   id uuid not null default gen_random_uuid (),
@@ -159,7 +159,7 @@ create index IF not exists course_enrollments_user_id_course_id_idx on public.co
 
 create index IF not exists idx_course_enrollments_user on public.course_enrollments using btree (user_id) TABLESPACE pg_default;
 
-Tabla BILLING_PROFILES:
+---------- Tabla BILLING_PROFILES:
 
 create table public.billing_profiles (
   id uuid not null default gen_random_uuid (),
@@ -185,7 +185,7 @@ create trigger trg_billing_profiles_user_id_immutable BEFORE
 update on billing_profiles for EACH row
 execute FUNCTION forbid_user_id_change ();
 
-Tabla BANK_TRANSFER_PAYMENTS:
+---------- Tabla BANK_TRANSFER_PAYMENTS:
 
 create table public.bank_transfer_payments (
   id uuid not null default gen_random_uuid (),
@@ -223,7 +223,7 @@ create trigger trg_btp_updated_at BEFORE
 update on bank_transfer_payments for EACH row
 execute FUNCTION update_updated_at_column ();
 
-Tabla COUPON_COURSES:
+---------- Tabla COUPON_COURSES:
 
 create table public.coupon_courses (
   coupon_id uuid not null,
@@ -233,7 +233,7 @@ create table public.coupon_courses (
   constraint coupon_courses_course_id_fkey foreign KEY (course_id) references courses (id) on delete CASCADE
 ) TABLESPACE pg_default;
 
-Tabla COUPON_REDEMPTIONS:
+---------- Tabla COUPON_REDEMPTIONS:
 
 create table public.coupon_redemptions (
   id uuid not null default gen_random_uuid (),
@@ -250,7 +250,7 @@ create table public.coupon_redemptions (
   constraint coupon_redemptions_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
 ) TABLESPACE pg_default;
 
-Tabla IA_USAGE_LOGS:
+---------- Tabla IA_USAGE_LOGS:
 
 create table public.ia_usage_logs (
   id uuid not null default gen_random_uuid (),
@@ -271,7 +271,7 @@ create index IF not exists idx_ia_usage_logs_user_id on public.ia_usage_logs usi
 
 create index IF not exists idx_ia_usage_logs_context_type on public.ia_usage_logs using btree (context_type) TABLESPACE pg_default;
 
-Tabla IA_USAGE_LIMITS:
+---------- Tabla IA_USAGE_LIMITS:
 
 create table public.ia_user_usage_limits (
   user_id uuid not null,
@@ -292,7 +292,7 @@ create trigger trg_reset_prompt_limit BEFORE
 update on ia_user_usage_limits for EACH row
 execute FUNCTION reset_daily_prompt_limit_if_needed ();
 
-Tabla NOTIFICATIONS:
+---------- Tabla NOTIFICATIONS:
 
 create table public.notifications (
   id uuid not null default gen_random_uuid (),
@@ -313,7 +313,7 @@ create table public.notifications (
 
 create index IF not exists notifications_created_at_idx on public.notifications using btree (created_at desc) TABLESPACE pg_default;
 
-Tabla PAYMENT_EVENTS:
+---------- Tabla PAYMENT_EVENTS:
 
 create table public.payment_events (
   id uuid not null default gen_random_uuid (),
@@ -340,7 +340,7 @@ create index IF not exists idx_payment_events_order_id on public.payment_events 
 
 create index IF not exists idx_payment_events_custom_id on public.payment_events using btree (custom_id) TABLESPACE pg_default;
 
-Tabla PAYMENTS:
+---------- Tabla PAYMENTS:
 
 create table public.payment_events (
   id uuid not null default gen_random_uuid (),
@@ -367,7 +367,7 @@ create index IF not exists idx_payment_events_order_id on public.payment_events 
 
 create index IF not exists idx_payment_events_custom_id on public.payment_events using btree (custom_id) TABLESPACE pg_default;
 
-Tabla USER_NOTIFICATIONS:
+---------- Tabla USER_NOTIFICATIONS:
 
 create table public.user_notifications (
   id uuid not null default gen_random_uuid (),
@@ -384,7 +384,7 @@ create table public.user_notifications (
 
 create index IF not exists user_notifications_user_idx on public.user_notifications using btree (user_id, read_at) TABLESPACE pg_default;
 
-Tabla PLAN_PRICES:
+---------- Tabla PLAN_PRICES:
 
 create table public.plan_prices (
   id uuid not null default gen_random_uuid (),
@@ -405,7 +405,7 @@ create table public.plan_prices (
   )
 ) TABLESPACE pg_default;
 
-Tabla ORGANIZATION_SUBSCRIPTIONS:
+---------- Tabla ORGANIZATION_SUBSCRIPTIONS:
 
 create table public.organization_subscriptions (
   id uuid not null default gen_random_uuid (),
@@ -436,58 +436,50 @@ create unique INDEX IF not exists org_subscriptions_unique_active on public.orga
 where
   (status = 'active'::text);
 
+create table public.organization_members (
+  created_at timestamp with time zone not null default now(),
+  id uuid not null default gen_random_uuid (),
+  user_id uuid null,
+  is_active boolean not null default true,
+  organization_id uuid not null,
+  invited_by uuid null,
+  joined_at timestamp with time zone null default now(),
+  role_id uuid null,
+  last_active_at timestamp with time zone null,
+  updated_at timestamp with time zone not null default now(),
+  is_billable boolean not null default true,
+  constraint organization_members_pkey primary key (id),
+  constraint organization_members_idd_key unique (id),
+  constraint organization_members_invited_by_fkey foreign KEY (invited_by) references organization_members (id) on delete set null,
+  constraint organization_members_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint organization_members_role_id_fkey foreign KEY (role_id) references roles (id) on delete set null,
+  constraint organization_members_user_id_fkey foreign KEY (user_id) references users (id) on delete set null
+) TABLESPACE pg_default;
 
-Vista ORGANIZATION_BILLING_SUMMARY:
+create index IF not exists organization_members_organization_id_idx on public.organization_members using btree (organization_id) TABLESPACE pg_default;
 
-[
-  {
-    "column_name": "organization_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "organization_name",
-    "data_type": "text"
-  },
-  {
-    "column_name": "plan_name",
-    "data_type": "text"
-  },
-  {
-    "column_name": "price",
-    "data_type": "numeric"
-  },
-  {
-    "column_name": "billing_type",
-    "data_type": "text"
-  },
-  {
-    "column_name": "active_members",
-    "data_type": "bigint"
-  },
-  {
-    "column_name": "monthly_cost",
-    "data_type": "numeric"
-  }
-]
+create index IF not exists organization_members_user_id_idx on public.organization_members using btree (user_id) TABLESPACE pg_default;
 
+create unique INDEX IF not exists unique_user_per_organization on public.organization_members using btree (user_id, organization_id) TABLESPACE pg_default;
 
-Vista COURSE_ACTIVE_PRICES:
+create index IF not exists idx_org_members_org_user on public.organization_members using btree (organization_id, user_id) TABLESPACE pg_default;
 
-[
-  {
-    "column_name": "course_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "currency_code",
-    "data_type": "text"
-  },
-  {
-    "column_name": "amount",
-    "data_type": "numeric"
-  },
-  {
-    "column_name": "provider",
-    "data_type": "text"
-  }
-]
+create trigger set_updated_at BEFORE
+update on organization_members for EACH row
+execute FUNCTION update_updated_at_column ();
+
+create trigger trg_sync_user_contact_on_member_ins
+after INSERT on organization_members for EACH row
+execute FUNCTION archub_sync_user_contact ();
+
+create trigger trg_sync_user_contact_on_member_upd
+after
+update OF user_id on organization_members for EACH row when (
+  new.user_id is not null
+  and old.user_id is distinct from new.user_id
+)
+execute FUNCTION archub_sync_user_contact ();
+
+create trigger trigger_create_contact_on_new_member
+after INSERT on organization_members for EACH row
+execute FUNCTION handle_new_org_member_contact ();

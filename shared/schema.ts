@@ -165,6 +165,7 @@ export const organization_members = pgTable("organization_members", {
   role_id: uuid("role_id"),
   invited_by: uuid("invited_by"),
   is_active: boolean("is_active").default(true).notNull(),
+  is_billable: boolean("is_billable").default(true).notNull(),
   joined_at: timestamp("joined_at", { withTimezone: true }).defaultNow(),
   last_active_at: timestamp("last_active_at", { withTimezone: true }),
   created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
