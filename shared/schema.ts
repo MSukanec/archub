@@ -1173,6 +1173,30 @@ export const insertOrganizationBillingCycleSchema = createInsertSchema(organizat
   updated_at: true,
 });
 
+// Organization Member Events Table
+export const organization_member_events = pgTable("organization_member_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organization_id: uuid("organization_id").notNull(),
+  subscription_id: uuid("subscription_id"),
+  member_id: uuid("member_id").notNull(),
+  user_id: uuid("user_id"),
+  
+  event_type: text("event_type").notNull(), // 'member_added', 'member_removed', 'billable_enabled', 'billable_disabled'
+  
+  was_billable: boolean("was_billable"),
+  is_billable: boolean("is_billable"),
+  
+  event_date: timestamp("event_date", { withTimezone: true }).notNull().defaultNow(),
+  performed_by: uuid("performed_by"),
+  
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export const insertOrganizationMemberEventSchema = createInsertSchema(organization_member_events).omit({
+  id: true,
+  created_at: true,
+});
+
 // Types for payments
 export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
@@ -1186,6 +1210,8 @@ export type OrganizationSubscription = typeof organization_subscriptions.$inferS
 export type InsertOrganizationSubscription = z.infer<typeof insertOrganizationSubscriptionSchema>;
 export type OrganizationBillingCycle = typeof organization_billing_cycles.$inferSelect;
 export type InsertOrganizationBillingCycle = z.infer<typeof insertOrganizationBillingCycleSchema>;
+export type OrganizationMemberEvent = typeof organization_member_events.$inferSelect;
+export type InsertOrganizationMemberEvent = z.infer<typeof insertOrganizationMemberEventSchema>;
 
 // Global Announcements Table
 export const global_announcements = pgTable("global_announcements", {
