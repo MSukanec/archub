@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { extractToken, createAuthenticatedClient } from '../lib/auth-helpers';
+import { extractToken, getUserFromToken } from '../lib/auth-helpers';
 import { createClientRole } from '../_lib/handlers/clients/createClientRole';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -13,11 +13,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ error: 'No authorization token provided' });
     }
 
-    const supabase = createAuthenticatedClient(token);
-    const { name, organization_id } = req.body;
+    const userResult = await getUserFromToken(token);
+    if (!userResult) {
+      return res.status(401).json({ error: 'User not found or invalid token' });
+    }
 
-    if (!name || !organization_id) {
-      return res.status(400).json({ error: 'name and organization_id are required' });
+    const { userId, supabase } = userResult;
+
+    // Get organization_id from user preferences (server-side, not from request)
+    const { data: preferences, error: prefError } = await supabase
+      .from('user_preferences')
+      .select('last_organization_id')
+      .eq('user_id', userId)
+      .single();
+
+    if (prefError || !preferences?.last_organization_id) {
+      return res.status(400).json({ error: 'User must belong to an organization' });
+    }
+
+    const organization_id = preferences.last_organization_id;
+    const { name } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ error: 'name is required' });
     }
 
     const role = await createClientRole({ supabase }, { name, organization_id });

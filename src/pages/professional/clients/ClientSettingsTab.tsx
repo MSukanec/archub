@@ -46,11 +46,8 @@ export default function ClientSettingsTab() {
   // Create role mutation
   const createRoleMutation = useMutation({
     mutationFn: async (name: string) => {
-      if (!organizationId) throw new Error('Organization ID is required');
-      return await apiRequest('POST', '/api/client-roles', {
-        name,
-        organization_id: organizationId
-      });
+      // organization_id is derived server-side from authenticated user
+      return await apiRequest('POST', '/api/client-roles', { name });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/client-roles?organization_id=${organizationId}`] });

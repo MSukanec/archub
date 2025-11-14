@@ -58,10 +58,40 @@ export function registerClientRoutes(app: Express, deps: RouteDeps) {
       }
 
       const supabase = createAuthenticatedClient(token);
-      const { name, organization_id } = req.body;
 
-      if (!name || !organization_id) {
-        return res.status(400).json({ error: 'name and organization_id are required' });
+      // Get user from token
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      // Get user_id from database
+      const { data: dbUser, error: dbError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .single();
+
+      if (dbError || !dbUser) {
+        return res.status(401).json({ error: "User not found" });
+      }
+
+      // Get organization_id from user preferences (server-side, not from request)
+      const { data: preferences, error: prefError } = await supabase
+        .from('user_preferences')
+        .select('last_organization_id')
+        .eq('user_id', dbUser.id)
+        .single();
+
+      if (prefError || !preferences?.last_organization_id) {
+        return res.status(400).json({ error: 'User must belong to an organization' });
+      }
+
+      const organization_id = preferences.last_organization_id;
+      const { name } = req.body;
+
+      if (!name) {
+        return res.status(400).json({ error: 'name is required' });
       }
 
       const role = await createClientRole({ supabase }, { name, organization_id });
