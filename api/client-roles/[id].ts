@@ -1,7 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { extractToken, createAuthenticatedClient } from '../lib/auth-helpers';
-import { updateClientRole } from '../_lib/handlers/clients/updateClientRole';
-import { deleteClientRole } from '../_lib/handlers/clients/deleteClientRole';
+import { extractToken, getUserFromToken } from '../lib/auth-helpers.js';
+import { updateClientRole } from '../_lib/handlers/clients/updateClientRole.js';
+import { deleteClientRole } from '../_lib/handlers/clients/deleteClientRole.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { id } = req.query;
@@ -16,13 +16,47 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ error: 'No authorization token provided' });
     }
 
-    const supabase = createAuthenticatedClient(token);
+    const userResult = await getUserFromToken(token);
+    if (!userResult) {
+      return res.status(401).json({ error: 'User not found or invalid token' });
+    }
+
+    const { userId, supabase } = userResult;
+
+    // Get organization_id from user preferences
+    const { data: preferences, error: prefError } = await supabase
+      .from('user_preferences')
+      .select('last_organization_id')
+      .eq('user_id', userId)
+      .single();
+
+    if (prefError || !preferences?.last_organization_id) {
+      return res.status(400).json({ error: 'User must belong to an organization' });
+    }
+
+    const organization_id = preferences.last_organization_id;
+
+    // CRITICAL: Verify user is an active member of this organization
+    const { data: membership, error: memberError } = await supabase
+      .from('organization_members')
+      .select('id, is_active')
+      .eq('organization_id', organization_id)
+      .eq('user_id', userId)
+      .single();
+
+    if (memberError || !membership) {
+      return res.status(403).json({ error: 'User is not a member of this organization' });
+    }
+
+    if (!membership.is_active) {
+      return res.status(403).json({ error: 'User membership is not active' });
+    }
 
     if (req.method === 'PATCH') {
-      const { name, organization_id } = req.body;
+      const { name } = req.body;
 
-      if (!name || !organization_id) {
-        return res.status(400).json({ error: 'name and organization_id are required' });
+      if (!name) {
+        return res.status(400).json({ error: 'name is required' });
       }
 
       const role = await updateClientRole({ supabase }, id, organization_id, { name });
@@ -30,12 +64,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'DELETE') {
-      const { organization_id } = req.query;
-
-      if (!organization_id || typeof organization_id !== 'string') {
-        return res.status(400).json({ error: 'organization_id is required' });
-      }
-
       await deleteClientRole({ supabase }, id, organization_id);
       return res.status(200).json({ success: true });
     }

@@ -37,9 +37,9 @@ export default function ClientSettingsTab() {
   const [editingRole, setEditingRole] = useState<ClientRole | null>(null);
   const [roleName, setRoleName] = useState('');
 
-  // Fetch client roles
+  // Fetch client roles (organization_id is derived server-side)
   const { data: clientRoles, isLoading } = useQuery<ClientRole[]>({
-    queryKey: [`/api/client-roles?organization_id=${organizationId}`],
+    queryKey: [`/api/client-roles`],
     enabled: !!organizationId
   });
 
@@ -50,7 +50,7 @@ export default function ClientSettingsTab() {
       return await apiRequest('POST', '/api/client-roles', { name });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/client-roles?organization_id=${organizationId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client-roles`] });
       toast({
         title: 'Rol creado',
         description: 'El rol de cliente ha sido creado correctamente',
@@ -70,14 +70,11 @@ export default function ClientSettingsTab() {
   // Update role mutation
   const updateRoleMutation = useMutation({
     mutationFn: async ({ id, name }: { id: string; name: string }) => {
-      if (!organizationId) throw new Error('Organization ID is required');
-      return await apiRequest('PATCH', `/api/client-roles/${id}`, {
-        name,
-        organization_id: organizationId
-      });
+      // organization_id is derived server-side from authenticated user
+      return await apiRequest('PATCH', `/api/client-roles/${id}`, { name });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/client-roles?organization_id=${organizationId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client-roles`] });
       toast({
         title: 'Rol actualizado',
         description: 'El rol de cliente ha sido actualizado correctamente',
@@ -98,11 +95,11 @@ export default function ClientSettingsTab() {
   // Delete role mutation
   const deleteRoleMutation = useMutation({
     mutationFn: async (id: string) => {
-      if (!organizationId) throw new Error('Organization ID is required');
-      return await apiRequest('DELETE', `/api/client-roles/${id}?organization_id=${organizationId}`);
+      // organization_id is derived server-side from authenticated user
+      return await apiRequest('DELETE', `/api/client-roles/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/client-roles?organization_id=${organizationId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client-roles`] });
       toast({
         title: 'Rol eliminado',
         description: 'El rol de cliente ha sido eliminado correctamente',

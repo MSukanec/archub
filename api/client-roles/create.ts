@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { extractToken, getUserFromToken } from '../lib/auth-helpers';
-import { createClientRole } from '../_lib/handlers/clients/createClientRole';
+import { extractToken, getUserFromToken } from '../lib/auth-helpers.js';
+import { createClientRole } from '../_lib/handlers/clients/createClientRole.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
