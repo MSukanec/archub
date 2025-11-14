@@ -56,11 +56,17 @@ export async function upgradeOrganizationPlan(
     throw subError;
   }
 
-  // Crear billing cycle snapshot
-  // Para el primer pago de TEAMS, siempre es 1 seat (lo que se facturó)
-  const billedSeats = 1;
+  // Contar billable members REALES en la organización
+  const { data: billableMembers } = await supabase
+    .from('organization_members')
+    .select('id')
+    .eq('organization_id', params.organizationId)
+    .eq('is_billable', true)
+    .eq('status', 'active');
 
-  // Obtener el precio real del plan
+  const actualSeats = billableMembers?.length || 1;
+
+  // Obtener precio del plan
   const { data: plan, error: planError } = await supabase
     .from('plans')
     .select('monthly_amount, annual_amount')
@@ -71,7 +77,6 @@ export async function upgradeOrganizationPlan(
     console.error('[subscriptions] Error fetching plan:', planError);
   }
 
-  // El amount_per_seat es el precio base del plan, NO dividido por seats
   const basePlanPrice = params.billingPeriod === 'monthly' 
     ? (plan?.monthly_amount || params.amount)
     : (plan?.annual_amount || params.amount);
@@ -84,12 +89,21 @@ export async function upgradeOrganizationPlan(
       organization_id: params.organizationId,
       subscription_id: subscription.id,
       plan_id: params.planId,
-      seats: billedSeats,
+      
+      // Snapshot real de miembros en la organización
+      seats: actualSeats,
+      
+      // Precio base del plan
       amount_per_seat: amountPerSeat,
-      seat_price_source: params.billingPeriod === 'monthly' ? 'plans.monthly_amount' : 'plans.annual_amount',
+      
+      // NOTA EXPLICATIVA: Este es el primer pago, solo se cobró 1 seat
+      seat_price_source: 'first_teams_payment_1_seat',
+      
+      // Montos REALES cobrados (1 seat)
       base_amount: params.amount,
       proration_adjustment: 0,
       total_amount: params.amount,
+      
       billing_period: params.billingPeriod,
       period_start: new Date().toISOString(),
       period_end: expiresAt.toISOString(),
@@ -103,12 +117,13 @@ export async function upgradeOrganizationPlan(
   if (cycleError) {
     console.error('[subscriptions] Error creating billing cycle:', cycleError);
   } else {
-    console.log('✅ [subscriptions] Billing cycle created:', {
+    console.log('[subscriptions] ✅ Billing cycle created:', {
       organizationId: params.organizationId,
-      seats: billedSeats,
-      amountPerSeat,
-      baseAmount: params.amount,
-      totalAmount: params.amount
+      seats: actualSeats,
+      amount_per_seat: amountPerSeat,
+      base_amount: params.amount,
+      total_amount: params.amount,
+      note: 'First TEAMS payment - only 1 seat billed'
     });
   }
   
