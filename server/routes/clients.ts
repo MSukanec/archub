@@ -1,9 +1,9 @@
 import type { Express } from "express";
 import type { RouteDeps } from './_base';
-import { handleGetClientRoles } from '../../api/_lib/handlers/clients/getClientRoles.js';
-import { createClientRole } from '../../api/_lib/handlers/clients/createClientRole.js';
-import { updateClientRole } from '../../api/_lib/handlers/clients/updateClientRole.js';
-import { deleteClientRole } from '../../api/_lib/handlers/clients/deleteClientRole.js';
+import { handleGetClientRoles } from '../../api/lib/handlers/clients/getClientRoles.js';
+import { createClientRole } from '../../api/lib/handlers/clients/createClientRole.js';
+import { updateClientRole } from '../../api/lib/handlers/clients/updateClientRole.js';
+import { deleteClientRole } from '../../api/lib/handlers/clients/deleteClientRole.js';
 import { extractToken, createAuthenticatedClient } from '../../api/lib/auth-helpers.js';
 
 /**
@@ -36,7 +36,7 @@ export function registerClientRoutes(app: Express, deps: RouteDeps) {
       const { data: dbUser, error: dbError } = await supabase
         .from('users')
         .select('id')
-        .eq('auth_user_id', user.id)
+        .eq('auth_id', user.id)
         .single();
 
       if (dbError || !dbUser) {
@@ -109,7 +109,7 @@ export function registerClientRoutes(app: Express, deps: RouteDeps) {
       const { data: dbUser, error: dbError } = await supabase
         .from('users')
         .select('id')
-        .eq('auth_user_id', user.id)
+        .eq('auth_id', user.id)
         .single();
 
       if (dbError || !dbUser) {
@@ -181,7 +181,7 @@ export function registerClientRoutes(app: Express, deps: RouteDeps) {
       const { data: dbUser, error: dbError } = await supabase
         .from('users')
         .select('id')
-        .eq('auth_user_id', user.id)
+        .eq('auth_id', user.id)
         .single();
 
       if (dbError || !dbUser) {
@@ -253,7 +253,7 @@ export function registerClientRoutes(app: Express, deps: RouteDeps) {
       const { data: dbUser, error: dbError } = await supabase
         .from('users')
         .select('id')
-        .eq('auth_user_id', user.id)
+        .eq('auth_id', user.id)
         .single();
 
       if (dbError || !dbUser) {

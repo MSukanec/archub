@@ -1,7 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { extractToken, getUserFromToken } from '../lib/auth-helpers.js';
-import { updateClientRole } from '../_lib/handlers/clients/updateClientRole.js';
-import { deleteClientRole } from '../_lib/handlers/clients/deleteClientRole.js';
+import { updateClientRole } from '../lib/handlers/clients/updateClientRole.js';
+import { deleteClientRole } from '../lib/handlers/clients/deleteClientRole.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { id } = req.query;

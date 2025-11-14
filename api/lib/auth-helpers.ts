@@ -61,11 +61,11 @@ export async function getUserFromToken(token: string): Promise<{
       return null;
     }
 
-    // Get the database user by auth_user_id
+    // Get the database user by auth_id
     const { data: dbUser, error: dbError } = await supabase
       .from('users')
       .select('id')
-      .eq('auth_user_id', user.id)
+      .eq('auth_id', user.id)
       .single();
 
     if (dbError || !dbUser) {

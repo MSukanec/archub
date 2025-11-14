@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { handleGetClientRoles } from './_lib/handlers/clients/getClientRoles.js';
-import { createClientRole } from './_lib/handlers/clients/createClientRole.js';
+import { handleGetClientRoles } from './lib/handlers/clients/getClientRoles.js';
+import { createClientRole } from './lib/handlers/clients/createClientRole.js';
 import { extractToken, getUserFromToken } from './lib/auth-helpers.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
