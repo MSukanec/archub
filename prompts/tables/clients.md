@@ -128,15 +128,16 @@ create table public.project_clients (
   organization_id uuid null,
   unit text null,
   exchange_rate numeric null,
-  role text not null default 'client'::text,
   is_primary boolean not null default false,
   notes text null,
   status text not null default 'active'::text,
+  client_role_id uuid null,
   constraint project_clients_pkey primary key (id),
-  constraint project_clients_client_id_fkey foreign KEY (client_id) references contacts (id) on delete set null,
+  constraint project_clients_client_role_id_fkey foreign KEY (client_role_id) references client_roles (id) on delete set null,
   constraint project_clients_currency_id_fkey foreign KEY (currency_id) references currencies (id) on delete set null,
-  constraint project_clients_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint project_clients_client_id_fkey foreign KEY (client_id) references contacts (id) on delete set null,
   constraint project_clients_project_id_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
+  constraint project_clients_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
   constraint project_clients_status_check check (
     (
       status = any (
@@ -152,8 +153,6 @@ create table public.project_clients (
     )
   )
 ) TABLESPACE pg_default;
-
-create index IF not exists idx_project_clients_role on public.project_clients using btree (role) TABLESPACE pg_default;
 
 create index IF not exists idx_project_clients_is_primary on public.project_clients using btree (is_primary) TABLESPACE pg_default;
 
