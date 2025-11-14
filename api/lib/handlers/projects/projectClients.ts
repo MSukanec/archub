@@ -183,28 +183,32 @@ export async function getClientsSummary(
       return { success: false, error: 'Forbidden: Project does not belong to organization' };
     }
 
-    // Fetch organization to get plan_id
-    const { data: orgData, error: orgError } = await supabase
+    // Fetch organization to get plan_id (avoid maybeSingle - use limit(1))
+    const { data: orgDataArray, error: orgError } = await supabase
       .from('organizations')
       .select('id, plan_id')
       .eq('id', params.organizationId)
-      .maybeSingle();
+      .limit(1);
 
     if (orgError) {
       console.error('Error fetching organization:', orgError);
       return { success: false, error: 'Failed to fetch organization' };
     }
 
+    const orgData = orgDataArray && orgDataArray.length > 0 ? orgDataArray[0] : null;
+
     // Fetch plan details separately (like all other endpoints do)
     let planSlug = 'FREE';
     let isMultiCurrency = false;
 
     if (orgData?.plan_id) {
-      const { data: planData, error: planError } = await supabase
+      const { data: planDataArray, error: planError } = await supabase
         .from('plans')
         .select('id, slug, name')
         .eq('id', orgData.plan_id)
-        .maybeSingle();
+        .limit(1);
+
+      const planData = planDataArray && planDataArray.length > 0 ? planDataArray[0] : null;
 
       if (!planError && planData) {
         planSlug = planData.slug?.toUpperCase() || 'FREE';
