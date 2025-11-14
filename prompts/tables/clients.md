@@ -115,6 +115,22 @@ create index IF not exists idx_client_payments_schedule on public.client_payment
 
 create index IF not exists idx_client_payments_date on public.client_payments using btree (payment_date) TABLESPACE pg_default;
 
+---------- TABLA CLIENT_ROLES:
+
+create table public.client_roles (
+  id uuid not null default gen_random_uuid (),
+  organization_id uuid null,
+  name text not null,
+  description text null,
+  is_default boolean null default false,
+  created_at timestamp with time zone null default now(),
+  created_by uuid not null,
+  updated_at timestamp with time zone null,
+  constraint client_roles_pkey primary key (id),
+  constraint client_roles_created_by_fkey foreign KEY (created_by) references organization_members (id),
+  constraint client_roles_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
+) TABLESPACE pg_default;
+
 ---------- TABLA PROJECT_CLIENTS:
 
 create table public.project_clients (
