@@ -183,29 +183,34 @@ export async function getClientsSummary(
       return { success: false, error: 'Forbidden: Project does not belong to organization' };
     }
 
-    // Fetch organization plan to determine behavior
+    // Fetch organization to get plan_id
     const { data: orgData, error: orgError } = await supabase
       .from('organizations')
-      .select(`
-        id,
-        plan_id,
-        plan:plan_id (
-          id,
-          slug,
-          name
-        )
-      `)
+      .select('id, plan_id')
       .eq('id', params.organizationId)
       .maybeSingle();
 
     if (orgError) {
-      console.error('Error fetching organization plan:', orgError);
-      return { success: false, error: 'Failed to fetch organization plan' };
+      console.error('Error fetching organization:', orgError);
+      return { success: false, error: 'Failed to fetch organization' };
     }
 
-    const plan = orgData?.plan as any;
-    const planSlug = plan?.slug?.toUpperCase() || 'FREE';
-    const isMultiCurrency = planSlug === 'PRO' || planSlug === 'TEAMS' || planSlug === 'ENTERPRISE';
+    // Fetch plan details separately (like all other endpoints do)
+    let planSlug = 'FREE';
+    let isMultiCurrency = false;
+
+    if (orgData?.plan_id) {
+      const { data: planData, error: planError } = await supabase
+        .from('plans')
+        .select('id, slug, name')
+        .eq('id', orgData.plan_id)
+        .maybeSingle();
+
+      if (!planError && planData) {
+        planSlug = planData.slug?.toUpperCase() || 'FREE';
+        isMultiCurrency = planSlug === 'PRO' || planSlug === 'TEAMS' || planSlug === 'ENTERPRISE';
+      }
+    }
 
     // Use unified view for all plans
     const viewName = 'client_financial_overview';
