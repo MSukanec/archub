@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/seencel-logo-192.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Seencel - Gestión de Construcción</title>
+    <meta name="description" content="Plataforma moderna de gestión de construcción para arquitectos y constructores">
+    <style>
+      /* Loader inicial que aparece INSTANTÁNEAMENTE antes de que React cargue */
+      #initial-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(to bottom, #ffffff, #f9fafb);
+        z-index: 9999;
+      }
+      
+      /* Ocultar por defecto si no es ruta de checkout */
+      #initial-loader.hide {
+        display: none;
+      }
+      
+      @media (prefers-color-scheme: dark) {
+        #initial-loader {
+          background: linear-gradient(to bottom, #0a0a0a, #1a1a1a);
+        }
+      }
+      
+      #initial-loader .spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-left-color: hsl(142, 76%, 36%);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @media (prefers-color-scheme: dark) {
+        #initial-loader .spinner {
+          border-color: rgba(255, 255, 255, 0.1);
+          border-left-color: hsl(142, 76%, 36%);
+        }
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
+      /* Fade out animation */
+      #initial-loader.fade-out {
+        animation: fadeOut 0.3s ease-out forwards;
+      }
+      
+      @keyframes fadeOut {
+        to {
+          opacity: 0;
+          visibility: hidden;
+        }
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/index-D5S-9p5U.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DECDE6BP.css">
+  </head>
+  <body>
+    <!-- Loader inicial - Visible INSTANTÁNEAMENTE en rutas de checkout -->
+    <div id="initial-loader">
+      <div class="spinner"></div>
+    </div>
+    
+    <script>
+      // Ocultar loader si NO estamos en ruta de checkout/pago
+      (function() {
+        var path = window.location.pathname;
+        var loader = document.getElementById('initial-loader');
+        if (!path.includes('/checkout/') && !path.includes('/payment')) {
+          loader.className = 'hide';
+        }
+      })();
+    </script>
+    
+    <div id="root"></div>
+  </body>
+</html>
