@@ -1,0 +1,202 @@
+Perfecto Mati.
+Esta es la conversación clave para dejar la facturación “per seat” bien hecha para toda la vida del proyecto.
+Vamos paso a paso, desde la arquitectura de tus tablas actuales, y te digo qué está bien, qué falta, y cómo se integra exactamente el tema de los usuarios billables / seats.
+
+✅ 1) Lo que ya tenés está PERFECTO
+
+Vos hoy tenés:
+
+1. Cuando alguien compra un plan
+
+Se crea/actualiza el plan de la organización (en organizations.plan_id)
+
+Se registra una fila en organization_subscriptions
+con:
+
+organization_id
+
+plan_id
+
+status
+
+período
+
+renewal_at
+
+amount
+
+currency
+
+transaction_id (PayPal / MP)
+
+etc.
+
+👉 Esto está bien. Es EXACTAMENTE como lo hacen Stripe, Paddle, Lemon Squeezy, SaaS Procore, Notion, etc.
+
+NO hay que cambiar eso.
+
+🧠 2) Pero esa parte solo cubre la compra del PLAN
+
+El Plan PRO es precio fijo (monthly).
+
+El Plan TEAMS es per-user (per-seat billing).
+
+La compra del plan no sabe CUÁNTOS seats hay.
+Solo sabe la base del plan:
+
+PRO → 1 precio fijo mensual
+
+TEAMS → precio “por usuario activo”
+
+Entonces:
+
+🔴 Algo falta entre tus tablas actuales.
+Lo que falta es la tabla que determina cuántos seats se van a facturar mes a mes.
+
+Y esa tabla NO es organization_subscriptions.
+
+🔥 3) En un sistema profesional, los seats NO están en organization_subscriptions
+
+Los seats se determinan POR ORGANIZACIÓN según los miembros activos.
+
+Por eso la tabla correcta para trackear seats NO es organization_subscriptions.
+
+La tabla correcta ya la tenés:
+👉 organization_members
+
+Pero le faltaba algo:
+👉 is_billable
+
+Con eso, cada miembro es:
+
+billable seat
+
+non-billable seat (dueños, invitados, free seats, etc.)
+
+Esto lo hace Slack, Notion, ClickUp, Miro, Figma, Asana, etc.
+
+✔ 4) Entonces, la arquitectura ideal que vos YA TENÉS con un pequeño ajuste es:
+A) organizations.plan_id
+
+→ define si el plan es Free, Pro o Teams.
+
+B) organization_subscriptions
+
+→ trackea cada ciclo de facturación.
+→ SOLO el plan, fechas, pagos, etc.
+→ NO trackea seats.
+
+C) organization_members
+
+→ contiene los seats reales.
+→ cada miembro = un seat potencial
+→ is_billable = true = seat facturable
+→ is_billable = false = seat no facturable (regalo tuyo)
+
+🧩 5) La tabla que te falta (si querés hacerlo PERFECTO)
+
+No necesitás otra tabla obligatoriamente, pero si querés facturación muy limpia te recomiendo agregar:
+
+📌 organization_billing_cycles
+
+Una tabla que guarda el resultado del cálculo mensual:
+
+create table organization_billing_cycles (
+  id uuid primary key default gen_random_uuid(),
+  organization_id uuid not null references organizations(id),
+  plan_id uuid not null references plans(id),
+  seats integer not null,
+  amount_per_seat numeric not null,
+  total_amount numeric not null,
+  period_start timestamptz not null,
+  period_end timestamptz not null,
+  paid boolean default false,
+  payment_provider text,
+  payment_id text,
+  created_at timestamptz default now()
+);
+
+¿Por qué sirve?
+
+Deja “registrado” cuántos seats tuvo la organización ese mes.
+
+Permite auditoría.
+
+Permite reintentos de cobro.
+
+Permite facturación pro-rata si agregan seats a mitad de mes.
+
+Permite informes históricos.
+
+Pero se puede vivir sin esto (al principio).
+
+🧠 6) ¿Dónde encaja el momento de invitar nuevos usuarios?
+
+Cuando alguien invita un usuario a su organización:
+
+Se crea una fila en organization_members
+
+El campo is_billable determina si ese usuario es un “seat” facturable o no.
+
+Nada más.
+
+Eso es TODO lo que se necesita para que la facturación mensual funcione.
+
+🔍 7) ¿Cuándo se calcula la facturación real?
+→ Al inicio (o fin) de cada ciclo mensual:
+seats_facturables = count(*) from organization_members
+                    where organization_id = X
+                    and is_billable = true
+                    and status = 'active'
+
+
+Y entonces:
+
+total_mensual = seats_facturables * price_per_seat
+
+
+Si plan PRO → 0 seats, es precio fijo.
+Si plan Teams → variable según seats.
+
+🎯 8) Respondiendo exacto a tu pregunta: “¿Dónde entra el tema de invitar usuarios más?”
+ENTRA ÚNICAMENTE a través de:
+organization_members.is_billable
+
+
+Y nada más.
+
+No afecta:
+
+organization_subscriptions
+
+users
+
+plans
+
+projects
+
+etc.
+
+El cálculo mensual usa solamente esta tabla.
+
+📌 9) ¿Qué tablas deberías tener para que todo funcione perfecto?
+⭐ Ya tenés:
+
+organizations
+
+organization_members
+
+plans
+
+organization_subscriptions
+
+users
+
+⭐ Te faltaba:
+
+organization_members.is_billable (ya agregado ✔)
+
+⭐ Opcional (recomendado para escalar):
+
+organization_billing_cycles
+(para registrar cada facturación mensual)
