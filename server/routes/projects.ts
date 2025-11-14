@@ -373,12 +373,13 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
       // Get unique currency_ids to fetch currency data
       const currencyIds = Array.from(new Set(financialData.map((item: any) => item.currency_id).filter(Boolean)));
 
-      // Fetch contact data for avatars
+      // Fetch contact data for avatars and client roles
       const { data: enrichedData, error: enrichError } = await authenticatedSupabase
         .from('project_clients')
         .select(`
           id,
           unit,
+          client_role_id,
           contacts:contacts!client_id (
             id,
             first_name,
@@ -391,6 +392,11 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
               id,
               avatar_url
             )
+          ),
+          client_role:client_roles!client_role_id (
+            id,
+            name,
+            is_default
           )
         `)
         .in('id', projectClientIds);
@@ -545,7 +551,7 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
           currency_id: clientData.currency_id || null,
           unit: clientData.unit || null,
           exchange_rate: clientData.exchange_rate || null,
-          client_role: clientData.client_role || null,
+          client_role_id: clientData.client_role_id || null,
           status: clientData.status || 'active',
           is_primary: clientData.is_primary || false,
           notes: clientData.notes || null,
@@ -668,8 +674,8 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
       if (updateData.hasOwnProperty('exchange_rate')) {
         updates.exchange_rate = updateData.exchange_rate || null;
       }
-      if (updateData.hasOwnProperty('client_role')) {
-        updates.client_role = updateData.client_role || null;
+      if (updateData.hasOwnProperty('client_role_id')) {
+        updates.client_role_id = updateData.client_role_id || null;
       }
       if (updateData.hasOwnProperty('status')) {
         updates.status = updateData.status || 'active';

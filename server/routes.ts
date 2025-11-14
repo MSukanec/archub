@@ -12,6 +12,7 @@ import { registerAdminRoutes } from './routes/admin';
 import { registerPaymentRoutes } from './routes/payments';
 import { registerBankTransferRoutes } from './routes/bank-transfer';
 import { registerContactRoutes } from './routes/contacts';
+import { registerClientRoutes } from './routes/clients';
 import { registerAIRoutes } from './routes/ai';
 import { registerSupportRoutes } from './routes/support';
 import { registerPersonnelRoutes } from './routes/personnel';
@@ -47,6 +48,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register contact routes (professional contacts)
   registerContactRoutes(app, deps);
+
+  // Register client routes (client roles)
+  registerClientRoutes(app, deps);
 
   // Register personnel routes (personnel rates, payments, attendance)
   registerPersonnelRoutes(app, deps);

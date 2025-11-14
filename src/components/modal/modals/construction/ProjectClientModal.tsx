@@ -23,7 +23,7 @@ import { Users, UserPlus } from 'lucide-react';
 const clientSchema = z.object({
   contactId: z.string().min(1, 'Debe seleccionar un contacto'),
   unit: z.string().optional(),
-  clientRole: z.string().optional(),
+  clientRoleId: z.string().optional(),
   status: z.enum(['active', 'inactive', 'deleted', 'potential', 'rejected', 'completed']).optional(),
   isPrimary: z.enum(['yes', 'no']).optional(),
   notes: z.string().optional(),
@@ -82,6 +82,12 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
     enabled: !!organizationId,
   });
 
+  // Query to get client roles
+  const { data: clientRoles = [] } = useQuery<any[]>({
+    queryKey: [`/api/client-roles?organization_id=${organizationId}`],
+    enabled: !!organizationId,
+  });
+
   // Query to get existing client data when editing
   const { data: existingClient } = useQuery<any>({
     queryKey: [`/api/projects/${projectId}/clients/${clientId}?organization_id=${organizationId}`],
@@ -93,7 +99,7 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
     defaultValues: {
       contactId: '',
       unit: '',
-      clientRole: '',
+      clientRoleId: '',
       status: 'active',
       isPrimary: 'no',
       notes: '',
@@ -106,7 +112,7 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
       form.reset({
         contactId: existingClient.client_id,
         unit: existingClient.unit || '',
-        clientRole: existingClient.client_role || '',
+        clientRoleId: existingClient.client_role_id || '',
         status: existingClient.status || 'active',
         isPrimary: existingClient.is_primary ? 'yes' : 'no',
         notes: existingClient.notes || '',
@@ -115,7 +121,7 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
       form.reset({
         contactId: '',
         unit: '',
-        clientRole: '',
+        clientRoleId: '',
         status: 'active',
         isPrimary: 'no',
         notes: '',
@@ -130,7 +136,7 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
       const payload: any = {
         organization_id: organizationId,
         unit: data.unit || null,
-        client_role: data.clientRole || null,
+        client_role_id: data.clientRoleId || null,
         status: data.status || 'active',
         is_primary: data.isPrimary === 'yes',
         notes: data.notes || null,
@@ -251,16 +257,28 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
 
         <FormField
           control={form.control}
-          name="clientRole"
+          name="clientRoleId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Rol del Cliente (Opcional)</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Ej: Comprador, Apoderado, Inversor, etc."
-                />
-              </FormControl>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar rol..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {clientRoles.length === 0 ? (
+                    <SelectItem value="_none" disabled>No hay roles disponibles</SelectItem>
+                  ) : (
+                    clientRoles.map((role: any) => (
+                      <SelectItem key={role.id} value={role.id}>
+                        {role.name}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
