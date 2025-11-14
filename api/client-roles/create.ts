@@ -20,7 +20,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const { userId, supabase } = userResult;
 
-    // Get organization_id from user preferences (server-side, not from request)
+    // Get organization_id from user preferences
     const { data: preferences, error: prefError } = await supabase
       .from('user_preferences')
       .select('last_organization_id')
@@ -32,6 +32,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const organization_id = preferences.last_organization_id;
+
+    // CRITICAL: Verify user is an active member of this organization
+    const { data: membership, error: memberError } = await supabase
+      .from('organization_members')
+      .select('id, is_active')
+      .eq('organization_id', organization_id)
+      .eq('user_id', userId)
+      .single();
+
+    if (memberError || !membership) {
+      return res.status(403).json({ error: 'User is not a member of this organization' });
+    }
+
+    if (!membership.is_active) {
+      return res.status(403).json({ error: 'User membership is not active' });
+    }
     const { name } = req.body;
 
     if (!name) {

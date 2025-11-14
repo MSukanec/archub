@@ -88,6 +88,23 @@ export function registerClientRoutes(app: Express, deps: RouteDeps) {
       }
 
       const organization_id = preferences.last_organization_id;
+
+      // CRITICAL: Verify user is an active member of this organization
+      const { data: membership, error: memberError } = await supabase
+        .from('organization_members')
+        .select('id, is_active')
+        .eq('organization_id', organization_id)
+        .eq('user_id', dbUser.id)
+        .single();
+
+      if (memberError || !membership) {
+        return res.status(403).json({ error: 'User is not a member of this organization' });
+      }
+
+      if (!membership.is_active) {
+        return res.status(403).json({ error: 'User membership is not active' });
+      }
+
       const { name } = req.body;
 
       if (!name) {
