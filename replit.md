@@ -48,8 +48,25 @@ Preferred communication style: Simple, everyday language.
 - **Backend Modular Architecture**: Modularized domain-specific route modules.
 - **Frontend Performance Optimizations**: Code-splitting and lazy loading.
 - **Performance Optimizations (Gacela Mode)**: Sub-second page loads using database views, smart caching, and optimized backend endpoints.
-- **AI Code Architecture**: Dual-location AI code structure to support both development (Express) and production (Vercel serverless). All AI-related changes must be made in `api/_lib/ai/`.
+- **AI Code Architecture**: Dual-location AI code structure to support both development (Express) and production (Vercel serverless). All AI-related changes must be made in `api/lib/ai/` (NOT `api/_lib/ai/`).
 - **Payment Endpoints Architecture**: Complete refactor of payment domain with centralized checkout architecture. New structure: `/api/checkout/mp/` and `/api/checkout/paypal/` with shared handlers and helpers. Architecture includes critical security validations for server-side pricing, admin role verification, coupon validation, and authentication.
+- **Vercel API Endpoints Architecture**: Complete documentation in `api/ARCHITECTURE.md`. ALL business logic in `api/lib/handlers/`, endpoints are thin wrappers. Mandatory checklist in `ENDPOINT_CHECKLIST.md` prevents regressions.
+
+## 🚨 CRITICAL RULES - NEVER BREAK THESE
+
+### Vercel Endpoints (Production)
+1. **NO Dynamic Route Conflicts**: Never create `api/something/[id].ts` and `api/something/[id]/nested.ts` together. Use `api/something/[somethingId]/index.ts` pattern instead.
+2. **ALWAYS Use api/lib/**: NEVER import from `api/_lib/` in production endpoints. The correct path is `api/lib/handlers/`.
+3. **Handler-First Pattern**: ALL business logic MUST be in `api/lib/handlers/`. Endpoints are thin authentication + validation wrappers.
+4. **Standard Auth Pattern**: Every endpoint MUST use the exact same Bearer token extraction pattern (see `api/ARCHITECTURE.md`).
+5. **Mandatory Checklist**: ALWAYS follow `ENDPOINT_CHECKLIST.md` before creating ANY new endpoint. No exceptions.
+6. **Documentation First**: READ `api/ARCHITECTURE.md` completely before touching any endpoint code.
+
+### Development vs Production
+- **Development**: Express.js server in `server/` with routes in `server/routes/`
+- **Production**: Vercel serverless functions in `api/` folder
+- **Shared Logic**: Business logic in `api/lib/handlers/` used by BOTH environments
+- **Critical**: Changes to `api/lib/` affect both dev and prod. Test thoroughly.
 
 ## External Dependencies
 - **Supabase**: Authentication.
