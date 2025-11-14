@@ -40,13 +40,13 @@ export async function getAuthenticatedUser(ctx: ProjectsContext) {
     return null;
   }
 
-  const { data: dbUser } = await ctx.supabase
+  const { data: dbUsers } = await ctx.supabase
     .from('users')
     .select('id, email')
     .eq('auth_id', user.id)
-    .maybeSingle();
+    .limit(1);
 
-  return dbUser;
+  return dbUsers && dbUsers.length > 0 ? dbUsers[0] : null;
 }
 
 export async function ensureAuth(ctx: ProjectsContext): Promise<{ success: true; user: { id: string; email: string } } | { success: false; error: string }> {
@@ -69,17 +69,19 @@ export async function ensureOrganizationAccess(
     return authResult;
   }
 
-  const { data: membership, error } = await ctx.supabase
+  const { data: memberships, error } = await ctx.supabase
     .from('organization_members')
     .select('id')
     .eq('organization_id', organizationId)
     .eq('user_id', authResult.user.id)
-    .maybeSingle();
+    .limit(1);
 
   if (error) {
     console.error('Error checking organization membership:', error);
     return { success: false, error: 'Failed to verify organization access' };
   }
+
+  const membership = memberships && memberships.length > 0 ? memberships[0] : null;
 
   if (!membership) {
     return { success: false, error: 'Forbidden: User does not have access to this organization' };
@@ -92,16 +94,18 @@ export async function getProjectById(
   ctx: ProjectsContext,
   projectId: string
 ): Promise<{ success: true; data: any } | { success: false; error: string }> {
-  const { data: project, error } = await ctx.supabase
+  const { data: projects, error } = await ctx.supabase
     .from('projects')
     .select('*')
     .eq('id', projectId)
-    .maybeSingle();
+    .limit(1);
 
   if (error) {
     console.error('Error fetching project:', error);
     return { success: false, error: 'Failed to fetch project' };
   }
+
+  const project = projects && projects.length > 0 ? projects[0] : null;
 
   if (!project) {
     return { success: false, error: 'Project not found' };
@@ -114,16 +118,18 @@ export async function getBudgetById(
   ctx: ProjectsContext,
   budgetId: string
 ): Promise<{ success: true; data: any } | { success: false; error: string }> {
-  const { data: budget, error } = await ctx.supabase
+  const { data: budgets, error } = await ctx.supabase
     .from('budgets')
     .select('*')
     .eq('id', budgetId)
-    .maybeSingle();
+    .limit(1);
 
   if (error) {
     console.error('Error fetching budget:', error);
     return { success: false, error: 'Failed to fetch budget' };
   }
+
+  const budget = budgets && budgets.length > 0 ? budgets[0] : null;
 
   if (!budget) {
     return { success: false, error: 'Budget not found' };
