@@ -673,6 +673,55 @@ export function MySelectionModal({ projectId, onClose }: MySelectionModalProps) 
 
 ---
 
+## 🔑 Obtener organization_member_id para created_by
+
+Cuando necesites el `created_by` field (organization_member_id):
+
+```typescript
+// Query para obtener organization_member_id del usuario actual
+const { data: organizationMember } = useQuery<any>({
+  queryKey: ['organization-member', organizationId, userId],
+  queryFn: async () => {
+    if (!supabase || !organizationId || !userId) return null;
+    
+    const { data, error } = await supabase
+      .from('organization_members')
+      .select('id')
+      .eq('organization_id', organizationId)
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .maybeSingle();
+      
+    if (error) {
+      console.error('Error fetching organization member:', error);
+      return null;
+    }
+    
+    return data;
+  },
+  enabled: !!organizationId && !!userId && !isEditing,
+});
+
+// Luego usa en tu mutation:
+const organizationMemberId = organizationMember?.id;
+
+const createMutation = useMutation({
+  mutationFn: async (data: FormData) => {
+    return await apiRequest('POST', '/api/endpoint', {
+      ...data,
+      created_by: organizationMemberId || null,
+    });
+  },
+  // ...
+});
+```
+
+**Referencias:**
+- `src/components/modal/modals/construction/ProjectClientModal.tsx` (líneas 55-77, 150-154)
+- `src/components/modal/modals/finances/movements/MovementImportStepModal.tsx` (línea 939)
+
+---
+
 ## ⚠️ Errores Comunes a Evitar
 
 1. **Olvidar la descripción en FormModalHeader**

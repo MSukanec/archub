@@ -82,9 +82,9 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
     enabled: !!organizationId,
   });
 
-  // Query to get client roles
-  const { data: clientRoles = [] } = useQuery<any[]>({
-    queryKey: [`/api/client-roles?organization_id=${organizationId}`],
+  // Query to get client roles (organization_id is derived server-side)
+  const { data: clientRoles = [], isLoading: clientRolesLoading } = useQuery<any[]>({
+    queryKey: [`/api/client-roles`],
     enabled: !!organizationId,
   });
 
@@ -261,19 +261,21 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
           render={({ field }) => (
             <FormItem>
               <FormLabel>Rol del Cliente (Opcional)</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} value={field.value} disabled={clientRolesLoading}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar rol..." />
+                    <SelectValue placeholder={clientRolesLoading ? "Cargando roles..." : "Seleccionar rol..."} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="">Sin rol</SelectItem>
-                  {clientRoles.map((role: any) => (
-                    <SelectItem key={role.id} value={role.id}>
-                      {role.name}
-                    </SelectItem>
-                  ))}
+                  {clientRoles && clientRoles.length > 0 ? (
+                    clientRoles.map((role: any) => (
+                      <SelectItem key={role.id} value={role.id}>
+                        {role.name}
+                      </SelectItem>
+                    ))
+                  ) : null}
                 </SelectContent>
               </Select>
               <FormMessage />
