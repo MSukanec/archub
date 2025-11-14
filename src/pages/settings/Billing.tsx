@@ -642,7 +642,9 @@ const Billing = () => {
                             <td className="py-3 px-4 text-sm">
                               {format(new Date(cycle.period_start), 'dd MMM', { locale: es })} - {format(new Date(cycle.period_end), 'dd MMM yyyy', { locale: es })}
                             </td>
-                            <td className="py-3 px-4 text-sm">{cycle.seats}</td>
+                            <td className="py-3 px-4 text-sm">
+                              {cycle.billed_seats} facturado{cycle.billed_seats !== cycle.seats ? ` (${cycle.seats} en org)` : ''}
+                            </td>
                             <td className="py-3 px-4 text-sm font-medium">
                               {cycle.currency_code} ${parseFloat(cycle.total_amount).toFixed(2)}
                             </td>

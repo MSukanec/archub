@@ -492,6 +492,7 @@ create table public.organization_billing_cycles (
   subscription_id uuid null,
   plan_id uuid not null,
   seats integer not null,
+  billed_seats integer not null default 1,
   amount_per_seat numeric(10, 2) not null,
   seat_price_source text null,
   base_amount numeric(10, 2) not null,

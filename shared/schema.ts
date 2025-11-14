@@ -1146,6 +1146,7 @@ export const organization_billing_cycles = pgTable("organization_billing_cycles"
   plan_id: uuid("plan_id").notNull(),
   
   seats: integer("seats").notNull(),
+  billed_seats: integer("billed_seats").notNull().default(1),
   amount_per_seat: numeric("amount_per_seat", { precision: 10, scale: 2 }).notNull(),
   seat_price_source: text("seat_price_source"),
   

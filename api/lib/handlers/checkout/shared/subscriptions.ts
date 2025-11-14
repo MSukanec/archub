@@ -66,6 +66,9 @@ export async function upgradeOrganizationPlan(
 
   const actualSeats = billableMembers?.length || 1;
 
+  // Para el primer pago de TEAMS, siempre es 1 seat facturado
+  const billedSeats = 1;
+
   // Obtener precio del plan
   const { data: plan, error: planError } = await supabase
     .from('plans')
@@ -83,6 +86,9 @@ export async function upgradeOrganizationPlan(
 
   const amountPerSeat = Number(basePlanPrice);
 
+  // Calcular montos basados en billed_seats (no actual seats)
+  const baseAmount = billedSeats * amountPerSeat;
+
   const { error: cycleError } = await supabase
     .from('organization_billing_cycles')
     .insert({
@@ -90,19 +96,19 @@ export async function upgradeOrganizationPlan(
       subscription_id: subscription.id,
       plan_id: params.planId,
       
-      // Snapshot real de miembros en la organización
+      // Snapshot histórico real
       seats: actualSeats,
       
-      // Precio base del plan
+      // Seats realmente facturados
+      billed_seats: billedSeats,
+      
       amount_per_seat: amountPerSeat,
+      seat_price_source: 'plans.monthly_amount',
       
-      // NOTA EXPLICATIVA: Este es el primer pago, solo se cobró 1 seat
-      seat_price_source: 'first_teams_payment_1_seat',
-      
-      // Montos REALES cobrados (1 seat)
-      base_amount: params.amount,
+      // Montos consistentes: billed_seats × amount_per_seat
+      base_amount: baseAmount,
       proration_adjustment: 0,
-      total_amount: params.amount,
+      total_amount: baseAmount,
       
       billing_period: params.billingPeriod,
       period_start: new Date().toISOString(),
@@ -117,13 +123,13 @@ export async function upgradeOrganizationPlan(
   if (cycleError) {
     console.error('[subscriptions] Error creating billing cycle:', cycleError);
   } else {
-    console.log('[subscriptions] ✅ Billing cycle created:', {
+    console.log('[subscriptions] ✅ Billing cycle created (Option C):', {
       organizationId: params.organizationId,
       seats: actualSeats,
+      billed_seats: billedSeats,
       amount_per_seat: amountPerSeat,
-      base_amount: params.amount,
-      total_amount: params.amount,
-      note: 'First TEAMS payment - only 1 seat billed'
+      base_amount: baseAmount,
+      total_amount: baseAmount,
     });
   }
   
