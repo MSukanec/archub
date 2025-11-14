@@ -6,7 +6,7 @@ Seencel is a comprehensive construction management platform designed to optimize
 ## Recent Changes
 
 ### Backend Refactor Progress (November 2025)
-**Completed Domains: 7/8 (~88%)**
+**Completed Domains: 8/8 (100%)**
 
 ✅ **Organization Domain** (6 endpoints) - Invitation system, member management  
 ✅ **Contacts Domain** (1 endpoint) - Professional contacts with 5-query enrichment  
@@ -15,6 +15,7 @@ Seencel is a comprehensive construction management platform designed to optimize
 ✅ **Learning Domain** (6 endpoints) - Dashboard (2 variants), courses, progress tracking, notes  
 ✅ **Projects Domain** (12 endpoints) - Projects CRUD, budgets, budget items with complete security layer
 ✅ **Payments Domain** (8 endpoints) - Centralized checkout with MercadoPago and PayPal integration, server-side pricing, critical security fixes
+✅ **Client Roles Domain** (3 endpoints) - Custom client role management with organization-scoped CRUD operations
 
 **Architecture Pattern:**
 - Handlers in `api/_lib/handlers/` with framework-agnostic logic
@@ -30,6 +31,7 @@ Seencel is a comprehensive construction management platform designed to optimize
 - **Admin auth**: Unified `verifyAdminUser()` across Express + Vercel
 - **Projects security**: Complete auth + org access enforcement across 12 handlers with derived created_by
 - **Payments refactor**: Eliminated 1,355 LOC of duplication, centralized checkout logic, fixed critical auth vulnerabilities
+- **Client Roles security**: Server-side organization_id derivation from user preferences with active membership validation across all CRUD operations
 - **Code reduction**: 46-83% reduction in endpoint line counts
 - **Zero regressions**: All refactors architect-reviewed and approved
 
@@ -75,6 +77,7 @@ Preferred communication style: Simple, everyday language.
 - **Project Data Management**: Organized project information into logical tabs (Basic Data, Location, Client) with Google Maps integration for enriched location data management and an auto-save system.
 - **Mobile Action Bar**: Fully functional mobile action bars for Project Data and Project Management sections with dynamic filtering and shared state.
 - **Project Client Management**: Tab-based interface using Table.tsx for managing project clients with add/edit/delete functionality via API endpoints `/api/projects/:projectId/clients`.
+- **Client Roles Management**: Organizations can create and manage custom client roles in addition to system-provided global roles. Implemented in "Ajustes" tab of Clients page with full CRUD operations. System roles (is_default=true) are global and visible to all organizations, while custom roles (is_default=false) are organization-specific. All client_roles CRUD endpoints enforce server-side organization_id derivation from user_preferences.last_organization_id with active membership validation in organization_members before allowing operations. Vercel endpoints follow RESTful pattern: `/api/client-roles` (GET, POST) and `/api/client-roles/:id` (PATCH, DELETE).
 - **Subscription System**: Complete organization subscription management with FREE, PRO, TEAMS, and ENTERPRISE plans. Admin interface with two tabs: "Planes" for managing plan definitions (name, slug, features, billing_type, is_active) and "Precios" for managing multi-currency pricing (plan_prices table with monthly_amount, annual_amount, currency_code, provider). The legacy `price` field in the `plans` table is deprecated and should not be used; all pricing now managed through the `plan_prices` table which supports multiple currencies (ARS, USD, EUR) and payment providers (MercadoPago, PayPal).
 
 ### System Design Choices

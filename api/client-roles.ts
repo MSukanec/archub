@@ -1,9 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { handleGetClientRoles } from './_lib/handlers/clients/getClientRoles.js';
+import { createClientRole } from './_lib/handlers/clients/createClientRole.js';
 import { extractToken, getUserFromToken } from './lib/auth-helpers.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'GET') {
+  if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
@@ -49,16 +50,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(403).json({ error: 'User membership is not active' });
     }
 
-    const result = await handleGetClientRoles(
-      { organizationId },
-      supabase
-    );
+    // Handle GET request
+    if (req.method === 'GET') {
+      const result = await handleGetClientRoles(
+        { organizationId },
+        supabase
+      );
 
-    if (!result.success) {
-      return res.status(400).json({ error: result.error });
+      if (!result.success) {
+        return res.status(400).json({ error: result.error });
+      }
+
+      return res.status(200).json(result.data);
     }
 
-    return res.status(200).json(result.data);
+    // Handle POST request
+    if (req.method === 'POST') {
+      const { name } = req.body;
+
+      if (!name) {
+        return res.status(400).json({ error: 'name is required' });
+      }
+
+      const role = await createClientRole({ supabase }, { name, organization_id: organizationId });
+      return res.status(201).json(role);
+    }
   } catch (error: any) {
     console.error('Error in /api/client-roles:', error);
     return res.status(500).json({ error: 'Internal server error' });

@@ -53,6 +53,9 @@
     { "source": "/api/admin/coupons", "destination": "/api/admin/coupons" },
     { "source": "/api/admin/coupons/:id", "destination": "/api/admin/coupons/[id]" },
     
+    { "source": "/api/client-roles", "destination": "/api/client-roles" },
+    { "source": "/api/client-roles/:id", "destination": "/api/client-roles/[id]" },
+    
     { "source": "/api/projects", "destination": "/api/projects" },
     { "source": "/api/projects/:id", "destination": "/api/projects/[id]" },
     
