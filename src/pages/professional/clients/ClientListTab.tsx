@@ -33,6 +33,7 @@ interface CurrencyFinancial {
   total_schedule_items: number;
   schedule_paid: number;
   schedule_overdue: number;
+  payments_missing_rate?: number; // Warning flag for PRO/TEAMS conversion issues
 }
 
 interface ProjectClientSummary {
@@ -65,6 +66,14 @@ interface ProjectClientSummary {
   next_due: number | null;
 }
 
+interface ClientSummaryResponse {
+  plan: {
+    slug: string;
+    isMultiCurrency: boolean;
+  };
+  clients: ProjectClientSummary[];
+}
+
 export default function ClientListTab({ projectId }: ClientListTabProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -77,11 +86,14 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
 
-  // Query to get project clients summary with financial data
-  const { data: projectClients = [], isLoading } = useQuery<ProjectClientSummary[]>({
+  // Query to get project clients summary with financial data (plan-aware)
+  const { data: summaryResponse, isLoading } = useQuery<ClientSummaryResponse>({
     queryKey: [`/api/projects/${activeProjectId}/clients/summary?organization_id=${organizationId}`],
     enabled: !!activeProjectId && !!organizationId
   });
+
+  const projectClients = summaryResponse?.clients || [];
+  const planInfo = summaryResponse?.plan || { slug: 'FREE', isMultiCurrency: false };
 
   // Delete mutation
   const deleteClientMutation = useMutation({
@@ -175,9 +187,33 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   };
 
   // Helper function to render multi-currency amounts
+  // Helper function to render amounts - plan-aware
   const renderMultiCurrency = (client: ProjectClientSummary, field: keyof Pick<CurrencyFinancial, 'total_committed_amount' | 'total_paid_amount' | 'balance_due'>) => {
     if (client.financialByCurrency.length === 0) return '-';
     
+    // For PRO/TEAMS: Show single currency (commitment currency) with converted amount
+    if (planInfo.isMultiCurrency) {
+      const currencyData = client.financialByCurrency[0];
+      if (!currencyData) return '-';
+      
+      const amount = currencyData[field];
+      const hasConversionWarning = field === 'total_paid_amount' && (currencyData.payments_missing_rate || 0) > 0;
+      
+      return (
+        <div className="flex flex-col">
+          <span className="font-semibold" style={{ fontSize: '14px' }}>
+            {formatCurrency(amount, currencyData.currency)}
+          </span>
+          {hasConversionWarning && (
+            <span className="text-xs text-orange-500">
+              {currencyData.payments_missing_rate} pago(s) sin tasa de cambio
+            </span>
+          )}
+        </div>
+      );
+    }
+    
+    // For FREE: Show multiple currencies if present
     return (
       <div className="flex flex-wrap gap-1">
         {client.financialByCurrency.map((f, index) => (
@@ -244,6 +280,26 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       render: (client: ProjectClientSummary) => {
         if (client.financialByCurrency.length === 0) return '-';
         
+        // For PRO/TEAMS: Show single currency (commitment currency) with converted balance
+        if (planInfo.isMultiCurrency) {
+          const currencyData = client.financialByCurrency[0];
+          if (!currencyData) return '-';
+          
+          const balance = currencyData.balance_due;
+          const className = balance > 0 
+            ? 'text-orange-600 dark:text-orange-400 font-semibold' 
+            : balance < 0
+            ? 'text-green-600 dark:text-green-400 font-semibold'
+            : 'font-semibold';
+          
+          return (
+            <span className={className} style={{ fontSize: '14px' }}>
+              {formatCurrency(balance, currencyData.currency)}
+            </span>
+          );
+        }
+        
+        // For FREE: Show multiple currencies if present
         return (
           <div className="flex flex-wrap gap-1">
             {client.financialByCurrency.map((f, index) => {

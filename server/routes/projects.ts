@@ -302,7 +302,7 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
     }
   });
 
-  // GET /api/projects/:projectId/clients/summary - Get financial summary for project clients
+  // GET /api/projects/:projectId/clients/summary - Get financial summary for project clients (plan-aware)
   app.get("/api/projects/:projectId/clients/summary", async (req, res) => {
     try {
       const { projectId } = req.params;
@@ -319,9 +319,35 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
 
       const authenticatedSupabase = createAuthenticatedClient(token);
 
-      // Query the financial overview view (returns multiple rows per client if multi-currency)
+      // Fetch organization plan to determine behavior
+      const { data: orgData, error: orgError } = await authenticatedSupabase
+        .from('organizations')
+        .select(`
+          id,
+          plan_id,
+          plan:plan_id (
+            id,
+            slug,
+            name
+          )
+        `)
+        .eq('id', organization_id as string)
+        .single();
+
+      if (orgError) {
+        console.error("Error fetching organization plan:", orgError);
+        return res.status(500).json({ error: "Failed to fetch organization plan" });
+      }
+
+      const planSlug = orgData?.plan?.slug?.toUpperCase() || 'FREE';
+      const isMultiCurrency = planSlug === 'PRO' || planSlug === 'TEAMS' || planSlug === 'ENTERPRISE';
+
+      // Use new view with currency conversion for PRO/TEAMS, old logic for FREE
+      const viewName = isMultiCurrency ? 'client_financial_overview_v2' : 'client_financial_overview';
+
+      // Query the financial overview view
       const { data: financialData, error: viewError } = await authenticatedSupabase
-        .from('client_financial_overview')
+        .from(viewName)
         .select('*')
         .eq('project_id', projectId)
         .eq('organization_id', organization_id as string);
@@ -427,6 +453,7 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
           total_schedule_items: row.total_schedule_items || 0,
           schedule_paid: row.schedule_paid || 0,
           schedule_overdue: row.schedule_overdue || 0,
+          payments_missing_rate: row.payments_missing_rate || 0, // Warning flag for PRO/TEAMS
         });
 
         return acc;
@@ -470,7 +497,14 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
         return nameA.localeCompare(nameB);
       });
 
-      res.json(mergedData);
+      // Include plan info in response for frontend rendering
+      res.json({
+        plan: {
+          slug: planSlug,
+          isMultiCurrency
+        },
+        clients: mergedData
+      });
     } catch (error) {
       console.error("Error in get project clients summary endpoint:", error);
       res.status(500).json({ error: "Internal server error" });
