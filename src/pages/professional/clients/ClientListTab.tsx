@@ -2,7 +2,7 @@ import React from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { apiRequest } from '@/lib/queryClient'
-import { Users, Plus, Edit, Trash2, User } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, User, FileText, Calendar } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -11,12 +11,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { Link, useLocation } from 'wouter'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 interface ClientListTabProps {
   projectId?: string;
 }
 
-interface ProjectClient {
+interface ProjectClientSummary {
   id: string;
   client_id: string;
   unit: string | null;
@@ -33,6 +35,19 @@ interface ProjectClient {
       avatar_url?: string;
     } | null;
   } | null;
+  financial: {
+    total_committed_amount: number;
+    total_paid_amount: number;
+    balance_due: number;
+    next_due_date: string | null;
+    next_due_amount: number | null;
+    last_payment_date: string | null;
+  };
+  currency: {
+    id: string;
+    code: string;
+    symbol: string;
+  } | null;
 }
 
 export default function ClientListTab({ projectId }: ClientListTabProps) {
@@ -47,22 +62,11 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
 
-  // Query to get project clients
-  const { data: projectClientsRaw = [], isLoading } = useQuery<ProjectClient[]>({
-    queryKey: [`/api/projects/${activeProjectId}/clients?organization_id=${organizationId}`],
+  // Query to get project clients summary with financial data
+  const { data: projectClients = [], isLoading } = useQuery<ProjectClientSummary[]>({
+    queryKey: [`/api/projects/${activeProjectId}/clients/summary?organization_id=${organizationId}`],
     enabled: !!activeProjectId && !!organizationId
   });
-
-  // Sort clients A-Z by full name
-  const projectClients = React.useMemo(() => {
-    return [...projectClientsRaw].sort((a, b) => {
-      const nameA = (a.contacts?.company_name || a.contacts?.full_name || 
-                    `${a.contacts?.first_name || ''} ${a.contacts?.last_name || ''}`.trim()).toLowerCase();
-      const nameB = (b.contacts?.company_name || b.contacts?.full_name || 
-                    `${b.contacts?.first_name || ''} ${b.contacts?.last_name || ''}`.trim()).toLowerCase();
-      return nameA.localeCompare(nameB);
-    });
-  }, [projectClientsRaw]);
 
   // Delete mutation
   const deleteClientMutation = useMutation({
@@ -72,7 +76,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       await apiRequest('DELETE', `/api/projects/${activeProjectId}/clients/${clientId}?organization_id=${organizationId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${activeProjectId}/clients?organization_id=${organizationId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${activeProjectId}/clients/summary?organization_id=${organizationId}`] });
       toast({
         title: 'Cliente eliminado',
         description: 'El cliente ha sido eliminado del proyecto correctamente',
@@ -87,7 +91,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     },
   });
 
-  const handleDelete = (client: ProjectClient) => {
+  const handleDelete = (client: ProjectClientSummary) => {
     const clientName = client.contacts 
       ? `${client.contacts.first_name} ${client.contacts.last_name}`.trim()
       : 'Cliente';
@@ -104,14 +108,14 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     });
   };
 
-  const handleEdit = (client: ProjectClient) => {
+  const handleEdit = (client: ProjectClientSummary) => {
     openModal('project-client', {
       projectId: activeProjectId,
       clientId: client.id,
     });
   };
 
-  const handleEditContact = (client: ProjectClient) => {
+  const handleEditContact = (client: ProjectClientSummary) => {
     if (!client.contacts) {
       toast({
         title: 'Error',
@@ -149,6 +153,12 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     )
   }
 
+  // Helper function to format currency
+  const formatCurrency = (amount: number, currency: ProjectClientSummary['currency']) => {
+    if (!currency) return `$${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `${currency.symbol}${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
   // Table columns
   const columns = [
     {
@@ -156,7 +166,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       label: '',
       width: '60px',
       sortable: false,
-      render: (client: ProjectClient) => {
+      render: (client: ProjectClientSummary) => {
         const avatarUrl = client.contacts?.linked_user?.avatar_url;
         const initials = client.contacts?.first_name?.[0] && client.contacts?.last_name?.[0]
           ? `${client.contacts.first_name[0]}${client.contacts.last_name[0]}`
@@ -174,10 +184,10 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     },
     {
       key: 'full_name',
-      label: 'Nombre Completo',
+      label: 'Cliente',
       sortable: true,
       cellClassName: 'font-semibold',
-      render: (client: ProjectClient) => {
+      render: (client: ProjectClientSummary) => {
         const displayName = client.contacts?.company_name || 
                            client.contacts?.full_name || 
                            `${client.contacts?.first_name || ''} ${client.contacts?.last_name || ''}`.trim();
@@ -185,22 +195,52 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       },
     },
     {
-      key: 'unit',
-      label: 'Unidad Funcional',
+      key: 'total_committed',
+      label: 'Compromiso total',
       sortable: true,
-      render: (client: ProjectClient) => client.unit || '-',
+      render: (client: ProjectClientSummary) => {
+        const amount = client.financial.total_committed_amount;
+        return amount > 0 ? formatCurrency(amount, client.currency) : '-';
+      },
     },
     {
-      key: 'email',
-      label: 'Email',
+      key: 'total_paid',
+      label: 'Pagado',
       sortable: true,
-      render: (client: ProjectClient) => client.contacts?.email || '-',
+      render: (client: ProjectClientSummary) => {
+        const amount = client.financial.total_paid_amount;
+        return amount > 0 ? formatCurrency(amount, client.currency) : '-';
+      },
     },
     {
-      key: 'phone',
-      label: 'Teléfono',
+      key: 'balance_due',
+      label: 'Saldo pendiente',
       sortable: true,
-      render: (client: ProjectClient) => client.contacts?.phone || '-',
+      render: (client: ProjectClientSummary) => {
+        const amount = client.financial.balance_due;
+        if (amount === 0) return '-';
+        const className = amount > 0 ? 'text-orange-600 dark:text-orange-400 font-medium' : 'text-green-600 dark:text-green-400';
+        return <span className={className}>{formatCurrency(amount, client.currency)}</span>;
+      },
+    },
+    {
+      key: 'next_due',
+      label: 'Próximo vencimiento',
+      sortable: true,
+      render: (client: ProjectClientSummary) => {
+        const { next_due_date, next_due_amount } = client.financial;
+        if (!next_due_date) return <span className="text-muted-foreground">Sin vencimientos</span>;
+        
+        const formattedDate = format(new Date(next_due_date), 'dd/MM/yyyy', { locale: es });
+        const formattedAmount = next_due_amount ? formatCurrency(next_due_amount, client.currency) : '';
+        
+        return (
+          <div className="flex flex-col">
+            <span className="font-medium">{formattedDate}</span>
+            {formattedAmount && <span className="text-muted-foreground">{formattedAmount}</span>}
+          </div>
+        );
+      },
     },
   ];
 
@@ -241,7 +281,27 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             </Button>
           ),
         }}
-        rowActions={(client: ProjectClient) => [
+        rowActions={(client: ProjectClientSummary) => [
+          {
+            label: 'Ver / editar compromiso',
+            icon: FileText,
+            onClick: () => {
+              toast({
+                title: 'Función en desarrollo',
+                description: 'La gestión de compromisos estará disponible próximamente',
+              });
+            },
+          },
+          {
+            label: 'Ver plan de pagos',
+            icon: Calendar,
+            onClick: () => {
+              toast({
+                title: 'Función en desarrollo',
+                description: 'El plan de pagos estará disponible próximamente',
+              });
+            },
+          },
           {
             label: 'Editar Cliente',
             icon: Edit,

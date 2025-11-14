@@ -302,6 +302,121 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
     }
   });
 
+  // GET /api/projects/:projectId/clients/summary - Get financial summary for project clients
+  app.get("/api/projects/:projectId/clients/summary", async (req, res) => {
+    try {
+      const { projectId } = req.params;
+      const { organization_id } = req.query;
+
+      if (!organization_id) {
+        return res.status(400).json({ error: "organization_id is required" });
+      }
+
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // Query the financial overview view
+      const { data: financialData, error: viewError } = await authenticatedSupabase
+        .from('client_financial_overview')
+        .select('*')
+        .eq('project_id', projectId)
+        .eq('organization_id', organization_id as string);
+
+      if (viewError) {
+        console.error("Error fetching client financial overview:", viewError);
+        return res.status(500).json({ error: "Failed to fetch client financial data" });
+      }
+
+      if (!financialData || financialData.length === 0) {
+        return res.json([]);
+      }
+
+      // Get project_client_ids to enrich with contact and currency data
+      const projectClientIds = financialData.map((item: any) => item.project_client_id);
+
+      // Enrich with contact (for avatar) and currency data
+      const { data: enrichedData, error: enrichError } = await authenticatedSupabase
+        .from('project_clients')
+        .select(`
+          id,
+          unit,
+          contacts:contacts!client_id (
+            id,
+            first_name,
+            last_name,
+            full_name,
+            email,
+            phone,
+            company_name,
+            linked_user:users!linked_user_id (
+              id,
+              avatar_url
+            )
+          ),
+          client_commitments!client_id (
+            currency:currencies!currency_id (
+              id,
+              code,
+              symbol
+            )
+          )
+        `)
+        .in('id', projectClientIds);
+
+      if (enrichError) {
+        console.error("Error enriching client data:", enrichError);
+        return res.status(500).json({ error: "Failed to enrich client data" });
+      }
+
+      // Merge financial data with enriched contact/currency data
+      const mergedData = financialData.map((financial: any) => {
+        const enriched = enrichedData?.find((e: any) => e.id === financial.project_client_id);
+        
+        // Get currency from first commitment (all should be same currency per client)
+        const currency = enriched?.client_commitments?.[0]?.currency || null;
+
+        return {
+          id: financial.project_client_id,
+          project_id: financial.project_id,
+          client_id: financial.client_id,
+          organization_id: financial.organization_id,
+          unit: enriched?.unit || null,
+          contacts: enriched?.contacts || null,
+          financial: {
+            total_committed_amount: parseFloat(financial.total_committed_amount || 0),
+            total_paid_amount: parseFloat(financial.total_paid_amount || 0),
+            balance_due: parseFloat(financial.balance_due || 0),
+            next_due_date: financial.next_due_date || null,
+            next_due_amount: financial.next_due_amount ? parseFloat(financial.next_due_amount) : null,
+            last_payment_date: financial.last_payment_date || null,
+            total_schedule_items: financial.total_schedule_items || 0,
+            schedule_paid: financial.schedule_paid || 0,
+            schedule_overdue: financial.schedule_overdue || 0,
+          },
+          currency: currency,
+        };
+      });
+
+      // Sort A-Z by client name
+      mergedData.sort((a: any, b: any) => {
+        const nameA = (a.contacts?.company_name || a.contacts?.full_name || 
+                      `${a.contacts?.first_name || ''} ${a.contacts?.last_name || ''}`.trim()).toLowerCase();
+        const nameB = (b.contacts?.company_name || b.contacts?.full_name || 
+                      `${b.contacts?.first_name || ''} ${b.contacts?.last_name || ''}`.trim()).toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+
+      res.json(mergedData);
+    } catch (error) {
+      console.error("Error in get project clients summary endpoint:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // POST /api/projects/:projectId/clients - Add a client to a project
   app.post("/api/projects/:projectId/clients", async (req, res) => {
     try {
