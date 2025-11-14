@@ -5,6 +5,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { supabase } from '@/lib/supabase'
+import ClientDashboardTab from './ClientDashboardTab'
 import ClientListTab from './ClientListTab'
 import { ClientObligations } from './ClientObligations'
 import { ClientPaymentPlans } from './ClientPaymentPlans'
@@ -16,7 +17,7 @@ import { useLocation } from 'wouter'
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
 
 export function Clients() {
-  const [activeTab, setActiveTab] = useState("list")
+  const [activeTab, setActiveTab] = useState("dashboard")
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
   const { setSidebarContext } = useNavigationStore()
@@ -133,6 +134,11 @@ export function Clients() {
   // Crear tabs para el header
   const headerTabs = [
     {
+      id: "dashboard",
+      label: "Visión General",
+      isActive: activeTab === "dashboard"
+    },
+    {
       id: "list",
       label: "Lista de Clientes",
       isActive: activeTab === "list"
@@ -243,6 +249,12 @@ export function Clients() {
   return (
     <Layout headerProps={headerProps} wide={true}>
       <div className="space-y-4">
+        {activeTab === "dashboard" && (
+          <ClientDashboardTab 
+            projectId={projectId}
+          />
+        )}
+
         {activeTab === "list" && (
           <ClientListTab 
             projectId={projectId}

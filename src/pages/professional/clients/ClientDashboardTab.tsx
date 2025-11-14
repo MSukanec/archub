@@ -74,7 +74,7 @@ interface ClientSummaryResponse {
   clients: ProjectClientSummary[];
 }
 
-export default function ClientListTab({ projectId }: ClientListTabProps) {
+export default function ClientDashboardTab({ projectId }: ClientListTabProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
@@ -372,16 +372,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
               </button>
               .
             </>
-          ),
-          action: (
-            <Button
-              onClick={handleAddClient}
-              size="sm"
-              data-testid="button-add-client-empty"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Agregar Cliente
-            </Button>
           ),
         }}
         rowActions={(client: ProjectClientSummary) => [
