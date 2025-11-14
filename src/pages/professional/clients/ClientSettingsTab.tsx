@@ -252,7 +252,14 @@ export default function ClientSettingsTab() {
           data={clientRoles || []}
           columns={tableColumns}
           isLoading={isLoading}
-          emptyMessage="No hay roles de cliente configurados"
+          emptyState={
+            <div className="text-center py-12">
+              <Settings className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-sm text-muted-foreground">
+                No hay roles de cliente configurados
+              </p>
+            </div>
+          }
         />
       </div>
 
