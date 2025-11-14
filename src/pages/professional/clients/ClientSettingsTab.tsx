@@ -2,21 +2,32 @@ import React, { useState } from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { Settings, Plus, Edit, Trash2, Shield } from 'lucide-react';
+import { Settings, Plus, Edit, Trash2, Shield, MoreVertical } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
+import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
+import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 
 interface ClientRole {
   id: string;
@@ -27,15 +38,27 @@ interface ClientRole {
   updated_at: string;
 }
 
+const roleSchema = z.object({
+  name: z.string().min(1, 'El nombre del rol es requerido').max(100, 'El nombre es demasiado largo'),
+});
+
+type RoleFormData = z.infer<typeof roleSchema>;
+
 export default function ClientSettingsTab() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<ClientRole | null>(null);
-  const [roleName, setRoleName] = useState('');
+
+  const form = useForm<RoleFormData>({
+    resolver: zodResolver(roleSchema),
+    defaultValues: {
+      name: '',
+    },
+  });
 
   // Fetch client roles (organization_id is derived server-side)
   const { data: clientRoles, isLoading } = useQuery<ClientRole[]>({
@@ -45,9 +68,8 @@ export default function ClientSettingsTab() {
 
   // Create role mutation
   const createRoleMutation = useMutation({
-    mutationFn: async (name: string) => {
-      // organization_id is derived server-side from authenticated user
-      return await apiRequest('POST', '/api/client-roles', { name });
+    mutationFn: async (data: RoleFormData) => {
+      return await apiRequest('POST', '/api/client-roles', { name: data.name });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/client-roles`] });
@@ -55,8 +77,7 @@ export default function ClientSettingsTab() {
         title: 'Rol creado',
         description: 'El rol de cliente ha sido creado correctamente',
       });
-      setIsDialogOpen(false);
-      setRoleName('');
+      handleClose();
     },
     onError: (error: any) => {
       toast({
@@ -69,9 +90,9 @@ export default function ClientSettingsTab() {
 
   // Update role mutation
   const updateRoleMutation = useMutation({
-    mutationFn: async ({ id, name }: { id: string; name: string }) => {
-      // organization_id is derived server-side from authenticated user
-      return await apiRequest('PATCH', `/api/client-roles/${id}`, { name });
+    mutationFn: async (data: RoleFormData) => {
+      if (!editingRole) throw new Error('No role selected');
+      return await apiRequest('PATCH', `/api/client-roles/${editingRole.id}`, { name: data.name });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/client-roles`] });
@@ -79,9 +100,7 @@ export default function ClientSettingsTab() {
         title: 'Rol actualizado',
         description: 'El rol de cliente ha sido actualizado correctamente',
       });
-      setIsDialogOpen(false);
-      setEditingRole(null);
-      setRoleName('');
+      handleClose();
     },
     onError: (error: any) => {
       toast({
@@ -95,7 +114,6 @@ export default function ClientSettingsTab() {
   // Delete role mutation
   const deleteRoleMutation = useMutation({
     mutationFn: async (id: string) => {
-      // organization_id is derived server-side from authenticated user
       return await apiRequest('DELETE', `/api/client-roles/${id}`);
     },
     onSuccess: () => {
@@ -114,38 +132,28 @@ export default function ClientSettingsTab() {
     },
   });
 
-  const handleOpenDialog = (role?: ClientRole) => {
+  const handleOpenModal = (role?: ClientRole) => {
     if (role) {
       setEditingRole(role);
-      setRoleName(role.name);
+      form.reset({ name: role.name });
     } else {
       setEditingRole(null);
-      setRoleName('');
+      form.reset({ name: '' });
     }
-    setIsDialogOpen(true);
+    setIsModalOpen(true);
   };
 
-  const handleCloseDialog = () => {
-    setIsDialogOpen(false);
+  const handleClose = () => {
+    setIsModalOpen(false);
     setEditingRole(null);
-    setRoleName('');
+    form.reset({ name: '' });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!roleName.trim()) {
-      toast({
-        title: 'Error',
-        description: 'El nombre del rol es requerido',
-        variant: 'destructive',
-      });
-      return;
-    }
-
+  const onSubmit = async (data: RoleFormData) => {
     if (editingRole) {
-      updateRoleMutation.mutate({ id: editingRole.id, name: roleName.trim() });
+      await updateRoleMutation.mutateAsync(data);
     } else {
-      createRoleMutation.mutate(roleName.trim());
+      await createRoleMutation.mutateAsync(data);
     }
   };
 
@@ -191,117 +199,139 @@ export default function ClientSettingsTab() {
     },
     {
       key: 'actions',
-      label: 'Acciones',
+      label: '',
       align: 'right' as const,
-      render: (role: ClientRole) => (
-        <div className="flex items-center justify-end gap-2">
-          {!role.is_default && (
-            <>
+      render: (role: ClientRole) => {
+        if (role.is_default) return null;
+        
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => handleOpenDialog(role)}
-                data-testid={`button-edit-role-${role.id}`}
+                data-testid={`button-actions-role-${role.id}`}
               >
-                <Edit className="w-4 h-4" />
+                <MoreVertical className="w-4 h-4" />
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => handleOpenModal(role)}
+                data-testid={`menu-edit-role-${role.id}`}
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Editar
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 onClick={() => handleDelete(role)}
-                data-testid={`button-delete-role-${role.id}`}
+                className="text-destructive"
+                data-testid={`menu-delete-role-${role.id}`}
               >
-                <Trash2 className="w-4 h-4 text-destructive" />
-              </Button>
-            </>
-          )}
-        </div>
-      ),
+                <Trash2 className="w-4 h-4 mr-2" />
+                Eliminar
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
     },
   ];
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold flex items-center gap-2">
-            <Settings className="w-6 h-6" />
-            Roles de Cliente
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Gestiona los roles que pueden asignarse a los clientes del proyecto
-          </p>
-        </div>
-        <Button
-          onClick={() => handleOpenDialog()}
-          data-testid="button-add-client-role"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Agregar Rol
-        </Button>
-      </div>
-
-      <div className="rounded-lg border">
-        <Table
-          data={clientRoles || []}
-          columns={tableColumns}
-          isLoading={isLoading}
-          emptyState={
-            <div className="text-center py-12">
-              <Settings className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-sm text-muted-foreground">
-                No hay roles de cliente configurados
-              </p>
-            </div>
-          }
+  // Modal panels
+  const editPanel = (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre del Rol</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Ej: Inversor, Copropietario, etc."
+                  data-testid="input-role-name"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
+      </form>
+    </Form>
+  );
+
+  const headerContent = (
+    <FormModalHeader
+      title={editingRole ? 'Editar Rol de Cliente' : 'Nuevo Rol de Cliente'}
+      description={
+        editingRole
+          ? 'Modifica el nombre del rol personalizado de cliente'
+          : 'Crea un nuevo rol personalizado para asignar a los clientes del proyecto'
+      }
+      icon={Settings}
+    />
+  );
+
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={handleClose}
+      rightLabel={editingRole ? 'Guardar Cambios' : 'Crear Rol'}
+      onRightClick={form.handleSubmit(onSubmit)}
+      isSubmitting={createRoleMutation.isPending || updateRoleMutation.isPending}
+    />
+  );
+
+  return (
+    <>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold flex items-center gap-2">
+              <Settings className="w-6 h-6" />
+              Roles de Cliente
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Gestiona los roles que pueden asignarse a los clientes. Los roles del sistema no pueden modificarse.
+            </p>
+          </div>
+          <Button
+            onClick={() => handleOpenModal()}
+            data-testid="button-add-client-role"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Agregar Rol
+          </Button>
+        </div>
+
+        <div className="rounded-lg border">
+          <Table
+            data={clientRoles || []}
+            columns={tableColumns}
+            isLoading={isLoading}
+            emptyStateConfig={{
+              icon: <Settings className="w-12 h-12 text-muted-foreground" />,
+              title: 'No hay roles de cliente',
+              description: 'Agrega roles personalizados para asignar a los clientes del proyecto',
+            }}
+          />
+        </div>
       </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
-        <DialogContent>
-          <form onSubmit={handleSubmit}>
-            <DialogHeader>
-              <DialogTitle>
-                {editingRole ? 'Editar Rol de Cliente' : 'Nuevo Rol de Cliente'}
-              </DialogTitle>
-              <DialogDescription>
-                {editingRole
-                  ? 'Modifica el nombre del rol de cliente'
-                  : 'Crea un nuevo rol personalizado para asignar a los clientes'}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="py-4">
-              <Label htmlFor="role-name">Nombre del Rol</Label>
-              <Input
-                id="role-name"
-                value={roleName}
-                onChange={(e) => setRoleName(e.target.value)}
-                placeholder="Ej: Inversor, Copropietario, etc."
-                className="mt-1"
-                autoFocus
-                data-testid="input-role-name"
-              />
-            </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleCloseDialog}
-                data-testid="button-cancel-role"
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                disabled={createRoleMutation.isPending || updateRoleMutation.isPending}
-                data-testid="button-submit-role"
-              >
-                {editingRole ? 'Guardar Cambios' : 'Crear Rol'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </div>
+      {isModalOpen && (
+        <FormModalLayout
+          columns={1}
+          viewPanel={<div></div>}
+          editPanel={editPanel}
+          headerContent={headerContent}
+          footerContent={footerContent}
+          onClose={handleClose}
+          isEditing={true}
+        />
+      )}
+    </>
   );
 }
