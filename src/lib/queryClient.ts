@@ -1,6 +1,16 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { supabase } from "./supabase";
 
+// Get API base URL from environment (for dev server)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+
+function getFullUrl(url: string): string {
+  if (API_BASE_URL && url.startsWith('/api')) {
+    return `${API_BASE_URL}${url}`;
+  }
+  return url;
+}
+
 async function throwIfResNotOk(res: Response) {
   // Silently suppress 400/401 auth errors - they are expected when no session exists
   if (res.status === 400 || res.status === 401) {
@@ -37,7 +47,7 @@ export async function apiRequest(
     headers["Authorization"] = `Bearer ${session.access_token}`;
   }
   
-  const res = await fetch(url, {
+  const res = await fetch(getFullUrl(url), {
     method,
     headers,
     body: data ? JSON.stringify(data) : undefined,
@@ -69,7 +79,7 @@ export const getQueryFn: <T>(options: {
       headers["Authorization"] = `Bearer ${session.access_token}`;
     }
     
-    const res = await fetch(queryKey[0] as string, {
+    const res = await fetch(getFullUrl(queryKey[0] as string), {
       credentials: "include",
       headers,
     });
