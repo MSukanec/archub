@@ -300,27 +300,10 @@ export function registerProjectClientsRoutes(app: Express, deps: RouteDeps) {
       // Get client IDs
       const clientIds = projectClients.map(pc => pc.client_id);
 
-      // Fetch payment records for these clients
+      // Fetch payment records for these clients (without joins to avoid ambiguity)
       const { data: payments, error } = await supabase
         .from('client_payments')
-        .select(`
-          *,
-          contacts:client_id (
-            id,
-            first_name,
-            last_name,
-            company_name
-          ),
-          currencies:currency_id (
-            id,
-            code,
-            symbol
-          ),
-          payment_methods:payment_method_id (
-            id,
-            name
-          )
-        `)
+        .select('*')
         .in('client_id', clientIds)
         .order('payment_date', { ascending: false });
 
@@ -329,19 +312,62 @@ export function registerProjectClientsRoutes(app: Express, deps: RouteDeps) {
         return res.status(500).json({ error: "Failed to fetch payment data" });
       }
 
+      if (!payments || payments.length === 0) {
+        return res.json([]);
+      }
+
+      // Fetch additional data separately to avoid ambiguity
+      const paymentClientIds = Array.from(new Set(payments.map((p: any) => p.client_id)));
+      const currencyIds = Array.from(new Set(payments.map((p: any) => p.currency_id).filter(Boolean)));
+      const methodIds = Array.from(new Set(payments.map((p: any) => p.payment_method_id).filter(Boolean)));
+
+      // Fetch contacts
+      const { data: contacts } = await supabase
+        .from('contacts')
+        .select('id, first_name, last_name, company_name')
+        .in('id', paymentClientIds);
+
+      // Fetch currencies
+      const { data: currencies } = await supabase
+        .from('currencies')
+        .select('id, code, symbol')
+        .in('id', currencyIds);
+
+      // Fetch payment methods
+      const { data: paymentMethods } = await supabase
+        .from('payment_methods')
+        .select('id, name')
+        .in('id', methodIds);
+
+      // Create lookup maps
+      const contactMap = (contacts || []).reduce((acc: any, c: any) => {
+        acc[c.id] = c;
+        return acc;
+      }, {});
+
+      const currencyMap = (currencies || []).reduce((acc: any, c: any) => {
+        acc[c.id] = c;
+        return acc;
+      }, {});
+
+      const methodMap = (paymentMethods || []).reduce((acc: any, m: any) => {
+        acc[m.id] = m;
+        return acc;
+      }, {});
+
       // Transform the data for frontend consumption
-      const transformedPayments = (payments || []).map((payment: any) => ({
+      const transformedPayments = payments.map((payment: any) => ({
         id: payment.id,
         amount: parseFloat(payment.amount || 0),
         payment_date: payment.payment_date,
         description: payment.description,
         status: payment.status || 'pending',
-        currency: payment.currencies || { code: 'USD', symbol: '$' },
-        payment_method: payment.payment_methods,
-        client: payment.project_clients?.contacts ? {
-          id: payment.project_clients.contacts.id,
-          name: payment.project_clients.contacts.company_name || 
-                `${payment.project_clients.contacts.first_name || ''} ${payment.project_clients.contacts.last_name || ''}`.trim()
+        currency: currencyMap[payment.currency_id] || { code: 'USD', symbol: '$' },
+        payment_method: methodMap[payment.payment_method_id] || null,
+        client: contactMap[payment.client_id] ? {
+          id: payment.client_id,
+          name: contactMap[payment.client_id].company_name || 
+                `${contactMap[payment.client_id].first_name || ''} ${contactMap[payment.client_id].last_name || ''}`.trim()
         } : null,
         created_at: payment.created_at,
         updated_at: payment.updated_at
