@@ -18,6 +18,7 @@ import { registerSupportRoutes } from './routes/support';
 import { registerPersonnelRoutes } from './routes/personnel';
 import { registerSubscriptionRoutes } from './routes/subscriptions';
 import { registerBillingRoutes } from './routes/billing';
+import { registerLearningRoutes } from './routes/learning';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get shared dependencies
@@ -37,6 +38,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register course routes (lessons progress, notes, enrollments, dashboard)
   registerCourseRoutes(app, deps);
+
+  // Register learning routes (courses dashboard, lesson notes, progress)
+  registerLearningRoutes(app, deps);
 
   // Register admin routes (courses, modules, lessons, enrollments, dashboard)
   registerAdminRoutes(app, deps);
