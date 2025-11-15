@@ -1,29 +1,22 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { createClient } from "@supabase/supabase-js";
+import { extractToken, getUserFromToken } from "../../../lib/auth-helpers.js";
 import { getClient, updateClient, deleteClient } from "../../../lib/handlers/projects/projectClients.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    const url = process.env.SUPABASE_URL;
-    const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
-
-    if (!url || !anonKey) {
-      return res.status(500).json({ error: "Missing SUPABASE_URL / SUPABASE_ANON_KEY" });
-    }
-
-    const authHeader = req.headers.authorization || "";
-    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-
+    const token = extractToken(req.headers.authorization);
     if (!token) {
       return res.status(401).json({ error: "No authorization token provided" });
     }
 
-    const supabase = createClient(url, anonKey, {
-      auth: { persistSession: false },
-      global: { headers: { Authorization: `Bearer ${token}` } },
-    });
+    const userResult = await getUserFromToken(token);
+    if (!userResult) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
+    const { supabase } = userResult;
     const ctx = { supabase };
+
     const projectId = req.query.projectId as string;
     const clientId = req.query.clientId as string;
     const organizationId = req.query.organization_id as string;
