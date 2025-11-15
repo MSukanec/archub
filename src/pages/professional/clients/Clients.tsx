@@ -270,7 +270,6 @@ export function Clients() {
         {activeTab === "obligations" && (
           <ClientObligationsTab 
             projectId={projectId}
-            organizationId={organizationId}
           />
         )}
 
