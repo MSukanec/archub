@@ -18,6 +18,7 @@ import { registerSupportRoutes } from './routes/support';
 import { registerPersonnelRoutes } from './routes/personnel';
 import { registerSubscriptionRoutes } from './routes/subscriptions';
 import { registerBillingRoutes } from './routes/billing';
+import { registerProjectClientsRoutes } from './routes/projectClients';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get shared dependencies
@@ -31,6 +32,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register project routes (projects, budgets, budget items, design phase tasks)
   registerProjectRoutes(app, deps);
+  
+  // Register project clients routes (project-clients, project-clients-summary, project-clients-payments)
+  registerProjectClientsRoutes(app, deps);
 
   // Register subcontract routes (movements, subcontracts, bids, tasks)
   registerSubcontractRoutes(app, deps);
