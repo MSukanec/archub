@@ -592,6 +592,42 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
     }
   });
 
+  // GET /api/projects/:projectId/clients/payments - Get client payments for a project
+  app.get("/api/projects/:projectId/clients/payments", async (req, res) => {
+    try {
+      const { projectId } = req.params;
+      const { organization_id } = req.query;
+
+      if (!organization_id) {
+        return res.status(400).json({ error: "organization_id is required" });
+      }
+
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      const { data: payments, error } = await authenticatedSupabase
+        .from('client_payments')
+        .select('*')
+        .eq('project_id', projectId)
+        .eq('organization_id', organization_id as string)
+        .order('payment_date', { ascending: false });
+
+      if (error) {
+        console.error("Error fetching client payments:", error);
+        return res.status(500).json({ error: "Failed to fetch client payments" });
+      }
+
+      res.json({ payments: payments || [], total: payments?.length || 0 });
+    } catch (error) {
+      console.error("Error in get client payments endpoint:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // DELETE /api/projects/:projectId/clients/:clientId - Remove a client from a project
   // GET individual project client
   app.get("/api/projects/:projectId/clients/:clientId", async (req, res) => {
