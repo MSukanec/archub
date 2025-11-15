@@ -1,10 +1,10 @@
 import type { Express } from "express";
 import type { RouteDeps } from './_base';
-import { handleGetClientRoles } from '../../api/lib/handlers/clients/getClientRoles.js';
-import { createClientRole } from '../../api/lib/handlers/clients/createClientRole.js';
-import { updateClientRole } from '../../api/lib/handlers/clients/updateClientRole.js';
-import { deleteClientRole } from '../../api/lib/handlers/clients/deleteClientRole.js';
-import { extractToken, createAuthenticatedClient } from '../../api/lib/auth-helpers.js';
+import { handleGetClientRoles } from '../lib/handlers/clients/getClientRoles.js';
+import { createClientRole } from '../lib/handlers/clients/createClientRole.js';
+import { updateClientRole } from '../lib/handlers/clients/updateClientRole.js';
+import { deleteClientRole } from '../lib/handlers/clients/deleteClientRole.js';
+import { extractToken, createAuthenticatedClient } from '../lib/auth/helpers.js';
 
 /**
  * Register client routes

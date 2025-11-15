@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import type { RouteDeps } from './_base';
-import { getContacts } from '../../api/lib/handlers/contacts/getContacts.js';
-import { extractToken, getUserFromToken } from '../../api/lib/auth-helpers.js';
+import { getContacts } from '../lib/handlers/contacts/getContacts.js';
+import { extractToken, getUserFromToken } from '../lib/auth/helpers.js';
 
 /**
  * Register contact routes
