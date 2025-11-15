@@ -124,6 +124,7 @@ export async function listClients(
           email,
           phone,
           company_name,
+          avatar_url,
           linked_user:users!linked_user_id (
             id,
             avatar_url
@@ -265,6 +266,7 @@ export async function getClientsSummary(
           email,
           phone,
           company_name,
+          avatar_url,
           linked_user:users!linked_user_id (
             id,
             avatar_url
