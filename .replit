@@ -79,12 +79,9 @@ runButton = "Start"
 
 [[workflows.workflow]]
 name = "Start"
-author = "agent"
+author = "manual"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5173
-
-[agent]
-integrations = ["javascript_database==1.0.0"]
