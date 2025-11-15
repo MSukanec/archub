@@ -48,7 +48,6 @@ interface ProjectClientSummary {
     email: string;
     phone?: string;
     company_name?: string;
-    avatar_url?: string;
     linked_user?: {
       id: string;
       avatar_url?: string;
@@ -235,7 +234,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       width: '60px',
       sortable: false,
       render: (client: ProjectClientSummary) => {
-        const avatarUrl = client.contacts?.avatar_url || client.contacts?.linked_user?.avatar_url;
+        const avatarUrl = client.contacts?.linked_user?.avatar_url;
         const initials = client.contacts?.first_name?.[0] && client.contacts?.last_name?.[0]
           ? `${client.contacts.first_name[0]}${client.contacts.last_name[0]}`
           : client.contacts?.first_name?.[0] || '?';
