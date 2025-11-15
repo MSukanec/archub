@@ -5,6 +5,39 @@ import type { AdminContext, AdminHandlerResult } from "./types.js";
 import { success, error } from "./types.js";
 
 /**
+ * List all coupons with their course associations
+ */
+export async function listCoupons(
+  ctx: AdminContext
+): Promise<AdminHandlerResult> {
+  try {
+    const { data: coupons, error: dbError } = await ctx.supabase
+      .from('coupons')
+      .select(`
+        *,
+        coupon_courses (
+          course_id,
+          courses (
+            id,
+            title
+          )
+        )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (dbError) {
+      console.error('Error fetching coupons:', dbError);
+      return error("Failed to fetch coupons");
+    }
+
+    return success(coupons || []);
+  } catch (err: any) {
+    console.error('listCoupons error:', err);
+    return error(err.message || "Internal error");
+  }
+}
+
+/**
  * Create new coupon with course associations
  */
 export async function createCoupon(
