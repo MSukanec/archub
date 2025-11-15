@@ -2,6 +2,11 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { extractToken, getUserFromToken } from "../../../lib/auth-helpers.js";
 import { getClient, updateClient, deleteClient } from "../../../lib/handlers/projects/projectClients.js";
 
+// Force Node.js runtime to avoid Edge Function issues
+export const config = {
+  runtime: "nodejs",
+};
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const token = extractToken(req.headers.authorization);

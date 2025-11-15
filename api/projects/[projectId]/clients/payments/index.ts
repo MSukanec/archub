@@ -2,6 +2,11 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { extractToken, getUserFromToken } from '../../../../lib/auth-helpers.js';
 import { getClientPayments } from '../../../../lib/handlers/projects/clientPayments.js';
 
+// Force Node.js runtime to avoid Edge Function issues
+export const config = {
+  runtime: "nodejs",
+};
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
