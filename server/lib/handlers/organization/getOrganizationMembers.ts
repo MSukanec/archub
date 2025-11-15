@@ -1,6 +1,6 @@
 // api/lib/handlers/organization/getOrganizationMembers.ts
 import { SupabaseClient } from "@supabase/supabase-js";
-import { HttpError } from "../../auth-helpers.js";
+import { HttpError } from "../../auth/helpers.js";
 
 export interface OrganizationMember {
   id: string;

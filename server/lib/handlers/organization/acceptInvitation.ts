@@ -1,6 +1,6 @@
 // api/lib/handlers/organization/acceptInvitation.ts
 import { SupabaseClient } from "@supabase/supabase-js";
-import { HttpError } from "../../auth-helpers.js";
+import { HttpError } from "../../auth/helpers.js";
 import { registerMemberEvent } from "../../billing/events.js";
 
 export async function acceptInvitation(

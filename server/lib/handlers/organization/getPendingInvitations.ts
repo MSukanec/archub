@@ -1,6 +1,6 @@
 // api/lib/handlers/organization/getPendingInvitations.ts
 import { SupabaseClient } from "@supabase/supabase-js";
-import { HttpError } from "../../auth-helpers.js";
+import { HttpError } from "../../auth/helpers.js";
 
 export interface PendingInvitation {
   id: string;
