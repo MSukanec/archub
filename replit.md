@@ -19,7 +19,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui, Tailwind CSS, Zustand, Wouter, TanStack Query.
-- **Backend**: Node.js, Express.js, TypeScript (ES modules), deployed as Vercel serverless functions.
+- **Backend**: Node.js, Express.js, TypeScript (ES modules). 100% Express architecture, no serverless.
 - **Database**: PostgreSQL with Drizzle ORM.
 - **Authentication**: Supabase Auth (Email/password, Google OAuth).
 - **Data Flow**: React Query for server state, Express.js for REST APIs, Drizzle ORM for database operations with cache invalidation.
@@ -45,28 +45,21 @@ Preferred communication style: Simple, everyday language.
 - **Subscription System**: Complete organization subscription management with FREE, PRO, TEAMS, and ENTERPRISE plans, supporting multi-currency pricing via `plan_prices` table.
 
 ### System Design Choices
-- **Backend Modular Architecture**: Modularized domain-specific route modules.
+- **Backend Modular Architecture**: Express-only architecture with modularized domain-specific route modules. All code in `server/` folder.
+- **Backend Structure**: Routes in `server/routes/`, controllers in `server/controllers/`, shared handlers in `server/lib/handlers/`. See `server/ARCHITECTURE.md` for details.
 - **Frontend Performance Optimizations**: Code-splitting and lazy loading.
 - **Performance Optimizations (Gacela Mode)**: Sub-second page loads using database views, smart caching, and optimized backend endpoints.
-- **AI Code Architecture**: Dual-location AI code structure to support both development (Express) and production (Vercel serverless). All AI-related changes must be made in `api/lib/ai/` (NOT `api/_lib/ai/`).
-- **Payment Endpoints Architecture**: Complete refactor of payment domain with centralized checkout architecture. New structure: `/api/checkout/mp/` and `/api/checkout/paypal/` with shared handlers and helpers. Architecture includes critical security validations for server-side pricing, admin role verification, coupon validation, and authentication.
-- **Vercel API Endpoints Architecture**: Complete documentation in `api/ARCHITECTURE.md`. ALL business logic in `api/lib/handlers/`, endpoints are thin wrappers. Mandatory checklist in `ENDPOINT_CHECKLIST.md` prevents regressions.
+- **Payment Endpoints Architecture**: Complete payment domain with centralized checkout architecture. Handlers in `server/lib/handlers/checkout/mp/` and `server/lib/handlers/checkout/paypal/` with shared helpers. Architecture includes critical security validations for server-side pricing, admin role verification, coupon validation, and authentication.
 
 ## 🚨 CRITICAL RULES - NEVER BREAK THESE
 
-### Vercel Endpoints (Production)
-1. **NO Dynamic Route Conflicts**: Never create `api/something/[id].ts` and `api/something/[id]/nested.ts` together. Use `api/something/[somethingId]/index.ts` pattern instead.
-2. **ALWAYS Use api/lib/**: NEVER import from `api/_lib/` in production endpoints. The correct path is `api/lib/handlers/`.
-3. **Handler-First Pattern**: ALL business logic MUST be in `api/lib/handlers/`. Endpoints are thin authentication + validation wrappers.
-4. **Standard Auth Pattern**: Every endpoint MUST use the exact same Bearer token extraction pattern (see `api/ARCHITECTURE.md`).
-5. **Mandatory Checklist**: ALWAYS follow `ENDPOINT_CHECKLIST.md` before creating ANY new endpoint. No exceptions.
-6. **Documentation First**: READ `api/ARCHITECTURE.md` completely before touching any endpoint code.
-
-### Development vs Production
-- **Development**: Express.js server in `server/` with routes in `server/routes/`
-- **Production**: Vercel serverless functions in `api/` folder
-- **Shared Logic**: Business logic in `api/lib/handlers/` used by BOTH environments
-- **Critical**: Changes to `api/lib/` affect both dev and prod. Test thoroughly.
+### Backend Architecture (Express-Only)
+1. **All code in server/**: The `/api` folder was completely eliminated. All backend code lives in `server/`.
+2. **Follow server/ARCHITECTURE.md**: Read and follow the documented architecture patterns.
+3. **Business Logic Location**: Core logic is in `server/lib/handlers/`, controllers orchestrate the flow.
+4. **No Vercel Dependencies**: Never add `@vercel/node` or any serverless-specific packages.
+5. **Standard Auth Pattern**: Every endpoint uses Bearer token extraction via `server/lib/auth/helpers.ts`.
+6. **Route Registration**: All routes registered in `server/routes.ts` with domain-specific route files.
 
 ## External Dependencies
 - **Supabase**: Authentication.
