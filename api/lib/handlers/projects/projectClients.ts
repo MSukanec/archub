@@ -158,43 +158,32 @@ export async function getClientsSummary(
 ): Promise<GetClientsSummaryResult> {
   try {
     const { supabase } = ctx;
-    console.log('🔍 [getClientsSummary] START - params:', { projectId: params.projectId, organizationId: params.organizationId });
 
     if (!params.projectId || !params.organizationId) {
-      console.log('❌ [getClientsSummary] Missing required params');
       return { success: false, error: 'projectId and organizationId are required' };
     }
 
-    console.log('🔐 [getClientsSummary] Calling ensureAuth...');
     const authResult = await ensureAuth(ctx);
     if (!authResult.success) {
-      console.log('❌ [getClientsSummary] Auth failed:', authResult.error);
       return authResult;
     }
-    console.log('✅ [getClientsSummary] Auth successful, user:', authResult.user.id);
 
-    console.log('🔐 [getClientsSummary] Calling ensureOrganizationAccess...');
     const orgAccessResult = await ensureOrganizationAccess(ctx, params.organizationId);
     if (!orgAccessResult.success) {
-      console.log('❌ [getClientsSummary] Org access failed:', orgAccessResult.error);
       return orgAccessResult;
     }
-    console.log('✅ [getClientsSummary] Org access successful, memberId:', orgAccessResult.memberId);
 
-    console.log('🔍 [getClientsSummary] Calling getProjectById...');
+    // Verify project belongs to organization
     const projectResult = await getProjectById(ctx, params.projectId);
     if (!projectResult.success) {
-      console.log('❌ [getClientsSummary] Project fetch failed:', projectResult.error);
       return projectResult;
     }
-    console.log('✅ [getClientsSummary] Project fetched successfully, org_id:', projectResult.data.organization_id);
 
     if (projectResult.data.organization_id !== params.organizationId) {
-      console.log('❌ [getClientsSummary] Project org_id mismatch');
       return { success: false, error: 'Forbidden: Project does not belong to organization' };
     }
 
-    console.log('🔍 [getClientsSummary] Fetching organization data...');
+    // Fetch organization to get plan_id (avoid maybeSingle - use limit(1))
     const { data: orgDataArray, error: orgError } = await supabase
       .from('organizations')
       .select('id, plan_id')
@@ -202,10 +191,9 @@ export async function getClientsSummary(
       .limit(1);
 
     if (orgError) {
-      console.error('❌ [getClientsSummary] Error fetching organization:', orgError);
+      console.error('Error fetching organization:', orgError);
       return { success: false, error: 'Failed to fetch organization' };
     }
-    console.log('✅ [getClientsSummary] Organization data fetched, count:', orgDataArray?.length || 0);
 
     const orgData = orgDataArray && orgDataArray.length > 0 ? orgDataArray[0] : null;
 

@@ -8,7 +8,6 @@ import { supabase } from '@/lib/supabase'
 import ClientDashboardTab from './ClientDashboardTab'
 import ClientListTab from './ClientListTab'
 import ClientSettingsTab from './ClientSettingsTab'
-import ClientPaymentsListTab from './ClientPaymentsListTab'
 import { ClientObligations } from './ClientObligations'
 import { ClientPaymentPlans } from './ClientPaymentPlans'
 import { ClientPayments } from './ClientPayments'
@@ -146,11 +145,6 @@ export function Clients() {
       isActive: activeTab === "list"
     },
     {
-      id: "pagos",
-      label: "Pagos",
-      isActive: activeTab === "pagos"
-    },
-    {
       id: "obligations",
       label: "Compromisos de Pago",
       isActive: activeTab === "obligations"
@@ -269,12 +263,6 @@ export function Clients() {
 
         {activeTab === "list" && (
           <ClientListTab 
-            projectId={projectId}
-          />
-        )}
-
-        {activeTab === "pagos" && (
-          <ClientPaymentsListTab 
             projectId={projectId}
           />
         )}

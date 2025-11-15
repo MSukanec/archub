@@ -105,13 +105,11 @@ export function PlanRestricted({
     
     // Usuario normal: bloquear completamente
     return (
-      <div 
-        className="opacity-40 pointer-events-none cursor-not-allowed"
-        data-plan-restricted="coming-soon"
-        aria-disabled="true"
-        tabIndex={-1}
-      >
-        {children}
+      <div className="opacity-40 pointer-events-none cursor-not-allowed">
+        {React.cloneElement(children as React.ReactElement, {
+          disableHover: true,
+          onClick: undefined
+        })}
       </div>
     );
   }
@@ -163,13 +161,11 @@ export function PlanRestricted({
             onClick={() => setOpen(true)}
           >
             {/* Contenido deshabilitado */}
-            <div 
-              className="opacity-60 pointer-events-none cursor-pointer"
-              data-plan-restricted={requiredPlan}
-              aria-disabled="true"
-              tabIndex={-1}
-            >
-              {children}
+            <div className="opacity-60 pointer-events-none">
+              {React.cloneElement(children as React.ReactElement, {
+                disabled: true,
+                className: `${(children as React.ReactElement).props.className || ''} cursor-pointer`,
+              })}
             </div>
             
             {/* Badge pequeño - DENTRO del contenedor */}
@@ -248,13 +244,11 @@ export function PlanRestricted({
         <PopoverTrigger asChild>
           <div className="relative inline-flex cursor-pointer overflow-visible">
             {/* Contenido deshabilitado */}
-            <div 
-              className="opacity-60 pointer-events-none cursor-pointer"
-              data-plan-restricted={requiredPlan}
-              aria-disabled="true"
-              tabIndex={-1}
-            >
-              {children}
+            <div className="opacity-60 pointer-events-none">
+              {React.cloneElement(children as React.ReactElement, {
+                disabled: true,
+                className: `${(children as React.ReactElement).props.className || ''} cursor-pointer`,
+              })}
             </div>
             
             {/* Badge pequeño - DENTRO del contenedor */}
