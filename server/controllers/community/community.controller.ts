@@ -1,6 +1,5 @@
 import type { Request, Response } from 'express';
-import { neon } from '@neondatabase/serverless';
-import { extractToken, requireUser, HttpError } from '../../lib/auth/helpers.js';
+import { extractToken, requireUser, HttpError, createAuthenticatedClient } from '../../lib/auth/helpers.js';
 import { getActiveUsers } from '../../lib/handlers/community/getActiveUsers.js';
 import { getOrganizations } from '../../lib/handlers/community/getOrganizations.js';
 import { getProjects } from '../../lib/handlers/community/getProjects.js';
@@ -10,13 +9,12 @@ export async function handleGetActiveUsers(req: Request, res: Response) {
   try {
     const token = extractToken(req.headers.authorization);
     await requireUser(token);
-
-    if (!process.env.DATABASE_URL) {
-      return res.status(500).json({ error: 'DATABASE_URL not configured' });
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const sql = neon(process.env.DATABASE_URL);
-    const ctx = { sql };
+    const supabase = createAuthenticatedClient(token);
+    const ctx = { supabase };
     const result = await getActiveUsers(ctx);
 
     if (result.success) {
@@ -39,13 +37,12 @@ export async function handleGetOrganizations(req: Request, res: Response) {
   try {
     const token = extractToken(req.headers.authorization);
     await requireUser(token);
-
-    if (!process.env.DATABASE_URL) {
-      return res.status(500).json({ error: 'DATABASE_URL not configured' });
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const sql = neon(process.env.DATABASE_URL);
-    const ctx = { sql };
+    const supabase = createAuthenticatedClient(token);
+    const ctx = { supabase };
     const result = await getOrganizations(ctx);
 
     if (result.success) {
@@ -68,13 +65,12 @@ export async function handleGetProjects(req: Request, res: Response) {
   try {
     const token = extractToken(req.headers.authorization);
     await requireUser(token);
-
-    if (!process.env.DATABASE_URL) {
-      return res.status(500).json({ error: 'DATABASE_URL not configured' });
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const sql = neon(process.env.DATABASE_URL);
-    const ctx = { sql };
+    const supabase = createAuthenticatedClient(token);
+    const ctx = { supabase };
     const result = await getProjects(ctx);
 
     if (result.success) {
@@ -97,13 +93,12 @@ export async function handleGetStats(req: Request, res: Response) {
   try {
     const token = extractToken(req.headers.authorization);
     await requireUser(token);
-
-    if (!process.env.DATABASE_URL) {
-      return res.status(500).json({ error: 'DATABASE_URL not configured' });
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const sql = neon(process.env.DATABASE_URL);
-    const ctx = { sql };
+    const supabase = createAuthenticatedClient(token);
+    const ctx = { supabase };
     const result = await getStats(ctx);
 
     if (result.success) {

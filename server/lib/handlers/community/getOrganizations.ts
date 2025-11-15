@@ -1,8 +1,7 @@
-// api/lib/handlers/community/getOrganizations.ts
-import type { NeonQueryFunction } from '@neondatabase/serverless';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface CommunityHandlerContext {
-  sql: NeonQueryFunction<false, false>;
+  supabase: SupabaseClient;
 }
 
 export interface CommunityOrganization {
@@ -20,23 +19,20 @@ export async function getOrganizations(
   ctx: CommunityHandlerContext
 ): Promise<GetOrganizationsResult> {
   try {
-    const { sql } = ctx;
+    const { supabase } = ctx;
 
-    const organizations = await sql`
-      SELECT 
-        id,
-        name,
-        logo_url,
-        created_at
-      FROM organizations
-      WHERE is_active = true
-      ORDER BY created_at DESC
-      LIMIT 20
-    `;
+    const { data, error } = await supabase
+      .from('organizations')
+      .select('id, name, logo_url, created_at')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    if (error) throw error;
 
     return {
       success: true,
-      data: organizations as CommunityOrganization[]
+      data: data as CommunityOrganization[]
     };
   } catch (error: any) {
     console.error('Error in getOrganizations handler:', error);

@@ -1,8 +1,7 @@
-// api/lib/handlers/community/getStats.ts
-import type { NeonQueryFunction } from '@neondatabase/serverless';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface CommunityHandlerContext {
-  sql: NeonQueryFunction<false, false>;
+  supabase: SupabaseClient;
 }
 
 export interface CommunityStats {
@@ -19,21 +18,24 @@ export async function getStats(
   ctx: CommunityHandlerContext
 ): Promise<GetStatsResult> {
   try {
-    const { sql } = ctx;
+    const { supabase } = ctx;
 
-    const [stats] = await sql`
-      SELECT 
-        (SELECT COUNT(*) FROM organizations) as "totalOrganizations",
-        (SELECT COUNT(*) FROM projects) as "totalProjects",
-        (SELECT COUNT(DISTINCT user_id) FROM organization_members) as "totalMembers"
-    `;
+    const [orgResult, projectsResult, membersResult] = await Promise.all([
+      supabase.from('organizations').select('id', { count: 'exact', head: true }),
+      supabase.from('projects').select('id', { count: 'exact', head: true }),
+      supabase.from('organization_members').select('user_id', { count: 'exact', head: true })
+    ]);
+
+    if (orgResult.error) throw orgResult.error;
+    if (projectsResult.error) throw projectsResult.error;
+    if (membersResult.error) throw membersResult.error;
 
     return {
       success: true,
       data: {
-        totalOrganizations: Number(stats.totalOrganizations) || 0,
-        totalProjects: Number(stats.totalProjects) || 0,
-        totalMembers: Number(stats.totalMembers) || 0
+        totalOrganizations: orgResult.count || 0,
+        totalProjects: projectsResult.count || 0,
+        totalMembers: membersResult.count || 0
       }
     };
   } catch (error: any) {

@@ -1,8 +1,7 @@
-// api/lib/handlers/community/getActiveUsers.ts
-import type { NeonQueryFunction } from '@neondatabase/serverless';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface CommunityHandlerContext {
-  sql: NeonQueryFunction<false, false>;
+  supabase: SupabaseClient;
 }
 
 export interface ActiveUser {
@@ -17,9 +16,6 @@ export type GetActiveUsersResult =
   | { success: true; data: ActiveUser[] }
   | { success: false; error: string };
 
-/**
- * Calculate the timestamp for "5 minutes ago"
- */
 function getFiveMinutesAgo(): string {
   return new Date(Date.now() - 5 * 60 * 1000).toISOString();
 }
@@ -28,27 +24,33 @@ export async function getActiveUsers(
   ctx: CommunityHandlerContext
 ): Promise<GetActiveUsersResult> {
   try {
-    const { sql } = ctx;
+    const { supabase } = ctx;
     const fiveMinutesAgo = getFiveMinutesAgo();
 
-    const activeUsers = await sql`
-      SELECT 
-        u.id,
-        COALESCE(u.full_name, u.first_name, 'Usuario') as name,
-        u.avatar_url,
-        up.last_activity,
-        up.current_page
-      FROM user_presence up
-      JOIN users u ON u.id = up.user_id
-      WHERE up.last_activity >= ${fiveMinutesAgo}
-        AND up.is_online = true
-      ORDER BY up.last_activity DESC
-      LIMIT 50
-    `;
+    const { data, error } = await supabase
+      .from('user_presence')
+      .select('user_id, updated_at, current_view, status, users!inner(id, full_name, avatar_url)')
+      .gte('updated_at', fiveMinutesAgo)
+      .eq('status', 'online')
+      .order('updated_at', { ascending: false })
+      .limit(50);
+
+    if (error) throw error;
+
+    const activeUsers: ActiveUser[] = (data || []).map((item: any) => {
+      const user = item.users;
+      return {
+        id: user.id,
+        name: user.full_name || 'Usuario',
+        avatar_url: user.avatar_url,
+        last_activity: item.updated_at,
+        current_page: item.current_view
+      };
+    });
 
     return {
       success: true,
-      data: activeUsers as ActiveUser[]
+      data: activeUsers
     };
   } catch (error: any) {
     console.error('Error in getActiveUsers handler:', error);
