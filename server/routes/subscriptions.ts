@@ -222,7 +222,8 @@ export function registerSubscriptionRoutes(app: Express, deps: RouteDeps): void 
       }
 
       // Check for admin role using role name (since we don't have a permission flag)
-      if (membership.role.name !== 'Administrador') {
+      const role = Array.isArray(membership.role) ? membership.role[0] : membership.role;
+      if (role?.name !== 'Administrador') {
         return res.status(403).json(createErrorResponse(
           ErrorCodes.FORBIDDEN,
           "Solo los administradores pueden cambiar planes de suscripción"
@@ -461,6 +462,108 @@ export function registerSubscriptionRoutes(app: Express, deps: RouteDeps): void 
     } catch (error) {
       console.error('Error in /api/subscriptions/cancel-scheduled-downgrade:', error);
       res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // POST /api/subscriptions/:id/cancel - Cancel a subscription
+  app.post("/api/subscriptions/:id/cancel", async (req, res) => {
+    const context = "POST /api/subscriptions/:id/cancel";
+    
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({ ok: false, error: 'Missing subscription ID' });
+      }
+
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ ok: false, error: 'Unauthorized' });
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // Get authenticated user
+      const { data: { user }, error: authError } = await authenticatedSupabase.auth.getUser();
+      if (authError || !user) {
+        console.error('[Cancel Subscription] Invalid token:', authError);
+        return res.status(401).json({ ok: false, error: 'Invalid token' });
+      }
+
+      // Get user's database ID
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+
+      if (!dbUser) {
+        return res.status(404).json({ ok: false, error: 'User not found' });
+      }
+
+      // Get subscription to check organization
+      const { data: subscription, error: subError } = await authenticatedSupabase
+        .from('organization_subscriptions')
+        .select('id, organization_id, status')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (subError || !subscription) {
+        console.error('[Cancel Subscription] Subscription not found:', subError);
+        return res.status(404).json({ ok: false, error: 'Subscription not found' });
+      }
+
+      // Verify user is admin of the organization
+      const { data: membership, error: memberError } = await authenticatedSupabase
+        .from('organization_members')
+        .select('id, role_id, role:roles!inner(name)')
+        .eq('organization_id', subscription.organization_id)
+        .eq('user_id', dbUser.id)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (memberError || !membership) {
+        console.error('[Cancel Subscription] User not member of organization:', memberError);
+        return res.status(403).json({ ok: false, error: 'You don\'t have permissions to cancel this subscription' });
+      }
+
+      // Verify user is admin
+      const role = Array.isArray(membership.role) ? membership.role[0] : membership.role;
+      const roleName = role?.name?.toLowerCase();
+      if (roleName !== 'admin' && roleName !== 'owner' && roleName !== 'administrador') {
+        console.error('[Cancel Subscription] User is not admin:', { roleName });
+        return res.status(403).json({ ok: false, error: 'Only administrators can cancel the subscription' });
+      }
+
+      // Check if already cancelled
+      if (subscription.status === 'cancelled') {
+        return res.status(400).json({ ok: false, error: 'Subscription is already cancelled' });
+      }
+
+      // Update subscription status to cancelled
+      const { error: updateError } = await authenticatedSupabase
+        .from('organization_subscriptions')
+        .update({
+          status: 'cancelled',
+          cancelled_at: new Date().toISOString()
+        })
+        .eq('id', id);
+
+      if (updateError) {
+        console.error('[Cancel Subscription] Error updating subscription:', updateError);
+        return res.status(500).json({ ok: false, error: 'Failed to cancel subscription' });
+      }
+
+      console.log('[Cancel Subscription] ✅ Subscription cancelled successfully:', id);
+
+      return res.status(200).json({
+        ok: true,
+        message: 'Subscription cancelled successfully. Access will remain until expiration date.'
+      });
+
+    } catch (error: any) {
+      console.error('[Cancel Subscription] Error:', error);
+      return res.status(500).json({ ok: false, error: error.message || 'Internal server error' });
     }
   });
 }
