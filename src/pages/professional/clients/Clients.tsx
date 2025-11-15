@@ -8,9 +8,9 @@ import { supabase } from '@/lib/supabase'
 import ClientDashboardTab from './ClientDashboardTab'
 import ClientListTab from './ClientListTab'
 import ClientObligationsTab from './ClientObligationsTab'
+import ClientPaymentsTab from './ClientPaymentsTab'
 import ClientSettingsTab from './ClientSettingsTab'
 import { ClientPaymentPlans } from './ClientPaymentPlans'
-import { ClientPayments } from './ClientPayments'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
@@ -274,9 +274,8 @@ export function Clients() {
         )}
 
         {activeTab === "details" && (
-          <ClientPayments 
+          <ClientPaymentsTab 
             projectId={projectId}
-            organizationId={organizationId}
           />
         )}
 
