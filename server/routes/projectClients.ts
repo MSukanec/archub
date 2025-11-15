@@ -281,21 +281,35 @@ export function registerProjectClientsRoutes(app: Express, deps: RouteDeps) {
 
       const supabase = createAuthenticatedClient(token);
 
-      // Fetch project payment records through project_client_payments
+      // First, get project clients for this project
+      const { data: projectClients, error: pcError } = await supabase
+        .from('project_clients')
+        .select('id, client_id')
+        .eq('project_id', projectId)
+        .eq('organization_id', organization_id as string);
+
+      if (pcError) {
+        console.error("Error fetching project clients:", pcError);
+        return res.status(500).json({ error: "Failed to fetch project clients" });
+      }
+
+      if (!projectClients || projectClients.length === 0) {
+        return res.json([]);
+      }
+
+      // Get client IDs
+      const clientIds = projectClients.map(pc => pc.client_id);
+
+      // Fetch payment records for these clients
       const { data: payments, error } = await supabase
-        .from('project_client_payments')
+        .from('client_payments')
         .select(`
           *,
-          project_clients!inner (
-            project_id,
-            organization_id,
-            client_id,
-            contacts:client_id (
-              id,
-              first_name,
-              last_name,
-              company_name
-            )
+          contacts:client_id (
+            id,
+            first_name,
+            last_name,
+            company_name
           ),
           currencies:currency_id (
             id,
@@ -307,8 +321,7 @@ export function registerProjectClientsRoutes(app: Express, deps: RouteDeps) {
             name
           )
         `)
-        .eq('project_clients.project_id', projectId)
-        .eq('project_clients.organization_id', organization_id as string)
+        .in('client_id', clientIds)
         .order('payment_date', { ascending: false });
 
       if (error) {
