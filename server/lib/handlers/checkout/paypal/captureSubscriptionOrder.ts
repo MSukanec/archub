@@ -1,4 +1,4 @@
-import type { VercelRequest } from "@vercel/node";
+import type { Request } from "express";
 import { createServiceSupabaseClient } from "../shared/auth.js";
 import { logPaymentEvent } from "../shared/events.js";
 import { insertPayment } from "../shared/payments.js";
@@ -60,7 +60,7 @@ const SUCCESS_HTML = `
 `;
 
 export async function captureSubscriptionOrder(
-  req: VercelRequest
+  req: Request
 ): Promise<CaptureSubscriptionOrderResult> {
   const supabase = createServiceSupabaseClient();
 

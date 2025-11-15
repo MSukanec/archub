@@ -1,4 +1,4 @@
-import type { VercelResponse } from "@vercel/node";
+import type { Response } from "express";
 
 export const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,14 +7,14 @@ export const corsHeaders = {
   "Access-Control-Max-Age": "86400",
 };
 
-export function handleCorsHeaders(res: VercelResponse): VercelResponse {
+export function handleCorsHeaders(res: Response): Response {
   return res
     .setHeader("Access-Control-Allow-Origin", corsHeaders["Access-Control-Allow-Origin"])
     .setHeader("Access-Control-Allow-Headers", corsHeaders["Access-Control-Allow-Headers"])
     .setHeader("Access-Control-Allow-Methods", corsHeaders["Access-Control-Allow-Methods"]);
 }
 
-export function handleCorsPreflight(res: VercelResponse) {
+export function handleCorsPreflight(res: Response) {
   return res
     .status(200)
     .setHeader("Access-Control-Allow-Origin", corsHeaders["Access-Control-Allow-Origin"])

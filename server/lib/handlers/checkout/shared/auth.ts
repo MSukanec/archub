@@ -1,10 +1,10 @@
-import type { VercelRequest } from "@vercel/node";
+import type { Request } from "express";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-export function extractAuthToken(req: VercelRequest): string | null {
+export function extractAuthToken(req: Request): string | null {
   const authHeader = req.headers.authorization;
   if (!authHeader) return null;
   
@@ -26,7 +26,7 @@ export type AuthResult =
   | { success: true; token: string; supabase: SupabaseClient }
   | { success: false; error: string };
 
-export function getAuthenticatedClient(req: VercelRequest): AuthResult {
+export function getAuthenticatedClient(req: Request): AuthResult {
   const token = extractAuthToken(req);
   
   if (!token) {

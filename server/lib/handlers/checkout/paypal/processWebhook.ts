@@ -1,4 +1,4 @@
-import type { VercelRequest } from "@vercel/node";
+import type { Request } from "express";
 import { createServiceSupabaseClient } from "../shared/auth.js";
 import { logPaymentEvent } from "../shared/events.js";
 import { insertPayment } from "../shared/payments.js";
@@ -84,7 +84,7 @@ function parseInvoiceId(invoiceId: string) {
 }
 
 export async function processWebhook(
-  req: VercelRequest
+  req: Request
 ): Promise<ProcessWebhookResult> {
   const supabase = createServiceSupabaseClient();
 

@@ -1,4 +1,4 @@
-import type { VercelRequest } from "@vercel/node";
+import type { Request } from "express";
 
 export type URLContext = {
   requestOrigin: string;
@@ -6,7 +6,7 @@ export type URLContext = {
   webhookBase: string;
 };
 
-export function buildURLContext(req: VercelRequest): URLContext {
+export function buildURLContext(req: Request): URLContext {
   const protocol = req.headers['x-forwarded-proto'] || 'https';
   const host = req.headers['x-forwarded-host'] || req.headers.host;
   const requestOrigin = `${protocol}://${host}`;

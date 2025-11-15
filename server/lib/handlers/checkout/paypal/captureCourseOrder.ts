@@ -1,4 +1,4 @@
-import type { VercelRequest } from "@vercel/node";
+import type { Request } from "express";
 import { capturePayPalOrder } from "./api.js";
 
 export type CaptureCourseOrderResult =
@@ -6,7 +6,7 @@ export type CaptureCourseOrderResult =
   | { success: false; error: string; status?: number };
 
 export async function captureCourseOrder(
-  req: VercelRequest
+  req: Request
 ): Promise<CaptureCourseOrderResult> {
   try {
     const { orderId } =

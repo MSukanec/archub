@@ -1,4 +1,4 @@
-import type { VercelRequest } from "@vercel/node";
+import type { Request } from "express";
 import { getAuthenticatedClient } from "../shared/auth.js";
 import { verifyAdminRoleForOrganization } from "../shared/permissions.js";
 import { getPlanPrice } from "../shared/pricing.js";
@@ -12,7 +12,7 @@ export type CreateSubscriptionPreferenceResult =
   | { success: true; initPoint: string; preferenceId: string }
   | { success: false; error: string; status?: number };
 
-export async function createSubscriptionPreference(req: VercelRequest): Promise<CreateSubscriptionPreferenceResult> {
+export async function createSubscriptionPreference(req: Request): Promise<CreateSubscriptionPreferenceResult> {
   logMPMode("create-subscription-preference");
 
   // 1. Parse body

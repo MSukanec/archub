@@ -1,4 +1,4 @@
-import type { VercelRequest } from "@vercel/node";
+import type { Request } from "express";
 import { getAuthenticatedClient } from "../shared/auth.js";
 import { validateAndApplyCoupon } from "../shared/coupons.js";
 import { getUserData } from "../shared/user.js";
@@ -11,7 +11,7 @@ export type CreateCoursePreferenceResult =
   | { success: true; initPoint: string; preferenceId: string }
   | { success: false; error: string; status?: number; reason?: string; freeEnrollment?: boolean; couponCode?: string };
 
-export async function createCoursePreference(req: VercelRequest): Promise<CreateCoursePreferenceResult> {
+export async function createCoursePreference(req: Request): Promise<CreateCoursePreferenceResult> {
   logMPMode("create-course-preference");
 
   // 1. Parse body

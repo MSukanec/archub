@@ -1,4 +1,4 @@
-import type { VercelRequest } from "@vercel/node";
+import type { Request } from "express";
 import { getAuthenticatedClient } from "../shared/auth.js";
 import { verifyAdminRoleForOrganization } from "../shared/permissions.js";
 import { buildURLContext } from "../shared/urls.js";
@@ -10,7 +10,7 @@ export type CreateSubscriptionOrderResult =
   | { success: false; error: string; status?: number; details?: any };
 
 export async function createSubscriptionOrder(
-  req: VercelRequest
+  req: Request
 ): Promise<CreateSubscriptionOrderResult> {
   try {
     const {

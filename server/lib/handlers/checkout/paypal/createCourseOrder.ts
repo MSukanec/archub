@@ -1,4 +1,4 @@
-import type { VercelRequest } from "@vercel/node";
+import type { Request } from "express";
 import { getAuthenticatedClient } from "../shared/auth.js";
 import { validateAndApplyCoupon } from "../shared/coupons.js";
 import { getUserData } from "../shared/user.js";
@@ -13,7 +13,7 @@ export type CreateCourseOrderResult =
   | { success: false; error: string; status?: number; details?: any };
 
 export async function createCourseOrder(
-  req: VercelRequest
+  req: Request
 ): Promise<CreateCourseOrderResult> {
   try {
     const {

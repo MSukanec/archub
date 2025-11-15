@@ -1,4 +1,4 @@
-import type { VercelRequest } from "@vercel/node";
+import type { Request } from "express";
 import { createServiceSupabaseClient } from "../shared/auth.js";
 import { logPaymentEvent } from "../shared/events.js";
 import { insertPayment } from "../shared/payments.js";
@@ -14,7 +14,7 @@ export type ProcessWebhookResult =
   | { success: true; processed: string; id: string }
   | { success: false; error: string };
 
-async function parseBody(req: VercelRequest): Promise<any> {
+async function parseBody(req: Request): Promise<any> {
   try {
     if (req.body && typeof req.body === "object") return req.body;
     if (typeof req.body === "string" && req.body.trim()) {
@@ -46,7 +46,7 @@ async function parseBody(req: VercelRequest): Promise<any> {
   }
 }
 
-export async function processWebhook(req: VercelRequest): Promise<ProcessWebhookResult> {
+export async function processWebhook(req: Request): Promise<ProcessWebhookResult> {
   const supabase = createServiceSupabaseClient();
 
   try {
