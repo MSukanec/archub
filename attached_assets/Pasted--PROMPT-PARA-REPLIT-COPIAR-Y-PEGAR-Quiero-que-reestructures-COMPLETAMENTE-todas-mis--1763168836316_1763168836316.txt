@@ -1,0 +1,114 @@
+🟩🟩🟩 PROMPT PARA REPLIT (COPIAR Y PEGAR) 🟩🟩🟩
+
+Quiero que reestructures COMPLETAMENTE todas mis API Routes en /api para que funcionen PERFECTAMENTE en Vercel. Ahora mismo tengo errores porque hay carpetas mal nombradas, duplicadas o con typos como project-cient, project-cients, etc. Y Vercel devuelve index.html porque no encuentra las rutas exactas.
+
+Hacelo EXACTAMENTE así:
+
+✅ OBJETIVO
+
+Reconstruir TODA la estructura /api dejando estas carpetas y archivos EXACTOS:
+
+/api
+  /project-client
+      [projectId].ts
+      [clientId].ts
+
+  /project-clients
+      [projectId].ts
+
+  /project-clients-payments
+      [projectId].ts
+
+  /project-clients-summary
+      [projectId].ts
+
+🚨 INSTRUCCIONES IMPORTANTES
+
+ELIMINÁ por completo las carpetas:
+
+project-cient
+
+project-cients
+
+cualquier otra variante duplicada o mal escrita.
+
+RENOMBRÁ y REUBICÁ los endpoints dentro de las carpetas correctas:
+
+✔ project-client
+
+Debe contener:
+
+/api/project-client/[projectId].ts
+/api/project-client/[clientId].ts
+
+
+Si los archivos están en otro lado, movelos.
+
+✔ project-clients
+
+Debe contener:
+
+/api/project-clients/[projectId].ts
+
+✔ project-clients-payments
+
+Debe contener:
+
+/api/project-clients-payments/[projectId].ts
+
+✔ project-clients-summary
+
+Debe contener:
+
+/api/project-clients-summary/[projectId].ts
+
+
+NO USAR index.ts dentro de carpetas dinámicas.
+Vercel no las reconoce si la ruta es:
+
+/api/project-client/[projectId]/index.ts
+
+
+Mové siempre al nivel DIRECTO:
+
+/api/project-client/[projectId].ts
+
+
+Verificá que las importaciones internas funcionan
+Ajustá rutas relativas si hace falta.
+
+Asegurá que cada archivo exporte default handler:
+
+export default async function handler(req, res) {
+  …
+}
+
+
+NUNCA devolver HTML por accidente:
+Todas las respuestas deben ser JSON:
+
+return res.status(200).json({ ... })
+
+🟩 TRAS LA REESTRUCTURACIÓN
+
+Decime en la consola:
+
+qué carpetas borraste
+
+qué archivos moviste
+
+la estructura final resultante
+
+si encontraste archivos duplicados o incoherentes
+
+🟢 MI OBJETIVO
+
+Que cuando haga deploy en Vercel:
+
+TODAS las rutas /api/project-* respondan 200
+
+NO aparezca más Unexpected token <
+
+NO aparezca más 406 ni 404 falsos
+
+NO devuelva nunca más index.html

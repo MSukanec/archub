@@ -90,7 +90,7 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
 
   // Query to get existing client data when editing
   const { data: existingClient } = useQuery<any>({
-    queryKey: [`/api/project-client/${projectId}/${clientId}?organization_id=${organizationId}`],
+    queryKey: [`/api/project-client/${projectId}?client_id=${clientId}&organization_id=${organizationId}`],
     enabled: !!clientId && !!projectId && !!organizationId,
   });
 
@@ -144,11 +144,11 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
 
       if (isEditing) {
         // Update existing client
-        return await apiRequest('PATCH', `/api/project-client/${projectId}/${clientId}`, payload);
+        return await apiRequest('PATCH', `/api/project-client/${clientId}?project_id=${projectId}&organization_id=${organizationId}`, payload);
       } else {
         // Create new client - include client_id and created_by
         const organizationMemberId = organizationMember?.id;
-        return await apiRequest('POST', `/api/project-clients/${projectId}`, {
+        return await apiRequest('POST', `/api/project-clients/${projectId}?organization_id=${organizationId}`, {
           ...payload,
           client_id: data.contactId,
           created_by: organizationMemberId || null,

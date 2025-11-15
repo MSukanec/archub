@@ -100,7 +100,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     mutationFn: async (clientId: string) => {
       if (!activeProjectId || !organizationId) return;
 
-      await apiRequest('DELETE', `/api/project-client/${activeProjectId}/${clientId}?organization_id=${organizationId}`);
+      await apiRequest('DELETE', `/api/project-client/${clientId}?project_id=${activeProjectId}&organization_id=${organizationId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/project-clients-summary/${activeProjectId}?organization_id=${organizationId}`] });
