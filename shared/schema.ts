@@ -1288,3 +1288,32 @@ export const user_view_history = pgTable("user_view_history", {
 });
 
 export type UserViewHistory = typeof user_view_history.$inferSelect;
+
+// Client Payments Table
+export const client_payments = pgTable("client_payments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  project_id: uuid("project_id").notNull(),
+  commitment_id: uuid("commitment_id"),
+  schedule_id: uuid("schedule_id"),
+  contact_id: uuid("contact_id").notNull(),
+  organization_id: uuid("organization_id").notNull(),
+  amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+  currency_id: uuid("currency_id").notNull(),
+  exchange_rate: numeric("exchange_rate").notNull(),
+  payment_date: timestamp("payment_date", { mode: 'date' }).notNull().defaultNow(),
+  notes: text("notes"),
+  reference: text("reference"),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  wallet_id: uuid("wallet_id"),
+  client_id: uuid("client_id"),
+});
+
+export const insertClientPaymentSchema = createInsertSchema(client_payments).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export type ClientPayment = typeof client_payments.$inferSelect;
+export type InsertClientPayment = z.infer<typeof insertClientPaymentSchema>;
