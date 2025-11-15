@@ -37,7 +37,7 @@ export default function ClientPaymentsListTab({ projectId }: ClientPaymentsListT
   const activeProjectId = projectId || selectedProjectId;
 
   const { data: paymentsResponse, isLoading, error } = useQuery<PaymentsResponse>({
-    queryKey: [`/api/projects/${activeProjectId}/clients/payments?organization_id=${organizationId}`],
+    queryKey: [`/api/project-clients-payments/${activeProjectId}?organization_id=${organizationId}`],
     enabled: !!activeProjectId && !!organizationId
   });
 

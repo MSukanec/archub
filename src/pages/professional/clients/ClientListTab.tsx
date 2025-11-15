@@ -88,7 +88,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
 
   // Query to get project clients summary with financial data (plan-aware)
   const { data: summaryResponse, isLoading } = useQuery<ClientSummaryResponse>({
-    queryKey: [`/api/projects/${activeProjectId}/clients/summary?organization_id=${organizationId}`],
+    queryKey: [`/api/project-clients-summary/${activeProjectId}?organization_id=${organizationId}`],
     enabled: !!activeProjectId && !!organizationId
   });
 
@@ -100,10 +100,10 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     mutationFn: async (clientId: string) => {
       if (!activeProjectId || !organizationId) return;
 
-      await apiRequest('DELETE', `/api/projects/${activeProjectId}/clients/${clientId}?organization_id=${organizationId}`);
+      await apiRequest('DELETE', `/api/project-client/${activeProjectId}/${clientId}?organization_id=${organizationId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${activeProjectId}/clients/summary?organization_id=${organizationId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/project-clients-summary/${activeProjectId}?organization_id=${organizationId}`] });
       toast({
         title: 'Cliente eliminado',
         description: 'El cliente ha sido eliminado del proyecto correctamente',

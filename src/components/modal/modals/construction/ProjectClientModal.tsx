@@ -90,7 +90,7 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
 
   // Query to get existing client data when editing
   const { data: existingClient } = useQuery<any>({
-    queryKey: [`/api/projects/${projectId}/clients/${clientId}?organization_id=${organizationId}`],
+    queryKey: [`/api/project-client/${projectId}/${clientId}?organization_id=${organizationId}`],
     enabled: !!clientId && !!projectId && !!organizationId,
   });
 
@@ -144,11 +144,11 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
 
       if (isEditing) {
         // Update existing client
-        return await apiRequest('PATCH', `/api/projects/${projectId}/clients/${clientId}`, payload);
+        return await apiRequest('PATCH', `/api/project-client/${projectId}/${clientId}`, payload);
       } else {
         // Create new client - include client_id and created_by
         const organizationMemberId = organizationMember?.id;
-        return await apiRequest('POST', `/api/projects/${projectId}/clients`, {
+        return await apiRequest('POST', `/api/project-clients/${projectId}`, {
           ...payload,
           client_id: data.contactId,
           created_by: organizationMemberId || null,
@@ -156,7 +156,8 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/clients?organization_id=${organizationId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/project-clients/${projectId}?organization_id=${organizationId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/project-clients-summary/${projectId}?organization_id=${organizationId}`] });
       toast({
         title: isEditing ? 'Cliente actualizado' : 'Cliente agregado',
         description: isEditing 
