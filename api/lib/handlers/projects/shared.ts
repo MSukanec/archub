@@ -34,17 +34,26 @@ export function computeBudgetTotals(items: BudgetItem[]): number {
 }
 
 export async function getAuthenticatedUser(ctx: ProjectsContext) {
+  console.log('🔍 [getAuthenticatedUser] START');
   const { data: { user }, error } = await ctx.supabase.auth.getUser();
   
   if (error || !user) {
+    console.log('❌ [getAuthenticatedUser] No user or error:', error);
     return null;
   }
+  console.log('✅ [getAuthenticatedUser] Auth user found:', user.id);
 
-  const { data: dbUsers } = await ctx.supabase
+  const { data: dbUsers, error: dbError } = await ctx.supabase
     .from('users')
     .select('id, email')
     .eq('auth_id', user.id)
     .limit(1);
+
+  if (dbError) {
+    console.log('❌ [getAuthenticatedUser] DB query error:', dbError);
+  } else {
+    console.log('✅ [getAuthenticatedUser] DB users fetched, count:', dbUsers?.length || 0);
+  }
 
   return dbUsers && dbUsers.length > 0 ? dbUsers[0] : null;
 }
@@ -63,12 +72,16 @@ export async function ensureOrganizationAccess(
   ctx: ProjectsContext,
   organizationId: string
 ): Promise<{ success: true; memberId: string } | { success: false; error: string }> {
+  console.log('🔍 [ensureOrganizationAccess] START - orgId:', organizationId);
   const authResult = await ensureAuth(ctx);
   
   if (!authResult.success) {
+    console.log('❌ [ensureOrganizationAccess] Auth failed');
     return authResult;
   }
+  console.log('✅ [ensureOrganizationAccess] Auth OK, userId:', authResult.user.id);
 
+  console.log('🔍 [ensureOrganizationAccess] Querying organization_members...');
   const { data: memberships, error } = await ctx.supabase
     .from('organization_members')
     .select('id')
@@ -77,16 +90,19 @@ export async function ensureOrganizationAccess(
     .limit(1);
 
   if (error) {
-    console.error('Error checking organization membership:', error);
+    console.error('❌ [ensureOrganizationAccess] Query error:', error);
     return { success: false, error: 'Failed to verify organization access' };
   }
+  console.log('✅ [ensureOrganizationAccess] Memberships fetched, count:', memberships?.length || 0);
 
   const membership = memberships && memberships.length > 0 ? memberships[0] : null;
 
   if (!membership) {
+    console.log('❌ [ensureOrganizationAccess] No membership found');
     return { success: false, error: 'Forbidden: User does not have access to this organization' };
   }
 
+  console.log('✅ [ensureOrganizationAccess] Membership OK, memberId:', membership.id);
   return { success: true, memberId: membership.id };
 }
 
@@ -94,6 +110,7 @@ export async function getProjectById(
   ctx: ProjectsContext,
   projectId: string
 ): Promise<{ success: true; data: any } | { success: false; error: string }> {
+  console.log('🔍 [getProjectById] START - projectId:', projectId);
   const { data: projects, error } = await ctx.supabase
     .from('projects')
     .select('*')
@@ -101,16 +118,19 @@ export async function getProjectById(
     .limit(1);
 
   if (error) {
-    console.error('Error fetching project:', error);
+    console.error('❌ [getProjectById] Query error:', error);
     return { success: false, error: 'Failed to fetch project' };
   }
+  console.log('✅ [getProjectById] Projects fetched, count:', projects?.length || 0);
 
   const project = projects && projects.length > 0 ? projects[0] : null;
 
   if (!project) {
+    console.log('❌ [getProjectById] No project found');
     return { success: false, error: 'Project not found' };
   }
 
+  console.log('✅ [getProjectById] Project found, id:', project.id);
   return { success: true, data: project };
 }
 
