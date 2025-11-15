@@ -7,8 +7,8 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { supabase } from '@/lib/supabase'
 import ClientDashboardTab from './ClientDashboardTab'
 import ClientListTab from './ClientListTab'
+import ClientObligationsTab from './ClientObligationsTab'
 import ClientSettingsTab from './ClientSettingsTab'
-import { ClientObligations } from './ClientObligations'
 import { ClientPaymentPlans } from './ClientPaymentPlans'
 import { ClientPayments } from './ClientPayments'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -268,7 +268,7 @@ export function Clients() {
         )}
 
         {activeTab === "obligations" && (
-          <ClientObligations 
+          <ClientObligationsTab 
             projectId={projectId}
             organizationId={organizationId}
           />
