@@ -94,10 +94,13 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   const [filterUnit, setFilterUnit] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
-  // Query to get client payments for the project
+  // Query to get client payments
+  // If activeProjectId is null, fetch ALL payments from the organization
   const { data: paymentsResponse, isLoading } = useQuery<{ data: ClientPayment[] }>({
-    queryKey: [`/api/projects/${activeProjectId}/client-payments?organization_id=${organizationId}`],
-    enabled: !!activeProjectId && !!organizationId
+    queryKey: activeProjectId
+      ? [`/api/projects/${activeProjectId}/client-payments?organization_id=${organizationId}`]
+      : [`/api/organizations/${organizationId}/client-payments`],
+    enabled: !!organizationId
   });
 
   const allPayments = paymentsResponse?.data || [];
@@ -220,10 +223,10 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     });
   };
 
-  if (!activeProjectId) {
+  if (!organizationId) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">No hay proyecto activo seleccionado</p>
+        <p className="text-muted-foreground">No se pudo cargar la información de la organización</p>
       </div>
     )
   }

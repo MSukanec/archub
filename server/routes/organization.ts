@@ -11,15 +11,27 @@ import {
   handleGetUserProfile,
   handleUpdateUserProfile
 } from '../controllers/organization/profile.controller.js';
+import { handleGetOrganizationClientsSummary } from '../controllers/organization/clients.controller.js';
+import { handleListOrganizationClientPayments } from '../controllers/organization/clientPayments.controller.js';
 
 /**
- * Register organization-related endpoints (members, invitations, profile)
+ * Register organization-related endpoints (members, invitations, profile, clients)
  */
 export function registerOrganizationRoutes(app: Express, deps: RouteDeps): void {
   // ========== ORGANIZATION - MEMBERS ENDPOINTS ==========
   
   // GET /api/organization-members/:organizationId - Get all members of an organization
   app.get("/api/organization-members/:organizationId", handleGetOrganizationMembers);
+
+  // ========== ORGANIZATION - CLIENTS ENDPOINTS ==========
+  
+  // GET /api/organizations/:organizationId/clients/summary - Get all clients for an organization
+  app.get("/api/organizations/:organizationId/clients/summary", handleGetOrganizationClientsSummary);
+
+  // ========== ORGANIZATION - CLIENT PAYMENTS ENDPOINTS ==========
+  
+  // GET /api/organizations/:organizationId/client-payments - Get all client payments for an organization
+  app.get("/api/organizations/:organizationId/client-payments", handleListOrganizationClientPayments);
 
   // ========== ORGANIZATION - INVITATIONS ENDPOINTS ==========
   

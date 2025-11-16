@@ -244,11 +244,11 @@ export function Clients() {
     })
   }
 
-  if (!projectId || !organizationId) {
+  if (!organizationId) {
     return (
       <Layout headerProps={headerProps} wide={false}>
         <div className="flex items-center justify-center h-64">
-          <div className="text-sm text-muted-foreground">Selecciona un proyecto para ver los aportes de clientes</div>
+          <div className="text-sm text-muted-foreground">No se pudo cargar la información de la organización</div>
         </div>
       </Layout>
     )

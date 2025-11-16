@@ -87,9 +87,12 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   const activeProjectId = projectId || selectedProjectId
 
   // Query to get project clients summary with financial data (plan-aware)
+  // If activeProjectId is null, fetch ALL clients from the organization
   const { data: summaryResponse, isLoading } = useQuery<ClientSummaryResponse>({
-    queryKey: [`/api/projects/${activeProjectId}/clients/summary?organization_id=${organizationId}`],
-    enabled: !!activeProjectId && !!organizationId
+    queryKey: activeProjectId 
+      ? [`/api/projects/${activeProjectId}/clients/summary?organization_id=${organizationId}`]
+      : [`/api/organizations/${organizationId}/clients/summary`],
+    enabled: !!organizationId
   });
 
   const projectClients = summaryResponse?.clients || [];
@@ -172,10 +175,11 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     });
   };
 
-  if (!activeProjectId) {
+  // Show message only if there's no organization (shouldn't happen)
+  if (!organizationId) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">No hay proyecto activo seleccionado</p>
+        <p className="text-muted-foreground">No se pudo cargar la información de la organización</p>
       </div>
     )
   }

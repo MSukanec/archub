@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, Plus } from "lucide-react";
+import { ChevronDown, Plus, Building2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -7,16 +7,19 @@ import { Badge } from "@/components/ui/badge";
 import { useProjectsLite } from "@/hooks/use-projects-lite";
 import { useProjectContext } from "@/stores/projectContext";
 import { useLocation } from "wouter";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { cn } from "@/lib/utils";
 
 export function ProjectSelectorButton() {
   const { data: projectsLite = [] } = useProjectsLite();
   const { selectedProjectId, setSelectedProject, currentOrganizationId } = useProjectContext();
+  const { data: userData } = useCurrentUser();
   const [open, setOpen] = useState(false);
   const [, navigate] = useLocation();
 
   const currentProject = projectsLite.find(p => p.id === selectedProjectId);
-  const currentProjectName = currentProject?.name || "Seleccionar proyecto";
+  const organizationName = userData?.organization?.name || "Organización";
+  const currentProjectName = currentProject?.name || organizationName;
 
   // Ordenar proyectos por última actividad (updated_at descendente)
   const sortedProjects = [...projectsLite].sort((a, b) => {
@@ -39,6 +42,12 @@ export function ProjectSelectorButton() {
     setOpen(false);
   };
 
+  const handleOrganizationView = () => {
+    // Set to null to indicate organization-wide view
+    setSelectedProject(null, currentOrganizationId);
+    setOpen(false);
+  };
+
   const handleNewProject = () => {
     setOpen(false);
     navigate('/organization/projects');
@@ -53,17 +62,23 @@ export function ProjectSelectorButton() {
           className="h-8 px-2 text-xs gap-2 border border-border"
           data-testid="button-project-selector"
         >
-          <Avatar className="h-5 w-5">
-            <AvatarFallback 
-              className="text-[10px] font-semibold"
-              style={{ 
-                backgroundColor: currentProject?.color || 'var(--accent)',
-                color: 'white'
-              }}
-            >
-              {currentProject ? getProjectInitials(currentProject.name) : '?'}
-            </AvatarFallback>
-          </Avatar>
+          {currentProject ? (
+            <Avatar className="h-5 w-5">
+              <AvatarFallback 
+                className="text-[10px] font-semibold"
+                style={{ 
+                  backgroundColor: currentProject.color || 'var(--accent)',
+                  color: 'white'
+                }}
+              >
+                {getProjectInitials(currentProject.name)}
+              </AvatarFallback>
+            </Avatar>
+          ) : (
+            <div className="h-5 w-5 flex items-center justify-center rounded-full bg-accent/10">
+              <Building2 className="h-3 w-3 text-[var(--accent)]" />
+            </div>
+          )}
           <span className="font-medium" style={{ color: 'var(--main-sidebar-fg)' }}>{currentProjectName}</span>
           <ChevronDown className="h-3 w-3 opacity-60" style={{ color: 'var(--main-sidebar-fg)' }} />
         </Button>
@@ -71,8 +86,36 @@ export function ProjectSelectorButton() {
       <PopoverContent align="end" className="w-64 p-2">
         <div className="space-y-1">
           <div className="px-2 py-1.5">
-            <p className="text-xs font-semibold text-muted-foreground">Proyectos</p>
+            <p className="text-xs font-semibold text-muted-foreground">Contexto de Datos</p>
           </div>
+
+          {/* Opción Organización */}
+          <button
+            onClick={handleOrganizationView}
+            data-testid="organization-view-option"
+            className="w-full px-2 py-2 text-left text-sm rounded-md transition-colors hover:bg-accent/5 flex items-center gap-2"
+          >
+            <div className="h-6 w-6 flex items-center justify-center rounded-full bg-accent/10 flex-shrink-0">
+              <Building2 className="h-4 w-4 text-[var(--accent)]" />
+            </div>
+            <span className="flex-1 truncate font-medium">{organizationName}</span>
+            {!selectedProjectId && (
+              <Badge 
+                variant="secondary" 
+                className="h-5 px-1.5 text-[10px] font-semibold"
+                style={{ 
+                  backgroundColor: 'var(--accent)',
+                  color: 'white'
+                }}
+              >
+                Activo
+              </Badge>
+            )}
+          </button>
+
+          {/* Separador */}
+          <div className="my-1 border-t border-border"></div>
+
           {projectsLite.length === 0 ? (
             <div className="px-2 py-4 text-center">
               <p className="text-sm text-muted-foreground">No hay proyectos disponibles</p>
