@@ -66,6 +66,16 @@ export type ListClientPaymentsResult =
   | { success: true; data: ClientPayment[] }
   | { success: false; error: string };
 
+export interface DeleteClientPaymentParams {
+  projectId: string;
+  paymentId: string;
+  organizationId: string;
+}
+
+export type DeleteClientPaymentResult =
+  | { success: true }
+  | { success: false; error: string };
+
 export async function listClientPayments(
   ctx: ProjectsContext,
   params: ListClientPaymentsParams
@@ -165,5 +175,70 @@ export async function listClientPayments(
   } catch (error: any) {
     console.error('Error in listClientPayments handler:', error);
     return { success: false, error: error.message || 'Failed to list client payments' };
+  }
+}
+
+export async function deleteClientPayment(
+  ctx: ProjectsContext,
+  params: DeleteClientPaymentParams
+): Promise<DeleteClientPaymentResult> {
+  try {
+    const { supabase } = ctx;
+
+    if (!params.projectId || !params.paymentId || !params.organizationId) {
+      return { success: false, error: 'projectId, paymentId and organizationId are required' };
+    }
+
+    const authResult = await ensureAuth(ctx);
+    if (!authResult.success) {
+      return authResult;
+    }
+
+    const orgAccessResult = await ensureOrganizationAccess(ctx, params.organizationId);
+    if (!orgAccessResult.success) {
+      return orgAccessResult;
+    }
+
+    // Verify project belongs to organization
+    const projectResult = await getProjectById(ctx, params.projectId);
+    if (!projectResult.success) {
+      return projectResult;
+    }
+
+    if (projectResult.data.organization_id !== params.organizationId) {
+      return { success: false, error: 'Forbidden: Project does not belong to organization' };
+    }
+
+    // First, verify the payment exists and belongs to this project
+    const { data: existingPayment, error: fetchError } = await supabase
+      .from('client_payments')
+      .select('id, project_id, organization_id')
+      .eq('id', params.paymentId)
+      .eq('project_id', params.projectId)
+      .eq('organization_id', params.organizationId)
+      .single();
+
+    if (fetchError || !existingPayment) {
+      return { success: false, error: 'Payment not found' };
+    }
+
+    // Delete the payment
+    const { error: deleteError } = await supabase
+      .from('client_payments')
+      .delete()
+      .eq('id', params.paymentId)
+      .eq('project_id', params.projectId)
+      .eq('organization_id', params.organizationId);
+
+    if (deleteError) {
+      console.error('Error deleting client payment:', deleteError);
+      return { success: false, error: 'Failed to delete client payment' };
+    }
+
+    return { success: true };
+
+  } catch (error: any) {
+    console.error('Error in deleteClientPayment handler:', error);
+    return { success: false, error: error.message || 'Failed to delete client payment' };
   }
 }

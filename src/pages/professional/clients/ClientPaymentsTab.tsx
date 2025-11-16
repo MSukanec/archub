@@ -1,16 +1,19 @@
 import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query'
-import { DollarSign, Plus, Edit } from 'lucide-react'
+import { useQuery, useMutation } from '@tanstack/react-query'
+import { DollarSign, Plus, Edit, Trash2 } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
 import { format } from 'date-fns'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { useToast } from '@/hooks/use-toast'
+import { apiRequest, queryClient } from '@/lib/queryClient'
 
 interface ClientPaymentsTabProps {
   projectId?: string;
@@ -75,6 +78,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   const { data: userData } = useCurrentUser();
   const { selectedProjectId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
+  const { showDeleteConfirmation } = useDeleteConfirmation();
+  const { toast } = useToast();
   
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
@@ -158,12 +163,52 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     });
   }, [allPayments, filterWallet, filterCurrency, filterHasSchedule, filterHasCommitment, filterClient, filterUnit, filterStatus]);
 
+  // Delete payment mutation
+  const deletePaymentMutation = useMutation({
+    mutationFn: async (paymentId: string) => {
+      return await apiRequest('DELETE', `/api/projects/${activeProjectId}/client-payments/${paymentId}?organization_id=${organizationId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${activeProjectId}/client-payments?organization_id=${organizationId}`] });
+      toast({
+        title: "Pago eliminado",
+        description: "El pago ha sido eliminado correctamente",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error al eliminar",
+        description: error.message || "No se pudo eliminar el pago",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleEdit = (payment: ClientPayment) => {
     openModal('installment', {
       projectId: activeProjectId,
       organizationId: organizationId,
       paymentId: payment.id,
       mode: 'edit',
+    });
+  };
+
+  const handleDeletePayment = (payment: ClientPayment) => {
+    const clientName = payment.contact?.company_name || 
+                      payment.contact?.full_name || 
+                      `${payment.contact?.first_name || ''} ${payment.contact?.last_name || ''}`.trim();
+    const symbol = payment.currency?.symbol || '$';
+    const formattedAmount = `${symbol} ${payment.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const paymentLabel = `${clientName} - ${formattedAmount}`;
+    
+    showDeleteConfirmation({
+      mode: 'simple',
+      title: "Eliminar pago",
+      description: `¿Estás seguro de que querés eliminar este pago? Esta acción no se puede deshacer.`,
+      itemName: paymentLabel,
+      destructiveActionText: "Eliminar pago",
+      onDelete: () => deletePaymentMutation.mutate(payment.id),
+      isLoading: deletePaymentMutation.isPending
     });
   };
 
@@ -493,6 +538,12 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
             label: 'Editar Pago',
             icon: Edit,
             onClick: () => handleEdit(payment),
+          },
+          {
+            label: 'Eliminar Pago',
+            icon: Trash2,
+            onClick: () => handleDeletePayment(payment),
+            variant: 'destructive' as const,
           },
         ]}
       />
