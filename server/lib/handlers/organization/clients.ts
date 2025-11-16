@@ -64,15 +64,15 @@ export async function getOrganizationClientsSummary(
     const features = (planData && typeof planData === 'object' && 'features' in planData) ? planData.features : [];
     const isMultiCurrency = Array.isArray(features) && features.includes('multi-currency');
 
-    // 🚀 PERFORMANCE BOOST: Use simplified client_list_view (direct table JOINs only)
-    // This view includes ONLY data displayed in LISTA tab (no financial data)
+    // 🚀 PERFORMANCE BOOST: Use client_obligations_view with financial data
+    // This view includes basic data + financial aggregations by currency
     const { data: viewData, error: viewError } = await supabase
-      .from('client_list_view')
+      .from('client_obligations_view')
       .select('*')
       .eq('organization_id', params.organizationId);
 
     if (viewError) {
-      console.error('Error fetching client_list_view:', viewError);
+      console.error('Error fetching client_obligations_view:', viewError);
       return { success: false, error: 'Failed to fetch client data' };
     }
 
@@ -89,46 +89,96 @@ export async function getOrganizationClientsSummary(
       };
     }
 
-    // Map view data to client objects
-    const clientsData = viewData.map((row: any) => {
-      // Build contacts object from view fields
-      const contacts = {
-        id: row.client_id,
-        first_name: row.contact_first_name,
-        last_name: row.contact_last_name,
-        full_name: row.contact_full_name,
-        email: row.contact_email,
-        phone: row.contact_phone,
-        company_name: row.contact_company_name,
-        linked_user: row.linked_user_id ? {
-          id: row.linked_user_id,
-          avatar_url: row.linked_user_avatar_url
-        } : null
-      };
+    // Group by project_client_id (one client can have multiple rows, one per currency)
+    const groupedByClient = viewData.reduce((acc: any, row: any) => {
+      const clientId = row.project_client_id;
       
-      // Create client entry with data from view
+      if (!acc[clientId]) {
+        // Build contacts object from view fields
+        const contacts = {
+          id: row.client_id,
+          first_name: row.contact_first_name,
+          last_name: row.contact_last_name,
+          full_name: row.contact_full_name,
+          email: row.contact_email,
+          phone: row.contact_phone,
+          company_name: row.contact_company_name,
+          linked_user: row.linked_user_id ? {
+            id: row.linked_user_id,
+            avatar_url: row.linked_user_avatar_url
+          } : null
+        };
+        
+        // Create client entry
+        acc[clientId] = {
+          id: row.project_client_id,
+          project_id: row.project_id,
+          client_id: row.client_id,
+          contact_id: row.client_id,
+          organization_id: row.organization_id,
+          unit: row.unit,
+          notes: row.notes,
+          is_primary: row.is_primary,
+          status: row.status,
+          contacts: contacts,
+          role: row.role_id ? {
+            id: row.role_id,
+            name: row.role_name,
+            is_default: row.role_is_default
+          } : null,
+          financialByCurrency: []
+        };
+      }
+
+      // Add financial data for this currency (if exists)
+      if (row.currency_id) {
+        acc[clientId].financialByCurrency.push({
+          currency: {
+            id: row.currency_id,
+            code: row.currency_code,
+            symbol: row.currency_symbol
+          },
+          total_committed_amount: parseFloat(row.total_committed_amount || 0),
+          total_paid_amount: parseFloat(row.total_paid_amount || 0),
+          balance_due: parseFloat(row.balance_due || 0),
+          next_due_date: row.next_due_date || null,
+          next_due_amount: row.next_due_amount ? parseFloat(row.next_due_amount) : null,
+          last_payment_date: row.last_payment_date || null,
+          total_schedule_items: row.total_schedule_items || 0,
+          schedule_paid: row.schedule_paid || 0,
+          schedule_overdue: row.schedule_overdue || 0,
+          payments_missing_rate: row.payments_missing_rate || 0,
+        });
+      }
+
+      return acc;
+    }, {});
+
+    // Convert to array and add derived totals for sorting
+    const clientsData = Object.values(groupedByClient).map((client: any) => {
+      // Calculate totals across all currencies
+      const total_committed_amount = client.financialByCurrency.reduce(
+        (sum: number, f: any) => sum + f.total_committed_amount, 0
+      );
+      const total_paid_amount = client.financialByCurrency.reduce(
+        (sum: number, f: any) => sum + f.total_paid_amount, 0
+      );
+      const balance_due = client.financialByCurrency.reduce(
+        (sum: number, f: any) => sum + f.balance_due, 0
+      );
+      
+      // Find earliest next due date
+      const nextDueDates = client.financialByCurrency
+        .filter((f: any) => f.next_due_date)
+        .map((f: any) => new Date(f.next_due_date).getTime());
+      const next_due = nextDueDates.length > 0 ? Math.min(...nextDueDates) : null;
+      
       return {
-        id: row.project_client_id,
-        project_id: row.project_id,
-        client_id: row.client_id,
-        contact_id: row.client_id,
-        organization_id: row.organization_id,
-        unit: row.unit,
-        notes: row.notes,
-        is_primary: row.is_primary,
-        status: row.status,
-        contacts: contacts,
-        role: row.role_id ? {
-          id: row.role_id,
-          name: row.role_name,
-          is_default: row.role_is_default
-        } : null,
-        // Financial fields not used in LISTA tab - set to empty/zero for compatibility
-        financialByCurrency: [],
-        total_committed_amount: 0,
-        total_paid_amount: 0,
-        balance_due: 0,
-        next_due: null,
+        ...client,
+        total_committed_amount,
+        total_paid_amount,
+        balance_due,
+        next_due,
       };
     });
 
