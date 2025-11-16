@@ -34,7 +34,7 @@ import ProjectData from "@/pages/professional/project-data/ProjectData";
 
 
 import ConstructionDashboard from "@/pages/professional/project/construction/ConstructionDashboard";
-import Logs from "@/pages/professional/project/construction/logs/Logs";
+import Logs from "@/pages/professional/logs/Logs";
 import Personnel from "@/pages/professional/personnel/Personnel";
 import Materials from "@/pages/professional/materials/Materials";
 import Budgets from "@/pages/professional/budgets/Budgets";

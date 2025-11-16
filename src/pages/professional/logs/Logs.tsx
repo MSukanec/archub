@@ -13,8 +13,8 @@ import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 
-import LogEntries from './LogEntries';
-import LogCharts from './LogCharts';
+import LogEntries from './LogEntriesTab';
+import LogCharts from './LogChartsTab';
 
 // Entry types enum with their icons and labels
 const entryTypes = {
@@ -284,7 +284,7 @@ export default function Logs() {
   const headerProps = {
     icon: FileText,
     title: "Bitácora de Obra",
-    organizationId,
+    organizationId: currentOrganizationId,
     showMembers: true,
     tabs: headerTabs,
     onTabChange: setActiveTab,
