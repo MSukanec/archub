@@ -177,7 +177,20 @@ export async function listClientPayments(
         ),
         project_client:project_clients!client_id (
           id,
-          unit
+          unit,
+          contacts:contacts!contact_id (
+            id,
+            first_name,
+            last_name,
+            full_name,
+            email,
+            phone,
+            company_name,
+            linked_user:users!linked_user_id (
+              id,
+              avatar_url
+            )
+          )
         ),
         currency:currencies!currency_id (
           id,
@@ -284,7 +297,20 @@ export async function createClientPayment(
         ),
         project_client:project_clients!client_id (
           id,
-          unit
+          unit,
+          contacts:contacts!contact_id (
+            id,
+            first_name,
+            last_name,
+            full_name,
+            email,
+            phone,
+            company_name,
+            linked_user:users!linked_user_id (
+              id,
+              avatar_url
+            )
+          )
         ),
         currency:currencies!currency_id (
           id,
@@ -400,7 +426,20 @@ export async function updateClientPayment(
         ),
         project_client:project_clients!client_id (
           id,
-          unit
+          unit,
+          contacts:contacts!contact_id (
+            id,
+            first_name,
+            last_name,
+            full_name,
+            email,
+            phone,
+            company_name,
+            linked_user:users!linked_user_id (
+              id,
+              avatar_url
+            )
+          )
         ),
         currency:currencies!currency_id (
           id,
