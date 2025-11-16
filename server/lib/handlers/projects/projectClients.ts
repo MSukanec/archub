@@ -257,6 +257,9 @@ export async function getClientsSummary(
         id,
         unit,
         client_role_id,
+        notes,
+        is_primary,
+        status,
         contacts:contacts!client_id (
           id,
           first_name,
@@ -317,6 +320,9 @@ export async function getClientsSummary(
           client_id: row.client_id,
           organization_id: row.organization_id,
           unit: enriched?.unit || null,
+          notes: enriched?.notes || null,
+          is_primary: enriched?.is_primary || false,
+          status: enriched?.status || 'active',
           contacts: enriched?.contacts || null,
           role: row.role_id ? {
             id: row.role_id,

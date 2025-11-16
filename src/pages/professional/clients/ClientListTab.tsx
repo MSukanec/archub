@@ -40,6 +40,9 @@ interface ProjectClientSummary {
   id: string;
   client_id: string;
   unit: string | null;
+  notes: string | null;
+  is_primary: boolean;
+  status: string;
   contacts: {
     id: string;
     first_name: string;
@@ -250,120 +253,81 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   // Table columns
   const columns = [
     {
-      key: 'avatar',
-      label: '',
-      width: '60px',
-      sortable: false,
+      key: 'full_name',
+      label: 'Cliente',
+      width: '300px',
+      sortable: true,
       render: (client: ProjectClientSummary) => {
         const avatarUrl = client.contacts?.linked_user?.avatar_url;
         const initials = client.contacts?.first_name?.[0] && client.contacts?.last_name?.[0]
           ? `${client.contacts.first_name[0]}${client.contacts.last_name[0]}`
           : client.contacts?.first_name?.[0] || '?';
         
-        return (
-          <Avatar className="h-8 w-8">
-            {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
-            <AvatarFallback>
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-        );
-      },
-    },
-    {
-      key: 'full_name',
-      label: 'Cliente',
-      sortable: true,
-      cellClassName: 'font-semibold',
-      render: (client: ProjectClientSummary) => {
         const displayName = client.contacts?.company_name || 
                            client.contacts?.full_name || 
                            `${client.contacts?.first_name || ''} ${client.contacts?.last_name || ''}`.trim();
-        return displayName || '-';
-      },
-    },
-    {
-      key: 'total_committed_amount',
-      label: 'Compromiso total',
-      sortable: true,
-      render: (client: ProjectClientSummary) => renderMultiCurrency(client, 'total_committed_amount'),
-    },
-    {
-      key: 'total_paid_amount',
-      label: 'Pagado',
-      sortable: true,
-      render: (client: ProjectClientSummary) => renderMultiCurrency(client, 'total_paid_amount'),
-    },
-    {
-      key: 'balance_due',
-      label: 'Saldo pendiente',
-      sortable: true,
-      render: (client: ProjectClientSummary) => {
-        if (client.financialByCurrency.length === 0) return '-';
         
-        // For PRO/TEAMS: Show single currency (commitment currency) with converted balance
-        if (planInfo.isMultiCurrency) {
-          const currencyData = client.financialByCurrency[0];
-          if (!currencyData) return '-';
-          
-          const balance = currencyData.balance_due;
-          const className = balance > 0 
-            ? 'text-orange-600 dark:text-orange-400 font-semibold' 
-            : balance < 0
-            ? 'text-green-600 dark:text-green-400 font-semibold'
-            : 'font-semibold';
-          
-          return (
-            <span className={className} style={{ fontSize: '14px' }}>
-              {formatCurrency(balance, currencyData.currency)}
-            </span>
-          );
-        }
-        
-        // For FREE: Show multiple currencies if present
         return (
-          <div className="flex flex-wrap gap-1">
-            {client.financialByCurrency.map((f, index) => {
-              const className = f.balance_due > 0 
-                ? 'text-orange-600 dark:text-orange-400 font-medium' 
-                : f.balance_due < 0
-                ? 'text-green-600 dark:text-green-400 font-medium'
-                : '';
-              return (
-                <span key={index} className={className + ' whitespace-nowrap'}>
-                  {formatCurrency(f.balance_due, f.currency)}
-                  {index < client.financialByCurrency.length - 1 && <span className="mx-1 text-muted-foreground">+</span>}
-                </span>
-              );
-            })}
+          <div className="flex items-center gap-3">
+            <Avatar className="h-8 w-8">
+              {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
+              <AvatarFallback>
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <span className="font-semibold">{displayName || '-'}</span>
           </div>
         );
       },
     },
     {
-      key: 'next_due',
-      label: 'Próximo vencimiento',
+      key: 'role',
+      label: 'Rol',
       sortable: true,
       render: (client: ProjectClientSummary) => {
-        // Find the earliest next due date across all currencies
-        const nextDues = client.financialByCurrency
-          .filter(f => f.next_due_date)
-          .sort((a, b) => new Date(a.next_due_date!).getTime() - new Date(b.next_due_date!).getTime());
-        
-        if (nextDues.length === 0) {
-          return <span className="text-muted-foreground">Sin vencimientos</span>;
-        }
-        
-        const earliest = nextDues[0];
-        const formattedDate = format(new Date(earliest.next_due_date!), 'dd/MM/yyyy', { locale: es });
-        const formattedAmount = earliest.next_due_amount ? formatCurrency(earliest.next_due_amount, earliest.currency) : '';
-        
-        return (
-          <div className="flex flex-col">
-            <span className="font-medium">{formattedDate}</span>
-            {formattedAmount && <span className="text-muted-foreground">{formattedAmount}</span>}
-          </div>
+        return client.role?.name || '-';
+      },
+    },
+    {
+      key: 'notes',
+      label: 'Notas',
+      sortable: false,
+      render: (client: ProjectClientSummary) => {
+        if (!client.notes) return '-';
+        const truncated = client.notes.length > 50 
+          ? client.notes.substring(0, 50) + '...' 
+          : client.notes;
+        return <span className="text-muted-foreground">{truncated}</span>;
+      },
+    },
+    {
+      key: 'is_primary',
+      label: 'Primario',
+      sortable: true,
+      width: '100px',
+      align: 'center' as const,
+      render: (client: ProjectClientSummary) => {
+        return client.is_primary ? (
+          <span className="text-green-600 dark:text-green-400 font-medium">Sí</span>
+        ) : (
+          <span className="text-muted-foreground">No</span>
         );
+      },
+    },
+    {
+      key: 'status',
+      label: 'Estado',
+      sortable: true,
+      width: '120px',
+      render: (client: ProjectClientSummary) => {
+        const statusMap: Record<string, { label: string; color: string }> = {
+          active: { label: 'Activo', color: 'text-green-600 dark:text-green-400' },
+          inactive: { label: 'Inactivo', color: 'text-muted-foreground' },
+          pending: { label: 'Pendiente', color: 'text-orange-600 dark:text-orange-400' },
+        };
+        
+        const status = statusMap[client.status] || { label: client.status, color: 'text-muted-foreground' };
+        return <span className={`font-medium ${status.color}`}>{status.label}</span>;
       },
     },
   ];
