@@ -253,15 +253,12 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     return statusConfig[status];
   };
 
-  // Table columns with optimized widths:
-  // - Fixed width for predictable data (dates, amounts, badges)
-  // - Flexible width for "Notas" (uses remaining space)
+  // Table columns
   const columns = [
     {
       key: 'payment_date',
       label: 'Fecha de Pago',
       sortable: true,
-      width: '120px',
       align: 'right' as const,
       render: (payment: ClientPayment) => formatDate(payment.payment_date, 'dd/MM/yyyy'),
     },
@@ -269,7 +266,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'created_at',
       label: 'Fecha de Registro',
       sortable: true,
-      width: '140px',
       align: 'right' as const,
       render: (payment: ClientPayment) => formatDate(payment.created_at, 'dd/MM/yyyy'),
     },
@@ -277,7 +273,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'contact',
       label: 'Cliente',
       sortable: true,
-      width: '220px',
       render: (payment: ClientPayment) => {
         const avatarUrl = payment.contact?.linked_user?.avatar_url;
         const initials = payment.contact?.first_name?.[0] && payment.contact?.last_name?.[0]
@@ -310,9 +305,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'notes',
       label: 'Notas',
       sortable: true,
-      // NO width = flexible, uses remaining space
       render: (payment: ClientPayment) => (
-        <div className="truncate" title={payment.notes || ''}>
+        <div className="max-w-md truncate" title={payment.notes || ''}>
           {payment.notes || '-'}
         </div>
       ),
@@ -321,7 +315,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'reference',
       label: 'Referencia',
       sortable: true,
-      width: '120px',
       align: 'right' as const,
       render: (payment: ClientPayment) => payment.reference || '-',
     },
@@ -329,7 +322,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'commitment_id',
       label: 'Compromiso',
       sortable: true,
-      width: '140px',
       align: 'right' as const,
       render: (payment: ClientPayment) => {
         if (!payment.commitment) return '-';
@@ -344,7 +336,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'schedule_id',
       label: 'Cuota',
       sortable: true,
-      width: '140px',
       align: 'right' as const,
       render: (payment: ClientPayment) => {
         if (!payment.schedule) return '-';
@@ -359,7 +350,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'wallet',
       label: 'Billetera',
       sortable: true,
-      width: '140px',
       align: 'right' as const,
       cellClassName: 'font-bold',
       render: (payment: ClientPayment) => payment.wallet?.name || '-',
@@ -368,7 +358,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'amount',
       label: 'Monto',
       sortable: true,
-      width: '140px',
       sortType: 'number' as const,
       cellClassName: 'font-bold',
       render: (payment: ClientPayment) => formatAmount(payment.amount, payment.currency?.symbol),
@@ -377,7 +366,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'status',
       label: 'Estado',
       sortable: true,
-      width: '120px',
       render: (payment: ClientPayment) => {
         const statusInfo = getStatusBadge(payment.status);
         return (
