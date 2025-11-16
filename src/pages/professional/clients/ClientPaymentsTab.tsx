@@ -196,6 +196,13 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   });
 
   const handleEdit = (payment: ClientPayment) => {
+    console.log('✏️ handleEdit called with payment:', payment.id);
+    console.log('📂 Modal params:', {
+      projectId: activeProjectId,
+      organizationId: organizationId,
+      paymentId: payment.id,
+      mode: 'edit',
+    });
     openModal('client-payment', {
       projectId: activeProjectId,
       organizationId: organizationId,
@@ -448,6 +455,13 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   };
 
   const handleViewPayment = (payment: ClientPayment) => {
+    console.log('👁️ handleViewPayment called with payment:', payment.id);
+    console.log('📂 Modal params:', {
+      projectId: activeProjectId,
+      organizationId: organizationId,
+      paymentId: payment.id,
+      mode: 'view',
+    });
     openModal('client-payment', {
       projectId: activeProjectId,
       organizationId: organizationId,
