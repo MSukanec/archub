@@ -457,8 +457,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         isLoading={isLoading}
         showDoubleHeader={false}
         columnWidths={{
-          contact: '280px',
-          attachments: '60px',
+          contact: '560px',
+          attachments: '30px',
         }}
         emptyStateConfig={{
           icon: <DollarSign className="h-12 w-12 text-muted-foreground" />,
