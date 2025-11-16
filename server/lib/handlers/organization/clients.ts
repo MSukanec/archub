@@ -64,19 +64,39 @@ export async function getOrganizationClientsSummary(
     const features = (planData && typeof planData === 'object' && 'features' in planData) ? planData.features : [];
     const isMultiCurrency = Array.isArray(features) && features.includes('multi-currency');
 
-    // 🚀 PERFORMANCE BOOST: Use client_obligations_view with financial data
-    // This view includes basic data + financial aggregations by currency
-    const { data: viewData, error: viewError } = await supabase
-      .from('client_obligations_view')
-      .select('*')
+    // 🚀 DIRECT TABLE QUERIES: Bypassing problematic view with explicit LEFT JOINs
+    // Query project_clients with all related data
+    const { data: clients, error: clientsError } = await supabase
+      .from('project_clients')
+      .select(`
+        *,
+        contacts!contact_id (
+          id,
+          first_name,
+          last_name,
+          full_name,
+          email,
+          phone,
+          company_name,
+          users!linked_user_id (
+            id,
+            avatar_url
+          )
+        ),
+        client_roles!client_role_id (
+          id,
+          name,
+          is_default
+        )
+      `)
       .eq('organization_id', params.organizationId);
 
-    if (viewError) {
-      console.error('Error fetching client_obligations_view:', viewError);
-      return { success: false, error: 'Failed to fetch client data' };
+    if (clientsError) {
+      console.error('Error fetching clients:', clientsError);
+      return { success: false, error: 'Failed to fetch clients' };
     }
 
-    if (!viewData || viewData.length === 0) {
+    if (!clients || clients.length === 0) {
       return {
         success: true,
         data: {
@@ -89,96 +109,137 @@ export async function getOrganizationClientsSummary(
       };
     }
 
-    // Group by project_client_id (one client can have multiple rows, one per currency)
-    const groupedByClient = viewData.reduce((acc: any, row: any) => {
-      const clientId = row.project_client_id;
-      
-      if (!acc[clientId]) {
-        // Build contacts object from view fields
-        const contacts = {
-          id: row.client_id,
-          first_name: row.contact_first_name,
-          last_name: row.contact_last_name,
-          full_name: row.contact_full_name,
-          email: row.contact_email,
-          phone: row.contact_phone,
-          company_name: row.contact_company_name,
-          linked_user: row.linked_user_id ? {
-            id: row.linked_user_id,
-            avatar_url: row.linked_user_avatar_url
-          } : null
-        };
+    // Fetch commitments for these clients
+    const clientIds = clients.map((c: any) => c.id);
+    const { data: commitments } = await supabase
+      .from('client_commitments')
+      .select(`
+        *,
+        currencies!currency_id (
+          id,
+          code,
+          symbol
+        )
+      `)
+      .in('client_id', clientIds)
+      .eq('organization_id', params.organizationId);
+
+    // Fetch payments for these clients
+    const { data: payments } = await supabase
+      .from('client_payments')
+      .select(`
+        *,
+        currencies!currency_id (
+          id,
+          code,
+          symbol
+        )
+      `)
+      .in('client_id', clientIds)
+      .eq('organization_id', params.organizationId)
+      .eq('status', 'confirmed');
+
+    // Build financialByCurrency for each client
+    const clientsData = clients.map((client: any) => {
+      const clientCommitments = commitments?.filter((cc: any) => cc.client_id === client.id) || [];
+      const clientPayments = payments?.filter((cp: any) => cp.client_id === client.id) || [];
+
+      // Group by currency
+      const currencyMap = new Map<string, any>();
+
+      // Process commitments
+      clientCommitments.forEach((cc: any) => {
+        if (!cc.currency_id) return;
         
-        // Create client entry
-        acc[clientId] = {
-          id: row.project_client_id,
-          project_id: row.project_id,
-          client_id: row.client_id,
-          contact_id: row.client_id,
-          organization_id: row.organization_id,
-          unit: row.unit,
-          notes: row.notes,
-          is_primary: row.is_primary,
-          status: row.status,
-          contacts: contacts,
-          role: row.role_id ? {
-            id: row.role_id,
-            name: row.role_name,
-            is_default: row.role_is_default
-          } : null,
-          financialByCurrency: []
-        };
-      }
+        const key = cc.currency_id;
+        if (!currencyMap.has(key)) {
+          currencyMap.set(key, {
+            currency: cc.currencies,
+            total_committed_amount: 0,
+            total_paid_amount: 0,
+            balance_due: 0,
+            next_due_date: null,
+            next_due_amount: null,
+            last_payment_date: null,
+            total_schedule_items: 0,
+            schedule_paid: 0,
+            schedule_overdue: 0,
+            payments_missing_rate: 0,
+          });
+        }
+        
+        const entry = currencyMap.get(key);
+        entry.total_committed_amount += parseFloat(cc.amount || 0);
+      });
 
-      // Add financial data for this currency (if exists)
-      if (row.currency_id) {
-        acc[clientId].financialByCurrency.push({
-          currency: {
-            id: row.currency_id,
-            code: row.currency_code,
-            symbol: row.currency_symbol
-          },
-          total_committed_amount: parseFloat(row.total_committed_amount || 0),
-          total_paid_amount: parseFloat(row.total_paid_amount || 0),
-          balance_due: parseFloat(row.balance_due || 0),
-          next_due_date: row.next_due_date || null,
-          next_due_amount: row.next_due_amount ? parseFloat(row.next_due_amount) : null,
-          last_payment_date: row.last_payment_date || null,
-          total_schedule_items: row.total_schedule_items || 0,
-          schedule_paid: row.schedule_paid || 0,
-          schedule_overdue: row.schedule_overdue || 0,
-          payments_missing_rate: row.payments_missing_rate || 0,
-        });
-      }
+      // Process payments
+      clientPayments.forEach((cp: any) => {
+        if (!cp.currency_id) return;
+        
+        const key = cp.currency_id;
+        if (!currencyMap.has(key)) {
+          currencyMap.set(key, {
+            currency: cp.currencies,
+            total_committed_amount: 0,
+            total_paid_amount: 0,
+            balance_due: 0,
+            next_due_date: null,
+            next_due_amount: null,
+            last_payment_date: null,
+            total_schedule_items: 0,
+            schedule_paid: 0,
+            schedule_overdue: 0,
+            payments_missing_rate: 0,
+          });
+        }
+        
+        const entry = currencyMap.get(key);
+        entry.total_paid_amount += parseFloat(cp.amount || 0);
+        
+        if (!entry.last_payment_date || new Date(cp.payment_date) > new Date(entry.last_payment_date)) {
+          entry.last_payment_date = cp.payment_date;
+        }
+        
+        if (!cp.exchange_rate || cp.exchange_rate === 0) {
+          entry.payments_missing_rate += 1;
+        }
+      });
 
-      return acc;
-    }, {});
+      // Calculate balance_due for each currency
+      currencyMap.forEach((entry) => {
+        entry.balance_due = entry.total_committed_amount - entry.total_paid_amount;
+      });
 
-    // Convert to array and add derived totals for sorting
-    const clientsData = Object.values(groupedByClient).map((client: any) => {
+      const financialByCurrency = Array.from(currencyMap.values());
+
       // Calculate totals across all currencies
-      const total_committed_amount = client.financialByCurrency.reduce(
-        (sum: number, f: any) => sum + f.total_committed_amount, 0
+      const total_committed_amount = financialByCurrency.reduce(
+        (sum, f) => sum + f.total_committed_amount, 0
       );
-      const total_paid_amount = client.financialByCurrency.reduce(
-        (sum: number, f: any) => sum + f.total_paid_amount, 0
+      const total_paid_amount = financialByCurrency.reduce(
+        (sum, f) => sum + f.total_paid_amount, 0
       );
-      const balance_due = client.financialByCurrency.reduce(
-        (sum: number, f: any) => sum + f.balance_due, 0
+      const balance_due = financialByCurrency.reduce(
+        (sum, f) => sum + f.balance_due, 0
       );
-      
-      // Find earliest next due date
-      const nextDueDates = client.financialByCurrency
-        .filter((f: any) => f.next_due_date)
-        .map((f: any) => new Date(f.next_due_date).getTime());
-      const next_due = nextDueDates.length > 0 ? Math.min(...nextDueDates) : null;
-      
+
       return {
-        ...client,
+        id: client.id,
+        project_id: client.project_id,
+        client_id: client.contact_id,
+        contact_id: client.contact_id,
+        organization_id: client.organization_id,
+        unit: client.unit,
+        notes: client.notes,
+        is_primary: client.is_primary,
+        status: client.status,
+        contacts: client.contacts,
+        role: client.client_roles,
+        financialByCurrency,
         total_committed_amount,
         total_paid_amount,
         balance_due,
-        next_due,
+        next_due: null,
       };
     });
 
