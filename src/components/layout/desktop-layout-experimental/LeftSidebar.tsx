@@ -5,6 +5,7 @@ import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useProjectsLite } from "@/hooks/use-projects-lite";
 import { useProject } from "@/hooks/use-projects";
 import { useUserMode } from "@/hooks/use-user-mode";
+import { useUserOrganizationPreferences } from "@/hooks/use-user-organization-preferences";
 import { isButtonExcluded } from "@/config/modes";
 import { cn } from "@/lib/utils";
 import { useProjectContext } from '@/stores/projectContext';
@@ -116,6 +117,9 @@ export function LeftSidebar() {
   const { data: currentProject } = useProject(selectedProjectId || undefined);
   const currentProjectName = currentProject?.name || "Seleccionar Proyecto";
   
+  // Get user preferences to check if they explicitly chose "Organization" view
+  const { data: userPreferences, isLoading: preferencesLoading } = useUserOrganizationPreferences(currentOrganizationId || undefined);
+  
   // Helper to check if there are projects available
   const hasProjects = projectsLite.length > 0;
 
@@ -164,20 +168,30 @@ export function LeftSidebar() {
   };
   
   // AUTO-SELECT FIRST PROJECT: If organization has projects but none selected, auto-select the first one
+  // IMPORTANT: Only auto-select for NEW users who have never made a choice
+  // Do NOT auto-select if user explicitly chose "Organization" view (last_project_id === null in preferences)
   useEffect(() => {
+    // Skip if preferences are still loading
+    if (preferencesLoading) return;
+    
     // Only run if:
     // 1. We have projects available
     // 2. No project is currently selected
     // 3. Not currently mutating
     // 4. User data is available
-    if (hasProjects && !selectedProjectId && !selectProjectMutation.isPending && userData?.user?.id) {
+    // 5. User preferences don't exist yet (new user) OR preferences exist but have a valid project_id that doesn't exist anymore
+    const userHasNeverChosenAnything = userPreferences === null || userPreferences === undefined;
+    const userExplicitlyChoseOrganizationView = userPreferences?.last_project_id === null;
+    
+    // Only auto-select if it's a NEW user who has never made a choice
+    if (hasProjects && !selectedProjectId && !selectProjectMutation.isPending && userData?.user?.id && userHasNeverChosenAnything) {
       const firstProject = projectsLite[0];
       if (firstProject) {
         console.log('🔧 Auto-selecting first project:', firstProject.name);
         selectProjectMutation.mutate(firstProject.id);
       }
     }
-  }, [hasProjects, selectedProjectId, selectProjectMutation.isPending, projectsLite, userData?.user?.id]);
+  }, [hasProjects, selectedProjectId, selectProjectMutation.isPending, projectsLite, userData?.user?.id, userPreferences, preferencesLoading]);
 
   // Organización y usuario para settings sections
   const organizationName = userData?.organization?.name || 'Organización';
