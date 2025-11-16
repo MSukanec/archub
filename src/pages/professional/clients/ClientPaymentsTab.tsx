@@ -55,19 +55,6 @@ interface ClientPayment {
   project_client: {
     id: string;
     unit: string | null;
-    contacts: {
-      id: string;
-      first_name: string;
-      last_name: string;
-      full_name: string;
-      email: string;
-      phone?: string;
-      company_name?: string;
-      linked_user?: {
-        id: string;
-        avatar_url?: string;
-      } | null;
-    } | null;
   } | null;
   currency: {
     id: string;
@@ -135,11 +122,10 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     allPayments.forEach(payment => {
       if (payment.wallet?.name) wallets.add(payment.wallet.name);
       if (payment.currency?.code) currencies.add(payment.currency.code);
-      const contact = payment.project_client?.contacts;
-      if (contact) {
-        const clientName = contact.company_name || 
-                          contact.full_name || 
-                          `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
+      if (payment.contact) {
+        const clientName = payment.contact.company_name || 
+                          payment.contact.full_name || 
+                          `${payment.contact.first_name || ''} ${payment.contact.last_name || ''}`.trim();
         if (clientName) clients.add(clientName);
       }
       if (payment.project_client?.unit) units.add(payment.project_client.unit);
@@ -172,10 +158,9 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       
       // Filter by client
       if (filterClient !== 'all') {
-        const contact = payment.project_client?.contacts;
-        const clientName = contact?.company_name || 
-                          contact?.full_name || 
-                          `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim();
+        const clientName = payment.contact?.company_name || 
+                          payment.contact?.full_name || 
+                          `${payment.contact?.first_name || ''} ${payment.contact?.last_name || ''}`.trim();
         if (clientName !== filterClient) return false;
       }
       
@@ -226,10 +211,9 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   };
 
   const handleDeletePayment = (payment: ClientPayment) => {
-    const contact = payment.project_client?.contacts;
-    const clientName = contact?.company_name || 
-                      contact?.full_name || 
-                      `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim();
+    const clientName = payment.contact?.company_name || 
+                      payment.contact?.full_name || 
+                      `${payment.contact?.first_name || ''} ${payment.contact?.last_name || ''}`.trim();
     const symbol = payment.currency?.symbol || '$';
     const formattedAmount = `${symbol} ${payment.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     const paymentLabel = `${clientName} - ${formattedAmount}`;
@@ -322,16 +306,14 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       sortable: true,
       width: '400px',
       render: (payment: ClientPayment) => {
-        // Get contact from project_client instead of direct contact
-        const contact = payment.project_client?.contacts;
-        const avatarUrl = contact?.linked_user?.avatar_url;
-        const initials = contact?.first_name?.[0] && contact?.last_name?.[0]
-          ? `${contact.first_name[0]}${contact.last_name[0]}`
-          : contact?.first_name?.[0] || '?';
+        const avatarUrl = payment.contact?.linked_user?.avatar_url;
+        const initials = payment.contact?.first_name?.[0] && payment.contact?.last_name?.[0]
+          ? `${payment.contact.first_name[0]}${payment.contact.last_name[0]}`
+          : payment.contact?.first_name?.[0] || '?';
         
-        const displayName = contact?.company_name || 
-                           contact?.full_name || 
-                           `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim();
+        const displayName = payment.contact?.company_name || 
+                           payment.contact?.full_name || 
+                           `${payment.contact?.first_name || ''} ${payment.contact?.last_name || ''}`.trim();
         
         const unit = payment.project_client?.unit;
         

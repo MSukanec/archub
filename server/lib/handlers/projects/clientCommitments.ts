@@ -157,7 +157,7 @@ export async function listClientCommitments(
             avatar_url
           )
         ),
-        project_client:project_clients!contact_id (
+        project_client:project_clients!client_id (
           id,
           unit
         ),
@@ -268,7 +268,7 @@ export async function createClientCommitment(
             avatar_url
           )
         ),
-        project_client:project_clients!contact_id (
+        project_client:project_clients!client_id (
           id,
           unit
         ),
@@ -392,7 +392,7 @@ export async function updateClientCommitment(
             avatar_url
           )
         ),
-        project_client:project_clients!contact_id (
+        project_client:project_clients!client_id (
           id,
           unit
         ),

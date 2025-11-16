@@ -40,7 +40,7 @@ interface CurrencyFinancial {
 
 interface ProjectClientSummary {
   id: string;
-  client_id: string;
+  contact_id: string;
   unit: string | null;
   contacts: {
     id: string;

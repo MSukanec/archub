@@ -111,7 +111,7 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
   useEffect(() => {
     if (existingClient) {
       form.reset({
-        contactId: existingClient.client_id,
+        contactId: existingClient.contact_id,
         unit: existingClient.unit || '',
         clientRoleId: existingClient.client_role_id || '',
         status: existingClient.status || 'active',
@@ -147,11 +147,11 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
         // Update existing client
         return await apiRequest('PATCH', `/api/projects/${projectId}/clients/${clientId}`, payload);
       } else {
-        // Create new client - include client_id and created_by
+        // Create new client - include contact_id and created_by
         const organizationMemberId = organizationMember?.id;
         return await apiRequest('POST', `/api/projects/${projectId}/clients`, {
           ...payload,
-          client_id: data.contactId,
+          contact_id: data.contactId,
           created_by: organizationMemberId || null,
         });
       }
