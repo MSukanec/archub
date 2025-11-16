@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { format, parseISO, isSameDay } from "date-fns";
+import { useMemo } from "react";
+import { format, parseISO } from "date-fns";
 import { useImageLightbox, ImageLightbox } from "@/components/ui-custom/media/ImageLightbox";
 import { DateSeparator } from "./DateSeparator";
 import { LogEntryCard } from "./LogEntryCard";
@@ -15,7 +15,6 @@ export function LogTimeline({
   toggleFavorite, 
   handleDeleteSiteLog 
 }: LogTimelineProps) {
-  const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
 
   // Group logs by date
   const groupedLogs = useMemo(() => {
@@ -38,13 +37,6 @@ export function LogTimeline({
     }));
   }, [siteLogs]);
 
-  // Auto-expand the most recent entry when data loads
-  useEffect(() => {
-    if (siteLogs && siteLogs.length > 0 && !expandedLogId) {
-      setExpandedLogId(siteLogs[0].id);
-    }
-  }, [siteLogs, expandedLogId]);
-
   // Initialize lightbox with all images from all logs
   const imageUrls = siteLogs.flatMap((log: any) => 
     log.files?.filter((file: any) => file.file_type === 'image').map((file: any) => file.file_url) || []
@@ -62,8 +54,8 @@ export function LogTimeline({
                 <LogEntryCard
                   key={siteLog.id}
                   siteLog={siteLog}
-                  isExpanded={expandedLogId === siteLog.id}
-                  onToggleExpand={(expanded) => setExpandedLogId(expanded ? siteLog.id : null)}
+                  isExpanded={false}
+                  onToggleExpand={() => {}}
                   toggleFavorite={toggleFavorite}
                   handleDeleteSiteLog={handleDeleteSiteLog}
                   imageUrls={imageUrls}

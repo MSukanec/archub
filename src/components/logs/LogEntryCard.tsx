@@ -1,11 +1,8 @@
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
-import { Star, ChevronDown, ChevronRight, Edit, Trash2, Image, Video } from "lucide-react";
+import { Star, Edit, Trash2, Image, Video } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useImageLightbox } from "@/components/ui-custom/media/ImageLightbox";
@@ -47,8 +44,6 @@ interface LogEntryCardProps {
 
 export function LogEntryCard({
   siteLog,
-  isExpanded,
-  onToggleExpand,
   toggleFavorite,
   handleDeleteSiteLog,
   imageUrls,
@@ -59,262 +54,203 @@ export function LogEntryCard({
   const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
 
   return (
-    <Collapsible 
-      open={isExpanded}
-      onOpenChange={onToggleExpand}
-    >
-      <Card className="w-full transition-all hover:shadow-sm">
-        <div className="flex items-center justify-between p-4">
-          {/* Lado izquierdo: Información principal */}
-          <CollapsibleTrigger asChild>
-            <div className="flex-1 cursor-pointer">
-              <div className="flex items-center gap-4">
-                {isExpanded ? (
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                )}
-                
-                {/* Hora */}
-                <span className="text-sm text-muted-foreground">
-                  21:00
-                </span>
+    <div className="group pl-12 py-3 hover:border hover:border-border rounded-md transition-all">
+      <div className="flex gap-3">
+        {/* Avatar */}
+        <Avatar className="h-9 w-9 flex-shrink-0">
+          <AvatarImage src={siteLog.creator?.avatar_url} />
+          <AvatarFallback className="bg-primary/10 text-primary text-sm">
+            {siteLog.creator?.full_name?.charAt(0) || 'U'}
+          </AvatarFallback>
+        </Avatar>
 
-                {/* Clima */}
-                {weatherConfig && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-sm text-muted-foreground">
-                      {weatherConfig.label}
-                    </span>
-                  </div>
-                )}
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          {/* Header: Name + Time */}
+          <div className="flex items-baseline gap-2 mb-1">
+            <span className="font-bold text-sm">
+              {siteLog.creator?.full_name || 'Usuario desconocido'}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              21:00
+            </span>
+            {/* Tipo de Entrada */}
+            <span className="text-xs font-medium text-muted-foreground">
+              {entryTypeConfig?.label || 'Sin tipo'}
+            </span>
+            {/* Clima */}
+            {weatherConfig && (
+              <span className="text-xs text-muted-foreground">
+                • {weatherConfig.label}
+              </span>
+            )}
+          </div>
 
-                {/* Creador */}
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-5 w-5">
-                    <AvatarImage src={siteLog.creator?.avatar_url} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                      {siteLog.creator?.full_name?.charAt(0) || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm text-muted-foreground">
-                    {siteLog.creator?.full_name || 'Usuario desconocido'}
-                  </span>
-                </div>
+          {/* Comentarios */}
+          {siteLog.comments && (
+            <div className="mb-4">
+              <p className="text-sm">{siteLog.comments}</p>
+            </div>
+          )}
 
-                {/* Tipo de Entrada */}
-                <span className="text-sm font-bold">
-                  {entryTypeConfig?.label || 'Sin tipo'}
-                </span>
-
+          {/* Archivos Adjuntos */}
+          {siteLog.files && siteLog.files.length > 0 && (
+            <div className="mb-4">
+              <div className="flex flex-wrap gap-2">
+                {siteLog.files.map((file: any, index: number) => {
+                  return file.file_type === 'image' ? (
+                    <div key={index} className="relative group/image">
+                      <img 
+                        src={file.file_url} 
+                        alt={file.file_name}
+                        className="w-16 h-16 object-cover rounded border-2 border-gray-200 hover:border-gray-300 transition-colors cursor-pointer"
+                        onClick={() => {
+                          const imageIndex = imageUrls.indexOf(file.file_url);
+                          if (imageIndex !== -1) {
+                            lightbox.openLightbox(imageIndex);
+                          }
+                        }}
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          const nextElement = e.currentTarget.nextElementSibling as HTMLElement | null;
+                          if (nextElement) {
+                            nextElement.style.display = 'flex';
+                          }
+                        }}
+                      />
+                      <div className="w-16 h-16 flex items-center justify-center bg-gray-100 rounded border-2 border-gray-200" style={{ display: 'none' }}>
+                        <Image className="h-6 w-6 text-gray-400" />
+                      </div>
+                    </div>
+                  ) : (
+                    <div key={index} className="flex items-center gap-2 px-2 py-1 rounded border border-gray-200">
+                      <Video className="h-4 w-4 text-gray-500" />
+                      <span className="text-xs text-muted-foreground">
+                        {file.file_name && file.file_name.length > 15 ? 
+                          file.file_name.substring(0, 15) + '...' : 
+                          file.file_name || 'Sin nombre'
+                        }
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          </CollapsibleTrigger>
+          )}
 
-          {/* Lado derecho: Botones de acción */}
-          <div className="flex items-center gap-2 ml-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleFavorite(siteLog.id);
-              }}
-              className=" hover:bg-transparent group"
-            >
-              <Star className={`h-4 w-4 transition-colors ${siteLog.is_favorite ? 'text-yellow-500 fill-yellow-500' : 'text-muted-foreground group-hover:text-yellow-500'}`} />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                openModal('site-log', { data: siteLog });
-              }}
-              className=" hover:bg-transparent group"
-            >
-              <Edit className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 transition-colors" />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDeleteSiteLog(siteLog);
-              }}
-              className=" hover:bg-transparent group"
-            >
-              <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500 transition-colors" />
-            </Button>
-          </div>
+          {/* Eventos */}
+          {siteLog.events && siteLog.events.length > 0 && (
+            <div className="mb-4">
+              <h3 className="text-xs font-medium text-muted-foreground mb-2">
+                Eventos ({siteLog.events.length}):
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
+                {siteLog.events.map((event: any, index: number) => (
+                  <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', borderColor: 'rgba(34, 197, 94, 0.3)' }}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium" style={{ color: '#22c55e' }}>
+                        {event.event_type?.name || event.type || 'Evento'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{event.description || 'Sin descripción'}</p>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Asistencias */}
+          {siteLog.attendees && siteLog.attendees.length > 0 && (
+            <div className="mb-4">
+              <h3 className="text-xs font-medium text-muted-foreground mb-2">
+                Asistencias ({siteLog.attendees.length}):
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
+                {siteLog.attendees.map((attendee: any, index: number) => (
+                  <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.3)' }}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium" style={{ color: '#3b82f6' }}>
+                        {attendee.contact ? 
+                          `${attendee.contact.first_name || ''} ${attendee.contact.last_name || ''}`.trim() || 'Personal' 
+                          : 'Personal'
+                        }
+                      </span>
+                      <span className="text-xs px-1 py-0.5 rounded" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
+                        {attendee.attendance_type || 'Presente'}
+                      </span>
+                    </div>
+                    {attendee.description && (
+                      <p className="text-xs text-muted-foreground">{attendee.description}</p>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Maquinaria */}
+          {siteLog.equipment && siteLog.equipment.length > 0 && (
+            <div className="mb-4">
+              <h3 className="text-xs font-medium text-muted-foreground mb-2">
+                Maquinaria ({siteLog.equipment.length}):
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
+                {siteLog.equipment.map((equipment: any, index: number) => (
+                  <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(251, 191, 36, 0.1)', borderColor: 'rgba(251, 191, 36, 0.3)' }}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium" style={{ color: '#fbbf24' }}>
+                        {equipment.equipment?.name || 'Equipo'}
+                      </span>
+                      <span className="text-xs px-1 py-0.5 rounded" style={{ backgroundColor: 'rgba(251, 191, 36, 0.1)', color: '#fbbf24' }}>
+                        x{equipment.quantity || 1}
+                      </span>
+                    </div>
+                    {equipment.description && (
+                      <p className="text-xs text-muted-foreground">{equipment.description}</p>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        <CollapsibleContent>
-          <div className="px-4 pb-4 pt-2 border-t bg-muted/30">
-            <div className="space-y-4">
-              {/* Comentarios */}
-              <div>
-                <h3 className="font-medium text-muted-foreground mb-3">
-                  Comentarios ({siteLog.comments ? '1' : '0'}):
-                </h3>
-                <div className="pl-4">
-                  {siteLog.comments ? (
-                    <p className="text-sm">{siteLog.comments}</p>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Sin comentarios adicionales</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Línea divisoria punteada */}
-              <div className="border-t border-dashed border-muted-foreground/30"></div>
-
-              {/* Archivos Adjuntos */}
-              <div>
-                <h3 className="font-medium text-muted-foreground mb-3">
-                  Archivos ({siteLog.files?.length || 0}):
-                </h3>
-                <div className="pl-4 flex flex-wrap gap-2">
-                  {siteLog.files && Array.isArray(siteLog.files) && siteLog.files.length > 0 ? (
-                    siteLog.files.map((file: any, index: number) => {
-                      return file.file_type === 'image' ? (
-                        <div key={index} className="relative group">
-                          <img 
-                            src={file.file_url} 
-                            alt={file.file_name}
-                            className="w-16 h-16 object-cover rounded border-2 border-gray-200 hover:border-gray-300 transition-colors cursor-pointer"
-                            onClick={() => {
-                              const imageIndex = imageUrls.indexOf(file.file_url);
-                              if (imageIndex !== -1) {
-                                lightbox.openLightbox(imageIndex);
-                              }
-                            }}
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                              const nextElement = e.currentTarget.nextElementSibling as HTMLElement | null;
-                              if (nextElement) {
-                                nextElement.style.display = 'flex';
-                              }
-                            }}
-                          />
-                          <div className="w-16 h-16 flex items-center justify-center bg-gray-100 rounded border-2 border-gray-200" style={{ display: 'none' }}>
-                            <Image className="h-6 w-6 text-gray-400" />
-                          </div>
-                        </div>
-                      ) : (
-                        <div key={index} className="flex items-center gap-2 px-2 py-1 rounded border border-gray-200">
-                          <Video className="h-4 w-4 text-gray-500" />
-                          <span className="text-xs text-muted-foreground">
-                            {file.file_name && file.file_name.length > 15 ? 
-                              file.file_name.substring(0, 15) + '...' : 
-                              file.file_name || 'Sin nombre'
-                            }
-                          </span>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Sin archivos adjuntos</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Línea divisoria punteada */}
-              <div className="border-t border-dashed border-muted-foreground/30"></div>
-
-              {/* Eventos */}
-              <div>
-                <h3 className="font-medium text-muted-foreground mb-3">
-                  Eventos ({siteLog.events?.length || 0}):
-                </h3>
-                <div className="pl-4 grid grid-cols-1 md:grid-cols-5 gap-2">
-                  {siteLog.events && Array.isArray(siteLog.events) && siteLog.events.length > 0 ? (
-                    siteLog.events.map((event: any, index: number) => (
-                      <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', borderColor: 'rgba(34, 197, 94, 0.3)' }}>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-medium" style={{ color: '#22c55e' }}>
-                            {event.event_type?.name || event.type || 'Evento'}
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground">{event.description || 'Sin descripción'}</p>
-                      </Card>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Sin eventos registrados</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Línea divisoria punteada */}
-              <div className="border-t border-dashed border-muted-foreground/30"></div>
-
-              {/* Asistencias */}
-              <div>
-                <h3 className="font-medium text-muted-foreground mb-3">
-                  Asistencias ({siteLog.attendees?.length || 0}):
-                </h3>
-                <div className="pl-4 grid grid-cols-1 md:grid-cols-5 gap-2">
-                  {siteLog.attendees && Array.isArray(siteLog.attendees) && siteLog.attendees.length > 0 ? (
-                    siteLog.attendees.map((attendee: any, index: number) => (
-                      <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.3)' }}>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-medium" style={{ color: '#3b82f6' }}>
-                            {attendee.contact ? 
-                              `${attendee.contact.first_name || ''} ${attendee.contact.last_name || ''}`.trim() || 'Personal' 
-                              : 'Personal'
-                            }
-                          </span>
-                          <span className="text-xs px-1 py-0.5 rounded" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
-                            {attendee.attendance_type || 'Presente'}
-                          </span>
-                        </div>
-                        {attendee.description && (
-                          <p className="text-xs text-muted-foreground">{attendee.description}</p>
-                        )}
-                      </Card>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Sin personal registrado</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Línea divisoria punteada */}
-              <div className="border-t border-dashed border-muted-foreground/30"></div>
-
-              {/* Maquinaria */}
-              <div>
-                <h3 className="font-medium text-muted-foreground mb-3">
-                  Maquinaria ({siteLog.equipment?.length || 0}):
-                </h3>
-                <div className="pl-4 grid grid-cols-1 md:grid-cols-5 gap-2">
-                  {siteLog.equipment && siteLog.equipment.length > 0 ? (
-                    siteLog.equipment.map((equipment: any, index: number) => (
-                      <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(251, 191, 36, 0.1)', borderColor: 'rgba(251, 191, 36, 0.3)' }}>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-medium" style={{ color: '#fbbf24' }}>
-                            {equipment.equipment?.name || 'Equipo'}
-                          </span>
-                          <span className="text-xs px-1 py-0.5 rounded" style={{ backgroundColor: 'rgba(251, 191, 36, 0.1)', color: '#fbbf24' }}>
-                            x{equipment.quantity || 1}
-                          </span>
-                        </div>
-                        {equipment.description && (
-                          <p className="text-xs text-muted-foreground">{equipment.description}</p>
-                        )}
-                      </Card>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Sin maquinaria registrada</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </CollapsibleContent>
-      </Card>
-    </Collapsible>
+        {/* Action Buttons - Show on hover */}
+        <div className="flex items-start gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFavorite(siteLog.id);
+            }}
+          >
+            <Star className={`h-4 w-4 ${siteLog.is_favorite ? 'text-yellow-500 fill-yellow-500' : 'text-muted-foreground'}`} />
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              openModal('site-log', { data: siteLog });
+            }}
+          >
+            <Edit className="h-4 w-4 text-muted-foreground" />
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDeleteSiteLog(siteLog);
+            }}
+          >
+            <Trash2 className="h-4 w-4 text-muted-foreground" />
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
