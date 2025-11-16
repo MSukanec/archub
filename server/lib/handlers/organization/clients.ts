@@ -172,14 +172,24 @@ export async function getOrganizationClientsSummary(
         entry.total_committed_amount += parseFloat(cc.amount || 0);
       });
 
-      // Process payments
+      // Process payments - CRITICAL: Always create currency entry even if no commitments exist
+      // Do NOT skip payments with null currency joins - default the metadata instead
       clientPayments.forEach((cp: any) => {
         if (!cp.currency_id) return;
         
         const key = cp.currency_id;
+        
+        // Default currency metadata if join failed (RLS/null scenario)
+        const currencyData = cp.currencies || {
+          id: cp.currency_id,
+          code: 'UNKNOWN',
+          symbol: '?'
+        };
+        
         if (!currencyMap.has(key)) {
+          // Create entry for payment-only currencies (no commitments in this currency)
           currencyMap.set(key, {
-            currency: cp.currencies,
+            currency: currencyData,
             total_committed_amount: 0,
             total_paid_amount: 0,
             balance_due: 0,
@@ -193,7 +203,7 @@ export async function getOrganizationClientsSummary(
           });
         }
         
-        const entry = currencyMap.get(key);
+        const entry = currencyMap.get(key)!;
         entry.total_paid_amount += parseFloat(cp.amount || 0);
         
         if (!entry.last_payment_date || new Date(cp.payment_date) > new Date(entry.last_payment_date)) {
