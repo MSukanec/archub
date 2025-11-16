@@ -37,7 +37,7 @@ export async function getOrganizationClientsSummary(
       .select(`
         id,
         name,
-        subscriptions (
+        organization_subscriptions (
           plan:plans (
             slug,
             name,
@@ -53,12 +53,12 @@ export async function getOrganizationClientsSummary(
       return { success: false, error: 'Failed to fetch organization' };
     }
 
-    const subscription = Array.isArray(orgData?.subscriptions) && orgData.subscriptions.length > 0 
-      ? orgData.subscriptions[0] 
+    const subscription = Array.isArray(orgData?.organization_subscriptions) && orgData.organization_subscriptions.length > 0 
+      ? orgData.organization_subscriptions[0] 
       : null;
     const planSlug = subscription?.plan?.slug || 'FREE';
     const features = subscription?.plan?.features || [];
-    const isMultiCurrency = features.includes('multi-currency');
+    const isMultiCurrency = Array.isArray(features) && features.includes('multi-currency');
 
     // Fetch all project clients for the organization with financial summaries
     const { data: projectClients, error } = await supabase

@@ -3,6 +3,12 @@
 ## Overview
 Seencel is a comprehensive construction management platform designed to optimize operations, enhance collaboration, and improve efficiency in the construction industry. It provides tools for project tracking, team management, budget monitoring, financial management with multi-currency support, robust document management, a detailed project dashboard with KPIs, and a learning module for professional development. Seencel aims to streamline workflows and provide a unified platform for all construction project needs, with a business vision to transform the construction industry through intelligent, integrated management solutions.
 
+## Recent Changes (Nov 16, 2025)
+- **Context-Aware Data Views**: Implemented organization-wide data viewing system with project selector.
+- **Client Management Enhancement**: Fixed critical filtering bug where client tables now properly filter by active project using dynamic `selectedProjectId`.
+- **Organization Context**: Added "Organización" option to project selector for viewing all data across projects.
+- **Backend Organization Endpoints**: Created new endpoints for organization-wide client and payment data.
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
