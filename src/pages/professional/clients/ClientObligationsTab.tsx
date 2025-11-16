@@ -2,7 +2,7 @@ import React from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { apiRequest } from '@/lib/queryClient'
-import { Users, Plus, Edit, Trash2, User, FileText, Calendar } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, User, FileText, Calendar, DollarSign, CheckCircle2, AlertCircle, ListChecks } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -13,6 +13,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { Link, useLocation } from 'wouter'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/stat-card'
 
 interface ClientListTabProps {
   projectId?: string;
@@ -367,8 +368,90 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     },
   ];
 
+  // Calculate KPIs for obligations tab
+  const totalCommittedAmount = projectClients.reduce((sum, client) => sum + (client.total_committed_amount || 0), 0);
+  const totalPaidAmount = projectClients.reduce((sum, client) => sum + (client.total_paid_amount || 0), 0);
+  const totalBalanceDue = projectClients.reduce((sum, client) => sum + (client.balance_due || 0), 0);
+  
+  // Calculate schedule items totals
+  const totalScheduleItems = projectClients.reduce((sum, client) => {
+    const scheduleSum = client.financialByCurrency.reduce((cSum, f) => cSum + (f.total_schedule_items || 0), 0);
+    return sum + scheduleSum;
+  }, 0);
+  
+  const totalSchedulePaid = projectClients.reduce((sum, client) => {
+    const paidSum = client.financialByCurrency.reduce((cSum, f) => cSum + (f.schedule_paid || 0), 0);
+    return sum + paidSum;
+  }, 0);
+
+  // Calculate percentages
+  const paidPercentage = totalCommittedAmount > 0 ? (totalPaidAmount / totalCommittedAmount) * 100 : 0;
+  const balancePercentage = totalCommittedAmount > 0 ? (totalBalanceDue / totalCommittedAmount) * 100 : 0;
+  const schedulePercentage = totalScheduleItems > 0 ? (totalSchedulePaid / totalScheduleItems) * 100 : 0;
+
+  // Format currency for KPIs
+  const formatCurrencyKPI = (amount: number) => {
+    // Get the primary currency from the first client's first currency
+    const primaryCurrency = projectClients[0]?.financialByCurrency[0]?.currency;
+    if (primaryCurrency) {
+      return `${primaryCurrency.symbol}${amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    }
+    return `$${amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  };
+
   return (
     <div className="space-y-6">
+      {/* KPIs Grid - 4 columnas, 2 por fila en mobile */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* 1. Compromiso Total */}
+        <StatCard data-testid="stat-card-compromiso-total">
+          <StatCardTitle showArrow={false}>
+            <DollarSign className="w-4 h-4 inline mr-1" />
+            Compromiso Total
+          </StatCardTitle>
+          <StatCardValue className="text-2xl md:text-3xl">
+            {formatCurrencyKPI(totalCommittedAmount)}
+          </StatCardValue>
+          <StatCardMeta>100% del total comprometido</StatCardMeta>
+        </StatCard>
+
+        {/* 2. Pagado */}
+        <StatCard data-testid="stat-card-pagado">
+          <StatCardTitle showArrow={false}>
+            <CheckCircle2 className="w-4 h-4 inline mr-1" />
+            Pagado
+          </StatCardTitle>
+          <StatCardValue className="text-2xl md:text-3xl text-green-600 dark:text-green-400">
+            {formatCurrencyKPI(totalPaidAmount)}
+          </StatCardValue>
+          <StatCardMeta>{paidPercentage.toFixed(1)}% del compromiso</StatCardMeta>
+        </StatCard>
+
+        {/* 3. Saldo */}
+        <StatCard data-testid="stat-card-saldo">
+          <StatCardTitle showArrow={false}>
+            <AlertCircle className="w-4 h-4 inline mr-1" />
+            Saldo
+          </StatCardTitle>
+          <StatCardValue className={`text-2xl md:text-3xl ${totalBalanceDue > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-green-600'}`}>
+            {formatCurrencyKPI(totalBalanceDue)}
+          </StatCardValue>
+          <StatCardMeta>{balancePercentage.toFixed(1)}% pendiente</StatCardMeta>
+        </StatCard>
+
+        {/* 4. Items de Pago */}
+        <StatCard data-testid="stat-card-items-pago">
+          <StatCardTitle showArrow={false}>
+            <ListChecks className="w-4 h-4 inline mr-1" />
+            Items de Pago
+          </StatCardTitle>
+          <StatCardValue className="text-2xl md:text-3xl">
+            {totalSchedulePaid}/{totalScheduleItems}
+          </StatCardValue>
+          <StatCardMeta>{schedulePercentage.toFixed(1)}% completado</StatCardMeta>
+        </StatCard>
+      </div>
+
       <Table
         columns={columns}
         data={projectClients}
