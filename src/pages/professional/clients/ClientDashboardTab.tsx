@@ -17,6 +17,7 @@ import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/componen
 
 interface ClientListTabProps {
   projectId?: string;
+  onTabChange?: (tab: string) => void;
 }
 
 interface CurrencyFinancial {
@@ -75,7 +76,7 @@ interface ClientSummaryResponse {
   clients: ProjectClientSummary[];
 }
 
-export default function ClientDashboardTab({ projectId }: ClientListTabProps) {
+export default function ClientDashboardTab({ projectId, onTabChange }: ClientListTabProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
@@ -404,8 +405,11 @@ export default function ClientDashboardTab({ projectId }: ClientListTabProps) {
       {/* KPIs Grid - 4 columnas, 2 por fila en mobile */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* 1. Clientes */}
-        <StatCard data-testid="stat-card-clientes">
-          <StatCardTitle showArrow={false}>
+        <StatCard 
+          onClick={() => onTabChange?.('list')}
+          data-testid="stat-card-clientes"
+        >
+          <StatCardTitle>
             <Users className="w-4 h-4 inline mr-1" />
             Clientes
           </StatCardTitle>
@@ -416,8 +420,11 @@ export default function ClientDashboardTab({ projectId }: ClientListTabProps) {
         </StatCard>
 
         {/* 2. Pagos */}
-        <StatCard data-testid="stat-card-pagos">
-          <StatCardTitle showArrow={false}>
+        <StatCard 
+          onClick={() => onTabChange?.('details')}
+          data-testid="stat-card-pagos"
+        >
+          <StatCardTitle>
             <Receipt className="w-4 h-4 inline mr-1" />
             Pagos
           </StatCardTitle>
@@ -428,8 +435,11 @@ export default function ClientDashboardTab({ projectId }: ClientListTabProps) {
         </StatCard>
 
         {/* 3. Compromiso Total */}
-        <StatCard data-testid="stat-card-compromiso-total">
-          <StatCardTitle showArrow={false}>
+        <StatCard 
+          onClick={() => onTabChange?.('obligations')}
+          data-testid="stat-card-compromiso-total"
+        >
+          <StatCardTitle>
             <DollarSign className="w-4 h-4 inline mr-1" />
             Compromiso Total
           </StatCardTitle>
@@ -440,8 +450,11 @@ export default function ClientDashboardTab({ projectId }: ClientListTabProps) {
         </StatCard>
 
         {/* 4. Balance Pendiente */}
-        <StatCard data-testid="stat-card-balance-pendiente">
-          <StatCardTitle showArrow={false}>
+        <StatCard 
+          onClick={() => onTabChange?.('obligations')}
+          data-testid="stat-card-balance-pendiente"
+        >
+          <StatCardTitle>
             <AlertCircle className="w-4 h-4 inline mr-1" />
             Balance Pendiente
           </StatCardTitle>

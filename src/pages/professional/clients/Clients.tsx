@@ -297,6 +297,7 @@ export function Clients() {
         {activeTab === "dashboard" && (
           <ClientDashboardTab 
             projectId={projectId || undefined}
+            onTabChange={setActiveTab}
           />
         )}
 
