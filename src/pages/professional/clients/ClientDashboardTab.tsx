@@ -2,7 +2,7 @@ import React from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { apiRequest } from '@/lib/queryClient'
-import { Users, Plus, Edit, Trash2, User, FileText, Calendar } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, User, FileText, Calendar, Receipt, DollarSign, AlertCircle } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -13,6 +13,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { Link, useLocation } from 'wouter'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/stat-card'
 
 interface ClientListTabProps {
   projectId?: string;
@@ -98,6 +99,37 @@ export default function ClientDashboardTab({ projectId }: ClientListTabProps) {
 
   const projectClients = summaryResponse?.clients || [];
   const planInfo = summaryResponse?.plan || { slug: 'FREE', isMultiCurrency: false };
+
+  // Fetch client payments for the KPI
+  const { data: clientPaymentsResponse } = useQuery<{ payments: any[] }>({
+    queryKey: activeProjectId
+      ? [`/api/projects/${activeProjectId}/client-payments?organization_id=${organizationId}`]
+      : [`/api/organizations/${organizationId}/client-payments`],
+    enabled: !!organizationId,
+    staleTime: 3 * 60 * 1000,
+  });
+
+  const clientPayments = clientPaymentsResponse?.payments || [];
+
+  // Calculate KPIs
+  const totalClients = projectClients.length;
+  const totalPayments = clientPayments.length;
+  const totalCommittedAmount = projectClients.reduce((sum: number, client: any) => 
+    sum + (parseFloat(client.total_committed_amount) || 0), 0
+  );
+  const totalBalanceDue = projectClients.reduce((sum: number, client: any) => 
+    sum + (parseFloat(client.balance_due) || 0), 0
+  );
+
+  // Format currency
+  const formatCurrencyKPI = (amount: number) => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
 
   // Delete mutation
   const deleteClientMutation = useMutation({
@@ -369,6 +401,57 @@ export default function ClientDashboardTab({ projectId }: ClientListTabProps) {
 
   return (
     <div className="space-y-6">
+      {/* KPIs Grid - 4 columnas, 2 por fila en mobile */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* 1. Clientes */}
+        <StatCard data-testid="stat-card-clientes">
+          <StatCardTitle showArrow={false}>
+            <Users className="w-4 h-4 inline mr-1" />
+            Clientes
+          </StatCardTitle>
+          <StatCardValue>
+            {totalClients}
+          </StatCardValue>
+          <StatCardMeta>Total {activeProjectId ? 'en el proyecto' : 'en la organización'}</StatCardMeta>
+        </StatCard>
+
+        {/* 2. Pagos */}
+        <StatCard data-testid="stat-card-pagos">
+          <StatCardTitle showArrow={false}>
+            <Receipt className="w-4 h-4 inline mr-1" />
+            Pagos
+          </StatCardTitle>
+          <StatCardValue>
+            {totalPayments}
+          </StatCardValue>
+          <StatCardMeta>Registros de pago</StatCardMeta>
+        </StatCard>
+
+        {/* 3. Compromiso Total */}
+        <StatCard data-testid="stat-card-compromiso-total">
+          <StatCardTitle showArrow={false}>
+            <DollarSign className="w-4 h-4 inline mr-1" />
+            Compromiso Total
+          </StatCardTitle>
+          <StatCardValue className="text-2xl md:text-3xl">
+            {formatCurrencyKPI(totalCommittedAmount)}
+          </StatCardValue>
+          <StatCardMeta>Monto comprometido</StatCardMeta>
+        </StatCard>
+
+        {/* 4. Balance Pendiente */}
+        <StatCard data-testid="stat-card-balance-pendiente">
+          <StatCardTitle showArrow={false}>
+            <AlertCircle className="w-4 h-4 inline mr-1" />
+            Balance Pendiente
+          </StatCardTitle>
+          <StatCardValue className={`text-2xl md:text-3xl ${totalBalanceDue > 0 ? 'text-destructive' : 'text-green-600'}`}>
+            {formatCurrencyKPI(totalBalanceDue)}
+          </StatCardValue>
+          <StatCardMeta>Saldo por cobrar</StatCardMeta>
+        </StatCard>
+      </div>
+
       <Table
         columns={columns}
         data={projectClients}
