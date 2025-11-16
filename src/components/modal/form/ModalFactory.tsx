@@ -228,6 +228,8 @@ export function ModalFactory() {
       return <InsuranceFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'renew-insurance':
       return <RenewInsuranceFormModal modalData={data || undefined} onClose={closeModal} />;
+    case 'client-payment':
+      return <ClientPaymentsModal modalData={data || undefined} onClose={closeModal} />;
     case 'client-payment-plans':
       return <ClientPaymentPlans modalData={data || undefined} onClose={closeModal} />;
     case 'client-installment':
