@@ -8,8 +8,72 @@ export interface ListOrganizationClientPaymentsParams {
 }
 
 export type ListOrganizationClientPaymentsResult =
-  | { success: true; data: ClientPayment[] }
+  | { success: true; data: (ClientPayment & { projects?: { id: string; name: string; color: string } | null })[] }
   | { success: false; error: string };
+
+// Helper function to transform view data to expected structure (with project info)
+function transformViewToClientPayment(row: any): ClientPayment & { projects?: { id: string; name: string; color: string } | null } {
+  return {
+    id: row.id,
+    project_id: row.project_id,
+    commitment_id: row.commitment_id,
+    schedule_id: row.schedule_id,
+    contact_id: row.contact_id,
+    organization_id: row.organization_id,
+    client_id: row.client_id,
+    amount: row.amount,
+    currency_id: row.currency_id,
+    exchange_rate: row.exchange_rate,
+    payment_date: row.payment_date,
+    notes: row.notes,
+    reference: row.reference,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+    wallet_id: row.wallet_id,
+    status: row.status,
+    file_url: row.file_url,
+    contact: row.contact_pk ? {
+      id: row.contact_pk,
+      first_name: row.contact_first_name,
+      last_name: row.contact_last_name,
+      full_name: row.contact_full_name,
+      email: row.contact_email,
+      phone: row.contact_phone,
+      company_name: row.contact_company_name,
+      linked_user: row.contact_linked_user_id ? {
+        id: row.contact_linked_user_id,
+        avatar_url: row.contact_avatar_url
+      } : null
+    } : null,
+    project_client: row.project_client_pk ? {
+      id: row.project_client_pk,
+      unit: row.project_client_unit
+    } : null,
+    currency: row.currency_id ? {
+      id: row.currency_id,
+      code: row.currency_code,
+      symbol: row.currency_symbol
+    } : null,
+    wallet: row.wallet_pk ? {
+      id: row.wallet_pk,
+      name: row.wallet_name
+    } : null,
+    commitment: row.commitment_id ? {
+      id: row.commitment_id,
+      amount: row.commitment_amount
+    } : null,
+    schedule: row.schedule_id ? {
+      id: row.schedule_id,
+      due_date: row.schedule_due_date,
+      amount: row.schedule_amount
+    } : null,
+    projects: row.project_id ? {
+      id: row.project_id,
+      name: row.project_name,
+      color: row.project_color
+    } : null
+  };
+}
 
 export async function listOrganizationClientPayments(
   ctx: ProjectsContext,
@@ -32,56 +96,10 @@ export async function listOrganizationClientPayments(
       return orgAccessResult;
     }
 
-    // Query client_payments for all projects in the organization with all necessary JOINs
-    const { data: clientPayments, error } = await supabase
-      .from('client_payments')
-      .select(`
-        *,
-        contact:contacts!contact_id (
-          id,
-          first_name,
-          last_name,
-          full_name,
-          email,
-          phone,
-          company_name,
-          linked_user:users!linked_user_id (
-            id,
-            avatar_url
-          )
-        ),
-        project_client:project_clients (
-          id,
-          unit
-        ),
-        currency:currencies!currency_id (
-          id,
-          code,
-          symbol
-        ),
-        wallet:organization_wallets!wallet_id (
-          id,
-          wallet_id,
-          wallets:wallet_id (
-            id,
-            name
-          )
-        ),
-        commitment:client_commitments!commitment_id (
-          id,
-          amount
-        ),
-        schedule:client_payment_schedule!schedule_id (
-          id,
-          due_date,
-          amount
-        ),
-        projects (
-          id,
-          name,
-          color
-        )
-      `)
+    // Query optimized view - no JOINs needed!
+    const { data: viewData, error } = await supabase
+      .from('client_payments_view')
+      .select('*')
       .eq('organization_id', params.organizationId)
       .order('payment_date', { ascending: false });
 
@@ -90,16 +108,10 @@ export async function listOrganizationClientPayments(
       return { success: false, error: 'Failed to fetch client payments' };
     }
 
-    // Normalize wallet structure: { id, wallet_id, wallets: {...} } → { id, name }
-    const normalizedPayments = (clientPayments || []).map((payment: any) => ({
-      ...payment,
-      wallet: payment.wallet ? {
-        id: payment.wallet.id,
-        name: payment.wallet.wallets?.name || null
-      } : null
-    }));
+    // Transform flat view data to nested structure
+    const clientPayments = (viewData || []).map(transformViewToClientPayment);
 
-    return { success: true, data: normalizedPayments };
+    return { success: true, data: clientPayments };
 
   } catch (error: any) {
     console.error('Error in listOrganizationClientPayments handler:', error);
