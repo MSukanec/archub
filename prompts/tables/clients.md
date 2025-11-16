@@ -201,53 +201,112 @@ create index IF not exists idx_project_clients_created_at on public.project_clie
 ---------- VISTA CLIENT_FINANCIAL_OVERVIEW:
 
 create view public.client_financial_overview as
+with
+  commitment_totals as (
+    select
+      client_commitments.client_id as project_client_id,
+      client_commitments.organization_id,
+      client_commitments.project_id,
+      client_commitments.currency_id,
+      sum(client_commitments.amount) as total_committed,
+      max(client_commitments.exchange_rate) as commitment_exchange_rate
+    from
+      client_commitments
+    group by
+      client_commitments.client_id,
+      client_commitments.organization_id,
+      client_commitments.project_id,
+      client_commitments.currency_id
+  ),
+  payments_converted as (
+    select
+      cc.client_id as project_client_id,
+      cp.organization_id,
+      cp.project_id,
+      cc.currency_id,
+      case
+        when cp.currency_id = cc.currency_id then cp.amount
+        when pay_curr.code = 'USD'::text
+        and com_curr.code = 'ARS'::text then cp.amount * cp.exchange_rate
+        when pay_curr.code = 'ARS'::text
+        and com_curr.code = 'USD'::text then cp.amount / cp.exchange_rate
+        else cp.amount
+      end as converted_amount,
+      case
+        when cp.currency_id <> cc.currency_id
+        and (
+          cp.exchange_rate is null
+          or cp.exchange_rate <= 0::numeric
+        ) then 1
+        else 0
+      end as invalid_rate
+    from
+      client_payments cp
+      join client_commitments cc on cp.commitment_id = cc.id
+      or cp.commitment_id is null
+      and cp.client_id = cc.client_id
+      join currencies pay_curr on pay_curr.id = cp.currency_id
+      join currencies com_curr on com_curr.id = cc.currency_id
+  ),
+  payment_totals as (
+    select
+      payments_converted.project_client_id,
+      payments_converted.organization_id,
+      payments_converted.project_id,
+      payments_converted.currency_id,
+      sum(payments_converted.converted_amount) as total_paid,
+      sum(payments_converted.invalid_rate)::integer as payments_missing_rate
+    from
+      payments_converted
+    group by
+      payments_converted.project_client_id,
+      payments_converted.organization_id,
+      payments_converted.project_id,
+      payments_converted.currency_id
+  ),
+  schedule_totals as (
+    select
+      cc.client_id as project_client_id,
+      cc.organization_id,
+      cc.project_id,
+      min(cps.due_date) filter (
+        where
+          cps.status = any (array['pending'::text, 'overdue'::text])
+      ) as next_due,
+      count(*) filter (
+        where
+          cps.status = 'pending'::text
+      )::integer as pending_invoices,
+      count(*) filter (
+        where
+          cps.status = 'overdue'::text
+      )::integer as overdue_invoices
+    from
+      client_commitments cc
+      left join client_payment_schedule cps on cps.commitment_id = cc.id
+    group by
+      cc.client_id,
+      cc.organization_id,
+      cc.project_id
+  )
 select
   pc.id as project_client_id,
-  pc.project_id,
-  pc.client_id,
-  pc.organization_id,
-  c.full_name as client_name,
-  c.email as client_email,
-  c.phone as client_phone,
-  COALESCE(sum(cc.amount), 0::numeric) as total_committed_amount,
-  COALESCE(sum(cp.amount), 0::numeric) as total_paid_amount,
-  COALESCE(sum(cc.amount), 0::numeric) - COALESCE(sum(cp.amount), 0::numeric) as balance_due,
-  count(cps.id) as total_schedule_items,
-  count(
-    case
-      when cps.status = 'paid'::text then 1
-      else null::integer
-    end
-  ) as schedule_paid,
-  count(
-    case
-      when cps.status = 'overdue'::text then 1
-      else null::integer
-    end
-  ) as schedule_overdue,
-  min(
-    case
-      when cps.status = 'pending'::text then cps.due_date
-      else null::date
-    end
-  ) as next_due_date,
-  max(cp.payment_date) as last_payment_date
+  COALESCE(ct.organization_id, pc.organization_id) as organization_id,
+  COALESCE(ct.project_id, pc.project_id) as project_id,
+  ct.currency_id,
+  COALESCE(ct.total_committed, 0::numeric) as total_committed_amount,
+  COALESCE(pt.total_paid, 0::numeric) as total_paid_amount,
+  COALESCE(ct.total_committed, 0::numeric) - COALESCE(pt.total_paid, 0::numeric) as balance_due,
+  COALESCE(pt.payments_missing_rate, 0) as payments_missing_rate,
+  st.next_due,
+  COALESCE(st.pending_invoices, 0) as pending_invoices,
+  COALESCE(st.overdue_invoices, 0) as overdue_invoices
 from
   project_clients pc
-  left join contacts c on c.id = pc.client_id
-  left join client_commitments cc on cc.project_id = pc.project_id
-  and cc.client_id = pc.client_id
-  left join client_payments cp on cp.project_id = pc.project_id
-  and cp.client_id = pc.client_id
-  left join client_payment_schedule cps on cps.commitment_id = cc.id
-group by
-  pc.id,
-  pc.project_id,
-  pc.client_id,
-  pc.organization_id,
-  c.full_name,
-  c.email,
-  c.phone;
+  left join commitment_totals ct on ct.project_client_id = pc.id
+  left join payment_totals pt on pt.project_client_id = ct.project_client_id
+  and pt.currency_id = ct.currency_id
+  left join schedule_totals st on st.project_client_id = ct.project_client_id;
 
   ---------- TABLA CONTACTS:
 
