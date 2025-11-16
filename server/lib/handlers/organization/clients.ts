@@ -94,35 +94,20 @@ export async function getOrganizationClientsSummary(
     // Get unique project_client_ids
     const projectClientIds = Array.from(new Set(financialData.map((item: any) => item.project_client_id)));
 
-    // Fetch contact data for avatars, client roles, and project info
+    // Fetch additional project_client data (unit, notes, status, is_primary, avatar, project info)
     const { data: enrichedData, error: enrichError } = await supabase
       .from('project_clients')
       .select(`
         id,
         unit,
-        project_id,
-        client_role_id,
         notes,
         is_primary,
         status,
-        client_id,
         contacts!project_clients_client_id_fkey (
-          id,
-          first_name,
-          last_name,
-          full_name,
-          email,
-          phone,
-          company_name,
           linked_user:users!linked_user_id (
             id,
             avatar_url
           )
-        ),
-        client_role:client_roles!client_role_id (
-          id,
-          name,
-          is_default
         ),
         projects (
           id,
@@ -147,17 +132,33 @@ export async function getOrganizationClientsSummary(
       if (!acc[clientId]) {
         const enriched = enrichedById.get(clientId);
         
+        // Construct contacts object using data from view (email, phone, name) + enriched avatar
+        const contacts = {
+          id: row.client_id,
+          first_name: row.client_first_name,
+          last_name: row.client_last_name,
+          full_name: row.client_name,
+          email: row.client_email,
+          phone: row.client_phone,
+          company_name: row.client_company_name,
+          linked_user: enriched?.contacts?.linked_user || null
+        };
+        
         acc[clientId] = {
           id: row.project_client_id,
-          project_id: enriched?.project_id || row.project_id,
+          project_id: row.project_id,
           client_id: row.client_id,
           organization_id: row.organization_id,
           unit: enriched?.unit || null,
           notes: enriched?.notes || null,
           is_primary: enriched?.is_primary || false,
           status: enriched?.status || 'active',
-          contacts: enriched?.contacts || null,
-          role: enriched?.client_role || null,
+          contacts: contacts,
+          role: row.role_id ? {
+            id: row.role_id,
+            name: row.role_name,
+            is_default: row.role_is_default
+          } : null,
           projects: enriched?.projects || null,
           financialByCurrency: [],
           total_committed_amount: parseFloat(row.total_committed_amount || 0),

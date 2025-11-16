@@ -244,40 +244,26 @@ export async function getClientsSummary(
       };
     }
 
-    // Get unique project_client_ids
+    // Get unique project_client_ids to fetch additional data (unit, notes, status, is_primary, avatar)
     const projectClientIds = Array.from(new Set(financialData.map((item: any) => item.project_client_id)));
 
     // Get unique currency_ids to fetch currency data
     const currencyIds = Array.from(new Set(financialData.map((item: any) => item.currency_id).filter(Boolean)));
 
-    // Fetch contact data for avatars and client roles
+    // Fetch additional project_client data (unit, notes, status, is_primary) and avatar
     const { data: enrichedData, error: enrichError } = await supabase
       .from('project_clients')
       .select(`
         id,
         unit,
-        client_role_id,
         notes,
         is_primary,
         status,
-        client_id,
         contacts!project_clients_client_id_fkey (
-          id,
-          first_name,
-          last_name,
-          full_name,
-          email,
-          phone,
-          company_name,
           linked_user:users!linked_user_id (
             id,
             avatar_url
           )
-        ),
-        client_role:client_roles!client_role_id (
-          id,
-          name,
-          is_default
         )
       `)
       .in('id', projectClientIds);
@@ -315,23 +301,17 @@ export async function getClientsSummary(
       if (!acc[clientId]) {
         const enriched = enrichedById.get(clientId);
         
-        // Construct contacts object combining data from view and enriched data
-        const contacts = enriched?.contacts ? {
-          ...enriched.contacts,
-          // Override with email/phone from financial view if available (these are more reliable)
-          email: row.client_email || enriched.contacts.email,
-          phone: row.client_phone || enriched.contacts.phone,
-          full_name: row.client_name || enriched.contacts.full_name,
-        } : (row.client_email || row.client_phone || row.client_name ? {
+        // Construct contacts object using data from view (email, phone, name) + enriched avatar
+        const contacts = {
           id: row.client_id,
+          first_name: row.client_first_name,
+          last_name: row.client_last_name,
+          full_name: row.client_name,
           email: row.client_email,
           phone: row.client_phone,
-          full_name: row.client_name,
-          first_name: null,
-          last_name: null,
-          company_name: null,
-          linked_user: null
-        } : null);
+          company_name: row.client_company_name,
+          linked_user: enriched?.contacts?.linked_user || null
+        };
         
         acc[clientId] = {
           id: row.project_client_id,
