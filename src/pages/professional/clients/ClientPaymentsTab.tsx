@@ -236,17 +236,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
 
   return (
     <div className="space-y-6">
-      {clientPayments.length > 0 && (
-        <div className="flex justify-end">
-          <Button 
-            onClick={handleAddPayment}
-            data-testid="button-add-payment"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Agregar Pago
-          </Button>
-        </div>
-      )}
       <Table
         columns={columns}
         data={clientPayments}
