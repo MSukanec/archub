@@ -31,15 +31,16 @@ const clientSchema = z.object({
 
 type ClientFormData = z.infer<typeof clientSchema>;
 
-interface ProjectClientModalProps {
+interface ClientDataModalProps {
   modalData?: {
     projectId?: string;
     clientId?: string;
+    mode?: 'view' | 'edit';
   };
   onClose: () => void;
 }
 
-export function ProjectClientModal({ modalData, onClose }: ProjectClientModalProps) {
+export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps) {
   const { projectId, clientId } = modalData || {};
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
