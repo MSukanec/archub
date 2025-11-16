@@ -17,6 +17,7 @@ Seencel is a comprehensive construction management platform designed to optimize
 - **Database View Optimization**: Created `client_payments_view` for PAGOS tab with pre-computed JOINs across contacts, users, project_clients, currencies, wallets, commitments, schedules, and projects. Backend handlers now use single SELECT from view instead of manual JOINs for improved performance.
 - **PAGOS Tab UX Enhancement**: Adjusted column widths (Cliente: 400px → 220px, Notas: auto → 400px) with text truncation for better space utilization and readability.
 - **Client Tabs Performance Optimization**: Created `client_obligations_view` using ONLY base tables (project_clients, contacts, users, client_roles, currencies, client_commitments, client_payments) with pre-computed financial aggregations via CTEs. Includes basic client data + financial data by currency (compromiso total, pagado, saldo, fechas). Both LISTA and COMPROMISOS tabs use same optimized view. Handlers group results by client_id and build financialByCurrency arrays.
+- **PAGOS Tab Direct Table Queries**: Modified client payments handlers (`server/lib/handlers/projects/clientPayments.ts` and `server/lib/handlers/organization/clientPayments.ts`) to query `client_payments` table directly with explicit JOINs instead of using `client_payments_view`. This bypasses potential view limitations and ensures ALL payment data is visible.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.

@@ -96,10 +96,53 @@ export async function listOrganizationClientPayments(
       return orgAccessResult;
     }
 
-    // Query optimized view - no JOINs needed!
-    const { data: viewData, error } = await supabase
-      .from('client_payments_view')
-      .select('*')
+    // 🔍 DIRECT TABLE QUERIES: Query tables directly with JOINs (no views)
+    // This helps debug data visibility issues
+    const { data: payments, error } = await supabase
+      .from('client_payments')
+      .select(`
+        *,
+        contact:contacts!contact_id (
+          id,
+          first_name,
+          last_name,
+          full_name,
+          email,
+          phone,
+          company_name,
+          linked_user:users!linked_user_id (
+            id,
+            avatar_url
+          )
+        ),
+        project_client:project_clients!client_id (
+          id,
+          unit
+        ),
+        currency:currencies!currency_id (
+          id,
+          code,
+          symbol
+        ),
+        wallet:wallets!wallet_id (
+          id,
+          name
+        ),
+        commitment:client_commitments!commitment_id (
+          id,
+          amount
+        ),
+        schedule:client_payment_schedule!schedule_id (
+          id,
+          due_date,
+          amount
+        ),
+        projects:projects!project_id (
+          id,
+          name,
+          color
+        )
+      `)
       .eq('organization_id', params.organizationId)
       .order('payment_date', { ascending: false });
 
@@ -108,10 +151,7 @@ export async function listOrganizationClientPayments(
       return { success: false, error: 'Failed to fetch client payments' };
     }
 
-    // Transform flat view data to nested structure
-    const clientPayments = (viewData || []).map(transformViewToClientPayment);
-
-    return { success: true, data: clientPayments };
+    return { success: true, data: payments || [] };
 
   } catch (error: any) {
     console.error('Error in listOrganizationClientPayments handler:', error);
