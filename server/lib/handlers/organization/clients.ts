@@ -59,9 +59,9 @@ export async function getOrganizationClientsSummary(
     
     // Extract plan from the subscription (Supabase returns it as an array in the relation)
     const plan = subscription?.plan;
-    const planData = Array.isArray(plan) && plan.length > 0 ? plan[0] : plan;
-    const planSlug = planData?.slug || 'FREE';
-    const features = planData?.features || [];
+    const planData = Array.isArray(plan) && plan.length > 0 ? plan[0] : (plan || null);
+    const planSlug = (planData && typeof planData === 'object' && 'slug' in planData) ? planData.slug : 'FREE';
+    const features = (planData && typeof planData === 'object' && 'features' in planData) ? planData.features : [];
     const isMultiCurrency = Array.isArray(features) && features.includes('multi-currency');
 
     // Use unified view for all plans (same as project handler)

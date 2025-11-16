@@ -14,13 +14,16 @@ import { ClientPaymentPlans } from './ClientPaymentPlans'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
-import { useLocation } from 'wouter'
+import { useLocation, useSearch } from 'wouter'
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
 import { useProjectContext } from '@/stores/projectContext'
 import { queryClient } from '@/lib/queryClient'
 
 export function Clients() {
-  const [activeTab, setActiveTab] = useState("dashboard")
+  const searchParams = useSearch();
+  const urlParams = new URLSearchParams(searchParams);
+  const tabFromUrl = urlParams.get('tab') || 'dashboard';
+  const [activeTab, setActiveTab] = useState(tabFromUrl)
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
   const { setSidebarContext } = useNavigationStore()
@@ -293,32 +296,32 @@ export function Clients() {
       <div className="space-y-4">
         {activeTab === "dashboard" && (
           <ClientDashboardTab 
-            projectId={projectId}
+            projectId={projectId || undefined}
           />
         )}
 
         {activeTab === "list" && (
           <ClientListTab 
-            projectId={projectId}
+            projectId={projectId || undefined}
           />
         )}
 
         {activeTab === "obligations" && (
           <ClientObligationsTab 
-            projectId={projectId}
+            projectId={projectId || undefined}
           />
         )}
 
         {activeTab === "details" && (
           <ClientPaymentsTab 
-            projectId={projectId}
+            projectId={projectId || undefined}
           />
         )}
 
         {activeTab === "monthly-installments" && (
           <PlanRestricted reason="coming_soon">
             <ClientPaymentPlans 
-              projectId={projectId}
+              projectId={projectId || ''}
               organizationId={organizationId}
             />
           </PlanRestricted>

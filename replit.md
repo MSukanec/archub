@@ -10,6 +10,9 @@ Seencel is a comprehensive construction management platform designed to optimize
 - **Backend Organization Endpoints**: Created new endpoints for organization-wide client and payment data.
 - **Performance Optimization - Fase 1 (Gacela Mode)**: Implemented intelligent prefetching for all client tabs with 3-minute staleTime, enabling instant tab switching after initial load. Dashboard, List, and Obligations tabs share the same `/clients/summary` query for maximum efficiency.
 - **Client Payments `created_by` Field**: Added `created_by` field tracking to client payments modal, matching MovementModal pattern. Submit button is disabled until organization member data loads to ensure data integrity.
+- **Organization Dashboard KPIs**: Added 4 KPI cards to Visión General dashboard showing organization-wide metrics: Clientes (total count), Pagos (payment records), Compromiso Total (total committed amount), and Balance Pendiente (outstanding balance). Cards link to specific client tabs with URL parameters. Mobile-responsive with 2 columns per row.
+- **Clients Tab Navigation**: Enhanced Clients page to accept `?tab=` URL parameter for direct navigation to specific tabs (list, details, obligations, etc.).
+- **Sidebar Feature Gating**: Blocked "Movimientos" button in organization sidebar with `coming_soon` restriction.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.

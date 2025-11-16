@@ -6,10 +6,14 @@ import {
   Home, 
   Folder, 
   Plus,
-  ArrowRight
+  ArrowRight,
+  Users,
+  Receipt,
+  DollarSign,
+  AlertCircle
 } from "lucide-react";
 import { useLocation } from 'wouter';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,6 +55,43 @@ export default function OrganizationDashboard() {
   const queryClient = useQueryClient();
   const { setShowActionBar } = useActionBarMobile();
   const isMobile = useMobile();
+
+  // Fetch organization-wide client data
+  const { data: clientsSummaryResponse } = useQuery<{ clients: any[] }>({
+    queryKey: [`/api/organizations/${organizationId}/clients/summary`],
+    enabled: !!organizationId,
+    staleTime: 3 * 60 * 1000,
+  });
+
+  // Fetch organization-wide client payments
+  const { data: clientPaymentsResponse } = useQuery<{ payments: any[] }>({
+    queryKey: [`/api/organizations/${organizationId}/client-payments`],
+    enabled: !!organizationId,
+    staleTime: 3 * 60 * 1000,
+  });
+
+  const organizationClients = clientsSummaryResponse?.clients || [];
+  const organizationPayments = clientPaymentsResponse?.payments || [];
+
+  // Calculate KPIs
+  const totalClients = organizationClients.length;
+  const totalPayments = organizationPayments.length;
+  const totalCommittedAmount = organizationClients.reduce((sum: number, client: any) => 
+    sum + (parseFloat(client.total_committed_amount) || 0), 0
+  );
+  const totalBalanceDue = organizationClients.reduce((sum: number, client: any) => 
+    sum + (parseFloat(client.balance_due) || 0), 0
+  );
+
+  // Format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
   
   // Usar la organización actual del contexto, fallback a la del usuario
   const organization = userData?.organizations?.find(org => org.id === currentOrganizationId) || 
@@ -206,60 +247,66 @@ export default function OrganizationDashboard() {
           </div>
         </div>
 
-        {/* KPIs Grid - 4 columnas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {/* 1. Proyectos */}
+        {/* KPIs Grid - 4 columnas, 2 por fila en mobile */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {/* 1. Clientes */}
           <StatCard 
-            href="/organization/projects"
-            onClick={() => setSidebarLevel('organization')}
-            data-testid="stat-card-proyectos"
+            href="/clients?tab=list"
+            data-testid="stat-card-clientes"
           >
-            <StatCardTitle>Proyectos</StatCardTitle>
+            <StatCardTitle>
+              <Users className="w-4 h-4 inline mr-1" />
+              Clientes
+            </StatCardTitle>
             <StatCardValue>
-              {projectsLoading ? '...' : projects.length}
+              {totalClients}
             </StatCardValue>
+            <StatCardMeta>Total en organización</StatCardMeta>
           </StatCard>
 
-          {/* 2. Contactos */}
+          {/* 2. Pagos */}
           <StatCard 
-            href="/contacts"
-            onClick={() => setSidebarLevel('organization')}
-            data-testid="stat-card-contactos"
+            href="/clients?tab=details"
+            data-testid="stat-card-pagos"
           >
-            <StatCardTitle>Contactos</StatCardTitle>
+            <StatCardTitle>
+              <Receipt className="w-4 h-4 inline mr-1" />
+              Pagos
+            </StatCardTitle>
             <StatCardValue>
-              {contactsLoading ? '...' : (contacts as any[]).length}
+              {totalPayments}
             </StatCardValue>
+            <StatCardMeta>Registros de pago</StatCardMeta>
           </StatCard>
 
-          {/* 3. Movimientos */}
+          {/* 3. Compromiso Total */}
           <StatCard 
-            href="/finances/movements"
-            onClick={() => setSidebarLevel('organization')}
-            data-testid="stat-card-movimientos"
+            href="/clients?tab=obligations"
+            data-testid="stat-card-compromiso-total"
           >
-            <StatCardTitle>Movimientos</StatCardTitle>
-            <StatCardValue>
-              {movementsLoading ? '...' : movements.length}
+            <StatCardTitle>
+              <DollarSign className="w-4 h-4 inline mr-1" />
+              Compromiso Total
+            </StatCardTitle>
+            <StatCardValue className="text-2xl md:text-3xl">
+              {formatCurrency(totalCommittedAmount)}
             </StatCardValue>
-            <StatCardMeta>Total histórico</StatCardMeta>
+            <StatCardMeta>Monto comprometido</StatCardMeta>
           </StatCard>
 
-          {/* 4. Actividad */}
+          {/* 4. Balance Pendiente */}
           <StatCard 
-            href="/finances/movements"
-            onClick={() => setSidebarLevel('organization')}
-            data-testid="stat-card-actividad"
+            href="/clients?tab=obligations"
+            data-testid="stat-card-balance-pendiente"
           >
-            <StatCardTitle>Actividad</StatCardTitle>
-            <StatCardValue>
-              {movementsLoading ? '...' : (() => {
-                const now = new Date();
-                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-                return movements.filter(m => new Date(m.created_at) >= startOfMonth).length;
-              })()}
+            <StatCardTitle>
+              <AlertCircle className="w-4 h-4 inline mr-1" />
+              Balance Pendiente
+            </StatCardTitle>
+            <StatCardValue className={`text-2xl md:text-3xl ${totalBalanceDue > 0 ? 'text-destructive' : 'text-green-600'}`}>
+              {formatCurrency(totalBalanceDue)}
             </StatCardValue>
-            <StatCardMeta>Este mes</StatCardMeta>
+            <StatCardMeta>Saldo por cobrar</StatCardMeta>
           </StatCard>
         </div>
 
