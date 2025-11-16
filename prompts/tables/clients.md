@@ -155,25 +155,21 @@ create table public.project_clients (
   id uuid not null default gen_random_uuid (),
   project_id uuid not null,
   contact_id uuid not null,
-  committed_amount numeric(12, 2) null,
   created_at timestamp with time zone null default now(),
   updated_at timestamp with time zone null default now(),
-  currency_id uuid null,
-  organization_id uuid null,
+  organization_id uuid not null,
   unit text null,
-  exchange_rate numeric null,
-  is_primary boolean not null default false,
+  is_primary boolean not null default true,
   notes text null,
   status text not null default 'active'::text,
   client_role_id uuid null,
   created_by uuid null,
   constraint project_clients_pkey primary key (id),
-  constraint project_clients_client_role_id_fkey foreign KEY (client_role_id) references client_roles (id) on delete set null,
-  constraint project_clients_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete RESTRICT,
-  constraint project_clients_currency_id_fkey foreign KEY (currency_id) references currencies (id) on delete set null,
-  constraint project_clients_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
-  constraint project_clients_project_id_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
   constraint project_clients_contact_id_fkey foreign KEY (contact_id) references contacts (id) on delete set null,
+  constraint project_clients_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
+  constraint project_clients_client_role_id_fkey foreign KEY (client_role_id) references client_roles (id) on delete set null,
+  constraint project_clients_project_id_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
+  constraint project_clients_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
   constraint project_clients_status_check check (
     (
       status = any (
@@ -196,7 +192,7 @@ create index IF not exists idx_project_clients_org_project on public.project_cli
 
 create index IF not exists idx_project_clients_project on public.project_clients using btree (project_id) TABLESPACE pg_default;
 
-create index IF not exists idx_project_clients_contact on public.project_clients using btree (contact_id) TABLESPACE pg_default;
+create index IF not exists idx_project_clients_client on public.project_clients using btree (contact_id) TABLESPACE pg_default;
 
 create index IF not exists idx_project_clients_created_at on public.project_clients using btree (created_at) TABLESPACE pg_default;
 
