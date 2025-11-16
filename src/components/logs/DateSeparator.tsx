@@ -10,15 +10,13 @@ export function DateSeparator({ date }: DateSeparatorProps) {
   const capitalizedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
 
   return (
-    <div className="relative flex items-center justify-center my-6">
-      <div className="absolute inset-0 flex items-center">
-        <div className="w-full border-t border-border/40"></div>
-      </div>
-      <div className="relative px-4 bg-background">
-        <span className="text-xs font-medium text-muted-foreground">
+    <div className="relative flex items-center my-6">
+      <div className="flex-shrink-0 pr-4">
+        <span className="text-xs font-medium text-border/60">
           {capitalizedDate}
         </span>
       </div>
+      <div className="flex-grow border-t border-border/40"></div>
     </div>
   );
 }
