@@ -155,18 +155,27 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
         });
       }
     },
-    onSuccess: () => {
-      // Invalidate ALL client-related queries to ensure UI updates
-      // This covers: /clients/summary, /clients, organization clients, etc.
-      queryClient.invalidateQueries({ 
+    onSuccess: async () => {
+      // Force refetch ALL client-related queries to ensure UI updates immediately
+      // Using refetchQueries instead of invalidateQueries for immediate update
+      console.log('🔄 Refetching all client queries after save...');
+      
+      await queryClient.refetchQueries({ 
         predicate: (query) => {
           const key = query.queryKey[0];
           if (typeof key === 'string') {
-            return key.includes('/clients') || key.includes('project-clients');
+            const shouldRefetch = key.includes('/clients') || key.includes('project-clients');
+            if (shouldRefetch) {
+              console.log('🔄 Refetching query:', key);
+            }
+            return shouldRefetch;
           }
           return false;
-        }
+        },
+        type: 'active' // Only refetch active queries that are currently being watched
       });
+      
+      console.log('✅ All client queries refetched');
       
       toast({
         title: isEditing ? 'Cliente actualizado' : 'Cliente agregado',
