@@ -128,13 +128,15 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'payment_date',
       label: 'Fecha de Pago',
       sortable: true,
+      align: 'right' as const,
       render: (payment: ClientPayment) => formatDate(payment.payment_date, 'dd/MM/yyyy'),
     },
     {
       key: 'created_at',
       label: 'Fecha de Registro',
       sortable: true,
-      render: (payment: ClientPayment) => formatDate(payment.created_at, 'dd/MM/yyyy HH:mm'),
+      align: 'right' as const,
+      render: (payment: ClientPayment) => formatDate(payment.created_at, 'dd/MM/yyyy'),
     },
     {
       key: 'contact',
@@ -150,6 +152,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
                            payment.contact?.full_name || 
                            `${payment.contact?.first_name || ''} ${payment.contact?.last_name || ''}`.trim();
         
+        const unit = payment.project_client?.unit;
+        
         return (
           <div className="flex items-center gap-3">
             <Avatar className="h-8 w-8">
@@ -158,35 +162,37 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
                 {initials}
               </AvatarFallback>
             </Avatar>
-            <span>{displayName || '-'}</span>
+            <div className="flex flex-col">
+              <span className="font-bold">{displayName || '-'}</span>
+              {unit && <span className="text-xs text-muted-foreground">{unit}</span>}
+            </div>
           </div>
         );
       },
     },
     {
-      key: 'unit',
-      label: 'Unidad Funcional',
-      sortable: true,
-      render: (payment: ClientPayment) => payment.project_client?.unit || '-',
-    },
-    {
-      key: 'currency',
-      label: 'Moneda',
-      sortable: true,
-      render: (payment: ClientPayment) => payment.currency?.code || '-',
-    },
-    {
       key: 'wallet',
       label: 'Billetera',
       sortable: true,
+      align: 'right' as const,
+      cellClassName: 'font-bold',
       render: (payment: ClientPayment) => payment.wallet?.name || '-',
+    },
+    {
+      key: 'amount',
+      label: 'Monto',
+      sortable: true,
+      align: 'right' as const,
+      cellClassName: 'font-bold',
+      render: (payment: ClientPayment) => formatAmount(payment.amount, payment.currency?.symbol),
     },
     {
       key: 'notes',
       label: 'Notas',
       sortable: true,
+      width: '300px',
       render: (payment: ClientPayment) => (
-        <div className="max-w-xs truncate" title={payment.notes || ''}>
+        <div className="max-w-md truncate" title={payment.notes || ''}>
           {payment.notes || '-'}
         </div>
       ),
@@ -195,12 +201,14 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'reference',
       label: 'Referencia',
       sortable: true,
+      align: 'right' as const,
       render: (payment: ClientPayment) => payment.reference || '-',
     },
     {
       key: 'commitment_id',
       label: 'Compromiso',
       sortable: true,
+      align: 'right' as const,
       render: (payment: ClientPayment) => {
         if (!payment.commitment) return '-';
         return (
@@ -214,6 +222,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'schedule_id',
       label: 'Cuota',
       sortable: true,
+      align: 'right' as const,
       render: (payment: ClientPayment) => {
         if (!payment.schedule) return '-';
         return (
@@ -222,13 +231,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           </span>
         );
       },
-    },
-    {
-      key: 'amount',
-      label: 'Monto',
-      sortable: true,
-      cellClassName: 'font-semibold',
-      render: (payment: ClientPayment) => formatAmount(payment.amount, payment.currency?.symbol),
     },
   ];
 
