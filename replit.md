@@ -13,6 +13,7 @@ Seencel is a comprehensive construction management platform designed to optimize
 - **Organization Dashboard KPIs**: Added 4 KPI cards to Visión General dashboard showing organization-wide metrics: Clientes (total count), Pagos (payment records), Compromiso Total (total committed amount), and Balance Pendiente (outstanding balance). Cards link to specific client tabs with URL parameters. Mobile-responsive with 2 columns per row.
 - **Clients Tab Navigation**: Enhanced Clients page to accept `?tab=` URL parameter for direct navigation to specific tabs (list, details, obligations, etc.).
 - **Sidebar Feature Gating**: Blocked "Movimientos" button in organization sidebar with `coming_soon` restriction.
+- **Client Commitments Feature**: Implemented complete CRUD functionality for client commitments with ClientCommitmentModal following standard modal pattern (FormModalLayout, RHF + Zod validation, React Query mutations). Backend includes comprehensive security layer with auth validation, organization access checks, project ownership verification, and client_id validation. REST endpoints: GET/POST/PATCH/DELETE `/api/projects/:projectId/client-commitments` with Supabase file upload support.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
