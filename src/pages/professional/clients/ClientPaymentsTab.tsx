@@ -297,6 +297,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'contact',
       label: 'Cliente',
       sortable: true,
+      width: '400px',
       render: (payment: ClientPayment) => {
         const avatarUrl = payment.contact?.linked_user?.avatar_url;
         const initials = payment.contact?.first_name?.[0] && payment.contact?.last_name?.[0]
@@ -410,6 +411,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       label: (<Paperclip className="h-4 w-4" />) as any,
       sortable: false,
       align: 'center' as const,
+      width: '50px',
       render: (payment: ClientPayment) => {
         const attachmentCount = payment.file_url ? 1 : 0;
         return (
@@ -456,10 +458,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         data={clientPayments}
         isLoading={isLoading}
         showDoubleHeader={false}
-        columnWidths={{
-          contact: '560px',
-          attachments: '30px',
-        }}
         emptyStateConfig={{
           icon: <DollarSign className="h-12 w-12 text-muted-foreground" />,
           title: 'No hay pagos registrados',
