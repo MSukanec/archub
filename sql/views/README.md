@@ -2,30 +2,31 @@
 
 ## 📊 Resumen
 
-Esta vista **elimina completamente** las queries adicionales que la tab LISTA DE CLIENTES necesitaba, reduciendo de **3-4 queries** a **1 sola query**.
+Esta vista simplificada usa **SOLO tablas base** y **SOLO datos necesarios** para la tab LISTA DE CLIENTES.
 
-### Antes (queries múltiples):
+### Antes (múltiples queries):
 ```
-1. SELECT * FROM client_financial_overview → datos financieros base
-2. SELECT * FROM project_clients WHERE id IN (...) → unit, notes, status, is_primary, avatar
-3. SELECT * FROM currencies WHERE id IN (...) → currency code, symbol
+1. SELECT * FROM project_clients
+2. JOIN contacts manually
+3. JOIN users manually  
+4. JOIN client_roles manually
 ```
 
-### Después (1 query):
+### Después (1 query optimizada):
 ```
 1. SELECT * FROM client_list_view → TODO en una sola query ✅
 ```
 
 ## 🚀 Beneficios de Performance
 
-- ✅ **~8 JOINs eliminados** por cada query
-- ✅ **2-3 queries adicionales eliminadas** completamente
-- ✅ **Sub-segundo response time** para lista de clientes
-- ✅ **Código más simple y mantenible** en handlers
+- ✅ **JOINs pre-computados** en la vista
+- ✅ **Queries adicionales eliminadas** completamente
+- ✅ **NO depende de otras vistas** (solo tablas base)
+- ✅ **Sin datos innecesarios** (solo lo que muestra la LISTA)
 
 ## 📋 Datos Pre-Computados
 
-La vista incluye TODOS estos datos en una sola consulta:
+La vista incluye SOLO estos datos (los que se muestran en la tab LISTA):
 
 ### Desde `project_clients`:
 - `unit`, `notes`, `is_primary`, `status`
@@ -36,18 +37,13 @@ La vista incluye TODOS estos datos en una sola consulta:
 ### Desde `users` (via linked_user):
 - `avatar_url`
 
-### Desde `projects`:
-- `name`, `color` (para vista de organización)
+### Desde `client_roles`:
+- `id`, `name`, `is_default`
 
-### Desde `currencies`:
-- `code`, `symbol`
-
-### Desde `client_financial_overview` (ya optimizada):
-- Todos los datos financieros agregados por moneda
-- `total_committed_amount`, `total_paid_amount`, `balance_due`
-- `next_due_date`, `next_due_amount`, `last_payment_date`
-- `total_schedule_items`, `schedule_paid`, `schedule_overdue`
-- `payments_missing_rate`
+### ❌ NO incluye:
+- Datos financieros (están en otras tabs)
+- Datos de moneda (no se usan en LISTA)
+- Datos de proyecto (no se muestran)
 
 ## 🔧 Instalación
 
@@ -110,6 +106,6 @@ Una vez creada la vista:
 
 ---
 
-**Creado:** Noviembre 16, 2025  
-**Patrón:** Vista SQL optimizada con pre-computed JOINs  
-**Performance:** ~8 JOINs eliminados, 2-3 queries menos por request
+**Actualizado:** Noviembre 16, 2025  
+**Patrón:** Vista SQL simplificada con tablas base (NO otras vistas)  
+**Datos:** Solo campos necesarios para tab LISTA (NO datos financieros)

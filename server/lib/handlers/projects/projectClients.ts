@@ -216,8 +216,8 @@ export async function getClientsSummary(
       }
     }
 
-    // 🚀 PERFORMANCE BOOST: Use optimized client_list_view (eliminates ~8 JOINs)
-    // This view pre-computes ALL data: project_clients, contacts, users, projects, currencies
+    // 🚀 PERFORMANCE BOOST: Use simplified client_list_view (direct table JOINs only)
+    // This view includes ONLY data displayed in LISTA tab (no financial data)
     const { data: viewData, error: viewError } = await supabase
       .from('client_list_view')
       .select('*')
@@ -242,97 +242,46 @@ export async function getClientsSummary(
       };
     }
 
-    // Group by project_client_id to build financialByCurrency array
-    const groupedByClient = viewData.reduce((acc: any, row: any) => {
-      const clientId = row.project_client_id;
+    // Map view data to client objects
+    const mergedData = viewData.map((row: any) => {
+      // Build contacts object from view fields
+      const contacts = {
+        id: row.client_id,
+        first_name: row.contact_first_name,
+        last_name: row.contact_last_name,
+        full_name: row.contact_full_name,
+        email: row.contact_email,
+        phone: row.contact_phone,
+        company_name: row.contact_company_name,
+        linked_user: row.linked_user_id ? {
+          id: row.linked_user_id,
+          avatar_url: row.linked_user_avatar_url
+        } : null
+      };
       
-      if (!acc[clientId]) {
-        // Build contacts object from pre-computed view fields
-        const contacts = {
-          id: row.client_id,
-          first_name: row.contact_first_name,
-          last_name: row.contact_last_name,
-          full_name: row.contact_full_name,
-          email: row.contact_email,
-          phone: row.contact_phone,
-          company_name: row.contact_company_name,
-          linked_user: row.linked_user_id ? {
-            id: row.linked_user_id,
-            avatar_url: row.linked_user_avatar_url
-          } : null
-        };
-        
-        // Create client entry with ALL data from view (no additional queries needed!)
-        acc[clientId] = {
-          id: row.project_client_id,
-          project_id: row.project_id,
-          client_id: row.client_id,
-          contact_id: row.client_id,
-          organization_id: row.organization_id,
-          unit: row.unit,
-          notes: row.notes,
-          is_primary: row.is_primary,
-          status: row.status,
-          contacts: contacts,
-          role: row.role_id ? {
-            id: row.role_id,
-            name: row.role_name,
-            is_default: row.role_is_default
-          } : null,
-          financialByCurrency: []
-        };
-      }
-
-      // Build currency object from pre-computed view fields
-      const currency = row.currency_id ? {
-        id: row.currency_id,
-        code: row.currency_code,
-        symbol: row.currency_symbol
-      } : null;
-
-      // Add this currency's financial data
-      acc[clientId].financialByCurrency.push({
-        currency: currency,
-        total_committed_amount: parseFloat(row.total_committed_amount || 0),
-        total_paid_amount: parseFloat(row.total_paid_amount || 0),
-        balance_due: parseFloat(row.balance_due || 0),
-        next_due_date: row.next_due_date || null,
-        next_due_amount: row.next_due_amount ? parseFloat(row.next_due_amount) : null,
-        last_payment_date: row.last_payment_date || null,
-        total_schedule_items: row.total_schedule_items || 0,
-        schedule_paid: row.schedule_paid || 0,
-        schedule_overdue: row.schedule_overdue || 0,
-        payments_missing_rate: row.payments_missing_rate || 0,
-      });
-
-      return acc;
-    }, {});
-
-    // Convert to array and add derived sorting fields
-    const mergedData = Object.values(groupedByClient).map((client: any) => {
-      // Calculate totals across all currencies for sorting
-      const total_committed_amount = client.financialByCurrency.reduce(
-        (sum: number, f: any) => sum + f.total_committed_amount, 0
-      );
-      const total_paid_amount = client.financialByCurrency.reduce(
-        (sum: number, f: any) => sum + f.total_paid_amount, 0
-      );
-      const balance_due = client.financialByCurrency.reduce(
-        (sum: number, f: any) => sum + f.balance_due, 0
-      );
-      
-      // Find earliest next due date for sorting
-      const nextDueDates = client.financialByCurrency
-        .filter((f: any) => f.next_due_date)
-        .map((f: any) => new Date(f.next_due_date).getTime());
-      const next_due = nextDueDates.length > 0 ? Math.min(...nextDueDates) : null;
-      
+      // Create client entry with data from view
       return {
-        ...client,
-        total_committed_amount,
-        total_paid_amount,
-        balance_due,
-        next_due,
+        id: row.project_client_id,
+        project_id: row.project_id,
+        client_id: row.client_id,
+        contact_id: row.client_id,
+        organization_id: row.organization_id,
+        unit: row.unit,
+        notes: row.notes,
+        is_primary: row.is_primary,
+        status: row.status,
+        contacts: contacts,
+        role: row.role_id ? {
+          id: row.role_id,
+          name: row.role_name,
+          is_default: row.role_is_default
+        } : null,
+        // Financial fields not used in LISTA tab - set to empty/zero for compatibility
+        financialByCurrency: [],
+        total_committed_amount: 0,
+        total_paid_amount: 0,
+        balance_due: 0,
+        next_due: null,
       };
     });
 
