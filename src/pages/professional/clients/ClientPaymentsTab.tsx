@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { DollarSign, Plus, Edit, Trash2 } from 'lucide-react'
+import { DollarSign, Plus, Edit, Trash2, Paperclip } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
@@ -407,6 +407,23 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           <Badge className={statusInfo.className}>
             {statusInfo.label}
           </Badge>
+        );
+      },
+    },
+    {
+      key: 'attachments',
+      label: '',
+      sortable: false,
+      align: 'center' as const,
+      headerRender: () => (
+        <Paperclip className="h-4 w-4" />
+      ),
+      render: (payment: ClientPayment) => {
+        const attachmentCount = payment.file_url ? 1 : 0;
+        return (
+          <span className={attachmentCount > 0 ? 'font-medium' : 'text-muted-foreground'}>
+            {attachmentCount}
+          </span>
         );
       },
     },
