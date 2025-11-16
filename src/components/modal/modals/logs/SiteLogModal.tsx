@@ -3,10 +3,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { FileText, Plus, Trash2, Calendar, Cloud, Users, Wrench, Camera, ArrowLeft, X } from "lucide-react";
-import { FormModalLayout } from "../../../form/FormModalLayout";
-import { FormModalHeader } from "../../../form/FormModalHeader";
-import { FormModalFooter } from "../../../form/FormModalFooter";
-import { FormSubsectionButton } from "../../../form/FormSubsectionButton";
+import { FormModalLayout } from "../../form/FormModalLayout";
+import { FormModalHeader } from "../../form/FormModalHeader";
+import { FormModalFooter } from "../../form/FormModalFooter";
+import { FormSubsectionButton } from "../../form/FormSubsectionButton";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,8 +18,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
 import { useContacts } from "@/hooks/use-contacts";
-import { useGlobalModalStore } from "../../../form/useGlobalModalStore";
-import { useModalPanelStore } from "../../../form/modalPanelStore";
+import { useGlobalModalStore } from "../../form/useGlobalModalStore";
+import { useModalPanelStore } from "../../form/modalPanelStore";
 import { supabase } from "@/lib/supabase";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { FileUploader } from "@/components/ui-custom/FileUploader";
@@ -477,102 +477,100 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         }}
         className="space-y-6"
       >
-        <div className="space-y-4">
-          {/* Fecha - Condición */}
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="log_date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fecha</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="weather"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Condición</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value || ""}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar clima" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="sunny">Soleado</SelectItem>
-                      <SelectItem value="partly_cloudy">Parcialmente Nublado</SelectItem>
-                      <SelectItem value="cloudy">Nublado</SelectItem>
-                      <SelectItem value="rain">Lluvia</SelectItem>
-                      <SelectItem value="storm">Tormenta</SelectItem>
-                      <SelectItem value="snow">Nieve</SelectItem>
-                      <SelectItem value="fog">Niebla</SelectItem>
-                      <SelectItem value="windy">Ventoso</SelectItem>
-                      <SelectItem value="hail">Granizo</SelectItem>
-                      <SelectItem value="none">Sin Especificar</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Tipo */}
+        {/* Fecha y Condición en una sola fila */}
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="entry_type"
+            name="log_date"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <FormLabel>Fecha</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="weather"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Condición</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || ""}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar tipo" />
+                      <SelectValue placeholder="Seleccionar..." />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="avance_de_obra">Avance de Obra</SelectItem>
-                    <SelectItem value="decision">Decisión</SelectItem>
-                    <SelectItem value="foto_diaria">Foto Diaria</SelectItem>
-                    <SelectItem value="inspeccion">Inspección</SelectItem>
-                    <SelectItem value="nota_climatica">Nota Climática</SelectItem>
-                    <SelectItem value="pedido_material">Pedido Material</SelectItem>
-                    <SelectItem value="problema_detectado">Problema Detectado</SelectItem>
-                    <SelectItem value="visita_tecnica">Visita Técnica</SelectItem>
+                    <SelectItem value="sunny">Soleado</SelectItem>
+                    <SelectItem value="partly_cloudy">Parcialmente Nublado</SelectItem>
+                    <SelectItem value="cloudy">Nublado</SelectItem>
+                    <SelectItem value="rain">Lluvia</SelectItem>
+                    <SelectItem value="storm">Tormenta</SelectItem>
+                    <SelectItem value="snow">Nieve</SelectItem>
+                    <SelectItem value="fog">Niebla</SelectItem>
+                    <SelectItem value="windy">Ventoso</SelectItem>
+                    <SelectItem value="hail">Granizo</SelectItem>
+                    <SelectItem value="none">Sin Especificar</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-          {/* Comentarios */}
-          <FormField
-            control={form.control}
-            name="comments"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Comentarios</FormLabel>
-                <FormControl>
-                  <Textarea 
-                    placeholder="Descripción general de las actividades del día..."
-                    className="min-h-[100px]"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
+
+        {/* Tipo */}
+        <FormField
+          control={form.control}
+          name="entry_type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar tipo" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="avance_de_obra">Avance de Obra</SelectItem>
+                  <SelectItem value="decision">Decisión</SelectItem>
+                  <SelectItem value="foto_diaria">Foto Diaria</SelectItem>
+                  <SelectItem value="inspeccion">Inspección</SelectItem>
+                  <SelectItem value="nota_climatica">Nota Climática</SelectItem>
+                  <SelectItem value="pedido_material">Pedido Material</SelectItem>
+                  <SelectItem value="problema_detectado">Problema Detectado</SelectItem>
+                  <SelectItem value="visita_tecnica">Visita Técnica</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Comentarios */}
+        <FormField
+          control={form.control}
+          name="comments"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Comentarios</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Descripción general de las actividades del día..."
+                  className="min-h-[100px]"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Fotos y Videos */}
         <div className="space-y-4">
