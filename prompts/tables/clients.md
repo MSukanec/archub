@@ -91,8 +91,10 @@ create table public.client_payments (
   updated_at timestamp with time zone null default now(),
   wallet_id uuid null,
   client_id uuid null,
+  status text not null default 'confirmed'::text,
   constraint client_payments_pkey primary key (id),
   constraint fk_payment_wallet foreign KEY (wallet_id) references organization_wallets (id) on delete set null,
+  constraint fk_payment_project foreign KEY (project_id) references projects (id) on delete CASCADE,
   constraint fk_payment_project_client foreign KEY (client_id) references project_clients (id) on delete set null,
   constraint fk_payment_schedule foreign KEY (schedule_id) references client_payment_schedule (id) on delete set null,
   constraint fk_payment_client foreign KEY (client_id) references project_clients (id) on delete set null,
@@ -100,8 +102,19 @@ create table public.client_payments (
   constraint fk_payment_contact foreign KEY (contact_id) references contacts (id) on delete set null,
   constraint fk_payment_currency foreign KEY (currency_id) references currencies (id) on delete RESTRICT,
   constraint fk_payment_org foreign KEY (organization_id) references organizations (id) on delete CASCADE,
-  constraint fk_payment_project foreign KEY (project_id) references projects (id) on delete CASCADE,
   constraint client_payments_exchange_rate_positive check ((exchange_rate > (0)::numeric)),
+  constraint client_payments_status_check check (
+    (
+      status = any (
+        array[
+          'confirmed'::text,
+          'pending'::text,
+          'rejected'::text,
+          'void'::text
+        ]
+      )
+    )
+  ),
   constraint client_payments_amount_positive check ((amount > (0)::numeric))
 ) TABLESPACE pg_default;
 
