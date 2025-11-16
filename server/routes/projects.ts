@@ -32,6 +32,12 @@ import {
   handleUpdateClientPayment,
   handleDeleteClientPayment
 } from '../controllers/projects/clientPayments.controller.js';
+import {
+  handleListClientCommitments,
+  handleCreateClientCommitment,
+  handleUpdateClientCommitment,
+  handleDeleteClientCommitment
+} from '../controllers/projects/clientCommitments.controller.js';
 
 /**
  * Register project-related endpoints (projects, budgets, budget items, project clients)
@@ -81,6 +87,20 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
 
   // DELETE /api/projects/:projectId/client-payments/:paymentId - Delete a client payment
   app.delete("/api/projects/:projectId/client-payments/:paymentId", handleDeleteClientPayment);
+
+  // ========== CLIENT COMMITMENTS ENDPOINTS ==========
+  
+  // GET /api/projects/:projectId/client-commitments - Get all client commitments for a project
+  app.get("/api/projects/:projectId/client-commitments", handleListClientCommitments);
+
+  // POST /api/projects/:projectId/client-commitments - Create a new client commitment
+  app.post("/api/projects/:projectId/client-commitments", handleCreateClientCommitment);
+
+  // PATCH /api/projects/:projectId/client-commitments/:commitmentId - Update a client commitment
+  app.patch("/api/projects/:projectId/client-commitments/:commitmentId", handleUpdateClientCommitment);
+
+  // DELETE /api/projects/:projectId/client-commitments/:commitmentId - Delete a client commitment
+  app.delete("/api/projects/:projectId/client-commitments/:commitmentId", handleDeleteClientCommitment);
 
   // GET/POST /api/project-clients - Alternative endpoint for listing/creating project clients (with query params)
   // This endpoint provides an alternative way to access clients using query parameters instead of path parameters

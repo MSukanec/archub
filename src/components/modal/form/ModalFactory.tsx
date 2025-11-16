@@ -26,6 +26,7 @@ import { ConstructionTaskScheduleModal } from '../modals/construction/Constructi
 import { ConstructionPhaseFormModal } from '../modals/construction/ConstructionPhaseFormModal';
 
 import ClientPaymentsModal from '../modals/clients/ClientPaymentsModal';
+import { ClientCommitmentModal } from '../modals/clients/ClientCommitmentModal';
 import ClientPaymentPlans from '../modals/general/clients/ClientPaymentPlans';
 import ClientInstallment from '../modals/general/clients/ClientInstallment';
 import { MaterialFormModal } from '../modals/admin/MaterialFormModal'
@@ -230,6 +231,8 @@ export function ModalFactory() {
       return <RenewInsuranceFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'client-payment':
       return <ClientPaymentsModal modalData={data || undefined} onClose={closeModal} />;
+    case 'client-commitment':
+      return <ClientCommitmentModal modalData={data || undefined} onClose={closeModal} />;
     case 'client-payment-plans':
       return <ClientPaymentPlans modalData={data || undefined} onClose={closeModal} />;
     case 'client-installment':
