@@ -37,6 +37,7 @@ interface ClientPayment {
   updated_at: string;
   wallet_id: string | null;
   status: 'confirmed' | 'pending' | 'rejected' | 'void';
+  file_url: string | null;
   contact: {
     id: string;
     first_name: string;
@@ -360,7 +361,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       sortable: true,
       sortType: 'number' as const,
       render: (payment: ClientPayment) => (
-        <div className="flex flex-col">
+        <div className="flex flex-col items-end">
           <span className="font-bold">{formatAmount(payment.amount, payment.currency?.symbol)}</span>
           <span className="text-xs text-muted-foreground" style={{ fontSize: '12px' }}>
             Cot. {payment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}

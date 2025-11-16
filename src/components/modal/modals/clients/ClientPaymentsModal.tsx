@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -13,10 +13,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { CalendarIcon, DollarSign } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import DatePickerField from '@/components/ui-custom/fields/DatePickerField'
+import { DollarSign, Upload, X, FileText } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
@@ -24,6 +23,7 @@ import { useProjectClients } from '@/hooks/use-project-clients'
 import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { apiRequest, queryClient } from '@/lib/queryClient'
+import { supabase } from '@/lib/supabase'
 
 const clientPaymentSchema = z.object({
   payment_date: z.date({
@@ -31,13 +31,14 @@ const clientPaymentSchema = z.object({
   }),
   contact_id: z.string().min(1, 'Cliente es requerido'),
   client_id: z.string().optional(),
+  wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
   currency_id: z.string().min(1, 'Moneda es requerida'),
-  exchange_rate: z.number().min(0.0001, 'Tipo de cambio debe ser mayor a 0'),
-  wallet_id: z.string().optional(),
-  notes: z.string().optional(),
-  reference: z.string().optional(),
+  exchange_rate: z.number().min(0.0001, 'Tipo de cambio debe ser mayor a 0').optional(),
   status: z.enum(['confirmed', 'pending', 'rejected', 'void']),
+  reference: z.string().optional(),
+  notes: z.string().optional(),
+  file_url: z.string().optional(),
 })
 
 type ClientPaymentForm = z.infer<typeof clientPaymentSchema>
@@ -57,6 +58,9 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
   const { setPanel } = useModalPanelStore()
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [existingFileUrl, setExistingFileUrl] = useState<string | null>(null)
 
   // Fetch existing payment data for edit mode
   const { data: existingPayment, isLoading: loadingPayment } = useQuery({
@@ -75,8 +79,8 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
 
   // Get default exchange rate for selected currency
   const getCurrencyExchangeRate = (currencyId: string) => {
-    const currency = currencies?.find(c => c.currency?.id === currencyId)
-    return currency?.exchange_rate || 1
+    // Default exchange rate is 1 (user can change it manually if needed)
+    return 1
   }
 
   const form = useForm<ClientPaymentForm>({
@@ -85,13 +89,14 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
       payment_date: new Date(),
       contact_id: '',
       client_id: undefined,
+      wallet_id: '',
       amount: 0,
       currency_id: '',
       exchange_rate: 1,
-      wallet_id: undefined,
-      notes: '',
-      reference: '',
       status: 'confirmed',
+      reference: '',
+      notes: '',
+      file_url: '',
     }
   })
 
@@ -115,14 +120,19 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
         payment_date: paymentDate,
         contact_id: existingPayment.contact_id || '',
         client_id: existingPayment.client_id || undefined,
+        wallet_id: existingPayment.wallet_id || '',
         amount: existingPayment.amount || 0,
         currency_id: existingPayment.currency_id || '',
         exchange_rate: existingPayment.exchange_rate || 1,
-        wallet_id: existingPayment.wallet_id || undefined,
-        notes: existingPayment.notes || '',
-        reference: existingPayment.reference || '',
         status: existingPayment.status || 'confirmed',
+        reference: existingPayment.reference || '',
+        notes: existingPayment.notes || '',
+        file_url: existingPayment.file_url || '',
       })
+      
+      if (existingPayment.file_url) {
+        setExistingFileUrl(existingPayment.file_url)
+      }
     }
   }, [existingPayment, mode, form])
 
@@ -170,24 +180,62 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
     }
   }, [selectedContactId, projectClients, form])
 
+  // File upload handler
+  const handleFileUpload = async (file: File): Promise<string> => {
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${organizationId}/${projectId}/${Date.now()}.${fileExt}`
+    
+    const { error: uploadError } = await supabase.storage
+      .from('client-payments-attachments')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      })
+    
+    if (uploadError) {
+      throw new Error(`Error al subir archivo: ${uploadError.message}`)
+    }
+    
+    const { data: { publicUrl } } = supabase.storage
+      .from('client-payments-attachments')
+      .getPublicUrl(fileName)
+    
+    return publicUrl
+  }
+
   // Mutation for create/update
   const savePaymentMutation = useMutation({
     mutationFn: async (data: ClientPaymentForm) => {
+      let fileUrl = data.file_url || null
+
+      // Upload file if there's a new one
+      if (uploadedFile) {
+        setIsUploading(true)
+        try {
+          fileUrl = await handleFileUpload(uploadedFile)
+        } catch (error: any) {
+          throw new Error(error.message || 'Error al subir el archivo')
+        } finally {
+          setIsUploading(false)
+        }
+      }
+
       const paymentData = {
         project_id: projectId,
         organization_id: organizationId,
         contact_id: data.contact_id,
         client_id: data.client_id || null,
+        wallet_id: data.wallet_id || null,
         amount: data.amount,
         currency_id: data.currency_id,
-        exchange_rate: data.exchange_rate,
+        exchange_rate: data.exchange_rate || 1,
         payment_date: format(data.payment_date, 'yyyy-MM-dd'),
-        wallet_id: data.wallet_id || null,
-        notes: data.notes || null,
-        reference: data.reference || null,
         status: data.status,
-        commitment_id: null, // TODO: Add support for linking to commitments
-        schedule_id: null, // TODO: Add support for linking to schedules
+        reference: data.reference || null,
+        notes: data.notes || null,
+        file_url: fileUrl,
+        commitment_id: null,
+        schedule_id: null,
       }
 
       if (mode === 'edit' && paymentId) {
@@ -276,7 +324,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
     return (
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {/* Row 1: Fecha de Pago - Cliente */}
+          {/* Row 1: Fecha de Pago / Cliente */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -285,32 +333,12 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
                 <FormItem>
                   <FormLabel>Fecha de Pago *</FormLabel>
                   <FormControl>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <div className="relative">
-                            <Input
-                              placeholder="Seleccionar fecha"
-                              value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
-                              className="pl-10"
-                              readOnly
-                            />
-                            <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          </div>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) =>
-                            date > new Date() || date < new Date('1900-01-01')
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <DatePickerField
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Seleccionar fecha"
+                      disableFuture={true}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -344,8 +372,36 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
             />
           </div>
 
-          {/* Row 2: Monto - Moneda */}
+          {/* Row 2: Billetera / Monto */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="wallet_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Billetera *</FormLabel>
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar billetera" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {wallets?.map((orgWallet) => (
+                          <SelectItem 
+                            key={orgWallet.id} 
+                            value={orgWallet.id}
+                          >
+                            {orgWallet.wallets?.name || 'Sin nombre'}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="amount"
@@ -367,7 +423,10 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
                 </FormItem>
               )}
             />
+          </div>
 
+          {/* Row 3: Moneda / Tipo de Cambio */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="currency_id"
@@ -395,16 +454,13 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
                 </FormItem>
               )}
             />
-          </div>
 
-          {/* Row 3: Tipo de Cambio - Billetera */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="exchange_rate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tipo de Cambio *</FormLabel>
+                  <FormLabel>Tipo de Cambio (opcional)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -419,56 +475,10 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={form.control}
-              name="wallet_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Billetera (opcional)</FormLabel>
-                  <FormControl>
-                    <Select value={field.value || 'none'} onValueChange={(value) => field.onChange(value === 'none' ? undefined : value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar billetera" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Sin billetera</SelectItem>
-                        {wallets?.map((orgWallet) => (
-                          <SelectItem 
-                            key={orgWallet.id} 
-                            value={orgWallet.id}
-                          >
-                            {orgWallet.wallets?.name || 'Sin nombre'}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </div>
 
-          {/* Row 4: Referencia - Estado */}
+          {/* Row 4: Estado / Referencia */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="reference"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Referencia (opcional)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Ej: Transferencia #12345"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               control={form.control}
               name="status"
@@ -487,6 +497,23 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
                         <SelectItem value="void">Anulado</SelectItem>
                       </SelectContent>
                     </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="reference"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Referencia (opcional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Ej: Transferencia #12345"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -512,6 +539,61 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
               </FormItem>
             )}
           />
+
+          {/* Row 6: Adjuntar Archivo */}
+          <div className="space-y-2">
+            <FormLabel>Adjuntar Archivo (opcional)</FormLabel>
+            {existingFileUrl && !uploadedFile && (
+              <div className="flex items-center gap-2 p-3 bg-muted rounded-md">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm flex-1 truncate">{existingFileUrl.split('/').pop()}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setExistingFileUrl(null)
+                    form.setValue('file_url', '')
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+            {uploadedFile && (
+              <div className="flex items-center gap-2 p-3 bg-muted rounded-md">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm flex-1 truncate">{uploadedFile.name}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setUploadedFile(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+            {!existingFileUrl && !uploadedFile && (
+              <div className="flex items-center gap-2">
+                <Input
+                  type="file"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      setUploadedFile(file)
+                    }
+                  }}
+                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx"
+                  className="flex-1"
+                />
+                <Upload className="h-4 w-4 text-muted-foreground" />
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Formatos aceptados: PDF, JPG, PNG, DOC, DOCX, XLS, XLSX
+            </p>
+          </div>
         </form>
       </Form>
     )

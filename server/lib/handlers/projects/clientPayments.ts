@@ -25,6 +25,7 @@ export interface ClientPayment {
   updated_at: string;
   wallet_id: string | null;
   status: 'confirmed' | 'pending' | 'rejected' | 'void';
+  file_url: string | null;
   contact: {
     id: string;
     first_name: string;
@@ -92,6 +93,7 @@ export interface CreateClientPaymentParams {
     status: 'confirmed' | 'pending' | 'rejected' | 'void';
     commitment_id: string | null;
     schedule_id: string | null;
+    file_url: string | null;
   };
 }
 
@@ -116,6 +118,7 @@ export interface UpdateClientPaymentParams {
     status?: 'confirmed' | 'pending' | 'rejected' | 'void';
     commitment_id?: string | null;
     schedule_id?: string | null;
+    file_url?: string | null;
   };
 }
 
