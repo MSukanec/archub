@@ -174,6 +174,15 @@ export async function getOrganizationClientsSummary(
     // Convert to array
     const clientsWithFinancials = Object.values(groupedByClient);
 
+    // Sort A-Z by client name (ALWAYS alphabetically ordered)
+    clientsWithFinancials.sort((a: any, b: any) => {
+      const nameA = (a.contacts?.company_name || a.contacts?.full_name || 
+                    `${a.contacts?.first_name || ''} ${a.contacts?.last_name || ''}`.trim()).toLowerCase();
+      const nameB = (b.contacts?.company_name || b.contacts?.full_name || 
+                    `${b.contacts?.first_name || ''} ${b.contacts?.last_name || ''}`.trim()).toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+
     return {
       success: true,
       data: {
