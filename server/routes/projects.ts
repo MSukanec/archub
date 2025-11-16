@@ -28,6 +28,8 @@ import {
 } from '../controllers/projects/projectClients.controller.js';
 import {
   handleListClientPayments,
+  handleCreateClientPayment,
+  handleUpdateClientPayment,
   handleDeleteClientPayment
 } from '../controllers/projects/clientPayments.controller.js';
 
@@ -70,6 +72,12 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
   
   // GET /api/projects/:projectId/client-payments - Get all client payments for a project
   app.get("/api/projects/:projectId/client-payments", handleListClientPayments);
+
+  // POST /api/projects/:projectId/client-payments - Create a new client payment
+  app.post("/api/projects/:projectId/client-payments", handleCreateClientPayment);
+
+  // PATCH /api/projects/:projectId/client-payments/:paymentId - Update a client payment
+  app.patch("/api/projects/:projectId/client-payments/:paymentId", handleUpdateClientPayment);
 
   // DELETE /api/projects/:projectId/client-payments/:paymentId - Delete a client payment
   app.delete("/api/projects/:projectId/client-payments/:paymentId", handleDeleteClientPayment);

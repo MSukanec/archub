@@ -2,8 +2,12 @@ import type { Request, Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import {
   listClientPayments,
+  createClientPayment,
+  updateClientPayment,
   deleteClientPayment,
   type ListClientPaymentsParams,
+  type CreateClientPaymentParams,
+  type UpdateClientPaymentParams,
   type DeleteClientPaymentParams
 } from '../../lib/handlers/projects/clientPayments.js';
 import type { ProjectsContext } from '../../lib/handlers/projects/shared.js';
@@ -55,6 +59,65 @@ export async function handleListClientPayments(req: Request, res: Response) {
   } catch (error: any) {
     console.error('Error in listClientPayments controller:', error);
     return res.status(500).json({ error: error.message || 'Failed to list client payments' });
+  }
+}
+
+export async function handleCreateClientPayment(req: Request, res: Response) {
+  try {
+    const token = extractToken(req.headers.authorization);
+    if (!token) {
+      return res.status(401).json({ error: 'No authorization token provided' });
+    }
+
+    const supabase = createAuthenticatedClient(token);
+    const ctx: ProjectsContext = { supabase };
+
+    const params: CreateClientPaymentParams = {
+      projectId: req.params.projectId,
+      organizationId: req.query.organization_id as string,
+      paymentData: req.body
+    };
+
+    const result = await createClientPayment(ctx, params);
+
+    if (result.success) {
+      return res.status(201).json({ data: result.data });
+    } else {
+      return res.status(400).json({ error: result.error });
+    }
+  } catch (error: any) {
+    console.error('Error in createClientPayment controller:', error);
+    return res.status(500).json({ error: error.message || 'Failed to create client payment' });
+  }
+}
+
+export async function handleUpdateClientPayment(req: Request, res: Response) {
+  try {
+    const token = extractToken(req.headers.authorization);
+    if (!token) {
+      return res.status(401).json({ error: 'No authorization token provided' });
+    }
+
+    const supabase = createAuthenticatedClient(token);
+    const ctx: ProjectsContext = { supabase };
+
+    const params: UpdateClientPaymentParams = {
+      projectId: req.params.projectId,
+      paymentId: req.params.paymentId,
+      organizationId: req.query.organization_id as string,
+      paymentData: req.body
+    };
+
+    const result = await updateClientPayment(ctx, params);
+
+    if (result.success) {
+      return res.status(200).json({ data: result.data });
+    } else {
+      return res.status(400).json({ error: result.error });
+    }
+  } catch (error: any) {
+    console.error('Error in updateClientPayment controller:', error);
+    return res.status(500).json({ error: error.message || 'Failed to update client payment' });
   }
 }
 
