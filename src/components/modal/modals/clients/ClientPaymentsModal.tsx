@@ -21,6 +21,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useProjectClients } from '@/hooks/use-project-clients'
 import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
+import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 import { supabase } from '@/lib/supabase'
@@ -30,6 +31,7 @@ const clientPaymentSchema = z.object({
   payment_date: z.date({
     required_error: "Fecha de pago es requerida",
   }),
+  created_by: z.string().min(1, 'Creador es requerido'),
   contact_id: z.string().min(1, 'Cliente es requerido'),
   client_id: z.string().optional(),
   wallet_id: z.string().min(1, 'Billetera es requerida'),
@@ -77,6 +79,12 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId)
   const { data: projectClients, isLoading: clientsLoading } = useProjectClients(projectId)
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId)
+  const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId)
+
+  // Find current member (same pattern as MovementModal)
+  const currentMember = React.useMemo(() => {
+    return members.find(m => m.user_id === userData?.user?.id) || null
+  }, [members, userData?.user?.id])
 
   // Get default exchange rate for selected currency
   const getCurrencyExchangeRate = (currencyId: string) => {
@@ -88,6 +96,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
     resolver: zodResolver(clientPaymentSchema),
     defaultValues: {
       payment_date: new Date(),
+      created_by: '',
       contact_id: '',
       client_id: undefined,
       wallet_id: '',
@@ -101,7 +110,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
     }
   })
 
-  const isLoading = currenciesLoading || clientsLoading || walletsLoading || (mode === 'edit' && loadingPayment)
+  const isLoading = currenciesLoading || clientsLoading || walletsLoading || membersLoading || (mode === 'edit' && loadingPayment)
 
   // Set panel mode - open in view mode when editing existing payment, edit mode when creating
   React.useEffect(() => {
@@ -119,6 +128,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
       
       form.reset({
         payment_date: paymentDate,
+        created_by: existingPayment.created_by || currentMember?.id || '',
         contact_id: existingPayment.contact_id || '',
         client_id: existingPayment.client_id || undefined,
         wallet_id: existingPayment.wallet_id || '',
@@ -135,11 +145,14 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
         setExistingFileUrl(existingPayment.file_url)
       }
     }
-  }, [existingPayment, mode, form])
+  }, [existingPayment, mode, form, currentMember?.id])
 
-  // Initialize default values for create mode
+  // Initialize default values for create mode (including created_by)
   React.useEffect(() => {
-    if (mode === 'create' && !paymentId) {
+    if (mode === 'create' && !paymentId && currentMember?.id) {
+      // Set created_by
+      form.setValue('created_by', currentMember.id)
+      
       // Set default currency
       if (currencies && currencies.length > 0) {
         const defaultCurrency = currencies.find(c => c.is_default)
@@ -159,7 +172,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
         }
       }
     }
-  }, [currencies, wallets, mode, paymentId, form])
+  }, [currencies, wallets, mode, paymentId, currentMember?.id, form])
 
   // Update exchange rate when currency changes
   const selectedCurrency = form.watch('currency_id')
@@ -224,6 +237,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
       const paymentData = {
         project_id: projectId,
         organization_id: organizationId,
+        created_by: data.created_by,
         contact_id: data.contact_id,
         client_id: data.client_id || null,
         wallet_id: data.wallet_id || null,
@@ -709,8 +723,8 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
       onLeftClick={handleClose}
       submitText={mode === 'edit' ? "Guardar Cambios" : "Registrar Pago"}
       onSubmit={handleSubmitClick}
-      submitDisabled={savePaymentMutation.isPending}
-      showLoadingSpinner={savePaymentMutation.isPending}
+      submitDisabled={savePaymentMutation.isPending || !currentMember || isLoading}
+      showLoadingSpinner={savePaymentMutation.isPending || isLoading}
     />
   )
 
