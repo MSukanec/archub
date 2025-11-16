@@ -26,7 +26,7 @@ export default function FormModalBody({
       <div className={cn(
         "gap-6 text-sm",
         paddingClasses,
-        columns === 1 ? "flex flex-col space-y-6" : "grid grid-cols-1 lg:grid-cols-2",
+        columns === 1 ? "flex flex-col" : "grid grid-cols-1 lg:grid-cols-2",
         className
       )}>
         {children}
