@@ -262,10 +262,14 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
       }
     },
     onSuccess: () => {
+      // Invalidate both project and organization queries
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/client-payments?organization_id=${organizationId}`] })
+      queryClient.invalidateQueries({ queryKey: [`/api/organizations/${organizationId}/client-payments`] })
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/clients/summary`] })
+      queryClient.invalidateQueries({ queryKey: [`/api/organizations/${organizationId}/clients/summary`] })
       toast({
-        title: mode === 'edit' ? 'Pago actualizado' : 'Pago registrado',
-        description: mode === 'edit'
+        title: mode === 'edit' || mode === 'view' ? 'Pago actualizado' : 'Pago registrado',
+        description: mode === 'edit' || mode === 'view'
           ? 'El pago ha sido actualizado correctamente'
           : 'El pago ha sido registrado correctamente',
       })

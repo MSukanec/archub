@@ -180,7 +180,13 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       return await apiRequest('DELETE', `/api/projects/${activeProjectId}/client-payments/${paymentId}?organization_id=${organizationId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${activeProjectId}/client-payments?organization_id=${organizationId}`] });
+      // Invalidate both project and organization queries
+      if (activeProjectId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/projects/${activeProjectId}/client-payments?organization_id=${organizationId}`] });
+      }
+      queryClient.invalidateQueries({ queryKey: [`/api/organizations/${organizationId}/client-payments`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${activeProjectId}/clients/summary`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/organizations/${organizationId}/clients/summary`] });
       toast({
         title: "Pago eliminado",
         description: "El pago ha sido eliminado correctamente",
