@@ -273,13 +273,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       align: 'right' as const,
       render: (payment: ClientPayment) => formatDate(payment.payment_date, 'dd/MM/yyyy'),
     },
-    {
-      key: 'created_at',
-      label: 'Fecha de Registro',
-      sortable: true,
-      align: 'right' as const,
-      render: (payment: ClientPayment) => formatDate(payment.created_at, 'dd/MM/yyyy'),
-    },
     // Project column - only shown when viewing organization-wide data
     ...(activeProjectId ? [] : [{
       key: 'project',
