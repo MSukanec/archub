@@ -106,7 +106,13 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       await apiRequest('DELETE', `/api/projects/${activeProjectId}/clients/${clientId}?organization_id=${organizationId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${activeProjectId}/clients/summary?organization_id=${organizationId}`] });
+      // Invalidate both project and organization queries
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0] as string;
+          return key?.includes('/clients/summary') || key?.includes('/clients');
+        }
+      });
       toast({
         title: 'Cliente eliminado',
         description: 'El cliente ha sido eliminado del proyecto correctamente',
@@ -122,6 +128,16 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   });
 
   const handleDelete = (client: ProjectClientSummary) => {
+    // Prevent deletion when viewing organization-wide data
+    if (!activeProjectId) {
+      toast({
+        title: 'No disponible',
+        description: 'Para eliminar un cliente, selecciona un proyecto específico',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     const clientName = client.contacts 
       ? `${client.contacts.first_name} ${client.contacts.last_name}`.trim()
       : 'Cliente';
