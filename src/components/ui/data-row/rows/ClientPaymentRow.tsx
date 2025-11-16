@@ -10,47 +10,48 @@ interface ClientPayment {
   amount: number;
   exchange_rate: number;
   status: 'confirmed' | 'pending' | 'rejected' | 'void';
-  reference?: string;
-  notes?: string;
-  file_url?: string;
+  reference: string | null;
+  notes: string | null;
+  file_url: string | null;
   contact_id: string;
-  client_id?: string;
-  wallet_id?: string;
-  currency_id?: string;
-  project_id?: string;
+  client_id: string | null;
+  wallet_id: string | null;
+  currency_id: string;
+  project_id: string;
   organization_id: string;
   
   // Datos expandidos
-  contact?: {
+  contact: {
     id: string;
-    first_name?: string;
-    last_name?: string;
-    full_name?: string;
+    first_name: string;
+    last_name: string;
+    full_name: string;
+    email: string;
+    phone?: string;
     company_name?: string;
     linked_user?: {
       id: string;
       avatar_url?: string;
-    };
-  };
-  project_client?: {
+    } | null;
+  } | null;
+  project_client: {
     id: string;
-    unit?: string;
-  };
-  currency?: {
+    unit: string | null;
+  } | null;
+  currency: {
     id: string;
     code: string;
     symbol: string;
-    name: string;
-  };
-  wallet?: {
+  } | null;
+  wallet: {
     id: string;
-    name: string;
-  };
+    name: string | null;
+  } | null;
   projects?: {
     id: string;
     name: string;
     color: string;
-  };
+  } | null;
 }
 
 interface ClientPaymentRowProps {
@@ -125,7 +126,7 @@ export default function ClientPaymentRow({
 }: ClientPaymentRowProps) {
   
   // Determinar el color del borde basado en el estado del pago
-  const getBorderColor = (payment: ClientPayment): 'success' | 'warning' | 'danger' | 'default' => {
+  const getBorderColor = (payment: ClientPayment): 'success' | 'warning' | 'danger' | 'neutral' => {
     switch (payment.status) {
       case 'confirmed':
         return 'success';
@@ -135,7 +136,7 @@ export default function ClientPaymentRow({
       case 'void':
         return 'danger';
       default:
-        return 'default';
+        return 'neutral';
     }
   };
 

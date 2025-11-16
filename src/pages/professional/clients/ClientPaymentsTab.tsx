@@ -271,7 +271,16 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   };
 
   // Table columns
-  const columns = [
+  const columns: Array<{
+    key: string;
+    label: string;
+    render?: (item: ClientPayment) => React.ReactNode;
+    sortable?: boolean;
+    sortType?: "string" | "number" | "date";
+    width?: string;
+    align?: 'left' | 'center' | 'right';
+    cellClassName?: string;
+  }> = [
     {
       key: 'payment_date',
       label: 'Fecha de Pago',
@@ -304,7 +313,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'contact',
       label: 'Cliente',
       sortable: true,
-      width: '400px',
+      width: '220px',
       render: (payment: ClientPayment) => {
         const avatarUrl = payment.contact?.linked_user?.avatar_url;
         const initials = payment.contact?.first_name?.[0] && payment.contact?.last_name?.[0]
@@ -325,9 +334,9 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
                 {initials}
               </AvatarFallback>
             </Avatar>
-            <div className="flex flex-col">
-              <span className="font-bold">{displayName || '-'}</span>
-              {unit && <span className="text-xs text-muted-foreground">{unit}</span>}
+            <div className="flex flex-col min-w-0">
+              <span className="font-bold truncate">{displayName || '-'}</span>
+              {unit && <span className="text-xs text-muted-foreground truncate">{unit}</span>}
             </div>
           </div>
         );
@@ -337,8 +346,9 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'notes',
       label: 'Notas',
       sortable: true,
+      width: '400px',
       render: (payment: ClientPayment) => (
-        <div className="max-w-md truncate" title={payment.notes || ''}>
+        <div className="max-w-full truncate" title={payment.notes || ''}>
           {payment.notes || '-'}
         </div>
       ),
