@@ -50,7 +50,7 @@ export async function listOrganizationClientPayments(
             avatar_url
           )
         ),
-        project_client:project_clients!fk_payment_client (
+        project_client:project_clients!client_id (
           id,
           unit
         ),

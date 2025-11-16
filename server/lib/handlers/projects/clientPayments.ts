@@ -175,7 +175,7 @@ export async function listClientPayments(
             avatar_url
           )
         ),
-        project_client:project_clients!fk_payment_client (
+        project_client:project_clients!client_id (
           id,
           unit
         ),
@@ -282,7 +282,7 @@ export async function createClientPayment(
             avatar_url
           )
         ),
-        project_client:project_clients!fk_payment_project_client (
+        project_client:project_clients!client_id (
           id,
           unit
         ),
@@ -398,7 +398,7 @@ export async function updateClientPayment(
             avatar_url
           )
         ),
-        project_client:project_clients!fk_payment_project_client (
+        project_client:project_clients!client_id (
           id,
           unit
         ),
