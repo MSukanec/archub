@@ -70,9 +70,9 @@ export async function getOrganizationClientsSummary(
       .select(`
         id,
         project_id,
-        contact_id,
+        client_id,
         unit,
-        role_id,
+        client_role_id,
         notes,
         total_committed,
         total_paid,
@@ -80,7 +80,7 @@ export async function getOrganizationClientsSummary(
         next_due,
         created_at,
         updated_at,
-        contacts (
+        contacts:contacts!client_id (
           id,
           first_name,
           last_name,
@@ -93,7 +93,7 @@ export async function getOrganizationClientsSummary(
             avatar_url
           )
         ),
-        role:client_roles (
+        role:client_roles!client_role_id (
           id,
           name,
           is_default
