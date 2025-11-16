@@ -313,6 +313,15 @@ export async function getClientsSummary(
           linked_user: enriched?.contacts?.linked_user || null
         };
         
+        // DEBUG: Log the data to see what's coming from the view
+        console.log('Row data for client:', {
+          client_name: row.client_name,
+          client_email: row.client_email,
+          client_phone: row.client_phone,
+          role_id: row.role_id,
+          role_name: row.role_name
+        });
+        
         acc[clientId] = {
           id: row.project_client_id,
           project_id: row.project_id,
