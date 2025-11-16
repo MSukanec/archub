@@ -105,12 +105,8 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
 
   // Set panel mode
   React.useEffect(() => {
-    if (mode === 'edit' && existingPayment) {
-      setPanel('view')
-    } else {
-      setPanel('edit')
-    }
-  }, [mode, existingPayment, setPanel])
+    setPanel('edit')
+  }, [setPanel])
 
   // Load existing payment data
   React.useEffect(() => {
