@@ -37,42 +37,38 @@ create index IF not exists idx_client_commitments_created_at on public.client_co
 
 ---------- TABLA CLIENT_PAYMENT_SCHEDULE:
 
-create table public.client_payment_schedule (
+create table public.client_commitments (
   id uuid not null default gen_random_uuid (),
-  commitment_id uuid not null,
-  due_date date not null,
+  project_id uuid not null,
+  client_id uuid not null,
+  organization_id uuid not null,
   amount numeric(12, 2) not null,
   currency_id uuid not null,
-  status text not null default 'pending'::text,
-  paid_at timestamp with time zone null,
-  payment_method text null,
-  notes text null,
-  organization_id uuid not null,
+  exchange_rate numeric not null,
   created_at timestamp with time zone null default now(),
   updated_at timestamp with time zone null default now(),
-  constraint client_payment_schedule_pkey primary key (id),
-  constraint client_payment_schedule_commitment_id_fkey foreign KEY (commitment_id) references client_commitments (id) on delete CASCADE,
-  constraint client_payment_schedule_currency_id_fkey foreign KEY (currency_id) references currencies (id) on delete RESTRICT,
-  constraint client_payment_schedule_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
-  constraint client_payment_schedule_status_check check (
-    (
-      status = any (
-        array[
-          'pending'::text,
-          'paid'::text,
-          'overdue'::text,
-          'cancelled'::text
-        ]
-      )
-    )
-  )
+  contact_id uuid null,
+  created_by uuid null,
+  constraint project_client_commitments_pkey primary key (id),
+  constraint client_commitments_created_by_fkey foreign KEY (created_by) references organization_members (id),
+  constraint fk_commit_client foreign KEY (client_id) references project_clients (id) on delete set null,
+  constraint fk_commit_contact foreign KEY (contact_id) references contacts (id) on delete set null,
+  constraint fk_commit_org foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint fk_commit_project foreign KEY (project_id) references projects (id) on delete CASCADE,
+  constraint fk_commit_currency foreign KEY (currency_id) references currencies (id) on delete set null,
+  constraint client_commitments_amount_positive check ((amount > (0)::numeric)),
+  constraint client_commitments_exchange_rate_positive check ((exchange_rate > (0)::numeric))
 ) TABLESPACE pg_default;
 
-create index IF not exists client_payment_schedule_org_idx on public.client_payment_schedule using btree (organization_id) TABLESPACE pg_default;
+create index IF not exists idx_client_commitments_org_project on public.client_commitments using btree (organization_id, project_id) TABLESPACE pg_default;
 
-create index IF not exists client_payment_schedule_commitment_idx on public.client_payment_schedule using btree (commitment_id) TABLESPACE pg_default;
+create index IF not exists idx_client_commitments_org on public.client_commitments using btree (organization_id) TABLESPACE pg_default;
 
-create index IF not exists client_payment_schedule_due_idx on public.client_payment_schedule using btree (due_date) TABLESPACE pg_default;
+create index IF not exists idx_client_commitments_client on public.client_commitments using btree (client_id) TABLESPACE pg_default;
+
+create index IF not exists idx_client_commitments_currency on public.client_commitments using btree (currency_id) TABLESPACE pg_default;
+
+create index IF not exists idx_client_commitments_created_at on public.client_commitments using btree (created_at) TABLESPACE pg_default;
 
 ---------- TABLA CLIENT_PAYMENTS:
 
@@ -81,7 +77,7 @@ create table public.client_payments (
   project_id uuid not null,
   commitment_id uuid null,
   schedule_id uuid null,
-  contact_id uuid not null,
+  contact_id uuid null,
   organization_id uuid not null,
   amount numeric(12, 2) not null,
   currency_id uuid not null,
@@ -99,14 +95,13 @@ create table public.client_payments (
   constraint client_payments_pkey primary key (id),
   constraint client_payments_created_by_fkey foreign KEY (created_by) references organization_members (id),
   constraint fk_payment_wallet foreign KEY (wallet_id) references organization_wallets (id) on delete set null,
+  constraint fk_payment_org foreign KEY (organization_id) references organizations (id) on delete CASCADE,
   constraint fk_payment_project foreign KEY (project_id) references projects (id) on delete CASCADE,
-  constraint fk_payment_project_client foreign KEY (client_id) references project_clients (id) on delete set null,
   constraint fk_payment_schedule foreign KEY (schedule_id) references client_payment_schedule (id) on delete set null,
   constraint fk_payment_client foreign KEY (client_id) references project_clients (id) on delete set null,
   constraint fk_payment_commitment foreign KEY (commitment_id) references client_commitments (id) on delete set null,
   constraint fk_payment_contact foreign KEY (contact_id) references contacts (id) on delete set null,
   constraint fk_payment_currency foreign KEY (currency_id) references currencies (id) on delete RESTRICT,
-  constraint fk_payment_org foreign KEY (organization_id) references organizations (id) on delete CASCADE,
   constraint client_payments_exchange_rate_positive check ((exchange_rate > (0)::numeric)),
   constraint client_payments_status_check check (
     (
@@ -132,6 +127,10 @@ create index IF not exists idx_client_payments_commitment on public.client_payme
 create index IF not exists idx_client_payments_schedule on public.client_payments using btree (schedule_id) TABLESPACE pg_default;
 
 create index IF not exists idx_client_payments_date on public.client_payments using btree (payment_date) TABLESPACE pg_default;
+
+create index IF not exists idx_client_payments_view_project on public.client_payments using btree (project_id, payment_date desc) TABLESPACE pg_default;
+
+create index IF not exists idx_client_payments_view_org on public.client_payments using btree (organization_id, payment_date desc) TABLESPACE pg_default;
 
 ---------- TABLA CLIENT_ROLES:
 
@@ -195,116 +194,6 @@ create index IF not exists idx_project_clients_project on public.project_clients
 create index IF not exists idx_project_clients_client on public.project_clients using btree (contact_id) TABLESPACE pg_default;
 
 create index IF not exists idx_project_clients_created_at on public.project_clients using btree (created_at) TABLESPACE pg_default;
-
----------- VISTA CLIENT_FINANCIAL_OVERVIEW:
-
-create view public.client_financial_overview as
-with
-  commitment_totals as (
-    select
-      client_commitments.client_id as project_client_id,
-      client_commitments.organization_id,
-      client_commitments.project_id,
-      client_commitments.currency_id,
-      sum(client_commitments.amount) as total_committed,
-      max(client_commitments.exchange_rate) as commitment_exchange_rate
-    from
-      client_commitments
-    group by
-      client_commitments.client_id,
-      client_commitments.organization_id,
-      client_commitments.project_id,
-      client_commitments.currency_id
-  ),
-  payments_converted as (
-    select
-      cc.client_id as project_client_id,
-      cp.organization_id,
-      cp.project_id,
-      cc.currency_id,
-      case
-        when cp.currency_id = cc.currency_id then cp.amount
-        when pay_curr.code = 'USD'::text
-        and com_curr.code = 'ARS'::text then cp.amount * cp.exchange_rate
-        when pay_curr.code = 'ARS'::text
-        and com_curr.code = 'USD'::text then cp.amount / cp.exchange_rate
-        else cp.amount
-      end as converted_amount,
-      case
-        when cp.currency_id <> cc.currency_id
-        and (
-          cp.exchange_rate is null
-          or cp.exchange_rate <= 0::numeric
-        ) then 1
-        else 0
-      end as invalid_rate
-    from
-      client_payments cp
-      join client_commitments cc on cp.commitment_id = cc.id
-      or cp.commitment_id is null
-      and cp.client_id = cc.client_id
-      join currencies pay_curr on pay_curr.id = cp.currency_id
-      join currencies com_curr on com_curr.id = cc.currency_id
-  ),
-  payment_totals as (
-    select
-      payments_converted.project_client_id,
-      payments_converted.organization_id,
-      payments_converted.project_id,
-      payments_converted.currency_id,
-      sum(payments_converted.converted_amount) as total_paid,
-      sum(payments_converted.invalid_rate)::integer as payments_missing_rate
-    from
-      payments_converted
-    group by
-      payments_converted.project_client_id,
-      payments_converted.organization_id,
-      payments_converted.project_id,
-      payments_converted.currency_id
-  ),
-  schedule_totals as (
-    select
-      cc.client_id as project_client_id,
-      cc.organization_id,
-      cc.project_id,
-      min(cps.due_date) filter (
-        where
-          cps.status = any (array['pending'::text, 'overdue'::text])
-      ) as next_due,
-      count(*) filter (
-        where
-          cps.status = 'pending'::text
-      )::integer as pending_invoices,
-      count(*) filter (
-        where
-          cps.status = 'overdue'::text
-      )::integer as overdue_invoices
-    from
-      client_commitments cc
-      left join client_payment_schedule cps on cps.commitment_id = cc.id
-    group by
-      cc.client_id,
-      cc.organization_id,
-      cc.project_id
-  )
-select
-  pc.id as project_client_id,
-  COALESCE(ct.organization_id, pc.organization_id) as organization_id,
-  COALESCE(ct.project_id, pc.project_id) as project_id,
-  ct.currency_id,
-  COALESCE(ct.total_committed, 0::numeric) as total_committed_amount,
-  COALESCE(pt.total_paid, 0::numeric) as total_paid_amount,
-  COALESCE(ct.total_committed, 0::numeric) - COALESCE(pt.total_paid, 0::numeric) as balance_due,
-  COALESCE(pt.payments_missing_rate, 0) as payments_missing_rate,
-  st.next_due,
-  COALESCE(st.pending_invoices, 0) as pending_invoices,
-  COALESCE(st.overdue_invoices, 0) as overdue_invoices
-from
-  project_clients pc
-  left join commitment_totals ct on ct.project_client_id = pc.id
-  left join payment_totals pt on pt.project_client_id = ct.project_client_id
-  and pt.currency_id = ct.currency_id
-  left join schedule_totals st on st.project_client_id = ct.project_client_id;
 
   ---------- TABLA CONTACTS:
 
