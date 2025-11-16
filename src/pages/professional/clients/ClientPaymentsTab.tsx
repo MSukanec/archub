@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { format } from 'date-fns'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 
 interface ClientPaymentsTabProps {
   projectId?: string;
@@ -346,109 +347,96 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           isFilterActive,
           onClearFilters: handleClearFilters,
           renderFilterContent: () => (
-            <div className="space-y-4 p-1">
-              <div className="grid grid-cols-2 gap-4">
-                {/* Filter by Wallet */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Billetera</label>
-                  <Select value={filterWallet} onValueChange={setFilterWallet}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Todas las billeteras" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas las billeteras</SelectItem>
-                      {filterOptions.wallets.map((wallet) => (
-                        <SelectItem key={wallet} value={wallet}>
-                          {wallet}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Filter by Currency */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Moneda</label>
-                  <Select value={filterCurrency} onValueChange={setFilterCurrency}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Todas las monedas" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas las monedas</SelectItem>
-                      {filterOptions.currencies.map((currency) => (
-                        <SelectItem key={currency} value={currency}>
-                          {currency}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Filter by Has Schedule */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Cuota</label>
-                  <Select value={filterHasSchedule} onValueChange={setFilterHasSchedule}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Todas" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas</SelectItem>
-                      <SelectItem value="yes">Con cuota</SelectItem>
-                      <SelectItem value="no">Sin cuota</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Filter by Has Commitment */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Compromiso</label>
-                  <Select value={filterHasCommitment} onValueChange={setFilterHasCommitment}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Todos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="yes">Con compromiso</SelectItem>
-                      <SelectItem value="no">Sin compromiso</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Filter by Client */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Cliente</label>
-                  <Select value={filterClient} onValueChange={setFilterClient}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Todos los clientes" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos los clientes</SelectItem>
-                      {filterOptions.clients.map((client) => (
-                        <SelectItem key={client} value={client}>
-                          {client}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Filter by Unit */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Unidad Funcional</label>
-                  <Select value={filterUnit} onValueChange={setFilterUnit}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Todas las unidades" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas las unidades</SelectItem>
-                      {filterOptions.units.map((unit) => (
-                        <SelectItem key={unit} value={unit}>
-                          {unit}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+            <div className="space-y-3 p-2 min-w-[200px]">
+              <div>
+                <Label className="text-xs font-medium mb-1 block">Billetera</Label>
+                <Select value={filterWallet} onValueChange={setFilterWallet}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Todas las billeteras" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas las billeteras</SelectItem>
+                    {filterOptions.wallets.map((wallet) => (
+                      <SelectItem key={wallet} value={wallet}>
+                        {wallet}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs font-medium mb-1 block">Moneda</Label>
+                <Select value={filterCurrency} onValueChange={setFilterCurrency}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Todas las monedas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas las monedas</SelectItem>
+                    {filterOptions.currencies.map((currency) => (
+                      <SelectItem key={currency} value={currency}>
+                        {currency}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs font-medium mb-1 block">Cuota</Label>
+                <Select value={filterHasSchedule} onValueChange={setFilterHasSchedule}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Todas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    <SelectItem value="yes">Con cuota</SelectItem>
+                    <SelectItem value="no">Sin cuota</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs font-medium mb-1 block">Compromiso</Label>
+                <Select value={filterHasCommitment} onValueChange={setFilterHasCommitment}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="yes">Con compromiso</SelectItem>
+                    <SelectItem value="no">Sin compromiso</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs font-medium mb-1 block">Cliente</Label>
+                <Select value={filterClient} onValueChange={setFilterClient}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Todos los clientes" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los clientes</SelectItem>
+                    {filterOptions.clients.map((client) => (
+                      <SelectItem key={client} value={client}>
+                        {client}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs font-medium mb-1 block">Unidad Funcional</Label>
+                <Select value={filterUnit} onValueChange={setFilterUnit}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Todas las unidades" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas las unidades</SelectItem>
+                    {filterOptions.units.map((unit) => (
+                      <SelectItem key={unit} value={unit}>
+                        {unit}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           ),
