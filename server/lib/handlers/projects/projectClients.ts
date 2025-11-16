@@ -22,7 +22,7 @@ export interface CreateClientParams {
   projectId: string;
   organizationId: string;
   clientData: {
-    client_id: string;
+    contact_id: string;
     committed_amount?: number | null;
     currency_id?: string | null;
     unit?: string | null;
@@ -116,7 +116,7 @@ export async function listClients(
       .from('project_clients')
       .select(`
         *,
-        contacts:contacts!client_id (
+        contacts:contacts!contact_id (
           id,
           first_name,
           last_name,
@@ -259,7 +259,7 @@ export async function getClientsSummary(
         notes,
         is_primary,
         status,
-        contacts!project_clients_client_id_fkey (
+        contacts!project_clients_contact_id_fkey (
           linked_user:users!linked_user_id (
             id,
             avatar_url
@@ -443,7 +443,7 @@ export async function getClient(
       .from('project_clients')
       .select(`
         *,
-        contacts:contacts!client_id (
+        contacts:contacts!contact_id (
           id,
           first_name,
           last_name,
@@ -483,8 +483,8 @@ export async function createClient(
       return { success: false, error: 'projectId and organizationId are required' };
     }
 
-    if (!params.clientData.client_id) {
-      return { success: false, error: 'client_id is required in clientData' };
+    if (!params.clientData.contact_id) {
+      return { success: false, error: 'contact_id is required in clientData' };
     }
 
     const authResult = await ensureAuth(ctx);
@@ -515,7 +515,7 @@ export async function createClient(
         project_id: params.projectId,
         organization_id: params.organizationId,
         created_by: orgAccessResult.memberId,
-        client_id: params.clientData.client_id,
+        contact_id: params.clientData.contact_id,
         committed_amount: params.clientData.committed_amount || null,
         currency_id: params.clientData.currency_id || null,
         unit: params.clientData.unit || null,
@@ -527,7 +527,7 @@ export async function createClient(
       })
       .select(`
         *,
-        contacts:contacts!client_id (
+        contacts:contacts!contact_id (
           id,
           first_name,
           last_name,
@@ -635,7 +635,7 @@ export async function updateClient(
       .eq('organization_id', params.organizationId)
       .select(`
         *,
-        contacts:contacts!client_id (
+        contacts:contacts!contact_id (
           id,
           first_name,
           last_name,

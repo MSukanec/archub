@@ -103,7 +103,7 @@ export async function getOrganizationClientsSummary(
         notes,
         is_primary,
         status,
-        contacts!project_clients_client_id_fkey (
+        contacts!project_clients_contact_id_fkey (
           linked_user:users!linked_user_id (
             id,
             avatar_url

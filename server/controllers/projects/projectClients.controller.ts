@@ -136,7 +136,7 @@ export async function handleCreateClient(req: Request, res: Response) {
       projectId: req.params.projectId,
       organizationId: req.body.organization_id,
       clientData: {
-        client_id: req.body.client_id,
+        contact_id: req.body.contact_id,
         committed_amount: req.body.committed_amount,
         currency_id: req.body.currency_id,
         unit: req.body.unit,
