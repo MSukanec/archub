@@ -10,6 +10,9 @@ export type { TransferGroup } from './TransferRow';
 export { default as ClientObligationRow } from './ClientObligationRow';
 export type { ClientObligation } from './ClientObligationRow';
 
+export { default as ClientPaymentRow } from './ClientPaymentRow';
+export type { ClientPayment } from './ClientPaymentRow';
+
 export { default as SubcontractRow } from './SubcontractRow';
 export type { Subcontract } from './SubcontractRow';
 

@@ -14,6 +14,8 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { apiRequest, queryClient } from '@/lib/queryClient'
+import { ClientPaymentRow } from '@/components/ui/data-row'
+import { useMobile } from '@/hooks/use-mobile'
 
 interface ClientPaymentsTabProps {
   projectId?: string;
@@ -86,6 +88,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();
   const { toast } = useToast();
+  const isMobile = useMobile();
   
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
@@ -605,6 +608,12 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
             variant: 'destructive' as const,
           },
         ]}
+        mobileRenderItem={isMobile ? (payment: ClientPayment) => (
+          <ClientPaymentRow
+            payment={payment}
+            onClick={() => handleRowClick(payment)}
+          />
+        ) : undefined}
       />
     </div>
   )

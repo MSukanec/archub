@@ -1,258 +1,213 @@
-import DataRowCard, { DataRowCardProps } from '../DataRowCard';
+import DataRowCard from '../DataRowCard';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-// Interface para el movimiento (usando la estructura real de la app)
-interface Movement {
+// Interface para client payment
+interface ClientPayment {
   id: string;
-  description: string;
-  amount: number;
-  exchange_rate?: number;
+  payment_date: string;
   created_at: string;
-  movement_date: string;
-  created_by: string;
-  organization_id: string;
-  project_id: string;
-  concept_id?: string;
+  amount: number;
+  exchange_rate: number;
+  status: 'confirmed' | 'pending' | 'rejected' | 'void';
+  reference?: string;
+  notes?: string;
+  file_url?: string;
+  contact_id: string;
+  client_id?: string;
   wallet_id?: string;
   currency_id?: string;
-  is_favorite?: boolean;
+  project_id?: string;
+  organization_id: string;
   
-  // Estructura real de movement_data
-  movement_data?: {
-    type?: {
-      name: string;
-    };
-    category?: {
-      name: string;
-    };
-    subcategory?: {
-      name: string;
-    };
-    wallet?: {
-      name: string;
-    };
-    currency?: {
-      symbol: string;
-      name: string;
-      code: string;
+  // Datos expandidos
+  contact?: {
+    id: string;
+    first_name?: string;
+    last_name?: string;
+    full_name?: string;
+    company_name?: string;
+    linked_user?: {
+      id: string;
+      avatar_url?: string;
     };
   };
-  
-  // Datos específicos de la vista movements_view
-  partner?: string;
-  subcontract?: string;
-  client?: string;
-  member?: string;
-  indirect?: string;
-  general_cost?: string;
-  
-  // Proyecto expandido
-  project?: {
+  project_client?: {
+    id: string;
+    unit?: string;
+  };
+  currency?: {
+    id: string;
+    code: string;
+    symbol: string;
     name: string;
+  };
+  wallet?: {
+    id: string;
+    name: string;
+  };
+  projects?: {
+    id: string;
+    name: string;
+    color: string;
   };
 }
 
-interface MovementRowProps {
-  movement: Movement;
+interface ClientPaymentRowProps {
+  payment: ClientPayment;
   onClick?: () => void;
   selected?: boolean;
   density?: 'compact' | 'normal' | 'comfortable';
-  showProject?: boolean;  // Para mostrar proyecto cuando no hay filtro activo
+  showProject?: boolean;
   className?: string;
 }
 
-// Helper para formatear el importe con signo
-const formatMovementAmount = (amount: number, currencySymbol?: string): string => {
+// Helper para formatear el monto de pago
+const formatPaymentAmount = (amount: number, currencySymbol?: string): string => {
   const formattedAmount = new Intl.NumberFormat('es-AR', {
-    minimumFractionDigits: 0,
+    minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(Math.abs(amount));
   
-  const sign = amount >= 0 ? '+' : '-';
   const symbol = currencySymbol || '$';
-  
-  return `${sign}${symbol}${formattedAmount}`;
+  return `${symbol}${formattedAmount}`;
 };
 
-// Helper para obtener las iniciales del concepto/categoría
-const getConceptInitials = (movement: Movement): string => {
-  const category = movement.movement_data?.category?.name;
-  const subcategory = movement.movement_data?.subcategory?.name;
+// Helper para obtener el nombre del cliente
+const getClientName = (payment: ClientPayment): string => {
+  const contact = payment.contact;
   
-  if (category && subcategory) {
-    const categoryInitial = category[0]?.toUpperCase() || '';
-    const subcategoryInitial = subcategory[0]?.toUpperCase() || '';
-    return categoryInitial + subcategoryInitial;
+  if (!contact) return 'Sin cliente';
+  
+  if (contact.company_name) {
+    return contact.company_name;
   }
   
-  if (category) {
-    const words = category.split(' ');
-    if (words.length > 1) {
-      return words.slice(0, 2).map(w => w[0]?.toUpperCase()).join('');
-    }
-    return category.slice(0, 2).toUpperCase();
+  if (contact.full_name) {
+    return contact.full_name;
   }
   
-  return 'M';
+  const firstName = contact.first_name || '';
+  const lastName = contact.last_name || '';
+  const fullName = `${firstName} ${lastName}`.trim();
+  
+  return fullName || 'Sin nombre';
 };
 
-// Helper para obtener el nombre completo del concepto
-const getConceptFullName = (movement: Movement): string => {
-  const category = movement.movement_data?.category?.name;
-  const subcategory = movement.movement_data?.subcategory?.name;
+// Helper para obtener las iniciales del cliente
+const getClientInitials = (payment: ClientPayment): string => {
+  const contact = payment.contact;
   
-  if (category && subcategory) {
-    return `${category} • ${subcategory}`;
+  if (!contact) return 'C';
+  
+  if (contact.first_name && contact.last_name) {
+    return `${contact.first_name[0]}${contact.last_name[0]}`.toUpperCase();
   }
   
-  if (category) {
-    return category;
+  if (contact.first_name) {
+    return contact.first_name.slice(0, 2).toUpperCase();
   }
   
-  return 'Sin categoría';
+  if (contact.company_name) {
+    return contact.company_name.slice(0, 2).toUpperCase();
+  }
+  
+  return 'CL';
 };
 
-// Helper para obtener el texto de la tercera línea específica
-const getSpecificThirdLine = (movement: Movement): string | null => {
-  // Para categoría "Indirectos", priorizar el tipo de indirecto sobre el miembro
-  const categoryName = movement.movement_data?.category?.name?.toLowerCase() || '';
-  
-  if (categoryName.includes('indirecto') && movement.indirect) {
-    return movement.indirect;
-  }
-  
-  // Para categoría "Gastos Generales", priorizar el gasto general
-  if (categoryName.includes('general') && movement.general_cost) {
-    return movement.general_cost;
-  }
-  
-  // Prioridad normal: personnel -> partner -> subcontract -> client -> indirect -> general_cost
-  // IMPORTANTE: NUNCA mostrar movement.member (nombre del creador)
-  if (movement.personnel) {
-    return movement.personnel;
-  }
-  
-  if (movement.partner) {
-    return movement.partner;
-  }
-  
-  if (movement.subcontract) {
-    return movement.subcontract;
-  }
-  
-  if (movement.client) {
-    return movement.client;
-  }
-  
-  if (movement.indirect) {
-    return movement.indirect;
-  }
-  
-  if (movement.general_cost) {
-    return movement.general_cost;
-  }
-  
-  // NO mostrar movement.member (nombre del creador) - eliminado completamente
-  
-  return null;
-};
-
-export default function MovementRow({ 
-  movement, 
+export default function ClientPaymentRow({ 
+  payment, 
   onClick, 
   selected, 
   density = 'normal',
   showProject = false,
   className 
-}: MovementRowProps) {
+}: ClientPaymentRowProps) {
   
-  // Determinar el color del borde basado en el tipo de movimiento
-  const getBorderColor = (movement: Movement): 'success' | 'danger' => {
-    const typeName = movement.movement_data?.type?.name?.toLowerCase() || '';
-    const categoryName = movement.movement_data?.category?.name?.toLowerCase() || '';
-    
-    // Si es ingreso, color verde
-    if (typeName.includes('ingreso') || categoryName.includes('ingreso')) {
-      return 'success';
+  // Determinar el color del borde basado en el estado del pago
+  const getBorderColor = (payment: ClientPayment): 'success' | 'warning' | 'danger' | 'default' => {
+    switch (payment.status) {
+      case 'confirmed':
+        return 'success';
+      case 'pending':
+        return 'warning';
+      case 'rejected':
+      case 'void':
+        return 'danger';
+      default:
+        return 'default';
     }
-    
-    // Si es egreso o monto negativo, color rojo
-    if (typeName.includes('egreso') || categoryName.includes('egreso') || movement.amount < 0) {
-      return 'danger';
-    }
-    
-    // Por defecto, si monto positivo, verde
-    return movement.amount >= 0 ? 'success' : 'danger';
   };
 
   // Formatear importe para trailing
-  const formattedAmount = formatMovementAmount(movement.amount, movement.movement_data?.currency?.symbol);
-  const currencyCode = movement.movement_data?.currency?.code || 'ARS';
+  const formattedAmount = formatPaymentAmount(payment.amount, payment.currency?.symbol);
+  const currencyCode = payment.currency?.code || 'ARS';
 
-  // Obtener avatar del creador (como en la card vieja)
-  const getCreatorAvatar = () => {
-    // Si hay un campo creator en el movement
-    if ((movement as any).creator?.avatar_url) {
-      return (movement as any).creator.avatar_url;
-    }
-    return undefined;
+  // Obtener avatar del cliente
+  const getClientAvatar = () => {
+    return payment.contact?.linked_user?.avatar_url;
   };
 
-  const getCreatorInitials = () => {
-    if ((movement as any).creator?.full_name) {
-      return (movement as any).creator.full_name
-        .split(' ')
-        .map((word: string) => word.charAt(0))
-        .join('')
-        .toUpperCase()
-        .slice(0, 2);
+  // Formatear fecha de pago
+  const formatPaymentDate = (dateString: string): string => {
+    try {
+      return format(new Date(dateString), 'dd/MM/yyyy', { locale: es });
+    } catch {
+      return '-';
     }
-    return 'A';
   };
 
-
-
-  // Obtener la información específica de la tercera línea
-  const specificThirdLine = getSpecificThirdLine(movement);
-  
+  // Obtener el estado formateado
+  const getStatusLabel = (status: string): string => {
+    const statusMap: Record<string, string> = {
+      confirmed: 'Confirmado',
+      pending: 'Pendiente',
+      rejected: 'Rechazado',
+      void: 'Anulado'
+    };
+    return statusMap[status] || status;
+  };
 
   // Contenido interno del card
   const cardContent = (
     <>
       {/* Columna de contenido (medio) */}
       <div className="flex-1 min-w-0">
-        {/* Línea 1: Tipo */}
+        {/* Línea 1: Nombre del cliente */}
         <div className="font-semibold text-sm truncate">
-          {movement.movement_data?.type?.name || 'Sin tipo'}
+          {getClientName(payment)}
         </div>
-        {/* Línea 2: Categoría */}
+        {/* Línea 2: Unidad funcional o billetera */}
         <div className="text-muted-foreground text-sm truncate">
-          {movement.movement_data?.category?.name || 'Sin categoría'}
+          {payment.project_client?.unit 
+            ? `Unidad: ${payment.project_client.unit}`
+            : payment.wallet?.name || 'Sin billetera'
+          }
         </div>
-        {/* Línea 3: Detalle específico */}
-        {specificThirdLine && (
-          <div className="text-muted-foreground text-sm truncate">
-            {specificThirdLine}
-          </div>
-        )}
+        {/* Línea 3: Fecha de pago */}
+        <div className="text-muted-foreground text-sm truncate">
+          {formatPaymentDate(payment.payment_date)}
+        </div>
       </div>
 
       {/* Columna trailing (dos líneas) */}
       <div className="flex flex-col items-end flex-shrink-0">
-        {/* Línea 1: Moneda y monto en dos columnas */}
+        {/* Línea 1: Moneda y monto */}
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">{currencyCode}</span>
-          <span className={`font-mono text-sm font-bold ${
-            getBorderColor(movement) === 'success' ? 'text-green-600' : 'text-red-600'
-          }`}>
+          <span className="font-mono text-sm font-bold text-green-600">
             {formattedAmount}
           </span>
         </div>
         
-        {/* Línea 2: Billetera */}
-        <div className="text-muted-foreground text-sm">
-          {movement.movement_data?.wallet?.name || 'Sin billetera'}
+        {/* Línea 2: Estado */}
+        <div className={`text-sm font-medium ${
+          payment.status === 'confirmed' ? 'text-green-600' :
+          payment.status === 'pending' ? 'text-orange-600' :
+          payment.status === 'rejected' || payment.status === 'void' ? 'text-red-600' :
+          'text-muted-foreground'
+        }`}>
+          {getStatusLabel(payment.status)}
         </div>
       </div>
     </>
@@ -260,14 +215,14 @@ export default function MovementRow({
 
   return (
     <DataRowCard
-      avatarUrl={getCreatorAvatar()}
-      avatarFallback={getCreatorInitials()}
-      borderColor={getBorderColor(movement)}
+      avatarUrl={getClientAvatar()}
+      avatarFallback={getClientInitials(payment)}
+      borderColor={getBorderColor(payment)}
       onClick={onClick}
       selected={selected}
       density={density}
       className={className}
-      data-testid={`movement-row-${movement.id}`}
+      data-testid={`payment-row-${payment.id}`}
     >
       {cardContent}
     </DataRowCard>
@@ -275,4 +230,4 @@ export default function MovementRow({
 }
 
 // Export del tipo para uso externo
-export type { Movement };
+export type { ClientPayment };
