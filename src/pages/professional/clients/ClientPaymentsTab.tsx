@@ -132,7 +132,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     });
   };
 
-  const handleEdit = (client: ProjectClientSummary) => {
+  const handleAddPayment = (client: ProjectClientSummary) => {
     openModal('installment', {
       projectId: activeProjectId,
       organizationId: organizationId,
@@ -232,7 +232,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
           {
             label: 'Editar Pago',
             icon: Edit,
-            onClick: () => handleEdit(client),
+            onClick: () => handleAddPayment(client),
           },
           {
             label: 'Eliminar',
