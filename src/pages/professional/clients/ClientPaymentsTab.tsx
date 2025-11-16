@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query'
 import { DollarSign, Plus, Edit } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { format } from 'date-fns'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface ClientPaymentsTabProps {
   projectId?: string;
@@ -75,13 +76,80 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
 
+  // Filter states
+  const [filterWallet, setFilterWallet] = useState<string>('all');
+  const [filterCurrency, setFilterCurrency] = useState<string>('all');
+  const [filterHasSchedule, setFilterHasSchedule] = useState<string>('all');
+  const [filterHasCommitment, setFilterHasCommitment] = useState<string>('all');
+  const [filterClient, setFilterClient] = useState<string>('all');
+  const [filterUnit, setFilterUnit] = useState<string>('all');
+
   // Query to get client payments for the project
   const { data: paymentsResponse, isLoading } = useQuery<{ data: ClientPayment[] }>({
     queryKey: [`/api/projects/${activeProjectId}/client-payments?organization_id=${organizationId}`],
     enabled: !!activeProjectId && !!organizationId
   });
 
-  const clientPayments = paymentsResponse?.data || [];
+  const allPayments = paymentsResponse?.data || [];
+
+  // Extract unique values for filters
+  const filterOptions = useMemo(() => {
+    const wallets = new Set<string>();
+    const currencies = new Set<string>();
+    const clients = new Set<string>();
+    const units = new Set<string>();
+
+    allPayments.forEach(payment => {
+      if (payment.wallet?.name) wallets.add(payment.wallet.name);
+      if (payment.currency?.code) currencies.add(payment.currency.code);
+      if (payment.contact) {
+        const clientName = payment.contact.company_name || 
+                          payment.contact.full_name || 
+                          `${payment.contact.first_name || ''} ${payment.contact.last_name || ''}`.trim();
+        if (clientName) clients.add(clientName);
+      }
+      if (payment.project_client?.unit) units.add(payment.project_client.unit);
+    });
+
+    return {
+      wallets: Array.from(wallets).sort(),
+      currencies: Array.from(currencies).sort(),
+      clients: Array.from(clients).sort(),
+      units: Array.from(units).sort(),
+    };
+  }, [allPayments]);
+
+  // Apply filters
+  const clientPayments = useMemo(() => {
+    return allPayments.filter(payment => {
+      // Filter by wallet
+      if (filterWallet !== 'all' && payment.wallet?.name !== filterWallet) return false;
+      
+      // Filter by currency
+      if (filterCurrency !== 'all' && payment.currency?.code !== filterCurrency) return false;
+      
+      // Filter by has schedule
+      if (filterHasSchedule === 'yes' && !payment.schedule_id) return false;
+      if (filterHasSchedule === 'no' && payment.schedule_id) return false;
+      
+      // Filter by has commitment
+      if (filterHasCommitment === 'yes' && !payment.commitment_id) return false;
+      if (filterHasCommitment === 'no' && payment.commitment_id) return false;
+      
+      // Filter by client
+      if (filterClient !== 'all') {
+        const clientName = payment.contact?.company_name || 
+                          payment.contact?.full_name || 
+                          `${payment.contact?.first_name || ''} ${payment.contact?.last_name || ''}`.trim();
+        if (clientName !== filterClient) return false;
+      }
+      
+      // Filter by unit
+      if (filterUnit !== 'all' && payment.project_client?.unit !== filterUnit) return false;
+      
+      return true;
+    });
+  }, [allPayments, filterWallet, filterCurrency, filterHasSchedule, filterHasCommitment, filterClient, filterUnit]);
 
   const handleEdit = (payment: ClientPayment) => {
     openModal('installment', {
@@ -234,6 +302,23 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     },
   ];
 
+  const isFilterActive = 
+    filterWallet !== 'all' || 
+    filterCurrency !== 'all' || 
+    filterHasSchedule !== 'all' || 
+    filterHasCommitment !== 'all' || 
+    filterClient !== 'all' || 
+    filterUnit !== 'all';
+
+  const handleClearFilters = () => {
+    setFilterWallet('all');
+    setFilterCurrency('all');
+    setFilterHasSchedule('all');
+    setFilterHasCommitment('all');
+    setFilterClient('all');
+    setFilterUnit('all');
+  };
+
   return (
     <div className="space-y-6">
       <Table
@@ -254,6 +339,118 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
               <Plus className="h-4 w-4 mr-2" />
               Agregar Pago
             </Button>
+          ),
+        }}
+        topBar={{
+          showFilter: true,
+          isFilterActive,
+          onClearFilters: handleClearFilters,
+          renderFilterContent: () => (
+            <div className="space-y-4 p-1">
+              <div className="grid grid-cols-2 gap-4">
+                {/* Filter by Wallet */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Billetera</label>
+                  <Select value={filterWallet} onValueChange={setFilterWallet}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todas las billeteras" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas las billeteras</SelectItem>
+                      {filterOptions.wallets.map((wallet) => (
+                        <SelectItem key={wallet} value={wallet}>
+                          {wallet}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Filter by Currency */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Moneda</label>
+                  <Select value={filterCurrency} onValueChange={setFilterCurrency}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todas las monedas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas las monedas</SelectItem>
+                      {filterOptions.currencies.map((currency) => (
+                        <SelectItem key={currency} value={currency}>
+                          {currency}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Filter by Has Schedule */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Cuota</label>
+                  <Select value={filterHasSchedule} onValueChange={setFilterHasSchedule}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas</SelectItem>
+                      <SelectItem value="yes">Con cuota</SelectItem>
+                      <SelectItem value="no">Sin cuota</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Filter by Has Commitment */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Compromiso</label>
+                  <Select value={filterHasCommitment} onValueChange={setFilterHasCommitment}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="yes">Con compromiso</SelectItem>
+                      <SelectItem value="no">Sin compromiso</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Filter by Client */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Cliente</label>
+                  <Select value={filterClient} onValueChange={setFilterClient}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todos los clientes" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos los clientes</SelectItem>
+                      {filterOptions.clients.map((client) => (
+                        <SelectItem key={client} value={client}>
+                          {client}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Filter by Unit */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Unidad Funcional</label>
+                  <Select value={filterUnit} onValueChange={setFilterUnit}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todas las unidades" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas las unidades</SelectItem>
+                      {filterOptions.units.map((unit) => (
+                        <SelectItem key={unit} value={unit}>
+                          {unit}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
           ),
         }}
         rowActions={(payment: ClientPayment) => [
