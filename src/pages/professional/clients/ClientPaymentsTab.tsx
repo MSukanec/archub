@@ -73,6 +73,11 @@ interface ClientPayment {
     due_date: string;
     amount: number;
   } | null;
+  projects?: {
+    id: string;
+    name: string;
+    color: string;
+  } | null;
 }
 
 export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps) {
@@ -273,6 +278,26 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       align: 'right' as const,
       render: (payment: ClientPayment) => formatDate(payment.created_at, 'dd/MM/yyyy'),
     },
+    // Project column - only shown when viewing organization-wide data
+    ...(activeProjectId ? [] : [{
+      key: 'project',
+      label: 'Proyecto',
+      sortable: true,
+      render: (payment: ClientPayment) => {
+        if (!payment.projects) return '-';
+        return (
+          <Badge 
+            className="font-medium"
+            style={{ 
+              backgroundColor: payment.projects.color,
+              color: 'white'
+            }}
+          >
+            {payment.projects.name}
+          </Badge>
+        );
+      },
+    }]),
     {
       key: 'contact',
       label: 'Cliente',
