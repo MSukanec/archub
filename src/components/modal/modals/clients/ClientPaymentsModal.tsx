@@ -51,7 +51,7 @@ interface ClientPaymentsModalProps {
     projectId: string
     organizationId: string
     paymentId?: string
-    mode?: 'create' | 'edit'
+    mode?: 'create' | 'edit' | 'view'
   }
   onClose: () => void
 }
@@ -65,10 +65,10 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
   const [isUploading, setIsUploading] = useState(false)
   const [existingFileUrl, setExistingFileUrl] = useState<string | null>(null)
 
-  // Fetch existing payment data for edit mode
+  // Fetch existing payment data for edit/view mode
   const { data: existingPayment, isLoading: loadingPayment } = useQuery({
     queryKey: [`/api/projects/${projectId}/client-payments?organization_id=${organizationId}`],
-    enabled: !!paymentId && mode === 'edit',
+    enabled: !!paymentId && (mode === 'edit' || mode === 'view'),
     select: (response: any) => {
       const payments = response?.data || []
       return payments.find((p: any) => p.id === paymentId)
@@ -110,20 +110,22 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
     }
   })
 
-  const isLoading = currenciesLoading || clientsLoading || walletsLoading || membersLoading || (mode === 'edit' && loadingPayment)
+  const isLoading = currenciesLoading || clientsLoading || walletsLoading || membersLoading || ((mode === 'edit' || mode === 'view') && loadingPayment)
 
-  // Set panel mode - open in view mode when editing existing payment, edit mode when creating
+  // Set panel mode based on the mode prop
   React.useEffect(() => {
-    if (mode === 'edit' && paymentId) {
+    if (mode === 'view') {
       setPanel('view')
+    } else if (mode === 'edit') {
+      setPanel('edit')
     } else {
       setPanel('edit')
     }
-  }, [setPanel, mode, paymentId])
+  }, [setPanel, mode])
 
   // Load existing payment data
   React.useEffect(() => {
-    if (existingPayment && mode === 'edit') {
+    if (existingPayment && (mode === 'edit' || mode === 'view')) {
       const paymentDate = existingPayment.payment_date ? new Date(existingPayment.payment_date) : new Date()
       
       form.reset({
@@ -288,7 +290,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
   }
 
   // View panel (read-only)
-  const viewPanel = mode === 'edit' && existingPayment ? (
+  const viewPanel = (mode === 'edit' || mode === 'view') && existingPayment ? (
     <div className="space-y-6">
       {/* Información Principal */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -705,8 +707,10 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
 
   const headerContent = (
     <FormModalHeader
-      title={mode === 'edit' ? "Editar Pago" : "Nuevo Pago de Cliente"}
-      description={mode === 'edit'
+      title={mode === 'view' ? "Ver Pago" : mode === 'edit' ? "Editar Pago" : "Nuevo Pago de Cliente"}
+      description={mode === 'view'
+        ? 'Consulta los detalles del pago seleccionado'
+        : mode === 'edit'
         ? 'Modifica los datos del pago seleccionado'
         : 'Registra un nuevo pago de cliente al proyecto'}
       icon={DollarSign}
