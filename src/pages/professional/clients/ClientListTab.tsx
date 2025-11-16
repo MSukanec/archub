@@ -2,7 +2,7 @@ import React from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { apiRequest } from '@/lib/queryClient'
-import { Users, Plus, Edit, Trash2, User, FileText, Calendar } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, User, Eye } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -158,6 +158,14 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     });
   };
 
+  const handleView = (client: ProjectClientSummary) => {
+    openModal('project-client', {
+      projectId: activeProjectId,
+      clientId: client.id,
+      mode: 'view',
+    });
+  };
+
   const handleEdit = (client: ProjectClientSummary) => {
     openModal('project-client', {
       projectId: activeProjectId,
@@ -255,7 +263,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     {
       key: 'full_name',
       label: 'Cliente',
-      width: '300px',
+      width: '250px',
       sortable: true,
       render: (client: ProjectClientSummary) => {
         const avatarUrl = client.contacts?.linked_user?.avatar_url;
@@ -278,6 +286,24 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             <span className="font-semibold">{displayName || '-'}</span>
           </div>
         );
+      },
+    },
+    {
+      key: 'email',
+      label: 'Mail',
+      width: '200px',
+      sortable: true,
+      render: (client: ProjectClientSummary) => {
+        return client.contacts?.email || '-';
+      },
+    },
+    {
+      key: 'phone',
+      label: 'Teléfono',
+      width: '150px',
+      sortable: true,
+      render: (client: ProjectClientSummary) => {
+        return client.contacts?.phone || '-';
       },
     },
     {
@@ -369,27 +395,12 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             </Button>
           ),
         }}
+        primaryRowAction={(client: ProjectClientSummary) => ({
+          icon: Eye,
+          onClick: () => handleView(client),
+          label: 'Ver cliente',
+        })}
         rowActions={(client: ProjectClientSummary) => [
-          {
-            label: 'Ver / editar compromiso',
-            icon: FileText,
-            onClick: () => {
-              toast({
-                title: 'Función en desarrollo',
-                description: 'La gestión de compromisos estará disponible próximamente',
-              });
-            },
-          },
-          {
-            label: 'Ver plan de pagos',
-            icon: Calendar,
-            onClick: () => {
-              toast({
-                title: 'Función en desarrollo',
-                description: 'El plan de pagos estará disponible próximamente',
-              });
-            },
-          },
           {
             label: 'Editar Cliente',
             icon: Edit,
