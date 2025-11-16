@@ -282,36 +282,30 @@ export default function ClientDashboardTab({ projectId, onTabChange }: ClientLis
   // Table columns
   const columns = [
     {
-      key: 'avatar',
-      label: '',
-      width: '60px',
-      sortable: false,
+      key: 'full_name',
+      label: 'Cliente',
+      sortable: true,
       render: (client: ProjectClientSummary) => {
         const avatarUrl = client.contacts?.linked_user?.avatar_url;
         const initials = client.contacts?.first_name?.[0] && client.contacts?.last_name?.[0]
           ? `${client.contacts.first_name[0]}${client.contacts.last_name[0]}`
           : client.contacts?.first_name?.[0] || '?';
         
-        return (
-          <Avatar className="h-8 w-8">
-            {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
-            <AvatarFallback>
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-        );
-      },
-    },
-    {
-      key: 'full_name',
-      label: 'Cliente',
-      sortable: true,
-      cellClassName: 'font-semibold',
-      render: (client: ProjectClientSummary) => {
         const displayName = client.contacts?.company_name || 
                            client.contacts?.full_name || 
                            `${client.contacts?.first_name || ''} ${client.contacts?.last_name || ''}`.trim();
-        return displayName || '-';
+        
+        return (
+          <div className="flex items-center gap-3">
+            <Avatar className="h-8 w-8">
+              {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
+              <AvatarFallback>
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <span className="font-semibold">{displayName || '-'}</span>
+          </div>
+        );
       },
     },
     {
@@ -490,44 +484,6 @@ export default function ClientDashboardTab({ projectId, onTabChange }: ClientLis
             </>
           ),
         }}
-        rowActions={(client: ProjectClientSummary) => [
-          {
-            label: 'Ver / editar compromiso',
-            icon: FileText,
-            onClick: () => {
-              toast({
-                title: 'Función en desarrollo',
-                description: 'La gestión de compromisos estará disponible próximamente',
-              });
-            },
-          },
-          {
-            label: 'Ver plan de pagos',
-            icon: Calendar,
-            onClick: () => {
-              toast({
-                title: 'Función en desarrollo',
-                description: 'El plan de pagos estará disponible próximamente',
-              });
-            },
-          },
-          {
-            label: 'Editar Cliente',
-            icon: Edit,
-            onClick: () => handleEdit(client),
-          },
-          {
-            label: 'Editar Contacto',
-            icon: User,
-            onClick: () => handleEditContact(client),
-          },
-          {
-            label: 'Eliminar',
-            icon: Trash2,
-            onClick: () => handleDelete(client),
-            variant: 'destructive',
-          },
-        ]}
       />
     </div>
   )
