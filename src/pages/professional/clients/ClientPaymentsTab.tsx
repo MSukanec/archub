@@ -240,22 +240,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       },
     },
     {
-      key: 'wallet',
-      label: 'Billetera',
-      sortable: true,
-      align: 'right' as const,
-      cellClassName: 'font-bold',
-      render: (payment: ClientPayment) => payment.wallet?.name || '-',
-    },
-    {
-      key: 'amount',
-      label: 'Monto',
-      sortable: true,
-      align: 'right' as const,
-      cellClassName: 'font-bold',
-      render: (payment: ClientPayment) => formatAmount(payment.amount, payment.currency?.symbol),
-    },
-    {
       key: 'notes',
       label: 'Notas',
       sortable: true,
@@ -300,6 +284,22 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           </span>
         );
       },
+    },
+    {
+      key: 'wallet',
+      label: 'Billetera',
+      sortable: true,
+      align: 'right' as const,
+      cellClassName: 'font-bold',
+      render: (payment: ClientPayment) => payment.wallet?.name || '-',
+    },
+    {
+      key: 'amount',
+      label: 'Monto',
+      sortable: true,
+      align: 'right' as const,
+      cellClassName: 'font-bold text-right',
+      render: (payment: ClientPayment) => formatAmount(payment.amount, payment.currency?.symbol),
     },
   ];
 
