@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye } from 'lucide-react'
+import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, CheckCircle2, AlertCircle, Calendar } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 import { ClientPaymentRow } from '@/components/ui/data-row'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/stat-card'
 
 interface ClientPaymentsTabProps {
   projectId?: string;
@@ -81,6 +82,22 @@ interface ClientPayment {
   } | null;
 }
 
+interface PaymentMetrics {
+  total_count: number;
+  by_currency: Array<{
+    currency_id: string;
+    currency_code: string;
+    currency_symbol: string;
+    total_confirmed: number;
+    total_pending: number;
+    total_rejected: number;
+    count_confirmed: number;
+    count_pending: number;
+    count_rejected: number;
+  }>;
+  latest_payment_date: string | null;
+}
+
 export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps) {
   const { data: userData } = useCurrentUser();
   const { selectedProjectId } = useProjectContext();
@@ -111,6 +128,15 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   });
 
   const allPayments = paymentsResponse?.data || [];
+
+  // Query to get payment metrics
+  const { data: metricsData } = useQuery<PaymentMetrics>({
+    queryKey: activeProjectId
+      ? [`/api/projects/${activeProjectId}/client-payments/metrics?organization_id=${organizationId}`]
+      : [`/api/organizations/${organizationId}/client-payments/metrics`],
+    enabled: !!organizationId,
+    staleTime: 3 * 60 * 1000, // 3 minutes - same as payments query
+  });
 
   // Extract unique values for filters
   const filterOptions = useMemo(() => {
@@ -183,8 +209,10 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       // Invalidate both project and organization queries
       if (activeProjectId) {
         queryClient.invalidateQueries({ queryKey: [`/api/projects/${activeProjectId}/client-payments?organization_id=${organizationId}`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/projects/${activeProjectId}/client-payments/metrics?organization_id=${organizationId}`] });
       }
       queryClient.invalidateQueries({ queryKey: [`/api/organizations/${organizationId}/client-payments`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/organizations/${organizationId}/client-payments/metrics`] });
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${activeProjectId}/clients/summary`] });
       queryClient.invalidateQueries({ queryKey: [`/api/organizations/${organizationId}/clients/summary`] });
       toast({
@@ -268,6 +296,16 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       void: { label: 'Anulado', className: 'bg-gray-600 text-white hover:bg-gray-600' },
     };
     return statusConfig[status];
+  };
+
+  // Format currency for KPIs - groups by currency
+  const formatCurrencyKPI = (currencyData: Array<{ currency_symbol: string; amount: number }>) => {
+    if (!currencyData || currencyData.length === 0) return '-';
+    
+    return currencyData.map(({ currency_symbol, amount }) => {
+      const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return `${currency_symbol} ${formattedAmount}`;
+    }).join(' · ');
   };
 
   // Table columns
@@ -470,6 +508,74 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
 
   return (
     <div className="space-y-6">
+      {/* KPI Cards Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {/* Card 1: Total Pagos (count) */}
+        <StatCard data-testid="stat-card-total-pagos">
+          <StatCardTitle showArrow={false}>
+            <DollarSign className="w-4 h-4 inline mr-1" />
+            Total Pagos
+          </StatCardTitle>
+          <StatCardValue className="text-2xl md:text-3xl">
+            {metricsData?.total_count ?? 0}
+          </StatCardValue>
+          <StatCardMeta>Cantidad de pagos registrados</StatCardMeta>
+        </StatCard>
+
+        {/* Card 2: Total Confirmado (sum of confirmed amounts by currency) */}
+        <StatCard data-testid="stat-card-total-confirmado">
+          <StatCardTitle showArrow={false}>
+            <CheckCircle2 className="w-4 h-4 inline mr-1" />
+            Total Confirmado
+          </StatCardTitle>
+          <StatCardValue className="text-2xl md:text-3xl text-green-600 dark:text-green-400">
+            {formatCurrencyKPI(
+              metricsData?.by_currency?.map(c => ({
+                currency_symbol: c.currency_symbol,
+                amount: c.total_confirmed
+              })) ?? []
+            )}
+          </StatCardValue>
+          <StatCardMeta>
+            {metricsData?.by_currency?.reduce((sum, c) => sum + c.count_confirmed, 0) ?? 0} pagos confirmados
+          </StatCardMeta>
+        </StatCard>
+
+        {/* Card 3: Total Pendiente (sum of pending amounts by currency) */}
+        <StatCard data-testid="stat-card-total-pendiente">
+          <StatCardTitle showArrow={false}>
+            <AlertCircle className="w-4 h-4 inline mr-1" />
+            Total Pendiente
+          </StatCardTitle>
+          <StatCardValue className="text-2xl md:text-3xl text-orange-600 dark:text-orange-400">
+            {formatCurrencyKPI(
+              metricsData?.by_currency?.map(c => ({
+                currency_symbol: c.currency_symbol,
+                amount: c.total_pending
+              })) ?? []
+            )}
+          </StatCardValue>
+          <StatCardMeta>
+            {metricsData?.by_currency?.reduce((sum, c) => sum + c.count_pending, 0) ?? 0} pagos pendientes
+          </StatCardMeta>
+        </StatCard>
+
+        {/* Card 4: Último Pago (latest payment date) */}
+        <StatCard data-testid="stat-card-ultimo-pago">
+          <StatCardTitle showArrow={false}>
+            <Calendar className="w-4 h-4 inline mr-1" />
+            Último Pago
+          </StatCardTitle>
+          <StatCardValue className="text-2xl md:text-3xl">
+            {metricsData?.latest_payment_date 
+              ? format(new Date(metricsData.latest_payment_date), 'd/M/yyyy')
+              : '-'
+            }
+          </StatCardValue>
+          <StatCardMeta>Fecha del último pago registrado</StatCardMeta>
+        </StatCard>
+      </div>
+
       <Table
         columns={columns}
         data={clientPayments}

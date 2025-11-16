@@ -108,10 +108,10 @@ function calculateMetricsFromPayments(payments: any[]): PaymentMetrics {
   const currencyMap = new Map<string, PaymentMetricsByCurrency>();
 
   payments.forEach((payment) => {
-    const currencyId = payment.currency_id;
-    if (!currencyId) return;
+    // Use UNKNOWN bucket for payments without currency_id to prevent data loss
+    const currencyId = payment.currency_id || 'UNKNOWN';
 
-    // Default currency metadata if join failed (RLS/null scenario)
+    // Default currency metadata if join failed or currency_id is null
     const currencyData = payment.currencies || {
       id: currencyId,
       code: 'UNKNOWN',
