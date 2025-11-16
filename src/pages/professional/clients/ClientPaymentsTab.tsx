@@ -278,11 +278,12 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'project',
       label: 'Proyecto',
       sortable: true,
+      width: '200px',
       render: (payment: ClientPayment) => {
         if (!payment.projects) return '-';
         return (
           <Badge 
-            className="font-medium"
+            className="font-medium whitespace-nowrap"
             style={{ 
               backgroundColor: payment.projects.color,
               color: 'white'
