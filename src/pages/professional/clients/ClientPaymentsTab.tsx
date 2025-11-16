@@ -195,7 +195,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   });
 
   const handleEdit = (payment: ClientPayment) => {
-    openModal('installment', {
+    openModal('client-payment', {
       projectId: activeProjectId,
       organizationId: organizationId,
       paymentId: payment.id,
@@ -223,7 +223,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   };
 
   const handleAddPayment = () => {
-    openModal('installment', {
+    openModal('client-payment', {
       projectId: activeProjectId,
       organizationId: organizationId,
     });
@@ -447,7 +447,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   };
 
   const handleRowClick = (payment: ClientPayment) => {
-    openModal('installment', {
+    openModal('client-payment', {
       projectId: activeProjectId,
       organizationId: organizationId,
       paymentId: payment.id,
