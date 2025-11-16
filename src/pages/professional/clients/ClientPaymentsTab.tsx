@@ -445,6 +445,15 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     setFilterStatus('all');
   };
 
+  const handleRowClick = (payment: ClientPayment) => {
+    openModal('installment', {
+      projectId: activeProjectId,
+      organizationId: organizationId,
+      paymentId: payment.id,
+      mode: 'edit',
+    });
+  };
+
   return (
     <div className="space-y-6">
       <Table
@@ -452,6 +461,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         data={clientPayments}
         isLoading={isLoading}
         showDoubleHeader={false}
+        onRowClick={handleRowClick}
         emptyStateConfig={{
           icon: <DollarSign className="h-12 w-12 text-muted-foreground" />,
           title: 'No hay pagos registrados',

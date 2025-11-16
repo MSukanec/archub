@@ -1079,9 +1079,11 @@ export function Table<T = any>({
                     className={cn(
                       "group relative grid gap-2 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-sm hover:bg-[var(--table-row-hover-bg)] transition-colors",
                       index < groupRows.length - 1 ? "border-b border-[var(--table-row-border)]" : "",
+                      onRowClick && "cursor-pointer",
                       getRowClassName?.(item),
                     )}
                     style={{ gridTemplateColumns: getGridTemplateColumns() }}
+                    onClick={() => onRowClick?.(item)}
                   >
                     {selectable && (
                       <div className="flex items-center justify-center">
@@ -1212,9 +1214,11 @@ export function Table<T = any>({
                         ? "border-b border-[var(--table-row-border)]"
                         : "",
                       isInactive && "opacity-50",
+                      onRowClick && "cursor-pointer",
                       getRowClassName?.(item),
                     )}
                     style={{ gridTemplateColumns: getGridTemplateColumns() }}
+                    onClick={() => onRowClick?.(item)}
                   >
                 {selectable && (
                   <div className="flex items-center justify-center">
