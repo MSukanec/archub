@@ -407,7 +407,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     },
     {
       key: 'attachments',
-      label: 'Adjuntos',
+      label: (<Paperclip className="h-4 w-4" />) as any,
       sortable: false,
       align: 'center' as const,
       render: (payment: ClientPayment) => {
@@ -419,7 +419,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         );
       },
     },
-  ];
+  ] as const;
 
   const isFilterActive = 
     filterWallet !== 'all' || 
@@ -456,6 +456,10 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         data={clientPayments}
         isLoading={isLoading}
         showDoubleHeader={false}
+        columnWidths={{
+          contact: '280px',
+          attachments: '60px',
+        }}
         emptyStateConfig={{
           icon: <DollarSign className="h-12 w-12 text-muted-foreground" />,
           title: 'No hay pagos registrados',
