@@ -103,10 +103,14 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
 
   const isLoading = currenciesLoading || clientsLoading || walletsLoading || (mode === 'edit' && loadingPayment)
 
-  // Set panel mode
+  // Set panel mode - open in view mode when editing existing payment, edit mode when creating
   React.useEffect(() => {
-    setPanel('edit')
-  }, [setPanel])
+    if (mode === 'edit' && paymentId) {
+      setPanel('view')
+    } else {
+      setPanel('edit')
+    }
+  }, [setPanel, mode, paymentId])
 
   // Load existing payment data
   React.useEffect(() => {
@@ -272,36 +276,125 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
   // View panel (read-only)
   const viewPanel = mode === 'edit' && existingPayment ? (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Información Principal */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <h4 className="font-medium text-foreground mb-2">Cliente</h4>
-          <span className="text-sm">
-            {formatContactName(existingPayment.contact) || '-'}
-          </span>
+          <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Cliente</h4>
+          <div className="flex flex-col">
+            <span className="text-base font-semibold">
+              {formatContactName(existingPayment.contact) || '-'}
+            </span>
+            {existingPayment.project_client?.unit && (
+              <span className="text-sm text-muted-foreground">Unidad: {existingPayment.project_client.unit}</span>
+            )}
+          </div>
         </div>
         <div>
-          <h4 className="font-medium text-foreground mb-2">Monto</h4>
-          <span className="text-sm font-medium">
+          <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Monto</h4>
+          <span className="text-base font-bold text-green-600 dark:text-green-500">
             {existingPayment.currency?.symbol} {existingPayment.amount?.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
+          <div className="text-xs text-muted-foreground mt-1">
+            {existingPayment.currency?.code} - Tipo de cambio: {existingPayment.exchange_rate?.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
+          </div>
         </div>
+      </div>
+
+      {/* Detalles del Pago */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>
-          <h4 className="font-medium text-foreground mb-2">Fecha de Pago</h4>
-          <span className="text-sm">
-            {existingPayment.payment_date ? format(new Date(existingPayment.payment_date), 'dd/MM/yyyy') : '-'}
+          <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Fecha de Pago</h4>
+          <span className="text-sm font-medium">
+            {existingPayment.payment_date ? format(new Date(existingPayment.payment_date), 'dd/MM/yyyy', { locale: es }) : '-'}
           </span>
         </div>
         <div>
-          <h4 className="font-medium text-foreground mb-2">Estado</h4>
-          <span className="text-sm capitalize">{existingPayment.status || '-'}</span>
+          <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Billetera</h4>
+          <span className="text-sm font-medium">
+            {existingPayment.wallet?.name || '-'}
+          </span>
+        </div>
+        <div>
+          <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Estado</h4>
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            existingPayment.status === 'confirmed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+            existingPayment.status === 'pending' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' :
+            existingPayment.status === 'rejected' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+            'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+          }`}>
+            {existingPayment.status === 'confirmed' ? 'Confirmado' :
+             existingPayment.status === 'pending' ? 'Pendiente' :
+             existingPayment.status === 'rejected' ? 'Rechazado' :
+             existingPayment.status === 'void' ? 'Anulado' : '-'}
+          </span>
         </div>
       </div>
-      {existingPayment.notes && (
-        <div>
-          <h4 className="font-medium text-foreground mb-2">Notas</h4>
-          <p className="text-sm text-muted-foreground">{existingPayment.notes}</p>
+
+      {/* Referencias y Vinculaciones */}
+      {(existingPayment.reference || existingPayment.commitment || existingPayment.schedule) && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {existingPayment.reference && (
+            <div>
+              <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Referencia</h4>
+              <span className="text-sm">{existingPayment.reference}</span>
+            </div>
+          )}
+          {existingPayment.commitment && (
+            <div>
+              <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Compromiso</h4>
+              <span className="text-sm">
+                {existingPayment.currency?.symbol} {existingPayment.commitment.amount?.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+            </div>
+          )}
+          {existingPayment.schedule && (
+            <div>
+              <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Cuota</h4>
+              <span className="text-sm">
+                Vencimiento: {format(new Date(existingPayment.schedule.due_date), 'dd/MM/yyyy', { locale: es })}
+              </span>
+            </div>
+          )}
         </div>
       )}
+
+      {/* Notas */}
+      {existingPayment.notes && (
+        <div>
+          <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Notas</h4>
+          <p className="text-sm bg-muted/30 p-3 rounded-md">{existingPayment.notes}</p>
+        </div>
+      )}
+
+      {/* Archivo Adjunto */}
+      {existingPayment.file_url && (
+        <div>
+          <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Archivo Adjunto</h4>
+          <a
+            href={existingPayment.file_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            <FileText className="h-4 w-4" />
+            Ver archivo adjunto
+          </a>
+        </div>
+      )}
+
+      {/* Metadatos */}
+      <div className="pt-4 border-t border-border">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-muted-foreground">
+          <div>
+            <span className="font-medium">Creado:</span> {format(new Date(existingPayment.created_at), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}
+          </div>
+          {existingPayment.updated_at && existingPayment.updated_at !== existingPayment.created_at && (
+            <div>
+              <span className="font-medium">Actualizado:</span> {format(new Date(existingPayment.updated_at), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   ) : null
 
