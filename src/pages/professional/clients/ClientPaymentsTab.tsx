@@ -359,8 +359,14 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       label: 'Monto',
       sortable: true,
       sortType: 'number' as const,
-      cellClassName: 'font-bold',
-      render: (payment: ClientPayment) => formatAmount(payment.amount, payment.currency?.symbol),
+      render: (payment: ClientPayment) => (
+        <div className="flex flex-col">
+          <span className="font-bold">{formatAmount(payment.amount, payment.currency?.symbol)}</span>
+          <span className="text-xs text-muted-foreground" style={{ fontSize: '12px' }}>
+            Cot. {payment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
+          </span>
+        </div>
+      ),
     },
     {
       key: 'status',
