@@ -315,6 +315,24 @@ export async function getClientsSummary(
       if (!acc[clientId]) {
         const enriched = enrichedById.get(clientId);
         
+        // Construct contacts object combining data from view and enriched data
+        const contacts = enriched?.contacts ? {
+          ...enriched.contacts,
+          // Override with email/phone from financial view if available (these are more reliable)
+          email: row.client_email || enriched.contacts.email,
+          phone: row.client_phone || enriched.contacts.phone,
+          full_name: row.client_name || enriched.contacts.full_name,
+        } : (row.client_email || row.client_phone || row.client_name ? {
+          id: row.client_id,
+          email: row.client_email,
+          phone: row.client_phone,
+          full_name: row.client_name,
+          first_name: null,
+          last_name: null,
+          company_name: null,
+          linked_user: null
+        } : null);
+        
         acc[clientId] = {
           id: row.project_client_id,
           project_id: row.project_id,
@@ -324,7 +342,7 @@ export async function getClientsSummary(
           notes: enriched?.notes || null,
           is_primary: enriched?.is_primary || false,
           status: enriched?.status || 'active',
-          contacts: enriched?.contacts || null,
+          contacts: contacts,
           role: row.role_id ? {
             id: row.role_id,
             name: row.role_name,

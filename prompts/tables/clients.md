@@ -198,7 +198,7 @@ create index IF not exists idx_project_clients_client on public.project_clients 
 
 create index IF not exists idx_project_clients_created_at on public.project_clients using btree (created_at) TABLESPACE pg_default;
 
-VISTA CLIENT_FINANCIAL_OVERVIEW:
+---------- VISTA CLIENT_FINANCIAL_OVERVIEW:
 
 create view public.client_financial_overview as
 select
@@ -248,3 +248,44 @@ group by
   c.full_name,
   c.email,
   c.phone;
+
+  ---------- TABLA CONTACTS:
+
+  create table public.contacts (
+    id uuid not null default gen_random_uuid (),
+    organization_id uuid null,
+    first_name text null,
+    email text null,
+    phone text null,
+    company_name text null,
+    location text null,
+    notes text null,
+    created_at timestamp with time zone null default now(),
+    last_name text null,
+    linked_user_id uuid null,
+    full_name text null,
+    updated_at timestamp with time zone null default now(),
+    national_id text null,
+    avatar_attachment_id uuid null,
+    avatar_updated_at timestamp with time zone null,
+    is_local boolean null default true,
+    display_name_override text null,
+    linked_at timestamp with time zone null,
+    sync_status text null default 'local'::text,
+    constraint contacts_pkey primary key (id),
+    constraint contacts_national_id_key unique (national_id),
+    constraint contacts_avatar_attachment_id_fkey foreign KEY (avatar_attachment_id) references contact_attachments (id) on delete set null,
+    constraint contacts_linked_user_id_fkey foreign KEY (linked_user_id) references users (id) on delete set null,
+    constraint contacts_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
+  ) TABLESPACE pg_default;
+
+  create unique INDEX IF not exists uniq_contacts_org_linked_user on public.contacts using btree (organization_id, linked_user_id) TABLESPACE pg_default
+  where
+    (linked_user_id is not null);
+
+  create index IF not exists idx_contacts_org_email on public.contacts using btree (organization_id, email) TABLESPACE pg_default;
+
+  create trigger on_contact_link_user BEFORE INSERT
+  or
+  update OF email on contacts for EACH row
+  execute FUNCTION handle_contact_link_user ();
