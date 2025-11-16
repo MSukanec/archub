@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { DollarSign, Plus, Edit, Trash2, Paperclip } from 'lucide-react'
+import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
@@ -447,12 +447,12 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     setFilterStatus('all');
   };
 
-  const handleRowClick = (payment: ClientPayment) => {
+  const handleViewPayment = (payment: ClientPayment) => {
     openModal('client-payment', {
       projectId: activeProjectId,
       organizationId: organizationId,
       paymentId: payment.id,
-      mode: 'edit',
+      mode: 'view',
     });
   };
 
@@ -463,7 +463,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         data={clientPayments}
         isLoading={isLoading}
         showDoubleHeader={false}
-        onRowClick={handleRowClick}
         emptyStateConfig={{
           icon: <DollarSign className="h-12 w-12 text-muted-foreground" />,
           title: 'No hay pagos registrados',
@@ -593,6 +592,10 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
             </div>
           ),
         }}
+        primaryRowAction={(payment: ClientPayment) => ({
+          label: 'Ver',
+          onClick: () => handleViewPayment(payment),
+        })}
         rowActions={(payment: ClientPayment) => [
           {
             label: 'Editar Pago',
@@ -609,7 +612,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         renderCard={(payment: ClientPayment) => (
           <ClientPaymentRow
             payment={payment}
-            onClick={() => handleRowClick(payment)}
+            onClick={() => handleViewPayment(payment)}
           />
         )}
       />
