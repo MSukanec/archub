@@ -157,36 +157,31 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   // Table columns
   const columns = [
     {
-      key: 'avatar',
-      label: '',
-      width: '60px',
-      sortable: false,
+      key: 'full_name',
+      label: 'Cliente',
+      sortable: true,
+      cellClassName: 'font-semibold',
       render: (client: ProjectClientSummary) => {
         const avatarUrl = client.contacts?.linked_user?.avatar_url;
         const initials = client.contacts?.first_name?.[0] && client.contacts?.last_name?.[0]
           ? `${client.contacts.first_name[0]}${client.contacts.last_name[0]}`
           : client.contacts?.first_name?.[0] || '?';
         
-        return (
-          <Avatar className="h-8 w-8">
-            {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
-            <AvatarFallback>
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-        );
-      },
-    },
-    {
-      key: 'full_name',
-      label: 'Cliente',
-      sortable: true,
-      cellClassName: 'font-semibold',
-      render: (client: ProjectClientSummary) => {
         const displayName = client.contacts?.company_name || 
                            client.contacts?.full_name || 
                            `${client.contacts?.first_name || ''} ${client.contacts?.last_name || ''}`.trim();
-        return displayName || '-';
+        
+        return (
+          <div className="flex items-center gap-3">
+            <Avatar className="h-8 w-8">
+              {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
+              <AvatarFallback>
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <span>{displayName || '-'}</span>
+          </div>
+        );
       },
     },
   ];

@@ -151,7 +151,7 @@ export function Clients() {
     },
     {
       id: "details",
-      label: "Historial de Pagos",
+      label: "Pagos",
       isActive: activeTab === "details"
     },
     {
@@ -231,7 +231,7 @@ export function Clients() {
     }),
     ...(activeTab === "details" && {
       actionButton: {
-        label: "Nuevo Aporte",
+        label: "Nuevo Pago",
         icon: Plus,
         onClick: () => openModal('installment', {
           projectId,
