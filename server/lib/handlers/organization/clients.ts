@@ -64,22 +64,44 @@ export async function getOrganizationClientsSummary(
     const features = planData?.features || [];
     const isMultiCurrency = Array.isArray(features) && features.includes('multi-currency');
 
-    // Fetch all project clients for the organization with financial summaries
-    const { data: projectClients, error } = await supabase
+    // Use unified view for all plans (same as project handler)
+    const viewName = 'client_financial_overview';
+
+    // Query the financial overview view for all clients in the organization
+    const { data: financialData, error: viewError } = await supabase
+      .from(viewName)
+      .select('*')
+      .eq('organization_id', params.organizationId);
+
+    if (viewError) {
+      console.error('Error fetching client financial overview:', viewError);
+      return { success: false, error: 'Failed to fetch client financial data' };
+    }
+
+    if (!financialData || financialData.length === 0) {
+      return {
+        success: true,
+        data: {
+          plan: {
+            slug: planSlug,
+            isMultiCurrency
+          },
+          clients: []
+        }
+      };
+    }
+
+    // Get unique project_client_ids
+    const projectClientIds = Array.from(new Set(financialData.map((item: any) => item.project_client_id)));
+
+    // Fetch contact data for avatars, client roles, and project info
+    const { data: enrichedData, error: enrichError } = await supabase
       .from('project_clients')
       .select(`
         id,
-        project_id,
-        client_id,
         unit,
+        project_id,
         client_role_id,
-        notes,
-        total_committed,
-        total_paid,
-        balance,
-        next_due,
-        created_at,
-        updated_at,
         contacts:contacts!client_id (
           id,
           first_name,
@@ -93,7 +115,7 @@ export async function getOrganizationClientsSummary(
             avatar_url
           )
         ),
-        role:client_roles!client_role_id (
+        client_role:client_roles!client_role_id (
           id,
           name,
           is_default
@@ -104,59 +126,45 @@ export async function getOrganizationClientsSummary(
           color
         )
       `)
-      .eq('organization_id', params.organizationId)
-      .order('created_at', { ascending: false });
+      .in('id', projectClientIds);
 
-    if (error) {
-      console.error('Error fetching project clients:', error);
-      return { success: false, error: 'Failed to fetch clients' };
+    if (enrichError) {
+      console.error('Error enriching client data:', enrichError);
+      return { success: false, error: 'Failed to enrich client data' };
     }
 
-    // Get financial details by currency for each client if multi-currency is enabled
-    let clientsWithFinancials = projectClients || [];
+    // Pre-index enriched data by project_client_id for O(1) lookup
+    const enrichedById = new Map(enrichedData?.map((e: any) => [e.id, e]) || []);
 
-    if (isMultiCurrency && clientsWithFinancials.length > 0) {
-      const clientIds = clientsWithFinancials.map(c => c.id);
-
-      const { data: financialsByCurrency, error: financialsError } = await supabase
-        .from('project_client_financials_by_currency')
-        .select('*')
-        .in('client_id', clientIds);
-
-      if (financialsError) {
-        console.error('Error fetching client financials by currency:', financialsError);
-      } else {
-        // Group financials by client_id
-        const financialsByClientId = new Map<string, any[]>();
-        (financialsByCurrency || []).forEach(f => {
-          if (!financialsByClientId.has(f.client_id)) {
-            financialsByClientId.set(f.client_id, []);
-          }
-          financialsByClientId.get(f.client_id)!.push(f);
-        });
-
-        // Add financials to each client
-        clientsWithFinancials = clientsWithFinancials.map(client => ({
-          ...client,
-          financialByCurrency: financialsByClientId.get(client.id) || [],
-          // For sorting purposes, use aggregated totals
-          total_committed_amount: client.total_committed || 0,
-          total_paid_amount: client.total_paid || 0,
-          balance_due: client.balance || 0,
-          next_due: client.next_due || null
-        }));
+    // Group financial data by project_client_id
+    const groupedByClient = financialData.reduce((acc: any, row: any) => {
+      const clientId = row.project_client_id;
+      
+      if (!acc[clientId]) {
+        const enriched = enrichedById.get(clientId);
+        
+        acc[clientId] = {
+          id: row.project_client_id,
+          project_id: enriched?.project_id || row.project_id,
+          client_id: row.client_id,
+          organization_id: row.organization_id,
+          unit: enriched?.unit || null,
+          contacts: enriched?.contacts || null,
+          role: enriched?.client_role || null,
+          projects: enriched?.projects || null,
+          financialByCurrency: [],
+          total_committed_amount: parseFloat(row.total_committed_amount || 0),
+          total_paid_amount: parseFloat(row.total_paid_amount || 0),
+          balance_due: parseFloat(row.balance_due || 0),
+          next_due: row.next_due || null
+        };
       }
-    } else {
-      // Single currency mode - use aggregated values
-      clientsWithFinancials = clientsWithFinancials.map(client => ({
-        ...client,
-        financialByCurrency: [],
-        total_committed_amount: client.total_committed || 0,
-        total_paid_amount: client.total_paid || 0,
-        balance_due: client.balance || 0,
-        next_due: client.next_due || null
-      }));
-    }
+
+      return acc;
+    }, {});
+
+    // Convert to array
+    const clientsWithFinancials = Object.values(groupedByClient);
 
     return {
       success: true,
