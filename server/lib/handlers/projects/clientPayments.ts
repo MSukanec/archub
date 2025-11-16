@@ -24,6 +24,7 @@ export interface ClientPayment {
   created_at: string;
   updated_at: string;
   wallet_id: string | null;
+  status: 'confirmed' | 'pending' | 'rejected' | 'void';
   contact: {
     id: string;
     first_name: string;

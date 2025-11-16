@@ -10,6 +10,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { format } from 'date-fns'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
 
 interface ClientPaymentsTabProps {
   projectId?: string;
@@ -32,6 +33,7 @@ interface ClientPayment {
   created_at: string;
   updated_at: string;
   wallet_id: string | null;
+  status: 'confirmed' | 'pending' | 'rejected' | 'void';
   contact: {
     id: string;
     first_name: string;
@@ -84,6 +86,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   const [filterHasCommitment, setFilterHasCommitment] = useState<string>('all');
   const [filterClient, setFilterClient] = useState<string>('all');
   const [filterUnit, setFilterUnit] = useState<string>('all');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
 
   // Query to get client payments for the project
   const { data: paymentsResponse, isLoading } = useQuery<{ data: ClientPayment[] }>({
@@ -148,9 +151,12 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       // Filter by unit
       if (filterUnit !== 'all' && payment.project_client?.unit !== filterUnit) return false;
       
+      // Filter by status
+      if (filterStatus !== 'all' && payment.status !== filterStatus) return false;
+      
       return true;
     });
-  }, [allPayments, filterWallet, filterCurrency, filterHasSchedule, filterHasCommitment, filterClient, filterUnit]);
+  }, [allPayments, filterWallet, filterCurrency, filterHasSchedule, filterHasCommitment, filterClient, filterUnit, filterStatus]);
 
   const handleEdit = (payment: ClientPayment) => {
     openModal('installment', {
@@ -189,6 +195,17 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   const formatAmount = (amount: number, currencySymbol: string | undefined) => {
     const symbol = currencySymbol || '$';
     return `${symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  // Get status badge configuration
+  const getStatusBadge = (status: 'confirmed' | 'pending' | 'rejected' | 'void') => {
+    const statusConfig = {
+      confirmed: { label: 'Confirmado', className: 'bg-green-600 text-white hover:bg-green-600' },
+      pending: { label: 'Pendiente', className: 'bg-orange-600 text-white hover:bg-orange-600' },
+      rejected: { label: 'Rechazado', className: 'bg-red-600 text-white hover:bg-red-600' },
+      void: { label: 'Anulado', className: 'bg-gray-600 text-white hover:bg-gray-600' },
+    };
+    return statusConfig[status];
   };
 
   // Table columns in EXACT ORDER specified
@@ -297,9 +314,22 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'amount',
       label: 'Monto',
       sortable: true,
-      align: 'right' as const,
-      cellClassName: 'font-bold text-right',
+      sortType: 'number' as const,
+      cellClassName: 'font-bold',
       render: (payment: ClientPayment) => formatAmount(payment.amount, payment.currency?.symbol),
+    },
+    {
+      key: 'status',
+      label: 'Estado',
+      sortable: true,
+      render: (payment: ClientPayment) => {
+        const statusInfo = getStatusBadge(payment.status);
+        return (
+          <Badge className={statusInfo.className}>
+            {statusInfo.label}
+          </Badge>
+        );
+      },
     },
   ];
 
@@ -309,7 +339,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     filterHasSchedule !== 'all' || 
     filterHasCommitment !== 'all' || 
     filterClient !== 'all' || 
-    filterUnit !== 'all';
+    filterUnit !== 'all' ||
+    filterStatus !== 'all';
 
   const handleClearFilters = () => {
     setFilterWallet('all');
@@ -318,6 +349,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     setFilterHasCommitment('all');
     setFilterClient('all');
     setFilterUnit('all');
+    setFilterStatus('all');
   };
 
   return (
@@ -435,6 +467,21 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
                         {unit}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs font-medium mb-1 block">Estado</Label>
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Todos los estados" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los estados</SelectItem>
+                    <SelectItem value="confirmed">Confirmado</SelectItem>
+                    <SelectItem value="pending">Pendiente</SelectItem>
+                    <SelectItem value="rejected">Rechazado</SelectItem>
+                    <SelectItem value="void">Anulado</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
