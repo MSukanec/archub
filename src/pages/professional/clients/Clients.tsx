@@ -16,6 +16,7 @@ import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileCo
 import { useMobile } from '@/hooks/use-mobile'
 import { useLocation } from 'wouter'
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
+import { useProjectContext } from '@/stores/projectContext'
 
 export function Clients() {
   const [activeTab, setActiveTab] = useState("dashboard")
@@ -23,6 +24,7 @@ export function Clients() {
   const { openModal } = useGlobalModalStore()
   const { setSidebarContext } = useNavigationStore()
   const [, navigate] = useLocation()
+  const { selectedProjectId } = useProjectContext()
   const { 
     setActions, 
     setShowActionBar, 
@@ -96,7 +98,7 @@ export function Clients() {
   // Note: Search and filter functionality is handled automatically by the MobileActionBar component
   // The buttons don't need special configuration - the popovers are built into the ActionBar
   
-  const projectId = userData?.preferences?.last_project_id
+  const projectId = selectedProjectId
   const organizationId = userData?.organization?.id
 
   // Fetch existing payment plan for the project to determine button text
