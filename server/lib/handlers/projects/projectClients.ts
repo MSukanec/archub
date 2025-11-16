@@ -260,7 +260,8 @@ export async function getClientsSummary(
         notes,
         is_primary,
         status,
-        contacts:contacts!client_id (
+        client_id,
+        contacts!project_clients_client_id_fkey (
           id,
           first_name,
           last_name,
