@@ -24,6 +24,7 @@ import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 import { supabase } from '@/lib/supabase'
+import { formatContactName } from '@/utils/contacts'
 
 const clientPaymentSchema = z.object({
   payment_date: z.date({
@@ -279,7 +280,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
         <div>
           <h4 className="font-medium text-foreground mb-2">Cliente</h4>
           <span className="text-sm">
-            {existingPayment.contact?.company_name || existingPayment.contact?.full_name || '-'}
+            {formatContactName(existingPayment.contact) || '-'}
           </span>
         </div>
         <div>
@@ -359,7 +360,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
                       <SelectContent>
                         {projectClients?.map((client) => (
                           <SelectItem key={client.contact.id} value={client.contact.id}>
-                            {client.contact.company_name || client.contact.full_name}
+                            {formatContactName(client.contact)}
                             {client.unit && ` - ${client.unit}`}
                           </SelectItem>
                         ))}

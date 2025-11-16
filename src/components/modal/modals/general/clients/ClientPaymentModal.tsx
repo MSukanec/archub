@@ -28,6 +28,7 @@ import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { supabase } from '@/lib/supabase'
+import { formatContactName } from '@/utils/contacts'
 
 const clientPaymentSchema = z.object({
   movement_date: z.date({
@@ -461,7 +462,7 @@ export function ClientPaymentModal({ modalData, onClose }: ClientPaymentModalPro
                     <SelectContent>
                       {projectClients?.map((client) => (
                         <SelectItem key={`client-${client.contact.id}`} value={client.contact.id}>
-                          {client.contact.company_name || client.contact.full_name}
+                          {formatContactName(client.contact)}
                         </SelectItem>
                       ))}
                     </SelectContent>
