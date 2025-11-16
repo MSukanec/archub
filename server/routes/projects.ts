@@ -26,6 +26,9 @@ import {
   handleUpdateClient,
   handleDeleteClient
 } from '../controllers/projects/projectClients.controller.js';
+import {
+  handleListClientPayments
+} from '../controllers/projects/clientPayments.controller.js';
 
 /**
  * Register project-related endpoints (projects, budgets, budget items, project clients)
@@ -61,6 +64,11 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
   
   // DELETE /api/projects/:projectId/clients/:clientId - Remove a client from a project
   app.delete("/api/projects/:projectId/clients/:clientId", handleDeleteClient);
+
+  // ========== CLIENT PAYMENTS ENDPOINTS ==========
+  
+  // GET /api/projects/:projectId/client-payments - Get all client payments for a project
+  app.get("/api/projects/:projectId/client-payments", handleListClientPayments);
 
   // GET/POST /api/project-clients - Alternative endpoint for listing/creating project clients (with query params)
   // This endpoint provides an alternative way to access clients using query parameters instead of path parameters

@@ -1,44 +1,36 @@
 import React from 'react';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
-import { useToast } from '@/hooks/use-toast'
-import { apiRequest } from '@/lib/queryClient'
-import { Users, Plus, Edit, Trash2 } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { DollarSign, Plus, Edit } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
-import { useNavigationStore } from '@/stores/navigationStore'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { useLocation } from 'wouter'
+import { format } from 'date-fns'
 
-interface ClientListTabProps {
+interface ClientPaymentsTabProps {
   projectId?: string;
 }
 
-interface CurrencyFinancial {
-  currency: {
-    id: string;
-    code: string;
-    symbol: string;
-  } | null;
-  total_committed_amount: number;
-  total_paid_amount: number;
-  balance_due: number;
-  next_due_date: string | null;
-  next_due_amount: number | null;
-  last_payment_date: string | null;
-  total_schedule_items: number;
-  schedule_paid: number;
-  schedule_overdue: number;
-  payments_missing_rate?: number; // Warning flag for PRO/TEAMS conversion issues
-}
-
-interface ProjectClientSummary {
+interface ClientPayment {
   id: string;
-  client_id: string;
-  unit: string | null;
-  contacts: {
+  project_id: string;
+  commitment_id: string | null;
+  schedule_id: string | null;
+  contact_id: string;
+  organization_id: string;
+  client_id: string | null;
+  amount: number;
+  currency_id: string;
+  exchange_rate: number;
+  payment_date: string;
+  notes: string | null;
+  reference: string | null;
+  created_at: string;
+  updated_at: string;
+  wallet_id: string | null;
+  contact: {
     id: string;
     first_name: string;
     last_name: string;
@@ -51,98 +43,59 @@ interface ProjectClientSummary {
       avatar_url?: string;
     } | null;
   } | null;
-  role: {
+  project_client: {
     id: string;
-    name: string;
-    is_default: boolean;
+    unit: string | null;
   } | null;
-  financialByCurrency: CurrencyFinancial[];
-  // Derived fields for sorting (sum across all currencies)
-  total_committed_amount: number;
-  total_paid_amount: number;
-  balance_due: number;
-  next_due: number | null;
+  currency: {
+    id: string;
+    code: string;
+    symbol: string;
+  } | null;
+  wallet: {
+    id: string;
+    name: string | null;
+  } | null;
+  commitment: {
+    id: string;
+    amount: number;
+  } | null;
+  schedule: {
+    id: string;
+    due_date: string;
+    amount: number;
+  } | null;
 }
 
-interface ClientSummaryResponse {
-  plan: {
-    slug: string;
-    isMultiCurrency: boolean;
-  };
-  clients: ProjectClientSummary[];
-}
-
-export default function ClientListTab({ projectId }: ClientListTabProps) {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps) {
   const { data: userData } = useCurrentUser();
   const { selectedProjectId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
-  const { setSidebarLevel } = useNavigationStore();
-  const [, navigate] = useLocation();
   
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
 
-  // Query to get project clients summary with financial data (plan-aware)
-  const { data: summaryResponse, isLoading } = useQuery<ClientSummaryResponse>({
-    queryKey: [`/api/projects/${activeProjectId}/clients/summary?organization_id=${organizationId}`],
+  // Query to get client payments for the project
+  const { data: paymentsResponse, isLoading } = useQuery<{ data: ClientPayment[] }>({
+    queryKey: [`/api/projects/${activeProjectId}/client-payments?organization_id=${organizationId}`],
     enabled: !!activeProjectId && !!organizationId
   });
 
-  const projectClients = summaryResponse?.clients || [];
+  const clientPayments = paymentsResponse?.data || [];
 
-  // Delete mutation
-  const deleteClientMutation = useMutation({
-    mutationFn: async (clientId: string) => {
-      if (!activeProjectId || !organizationId) return;
-
-      await apiRequest('DELETE', `/api/projects/${activeProjectId}/clients/${clientId}?organization_id=${organizationId}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${activeProjectId}/clients/summary?organization_id=${organizationId}`] });
-      toast({
-        title: 'Cliente eliminado',
-        description: 'El cliente ha sido eliminado del proyecto correctamente',
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Error al eliminar cliente',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
-  });
-
-  const handleDelete = (client: ProjectClientSummary) => {
-    const clientName = client.contacts 
-      ? `${client.contacts.first_name} ${client.contacts.last_name}`.trim()
-      : 'Cliente';
-    
-    openModal('delete-confirmation', {
-      mode: 'dangerous',
-      title: 'Eliminar Cliente',
-      description: 'Se eliminará este cliente del proyecto. Esta acción no se puede deshacer.',
-      itemName: clientName,
-      itemType: 'cliente',
-      onConfirm: () => {
-        deleteClientMutation.mutate(client.id);
-      },
-    });
-  };
-
-  const handleAddPayment = (client: ProjectClientSummary) => {
+  const handleEdit = (payment: ClientPayment) => {
     openModal('installment', {
       projectId: activeProjectId,
       organizationId: organizationId,
-      clientId: client.client_id,
+      paymentId: payment.id,
+      mode: 'edit',
     });
   };
 
-  const handleAddClient = () => {
-    openModal('project-client', {
+  const handleAddPayment = () => {
+    openModal('installment', {
       projectId: activeProjectId,
+      organizationId: organizationId,
     });
   };
 
@@ -154,22 +107,48 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     )
   }
 
-  // Table columns
+  // Format date helper
+  const formatDate = (dateString: string, formatString: string) => {
+    try {
+      return format(new Date(dateString), formatString);
+    } catch {
+      return '-';
+    }
+  };
+
+  // Format amount with currency
+  const formatAmount = (amount: number, currencySymbol: string | undefined) => {
+    const symbol = currencySymbol || '$';
+    return `${symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  // Table columns in EXACT ORDER specified
   const columns = [
     {
-      key: 'full_name',
+      key: 'payment_date',
+      label: 'Fecha de Pago',
+      sortable: true,
+      render: (payment: ClientPayment) => formatDate(payment.payment_date, 'dd/MM/yyyy'),
+    },
+    {
+      key: 'created_at',
+      label: 'Fecha de Registro',
+      sortable: true,
+      render: (payment: ClientPayment) => formatDate(payment.created_at, 'dd/MM/yyyy HH:mm'),
+    },
+    {
+      key: 'contact',
       label: 'Cliente',
       sortable: true,
-      cellClassName: 'font-semibold',
-      render: (client: ProjectClientSummary) => {
-        const avatarUrl = client.contacts?.linked_user?.avatar_url;
-        const initials = client.contacts?.first_name?.[0] && client.contacts?.last_name?.[0]
-          ? `${client.contacts.first_name[0]}${client.contacts.last_name[0]}`
-          : client.contacts?.first_name?.[0] || '?';
+      render: (payment: ClientPayment) => {
+        const avatarUrl = payment.contact?.linked_user?.avatar_url;
+        const initials = payment.contact?.first_name?.[0] && payment.contact?.last_name?.[0]
+          ? `${payment.contact.first_name[0]}${payment.contact.last_name[0]}`
+          : payment.contact?.first_name?.[0] || '?';
         
-        const displayName = client.contacts?.company_name || 
-                           client.contacts?.full_name || 
-                           `${client.contacts?.first_name || ''} ${client.contacts?.last_name || ''}`.trim();
+        const displayName = payment.contact?.company_name || 
+                           payment.contact?.full_name || 
+                           `${payment.contact?.first_name || ''} ${payment.contact?.last_name || ''}`.trim();
         
         return (
           <div className="flex items-center gap-3">
@@ -184,56 +163,113 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
         );
       },
     },
+    {
+      key: 'unit',
+      label: 'Unidad Funcional',
+      sortable: true,
+      render: (payment: ClientPayment) => payment.project_client?.unit || '-',
+    },
+    {
+      key: 'currency',
+      label: 'Moneda',
+      sortable: true,
+      render: (payment: ClientPayment) => payment.currency?.code || '-',
+    },
+    {
+      key: 'wallet',
+      label: 'Billetera',
+      sortable: true,
+      render: (payment: ClientPayment) => payment.wallet?.name || '-',
+    },
+    {
+      key: 'notes',
+      label: 'Notas',
+      sortable: true,
+      render: (payment: ClientPayment) => (
+        <div className="max-w-xs truncate" title={payment.notes || ''}>
+          {payment.notes || '-'}
+        </div>
+      ),
+    },
+    {
+      key: 'reference',
+      label: 'Referencia',
+      sortable: true,
+      render: (payment: ClientPayment) => payment.reference || '-',
+    },
+    {
+      key: 'commitment_id',
+      label: 'Compromiso',
+      sortable: true,
+      render: (payment: ClientPayment) => {
+        if (!payment.commitment) return '-';
+        return (
+          <span className="text-xs text-muted-foreground">
+            {formatAmount(payment.commitment.amount, payment.currency?.symbol)}
+          </span>
+        );
+      },
+    },
+    {
+      key: 'schedule_id',
+      label: 'Cuota',
+      sortable: true,
+      render: (payment: ClientPayment) => {
+        if (!payment.schedule) return '-';
+        return (
+          <span className="text-xs text-muted-foreground">
+            Vcto: {formatDate(payment.schedule.due_date, 'dd/MM/yyyy')}
+          </span>
+        );
+      },
+    },
+    {
+      key: 'amount',
+      label: 'Monto',
+      sortable: true,
+      cellClassName: 'font-semibold',
+      render: (payment: ClientPayment) => formatAmount(payment.amount, payment.currency?.symbol),
+    },
   ];
 
   return (
     <div className="space-y-6">
+      {clientPayments.length > 0 && (
+        <div className="flex justify-end">
+          <Button 
+            onClick={handleAddPayment}
+            data-testid="button-add-payment"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Agregar Pago
+          </Button>
+        </div>
+      )}
       <Table
         columns={columns}
-        data={projectClients}
+        data={clientPayments}
         isLoading={isLoading}
         showDoubleHeader={false}
         emptyStateConfig={{
-          icon: <Users className="h-12 w-12 text-muted-foreground" />,
-          title: 'No hay clientes en este proyecto',
-          description: (
-            <>
-              Agrega clientes para gestionar la información del proyecto. Recuerda que un cliente, antes debe ser un{' '}
-              <button
-                onClick={() => {
-                  setSidebarLevel('organization');
-                  navigate('/contacts');
-                }}
-                className="hover:underline font-bold cursor-pointer"
-                style={{ color: 'var(--accent)' }}
-              >
-                contacto
-              </button>
-              .
-            </>
-          ),
+          icon: <DollarSign className="h-12 w-12 text-muted-foreground" />,
+          title: 'No hay pagos registrados',
+          description: 'Agrega pagos de clientes para llevar un registro de los ingresos del proyecto.',
           action: (
             <Button
-              onClick={handleAddClient}
+              onClick={handleAddPayment}
               size="sm"
-              data-testid="button-add-client-empty"
+              data-testid="button-add-payment-empty"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Agregar Cliente
+              Agregar Pago
             </Button>
           ),
         }}
-        rowActions={(client: ProjectClientSummary) => [
+        rowActions={(payment: ClientPayment) => [
           {
             label: 'Editar Pago',
             icon: Edit,
-            onClick: () => handleAddPayment(client),
-          },
-          {
-            label: 'Eliminar',
-            icon: Trash2,
-            onClick: () => handleDelete(client),
-            variant: 'destructive',
+            onClick: () => handleEdit(payment),
           },
         ]}
       />
