@@ -412,12 +412,9 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     },
     {
       key: 'attachments',
-      label: '',
+      label: 'Adjuntos',
       sortable: false,
       align: 'center' as const,
-      headerRender: () => (
-        <Paperclip className="h-4 w-4" />
-      ),
       render: (payment: ClientPayment) => {
         const attachmentCount = payment.file_url ? 1 : 0;
         return (
