@@ -963,6 +963,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   return (
     <FormModalLayout 
       onClose={closeModal}
+      columns={1}
       viewPanel={viewPanel}
       editPanel={editPanel}
       subformPanel={
