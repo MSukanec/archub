@@ -216,22 +216,20 @@ export async function getClientsSummary(
       }
     }
 
-    // Use unified view for all plans
-    const viewName = 'client_financial_overview';
-
-    // Query the financial overview view
-    const { data: financialData, error: viewError } = await supabase
-      .from(viewName)
+    // 🚀 PERFORMANCE BOOST: Use optimized client_list_view (eliminates ~8 JOINs)
+    // This view pre-computes ALL data: project_clients, contacts, users, projects, currencies
+    const { data: viewData, error: viewError } = await supabase
+      .from('client_list_view')
       .select('*')
       .eq('project_id', params.projectId)
       .eq('organization_id', params.organizationId);
 
     if (viewError) {
-      console.error('Error fetching client financial overview:', viewError);
-      return { success: false, error: 'Failed to fetch client financial data' };
+      console.error('Error fetching client_list_view:', viewError);
+      return { success: false, error: 'Failed to fetch client data' };
     }
 
-    if (!financialData || financialData.length === 0) {
+    if (!viewData || viewData.length === 0) {
       return {
         success: true,
         data: {
@@ -244,84 +242,37 @@ export async function getClientsSummary(
       };
     }
 
-    // Get unique project_client_ids to fetch additional data (unit, notes, status, is_primary, avatar)
-    const projectClientIds = Array.from(new Set(financialData.map((item: any) => item.project_client_id)));
-
-    // Get unique currency_ids to fetch currency data
-    const currencyIds = Array.from(new Set(financialData.map((item: any) => item.currency_id).filter(Boolean)));
-
-    // Fetch additional project_client data (unit, notes, status, is_primary) and avatar
-    const { data: enrichedData, error: enrichError } = await supabase
-      .from('project_clients')
-      .select(`
-        id,
-        unit,
-        notes,
-        is_primary,
-        status,
-        contacts!project_clients_contact_id_fkey (
-          linked_user:users!linked_user_id (
-            id,
-            avatar_url
-          )
-        )
-      `)
-      .in('id', projectClientIds);
-
-    if (enrichError) {
-      console.error('Error enriching client data:', enrichError);
-      return { success: false, error: 'Failed to enrich client data' };
-    }
-
-    // Fetch currency data only if there are currency_ids
-    let currencyData: any[] = [];
-    if (currencyIds.length > 0) {
-      const { data, error: currencyError } = await supabase
-        .from('currencies')
-        .select('id, code, symbol')
-        .in('id', currencyIds);
-
-      if (currencyError) {
-        console.error('Error fetching currency data:', currencyError);
-        return { success: false, error: 'Failed to fetch currency data' };
-      }
-      currencyData = data || [];
-    }
-
-    // Pre-index currencies by ID for O(1) lookup
-    const currencyById = new Map(currencyData?.map((c: any) => [c.id, c]) || []);
-
-    // Pre-index enriched data by project_client_id for O(1) lookup
-    const enrichedById = new Map(enrichedData?.map((e: any) => [e.id, e]) || []);
-
-    // Group financial data by project_client_id
-    const groupedByClient = financialData.reduce((acc: any, row: any) => {
+    // Group by project_client_id to build financialByCurrency array
+    const groupedByClient = viewData.reduce((acc: any, row: any) => {
       const clientId = row.project_client_id;
       
       if (!acc[clientId]) {
-        const enriched = enrichedById.get(clientId);
-        
-        // Construct contacts object using data from view (email, phone, name) + enriched avatar
+        // Build contacts object from pre-computed view fields
         const contacts = {
           id: row.client_id,
-          first_name: row.client_first_name,
-          last_name: row.client_last_name,
-          full_name: row.client_name,
-          email: row.client_email,
-          phone: row.client_phone,
-          company_name: row.client_company_name,
-          linked_user: enriched?.contacts?.linked_user || null
+          first_name: row.contact_first_name,
+          last_name: row.contact_last_name,
+          full_name: row.contact_full_name,
+          email: row.contact_email,
+          phone: row.contact_phone,
+          company_name: row.contact_company_name,
+          linked_user: row.linked_user_id ? {
+            id: row.linked_user_id,
+            avatar_url: row.linked_user_avatar_url
+          } : null
         };
         
+        // Create client entry with ALL data from view (no additional queries needed!)
         acc[clientId] = {
           id: row.project_client_id,
           project_id: row.project_id,
           client_id: row.client_id,
+          contact_id: row.client_id,
           organization_id: row.organization_id,
-          unit: enriched?.unit || null,
-          notes: enriched?.notes || null,
-          is_primary: enriched?.is_primary || false,
-          status: enriched?.status || 'active',
+          unit: row.unit,
+          notes: row.notes,
+          is_primary: row.is_primary,
+          status: row.status,
           contacts: contacts,
           role: row.role_id ? {
             id: row.role_id,
@@ -332,12 +283,16 @@ export async function getClientsSummary(
         };
       }
 
-      // Get currency info using pre-indexed Map
-      const currency = row.currency_id ? currencyById.get(row.currency_id) : null;
+      // Build currency object from pre-computed view fields
+      const currency = row.currency_id ? {
+        id: row.currency_id,
+        code: row.currency_code,
+        symbol: row.currency_symbol
+      } : null;
 
       // Add this currency's financial data
       acc[clientId].financialByCurrency.push({
-        currency: currency || null,
+        currency: currency,
         total_committed_amount: parseFloat(row.total_committed_amount || 0),
         total_paid_amount: parseFloat(row.total_paid_amount || 0),
         balance_due: parseFloat(row.balance_due || 0),

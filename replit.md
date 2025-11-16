@@ -16,6 +16,7 @@ Seencel is a comprehensive construction management platform designed to optimize
 - **Client Commitments Feature**: Implemented complete CRUD functionality for client commitments with ClientCommitmentModal following standard modal pattern (FormModalLayout, RHF + Zod validation, React Query mutations). Backend includes comprehensive security layer with auth validation, organization access checks, project ownership verification, and client_id validation. REST endpoints: GET/POST/PATCH/DELETE `/api/projects/:projectId/client-commitments` with Supabase file upload support.
 - **Database View Optimization**: Created `client_payments_view` for PAGOS tab with pre-computed JOINs across contacts, users, project_clients, currencies, wallets, commitments, schedules, and projects. Backend handlers now use single SELECT from view instead of manual JOINs for improved performance.
 - **PAGOS Tab UX Enhancement**: Adjusted column widths (Cliente: 400px → 220px, Notas: auto → 400px) with text truncation for better space utilization and readability.
+- **LISTA Tab Performance Optimization**: Created `client_list_view` with ALL pre-computed JOINs (project_clients, contacts, users, projects, currencies). Eliminates ~8 JOINs and 2-3 additional queries per request. Both project and organization handlers now use single SELECT from view with currency deduplication Map for accurate multi-currency aggregation.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
