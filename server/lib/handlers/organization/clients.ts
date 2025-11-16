@@ -38,7 +38,7 @@ export async function getOrganizationClientsSummary(
         id,
         name,
         organization_subscriptions (
-          plan:plans (
+          plan:plans!organization_subscriptions_plan_id_fkey (
             slug,
             name,
             features
@@ -56,8 +56,12 @@ export async function getOrganizationClientsSummary(
     const subscription = Array.isArray(orgData?.organization_subscriptions) && orgData.organization_subscriptions.length > 0 
       ? orgData.organization_subscriptions[0] 
       : null;
-    const planSlug = subscription?.plan?.slug || 'FREE';
-    const features = subscription?.plan?.features || [];
+    
+    // Extract plan from the subscription (Supabase returns it as an array in the relation)
+    const plan = subscription?.plan;
+    const planData = Array.isArray(plan) && plan.length > 0 ? plan[0] : plan;
+    const planSlug = planData?.slug || 'FREE';
+    const features = planData?.features || [];
     const isMultiCurrency = Array.isArray(features) && features.includes('multi-currency');
 
     // Fetch all project clients for the organization with financial summaries

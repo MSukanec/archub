@@ -156,7 +156,18 @@ export function ProjectClientModal({ modalData, onClose }: ProjectClientModalPro
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/clients?organization_id=${organizationId}`] });
+      // Invalidate ALL client-related queries to ensure UI updates
+      // This covers: /clients/summary, /clients, organization clients, etc.
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0];
+          if (typeof key === 'string') {
+            return key.includes('/clients') || key.includes('project-clients');
+          }
+          return false;
+        }
+      });
+      
       toast({
         title: isEditing ? 'Cliente actualizado' : 'Cliente agregado',
         description: isEditing 
