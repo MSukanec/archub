@@ -10,6 +10,7 @@ import {
   type UpdateClientPaymentParams,
   type DeleteClientPaymentParams
 } from '../../lib/handlers/projects/clientPayments.js';
+import { getProjectPaymentMetrics } from '../../lib/services/paymentsMetrics.js';
 import type { ProjectsContext } from '../../lib/handlers/projects/shared.js';
 import { supabaseUrl, supabaseAnonKey } from '../../routes/_base.js';
 
@@ -147,5 +148,30 @@ export async function handleDeleteClientPayment(req: Request, res: Response) {
   } catch (error: any) {
     console.error('Error in deleteClientPayment controller:', error);
     return res.status(500).json({ error: error.message || 'Failed to delete client payment' });
+  }
+}
+
+export async function handleGetClientPaymentsMetrics(req: Request, res: Response) {
+  try {
+    const token = extractToken(req.headers.authorization);
+    if (!token) {
+      return res.status(401).json({ error: 'No authorization token provided' });
+    }
+
+    const supabase = createAuthenticatedClient(token);
+
+    const projectId = req.params.projectId;
+    const organizationId = req.query.organization_id as string;
+
+    if (!projectId || !organizationId) {
+      return res.status(400).json({ error: 'projectId and organization_id are required' });
+    }
+
+    const metrics = await getProjectPaymentMetrics(supabase, projectId, organizationId);
+
+    return res.status(200).json({ data: metrics });
+  } catch (error: any) {
+    console.error('Error in getClientPaymentsMetrics controller:', error);
+    return res.status(500).json({ error: error.message || 'Failed to get payment metrics' });
   }
 }

@@ -12,7 +12,10 @@ import {
   handleUpdateUserProfile
 } from '../controllers/organization/profile.controller.js';
 import { handleGetOrganizationClientsSummary } from '../controllers/organization/clients.controller.js';
-import { handleListOrganizationClientPayments } from '../controllers/organization/clientPayments.controller.js';
+import { 
+  handleListOrganizationClientPayments,
+  handleGetOrganizationClientPaymentsMetrics
+} from '../controllers/organization/clientPayments.controller.js';
 
 /**
  * Register organization-related endpoints (members, invitations, profile, clients)
@@ -30,6 +33,9 @@ export function registerOrganizationRoutes(app: Express, deps: RouteDeps): void 
 
   // ========== ORGANIZATION - CLIENT PAYMENTS ENDPOINTS ==========
   
+  // GET /api/organizations/:organizationId/client-payments/metrics - Get payment metrics (KPIs) for an organization
+  app.get("/api/organizations/:organizationId/client-payments/metrics", handleGetOrganizationClientPaymentsMetrics);
+
   // GET /api/organizations/:organizationId/client-payments - Get all client payments for an organization
   app.get("/api/organizations/:organizationId/client-payments", handleListOrganizationClientPayments);
 

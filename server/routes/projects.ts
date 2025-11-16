@@ -30,7 +30,8 @@ import {
   handleListClientPayments,
   handleCreateClientPayment,
   handleUpdateClientPayment,
-  handleDeleteClientPayment
+  handleDeleteClientPayment,
+  handleGetClientPaymentsMetrics
 } from '../controllers/projects/clientPayments.controller.js';
 import {
   handleListClientCommitments,
@@ -76,6 +77,9 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
 
   // ========== CLIENT PAYMENTS ENDPOINTS ==========
   
+  // GET /api/projects/:projectId/client-payments/metrics - Get payment metrics (KPIs) for a project
+  app.get("/api/projects/:projectId/client-payments/metrics", handleGetClientPaymentsMetrics);
+
   // GET /api/projects/:projectId/client-payments - Get all client payments for a project
   app.get("/api/projects/:projectId/client-payments", handleListClientPayments);
 
