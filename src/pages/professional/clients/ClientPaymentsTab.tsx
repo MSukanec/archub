@@ -105,7 +105,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     queryKey: activeProjectId
       ? [`/api/projects/${activeProjectId}/client-payments?organization_id=${organizationId}`]
       : [`/api/organizations/${organizationId}/client-payments`],
-    enabled: !!organizationId
+    enabled: !!organizationId,
+    staleTime: 3 * 60 * 1000, // 3 minutes - data is prefetched and cached
   });
 
   const allPayments = paymentsResponse?.data || [];

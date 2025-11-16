@@ -92,7 +92,8 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     queryKey: activeProjectId
       ? [`/api/projects/${activeProjectId}/clients/summary?organization_id=${organizationId}`]
       : [`/api/organizations/${organizationId}/clients/summary`],
-    enabled: !!organizationId
+    enabled: !!organizationId,
+    staleTime: 3 * 60 * 1000, // 3 minutes - data is prefetched and cached
   });
 
   const projectClients = summaryResponse?.clients || [];

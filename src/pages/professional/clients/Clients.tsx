@@ -17,6 +17,7 @@ import { useMobile } from '@/hooks/use-mobile'
 import { useLocation } from 'wouter'
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
 import { useProjectContext } from '@/stores/projectContext'
+import { queryClient } from '@/lib/queryClient'
 
 export function Clients() {
   const [activeTab, setActiveTab] = useState("dashboard")
@@ -131,8 +132,41 @@ export function Clients() {
 
       return data
     },
-    enabled: !!projectId
+    enabled: !!projectId,
+    staleTime: 5 * 60 * 1000, // 5 minutes - payment plans don't change often
   })
+
+  // 🚀 PREFETCH ALL TAB DATA ON MOUNT - Makes tab switching instantaneous!
+  useEffect(() => {
+    if (!organizationId) return;
+
+    const prefetchAllTabs = async () => {
+      const clientsSummaryKey = projectId
+        ? [`/api/projects/${projectId}/clients/summary?organization_id=${organizationId}`]
+        : [`/api/organizations/${organizationId}/clients/summary`];
+
+      const clientPaymentsKey = projectId
+        ? [`/api/projects/${projectId}/client-payments?organization_id=${organizationId}`]
+        : [`/api/organizations/${organizationId}/client-payments`];
+
+      // Prefetch clients summary (used by Dashboard, List, and Obligations tabs)
+      queryClient.prefetchQuery({
+        queryKey: clientsSummaryKey,
+        staleTime: 3 * 60 * 1000, // 3 minutes cache
+      });
+
+      // Prefetch client payments (used by Payments tab)
+      queryClient.prefetchQuery({
+        queryKey: clientPaymentsKey,
+        staleTime: 3 * 60 * 1000, // 3 minutes cache
+      });
+    };
+
+    // Small delay to prioritize initial render, then prefetch
+    const timeoutId = setTimeout(prefetchAllTabs, 100);
+    
+    return () => clearTimeout(timeoutId);
+  }, [organizationId, projectId])
 
   // Crear tabs para el header
   const headerTabs = [
