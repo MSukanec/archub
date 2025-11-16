@@ -12,7 +12,8 @@ import {
   Group,
   FileText,
   Upload,
-  MoreHorizontal
+  MoreHorizontal,
+  Eye
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -1122,12 +1123,16 @@ export function Table<T = any>({
                           const action = primaryRowAction(item);
                           return action ? (
                             <Button
-                              variant="secondary"
-                              size="sm"
-                              onClick={action.onClick}
-                              className="text-xs"
+                              variant="ghost"
+                              size="icon-sm"
+                              className="h-6 w-6"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                action.onClick();
+                              }}
+                              title={action.label}
                             >
-                              {action.label}
+                              <Eye className="h-4 w-4" />
                             </Button>
                           ) : null;
                         })()}
@@ -1255,12 +1260,16 @@ export function Table<T = any>({
                       const action = primaryRowAction(item);
                       return action ? (
                         <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={action.onClick}
-                          className="text-xs"
+                          variant="ghost"
+                          size="icon-sm"
+                          className="h-6 w-6"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            action.onClick();
+                          }}
+                          title={action.label}
                         >
-                          {action.label}
+                          <Eye className="h-4 w-4" />
                         </Button>
                       ) : null;
                     })()}
