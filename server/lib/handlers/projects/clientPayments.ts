@@ -222,7 +222,7 @@ export async function listClientPayments(
       .from('client_payments')
       .select(`
         *,
-        contact:contacts!contact_id (
+        contacts!contact_id (
           id,
           first_name,
           last_name,
@@ -230,32 +230,19 @@ export async function listClientPayments(
           email,
           phone,
           company_name,
-          linked_user:users!linked_user_id (
+          users!linked_user_id (
             id,
             avatar_url
           )
         ),
-        project_client:project_clients!client_id (
+        project_clients!client_id (
           id,
           unit
         ),
-        currency:currencies!currency_id (
+        currencies!currency_id (
           id,
           code,
           symbol
-        ),
-        wallet:wallets!wallet_id (
-          id,
-          name
-        ),
-        commitment:client_commitments!commitment_id (
-          id,
-          amount
-        ),
-        schedule:client_payment_schedule!schedule_id (
-          id,
-          due_date,
-          amount
         )
       `)
       .eq('project_id', params.projectId)
@@ -267,7 +254,19 @@ export async function listClientPayments(
       return { success: false, error: 'Failed to fetch client payments' };
     }
 
-    return { success: true, data: payments || [] };
+    // Map response to match frontend expectations
+    const mappedPayments = (payments || []).map((payment: any) => ({
+      ...payment,
+      contact: payment.contacts || null,
+      project_client: payment.project_clients || null,
+      currency: payment.currencies || null,
+      // Remove plural keys to avoid confusion
+      contacts: undefined,
+      project_clients: undefined,
+      currencies: undefined,
+    }));
+
+    return { success: true, data: mappedPayments };
 
   } catch (error: any) {
     console.error('Error in listClientPayments handler:', error);
