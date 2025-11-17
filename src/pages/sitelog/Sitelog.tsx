@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { FileText, Plus } from "lucide-react";
 
 import { Layout } from '@/components/layout/desktop/Layout';
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from '@/stores/projectContext';
@@ -158,8 +159,8 @@ export default function Sitelog() {
   if (isLoading || siteLogsLoading) {
     return (
       <Layout wide headerProps={headerProps}>
-        <div className="p-8 text-center text-muted-foreground">
-          Cargando bitácora...
+        <div className="flex items-center justify-center h-64">
+          <LoadingSpinner size="lg" />
         </div>
       </Layout>
     );

@@ -9,6 +9,7 @@ import { HierarchicalTree } from '@/components/ui-custom/tables-and-trees/Hierar
 
 import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
 const AdminTaskCategories = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -119,10 +120,7 @@ const AdminTaskCategories = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Cargando categorías...</p>
-        </div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }

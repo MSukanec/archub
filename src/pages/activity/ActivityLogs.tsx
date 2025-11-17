@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
 interface ActivityLogsProps {
   organizationId: string;
@@ -122,9 +123,8 @@ export default function ActivityLogs({ organizationId }: ActivityLogsProps) {
     <div className="space-y-6">
       {/* Activity Chart and Table */}
       {isLoading ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <ActivityIcon className="h-12 w-12 mx-auto mb-4 opacity-20 animate-pulse" />
-          <p className="text-sm">Cargando actividades...</p>
+        <div className="flex items-center justify-center h-64">
+          <LoadingSpinner size="lg" />
         </div>
       ) : activities.length === 0 ? (
         <EmptyState

@@ -10,6 +10,7 @@ import { useMovements } from '@/hooks/use-movements'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useToast } from '@/hooks/use-toast'
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
 
 import { CapitalMembersSummaryTab } from './CapitalMembersSummaryTab'
 import { CapitalHistoryTab } from './CapitalHistoryTab'
@@ -370,7 +371,7 @@ export default function FinancesCapitalMovements() {
     return (
       <Layout headerProps={headerProps} wide={true}>
         <div className="flex items-center justify-center h-64">
-          <div className="text-sm text-muted-foreground">Cargando movimientos de capital...</div>
+          <LoadingSpinner size="lg" />
         </div>
       </Layout>
     )

@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import PayButton from '@/components/learning/PayButton'
 import { Button } from '@/components/ui/button'
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
 
 type CourseTabFilter = 'enrolled' | 'completed' | 'all';
 
@@ -173,8 +174,8 @@ export default function CourseList() {
   if (fullDataLoading) {
     return (
       <Layout headerProps={headerProps} wide>
-        <div className="p-8 text-center text-muted-foreground">
-          Cargando cursos...
+        <div className="flex items-center justify-center h-64">
+          <LoadingSpinner size="lg" />
         </div>
       </Layout>
     );

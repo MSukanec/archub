@@ -5,6 +5,7 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { ProfileBasicData } from '@/pages/profile/ProfileBasicData';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
 export default function UserBasicData() {
   const { data: userData, isLoading } = useCurrentUser();
@@ -27,7 +28,7 @@ export default function UserBasicData() {
     return (
       <Layout headerProps={headerProps} wide={false}>
         <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Cargando perfil...</div>
+          <LoadingSpinner size="lg" />
         </div>
       </Layout>
     );

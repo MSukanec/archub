@@ -19,6 +19,7 @@ import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useQuery } from "@tanstack/react-query";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
 interface SubcontractHistoryViewProps {
   subcontract: any;
@@ -243,8 +244,8 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
 
   if (isLoading) {
     return (
-      <div className="text-center py-8">
-        <div className="text-muted-foreground">Cargando historial...</div>
+      <div className="flex items-center justify-center h-64">
+        <LoadingSpinner size="md" />
       </div>
     );
   }

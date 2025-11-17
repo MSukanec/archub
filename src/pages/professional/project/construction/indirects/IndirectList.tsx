@@ -15,6 +15,7 @@ import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useMobile } from '@/hooks/use-mobile';
 import { useIndirectCosts } from '@/hooks/use-indirect-costs';
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
 interface IndirectListProps {
   filterByStatus?: string;
@@ -231,8 +232,8 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
 
   if (isLoading) {
     return (
-      <div className="text-center py-8">
-        <div className="text-muted-foreground">Cargando costos indirectos...</div>
+      <div className="flex items-center justify-center h-64">
+        <LoadingSpinner size="md" />
       </div>
     );
   }

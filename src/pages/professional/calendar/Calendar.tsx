@@ -20,6 +20,7 @@ import { ActionBarMobileProvider, useActionBarMobile } from '@/components/layout
 import { ActionBarMobile } from '@/components/layout/mobile/ActionBarMobile';
 
 import { Card } from '@/components/ui/card';
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
 function CalendarContent() {
   const { setSidebarContext } = useNavigationStore();
@@ -186,9 +187,7 @@ function CalendarContent() {
     return (
       <Layout headerProps={loadingHeaderProps} wide={true}>
         <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="text-lg font-semibold">Cargando tableros...</div>
-          </div>
+          <LoadingSpinner size="lg" />
         </div>
       </Layout>
     );

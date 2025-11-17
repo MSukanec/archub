@@ -8,6 +8,7 @@ import { ProfilePreferences } from './ProfilePreferences';
 import { ProfileOrganizations } from './ProfileOrganizations';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
 export default function Profile() {
   const [location, setLocation] = useLocation();
@@ -75,7 +76,7 @@ export default function Profile() {
     return (
       <Layout headerProps={headerProps} wide={false}>
         <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Cargando perfil...</div>
+          <LoadingSpinner size="lg" />
         </div>
       </Layout>
     );

@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Edit, Trash2, ShieldCheck, ShieldAlert, ShieldX, Shield } from "lucide-react"
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
 
 interface InsuranceStatus {
   status: 'sin_seguro' | 'vigente' | 'por_vencer' | 'vencido'
@@ -161,7 +162,7 @@ export default function PersonnelListTab({
   if (isPersonnelLoading) {
     return (
       <div className="flex items-center justify-center h-32">
-        <div className="text-muted-foreground">Cargando personal...</div>
+        <LoadingSpinner size="md" />
       </div>
     )
   }

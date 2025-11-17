@@ -19,6 +19,7 @@ import { useSubcontractAnalysis } from "@/hooks/use-subcontract-analysis";
 import { useQuery } from '@tanstack/react-query';
 import { useMobile } from '@/hooks/use-mobile';
 import { SubcontractRow } from '@/components/ui/data-row/rows';
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
 interface SubcontractListProps {
   filterByStatus?: string;
@@ -394,8 +395,8 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
 
   if (isLoading || isLoadingAnalysis) {
     return (
-      <div className="text-center py-8">
-        <div className="text-muted-foreground">Cargando subcontratos...</div>
+      <div className="flex items-center justify-center h-64">
+        <LoadingSpinner size="md" />
       </div>
     );
   }

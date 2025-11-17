@@ -33,6 +33,7 @@ import { useMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/lib/supabase';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
 export default function OrganizationDashboard() {
   const [, setLocation] = useLocation();
@@ -144,7 +145,7 @@ export default function OrganizationDashboard() {
     return (
       <Layout wide={true}>
         <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Cargando organización...</div>
+          <LoadingSpinner size="lg" />
         </div>
       </Layout>
     );
@@ -212,7 +213,7 @@ export default function OrganizationDashboard() {
           <StatCardContent>
             {isLoading || projectsLoading ? (
               <div className="flex items-center justify-center h-64">
-                <div className="text-muted-foreground">Cargando proyectos...</div>
+                <LoadingSpinner size="lg" />
               </div>
             ) : sortedProjects.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

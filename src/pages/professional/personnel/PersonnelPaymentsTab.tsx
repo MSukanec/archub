@@ -7,6 +7,7 @@ import { Table } from "@/components/ui-custom/tables-and-trees/Table"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { convertCurrency } from '@/ai/utils/currencyConverter'
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
 
 interface PersonnelPaymentsTabProps {
   openModal: any
@@ -286,7 +287,7 @@ export default function PersonnelPaymentsTab({
   if (isPersonnelLoading || isPaymentsLoading || isBatchLoading) {
     return (
       <div className="flex items-center justify-center h-32">
-        <div className="text-muted-foreground">Cargando pagos...</div>
+        <LoadingSpinner size="md" />
       </div>
     )
   }

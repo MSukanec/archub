@@ -5,6 +5,7 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { ProfilePreferences } from '@/pages/profile/ProfilePreferences';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
 export default function UserPreferences() {
   const { data: userData, isLoading } = useCurrentUser();
@@ -27,7 +28,7 @@ export default function UserPreferences() {
     return (
       <Layout headerProps={headerProps} wide={false}>
         <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Cargando preferencias...</div>
+          <LoadingSpinner size="lg" />
         </div>
       </Layout>
     );
