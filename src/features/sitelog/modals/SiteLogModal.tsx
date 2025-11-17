@@ -1015,6 +1015,57 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
 
   const footerConfig = getFooterConfig();
 
+  // Configurar header dinámico según el panel actual
+  const getHeaderConfig = () => {
+    if (currentPanel === 'subform') {
+      // Headers para subforms con botón de volver
+      const subformHeaders: Record<string, { icon: any; title: string; description: string }> = {
+        'files': {
+          icon: Camera,
+          title: 'Fotos y Videos',
+          description: 'Adjunta archivos multimedia al registro de bitácora'
+        },
+        'personal': {
+          icon: Users,
+          title: 'Personal',
+          description: 'Control de asistencia y personal en obra'
+        },
+        'events': {
+          icon: Calendar,
+          title: 'Eventos',
+          description: 'Registra eventos importantes del día'
+        },
+        'equipment': {
+          icon: Wrench,
+          title: 'Maquinaria',
+          description: 'Registro de equipos y maquinaria utilizada'
+        }
+      };
+
+      const config = subformHeaders[currentSubform || ''];
+      if (!config) return null;
+
+      return (
+        <FormModalHeader
+          icon={config.icon}
+          title={config.title}
+          description={config.description}
+          showBackButton={true}
+          onBackClick={() => setPanel('edit')}
+        />
+      );
+    }
+
+    // Header por defecto para view/edit
+    return (
+      <FormModalHeader
+        icon={FileText}
+        title={siteLogId ? "Editar Bitácora" : "Nueva Bitácora"}
+        description={siteLogId ? "Actualizar información de la bitácora de obra" : "Crear una nueva entrada en la bitácora de obra"}
+      />
+    );
+  };
+
   return (
     <FormModalLayout 
       onClose={closeModal}
@@ -1028,13 +1079,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         currentSubform === 'equipment' ? equipmentSubform :
         null
       }
-      headerContent={
-        <FormModalHeader
-          icon={FileText}
-          title={siteLogId ? "Editar Bitácora" : "Nueva Bitácora"}
-          description={siteLogId ? "Actualizar información de la bitácora de obra" : "Crear una nueva entrada en la bitácora de obra"}
-        />
-      }
+      headerContent={getHeaderConfig()}
       footerContent={
         <FormModalFooter
           cancelText={footerConfig.cancelText}
