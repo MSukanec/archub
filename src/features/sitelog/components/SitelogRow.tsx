@@ -103,8 +103,9 @@ export default function SitelogRow({
   enableSwipe = true,
   className
 }: SitelogRowProps) {
-  // Si no hay entry_type, usar 'registro_general' por defecto
-  const entryType = siteLog.entry_type || 'registro_general';
+  // Obtener el slug del tipo desde la relación site_log_type
+  // Fallback a 'registro_general' si no hay tipo definido
+  const entryType = (siteLog as any).site_log_type?.slug || 'registro_general';
   const entryTypeConfig = entryTypes[entryType as keyof typeof entryTypes] || entryTypes.registro_general;
   const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
 
