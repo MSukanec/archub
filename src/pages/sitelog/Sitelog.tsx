@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 
 import SitelogEntriesTab from './SitelogEntriesTab';
 import SitelogChartsTab from './SitelogChartsTab';
+import { SitelogStatsSection } from '@/features/sitelog/components/SitelogStatsSection';
 
 export default function Sitelog() {
   const { openModal } = useGlobalModalStore();
@@ -169,6 +170,9 @@ export default function Sitelog() {
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
+        {/* Stats Section - Above Tabs */}
+        <SitelogStatsSection siteLogs={siteLogs} />
+
         {activeTab === "bitacoras" && (
           <SitelogEntriesTab 
             siteLogs={siteLogs}

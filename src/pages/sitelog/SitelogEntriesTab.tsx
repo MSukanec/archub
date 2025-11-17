@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 import { LogTimeline } from "@/features/sitelog/components/LogTimeline";
 import { ENTRY_TYPE_OPTIONS } from '@/features/sitelog/constants';
 import { Button } from "@/components/ui/button";
+import { useSitelogFiltersStore } from "@/features/sitelog/stores/useSitelogFiltersStore";
 
 interface SitelogEntriesProps {
   siteLogs: any[];
@@ -134,8 +135,14 @@ export default function SitelogEntriesTab({
     setSearchValue(mobileSearchValue);
   }, [mobileSearchValue]);
 
-  // Filtrar bitácoras según los criterios
-  const filteredSiteLogs = siteLogs?.filter((log: any) => {
+  // Get Zustand store filters
+  const { getFilteredLogs } = useSitelogFiltersStore();
+
+  // First apply Zustand store filters (from SitelogFiltersBar)
+  const storeFilteredLogs = getFilteredLogs(siteLogs || []);
+
+  // Then apply additional local filters (mobile action bar and sorting)
+  const filteredSiteLogs = storeFilteredLogs.filter((log: any) => {
     const matchesSearch = log.comments?.toLowerCase().includes(searchValue.toLowerCase()) || "";
     
     if (filterByType !== "all" && log.entry_type !== filterByType) return false;
@@ -143,7 +150,7 @@ export default function SitelogEntriesTab({
     if (publicOnly && !log.is_public) return false;
     
     return matchesSearch;
-  }) || [];
+  });
 
   // Ordenar bitácoras
   if (sortBy === "date_recent") {
