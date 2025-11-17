@@ -98,7 +98,12 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         .order('is_default', { ascending: false })
         .order('name');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading site log types:', error);
+        throw error;
+      }
+      
+      console.log('✅ Site Log Types loaded:', data);
       return data || [];
     },
     enabled: !!currentUser?.organization?.id && !!supabase
@@ -355,15 +360,15 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
     }
   });
 
-  // Obtener el tipo por defecto
-  const defaultType = siteLogTypes.find((t: any) => t.is_default);
+  // Obtener el tipo por defecto - Priorizar is_default=true, si no, tomar el primero
+  const defaultType = siteLogTypes.find((t: any) => t.is_default) || siteLogTypes[0];
   
   const form = useForm<SiteLogFormData>({
     resolver: zodResolver(siteLogSchema),
     defaultValues: {
       log_date: new Date().toISOString().split('T')[0],
       is_public: false,
-      entry_type_id: defaultType?.id || "",
+      entry_type_id: "",
       weather: "none",
       severity: "low",
       status: "approved",
@@ -375,9 +380,13 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
     }
   });
   
-  // Actualizar entry_type_id cuando se carguen los tipos
+  // Actualizar entry_type_id cuando se carguen los tipos o cuando se abra el modal
   useEffect(() => {
-    if (defaultType && !data) {
+    const siteLogId = data?.data?.id || data?.id;
+    const isCreating = !siteLogId;
+    
+    if (isCreating && defaultType && !form.getValues('entry_type_id')) {
+      console.log('🔧 Setting default type:', defaultType);
       form.setValue('entry_type_id', defaultType.id);
     }
   }, [defaultType, data, form]);
@@ -565,8 +574,11 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
                   )}
                 </FormLabel>
                 <Select 
-                  onValueChange={field.onChange} 
-                  value={field.value}
+                  onValueChange={(value) => {
+                    console.log('📝 Type selected:', value);
+                    field.onChange(value);
+                  }} 
+                  value={field.value || defaultType?.id || ""}
                   disabled={typesLoading || !isPro}
                 >
                   <FormControl>
@@ -579,6 +591,11 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
+                    {siteLogTypes.length === 0 && (
+                      <div className="px-2 py-6 text-center text-sm text-muted-foreground">
+                        No hay tipos de bitácora disponibles
+                      </div>
+                    )}
                     {siteLogTypes.map((type: any) => (
                       <SelectItem key={type.id} value={type.id}>
                         {type.name}
