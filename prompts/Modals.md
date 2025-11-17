@@ -989,4 +989,423 @@ const createMutation = useMutation({
 
 ---
 
-**Última actualización**: Noviembre 2024
+## 🎛️ MODALES CON SUBFORMS (Multi-Panel Modals)
+
+### 📌 ¿Qué son los Subforms?
+
+Los **subforms** son paneles secundarios dentro de un modal que permiten editar datos relacionados de forma aislada. Son ideales para:
+
+- **Listas complejas** que requieren su propia UI (Personal, Maquinaria, Eventos)
+- **Uploads de archivos** con drag & drop y preview
+- **Formularios anidados** que no caben bien en el panel principal
+
+**Ejemplo:** Modal de Bitácora con subforms de "Fotos y Videos", "Personal", "Eventos", "Maquinaria"
+
+---
+
+### 🎯 Cuándo usar Subforms
+
+✅ **Usa subforms cuando:**
+- Necesitas gestionar **listas de items** (agregar/editar/eliminar múltiples elementos)
+- El subform tiene **su propia UI compleja** (tabla, galería, drag & drop)
+- Quieres **separar visualmente** secciones del formulario principal
+- Los datos del subform se guardan en **estado local** hasta el submit final
+
+❌ **NO uses subforms cuando:**
+- Solo tienes 2-3 campos simples (usa el panel principal)
+- Los datos deben guardarse inmediatamente (usa modal separado)
+
+---
+
+### ⚡ Funcionalidad AUTOMÁTICA de FormModalLayout
+
+`FormModalLayout` **automáticamente maneja** la navegación de subforms sin código adicional:
+
+#### 1️⃣ **Auto-Back Button en Headers**
+
+Cuando `currentPanel === 'subform'`, FormModalLayout:
+- ✅ Detecta automáticamente que estás en un subform
+- ✅ Inyecta `showBackButton={true}` al header
+- ✅ Inyecta `onBackClick={() => setPanel('edit')}` para volver al panel principal
+
+**NO necesitas agregar esto manualmente:**
+```typescript
+// ❌ CÓDIGO VIEJO (ya no necesario)
+<FormModalHeader
+  title="Fotos y Videos"
+  showBackButton={true}              // ← FormModalLayout lo agrega automáticamente
+  onBackClick={() => setPanel('edit')} // ← FormModalLayout lo agrega automáticamente
+/>
+
+// ✅ CÓDIGO NUEVO (más limpio)
+<FormModalHeader
+  title="Fotos y Videos"
+  description="Adjunta archivos multimedia"
+  icon={Camera}
+  // ← El botón de volver se agrega AUTOMÁTICAMENTE
+/>
+```
+
+#### 2️⃣ **Auto-Navigation en Footer Buttons**
+
+Cuando `currentPanel === 'subform'`, FormModalLayout:
+- ✅ Sobrescribe `onLeftClick` (Cancelar) → Vuelve a `edit` en lugar de cerrar modal
+- ✅ Envuelve `onRightClick` (Submit) → Ejecuta acción original + Vuelve a `edit`
+
+**Comportamiento automático:**
+
+| Botón | Usuario hace click | Lo que pasa automáticamente |
+|-------|-------------------|----------------------------|
+| **Cancelar** | Click en "Cancelar" | ✅ Vuelve al panel `edit` (NO cierra modal) |
+| **Guardar** | Click en "Guardar" | ✅ Ejecuta la acción + Vuelve a `edit` |
+
+**Flujo de usuario mejorado:**
+```
+1. Abrir modal Bitácora
+2. Click "Fotos" → Subir 3 imágenes → Click "Guardar"
+   └─ ✅ Vuelve al form principal (datos en estado local)
+   
+3. Click "Personal" → Agregar 5 personas → Click "Guardar"
+   └─ ✅ Vuelve al form principal (datos en estado local)
+   
+4. Revisar campos principales → Click "Crear"
+   └─ ✅ Guarda TODO a la BD (bitácora + fotos + personal)
+   └─ ✅ Modal se cierra
+```
+
+---
+
+### 🏗️ Estructura de Modal con Subforms
+
+**Archivo de referencia:** `src/features/sitelog/modals/SiteLogModal.tsx` ← **GOLD STANDARD**
+
+#### Paso 1: Configurar panel store
+
+```typescript
+import { useModalPanelStore } from '@/components/modal/form/modalPanelStore';
+
+export function MiModal({ modalData, onClose }: MiModalProps) {
+  const { currentPanel, currentSubform, setPanel, setSubform } = useModalPanelStore();
+  
+  // Estado local para datos de subforms
+  const [filesToUpload, setFilesToUpload] = useState<FileInput[]>([]);
+  const [personnelItems, setPersonnelItems] = useState<PersonnelItem[]>([]);
+  // ...
+}
+```
+
+#### Paso 2: Crear paneles de subforms
+
+```typescript
+// Subform de Fotos y Videos
+const mediaSubform = (
+  <MediaForm
+    filesToUpload={filesToUpload}
+    setFilesToUpload={setFilesToUpload}
+    siteLogFiles={existingFiles}
+  />
+);
+
+// Subform de Personal
+const personnelSubform = (
+  <PersonnelForm
+    personnelItems={personnelItems}
+    setPersonnelItems={setPersonnelItems}
+    projectPersonnel={projectPersonnel}
+  />
+);
+```
+
+#### Paso 3: Configurar botones en panel principal
+
+```typescript
+const editPanel = (
+  <Form {...form}>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      {/* Campos normales del formulario */}
+      <FormField name="title" /* ... */ />
+      
+      {/* Botones para abrir subforms */}
+      <div className="space-y-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            setSubform('files');
+            setPanel('subform');
+          }}
+          className="w-full"
+        >
+          <Camera className="mr-2 h-4 w-4" />
+          Fotos y Videos ({filesToUpload.length})
+        </Button>
+        
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            setSubform('personal');
+            setPanel('subform');
+          }}
+          className="w-full"
+        >
+          <Users className="mr-2 h-4 w-4" />
+          Personal ({personnelItems.length})
+        </Button>
+      </div>
+    </form>
+  </Form>
+);
+```
+
+#### Paso 4: Configurar headers dinámicos
+
+```typescript
+const getHeaderConfig = () => {
+  if (currentPanel === 'subform') {
+    const subformHeaders: Record<string, { icon: any; title: string; description: string }> = {
+      'files': {
+        icon: Camera,
+        title: 'Fotos y Videos',
+        description: 'Adjunta archivos multimedia al registro'
+      },
+      'personal': {
+        icon: Users,
+        title: 'Personal',
+        description: 'Control de asistencia y personal'
+      }
+    };
+
+    const config = subformHeaders[currentSubform || ''];
+    if (!config) return null;
+
+    // NO agregues showBackButton ni onBackClick - FormModalLayout lo hace automáticamente
+    return (
+      <FormModalHeader
+        icon={config.icon}
+        title={config.title}
+        description={config.description}
+      />
+    );
+  }
+
+  // Header por defecto para edit
+  return (
+    <FormModalHeader
+      icon={FileText}
+      title="Nueva Bitácora"
+      description="Crear una nueva entrada en la bitácora"
+    />
+  );
+};
+```
+
+#### Paso 5: Configurar footer dinámico
+
+```typescript
+const getFooterConfig = () => {
+  if (currentPanel === 'subform') {
+    // FormModalLayout maneja automáticamente la navegación
+    // Solo define los textos y acciones de datos
+    return {
+      cancelText: "Cancelar",
+      onLeftClick: closeModal, // ← FormModalLayout lo convertirá a setPanel('edit')
+      submitText: "Guardar",
+      onSubmit: () => {}, // ← Datos ya están en estado, FormModalLayout vuelve a edit
+      showLoadingSpinner: false
+    };
+  }
+
+  // Footer para panel principal (submit real a BD)
+  return {
+    cancelText: "Cancelar",
+    onLeftClick: closeModal,
+    submitText: "Crear",
+    onSubmit: handleSubmit,
+    showLoadingSpinner: isLoading
+  };
+};
+
+const footerConfig = getFooterConfig();
+```
+
+#### Paso 6: Layout final con subformPanel
+
+```typescript
+return (
+  <FormModalLayout 
+    onClose={closeModal}
+    columns={1}
+    viewPanel={viewPanel}
+    editPanel={editPanel}
+    subformPanel={
+      currentSubform === 'files' ? mediaSubform :
+      currentSubform === 'personal' ? personnelSubform :
+      null
+    }
+    headerContent={getHeaderConfig()}
+    footerContent={
+      <FormModalFooter
+        cancelText={footerConfig.cancelText}
+        onLeftClick={footerConfig.onLeftClick}
+        onSubmit={footerConfig.onSubmit}
+        submitText={footerConfig.submitText}
+        showLoadingSpinner={footerConfig.showLoadingSpinner}
+      />
+    }
+    isEditing={false}
+  />
+);
+```
+
+---
+
+### 📸 UploadMediaField - Component para Subforms de Archivos
+
+Para subforms que manejan uploads de archivos, usa el componente **`UploadMediaField`**:
+
+**Ubicación:** `src/components/ui-custom/fields/UploadMediaField.tsx`
+
+**Features:**
+- ✅ **Drag & Drop area SIEMPRE visible** (no desaparece cuando hay archivos)
+- ✅ **Lista vertical de cards** con thumbnail, nombre, peso, progreso
+- ✅ **Barra de progreso** con porcentaje durante upload
+- ✅ **Image Lightbox** para preview de imágenes
+- ✅ **Validación** de tipos y tamaños de archivos
+- ✅ **Badge "Nuevo"** para archivos recién subidos
+
+**Uso en subform:**
+
+```typescript
+import { UploadMediaField } from '@/components/ui-custom/fields/UploadMediaField';
+
+export function MediaForm({ filesToUpload, setFilesToUpload, siteLogFiles }: Props) {
+  const handleExistingFileDelete = async (fileId: string) => {
+    // Lógica de eliminación
+  };
+
+  return (
+    <UploadMediaField
+      existingFiles={siteLogFiles}
+      filesToUpload={filesToUpload}
+      onFilesChange={setFilesToUpload}
+      onExistingFileDelete={handleExistingFileDelete}
+      emptyStateTitle="No hay archivos adjuntos"
+      emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
+      uploadButtonText="Subir Archivos"
+      newFileBadgeText="Nuevo"
+      maxSize={50 * 1024 * 1024} // 50MB
+      acceptedTypes={{
+        'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
+        'video/*': ['.mp4', '.mov', '.avi', '.mkv']
+      }}
+    />
+  );
+}
+```
+
+**Layout visual:**
+
+```
+┌─────────────────────────────────────┐
+│          📤                          │ ← Drag & Drop (SIEMPRE visible)
+│   Arrastra archivos o haz clic...   │
+│   Tamaño máximo: 50 MB              │
+└─────────────────────────────────────┘
+
+┌──────────────────────────────────────┐
+│ 🖼️  photo1.jpg       [NUEVO]   🗑️   │ ← Card vertical
+│     2.5 MB • Completado              │
+└──────────────────────────────────────┘
+
+┌──────────────────────────────────────┐
+│ 🖼️  photo2.jpg              [×]      │
+│     1.2 MB / 3.5 MB • 34%           │
+│     ▓▓▓▓▓░░░░░░░░░░                 │ ← Progress bar
+└──────────────────────────────────────┘
+```
+
+**Props principales:**
+
+| Prop | Tipo | Descripción |
+|------|------|-------------|
+| `existingFiles` | `any[]` | Archivos ya guardados en BD |
+| `filesToUpload` | `any[]` | Archivos nuevos en estado local |
+| `onFilesChange` | `(files) => void` | Callback cuando cambian archivos |
+| `onExistingFileDelete` | `(id) => Promise<void>` | Handler para eliminar archivos existentes |
+| `maxSize` | `number` | Tamaño máximo en bytes (default: 50MB) |
+| `acceptedTypes` | `Record<string, string[]>` | Tipos de archivos aceptados |
+
+---
+
+### ✅ Checklist para Modales con Subforms
+
+**Configuración:**
+- [ ] ✅ Usa `useModalPanelStore` para manejar `currentPanel` y `currentSubform`
+- [ ] ✅ Estado local para datos de cada subform (arrays, objects, etc.)
+- [ ] ✅ Botones en `editPanel` para abrir subforms con `setSubform()` y `setPanel('subform')`
+
+**Headers dinámicos:**
+- [ ] ✅ Función `getHeaderConfig()` que retorna headers según `currentPanel`
+- [ ] ✅ Headers de subforms **NO incluyen** `showBackButton` ni `onBackClick` (automático)
+- [ ] ✅ Cada subform tiene su propio `icon`, `title` y `description`
+
+**Footer dinámico:**
+- [ ] ✅ Función `getFooterConfig()` que retorna config según `currentPanel`
+- [ ] ✅ Footer de subforms solo define textos y acciones de datos (navegación es automática)
+- [ ] ✅ Footer del panel principal maneja submit real a BD
+
+**Layout:**
+- [ ] ✅ `FormModalLayout` recibe prop `subformPanel` con lógica condicional
+- [ ] ✅ Cada subform se mapea correctamente según `currentSubform`
+
+**UX Automática (verificar que funcione):**
+- [ ] ✅ Botón "Volver" aparece automáticamente en headers de subforms
+- [ ] ✅ Click en "Cancelar" en subform → Vuelve a `edit` (NO cierra modal)
+- [ ] ✅ Click en "Guardar" en subform → Ejecuta acción + Vuelve a `edit`
+- [ ] ✅ Los datos se mantienen en estado local hasta el submit final
+
+---
+
+### 🏆 Ejemplo Completo de Referencia
+
+**GOLD STANDARD:** `src/features/sitelog/modals/SiteLogModal.tsx`
+
+Este modal tiene:
+- ✅ 4 subforms (Personal, Fotos, Eventos, Maquinaria)
+- ✅ Headers y footers dinámicos correctamente configurados
+- ✅ Navegación automática funcionando perfectamente
+- ✅ Estado local para cada subform
+- ✅ Submit final que guarda TODO a la BD
+
+**Otros modales con subforms:**
+- `src/components/modal/modals/resources/contacts/ContactModal.tsx` (1 subform: Attachments)
+- `src/components/modal/modals/construction/tasks/TaskMultiModal.tsx` (2 subforms: Parametric-task, Custom)
+
+---
+
+### 🚫 Errores Comunes con Subforms
+
+1. **Agregar `showBackButton` manualmente en headers de subforms**
+   - ❌ `<FormModalHeader showBackButton={true} onBackClick={...} />`
+   - ✅ Omitir estas props - FormModalLayout las inyecta automáticamente
+
+2. **Cerrar el modal al hacer submit en subform**
+   - ❌ `onSubmit: closeModal` en footer de subform
+   - ✅ `onSubmit: () => {}` - FormModalLayout maneja la navegación
+
+3. **No usar estado local para datos de subforms**
+   - ❌ Guardar a BD inmediatamente al cambiar subform
+   - ✅ Guardar en estado (`useState`) hasta submit final
+
+4. **Olvidar mapear `currentSubform` en `subformPanel`**
+   - ❌ `subformPanel={mediaSubform}` (siempre el mismo)
+   - ✅ `subformPanel={currentSubform === 'files' ? mediaSubform : ...}`
+
+5. **No invalidar queries después del submit final**
+   - ❌ Solo cerrar modal sin invalidar
+   - ✅ `queryClient.invalidateQueries()` antes de cerrar
+
+---
+
+**Última actualización**: Noviembre 17, 2025
