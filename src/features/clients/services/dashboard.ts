@@ -84,19 +84,19 @@ function calculateFinancialSummaries(
   payments: any[],
   schedule: any[]
 ): Array<{ clientId: string; summaries: ClientFinancialSummary[] }> {
-  const summariesMap = new Map<string, ClientFinancialSummary[]>();
+  const summariesByClient: Array<{ clientId: string; summaries: ClientFinancialSummary[] }> = [];
 
   clientIds.forEach(clientId => {
     const clientCommitments = commitments.filter(c => c.client_id === clientId);
     const clientPayments = payments.filter(p => p.client_id === clientId);
     
-    const currencyGroups = new Map<string, ClientFinancialSummary>();
+    const currencyGroups: Record<string, ClientFinancialSummary> = {};
 
     clientCommitments.forEach(commitment => {
       const currencyId = commitment.currency_id;
       
-      if (!currencyGroups.has(currencyId)) {
-        currencyGroups.set(currencyId, {
+      if (!currencyGroups[currencyId]) {
+        currencyGroups[currencyId] = {
           client_id: clientId,
           currency_id: currencyId,
           total_committed: 0,
@@ -111,10 +111,10 @@ function calculateFinancialSummaries(
           next_due_amount: null,
           last_payment_date: null,
           last_payment_amount: null,
-        });
+        };
       }
 
-      const summary = currencyGroups.get(currencyId)!;
+      const summary = currencyGroups[currencyId];
       summary.total_committed += commitment.amount;
 
       const commitmentSchedule = schedule.filter(s => s.commitment_id === commitment.id);
@@ -145,8 +145,8 @@ function calculateFinancialSummaries(
     clientPayments.forEach(payment => {
       const currencyId = payment.currency_id;
       
-      if (!currencyGroups.has(currencyId)) {
-        currencyGroups.set(currencyId, {
+      if (!currencyGroups[currencyId]) {
+        currencyGroups[currencyId] = {
           client_id: clientId,
           currency_id: currencyId,
           total_committed: 0,
@@ -161,10 +161,10 @@ function calculateFinancialSummaries(
           next_due_amount: null,
           last_payment_date: null,
           last_payment_amount: null,
-        });
+        };
       }
 
-      const summary = currencyGroups.get(currencyId)!;
+      const summary = currencyGroups[currencyId];
       summary.total_paid += payment.amount;
 
       if (!summary.last_payment_date || payment.payment_date > summary.last_payment_date) {
@@ -173,15 +173,15 @@ function calculateFinancialSummaries(
       }
     });
 
-    currencyGroups.forEach((summary, currencyId) => {
+    Object.values(currencyGroups).forEach(summary => {
       summary.balance_due = summary.total_committed - summary.total_paid;
     });
 
-    summariesMap.set(clientId, Array.from(currencyGroups.values()));
+    summariesByClient.push({
+      clientId,
+      summaries: Object.values(currencyGroups),
+    });
   });
 
-  return Array.from(summariesMap.entries()).map(([clientId, summaries]) => ({
-    clientId,
-    summaries,
-  }));
+  return summariesByClient;
 }

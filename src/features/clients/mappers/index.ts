@@ -141,15 +141,6 @@ export function calculateClientTotals(summaries: ClientFinancialSummary[]) {
 }
 
 /**
- * Groups financial summaries by currency for display
- */
-export function groupSummariesByCurrency(
-  summaries: ClientFinancialSummary[]
-): Map<string, ClientFinancialSummary> {
-  return new Map(summaries.map((summary) => [summary.currency_id, summary]));
-}
-
-/**
  * Formats contact display name with fallbacks
  */
 export function formatClientDisplayName(
