@@ -10,6 +10,7 @@ import {
   useCurrentProject, 
   useGalleryFiles, 
   useDeleteMediaFile,
+  MediaStatsSection,
   type GalleryFile 
 } from '@/features/media';
 
@@ -27,10 +28,15 @@ export function MediaGallery() {
 
   // Get gallery files using the new hook
   const { 
-    data: galleryFiles = [], 
+    data: allFiles = [], 
     isLoading: galleryLoading, 
     error: galleryError 
   } = useGalleryFiles(organizationId, currentProject?.id);
+
+  // Filter gallery files to only show images and videos (documents go to Documentation tab)
+  const galleryFiles = allFiles.filter(file => 
+    file.file_type?.startsWith('image/') || file.file_type?.startsWith('video/')
+  );
 
   // Delete mutation
   const deleteFileMutation = useDeleteMediaFile();
@@ -113,11 +119,17 @@ export function MediaGallery() {
   }
 
   return (
-    <GalleryComponent
-      files={galleryFiles as any}
-      onEdit={handleEdit as any}
-      onDownload={handleDownload as any}
-      onDelete={handleDelete as any}
-    />
+    <div className="space-y-6">
+      {galleryFiles.length > 0 && (
+        <MediaStatsSection galleryFiles={galleryFiles} />
+      )}
+      
+      <GalleryComponent
+        files={galleryFiles as any}
+        onEdit={handleEdit as any}
+        onDownload={handleDownload as any}
+        onDelete={handleDelete as any}
+      />
+    </div>
   );
 }

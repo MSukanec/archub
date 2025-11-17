@@ -42,3 +42,7 @@ export { useCurrentProject } from './hooks/use-current-project';
 export { useGalleryFiles } from './hooks/use-gallery-files';
 export { useDeleteMediaFile } from './hooks/use-delete-media-file';
 export { useUploadMediaFile } from './hooks/use-upload-media-file';
+export { useMediaMetrics } from './hooks/use-media-metrics';
+
+// Components
+export { MediaStatsSection } from './components/MediaStatsSection';

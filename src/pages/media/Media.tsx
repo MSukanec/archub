@@ -2,13 +2,15 @@ import { useEffect, useState } from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { MediaDocumentation } from './MediaDocumentation';
 import { MediaGallery } from './MediaGallery';
-import { FileText, Upload, Plus } from 'lucide-react';
+import { FolderOpen, Upload, Plus } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useProjectContext } from '@/stores/projectContext';
 
 export default function Media() {
   const { setSidebarContext } = useNavigationStore();
   const { openModal } = useGlobalModalStore();
+  const { currentOrganizationId } = useProjectContext();
   const [activeTab, setActiveTab] = useState('documentation');
 
   useEffect(() => {
@@ -51,8 +53,12 @@ export default function Media() {
   };
 
   const headerProps = {
-    icon: <FileText className="w-5 h-5" />,
-    title: "Media",
+    icon: FolderOpen,
+    title: "Archivos y Media",
+    description: "Gestiona todos los archivos del proyecto: galería de imágenes y videos, documentación técnica y archivos adjuntos",
+    organizationId: currentOrganizationId,
+    showMembers: true,
+    showProjectSelector: true,
     tabs,
     onTabChange: setActiveTab,
     actionButton: getActionButton()
