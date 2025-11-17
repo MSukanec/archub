@@ -22,7 +22,13 @@ export async function getGalleryFiles(
   organizationId: string | undefined,
   projectId: string | undefined
 ): Promise<GalleryFile[]> {
+  console.log('=== getGalleryFiles DEBUG ===');
+  console.log('organizationId:', organizationId);
+  console.log('projectId:', projectId);
+  console.log('supabase:', !!supabase);
+  
   if (!organizationId || !supabase) {
+    console.log('Early return: no organizationId or supabase');
     return [];
   }
 
@@ -79,11 +85,17 @@ export async function getGalleryFiles(
       projectQuery
     ]);
 
+    console.log('orgResult:', orgResult);
+    console.log('projectResult:', projectResult);
+
     if (orgResult.error) throw orgResult.error;
     if (projectResult?.error) throw projectResult.error;
 
     const orgFiles = orgResult.data || [];
     const projectFiles = projectResult?.data || [];
+    
+    console.log('orgFiles count:', orgFiles.length);
+    console.log('projectFiles count:', projectFiles.length);
 
     // Combine and format files
     const allFiles: GalleryFile[] = [...orgFiles, ...projectFiles].map((file: any) => ({
