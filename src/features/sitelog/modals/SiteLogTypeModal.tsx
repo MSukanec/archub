@@ -26,7 +26,10 @@ const siteLogTypeSchema = z.object({
   description: z.string().max(500, 'Máximo 500 caracteres').optional(),
   icon: z.string().max(50, 'Máximo 50 caracteres').optional(),
   color: z.string()
-    .regex(/^#[0-9A-Fa-f]{6}$/, 'Debe ser un color hexadecimal válido (#RRGGBB)')
+    .refine(
+      (val) => !val || /^#[0-9A-Fa-f]{6}$/.test(val),
+      'Debe ser un color hexadecimal válido (#RRGGBB)'
+    )
     .optional(),
 });
 
@@ -53,7 +56,7 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
       code: '',
       description: '',
       icon: '',
-      color: '#84cc16',
+      color: undefined,
     }
   });
 
@@ -65,7 +68,7 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
         code: siteLogType.code || '',
         description: siteLogType.description || '',
         icon: siteLogType.icon || '',
-        color: siteLogType.color || '#84cc16',
+        color: siteLogType.color || undefined,
       });
     } else {
       form.reset({
@@ -73,7 +76,7 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
         code: '',
         description: '',
         icon: '',
-        color: '#84cc16',
+        color: undefined,
       });
     }
   }, [siteLogType, form]);
@@ -261,24 +264,36 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
             name="color"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Color</FormLabel>
+                <FormLabel>Color (opcional)</FormLabel>
                 <div className="flex gap-2">
-                  <FormControl>
-                    <Input 
-                      type="color" 
-                      value={field.value}
-                      onChange={field.onChange}
-                      className="w-16 h-10 p-1 cursor-pointer"
-                      data-testid="input-sitelog-type-color"
-                    />
-                  </FormControl>
+                  {field.value && (
+                    <FormControl>
+                      <Input 
+                        type="color" 
+                        value={field.value}
+                        onChange={field.onChange}
+                        className="w-16 h-10 p-1 cursor-pointer"
+                        data-testid="input-sitelog-type-color"
+                      />
+                    </FormControl>
+                  )}
+                  {!field.value && (
+                    <div 
+                      onClick={() => field.onChange('#84cc16')}
+                      className="w-16 h-10 border border-input rounded-md flex items-center justify-center cursor-pointer hover:bg-accent"
+                      data-testid="button-sitelog-type-color-placeholder"
+                    >
+                      <div className="w-6 h-6 rounded border border-border bg-muted" />
+                    </div>
+                  )}
                   <Input 
                     placeholder="#84cc16" 
                     value={field.value || ''}
                     onChange={(e) => {
                       const val = e.target.value;
-                      // Solo actualizar si es vacío o formato hexadecimal válido
-                      if (val === '' || /^#[0-9A-Fa-f]{0,6}$/.test(val)) {
+                      if (val === '') {
+                        field.onChange(undefined);
+                      } else if (/^#[0-9A-Fa-f]{0,6}$/.test(val)) {
                         field.onChange(val);
                       }
                     }}
