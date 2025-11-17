@@ -1,5 +1,18 @@
 import { supabase } from '@/lib/supabase';
 
+export interface SiteLogType {
+  id: string;
+  name: string;
+  code: string;
+  description: string | null;
+  icon: string | null;
+  color: string | null;
+  is_default: boolean;
+  created_at: string;
+  organization_id: string | null;
+  updated_at: string;
+}
+
 /**
  * Obtiene los tipos de bitácora disponibles para una organización.
  * 
@@ -10,7 +23,7 @@ import { supabase } from '@/lib/supabase';
  * @returns Array de tipos de bitácora ordenados, o array vacío
  * @throws {Error} Si falla la query de Supabase
  */
-export async function getSiteLogTypes(organizationId: string) {
+export async function getSiteLogTypes(organizationId: string): Promise<SiteLogType[]> {
   if (!supabase || !organizationId) {
     return [];
   }
