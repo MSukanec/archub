@@ -21,23 +21,9 @@ import { useProjectContext } from '@/stores/projectContext';
 import { supabase } from '@/lib/supabase';
 
 const gallerySchema = z.object({
-  visibility: z.enum(['organization', 'project'], {
-    required_error: "La visibilidad es requerida"
-  }),
   project_id: z.string().nullable().optional(),
   description: z.string().optional(),
-}).refine(
-  (data) => {
-    if (data.visibility === 'project' && !data.project_id) {
-      return false;
-    }
-    return true;
-  },
-  {
-    message: "El proyecto es requerido cuando la visibilidad es 'proyecto'",
-    path: ["project_id"],
-  }
-);
+});
 
 type GalleryFormData = z.infer<typeof gallerySchema>;
 
@@ -68,21 +54,17 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
   const form = useForm<GalleryFormData>({
     resolver: zodResolver(gallerySchema),
     defaultValues: {
-      visibility: selectedProjectId ? 'project' : 'organization',
       project_id: selectedProjectId || null,
       description: '',
     },
   });
 
-  const { handleSubmit, reset, formState: { isSubmitting }, watch } = form;
-  
-  const selectedVisibility = watch('visibility');
+  const { handleSubmit, reset, formState: { isSubmitting } } = form;
 
   // Reset form when editing file changes or user data loads
   useEffect(() => {
     if (userData) {
       reset({
-        visibility: selectedProjectId ? 'project' : 'organization',
         project_id: selectedProjectId || null,
         description: '',
       });
@@ -124,7 +106,7 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
         formData.project_id || null,
         currentOrganizationId,
         createdByMemberId,
-        formData.visibility
+        'organization'
       );
     },
     onSuccess: () => {
@@ -229,61 +211,6 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
   const editPanel = (
     <Form {...form}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* Visibility Field */}
-        <FormField
-          control={form.control}
-          name="visibility"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Visibilidad *</FormLabel>
-              <Select 
-                onValueChange={(value) => {
-                  field.onChange(value);
-                  if (value === 'organization') {
-                    form.setValue('project_id', null);
-                  } else if (value === 'project' && selectedProjectId) {
-                    form.setValue('project_id', selectedProjectId);
-                  }
-                }}
-                value={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar visibilidad" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="organization">Organización (sin proyecto específico)</SelectItem>
-                  <SelectItem value="project">Proyecto específico</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Project ID Field - Only shown when visibility is 'project' */}
-        {selectedVisibility === 'project' && (
-          <FormField
-            control={form.control}
-            name="project_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Proyecto *</FormLabel>
-                <FormControl>
-                  <Input 
-                    {...field} 
-                    value={field.value || ''} 
-                    disabled
-                    placeholder={selectedProjectId || "No hay proyecto seleccionado"}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
         {/* Description Field */}
         <FormField
           control={form.control}
