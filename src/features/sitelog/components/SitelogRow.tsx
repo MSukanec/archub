@@ -103,6 +103,8 @@ export default function SitelogRow({
   enableSwipe = true,
   className
 }: SitelogRowProps) {
+  console.log('📱 SitelogRow INIT:', siteLog.id);
+
   const entryTypeConfig = entryTypes[siteLog.entry_type as keyof typeof entryTypes];
   const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
   
@@ -206,11 +208,10 @@ export default function SitelogRow({
     }] : [])
   ] : undefined;
 
-  // Usar SwipeableCard en móvil, DataRowCard en desktop
-  console.log('📱 SitelogRow render:', {
+  console.log('📱 SitelogRow actions:', {
     id: siteLog.id,
     enableSwipe,
-    hasActions: swipeActions && swipeActions.length > 0,
+    swipeActions,
     actionCount: swipeActions?.length
   });
 

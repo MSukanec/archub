@@ -202,6 +202,7 @@ export default function SitelogEntriesTab({
                 key={siteLog.id}
                 siteLog={siteLog}
                 onClick={() => handleViewSiteLog(siteLog)}
+                onEdit={handleEditSiteLog}
                 onDelete={handleDeleteSiteLog}
                 onToggleFavorite={toggleFavorite}
                 enableSwipe={true}
