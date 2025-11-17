@@ -32,7 +32,7 @@ export async function getSiteLogs(projectId: string | undefined, organizationId:
       ),
       site_log_type:site_log_types(
         id,
-        slug,
+        code,
         name,
         icon
       )
@@ -47,11 +47,8 @@ export async function getSiteLogs(projectId: string | undefined, organizationId:
   const { data: logsData, error } = await query.order('created_at', { ascending: false });
 
   if (error) {
-    console.error('❌ Error fetching site logs:', error);
     throw error;
   }
-  
-  console.log('✅ Site logs fetched:', logsData?.length || 0, 'logs');
 
   if (!logsData || logsData.length === 0) {
     return [];
@@ -80,7 +77,7 @@ export async function getSiteLogs(projectId: string | undefined, organizationId:
     .in('site_log_id', logIds);
 
   if (attendeesError) {
-    console.error('⚠️ Error fetching attendees (non-fatal):', attendeesError);
+    // Non-fatal, just log silently
   }
 
   const { data: filesData, error: filesError } = await supabase
@@ -89,7 +86,7 @@ export async function getSiteLogs(projectId: string | undefined, organizationId:
     .in('site_log_id', logIds);
 
   if (filesError) {
-    console.error('⚠️ Error fetching files (non-fatal):', filesError);
+    // Non-fatal, just log silently
   }
 
   const data = logsData.map(log => ({
