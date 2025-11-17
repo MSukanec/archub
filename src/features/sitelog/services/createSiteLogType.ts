@@ -14,11 +14,15 @@ export interface CreateSiteLogTypeData {
  * 
  * @param data - Datos del nuevo tipo de bitácora
  * @returns El tipo de bitácora creado
- * @throws {Error} Si falla la creación
+ * @throws {Error} Si falla la creación o si faltan parámetros requeridos
  */
 export async function createSiteLogType(data: CreateSiteLogTypeData) {
   if (!supabase) {
     throw new Error('Supabase client not available');
+  }
+
+  if (!data.name || !data.code || !data.organizationId) {
+    throw new Error('Missing required parameters: name, code, and organizationId are required');
   }
 
   const { data: newType, error } = await supabase

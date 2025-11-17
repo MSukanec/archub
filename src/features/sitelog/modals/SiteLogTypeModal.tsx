@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Tag } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
@@ -11,7 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useCreateSiteLogType, useUpdateSiteLogType } from '../hooks/use-sitelog-types';
+import { createSiteLogType } from '../services/createSiteLogType';
+import { updateSiteLogType } from '../services/updateSiteLogType';
 import type { SiteLogType } from '../services/getSiteLogTypes';
 
 // Schema de validación
@@ -41,7 +43,7 @@ interface SiteLogTypeModalProps {
 export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) {
   const { siteLogType, isEditing = false } = modalData || {};
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
 
   const form = useForm<SiteLogTypeFormData>({
@@ -81,10 +83,52 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
     onClose();
   };
 
-  const createMutation = useCreateSiteLogType();
-  const updateMutation = useUpdateSiteLogType();
+  // Define mutations inline siguiendo el patrón GOLD STANDARD de SiteLogModal
+  const createMutation = useMutation({
+    mutationFn: createSiteLogType,
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['sitelog-types', variables.organizationId] });
+      toast({
+        title: 'Tipo creado',
+        description: 'El tipo de bitácora se creó correctamente'
+      });
+      handleClose();
+    },
+    onError: (error) => {
+      console.error('Error creating site log type:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo crear el tipo de bitácora',
+        variant: 'destructive'
+      });
+    }
+  });
 
-  const onSubmit = async (data: SiteLogTypeFormData) => {
+  const updateMutation = useMutation({
+    mutationFn: ({ typeId, organizationId, data }: {
+      typeId: string;
+      organizationId: string;
+      data: any;
+    }) => updateSiteLogType(typeId, organizationId, data),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['sitelog-types', variables.organizationId] });
+      toast({
+        title: 'Tipo actualizado',
+        description: 'El tipo de bitácora se actualizó correctamente'
+      });
+      handleClose();
+    },
+    onError: (error) => {
+      console.error('Error updating site log type:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo actualizar el tipo de bitácora',
+        variant: 'destructive'
+      });
+    }
+  });
+
+  const onSubmit = (data: SiteLogTypeFormData) => {
     if (!userData?.organization?.id) {
       toast({
         title: 'Error',
@@ -94,54 +138,27 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
       return;
     }
 
-    setIsLoading(true);
-
-    try {
-      if (isEditing && siteLogType) {
-        await updateMutation.mutateAsync({
-          typeId: siteLogType.id,
-          organizationId: userData.organization.id,
-          data: {
-            name: data.name,
-            code: data.code,
-            description: data.description || null,
-            icon: data.icon || null,
-            color: data.color || null,
-          }
-        });
-
-        toast({
-          title: 'Tipo actualizado',
-          description: 'El tipo de bitácora se actualizó correctamente'
-        });
-      } else {
-        await createMutation.mutateAsync({
+    if (isEditing && siteLogType) {
+      updateMutation.mutate({
+        typeId: siteLogType.id,
+        organizationId: userData.organization.id,
+        data: {
           name: data.name,
           code: data.code,
           description: data.description || null,
           icon: data.icon || null,
           color: data.color || null,
-          organizationId: userData.organization.id,
-        });
-
-        toast({
-          title: 'Tipo creado',
-          description: 'El tipo de bitácora se creó correctamente'
-        });
-      }
-
-      handleClose();
-    } catch (error) {
-      console.error('Error saving site log type:', error);
-      toast({
-        title: 'Error',
-        description: isEditing 
-          ? 'No se pudo actualizar el tipo de bitácora'
-          : 'No se pudo crear el tipo de bitácora',
-        variant: 'destructive'
+        }
       });
-    } finally {
-      setIsLoading(false);
+    } else {
+      createMutation.mutate({
+        name: data.name,
+        code: data.code,
+        description: data.description || null,
+        icon: data.icon || null,
+        color: data.color || null,
+        organizationId: userData.organization.id,
+      });
     }
   };
 
@@ -249,19 +266,25 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
                   <FormControl>
                     <Input 
                       type="color" 
-                      {...field}
+                      value={field.value}
+                      onChange={field.onChange}
                       className="w-16 h-10 p-1 cursor-pointer"
                       data-testid="input-sitelog-type-color"
                     />
                   </FormControl>
-                  <FormControl>
-                    <Input 
-                      placeholder="#84cc16" 
-                      {...field}
-                      className="flex-1"
-                      maxLength={7}
-                    />
-                  </FormControl>
+                  <Input 
+                    placeholder="#84cc16" 
+                    value={field.value || ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      // Solo actualizar si es vacío o formato hexadecimal válido
+                      if (val === '' || /^#[0-9A-Fa-f]{0,6}$/.test(val)) {
+                        field.onChange(val);
+                      }
+                    }}
+                    className="flex-1"
+                    maxLength={7}
+                  />
                 </div>
                 <FormMessage />
               </FormItem>
@@ -283,13 +306,15 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
     />
   );
 
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
       rightLabel={isEditing ? 'Guardar Cambios' : 'Crear Tipo'}
       onRightClick={form.handleSubmit(onSubmit)}
-      isSubmitting={isLoading}
+      isSubmitting={isSubmitting}
     />
   );
 
