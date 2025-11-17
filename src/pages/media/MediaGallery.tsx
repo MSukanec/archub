@@ -34,9 +34,11 @@ export function MediaGallery() {
   } = useGalleryFiles(organizationId, currentProject?.id);
 
   // Filter to only show images and videos in gallery (documents go to Documentation tab)
-  const galleryFiles = allFiles.filter(file => 
-    file.file_type?.startsWith('image/') || file.file_type?.startsWith('video/')
-  );
+  // Support both "image" and "image/jpeg" formats
+  const galleryFiles = allFiles.filter(file => {
+    const type = file.file_type?.toLowerCase() || '';
+    return type.startsWith('image') || type.startsWith('video');
+  });
 
   // Delete mutation
   const deleteFileMutation = useDeleteMediaFile();
