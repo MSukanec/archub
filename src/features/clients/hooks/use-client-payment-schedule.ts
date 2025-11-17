@@ -37,21 +37,20 @@ export function useCreateClientPaymentSchedule() {
   return useMutation({
     mutationFn: ({
       schedule,
-      projectId,
       organizationId,
-      createdBy,
+      projectId,
     }: {
-      schedule: Omit<ClientPaymentSchedule, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>;
-      projectId: string;
+      schedule: Omit<ClientPaymentSchedule, 'id' | 'created_at' | 'updated_at' | 'organization_id'>;
       organizationId: string;
-      createdBy: string;
-    }) => createClientPaymentSchedule(schedule, projectId, organizationId, createdBy),
-    onSuccess: (data) => {
+      projectId: string;
+    }) => createClientPaymentSchedule(schedule, organizationId),
+    onSuccess: (data, variables) => {
+      // Use projectId from variables since schedule table doesn't have it
       queryClient.invalidateQueries({
-        queryKey: CLIENT_QUERY_KEYS.schedule(data.project_id),
+        queryKey: CLIENT_QUERY_KEYS.schedule(variables.projectId),
       });
       queryClient.invalidateQueries({
-        queryKey: CLIENT_QUERY_KEYS.dashboard(data.project_id),
+        queryKey: CLIENT_QUERY_KEYS.dashboard(variables.projectId),
       });
     },
   });
@@ -65,20 +64,23 @@ export function useUpdateClientPaymentSchedule() {
       scheduleId,
       updates,
       organizationId,
+      projectId,
     }: {
       scheduleId: string;
-      updates: Partial<Omit<ClientPaymentSchedule, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>>;
+      updates: Partial<Omit<ClientPaymentSchedule, 'id' | 'created_at' | 'updated_at' | 'organization_id'>>;
       organizationId: string;
+      projectId: string;
     }) => updateClientPaymentSchedule(scheduleId, updates, organizationId),
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
+      // Use projectId from variables since schedule table doesn't have it
       queryClient.invalidateQueries({
-        queryKey: CLIENT_QUERY_KEYS.schedule(data.project_id),
+        queryKey: CLIENT_QUERY_KEYS.schedule(variables.projectId),
       });
       queryClient.invalidateQueries({
         queryKey: CLIENT_QUERY_KEYS.scheduleItem(data.id),
       });
       queryClient.invalidateQueries({
-        queryKey: CLIENT_QUERY_KEYS.dashboard(data.project_id),
+        queryKey: CLIENT_QUERY_KEYS.dashboard(variables.projectId),
       });
     },
   });

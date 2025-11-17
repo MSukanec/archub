@@ -21,10 +21,37 @@ export async function getClientPaymentSchedule(
     return [];
   }
 
+  const { data: commitmentsData, error: commitmentsError } = await supabase
+    .from('client_commitments')
+    .select('id')
+    .eq('project_id', projectId)
+    .eq('organization_id', organizationId);
+
+  if (commitmentsError) {
+    throw commitmentsError;
+  }
+
+  if (!commitmentsData || commitmentsData.length === 0) {
+    return [];
+  }
+
+  const commitmentIds = commitmentsData.map(c => c.id);
+
   const { data: scheduleData, error } = await supabase
     .from('client_payment_schedule')
     .select(`
-      *,
+      id,
+      commitment_id,
+      organization_id,
+      due_date,
+      amount,
+      currency_id,
+      status,
+      paid_at,
+      payment_method,
+      notes,
+      created_at,
+      updated_at,
       commitment:client_commitments(
         id,
         project_id,
@@ -112,8 +139,8 @@ export async function getClientPaymentSchedule(
         name
       )
     `)
+    .in('commitment_id', commitmentIds)
     .eq('organization_id', organizationId)
-    .eq('project_id', projectId)
     .order('due_date', { ascending: true });
 
   if (error) {
@@ -124,18 +151,18 @@ export async function getClientPaymentSchedule(
     return [];
   }
 
-  const data = scheduleData.map(schedule => ({
+  const data = scheduleData.map((schedule: any) => ({
     ...schedule,
-    commitment: schedule.commitment ? {
-      ...schedule.commitment,
-      client: schedule.commitment.client ? {
-        ...schedule.commitment.client,
-        contact: schedule.commitment.client.contact || null,
-        role: schedule.commitment.client.role || null,
+    commitment: schedule.commitment?.[0] ? {
+      ...schedule.commitment[0],
+      client: schedule.commitment[0].client?.[0] ? {
+        ...schedule.commitment[0].client[0],
+        contact: schedule.commitment[0].client[0].contact?.[0] || null,
+        role: schedule.commitment[0].client[0].role?.[0] || null,
       } : null,
-      contact: schedule.commitment.contact || null,
+      contact: schedule.commitment[0].contact?.[0] || null,
     } : null,
-    currency: schedule.currency || null,
+    currency: schedule.currency?.[0] || null,
   }));
 
   return data;
@@ -164,7 +191,18 @@ export async function getClientPaymentScheduleById(
   const { data, error } = await supabase
     .from('client_payment_schedule')
     .select(`
-      *,
+      id,
+      commitment_id,
+      organization_id,
+      due_date,
+      amount,
+      currency_id,
+      status,
+      paid_at,
+      payment_method,
+      notes,
+      created_at,
+      updated_at,
       commitment:client_commitments(
         id,
         project_id,
@@ -254,7 +292,7 @@ export async function getClientPaymentScheduleById(
     `)
     .eq('id', scheduleId)
     .eq('organization_id', organizationId)
-    .single();
+    .maybeSingle();
 
   if (error) {
     throw error;
@@ -264,18 +302,20 @@ export async function getClientPaymentScheduleById(
     return null;
   }
 
+  const typedData = data as any;
+
   return {
-    ...data,
-    commitment: data.commitment ? {
-      ...data.commitment,
-      client: data.commitment.client ? {
-        ...data.commitment.client,
-        contact: data.commitment.client.contact || null,
-        role: data.commitment.client.role || null,
+    ...typedData,
+    commitment: typedData.commitment?.[0] ? {
+      ...typedData.commitment[0],
+      client: typedData.commitment[0].client?.[0] ? {
+        ...typedData.commitment[0].client[0],
+        contact: typedData.commitment[0].client[0].contact?.[0] || null,
+        role: typedData.commitment[0].client[0].role?.[0] || null,
       } : null,
-      contact: data.commitment.contact || null,
+      contact: typedData.commitment[0].contact?.[0] || null,
     } : null,
-    currency: data.currency || null,
+    currency: typedData.currency?.[0] || null,
   };
 }
 
@@ -283,28 +323,33 @@ export async function getClientPaymentScheduleById(
  * Crea un nuevo item en el cronograma de pago.
  * 
  * @param schedule - Datos del item del cronograma a crear
- * @param projectId - ID del proyecto
  * @param organizationId - ID de la organización
- * @param createdBy - ID del miembro de organización que crea el registro
  * @returns Item del cronograma creado con sus relaciones
  * @throws {Error} Si falla la creación
  */
 export async function createClientPaymentSchedule(
-  schedule: Omit<ClientPaymentSchedule, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>,
-  projectId: string,
-  organizationId: string,
-  createdBy: string
+  schedule: Omit<ClientPaymentSchedule, 'id' | 'created_at' | 'updated_at' | 'organization_id'>,
+  organizationId: string
 ): Promise<ClientPaymentScheduleWithRelations> {
   const { data, error } = await supabase
     .from('client_payment_schedule')
     .insert({
       ...schedule,
-      project_id: projectId,
       organization_id: organizationId,
-      created_by: createdBy,
     })
     .select(`
-      *,
+      id,
+      commitment_id,
+      organization_id,
+      due_date,
+      amount,
+      currency_id,
+      status,
+      paid_at,
+      payment_method,
+      notes,
+      created_at,
+      updated_at,
       commitment:client_commitments(
         id,
         project_id,
@@ -398,18 +443,20 @@ export async function createClientPaymentSchedule(
     throw error;
   }
 
+  const typedData = data as any;
+
   return {
-    ...data,
-    commitment: data.commitment ? {
-      ...data.commitment,
-      client: data.commitment.client ? {
-        ...data.commitment.client,
-        contact: data.commitment.client.contact || null,
-        role: data.commitment.client.role || null,
+    ...typedData,
+    commitment: typedData.commitment?.[0] ? {
+      ...typedData.commitment[0],
+      client: typedData.commitment[0].client?.[0] ? {
+        ...typedData.commitment[0].client[0],
+        contact: typedData.commitment[0].client[0].contact?.[0] || null,
+        role: typedData.commitment[0].client[0].role?.[0] || null,
       } : null,
-      contact: data.commitment.contact || null,
+      contact: typedData.commitment[0].contact?.[0] || null,
     } : null,
-    currency: data.currency || null,
+    currency: typedData.currency?.[0] || null,
   };
 }
 
@@ -424,7 +471,7 @@ export async function createClientPaymentSchedule(
  */
 export async function updateClientPaymentSchedule(
   scheduleId: string,
-  updates: Partial<Omit<ClientPaymentSchedule, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>>,
+  updates: Partial<Omit<ClientPaymentSchedule, 'id' | 'created_at' | 'updated_at' | 'organization_id'>>,
   organizationId: string
 ): Promise<ClientPaymentScheduleWithRelations> {
   const { data, error } = await supabase
@@ -436,7 +483,18 @@ export async function updateClientPaymentSchedule(
     .eq('id', scheduleId)
     .eq('organization_id', organizationId)
     .select(`
-      *,
+      id,
+      commitment_id,
+      organization_id,
+      due_date,
+      amount,
+      currency_id,
+      status,
+      paid_at,
+      payment_method,
+      notes,
+      created_at,
+      updated_at,
       commitment:client_commitments(
         id,
         project_id,
@@ -530,18 +588,20 @@ export async function updateClientPaymentSchedule(
     throw error;
   }
 
+  const typedData = data as any;
+
   return {
-    ...data,
-    commitment: data.commitment ? {
-      ...data.commitment,
-      client: data.commitment.client ? {
-        ...data.commitment.client,
-        contact: data.commitment.client.contact || null,
-        role: data.commitment.client.role || null,
+    ...typedData,
+    commitment: typedData.commitment?.[0] ? {
+      ...typedData.commitment[0],
+      client: typedData.commitment[0].client?.[0] ? {
+        ...typedData.commitment[0].client[0],
+        contact: typedData.commitment[0].client[0].contact?.[0] || null,
+        role: typedData.commitment[0].client[0].role?.[0] || null,
       } : null,
-      contact: data.commitment.contact || null,
+      contact: typedData.commitment[0].contact?.[0] || null,
     } : null,
-    currency: data.currency || null,
+    currency: typedData.currency?.[0] || null,
   };
 }
 

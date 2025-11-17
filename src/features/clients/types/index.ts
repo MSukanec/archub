@@ -97,16 +97,14 @@ export interface ClientCommitmentWithRelations extends ClientCommitment {
 export interface ClientPaymentSchedule {
   id: string;
   commitment_id: string;
-  project_id: string;
   organization_id: string;
-  installment_number: number;
   due_date: string;
   amount: number;
   currency_id: string;
-  exchange_rate: number;
   status: 'pending' | 'paid' | 'overdue' | 'cancelled';
+  paid_at: string | null;
+  payment_method: string | null;
   notes: string | null;
-  created_by: string | null;
   created_at: string;
   updated_at: string;
 }
