@@ -1,8 +1,10 @@
 import { Star, Edit, Trash2, Image, Video, Play } from "lucide-react";
+import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 import { useMediaLightbox, type MediaItem } from "@/components/ui-custom/media/ImageLightbox";
 import { ENTRY_TYPES, WEATHER_TYPES } from '../constants';
@@ -30,6 +32,15 @@ export function LogEntryCard({
 }: LogEntryCardProps) {
   const entryTypeConfig = ENTRY_TYPES[siteLog.entry_type as keyof typeof ENTRY_TYPES];
   const weatherConfig = WEATHER_TYPES[siteLog.weather as keyof typeof WEATHER_TYPES];
+  
+  // Formatear hora del created_at
+  const formattedTime = siteLog.created_at 
+    ? format(new Date(siteLog.created_at), 'HH:mm')
+    : '00:00';
+  
+  // Componentes de ícono dinámicos
+  const WeatherIcon = weatherConfig?.icon;
+  const TypeIcon = entryTypeConfig?.icon;
 
   return (
     <div 
@@ -48,21 +59,27 @@ export function LogEntryCard({
         {/* Content */}
         <div className="flex-1 min-w-0">
           {/* Header: Name + Time */}
-          <div className="flex items-baseline gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1">
             <span className="font-bold text-sm">
               {siteLog.creator?.full_name || 'Usuario desconocido'}
             </span>
             <span className="text-xs text-muted-foreground">
-              21:00
+              {formattedTime}
             </span>
-            {/* Tipo de Entrada */}
-            <span className="text-xs font-medium text-muted-foreground">
-              {entryTypeConfig?.label || 'Sin tipo'}
-            </span>
-            {/* Clima */}
-            {weatherConfig && (
-              <span className="text-xs text-muted-foreground">
-                • {weatherConfig.label}
+            {/* Tipo de Entrada como Badge */}
+            {entryTypeConfig && (
+              <Badge 
+                variant="secondary" 
+                className="text-xs font-medium px-2 py-0.5 bg-[var(--accent)] text-white hover:bg-[var(--accent)]"
+              >
+                {entryTypeConfig.label}
+              </Badge>
+            )}
+            {/* Clima con icono */}
+            {weatherConfig && WeatherIcon && (
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <WeatherIcon className="h-3.5 w-3.5" />
+                {weatherConfig.label}
               </span>
             )}
           </div>
