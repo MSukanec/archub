@@ -151,6 +151,92 @@ export function getSiteLogs() {
 }
 ```
 
+### 🛡️ Error Handling en Services
+
+**Estrategia consistente para todos los services:**
+
+#### ✅ Regla de error handling:
+
+1. **Queries principales (datos críticos)** → `throw error`
+2. **Queries de relaciones (datos secundarios)** → `console.error()` y continuar
+3. **Datos faltantes** → retornar arrays vacíos `[]`
+
+#### 📘 Ejemplo completo:
+
+```typescript
+/**
+ * Obtiene todas las bitácoras con sus relaciones.
+ * @param projectId - ID del proyecto
+ * @param organizationId - ID de la organización
+ * @returns Array de site logs o array vacío
+ * @throws {Error} Si falla la query principal
+ */
+export async function getSiteLogs(projectId: string, organizationId: string) {
+  if (!projectId || !organizationId) {
+    return []; // Datos faltantes → return []
+  }
+
+  // Query principal - THROW si falla
+  const { data: siteLogs, error } = await supabase
+    .from('site_logs')
+    .select('*')
+    .eq('project_id', projectId);
+
+  if (error) {
+    throw error; // ✅ Lanzar error crítico
+  }
+
+  if (!siteLogs || siteLogs.length === 0) {
+    return []; // ✅ No hay datos → array vacío
+  }
+
+  // Query de relaciones - LOG y continuar
+  const { data: events, error: eventsError } = await supabase
+    .from('site_log_events')
+    .select('*')
+    .in('site_log_id', siteLogs.map(log => log.id));
+
+  if (eventsError) {
+    console.error('Error fetching site log events:', eventsError); // ✅ Log y continuar
+  }
+
+  // Combinar datos
+  return siteLogs.map(log => ({
+    ...log,
+    events: events?.filter(e => e.site_log_id === log.id) || []
+  }));
+}
+```
+
+#### 📋 Beneficios de esta estrategia:
+
+- **Consistencia**: Todos los services siguen el mismo patrón
+- **Resiliencia**: La app no se rompe si falla una relación
+- **Debugging**: Los errores secundarios se logean para debugging
+- **UX**: El usuario ve datos parciales en vez de pantalla en blanco
+
+### 📝 JSDoc en Services
+
+**SIEMPRE agregar JSDoc a cada service:**
+
+```typescript
+/**
+ * Descripción breve de lo que hace el service.
+ * 
+ * Detalles adicionales si es necesario:
+ * - Qué relaciones trae
+ * - Qué transformaciones hace
+ * - Casos especiales
+ * 
+ * @param param1 - Descripción del parámetro
+ * @param param2 - Descripción del parámetro
+ * @returns Qué retorna la función
+ * @throws {Error} Cuándo lanza errores
+ */
+```
+
+**Beneficio**: Al hacer hover en el IDE, se ve toda la documentación sin leer el código.
+
 ---
 
 ## 📦 5. HOOKS (REACT QUERY)
@@ -384,16 +470,229 @@ features/sitelog/modals/
 
 ## 🧪 11. TESTS
 
-### ✅ Regla:
+### ✅ Regla fundamental:
 
-**Siempre crear carpeta `tests/` aunque esté vacía.**
+**Siempre crear carpeta `tests/` con al menos 2 tests de ejemplo:**
+- 1 test de **service** (función pura, fácil de testear)
+- 1 test de **hook** (React Query + mocking)
+
+### 📦 Configuración de Testing
+
+**Framework**: Vitest + @testing-library/react
+
+#### Instalación (ya incluido en el proyecto):
+
+```json
+// package.json
+{
+  "scripts": {
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
+  },
+  "dependencies": {
+    "vitest": "^4.0.10",
+    "@testing-library/react": "^16.3.0",
+    "jsdom": "^27.2.0"
+  }
+}
+```
+
+#### Configuración (vitest.config.ts):
+
+```typescript
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+
+export default defineConfig({
+  plugins: [react()] as any,
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: [],
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      '@shared': path.resolve(__dirname, './shared'),
+    },
+  },
+});
+```
+
+### 📘 Ejemplo 1: Test de Service
+
+```typescript
+// features/sitelog/tests/getSiteLogs.test.ts
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { getSiteLogs } from '../services/getSiteLogs';
+import { supabase } from '@/lib/supabase';
+
+// Mock de Supabase
+vi.mock('@/lib/supabase', () => ({
+  supabase: {
+    from: vi.fn()
+  }
+}));
+
+describe('getSiteLogs service', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should return site logs for valid project', async () => {
+    const mockSiteLogs = [
+      { id: '1', log_date: '2025-11-17', comments: 'Test log' }
+    ];
+    
+    const mockFrom = vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          order: vi.fn().mockResolvedValue({ 
+            data: mockSiteLogs, 
+            error: null 
+          })
+        })
+      })
+    });
+    
+    (supabase.from as any) = mockFrom;
+
+    const result = await getSiteLogs('project-123', 'org-456');
+
+    expect(result).toBeDefined();
+    expect(mockFrom).toHaveBeenCalledWith('site_logs');
+  });
+
+  it('should return empty array when no logs found', async () => {
+    const mockFrom = vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          order: vi.fn().mockResolvedValue({ 
+            data: [], 
+            error: null 
+          })
+        })
+      })
+    });
+    
+    (supabase.from as any) = mockFrom;
+
+    const result = await getSiteLogs('project-123', 'org-456');
+    expect(result).toEqual([]);
+  });
+
+  it('should throw error when Supabase query fails', async () => {
+    const mockError = new Error('Database connection failed');
+    const mockFrom = vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          order: vi.fn().mockResolvedValue({ 
+            data: null, 
+            error: mockError 
+          })
+        })
+      })
+    });
+    
+    (supabase.from as any) = mockFrom;
+
+    await expect(getSiteLogs('project-123', 'org-456'))
+      .rejects.toThrow('Database connection failed');
+  });
+});
+```
+
+### 📘 Ejemplo 2: Test de Hook
+
+```typescript
+// features/sitelog/tests/use-site-logs.test.tsx
+import { describe, it, expect, vi } from 'vitest';
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useSiteLogs } from '../hooks/use-site-logs';
+import * as getSiteLogsService from '../services/getSiteLogs';
+
+// Mock del service
+vi.mock('../services/getSiteLogs', () => ({
+  getSiteLogs: vi.fn()
+}));
+
+describe('useSiteLogs hook', () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false }
+    }
+  });
+
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>
+      {children}
+    </QueryClientProvider>
+  );
+
+  it('should fetch site logs successfully', async () => {
+    const mockLogs = [
+      { id: '1', log_date: '2025-11-17', comments: 'Test' }
+    ];
+    
+    vi.spyOn(getSiteLogsService, 'getSiteLogs').mockResolvedValue(mockLogs);
+
+    const { result } = renderHook(
+      () => useSiteLogs('project-123', 'org-456'),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual(mockLogs);
+  });
+
+  it('should not fetch when projectId is undefined', () => {
+    const { result } = renderHook(
+      () => useSiteLogs(undefined, 'org-456'),
+      { wrapper }
+    );
+
+    expect(result.current.isFetching).toBe(false);
+  });
+});
+```
+
+### 🎯 Estructura de tests recomendada:
 
 ```
 features/<feature>/tests/
-  .gitkeep  ← Mantiene la carpeta en Git
+  <serviceName>.test.ts       ← Tests de services (async functions)
+  <hookName>.test.tsx         ← Tests de hooks (React Query)
+  <mapperName>.test.ts        ← Tests de mappers (opcional)
 ```
 
-Esto facilita agregar tests en el futuro sin cambiar estructura.
+### ✅ Cobertura mínima esperada:
+
+Para cada service principal:
+- ✅ Test de caso exitoso (happy path)
+- ✅ Test de caso sin datos (empty array)
+- ✅ Test de caso con error (throw)
+
+Para cada hook principal:
+- ✅ Test de fetch exitoso
+- ✅ Test con parámetros undefined (enabled: false)
+
+### 🚀 Ejecutar tests:
+
+```bash
+npm run test                  # Ejecutar tests una vez
+npm run test:ui              # Ejecutar con UI interactivo
+npm run test:coverage        # Ejecutar con reporte de cobertura
+```
+
+### 💡 Beneficios de testing:
+
+- **Confianza**: Saber que los cambios no rompen nada
+- **Documentación**: Los tests son ejemplos vivos de cómo usar el código
+- **Refactoring**: Cambiar código sin miedo a romper funcionalidad
+- **Debugging**: Encontrar bugs antes de producción
 
 ---
 
