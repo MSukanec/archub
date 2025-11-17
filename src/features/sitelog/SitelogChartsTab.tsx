@@ -1,18 +1,18 @@
 import { SiteLogTimelineChart } from "@/components/charts/SiteLogTimelineChart";
 
-interface LogChartsProps {
+interface SitelogChartsProps {
   siteLogTimelineData: any[];
   timelineLoading: boolean;
   timePeriod: 'days' | 'weeks' | 'months';
   setTimePeriod: (period: 'days' | 'weeks' | 'months') => void;
 }
 
-export default function LogCharts({ 
+export default function SitelogChartsTab({ 
   siteLogTimelineData, 
   timelineLoading, 
   timePeriod, 
   setTimePeriod 
-}: LogChartsProps) {
+}: SitelogChartsProps) {
   return (
     <div className="space-y-6">
       {/* Timeline Chart */}

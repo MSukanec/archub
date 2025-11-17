@@ -22,18 +22,18 @@ const entryTypeOptions = [
   { value: "registro_general", label: "Registro general" }
 ];
 
-interface LogEntriesProps {
+interface SitelogEntriesProps {
   siteLogs: any[];
   toggleFavorite: (siteLogId: string) => void;
   handleEditSiteLog: (siteLog: any) => void;
   handleDeleteSiteLog: (siteLog: any) => void;
 }
 
-export default function LogEntries({ 
+export default function SitelogEntriesTab({ 
   siteLogs, 
   toggleFavorite, 
   handleDeleteSiteLog 
-}: LogEntriesProps) {
+}: SitelogEntriesProps) {
   const [searchValue, setSearchValue] = useState("");
   const [sortBy, setSortBy] = useState("date_recent");
   const [filterByType, setFilterByType] = useState("all");

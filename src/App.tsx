@@ -34,7 +34,7 @@ import ProjectData from "@/pages/professional/project-data/ProjectData";
 
 
 import ConstructionDashboard from "@/pages/professional/project/construction/ConstructionDashboard";
-import Logs from "@/pages/professional/logs/Logs";
+import Sitelog from "@/features/sitelog/Sitelog";
 import Personnel from "@/pages/professional/personnel/Personnel";
 import Materials from "@/pages/professional/materials/Materials";
 import Budgets from "@/pages/professional/budgets/Budgets";
@@ -194,7 +194,7 @@ function Router() {
         <Route path="/construction/subcontracts" component={ConstructionSubcontracts} />
         <Route path="/construction/subcontracts/:id" component={SubcontractView} />
         <Route path="/construction/indirects" component={ConstructionIndirects} />
-        <Route path="/construction/logs" component={Logs} />
+        <Route path="/construction/logs" component={Sitelog} />
         <Route path="/construction/personnel" component={Personnel} />
         <Route path="/construction/materials" component={Materials} />
         <Route path="/analysis" component={Analysis} />

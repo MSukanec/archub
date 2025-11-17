@@ -13,8 +13,8 @@ import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 
-import LogEntries from './LogEntriesTab';
-import LogCharts from './LogChartsTab';
+import SitelogEntriesTab from './SitelogEntriesTab';
+import SitelogChartsTab from './SitelogChartsTab';
 
 // Entry types enum with their icons and labels
 const entryTypes = {
@@ -158,7 +158,7 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
   });
 }
 
-export default function Logs() {
+export default function Sitelog() {
   const { openModal } = useGlobalModalStore();
 
   const [timePeriod, setTimePeriod] = useState<'days' | 'weeks' | 'months'>('days');
@@ -309,7 +309,7 @@ export default function Logs() {
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
         {activeTab === "bitacoras" && (
-          <LogEntries 
+          <SitelogEntriesTab 
             siteLogs={siteLogs}
             toggleFavorite={toggleFavorite}
             handleEditSiteLog={handleEditSiteLog}
@@ -318,7 +318,7 @@ export default function Logs() {
         )}
 
         {activeTab === "graficos" && (
-          <LogCharts 
+          <SitelogChartsTab 
             siteLogTimelineData={siteLogTimelineData}
             timelineLoading={timelineLoading}
             timePeriod={timePeriod}
