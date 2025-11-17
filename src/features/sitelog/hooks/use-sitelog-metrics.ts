@@ -20,30 +20,28 @@ export function useSitelogMetrics(siteLogs: any[]): SitelogMetrics {
       return sum + (log.files?.length || 0);
     }, 0);
 
-    // Generate timeline for last 14 days
-    const today = new Date();
-    const timeline = Array.from({ length: 14 }, (_, i) => {
-      const date = subDays(today, 13 - i);
-      const dateStr = format(date, 'yyyy-MM-dd');
-      
-      // Count logs for this day
-      const count = siteLogs.filter(log => {
-        if (!log.log_date) return false;
-        try {
-          // Parse log_date (formato "YYYY-MM-DD") añadiendo hora local para evitar problemas de zona horaria
-          const logDate = parseISO(log.log_date + 'T00:00:00');
-          const logDateStr = format(logDate, 'yyyy-MM-dd');
-          return logDateStr === dateStr;
-        } catch {
-          return false;
-        }
-      }).length;
-
-      return {
-        value: count,
-        date: dateStr
-      };
+    // Generate historical timeline from all logs
+    // Group logs by date
+    const logsByDate: Record<string, number> = {};
+    
+    siteLogs.forEach(log => {
+      if (!log.log_date) return;
+      try {
+        // Use log_date directly as it's already in YYYY-MM-DD format
+        const dateStr = log.log_date;
+        logsByDate[dateStr] = (logsByDate[dateStr] || 0) + 1;
+      } catch {
+        // Skip invalid dates
+      }
     });
+
+    // Convert to timeline array sorted by date
+    const timeline = Object.entries(logsByDate)
+      .map(([date, count]) => ({
+        value: count,
+        date
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
 
     return {
       totalLogs,
