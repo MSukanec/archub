@@ -7,7 +7,7 @@ import { useMobile } from "@/hooks/use-mobile";
 import { LogRow } from "@/components/ui/data-row/rows";
 import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileContext";
 import { EmptyState } from "@/components/ui-custom/security/EmptyState";
-import { LogTimeline } from "@/components/logs/LogTimeline";
+import { LogTimeline } from "@/features/sitelog/components/LogTimeline";
 
 // Entry type options for filters
 const entryTypeOptions = [
