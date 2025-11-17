@@ -184,8 +184,51 @@ export default function SitelogRow({
     </>
   );
 
-  // Crear el card base usando DataRowCard
-  const logCard = (
+  // Acciones de swipe para móvil
+  const swipeActions = enableSwipe ? [
+    ...(onToggleFavorite ? [{
+      label: siteLog.is_favorite ? 'Quitar favorito' : 'Marcar favorito',
+      icon: <Star className="h-4 w-4" />,
+      variant: 'default' as const,
+      onClick: () => onToggleFavorite(siteLog.id)
+    }] : []),
+    ...(onEdit ? [{
+      label: 'Editar',
+      icon: <Edit className="h-4 w-4" />,
+      variant: 'default' as const,
+      onClick: () => onEdit(siteLog)
+    }] : []),
+    ...(onDelete ? [{
+      label: 'Eliminar',
+      icon: <Trash2 className="h-4 w-4" />,
+      variant: 'destructive' as const,
+      onClick: () => onDelete(siteLog)
+    }] : [])
+  ] : undefined;
+
+  // Usar SwipeableCard en móvil, DataRowCard en desktop
+  if (enableSwipe && swipeActions && swipeActions.length > 0) {
+    return (
+      <SwipeableCard
+        actions={swipeActions}
+        data-testid={`log-row-${siteLog.id}`}
+      >
+        <DataRowCard
+          avatarUrl={avatarUrl}
+          avatarFallback={avatarFallback}
+          selected={selected}
+          density={density}
+          onClick={onClick ? () => onClick(siteLog) : undefined}
+          className={className}
+        >
+          {cardContent}
+        </DataRowCard>
+      </SwipeableCard>
+    );
+  }
+
+  // Desktop: solo DataRowCard
+  return (
     <DataRowCard
       avatarUrl={avatarUrl}
       avatarFallback={avatarFallback}
@@ -198,8 +241,6 @@ export default function SitelogRow({
       {cardContent}
     </DataRowCard>
   );
-
-  return logCard;
 }
 
 // Export del tipo para uso externo
