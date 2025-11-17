@@ -207,6 +207,13 @@ export default function SitelogRow({
   ] : undefined;
 
   // Usar SwipeableCard en móvil, DataRowCard en desktop
+  console.log('📱 SitelogRow render:', {
+    id: siteLog.id,
+    enableSwipe,
+    hasActions: swipeActions && swipeActions.length > 0,
+    actionCount: swipeActions?.length
+  });
+
   if (enableSwipe && swipeActions && swipeActions.length > 0) {
     return (
       <SwipeableCard
