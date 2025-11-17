@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { UploadGallery } from "@/components/ui-custom/media/UploadGallery";
-import type { SiteLogFileInput } from "@/utils/uploadSiteLogFiles";
+import type { SiteLogFileInput } from "@/features/sitelog/utils/uploadSiteLogFiles";
 
 interface MediaFormProps {
   filesToUpload: SiteLogFileInput[];

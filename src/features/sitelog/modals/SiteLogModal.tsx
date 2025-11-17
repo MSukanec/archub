@@ -24,7 +24,7 @@ import { supabase } from "@/lib/supabase";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { FileUploader } from "@/components/ui-custom/FileUploader";
 import { EmptyState } from "@/components/ui-custom/security/EmptyState";
-import { uploadSiteLogFiles, type SiteLogFileInput } from "@/utils/uploadSiteLogFiles";
+import { uploadSiteLogFiles, type SiteLogFileInput } from "@/features/sitelog/utils/uploadSiteLogFiles";
 import { PersonnelForm } from "./forms/PersonnelForm";
 import { MediaForm } from "./forms/MediaForm";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";

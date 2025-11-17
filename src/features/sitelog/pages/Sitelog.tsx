@@ -7,7 +7,7 @@ import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from '@/stores/projectContext';
-import { useSiteLogTimeline } from "@/hooks/use-sitelog-timeline";
+import { useSiteLogTimeline } from "@/features/sitelog/hooks/use-sitelog-timeline";
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { supabase } from "@/lib/supabase";
