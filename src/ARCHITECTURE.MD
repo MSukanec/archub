@@ -794,6 +794,105 @@ import { useSiteLogs, LogTimeline, ENTRY_TYPES } from '@/features/sitelog';
 
 ---
 
+## 📖 15. GUÍAS AUXILIARES ESPECIALIZADAS
+
+Este archivo (`ARCHITECTURE.MD`) es la **BIBLIA GENERAL** de arquitectura del proyecto.
+
+Para tareas específicas, existen **guías auxiliares complementarias**:
+
+### 📋 Crear Modales: `prompts/Modals.md`
+
+**Cuándo consultarla:** Cuando necesites crear un modal (formulario, selección, confirmación)
+
+**Qué incluye:**
+- ✅ Patrón completo de modales con React Hook Form + Zod
+- ✅ DOS opciones arquitectónicas:
+  - **Opción A**: Modales en features/ usando services (PREFERIDO)
+  - **Opción B**: Modales globales usando REST endpoints
+- ✅ Template copy-paste listo para usar
+- ✅ Form Modals vs Selection Modals
+- ✅ Componentes de formulario (Input, Textarea, Select, Switch, etc.)
+- ✅ Checklist de validación
+- ✅ Errores comunes a evitar
+
+**Ejemplo de uso:**
+```bash
+# Antes de crear un modal, leer:
+prompts/Modals.md
+```
+
+**Regla de oro:** Los modales dentro de `features/` usan **services**, los modales globales usan **REST endpoints**. NUNCA queries directas de Supabase.
+
+---
+
+### 📄 Crear Páginas: `prompts/Pages.md`
+
+**Cuándo consultarla:** Cuando necesites crear una nueva página o tab
+
+**Qué incluye:**
+- ✅ Estructura base de páginas con `Layout` + `headerProps`
+- ✅ Páginas con tabs (en header o en contenido)
+- ✅ Botones de acción en header (NO en contenido)
+- ✅ Empty states con actionButton
+- ✅ **Importación desde features** (hooks, components, modals)
+- ✅ Ejemplos de referencia (AdminDashboard, AdminAdmin, AdminSupport)
+- ✅ Props comunes del header
+- ✅ Navegación admin
+- ✅ Checklist completo
+
+**Ejemplo de uso:**
+```bash
+# Antes de crear una página, leer:
+prompts/Pages.md
+```
+
+**Regla de oro:** Las páginas importan desde `features/`, NUNCA hacen queries directas. Usan `Layout` con `headerProps`, NO `PageLayout` directamente.
+
+---
+
+### 🔄 Flujo de trabajo completo
+
+Cuando necesites crear un feature completo:
+
+1. **Leer `src/ARCHITECTURE.MD`** → Entender estructura general de features
+2. **Crear estructura de feature** → Seguir patrón de `features/sitelog/`
+3. **Leer `prompts/Modals.md`** → Si necesitas modales para el feature
+4. **Leer `prompts/Pages.md`** → Si necesitas páginas que consuman el feature
+5. **Verificar checklist** → Antes de dar por terminado
+
+---
+
+### 📚 Relación entre documentos
+
+```
+┌─────────────────────────────────────────────────┐
+│  src/ARCHITECTURE.MD (GENERAL)                 │
+│  ├─ Estructura de features/                    │
+│  ├─ Services, Hooks, Mappers                   │
+│  ├─ Error Handling, JSDoc, Testing             │
+│  └─ Checklist completo                         │
+└─────────────────────────────────────────────────┘
+                    ↓
+        ┌───────────┴───────────┐
+        ↓                       ↓
+┌───────────────┐      ┌───────────────┐
+│ Modals.md     │      │ Pages.md      │
+│ (ESPECÍFICO)  │      │ (ESPECÍFICO)  │
+├───────────────┤      ├───────────────┤
+│ - Formularios │      │ - Layout      │
+│ - React Hook  │      │ - HeaderProps │
+│   Form        │      │ - Tabs        │
+│ - Validación  │      │ - Imports de  │
+│ - useMutation │      │   features/   │
+└───────────────┘      └───────────────┘
+```
+
+---
+
+**💡 Tip:** Mantén estos 3 documentos abiertos mientras desarrollas. ARCHITECTURE.MD es tu guía principal, Modals.md y Pages.md son referencias rápidas para tareas específicas.
+
+---
+
 ## 📚 RESUMEN VISUAL
 
 ```
