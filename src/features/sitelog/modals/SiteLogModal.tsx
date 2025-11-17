@@ -27,14 +27,11 @@ import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 import { uploadSiteLogFiles } from "@/features/sitelog/services/uploadSiteLogFiles";
 import { createSiteLog } from '../services/createSiteLog';
 import { updateSiteLog } from '../services/updateSiteLog';
-import { replaceSiteLogAttendees } from '../services/replaceSiteLogAttendees';
-import { PersonnelForm } from "./forms/PersonnelForm";
 import { MediaForm } from "./forms/MediaForm";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 import { siteLogSchema, type SiteLogFormData } from '../schemas';
 import type { SiteLogFileInput } from '../types';
 import { useSiteLogTypes } from '../hooks/use-sitelog-types';
-import { useProjectPersonnel } from '../hooks/use-project-personnel';
 import { useSiteLogFiles } from '../hooks/use-sitelog-files';
 
 interface SiteLogModalProps {
@@ -61,13 +58,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
     currentOrganizationId
   );
   
-  // Get project personnel only
-  const { data: projectPersonnel = [], isLoading: personnelLoading } = useProjectPersonnel(
-    selectedProjectId || undefined,
-    currentOrganizationId
-  );
-  
-  const [attendees, setAttendees] = useState<any[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [filesToUpload, setFilesToUpload] = useState<SiteLogFileInput[]>([]);
   const [existingSiteLogFiles, setExistingSiteLogFiles] = useState<any[]>([]);
@@ -170,22 +160,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         ? await updateSiteLog(siteLogId, siteLogData)
         : await createSiteLog(siteLogData);
 
-      // Siempre reemplazar attendees (para limpiar si se eliminaron todos)
-      const attendeesToInsert = formData.attendees && formData.attendees.length > 0
-        ? formData.attendees.map((attendee: any) => ({
-            site_log_id: savedSiteLog.id,
-            personnel_id: attendee.personnel_id,
-            attendance_type: attendee.attendance_type || 'full',
-            hours_worked: attendee.hours_worked || 8,
-            description: attendee.description || attendee.notes || '',
-            created_by: currentMember.id,
-            project_id: selectedProjectId,
-            organization_id: currentOrganizationId
-          }))
-        : [];
-
-      await replaceSiteLogAttendees(savedSiteLog.id, attendeesToInsert);
-
       return savedSiteLog;
     },
     onSuccess: async (savedSiteLog) => {
@@ -232,8 +206,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       weather: "none",
       severity: "low",
       status: "approved",
-      comments: "",
-      attendees: []
+      comments: ""
     }
   });
   
@@ -262,46 +235,16 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         weather: siteLogData.weather || "none",
         severity: siteLogData.severity || "low",
         status: siteLogData.status || "approved",
-        comments: siteLogData.comments || "",
-        attendees: siteLogData.attendees || []
+        comments: siteLogData.comments || ""
       };
       
       form.reset(resetValues);
-      setAttendees(siteLogData.attendees || []);
       setUploadedFiles(siteLogData.files || []);
     }
   }, [data, form, defaultType]);
 
-  // Funciones para asistentes
-  const addAttendee = () => {
-    const newAttendee = {
-      id: Date.now().toString(),
-      contact_id: "",
-      contact_type: "",
-      arrival_time: "",
-      departure_time: "",
-      notes: ""
-    };
-    setAttendees([...attendees, newAttendee]);
-  };
-
-  const updateAttendee = (id: string, field: string, value: string) => {
-    setAttendees(attendees.map(attendee => 
-      attendee.id === id ? { ...attendee, [field]: value } : attendee
-    ));
-  };
-
-  const removeAttendee = (id: string) => {
-    setAttendees(attendees.filter(attendee => attendee.id !== id));
-  };
-
   const onSubmit = async (formData: SiteLogFormData) => {
-    const completeFormData = {
-      ...formData,
-      attendees: attendees
-    };
-    
-    siteLogMutation.mutate(completeFormData);
+    siteLogMutation.mutate(formData);
   };
 
   const isLoading = siteLogMutation.isPending;
@@ -617,57 +560,10 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
           })()}
         </div>
 
-        {/* Personal */}
-        <div className="space-y-4">
-          <PlanRestricted reason="coming_soon">
-            <FormSubsectionButton
-              icon={<Users />}
-              title="Personal"
-              description="Control de asistencia y personal en obra"
-              onClick={() => {
-                setCurrentSubform('personal');
-                setPanel('subform');
-              }}
-            />
-          </PlanRestricted>
-          
-          {/* Lista de personal agregado */}
-          {attendees.length > 0 && (
-            <div className="space-y-2">
-              {attendees.map((attendee, index) => (
-                <div key={attendee.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">
-                      {(contacts as any[]).find((c: any) => c.id === attendee.contact_id)?.first_name} {(contacts as any[]).find((c: any) => c.id === attendee.contact_id)?.last_name}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {attendee.arrival_time} - {attendee.departure_time}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm">Editar</Button>
-                    <Button variant="ghost" size="icon-sm" onClick={() => removeAttendee(attendee.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* Botón submit oculto */}
         <button type="submit" style={{ display: 'none' }} />
       </form>
     </Form>
-  );
-
-  const personnelSubform = (
-    <PersonnelForm
-      attendees={attendees}
-      setAttendees={setAttendees}
-      projectPersonnel={projectPersonnel}
-    />
   );
 
   const mediaSubform = (
@@ -731,11 +627,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
           icon: Camera,
           title: 'Fotos y Videos',
           description: 'Adjunta archivos multimedia al registro de bitácora'
-        },
-        'personal': {
-          icon: Users,
-          title: 'Personal',
-          description: 'Control de asistencia y personal en obra'
         }
       };
 
@@ -769,7 +660,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       viewPanel={viewPanel}
       editPanel={editPanel}
       subformPanel={
-        currentSubform === 'personal' ? personnelSubform :
         currentSubform === 'files' ? mediaSubform :
         null
       }
