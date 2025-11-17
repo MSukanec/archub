@@ -236,7 +236,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         entry_type_id: formData.entry_type_id,
         weather: formData.weather || null,
         severity: formData.severity,
-        status: formData.status || null,
+        status: formData.status || "approved",
         comments: formData.comments,
         is_public: formData.is_public,
         is_favorite: false,
@@ -352,7 +352,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       entry_type_id: defaultType?.id || "",
       weather: "none",
       severity: "low",
-      status: null,
+      status: "approved",
       comments: "",
       files: [],
       events: [],
@@ -382,7 +382,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         entry_type_id: siteLogData.entry_type_id || defaultType?.id || "",
         weather: siteLogData.weather || "none",
         severity: siteLogData.severity || "low",
-        status: siteLogData.status || null,
+        status: siteLogData.status || "approved",
         comments: siteLogData.comments || "",
         files: siteLogData.files || [],
         events: siteLogData.events || [],
@@ -693,7 +693,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
                 </FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
-                  value={field.value}
+                  value={field.value || "approved"}
                   disabled={!isTeams}
                 >
                   <FormControl>
