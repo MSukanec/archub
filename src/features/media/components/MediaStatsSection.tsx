@@ -1,7 +1,9 @@
-import { Image, Video } from 'lucide-react';
+import { Image, Video, Plus } from 'lucide-react';
 
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { MiniTrendChart } from '@/components/charts/MiniTrendChart';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 import { useMediaMetrics } from '../hooks/use-media-metrics';
 import type { GalleryFile } from '../types';
@@ -11,6 +13,7 @@ interface MediaStatsSectionProps {
 }
 
 export function MediaStatsSection({ galleryFiles }: MediaStatsSectionProps) {
+  const { openModal } = useGlobalModalStore();
   const {
     totalFiles,
     totalImages,
@@ -53,6 +56,17 @@ export function MediaStatsSection({ galleryFiles }: MediaStatsSectionProps) {
               {totalVideos}
             </span>
           </div>
+
+          {/* Upload Button */}
+          <Button 
+            onClick={() => openModal('gallery', {})}
+            size="sm"
+            className="ml-4"
+            data-testid="button-upload-file"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Subir Archivo
+          </Button>
         </div>
       </div>
 

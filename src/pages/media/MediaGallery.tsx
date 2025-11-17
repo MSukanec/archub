@@ -33,7 +33,7 @@ export function MediaGallery() {
     error: galleryError 
   } = useGalleryFiles(organizationId, currentProject?.id);
 
-  // Filter gallery files to only show images and videos (documents go to Documentation tab)
+  // Filter to only show images and videos in gallery (documents go to Documentation tab)
   const galleryFiles = allFiles.filter(file => 
     file.file_type?.startsWith('image/') || file.file_type?.startsWith('video/')
   );

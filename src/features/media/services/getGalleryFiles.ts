@@ -86,7 +86,7 @@ export async function getGalleryFiles(
     const projectFiles = projectResult?.data || [];
 
     // Combine and format files
-    const allFiles: GalleryFile[] = [...orgFiles, ...projectFiles].map(file => ({
+    const allFiles: GalleryFile[] = [...orgFiles, ...projectFiles].map((file: any) => ({
       id: file.id,
       file_url: file.file_url,
       file_name: file.file_name,
