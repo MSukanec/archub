@@ -419,7 +419,24 @@ export function FormModalLayout({
             </Button>
           </div>
         )}
-        
+
+        {/* Current Panel Content con readiness gates */}
+        <div className="flex-1 overflow-auto">
+          {readinessState && !readinessState.isReady ? (
+            <readinessState.LoadingGate>
+              {/* Este contenido se muestra cuando no está ready */}
+              <div className="p-8"></div>
+            </readinessState.LoadingGate>
+          ) : (
+            <FormModalBody 
+              columns={columns} 
+              data-testid={`modal-body-${modalId}`}
+            >
+              {getCurrentPanel()}
+            </FormModalBody>
+          )}
+        </div>
+
         {/* Footer */}
         {footerContent && (
           <div className="shrink-0" data-testid={`modal-footer-${modalId}`}>
@@ -445,30 +462,6 @@ export function FormModalLayout({
             ) : (
               footerContent
             )}
-          </div>
-        )}
-
-        {/* Current Panel Content con readiness gates */}
-        <div className="flex-1 overflow-auto">
-          {readinessState && !readinessState.isReady ? (
-            <readinessState.LoadingGate>
-              {/* Este contenido se muestra cuando no está ready */}
-              <div className="p-8"></div>
-            </readinessState.LoadingGate>
-          ) : (
-            <FormModalBody 
-              columns={columns} 
-              data-testid={`modal-body-${modalId}`}
-            >
-              {getCurrentPanel()}
-            </FormModalBody>
-          )}
-        </div>
-
-        {/* Footer */}
-        {footerContent && (
-          <div className="shrink-0" data-testid={`modal-footer-${modalId}`}>
-            {footerContent}
           </div>
         )}
       </div>
