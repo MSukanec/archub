@@ -21,7 +21,7 @@ import { SitelogStatsSection } from '@/features/sitelog/components/SitelogStatsS
 export default function Sitelog() {
   const { openModal } = useGlobalModalStore();
   const [activeTab, setActiveTab] = useState<'entradas' | 'multimedia' | 'ajustes'>('entradas');
-
+  
   const { data: userData, isLoading } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId } = useProjectContext();
   // Si selectedProjectId es null, mostrará todas las bitácoras de la organización
@@ -29,6 +29,14 @@ export default function Sitelog() {
     selectedProjectId || undefined,
     currentOrganizationId || undefined
   );
+  
+  // Si no hay bitácoras y el usuario está en multimedia, redirigir a entradas
+  useEffect(() => {
+    if (siteLogs.length === 0 && activeTab === 'multimedia') {
+      setActiveTab('entradas');
+    }
+  }, [siteLogs.length, activeTab]);
+  
   const { setSidebarContext } = useNavigationStore()
 
   // Set sidebar context on mount
@@ -129,7 +137,12 @@ export default function Sitelog() {
     showProjectSelector: true,
     tabs: [
       { id: 'entradas', label: 'Entradas', isActive: activeTab === 'entradas' },
-      { id: 'multimedia', label: 'Multimedia', isActive: activeTab === 'multimedia' },
+      { 
+        id: 'multimedia', 
+        label: 'Multimedia', 
+        isActive: activeTab === 'multimedia',
+        disabled: siteLogs.length === 0
+      },
       { id: 'ajustes', label: 'Ajustes', isActive: activeTab === 'ajustes' }
     ],
     onTabChange: (tabId: string) => setActiveTab(tabId as 'entradas' | 'multimedia' | 'ajustes'),
