@@ -3,7 +3,6 @@ import { subDays, format, parseISO, startOfDay, endOfDay, isWithinInterval } fro
 
 interface SitelogMetrics {
   totalLogs: number;
-  totalEvents: number;
   totalAttendees: number;
   totalFiles: number;
   timeline: { value: number; date: string }[];
@@ -12,10 +11,6 @@ interface SitelogMetrics {
 export function useSitelogMetrics(siteLogs: any[]): SitelogMetrics {
   return useMemo(() => {
     const totalLogs = siteLogs.length;
-    
-    const totalEvents = siteLogs.reduce((sum, log) => {
-      return sum + (log.events?.length || 0);
-    }, 0);
 
     const totalAttendees = siteLogs.reduce((sum, log) => {
       return sum + (log.attendees?.length || 0);
@@ -53,7 +48,6 @@ export function useSitelogMetrics(siteLogs: any[]): SitelogMetrics {
 
     return {
       totalLogs,
-      totalEvents,
       totalAttendees,
       totalFiles,
       timeline

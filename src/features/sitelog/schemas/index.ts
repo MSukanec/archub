@@ -1,12 +1,5 @@
 import { z } from "zod";
 
-export const siteLogEventSchema = z.object({
-  id: z.string(),
-  description: z.string(),
-  time: z.string(),
-  responsible: z.string().optional()
-});
-
 export const siteLogAttendeeSchema = z.object({
   id: z.string(),
   contact_id: z.string(),
@@ -24,10 +17,8 @@ export const siteLogSchema = z.object({
   severity: z.enum(['low', 'medium', 'high', 'critical'], { required_error: "La severidad es requerida" }),
   status: z.enum(['pending', 'review', 'approved', 'closed']).nullable().optional(),
   comments: z.string().optional(),
-  events: z.array(siteLogEventSchema).optional().default([]),
   attendees: z.array(siteLogAttendeeSchema).optional().default([])
 });
 
 export type SiteLogFormData = z.infer<typeof siteLogSchema>;
-export type SiteLogEventFormData = z.infer<typeof siteLogEventSchema>;
 export type SiteLogAttendeeFormData = z.infer<typeof siteLogAttendeeSchema>;

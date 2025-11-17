@@ -54,21 +54,6 @@ export async function getSiteLogs(projectId: string | undefined, organizationId:
     return [];
   }
 
-  const { data: eventsData, error: eventsError } = await supabase
-    .from('site_log_events')
-    .select(`
-      *,
-      event_type:site_log_event_types(
-        id,
-        name
-      )
-    `)
-    .in('site_log_id', logIds);
-
-  if (eventsError) {
-    console.error('Error fetching site log events:', eventsError);
-  }
-
   const { data: attendeesData, error: attendeesError } = await supabase
     .from('personnel_attendees')
     .select(`
@@ -105,7 +90,6 @@ export async function getSiteLogs(projectId: string | undefined, organizationId:
       full_name: log.creator.user.full_name,
       avatar_url: log.creator.user.avatar_url
     } : null,
-    events: eventsData?.filter(event => event.site_log_id === log.id) || [],
     attendees: attendeesData?.filter(attendee => attendee.site_log_id === log.id) || [],
     files: filesData?.filter(file => file.site_log_id === log.id) || []
   }));

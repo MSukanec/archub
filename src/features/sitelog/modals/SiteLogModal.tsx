@@ -66,7 +66,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
     currentUser?.organization?.id
   );
   
-  const [events, setEvents] = useState<any[]>([]);
   const [attendees, setAttendees] = useState<any[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [filesToUpload, setFilesToUpload] = useState<SiteLogFileInput[]>([]);
@@ -233,7 +232,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       severity: "low",
       status: "approved",
       comments: "",
-      events: [],
       attendees: []
     }
   });
@@ -264,37 +262,14 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         severity: siteLogData.severity || "low",
         status: siteLogData.status || "approved",
         comments: siteLogData.comments || "",
-        events: siteLogData.events || [],
         attendees: siteLogData.attendees || []
       };
       
       form.reset(resetValues);
-      setEvents(siteLogData.events || []);
       setAttendees(siteLogData.attendees || []);
       setUploadedFiles(siteLogData.files || []);
     }
   }, [data, form, defaultType]);
-
-  // Funciones para eventos
-  const addEvent = () => {
-    const newEvent = {
-      id: Date.now().toString(),
-      description: "",
-      time: "",
-      responsible: ""
-    };
-    setEvents([...events, newEvent]);
-  };
-
-  const updateEvent = (id: string, field: string, value: string) => {
-    setEvents(events.map(event => 
-      event.id === id ? { ...event, [field]: value } : event
-    ));
-  };
-
-  const removeEvent = (id: string) => {
-    setEvents(events.filter(event => event.id !== id));
-  };
 
   // Funciones para asistentes
   const addAttendee = () => {
@@ -322,7 +297,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   const onSubmit = async (formData: SiteLogFormData) => {
     const completeFormData = {
       ...formData,
-      events: events,
       attendees: attendees
     };
     
@@ -642,43 +616,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
           })()}
         </div>
 
-        {/* Eventos */}
-        <div className="space-y-4">
-          <PlanRestricted reason="coming_soon">
-            <FormSubsectionButton
-              icon={<Calendar />}
-              title="Eventos"
-              description="Registra eventos importantes del día"
-              onClick={() => {
-                setCurrentSubform('events');
-                setPanel('subform');
-              }}
-            />
-          </PlanRestricted>
-          
-          {/* Lista de eventos agregados */}
-          {events.length > 0 && (
-            <div className="space-y-2">
-              {events.map((event, index) => (
-                <div key={event.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{event.description}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {event.time} {event.responsible && `- ${event.responsible}`}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm">Editar</Button>
-                    <Button variant="ghost" size="icon-sm" onClick={() => removeEvent(event.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* Personal */}
         <div className="space-y-4">
           <PlanRestricted reason="coming_soon">
@@ -740,83 +677,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
     />
   );
 
-  // Configuración de eventos subform
-  const eventsSubform = (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="font-medium">Eventos del Día</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            Registra actividades importantes ocurridas durante la jornada
-          </p>
-        </div>
-        <Button onClick={addEvent} size="sm">
-          <Plus className="h-4 w-4 mr-2" />
-          Agregar Evento
-        </Button>
-      </div>
-
-      {events.length === 0 ? (
-        <EmptyState
-          icon={<Calendar className="w-12 h-12 text-muted-foreground" />}
-          title="Sin eventos registrados"
-          description="Comienza agregando el primer evento del día"
-        />
-      ) : (
-        <div className="space-y-4">
-          {events.map((event) => (
-            <div key={event.id} className="p-4 border rounded-lg space-y-4">
-              <div className="flex justify-between items-start">
-                <h4 className="font-medium text-sm">Evento #{events.indexOf(event) + 1}</h4>
-                <Button 
-                  variant="ghost" 
-                  size="icon-sm" 
-                  onClick={() => removeEvent(event.id)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <div className="grid gap-4">
-                <div>
-                  <label className="text-sm font-medium">Descripción</label>
-                  <Textarea
-                    placeholder="¿Qué ocurrió?"
-                    value={event.description}
-                    onChange={(e) => updateEvent(event.id, 'description', e.target.value)}
-                    className="mt-1"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium">Hora</label>
-                    <Input
-                      type="time"
-                      value={event.time}
-                      onChange={(e) => updateEvent(event.id, 'time', e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium">Responsable</label>
-                    <Input
-                      placeholder="¿Quién fue responsable?"
-                      value={event.responsible}
-                      onChange={(e) => updateEvent(event.id, 'responsible', e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-
   const handleSubmit = () => {
     form.handleSubmit(onSubmit)();
   };
@@ -875,11 +735,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
           icon: Users,
           title: 'Personal',
           description: 'Control de asistencia y personal en obra'
-        },
-        'events': {
-          icon: Calendar,
-          title: 'Eventos',
-          description: 'Registra eventos importantes del día'
         }
       };
 
@@ -915,7 +770,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       subformPanel={
         currentSubform === 'personal' ? personnelSubform :
         currentSubform === 'files' ? mediaSubform :
-        currentSubform === 'events' ? eventsSubform :
         null
       }
       headerContent={getHeaderConfig()}

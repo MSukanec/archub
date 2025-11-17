@@ -1,4 +1,4 @@
-import { Calendar, Users, Paperclip } from 'lucide-react';
+import { Users, Paperclip } from 'lucide-react';
 
 import { Card } from '@/components/ui/card';
 import { MiniTrendChart } from '@/components/charts/MiniTrendChart';
@@ -13,7 +13,6 @@ interface SitelogStatsSectionProps {
 export function SitelogStatsSection({ siteLogs }: SitelogStatsSectionProps) {
   const {
     totalLogs,
-    totalEvents,
     totalAttendees,
     totalFiles,
     timeline
@@ -31,7 +30,7 @@ export function SitelogStatsSection({ siteLogs }: SitelogStatsSectionProps) {
             {totalLogs}
           </p>
           <p className="text-sm text-muted-foreground">
-            Registros de obra completos con datos de personal, eventos y archivos adjuntos
+            Registros de obra completos con datos de personal y archivos adjuntos
           </p>
         </div>
         
@@ -51,18 +50,7 @@ export function SitelogStatsSection({ siteLogs }: SitelogStatsSectionProps) {
       </div>
 
       {/* Secondary Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        {/* Events */}
-        <div className="space-y-1" data-testid="stat-events">
-          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            <Calendar className="h-3.5 w-3.5" />
-            <span>Eventos</span>
-          </div>
-          <p className="text-2xl font-semibold" data-testid="text-total-events">
-            {totalEvents}
-          </p>
-        </div>
-
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Personnel */}
         <div className="space-y-1" data-testid="stat-personnel">
           <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">

@@ -114,27 +114,6 @@ export function LogEntryCard({
             </div>
           )}
 
-          {/* Eventos */}
-          {siteLog.events && siteLog.events.length > 0 && (
-            <div className="mb-4">
-              <h3 className="text-xs font-medium text-muted-foreground mb-2">
-                Eventos ({siteLog.events.length}):
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
-                {siteLog.events.map((event: any, index: number) => (
-                  <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', borderColor: 'rgba(34, 197, 94, 0.3)' }}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium" style={{ color: '#22c55e' }}>
-                        {event.event_type?.name || event.type || 'Evento'}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{event.description || 'Sin descripción'}</p>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Asistencias */}
           {siteLog.attendees && siteLog.attendees.length > 0 && (
             <div className="mb-4">

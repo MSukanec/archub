@@ -14,13 +14,6 @@ export interface SiteLogFileInput {
   description?: string;
 }
 
-export interface SiteLogEvent {
-  id: string;
-  description: string;
-  time: string;
-  responsible?: string;
-}
-
 export interface SiteLogAttendee {
   id: string;
   contact_id: string;
@@ -49,7 +42,6 @@ export interface SiteLog {
 export interface SiteLogTimelineData {
   date: string;
   files: number;
-  events: number;
   attendees: number;
 }
 

@@ -214,34 +214,6 @@ export function SiteLogModalView({ modalData, onClose, onEdit, onDelete }: SiteL
         </>
       )}
 
-      {/* Eventos del día */}
-      {siteLog.events && siteLog.events.length > 0 && (
-        <>
-          <Separator />
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <CheckCircle className="h-4 w-4 text-accent" />
-              Eventos del Día ({siteLog.events.length})
-            </div>
-            <div className="space-y-3">
-              {siteLog.events.map((event: any, index: number) => (
-                <div key={event.id || index} className="p-3 bg-muted/20 rounded-md">
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="text-sm font-medium">{event.description}</div>
-                    <div className="text-xs text-muted-foreground">{event.time}</div>
-                  </div>
-                  {event.responsible && (
-                    <div className="text-xs text-muted-foreground">
-                      Responsable: {event.responsible}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
-
       {/* Personal asistente */}
       {siteLog.attendees && siteLog.attendees.length > 0 && (
         <>
