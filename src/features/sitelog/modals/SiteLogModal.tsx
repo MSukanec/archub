@@ -44,7 +44,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   const { currentPanel, setPanel, currentSubform, setCurrentSubform } = useModalPanelStore();
   const { data: currentUser } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId } = useProjectContext();
-  const { data: members = [] } = useOrganizationMembers(currentOrganizationId);
+  const { data: members = [] } = useOrganizationMembers(currentOrganizationId || undefined);
   const { data: contacts = [] } = useContacts();
   
   // Plan features para restricciones
@@ -55,7 +55,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   
   // Query para obtener tipos de bitácora
   const { data: siteLogTypes = [], isLoading: typesLoading } = useSiteLogTypes(
-    currentOrganizationId
+    currentOrganizationId || undefined
   );
   
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
@@ -81,7 +81,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   // Query para obtener archivos existentes de la bitácora
   const { data: siteLogFiles = [], isLoading: filesLoading } = useSiteLogFiles(
     data?.id || data?.data?.id,
-    currentOrganizationId
+    currentOrganizationId || undefined
   );
 
   // Mutación para subir archivos de bitácora
@@ -106,6 +106,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['sitelog-files', variables.siteLogId, currentOrganizationId] });
+      queryClient.invalidateQueries({ queryKey: ['site-logs', selectedProjectId, currentOrganizationId] });
       queryClient.invalidateQueries({ queryKey: ['galleryFiles'] });
       setFilesToUpload([]);
       toast({
@@ -673,7 +674,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
           submitText={footerConfig.submitText}
         />
       }
-      isEditing={false}
+      isEditing={data?.isEditing || false}
     />
   );
 }
