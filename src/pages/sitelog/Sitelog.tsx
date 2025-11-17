@@ -142,8 +142,10 @@ export default function Sitelog() {
   const headerProps = {
     icon: FileText,
     title: "Bitácora de Obra",
+    description: "Registra el progreso diario del proyecto con entradas detalladas de obra, condiciones climáticas, personal y eventos importantes",
     organizationId: currentOrganizationId,
     showMembers: true,
+    showProjectSelector: true,
     tabs: headerTabs,
     onTabChange: setActiveTab,
     actionButton: activeTab === "bitacoras" ? {

@@ -163,6 +163,22 @@ export default function SitelogEntriesTab({
             ? 'Prueba ajustando los filtros de búsqueda' 
             : 'Comienza creando tu primera entrada de bitácora para documentar el progreso'
           }
+          action={
+            !searchValue && filterByType === 'all' && !favoritesOnly && !publicOnly ? (
+              <button
+                onClick={() => openModal('site-log')}
+                className="px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
+                style={{
+                  backgroundColor: 'var(--accent)',
+                  color: 'white'
+                }}
+                data-testid="button-create-sitelog-empty"
+              >
+                <Plus className="w-5 h-5" />
+                Nueva Bitácora
+              </button>
+            ) : undefined
+          }
         />
       ) : isMobile ? (
         <div className="space-y-3">

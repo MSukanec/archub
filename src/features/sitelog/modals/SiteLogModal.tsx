@@ -152,14 +152,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         throw new Error('Tipo de bitácora no especificado');
       }
 
-      console.log('🔍 SiteLog Mutation Debug:', {
-        formData_entry_type_id: formData.entry_type_id,
-        defaultType_id: defaultType?.id,
-        final_entryTypeId: entryTypeId,
-        siteLogTypes_count: siteLogTypes.length,
-        isPro
-      });
-
       const siteLogData = {
         log_date: formData.log_date,
         created_by: currentMember.id,
@@ -175,13 +167,9 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       };
 
       const siteLogId = data?.data?.id || data?.id;
-      console.log('🚀 Saving site log...', { siteLogId, isUpdate: !!siteLogId });
-      
       const savedSiteLog = siteLogId
         ? await updateSiteLog(siteLogId, siteLogData)
         : await createSiteLog(siteLogData);
-
-      console.log('✅ Site log saved:', savedSiteLog.id);
 
       // Siempre reemplazar attendees (para limpiar si se eliminaron todos)
       const attendeesToInsert = formData.attendees && formData.attendees.length > 0
@@ -197,9 +185,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
           }))
         : [];
 
-      console.log('🔄 Replacing attendees...', { count: attendeesToInsert.length });
       await replaceSiteLogAttendees(savedSiteLog.id, attendeesToInsert);
-      console.log('✅ Attendees replaced');
 
       return savedSiteLog;
     },
@@ -260,7 +246,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
     const isCreating = !siteLogId;
     
     if (isCreating && defaultType && !form.getValues('entry_type_id')) {
-      console.log('🔧 Setting default type:', defaultType);
       form.setValue('entry_type_id', defaultType.id);
     }
   }, [defaultType, data, form]);
@@ -271,14 +256,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
     if (data) {
       // Los datos pueden venir anidados en data.data, normalizar
       const siteLogData = data.data || data;
-      
-      console.log('🔄 Loading existing sitelog data:', {
-        hasData: !!data,
-        siteLogId: siteLogData.id,
-        entry_type_id: siteLogData.entry_type_id,
-        defaultType_id: defaultType?.id,
-        allData: siteLogData
-      });
       
       // Si estamos editando, cargar los datos existentes
       const resetValues = {
@@ -294,11 +271,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         equipment: siteLogData.equipment || []
       };
       
-      console.log('📝 Resetting form with values:', resetValues);
       form.reset(resetValues);
-      
-      console.log('✅ Form reset complete. Current entry_type_id:', form.getValues('entry_type_id'));
-      
       setEvents(siteLogData.events || []);
       setAttendees(siteLogData.attendees || []);
       setEquipment(siteLogData.equipment || []);
@@ -374,13 +347,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   };
 
   const onSubmit = async (formData: SiteLogFormData) => {
-    console.log('🎯 onSubmit called!', { 
-      hasData: !!data, 
-      siteLogId: data?.data?.id || data?.id,
-      formData 
-    });
-    
-    // Agregar los datos adicionales al formulario
     const completeFormData = {
       ...formData,
       events: events,
@@ -388,7 +354,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       equipment: equipment
     };
     
-    console.log('📦 Complete form data:', completeFormData);
     siteLogMutation.mutate(completeFormData);
   };
 
@@ -468,7 +433,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
                 </FormLabel>
                 <Select 
                   onValueChange={(value) => {
-                    console.log('📝 Type selected:', value);
                     field.onChange(value);
                   }} 
                   value={field.value || defaultType?.id || ""}
@@ -1019,12 +983,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   );
 
   const handleSubmit = () => {
-    console.log('🔘 handleSubmit button clicked!');
-    console.log('📋 Form state:', { 
-      isValid: form.formState.isValid,
-      errors: form.formState.errors,
-      isDirty: form.formState.isDirty
-    });
     form.handleSubmit(onSubmit)();
   };
 
