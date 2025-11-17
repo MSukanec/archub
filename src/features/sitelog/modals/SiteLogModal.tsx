@@ -1002,7 +1002,18 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         onSubmit: handleEditClick,
         showLoadingSpinner: false
       };
+    } else if (currentPanel === 'subform') {
+      // En subforms: los datos ya se guardan en el estado local
+      // Solo necesitamos volver al panel edit
+      return {
+        cancelText: "Cancelar",
+        onLeftClick: () => setPanel('edit'), // ← Volver a edit, no cerrar
+        submitText: "Guardar",
+        onSubmit: () => setPanel('edit'), // ← Guardar (ya está en estado) y volver a edit
+        showLoadingSpinner: false
+      };
     } else {
+      // Panel edit: submit real a la BD
       return {
         cancelText: "Cancelar",
         onLeftClick: closeModal,
