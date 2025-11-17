@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { FileText, Plus } from "lucide-react";
 
 import { Layout } from '@/components/layout/desktop/Layout';
@@ -7,7 +7,6 @@ import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from '@/stores/projectContext';
-import { useSiteLogTimeline } from "@/features/sitelog/hooks/use-sitelog-timeline";
 import { useSiteLogs } from "@/features/sitelog/hooks/use-site-logs";
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
@@ -15,14 +14,10 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 
 import SitelogEntriesTab from './SitelogEntriesTab';
-import SitelogChartsTab from './SitelogChartsTab';
 import { SitelogStatsSection } from '@/features/sitelog/components/SitelogStatsSection';
 
 export default function Sitelog() {
   const { openModal } = useGlobalModalStore();
-
-  const [timePeriod, setTimePeriod] = useState<'days' | 'weeks' | 'months'>('days');
-  const [activeTab, setActiveTab] = useState("bitacoras");
 
   const { data: userData, isLoading } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId } = useProjectContext();
@@ -37,12 +32,6 @@ export default function Sitelog() {
     setSidebarContext('construction')
   }, [])
   
-  // Site log timeline data for timeline chart
-  const { data: siteLogTimelineData = [], isLoading: timelineLoading } = useSiteLogTimeline(
-    currentOrganizationId || undefined,
-    selectedProjectId || undefined,
-    timePeriod
-  );
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -127,20 +116,6 @@ export default function Sitelog() {
     });
   };
 
-  // Header tabs configuration
-  const headerTabs = [
-    {
-      id: "bitacoras",
-      label: "Entradas",
-      isActive: activeTab === "bitacoras"
-    },
-    {
-      id: "graficos", 
-      label: "Gráficos",
-      isActive: activeTab === "graficos"
-    }
-  ]
-
   const headerProps = {
     icon: FileText,
     title: "Bitácora de Obra",
@@ -148,13 +123,11 @@ export default function Sitelog() {
     organizationId: currentOrganizationId,
     showMembers: true,
     showProjectSelector: true,
-    tabs: headerTabs,
-    onTabChange: setActiveTab,
-    actionButton: activeTab === "bitacoras" ? {
+    actionButton: {
       label: 'Nueva Bitácora',
       icon: Plus,
       onClick: () => openModal('site-log')
-    } : undefined
+    }
   };
 
   if (isLoading || siteLogsLoading) {
@@ -170,26 +143,16 @@ export default function Sitelog() {
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Stats Section - Above Tabs */}
+        {/* Stats Section */}
         <SitelogStatsSection siteLogs={siteLogs} />
 
-        {activeTab === "bitacoras" && (
-          <SitelogEntriesTab 
-            siteLogs={siteLogs}
-            toggleFavorite={toggleFavorite}
-            handleEditSiteLog={handleEditSiteLog}
-            handleDeleteSiteLog={handleDeleteSiteLog}
-          />
-        )}
-
-        {activeTab === "graficos" && (
-          <SitelogChartsTab 
-            siteLogTimelineData={siteLogTimelineData}
-            timelineLoading={timelineLoading}
-            timePeriod={timePeriod}
-            setTimePeriod={setTimePeriod}
-          />
-        )}
+        {/* Entries Tab */}
+        <SitelogEntriesTab 
+          siteLogs={siteLogs}
+          toggleFavorite={toggleFavorite}
+          handleEditSiteLog={handleEditSiteLog}
+          handleDeleteSiteLog={handleDeleteSiteLog}
+        />
       </div>
     </Layout>
   );
