@@ -1,5 +1,19 @@
 import { supabase } from '@/lib/supabase';
 
+/**
+ * Obtiene todas las bitácoras de un proyecto con sus relaciones completas.
+ * 
+ * Incluye:
+ * - Eventos (site_log_events)
+ * - Asistentes de personal (personnel_attendees)
+ * - Equipamiento (site_log_equipment)
+ * - Archivos multimedia (project_media)
+ * 
+ * @param projectId - ID del proyecto
+ * @param organizationId - ID de la organización
+ * @returns Array de site logs con todas las relaciones, o array vacío si no hay datos
+ * @throws {Error} Si falla la query principal de Supabase
+ */
 export async function getSiteLogs(projectId: string, organizationId: string) {
   if (!supabase || !projectId || !organizationId) {
     return [];
@@ -46,6 +60,10 @@ export async function getSiteLogs(projectId: string, organizationId: string) {
     `)
     .in('site_log_id', logIds);
 
+  if (eventsError) {
+    console.error('Error fetching site log events:', eventsError);
+  }
+
   const { data: attendeesData, error: attendeesError } = await supabase
     .from('personnel_attendees')
     .select(`
@@ -66,7 +84,7 @@ export async function getSiteLogs(projectId: string, organizationId: string) {
     console.error('Error fetching attendees:', attendeesError);
   }
 
-  const { data: equipmentData } = await supabase
+  const { data: equipmentData, error: equipmentError } = await supabase
     .from('site_log_equipment')
     .select(`
       *,
@@ -77,10 +95,18 @@ export async function getSiteLogs(projectId: string, organizationId: string) {
     `)
     .in('site_log_id', logIds);
 
-  const { data: filesData } = await supabase
+  if (equipmentError) {
+    console.error('Error fetching equipment:', equipmentError);
+  }
+
+  const { data: filesData, error: filesError } = await supabase
     .from('project_media')
     .select('*')
     .in('site_log_id', logIds);
+
+  if (filesError) {
+    console.error('Error fetching files:', filesError);
+  }
 
   const data = logsData.map(log => ({
     ...log,

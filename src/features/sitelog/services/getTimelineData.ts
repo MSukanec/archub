@@ -3,6 +3,21 @@ import { format, subDays, subWeeks, subMonths, eachDayOfInterval, eachWeekOfInte
 import { es } from 'date-fns/locale';
 import type { SiteLogTimelineData, TimePeriod } from '../types';
 
+/**
+ * Obtiene datos agregados de bitácoras para visualización en timeline/gráficos.
+ * 
+ * Calcula totales por período de:
+ * - Archivos subidos
+ * - Eventos registrados
+ * - Asistentes presentes
+ * - Equipamiento utilizado
+ * 
+ * @param organizationId - ID de la organización
+ * @param projectId - ID del proyecto
+ * @param timePeriod - Período de agregación: 'days' (7 días), 'weeks' (7 meses), 'months' (7 trimestres)
+ * @returns Array con datos agregados por período
+ * @throws {Error} Si falla la query de Supabase
+ */
 export async function getTimelineData(
   organizationId: string,
   projectId: string,

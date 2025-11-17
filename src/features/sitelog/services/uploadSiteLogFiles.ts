@@ -1,6 +1,21 @@
 import { supabase } from '@/lib/supabase';
 import type { SiteLogFileInput } from '../types';
 
+/**
+ * Sube archivos multimedia a Supabase Storage y los vincula a una bitácora.
+ * 
+ * Proceso:
+ * 1. Sube cada archivo a bucket 'media'
+ * 2. Crea registro en tabla 'project_media'
+ * 3. Vincula con site_log_id
+ * 
+ * @param files - Array de archivos con título y descripción opcional
+ * @param siteLogId - ID de la bitácora a la que pertenecen los archivos
+ * @param projectId - ID del proyecto
+ * @param organizationId - ID de la organización
+ * @param createdBy - ID del usuario que sube los archivos
+ * @throws {Error} Si falla la subida o creación de registro
+ */
 export async function uploadSiteLogFiles(
   files: SiteLogFileInput[],
   siteLogId: string,

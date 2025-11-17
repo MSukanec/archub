@@ -2,6 +2,17 @@ import { supabase } from '@/lib/supabase';
 import { subDays, format, startOfDay, endOfDay } from 'date-fns';
 import type { SiteLogActivity, ActivityTimePeriod } from '../types';
 
+/**
+ * Obtiene actividad de usuarios en bitácoras por día.
+ * 
+ * Cuenta cuántas bitácoras creó cada miembro en el período especificado.
+ * 
+ * @param organizationId - ID de la organización
+ * @param projectId - ID del proyecto
+ * @param timePeriod - Período de análisis: 'week' (7 días), 'month' (30 días), 'year' (365 días)
+ * @param membersData - Lista de miembros de la organización para cruzar con actividad
+ * @returns Array con actividad por día, cada día tiene usuarios activos y total
+ */
 export async function getActivityData(
   organizationId: string,
   projectId: string,
