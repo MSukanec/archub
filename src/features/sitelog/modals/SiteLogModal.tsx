@@ -248,7 +248,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       severity: "low",
       status: "approved",
       comments: "",
-      files: [],
       events: [],
       attendees: [],
       equipment: []
@@ -290,7 +289,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         severity: siteLogData.severity || "low",
         status: siteLogData.status || "approved",
         comments: siteLogData.comments || "",
-        files: siteLogData.files || [],
         events: siteLogData.events || [],
         attendees: siteLogData.attendees || [],
         equipment: siteLogData.equipment || []

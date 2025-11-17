@@ -33,7 +33,6 @@ export const siteLogSchema = z.object({
   severity: z.enum(['low', 'medium', 'high', 'critical'], { required_error: "La severidad es requerida" }),
   status: z.enum(['pending', 'review', 'approved', 'closed']).nullable().optional(),
   comments: z.string().optional(),
-  files: z.array(z.string()).optional().default([]),
   events: z.array(siteLogEventSchema).optional().default([]),
   attendees: z.array(siteLogAttendeeSchema).optional().default([]),
   equipment: z.array(siteLogEquipmentSchema).optional().default([])
