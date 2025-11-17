@@ -20,11 +20,13 @@ import { useOrganizationMembers } from "@/hooks/use-organization-members";
 import { useContacts } from "@/hooks/use-contacts";
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
-import { supabase } from "@/lib/supabase";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { FileUploader } from "@/components/ui-custom/FileUploader";
 import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 import { uploadSiteLogFiles } from "@/features/sitelog/services/uploadSiteLogFiles";
+import { createSiteLog } from '../services/createSiteLog';
+import { updateSiteLog } from '../services/updateSiteLog';
+import { replaceSiteLogAttendees } from '../services/replaceSiteLogAttendees';
 import { PersonnelForm } from "./forms/PersonnelForm";
 import { MediaForm } from "./forms/MediaForm";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
@@ -113,8 +115,8 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         currentMember.id
       );
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sitelog-files'] });
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['sitelog-files', variables.siteLogId, currentUser?.organization?.id] });
       queryClient.invalidateQueries({ queryKey: ['galleryFiles'] });
       setFilesToUpload([]);
       toast({
@@ -136,10 +138,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
     mutationFn: async (formData: SiteLogFormData) => {
       if (!currentUser?.organization?.id || !currentUser?.preferences?.last_project_id) {
         throw new Error('No hay proyecto u organización seleccionada');
-      }
-
-      if (!supabase) {
-        throw new Error('Error de conexión con la base de datos');
       }
 
       // Obtener el organization_member.id del usuario actual
@@ -164,7 +162,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
 
       const siteLogData = {
         log_date: formData.log_date,
-        created_by: currentMember.id, // Usar automáticamente el current user
+        created_by: currentMember.id,
         entry_type_id: entryTypeId,
         weather: formData.weather || null,
         severity: formData.severity,
@@ -176,49 +174,14 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         organization_id: currentUser?.organization?.id || ''
       };
 
-
-
-      let siteLogResult;
-      
       const siteLogId = data?.data?.id || data?.id;
-      if (siteLogId) {
-        // Actualizando bitácora existente
-        siteLogResult = await supabase
-          .from('site_logs')
-          .update(siteLogData)
-          .eq('id', siteLogId)
-          .select()
-          .single();
-      } else {
-        // Creando nueva bitácora
-        siteLogResult = await supabase
-          .from('site_logs')
-          .insert([siteLogData])
-          .select()
-          .single();
-      }
-
-      if (siteLogResult.error) {
-
-        throw new Error(siteLogResult.error.message);
-      }
-
-      const savedSiteLog = siteLogResult.data;
+      const savedSiteLog = siteLogId
+        ? await updateSiteLog(siteLogId, siteLogData)
+        : await createSiteLog(siteLogData);
 
 
-      // Ahora guardar los attendees si existen
+      // Guardar los attendees usando el service
       if (formData.attendees && formData.attendees.length > 0) {
-
-        
-        // Primero eliminar attendees existentes si estamos actualizando
-        if (siteLogId) {
-          await supabase
-            .from('personnel_attendees')
-            .delete()
-            .eq('site_log_id', savedSiteLog.id);
-        }
-
-        // Insertar nuevos attendees en tabla ATTENDEES
         const attendeesToInsert = formData.attendees.map((attendee: any) => ({
           site_log_id: savedSiteLog.id,
           personnel_id: attendee.personnel_id,
@@ -230,19 +193,13 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
           organization_id: currentUser?.organization?.id || ''
         }));
 
-        const { error: attendeesError } = await supabase
-          .from('personnel_attendees')
-          .insert(attendeesToInsert);
-
-        if (attendeesError) {
-          // No throw aquí para no fallar todo el proceso
-        }
+        await replaceSiteLogAttendees(savedSiteLog.id, attendeesToInsert);
       }
 
       return savedSiteLog;
     },
     onSuccess: async (savedSiteLog) => {
-      queryClient.invalidateQueries({ queryKey: ['site-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['site-logs', currentUser?.preferences?.last_project_id, currentUser?.organization?.id] });
       
       // Si hay archivos para subir, subirlos después de guardar la bitácora
       if (filesToUpload.length > 0) {

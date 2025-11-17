@@ -222,11 +222,43 @@ export function MiFormModal({ modalData, onClose }: MiFormModalProps) {
 }
 ```
 
-### Referencias de modales correctos:
+### 🏆 EJEMPLO PERFECTO - GOLD STANDARD:
+
+**`src/features/sitelog/modals/SiteLogModal.tsx`** ← **ESTE ES EL MODAL PERFECTO**
+
+**¿Por qué es el ejemplo perfecto?**
+
+✅ **Arquitectura 100% correcta:**
+- ✅ NO tiene queries directas de Supabase
+- ✅ USA hooks desde el feature (`useSiteLogTypes`, `useProjectPersonnel`, `useSiteLogFiles`)
+- ✅ Los hooks consumen services con JSDoc completo
+- ✅ Caching optimizado con `staleTime` (2-5 min) y `gcTime` (5-10 min)
+- ✅ Invalidación de cache correcta con queryKeys alineados
+
+✅ **Seguridad multi-tenant:**
+- ✅ Todos los services filtran por `organization_id`
+- ✅ Previene data leaks cross-organization
+
+✅ **Rendimiento:**
+- ✅ Queries compartidas entre componentes via React Query
+- ✅ Sin tráfico de red duplicado
+- ✅ Sub-segundo de carga gracias a caching
+
+✅ **Separación de responsabilidades:**
+- ✅ Modal solo orquesta UI y validaciones
+- ✅ Services contienen toda la lógica de Supabase
+- ✅ Hooks manejan React Query
+- ✅ Mappers transforman datos (si aplica)
+
+**Este modal debe ser tu referencia #1 al crear cualquier modal nuevo en features.**
+
+---
+
+### Otros ejemplos correctos (globales/admin):
 - `src/components/modal/modals/admin/AnnouncementFormModal.tsx`
 - `src/components/modal/modals/admin/PaymentFormModal.tsx`
-- `src/components/modal/modals/admin/PlanFormModal.tsx` (después de este fix)
-- `src/components/modal/modals/admin/PlanPriceFormModal.tsx` (después de este fix)
+- `src/components/modal/modals/admin/PlanFormModal.tsx`
+- `src/components/modal/modals/admin/PlanPriceFormModal.tsx`
 
 ---
 
@@ -528,17 +560,27 @@ export function MyModal({ modalData, onClose }: MyModalProps) {
 
 Antes de dar por terminado un modal, verificar:
 
+**Arquitectura (CRÍTICO):**
+- [ ] ✅ Si es modal dentro de feature → USA hooks desde feature (NO queries directas de Supabase)
+- [ ] ✅ Si es modal global/admin → USA REST endpoints con `apiRequest`
+- [ ] ✅ NUNCA usa queries directas `supabase.from().select()` dentro del modal
+
+**Estructura:**
 - [ ] ✅ Usa `FormModalLayout`, `FormModalHeader`, `FormModalFooter`
 - [ ] ✅ FormModalHeader tiene `title`, `description` e `icon`
 - [ ] ✅ Usa `useForm` con `zodResolver`
+- [ ] ✅ Props correctas: `modalData` y `onClose`
+
+**Lógica de datos:**
 - [ ] ✅ Usa `useMutation` (NO async/await directo)
-- [ ] ✅ Invalida queries con `queryClient.invalidateQueries()`
+- [ ] ✅ Invalida queries con `queryClient.invalidateQueries()` usando queryKeys correctos
 - [ ] ✅ Muestra toast de éxito y error
+- [ ] ✅ Manejo de isLoading durante submit
+
+**UX:**
 - [ ] ✅ Reset del form en handleClose
 - [ ] ✅ useEffect para cargar datos si es edición
-- [ ] ✅ Manejo de isLoading durante submit
 - [ ] ✅ Campos con FormField, FormLabel, FormControl, FormMessage
-- [ ] ✅ Props correctas: `modalData` y `onClose`
 
 ---
 
@@ -546,7 +588,14 @@ Antes de dar por terminado un modal, verificar:
 
 Buenos ejemplos a seguir en el proyecto:
 
-**Form Modals (con formularios tradicionales):**
+**🏆 GOLD STANDARD - Modal perfecto dentro de feature:**
+- **`src/features/sitelog/modals/SiteLogModal.tsx`** ← **USAR ESTE COMO REFERENCIA #1**
+  - ✅ Arquitectura perfecta: usa hooks desde feature, NO queries directas
+  - ✅ Caching optimizado con React Query
+  - ✅ Seguridad multi-tenant con filtros organization_id
+  - ✅ Separación de responsabilidades (modal → hooks → services)
+
+**Form Modals globales/admin (con formularios tradicionales):**
 - `src/components/modal/modals/admin/NotificationFormModal.tsx`
 - `src/components/modal/modals/admin/ChangelogFormModal.tsx`
 - `src/components/modal/modals/admin/AnnouncementFormModal.tsx`

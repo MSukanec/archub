@@ -12,6 +12,10 @@ export { getSiteLogs } from './services/getSiteLogs';
 export { getTimelineData } from './services/getTimelineData';
 export { getActivityData } from './services/getActivityData';
 export { uploadSiteLogFiles } from './services/uploadSiteLogFiles';
+export { createSiteLog } from './services/createSiteLog';
+export { updateSiteLog } from './services/updateSiteLog';
+export { deleteSiteLog } from './services/deleteSiteLog';
+export { replaceSiteLogAttendees } from './services/replaceSiteLogAttendees';
 
 export { mapSiteLogFromSupabase, mapSiteLogsWithRelations } from './mappers/siteLogMapper';
 export { mapToTimelineData } from './mappers/timelineMapper';
