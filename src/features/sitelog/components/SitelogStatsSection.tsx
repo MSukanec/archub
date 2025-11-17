@@ -1,4 +1,4 @@
-import { Users, Paperclip } from 'lucide-react';
+import { Paperclip } from 'lucide-react';
 
 import { Card } from '@/components/ui/card';
 import { MiniTrendChart } from '@/components/charts/MiniTrendChart';
@@ -33,17 +33,8 @@ export function SitelogStatsSection({ siteLogs }: SitelogStatsSectionProps) {
           </p>
         </div>
         
-        {/* Quick Stats - Personal y Archivos */}
+        {/* Quick Stats - Solo Archivos */}
         <div className="flex items-center gap-6">
-          {/* Personnel */}
-          <div className="flex items-center gap-2" data-testid="stat-personnel">
-            <Users className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium text-muted-foreground">Personal</span>
-            <span className="text-lg font-semibold" data-testid="text-total-attendees">
-              {totalAttendees}
-            </span>
-          </div>
-
           {/* Files */}
           <div className="flex items-center gap-2" data-testid="stat-files">
             <Paperclip className="h-4 w-4 text-muted-foreground" />
