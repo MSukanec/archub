@@ -16,15 +16,6 @@ export const siteLogAttendeeSchema = z.object({
   notes: z.string().optional()
 });
 
-export const siteLogEquipmentSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  quantity: z.number(),
-  condition: z.string().optional(),
-  operator: z.string().optional(),
-  notes: z.string().optional()
-});
-
 export const siteLogSchema = z.object({
   log_date: z.string().min(1, "La fecha es requerida"),
   is_public: z.boolean().default(false),
@@ -34,11 +25,9 @@ export const siteLogSchema = z.object({
   status: z.enum(['pending', 'review', 'approved', 'closed']).nullable().optional(),
   comments: z.string().optional(),
   events: z.array(siteLogEventSchema).optional().default([]),
-  attendees: z.array(siteLogAttendeeSchema).optional().default([]),
-  equipment: z.array(siteLogEquipmentSchema).optional().default([])
+  attendees: z.array(siteLogAttendeeSchema).optional().default([])
 });
 
 export type SiteLogFormData = z.infer<typeof siteLogSchema>;
 export type SiteLogEventFormData = z.infer<typeof siteLogEventSchema>;
 export type SiteLogAttendeeFormData = z.infer<typeof siteLogAttendeeSchema>;
-export type SiteLogEquipmentFormData = z.infer<typeof siteLogEquipmentSchema>;

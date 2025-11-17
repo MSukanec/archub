@@ -30,15 +30,6 @@ export interface SiteLogAttendee {
   notes?: string;
 }
 
-export interface SiteLogEquipment {
-  id: string;
-  name: string;
-  quantity: number;
-  condition?: string;
-  operator?: string;
-  notes?: string;
-}
-
 export interface SiteLog {
   id: string;
   log_date: string;
@@ -60,7 +51,6 @@ export interface SiteLogTimelineData {
   files: number;
   events: number;
   attendees: number;
-  equipment: number;
 }
 
 export interface SiteLogActivityUser {

@@ -163,32 +163,6 @@ export function LogEntryCard({
               </div>
             </div>
           )}
-
-          {/* Maquinaria */}
-          {siteLog.equipment && siteLog.equipment.length > 0 && (
-            <div className="mb-4">
-              <h3 className="text-xs font-medium text-muted-foreground mb-2">
-                Maquinaria ({siteLog.equipment.length}):
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
-                {siteLog.equipment.map((equipment: any, index: number) => (
-                  <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(251, 191, 36, 0.1)', borderColor: 'rgba(251, 191, 36, 0.3)' }}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium" style={{ color: '#fbbf24' }}>
-                        {equipment.equipment?.name || 'Equipo'}
-                      </span>
-                      <span className="text-xs px-1 py-0.5 rounded" style={{ backgroundColor: 'rgba(251, 191, 36, 0.1)', color: '#fbbf24' }}>
-                        x{equipment.quantity || 1}
-                      </span>
-                    </div>
-                    {equipment.description && (
-                      <p className="text-xs text-muted-foreground">{equipment.description}</p>
-                    )}
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Action Buttons - Show on hover */}

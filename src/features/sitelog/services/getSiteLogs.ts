@@ -6,7 +6,6 @@ import { supabase } from '@/lib/supabase';
  * Incluye:
  * - Eventos (site_log_events)
  * - Asistentes de personal (personnel_attendees)
- * - Equipamiento (site_log_equipment)
  * - Archivos multimedia (project_media)
  * 
  * @param projectId - ID del proyecto
@@ -85,21 +84,6 @@ export async function getSiteLogs(projectId: string, organizationId: string) {
     console.error('Error fetching attendees:', attendeesError);
   }
 
-  const { data: equipmentData, error: equipmentError } = await supabase
-    .from('site_log_equipment')
-    .select(`
-      *,
-      equipment:equipment(
-        id,
-        name
-      )
-    `)
-    .in('site_log_id', logIds);
-
-  if (equipmentError) {
-    console.error('Error fetching equipment:', equipmentError);
-  }
-
   const { data: filesData, error: filesError } = await supabase
     .from('project_media')
     .select('*')
@@ -118,7 +102,6 @@ export async function getSiteLogs(projectId: string, organizationId: string) {
     } : null,
     events: eventsData?.filter(event => event.site_log_id === log.id) || [],
     attendees: attendeesData?.filter(attendee => attendee.site_log_id === log.id) || [],
-    equipment: equipmentData?.filter(equip => equip.site_log_id === log.id) || [],
     files: filesData?.filter(file => file.site_log_id === log.id) || []
   }));
 

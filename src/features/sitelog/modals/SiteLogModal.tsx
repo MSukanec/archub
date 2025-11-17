@@ -68,7 +68,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   
   const [events, setEvents] = useState<any[]>([]);
   const [attendees, setAttendees] = useState<any[]>([]);
-  const [equipment, setEquipment] = useState<any[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [filesToUpload, setFilesToUpload] = useState<SiteLogFileInput[]>([]);
   const [existingSiteLogFiles, setExistingSiteLogFiles] = useState<any[]>([]);
@@ -235,8 +234,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       status: "approved",
       comments: "",
       events: [],
-      attendees: [],
-      equipment: []
+      attendees: []
     }
   });
   
@@ -267,14 +265,12 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         status: siteLogData.status || "approved",
         comments: siteLogData.comments || "",
         events: siteLogData.events || [],
-        attendees: siteLogData.attendees || [],
-        equipment: siteLogData.equipment || []
+        attendees: siteLogData.attendees || []
       };
       
       form.reset(resetValues);
       setEvents(siteLogData.events || []);
       setAttendees(siteLogData.attendees || []);
-      setEquipment(siteLogData.equipment || []);
       setUploadedFiles(siteLogData.files || []);
     }
   }, [data, form, defaultType]);
@@ -323,35 +319,11 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
     setAttendees(attendees.filter(attendee => attendee.id !== id));
   };
 
-  // Funciones para maquinaria
-  const addEquipment = () => {
-    const newEquipment = {
-      id: Date.now().toString(),
-      name: "",
-      quantity: 1,
-      condition: "",
-      operator: "",
-      notes: ""
-    };
-    setEquipment([...equipment, newEquipment]);
-  };
-
-  const updateEquipmentItem = (id: string, field: string, value: any) => {
-    setEquipment(equipment.map(item => 
-      item.id === id ? { ...item, [field]: value } : item
-    ));
-  };
-
-  const removeEquipment = (id: string) => {
-    setEquipment(equipment.filter(item => item.id !== id));
-  };
-
   const onSubmit = async (formData: SiteLogFormData) => {
     const completeFormData = {
       ...formData,
       events: events,
-      attendees: attendees,
-      equipment: equipment
+      attendees: attendees
     };
     
     siteLogMutation.mutate(completeFormData);
@@ -746,43 +718,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
           )}
         </div>
 
-        {/* Maquinaria */}
-        <div className="space-y-4">
-          <PlanRestricted reason="coming_soon">
-            <FormSubsectionButton
-              icon={<Wrench />}
-              title="Maquinaria"
-              description="Registro de equipos utilizados"
-              onClick={() => {
-                setCurrentSubform('equipment');
-                setPanel('subform');
-              }}
-            />
-          </PlanRestricted>
-          
-          {/* Lista de maquinaria agregada */}
-          {equipment.length > 0 && (
-            <div className="space-y-2">
-              {equipment.map((item, index) => (
-                <div key={item.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{item.name} (x{item.quantity})</p>
-                    <p className="text-xs text-muted-foreground">
-                      {item.condition} {item.operator && `- Operador: ${item.operator}`}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm">Editar</Button>
-                    <Button variant="ghost" size="icon-sm" onClick={() => removeEquipment(item.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* Botón submit oculto */}
         <button type="submit" style={{ display: 'none' }} />
       </form>
@@ -882,106 +817,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
     </div>
   );
 
-  // Configuración de maquinaria subform
-  const equipmentSubform = (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="font-medium">Maquinaria y Equipos</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            Registra los equipos utilizados durante la jornada
-          </p>
-        </div>
-        <Button onClick={addEquipment} size="sm">
-          <Plus className="h-4 w-4 mr-2" />
-          Agregar Equipo
-        </Button>
-      </div>
-
-      {equipment.length === 0 ? (
-        <EmptyState
-          icon={<Wrench className="w-12 h-12 text-muted-foreground" />}
-          title="Sin equipos registrados"
-          description="Comienza agregando el primer equipo utilizado"
-        />
-      ) : (
-        <div className="space-y-4">
-          {equipment.map((item) => (
-            <div key={item.id} className="p-4 border rounded-lg space-y-4">
-              <div className="flex justify-between items-start">
-                <h4 className="font-medium text-sm">Equipo #{equipment.indexOf(item) + 1}</h4>
-                <Button 
-                  variant="ghost" 
-                  size="icon-sm" 
-                  onClick={() => removeEquipment(item.id)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <div className="grid gap-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium">Nombre del Equipo</label>
-                    <Input
-                      placeholder="Ej: Excavadora Caterpillar 320D"
-                      value={item.name}
-                      onChange={(e) => updateEquipmentItem(item.id, 'name', e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium">Cantidad</label>
-                    <Input
-                      type="number"
-                      min="1"
-                      value={item.quantity}
-                      onChange={(e) => updateEquipmentItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium">Estado/Condición</label>
-                    <Input
-                      placeholder="Ej: Operativo, En reparación"
-                      value={item.condition}
-                      onChange={(e) => updateEquipmentItem(item.id, 'condition', e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium">Operador</label>
-                    <Input
-                      placeholder="Nombre del operador"
-                      value={item.operator}
-                      onChange={(e) => updateEquipmentItem(item.id, 'operator', e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium">Observaciones</label>
-                  <Textarea
-                    placeholder="Notas adicionales sobre el equipo..."
-                    value={item.notes}
-                    onChange={(e) => updateEquipmentItem(item.id, 'notes', e.target.value)}
-                    className="mt-1"
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-
   const handleSubmit = () => {
     form.handleSubmit(onSubmit)();
   };
@@ -1045,11 +880,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
           icon: Calendar,
           title: 'Eventos',
           description: 'Registra eventos importantes del día'
-        },
-        'equipment': {
-          icon: Wrench,
-          title: 'Maquinaria',
-          description: 'Registro de equipos y maquinaria utilizada'
         }
       };
 
@@ -1086,7 +916,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         currentSubform === 'personal' ? personnelSubform :
         currentSubform === 'files' ? mediaSubform :
         currentSubform === 'events' ? eventsSubform :
-        currentSubform === 'equipment' ? equipmentSubform :
         null
       }
       headerContent={getHeaderConfig()}

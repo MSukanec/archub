@@ -22,8 +22,7 @@ export function mapSiteLogsWithRelations(
   logs: any[],
   files: any[],
   events: any[],
-  attendees: any[],
-  equipment: any[]
+  attendees: any[]
 ) {
   return logs.map(log => ({
     ...log,
@@ -34,7 +33,6 @@ export function mapSiteLogsWithRelations(
     } : null,
     events: events?.filter(event => event.site_log_id === log.id) || [],
     attendees: attendees?.filter(attendee => attendee.site_log_id === log.id) || [],
-    equipment: equipment?.filter(equip => equip.site_log_id === log.id) || [],
     files: files?.filter(file => file.site_log_id === log.id) || []
   }));
 }

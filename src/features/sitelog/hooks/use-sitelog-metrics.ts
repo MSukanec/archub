@@ -5,7 +5,6 @@ interface SitelogMetrics {
   totalLogs: number;
   totalEvents: number;
   totalAttendees: number;
-  totalEquipment: number;
   totalFiles: number;
   timeline: { value: number; date: string }[];
 }
@@ -20,10 +19,6 @@ export function useSitelogMetrics(siteLogs: any[]): SitelogMetrics {
 
     const totalAttendees = siteLogs.reduce((sum, log) => {
       return sum + (log.attendees?.length || 0);
-    }, 0);
-
-    const totalEquipment = siteLogs.reduce((sum, log) => {
-      return sum + (log.equipment?.length || 0);
     }, 0);
 
     const totalFiles = siteLogs.reduce((sum, log) => {
@@ -60,7 +55,6 @@ export function useSitelogMetrics(siteLogs: any[]): SitelogMetrics {
       totalLogs,
       totalEvents,
       totalAttendees,
-      totalEquipment,
       totalFiles,
       timeline
     };
