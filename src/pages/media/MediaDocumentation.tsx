@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { cn } from '@/lib/utils';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useDesignDocuments } from '@/hooks/use-design-documents';
+import { useDesignDocumentFolders } from '@/hooks/use-design-document-folders';
 import { FileText, FolderOpen, Clock, Plus, BookOpen } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -20,6 +21,7 @@ export function MediaDocumentation() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   
   const { data: allDocuments } = useDesignDocuments();
+  const { data: allFolders } = useDesignDocumentFolders();
   const recentDocuments = allDocuments?.slice(0, 10) || [];
 
   useEffect(() => {
@@ -42,6 +44,24 @@ export function MediaDocumentation() {
     setIsPreviewOpen(true);
   };
 
+  // Empty state: No folders exist yet
+  if (!allFolders || allFolders.length === 0) {
+    return (
+      <EmptyState
+        icon={<FolderOpen />}
+        title="Crea tu primera carpeta"
+        description="Organiza tus documentos creando carpetas por tipo, etapa o cualquier categoría que necesites"
+        action={
+          <Button onClick={() => openModal('document-folder', {})}>
+            <Plus className="w-4 h-4 mr-2" />
+            Crear Carpeta
+          </Button>
+        }
+      />
+    );
+  }
+
+  // Empty state: Folders exist but no documents
   if (!allDocuments || allDocuments.length === 0) {
     return (
       <EmptyState
