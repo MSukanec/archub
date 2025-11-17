@@ -1,8 +1,10 @@
-import { Star, Edit, Trash2, Image, Video } from "lucide-react";
+import { useState } from "react";
+import { Star, Edit, Trash2, Image, Video, Play } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 import { useImageLightbox } from "@/components/ui-custom/media/ImageLightbox";
 import { ENTRY_TYPES, WEATHER_TYPES } from '../constants';
@@ -28,6 +30,8 @@ export function LogEntryCard({
 }: LogEntryCardProps) {
   const entryTypeConfig = ENTRY_TYPES[siteLog.entry_type as keyof typeof ENTRY_TYPES];
   const weatherConfig = WEATHER_TYPES[siteLog.weather as keyof typeof WEATHER_TYPES];
+  
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
   return (
     <div className="group pl-12 py-3 hover:border hover:border-border rounded-md transition-all">
@@ -74,41 +78,64 @@ export function LogEntryCard({
             <div className="mb-4">
               <div className="flex flex-wrap gap-2">
                 {siteLog.files.map((file: any, index: number) => {
-                  return file.file_type === 'image' ? (
-                    <div key={index} className="relative group/image">
-                      <img 
-                        src={file.file_url} 
-                        alt={file.file_name}
-                        className="w-16 h-16 object-cover rounded border-2 border-gray-200 hover:border-gray-300 transition-colors cursor-pointer"
-                        onClick={() => {
-                          const imageIndex = imageUrls.indexOf(file.file_url);
-                          if (imageIndex !== -1) {
-                            lightbox.openLightbox(imageIndex);
-                          }
-                        }}
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          const nextElement = e.currentTarget.nextElementSibling as HTMLElement | null;
-                          if (nextElement) {
-                            nextElement.style.display = 'flex';
-                          }
-                        }}
-                      />
-                      <div className="w-16 h-16 flex items-center justify-center bg-gray-100 rounded border-2 border-gray-200" style={{ display: 'none' }}>
-                        <Image className="h-6 w-6 text-gray-400" />
+                  if (file.file_type === 'image') {
+                    return (
+                      <div key={index} className="relative group/image">
+                        <img 
+                          src={file.file_url} 
+                          alt={file.file_name}
+                          className="w-16 h-16 object-cover rounded border-2 border-gray-200 hover:border-gray-300 transition-colors cursor-pointer"
+                          onClick={() => {
+                            const imageIndex = imageUrls.indexOf(file.file_url);
+                            if (imageIndex !== -1) {
+                              lightbox.openLightbox(imageIndex);
+                            }
+                          }}
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            const nextElement = e.currentTarget.nextElementSibling as HTMLElement | null;
+                            if (nextElement) {
+                              nextElement.style.display = 'flex';
+                            }
+                          }}
+                        />
+                        <div className="w-16 h-16 flex items-center justify-center bg-gray-100 rounded border-2 border-gray-200" style={{ display: 'none' }}>
+                          <Image className="h-6 w-6 text-gray-400" />
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div key={index} className="flex items-center gap-2 px-2 py-1 rounded border border-gray-200">
-                      <Video className="h-4 w-4 text-gray-500" />
-                      <span className="text-xs text-muted-foreground">
-                        {file.file_name && file.file_name.length > 15 ? 
-                          file.file_name.substring(0, 15) + '...' : 
-                          file.file_name || 'Sin nombre'
-                        }
-                      </span>
-                    </div>
-                  );
+                    );
+                  } else if (file.file_type === 'video') {
+                    return (
+                      <div 
+                        key={index} 
+                        className="relative w-16 h-16 cursor-pointer group/video"
+                        onClick={() => setSelectedVideo(file.file_url)}
+                      >
+                        <video 
+                          src={file.file_url}
+                          className="w-16 h-16 object-cover rounded border-2 border-gray-200 group-hover/video:border-gray-300 transition-colors"
+                          preload="metadata"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded group-hover/video:bg-black/40 transition-colors">
+                          <div className="bg-white/90 rounded-full p-1.5">
+                            <Play className="h-3 w-3 text-gray-900 fill-gray-900" />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div key={index} className="flex items-center gap-2 px-2 py-1 rounded border border-gray-200">
+                        <Video className="h-4 w-4 text-gray-500" />
+                        <span className="text-xs text-muted-foreground">
+                          {file.file_name && file.file_name.length > 15 ? 
+                            file.file_name.substring(0, 15) + '...' : 
+                            file.file_name || 'Sin nombre'
+                          }
+                        </span>
+                      </div>
+                    );
+                  }
                 })}
               </div>
             </div>
@@ -180,6 +207,20 @@ export function LogEntryCard({
           </Button>
         </div>
       </div>
+
+      {/* Modal de Video */}
+      <Dialog open={!!selectedVideo} onOpenChange={() => setSelectedVideo(null)}>
+        <DialogContent className="max-w-4xl p-0">
+          {selectedVideo && (
+            <video 
+              src={selectedVideo}
+              controls
+              autoPlay
+              className="w-full h-auto rounded-lg"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
