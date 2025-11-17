@@ -27,21 +27,14 @@ import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 import { uploadSiteLogFiles, type SiteLogFileInput } from "@/utils/uploadSiteLogFiles";
 import { PersonnelForm } from "./forms/PersonnelForm";
 import { MediaForm } from "./forms/MediaForm";
+import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 
-// Schema basado en el modal original con valores exactos del enum
+// Schema actualizado según la nueva estructura de la tabla
 const siteLogSchema = z.object({
   log_date: z.string().min(1, "La fecha es requerida"),
-  entry_type: z.enum([
-    'avance_de_obra',
-    'decision',
-    'foto_diaria',
-    'inspeccion',
-    'nota_climatica',
-    'pedido_material',
-    'problema_detectado',
-    'visita_tecnica'
-  ]),
-  weather: z.enum(['sunny', 'partly_cloudy', 'cloudy', 'rain', 'storm', 'snow', 'fog', 'windy', 'hail', 'none']).nullable(),
+  entry_type_id: z.string().min(1, "El tipo de bitácora es requerido"),
+  weather: z.enum(['sunny', 'partly_cloudy', 'cloudy', 'rain', 'storm', 'snow', 'fog', 'windy', 'hail', 'none']).nullable().optional(),
+  severity: z.string().optional(),
   comments: z.string().optional(),
   files: z.array(z.string()).optional().default([]),
   events: z.array(z.object({
@@ -81,6 +74,26 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   const { data: currentUser } = useCurrentUser();
   const { data: members = [] } = useOrganizationMembers(currentUser?.organization?.id);
   const { data: contacts = [] } = useContacts();
+  
+  // Query para obtener tipos de bitácora
+  const { data: siteLogTypes = [], isLoading: typesLoading } = useQuery({
+    queryKey: ['site-log-types', currentUser?.organization?.id],
+    queryFn: async () => {
+      const organizationId = currentUser?.organization?.id;
+      if (!organizationId || !supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('site_log_types')
+        .select('*')
+        .or(`organization_id.eq.${organizationId},organization_id.is.null`)
+        .order('is_default', { ascending: false })
+        .order('name');
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!currentUser?.organization?.id && !!supabase
+  });
   
   // Get project personnel only
   const { data: projectPersonnel = [], isLoading: personnelLoading } = useQuery({
@@ -211,8 +224,9 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       const siteLogData = {
         log_date: formData.log_date,
         created_by: currentMember.id, // Usar automáticamente el current user
-        entry_type: formData.entry_type,
-        weather: formData.weather,
+        entry_type_id: formData.entry_type_id,
+        weather: formData.weather || null,
+        severity: formData.severity || null,
         comments: formData.comments,
         is_public: true,
         is_favorite: false,
@@ -317,12 +331,16 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
     }
   });
 
+  // Obtener el tipo por defecto
+  const defaultType = siteLogTypes.find((t: any) => t.is_default);
+  
   const form = useForm<SiteLogFormData>({
     resolver: zodResolver(siteLogSchema),
     defaultValues: {
       log_date: new Date().toISOString().split('T')[0],
-      entry_type: "avance_de_obra",
+      entry_type_id: defaultType?.id || "",
       weather: null,
+      severity: "normal",
       comments: "",
       files: [],
       events: [],
@@ -330,6 +348,13 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       equipment: []
     }
   });
+  
+  // Actualizar entry_type_id cuando se carguen los tipos
+  useEffect(() => {
+    if (defaultType && !data) {
+      form.setValue('entry_type_id', defaultType.id);
+    }
+  }, [defaultType, data, form]);
 
 
 
@@ -341,8 +366,9 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       // Si estamos editando, cargar los datos existentes
       const resetValues = {
         log_date: siteLogData.log_date || new Date().toISOString().split('T')[0],
-        entry_type: siteLogData.entry_type || "avance_de_obra",
+        entry_type_id: siteLogData.entry_type_id || defaultType?.id || "",
         weather: siteLogData.weather || null,
+        severity: siteLogData.severity || "normal",
         comments: siteLogData.comments || "",
         files: siteLogData.files || [],
         events: siteLogData.events || [],
@@ -355,7 +381,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       setEquipment(siteLogData.equipment || []);
       setUploadedFiles(siteLogData.files || []);
     }
-  }, [data, form]);
+  }, [data, form, defaultType]);
 
   // Funciones para eventos
   const addEvent = () => {
@@ -477,14 +503,14 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         }}
         className="space-y-6"
       >
-        {/* Fecha y Condición en una sola fila */}
+        {/* Fecha y Condición Climática en una sola fila */}
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="log_date"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Fecha</FormLabel>
+                <FormLabel>Fecha *</FormLabel>
                 <FormControl>
                   <Input type="date" {...field} />
                 </FormControl>
@@ -498,7 +524,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
             name="weather"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Condición</FormLabel>
+                <FormLabel>Condición Climática</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value || ""}>
                   <FormControl>
                     <SelectTrigger>
@@ -506,15 +532,15 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="sunny">Soleado</SelectItem>
-                    <SelectItem value="partly_cloudy">Parcialmente Nublado</SelectItem>
-                    <SelectItem value="cloudy">Nublado</SelectItem>
-                    <SelectItem value="rain">Lluvia</SelectItem>
-                    <SelectItem value="storm">Tormenta</SelectItem>
-                    <SelectItem value="snow">Nieve</SelectItem>
-                    <SelectItem value="fog">Niebla</SelectItem>
-                    <SelectItem value="windy">Ventoso</SelectItem>
-                    <SelectItem value="hail">Granizo</SelectItem>
+                    <SelectItem value="sunny">☀️ Soleado</SelectItem>
+                    <SelectItem value="partly_cloudy">⛅ Parcialmente Nublado</SelectItem>
+                    <SelectItem value="cloudy">☁️ Nublado</SelectItem>
+                    <SelectItem value="rain">🌧️ Lluvia</SelectItem>
+                    <SelectItem value="storm">⛈️ Tormenta</SelectItem>
+                    <SelectItem value="snow">❄️ Nieve</SelectItem>
+                    <SelectItem value="fog">🌫️ Niebla</SelectItem>
+                    <SelectItem value="windy">💨 Ventoso</SelectItem>
+                    <SelectItem value="hail">🧊 Granizo</SelectItem>
                     <SelectItem value="none">Sin Especificar</SelectItem>
                   </SelectContent>
                 </Select>
@@ -524,34 +550,60 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
           />
         </div>
 
-        {/* Tipo */}
-        <FormField
-          control={form.control}
-          name="entry_type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tipo</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar tipo" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="avance_de_obra">Avance de Obra</SelectItem>
-                  <SelectItem value="decision">Decisión</SelectItem>
-                  <SelectItem value="foto_diaria">Foto Diaria</SelectItem>
-                  <SelectItem value="inspeccion">Inspección</SelectItem>
-                  <SelectItem value="nota_climatica">Nota Climática</SelectItem>
-                  <SelectItem value="pedido_material">Pedido Material</SelectItem>
-                  <SelectItem value="problema_detectado">Problema Detectado</SelectItem>
-                  <SelectItem value="visita_tecnica">Visita Técnica</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Tipo de Bitácora y Severidad en una sola fila */}
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="entry_type_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de Bitácora *</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  value={field.value}
+                  disabled={typesLoading}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={typesLoading ? "Cargando..." : "Seleccionar tipo"} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {siteLogTypes.map((type: any) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="severity"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Severidad</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || "normal"}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar severidad" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="importante">Importante</SelectItem>
+                    <SelectItem value="critico">Crítico</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         {/* Comentarios */}
         <FormField
@@ -623,15 +675,17 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
 
         {/* Eventos */}
         <div className="space-y-4">
-          <FormSubsectionButton
-            icon={<Calendar />}
-            title="Eventos"
-            description="Registra eventos importantes del día"
-            onClick={() => {
-              setCurrentSubform('events');
-              setPanel('subform');
-            }}
-          />
+          <PlanRestricted reason="coming_soon">
+            <FormSubsectionButton
+              icon={<Calendar />}
+              title="Eventos"
+              description="Registra eventos importantes del día"
+              onClick={() => {
+                setCurrentSubform('events');
+                setPanel('subform');
+              }}
+            />
+          </PlanRestricted>
           
           {/* Lista de eventos agregados */}
           {events.length > 0 && (
@@ -658,15 +712,17 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
 
         {/* Personal */}
         <div className="space-y-4">
-          <FormSubsectionButton
-            icon={<Users />}
-            title="Personal"
-            description="Control de asistencia y personal en obra"
-            onClick={() => {
-              setCurrentSubform('personal');
-              setPanel('subform');
-            }}
-          />
+          <PlanRestricted reason="coming_soon">
+            <FormSubsectionButton
+              icon={<Users />}
+              title="Personal"
+              description="Control de asistencia y personal en obra"
+              onClick={() => {
+                setCurrentSubform('personal');
+                setPanel('subform');
+              }}
+            />
+          </PlanRestricted>
           
           {/* Lista de personal agregado */}
           {attendees.length > 0 && (
@@ -695,15 +751,17 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
 
         {/* Maquinaria */}
         <div className="space-y-4">
-          <FormSubsectionButton
-            icon={<Wrench />}
-            title="Maquinaria"
-            description="Registro de equipos utilizados"
-            onClick={() => {
-              setCurrentSubform('equipment');
-              setPanel('subform');
-            }}
-          />
+          <PlanRestricted reason="coming_soon">
+            <FormSubsectionButton
+              icon={<Wrench />}
+              title="Maquinaria"
+              description="Registro de equipos utilizados"
+              onClick={() => {
+                setCurrentSubform('equipment');
+                setPanel('subform');
+              }}
+            />
+          </PlanRestricted>
           
           {/* Lista de maquinaria agregada */}
           {equipment.length > 0 && (
