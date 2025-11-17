@@ -162,13 +162,6 @@ export default function SitelogEntriesTab({
     filteredSiteLogs.sort((a: any, b: any) => a.entry_type.localeCompare(b.entry_type));
   }
 
-  console.log('🔍 RENDERING DEBUG:', {
-    isMobile,
-    filteredCount: filteredSiteLogs.length,
-    isEmpty: filteredSiteLogs.length === 0,
-    willRenderMobile: isMobile && filteredSiteLogs.length > 0
-  });
-
   return (
     <>
       {filteredSiteLogs.length === 0 ? (
@@ -195,21 +188,18 @@ export default function SitelogEntriesTab({
         />
       ) : isMobile ? (
         <div className="space-y-3">
-          {filteredSiteLogs.map((siteLog: any) => {
-            console.log('🔄 Mapping siteLog:', siteLog.id);
-            return (
-              <SitelogRow
-                key={siteLog.id}
-                siteLog={siteLog}
-                onClick={() => handleViewSiteLog(siteLog)}
-                onEdit={handleEditSiteLog}
-                onDelete={handleDeleteSiteLog}
-                onToggleFavorite={toggleFavorite}
-                enableSwipe={true}
-                density="normal"
-              />
-            );
-          })}
+          {filteredSiteLogs.map((siteLog: any) => (
+            <SitelogRow
+              key={siteLog.id}
+              siteLog={siteLog}
+              onClick={() => handleViewSiteLog(siteLog)}
+              onEdit={handleEditSiteLog}
+              onDelete={handleDeleteSiteLog}
+              onToggleFavorite={toggleFavorite}
+              enableSwipe={true}
+              density="normal"
+            />
+          ))}
         </div>
       ) : (
         <LogTimeline 

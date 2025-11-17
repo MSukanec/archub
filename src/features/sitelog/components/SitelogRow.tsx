@@ -103,20 +103,10 @@ export default function SitelogRow({
   enableSwipe = true,
   className
 }: SitelogRowProps) {
-  console.log('📱 SitelogRow INIT:', {
-    id: siteLog.id,
-    entry_type: siteLog.entry_type
-  });
-
-  const entryTypeConfig = entryTypes[siteLog.entry_type as keyof typeof entryTypes];
+  // Si no hay entry_type, usar 'registro_general' por defecto
+  const entryType = siteLog.entry_type || 'registro_general';
+  const entryTypeConfig = entryTypes[entryType as keyof typeof entryTypes] || entryTypes.registro_general;
   const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
-  
-  console.log('📱 EntryTypeConfig:', { id: siteLog.id, config: entryTypeConfig });
-  
-  if (!entryTypeConfig) {
-    console.log('❌ NO entryTypeConfig, returning null for:', siteLog.id);
-    return null;
-  }
 
   // Obtener avatar y nombre del creador
   const creatorName = siteLog.creator?.full_name || 'Usuario';
@@ -213,13 +203,6 @@ export default function SitelogRow({
       onClick: () => onDelete(siteLog)
     }] : [])
   ] : undefined;
-
-  console.log('📱 SitelogRow actions:', {
-    id: siteLog.id,
-    enableSwipe,
-    swipeActions,
-    actionCount: swipeActions?.length
-  });
 
   if (enableSwipe && swipeActions && swipeActions.length > 0) {
     return (
