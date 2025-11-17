@@ -77,7 +77,7 @@ export async function getSiteLogs(projectId: string | undefined, organizationId:
     .in('site_log_id', logIds);
 
   if (attendeesError) {
-    console.error('Error fetching attendees:', attendeesError);
+    throw attendeesError;
   }
 
   const { data: filesData, error: filesError } = await supabase
@@ -86,7 +86,7 @@ export async function getSiteLogs(projectId: string | undefined, organizationId:
     .in('site_log_id', logIds);
 
   if (filesError) {
-    console.error('Error fetching files:', filesError);
+    throw filesError;
   }
 
   const data = logsData.map(log => ({
