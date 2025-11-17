@@ -43,6 +43,8 @@ interface GalleryProps {
   onDelete?: (file: GalleryFile) => void;
   onDownload?: (file: GalleryFile) => void;
   showProjectName?: boolean;
+  galleryStyle?: 'uniform' | 'masonry';
+  hideActionBar?: boolean;
 }
 
 export function Gallery({ 
@@ -50,11 +52,12 @@ export function Gallery({
   onEdit, 
   onDelete, 
   onDownload, 
-  showProjectName = false 
+  showProjectName = false,
+  galleryStyle = 'uniform',
+  hideActionBar = false
 }: GalleryProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [fileTypeFilter, setFileTypeFilter] = useState<'Todo' | 'Imágenes' | 'Videos'>('Todo');
-  const [galleryStyle, setGalleryStyle] = useState<'uniform' | 'masonry'>('uniform');
   const [sourceFilter, setSourceFilter] = useState<'all' | 'standalone' | 'sitelog'>('all');
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -141,7 +144,8 @@ export function Gallery({
   return (
     <div className="space-y-6">
       {/* Filter Buttons - Always show when we have any files */}
-      <div className="hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg" style={{ backgroundColor: "var(--card-bg)" }}>
+      {!hideActionBar && (
+        <div className="hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg" style={{ backgroundColor: "var(--card-bg)" }}>
         <div className="flex items-center justify-between px-4 py-3">
           {/* Filter buttons on the left - Using same style as TableTopBar tabs */}
           <div className="flex items-center gap-1">
@@ -280,8 +284,7 @@ export function Gallery({
           </div>
         </div>
       </div>
-
-
+      )}
 
       {/* Gallery Grid */}
       {filteredFiles.length > 0 ? (

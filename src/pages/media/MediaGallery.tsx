@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Gallery as GalleryComponent } from '@/components/ui-custom/media/Gallery';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ export function MediaGallery() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
+  const [galleryStyle, setGalleryStyle] = useState<'uniform' | 'masonry'>('uniform');
   
   const storedProjectId = userData?.preferences?.last_project_id;
   const organizationId = userData?.organization?.id;
@@ -123,7 +125,11 @@ export function MediaGallery() {
   return (
     <div className="space-y-6">
       {galleryFiles.length > 0 && (
-        <MediaStatsSection galleryFiles={galleryFiles} />
+        <MediaStatsSection 
+          galleryFiles={galleryFiles}
+          galleryStyle={galleryStyle}
+          onGalleryStyleChange={() => setGalleryStyle(galleryStyle === 'uniform' ? 'masonry' : 'uniform')}
+        />
       )}
       
       <GalleryComponent
@@ -131,6 +137,8 @@ export function MediaGallery() {
         onEdit={handleEdit as any}
         onDownload={handleDownload as any}
         onDelete={handleDelete as any}
+        galleryStyle={galleryStyle}
+        hideActionBar={true}
       />
     </div>
   );

@@ -18,8 +18,8 @@ export default function Media() {
   }, [setSidebarContext]);
 
   const tabs = [
-    { id: 'documentation', label: 'Documentación', isActive: activeTab === 'documentation' },
-    { id: 'gallery', label: 'Galería', isActive: activeTab === 'gallery' }
+    { id: 'documentation', label: 'Documentos', isActive: activeTab === 'documentation' },
+    { id: 'gallery', label: 'Fotos y Videos', isActive: activeTab === 'gallery' }
   ];
 
   const getActionButton = () => {
@@ -27,12 +27,12 @@ export default function Media() {
       case 'documentation':
         return {
           label: "Subir Documentos",
-          icon: Upload,
+          icon: Plus,
           onClick: () => openModal('document-upload', {})
         };
       case 'gallery':
         return {
-          label: 'Subir Archivo',
+          label: 'Subir Fotos y Videos',
           icon: Plus,
           onClick: () => openModal('gallery', {})
         };

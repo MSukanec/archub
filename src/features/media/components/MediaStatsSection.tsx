@@ -1,19 +1,19 @@
-import { Image, Video, Plus } from 'lucide-react';
+import { Image, Video, LayoutGrid, Grid3X3 } from 'lucide-react';
 
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MiniTrendChart } from '@/components/charts/MiniTrendChart';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 import { useMediaMetrics } from '../hooks/use-media-metrics';
 import type { GalleryFile } from '../types';
 
 interface MediaStatsSectionProps {
   galleryFiles: GalleryFile[];
+  galleryStyle: 'uniform' | 'masonry';
+  onGalleryStyleChange: () => void;
 }
 
-export function MediaStatsSection({ galleryFiles }: MediaStatsSectionProps) {
-  const { openModal } = useGlobalModalStore();
+export function MediaStatsSection({ galleryFiles, galleryStyle, onGalleryStyleChange }: MediaStatsSectionProps) {
   const {
     totalFiles,
     totalImages,
@@ -57,15 +57,21 @@ export function MediaStatsSection({ galleryFiles }: MediaStatsSectionProps) {
             </span>
           </div>
 
-          {/* Upload Button */}
+          {/* Style Toggle Button */}
           <Button 
-            onClick={() => openModal('gallery', {})}
+            variant="ghost"
             size="sm"
-            className="ml-4"
-            data-testid="button-upload-file"
+            onClick={onGalleryStyleChange}
+            className="ml-4 h-8 px-3"
+            title={galleryStyle === 'uniform' ? 'Cambiar a estilo mosaico' : 'Cambiar a estilo uniforme'}
+            data-testid="button-gallery-style"
           >
-            <Plus className="w-4 h-4 mr-2" />
-            Subir Archivo
+            {galleryStyle === 'uniform' ? (
+              <LayoutGrid className="w-4 h-4 mr-2" />
+            ) : (
+              <Grid3X3 className="w-4 h-4 mr-2" />
+            )}
+            Estilo
           </Button>
         </div>
       </div>
