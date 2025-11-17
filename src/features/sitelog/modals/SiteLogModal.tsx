@@ -1003,13 +1003,13 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         showLoadingSpinner: false
       };
     } else if (currentPanel === 'subform') {
-      // En subforms: los datos ya se guardan en el estado local
-      // Solo necesitamos volver al panel edit
+      // FormModalLayout maneja automáticamente la navegación en subforms
+      // Solo necesitamos definir los textos y acciones de los datos
       return {
         cancelText: "Cancelar",
-        onLeftClick: () => setPanel('edit'), // ← Volver a edit, no cerrar
+        onLeftClick: closeModal, // ← FormModalLayout lo convertirá a setPanel('edit')
         submitText: "Guardar",
-        onSubmit: () => setPanel('edit'), // ← Guardar (ya está en estado) y volver a edit
+        onSubmit: () => {}, // ← No-op: datos ya están en estado, FormModalLayout vuelve a edit
         showLoadingSpinner: false
       };
     } else {

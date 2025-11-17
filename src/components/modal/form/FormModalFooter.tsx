@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { useModalInputStates } from '../utils/modal-readiness';
 
 type ButtonVariant = "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
 
@@ -267,7 +266,7 @@ export function FormModalFooter({
             type="button"
             variant={action.variant || "outline"}
             onClick={action.onClick}
-            disabled={action.disabled || (!readinessState?.isReady && readinessState)}
+            disabled={action.disabled || (readinessState && !readinessState.isReady)}
             className="flex-1"
           >
             {action.loading ? (

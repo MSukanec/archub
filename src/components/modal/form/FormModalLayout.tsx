@@ -419,6 +419,34 @@ export function FormModalLayout({
             </Button>
           </div>
         )}
+        
+        {/* Footer */}
+        {footerContent && (
+          <div className="shrink-0" data-testid={`modal-footer-${modalId}`}>
+            {/* Auto-handle subform navigation: Cancelar → vuelve a edit, Submit → ejecuta + vuelve a edit */}
+            {effectivePanel === 'subform' && isValidElement(footerContent) ? (
+              cloneElement(footerContent, {
+                // Sobrescribir onLeftClick para volver a edit (Cancelar)
+                onLeftClick: () => setPanel('edit'),
+                // Envolver onRightClick/onSubmit para ejecutar original + volver a edit (Submit)
+                onRightClick: (footerContent.props as any).onRightClick 
+                  ? () => {
+                      (footerContent.props as any).onRightClick?.();
+                      setPanel('edit');
+                    }
+                  : undefined,
+                onSubmit: (footerContent.props as any).onSubmit
+                  ? () => {
+                      (footerContent.props as any).onSubmit?.();
+                      setPanel('edit');
+                    }
+                  : undefined,
+              } as any)
+            ) : (
+              footerContent
+            )}
+          </div>
+        )}
 
         {/* Current Panel Content con readiness gates */}
         <div className="flex-1 overflow-auto">
