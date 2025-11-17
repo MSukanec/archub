@@ -9,6 +9,7 @@ import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileCo
 import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 import { LogTimeline } from "@/features/sitelog/components/LogTimeline";
 import { ENTRY_TYPE_OPTIONS } from '@/features/sitelog/constants';
+import { Button } from "@/components/ui/button";
 
 interface SitelogEntriesProps {
   siteLogs: any[];
@@ -165,18 +166,15 @@ export default function SitelogEntriesTab({
           }
           action={
             !searchValue && filterByType === 'all' && !favoritesOnly && !publicOnly ? (
-              <button
+              <Button
                 onClick={() => openModal('site-log')}
-                className="px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
-                style={{
-                  backgroundColor: 'var(--accent)',
-                  color: 'white'
-                }}
+                variant="default"
+                className="gap-2"
                 data-testid="button-create-sitelog-empty"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="h-4 w-4" />
                 Nueva Bitácora
-              </button>
+              </Button>
             ) : undefined
           }
         />
