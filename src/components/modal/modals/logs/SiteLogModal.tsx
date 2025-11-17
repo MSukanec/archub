@@ -34,7 +34,7 @@ const siteLogSchema = z.object({
   log_date: z.string().min(1, "La fecha es requerida"),
   entry_type_id: z.string().min(1, "El tipo de bitácora es requerido"),
   weather: z.enum(['sunny', 'partly_cloudy', 'cloudy', 'rain', 'storm', 'snow', 'fog', 'windy', 'hail', 'none']).nullable().optional(),
-  severity: z.string().optional(),
+  severity: z.enum(['low', 'medium', 'high', 'critical'], { required_error: "La severidad es requerida" }),
   comments: z.string().optional(),
   files: z.array(z.string()).optional().default([]),
   events: z.array(z.object({
@@ -226,7 +226,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         created_by: currentMember.id, // Usar automáticamente el current user
         entry_type_id: formData.entry_type_id,
         weather: formData.weather || null,
-        severity: formData.severity || null,
+        severity: formData.severity,
         comments: formData.comments,
         is_public: true,
         is_favorite: false,
@@ -340,7 +340,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       log_date: new Date().toISOString().split('T')[0],
       entry_type_id: defaultType?.id || "",
       weather: "none",
-      severity: "normal",
+      severity: "medium",
       comments: "",
       files: [],
       events: [],
@@ -368,7 +368,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         log_date: siteLogData.log_date || new Date().toISOString().split('T')[0],
         entry_type_id: siteLogData.entry_type_id || defaultType?.id || "",
         weather: siteLogData.weather || "none",
-        severity: siteLogData.severity || "normal",
+        severity: siteLogData.severity || "medium",
         comments: siteLogData.comments || "",
         files: siteLogData.files || [],
         events: siteLogData.events || [],
@@ -586,17 +586,18 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
             name="severity"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Severidad</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value || "normal"}>
+                <FormLabel>Severidad *</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar severidad" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="normal">Normal</SelectItem>
-                    <SelectItem value="importante">Importante</SelectItem>
-                    <SelectItem value="critico">Crítico</SelectItem>
+                    <SelectItem value="low">Baja</SelectItem>
+                    <SelectItem value="medium">Media</SelectItem>
+                    <SelectItem value="high">Alta</SelectItem>
+                    <SelectItem value="critical">Crítica</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
