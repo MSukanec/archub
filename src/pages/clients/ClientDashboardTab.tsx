@@ -15,69 +15,16 @@ import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/componen
 import {
   useClientDashboard,
   useDeleteProjectClient,
-  type ProjectClientWithRelations,
-  type ClientFinancialSummary,
+  mapToClientSummaries,
+  calculateDashboardKPIs,
+  formatCurrencyAmount,
+  type ProjectClientSummary,
+  type CurrencyFinancial,
 } from '@/features/clients'
 
 interface ClientListTabProps {
   projectId?: string;
   onTabChange?: (tab: string) => void;
-}
-
-interface CurrencyFinancial {
-  currency: {
-    id: string;
-    code: string;
-    symbol: string;
-  } | null;
-  total_committed_amount: number;
-  total_paid_amount: number;
-  balance_due: number;
-  next_due_date: string | null;
-  next_due_amount: number | null;
-  last_payment_date: string | null;
-  total_schedule_items: number;
-  schedule_paid: number;
-  schedule_overdue: number;
-  payments_missing_rate?: number; // Warning flag for PRO/TEAMS conversion issues
-}
-
-interface ProjectClientSummary {
-  id: string;
-  contact_id: string;
-  unit: string | null;
-  contacts: {
-    id: string;
-    first_name: string | null;
-    last_name: string | null;
-    full_name: string | null;
-    email: string | null;
-    phone?: string | null;
-    company_name?: string | null;
-    linked_user?: {
-      id: string;
-      avatar_url?: string;
-    } | null;
-  } | null;
-  role: {
-    id: string;
-    name: string;
-    is_default: boolean;
-  } | null;
-  financialByCurrency: CurrencyFinancial[];
-  // Derived fields for sorting (sum across all currencies)
-  total_committed_amount: number;
-  total_paid_amount: number;
-  balance_due: number;
-  next_due: number | null;
-}
-
-interface ClientSummaryResponse {
-  plan: {
-    slug: string;
-    isMultiCurrency: boolean;
-  };
-  clients: ProjectClientSummary[];
 }
 
 export default function ClientDashboardTab({ projectId, onTabChange }: ClientListTabProps) {
@@ -94,88 +41,16 @@ export default function ClientDashboardTab({ projectId, onTabChange }: ClientLis
   // Use feature hook to get dashboard data with financial summaries
   const { data: dashboardData, isLoading } = useClientDashboard(activeProjectId || undefined, organizationId);
 
-  // Transform dashboard data to match the current component's expected structure
+  // Transform dashboard data using mappers (no inline calculations)
   const projectClients = useMemo(() => {
     if (!dashboardData) return [];
-
-    return dashboardData.clients.map((client: ProjectClientWithRelations) => {
-      const financialSummaries = dashboardData.financialSummaries.get(client.id) || [];
-      
-      // Convert financial summaries to currency financial format
-      const financialByCurrency = financialSummaries.map((summary: ClientFinancialSummary) => ({
-        currency: summary.currency_id ? {
-          id: summary.currency_id,
-          code: 'ARS', // Default, should be fetched from currencies if needed
-          symbol: '$',
-        } : null,
-        total_committed_amount: summary.total_committed,
-        total_paid_amount: summary.total_paid,
-        balance_due: summary.balance_due,
-        next_due_date: summary.next_due_date,
-        next_due_amount: summary.next_due_amount,
-        last_payment_date: summary.last_payment_date,
-        total_schedule_items: summary.total_schedule_items,
-        schedule_paid: summary.schedule_paid,
-        schedule_overdue: summary.schedule_overdue,
-      }));
-
-      // Calculate totals across all currencies
-      const total_committed_amount = financialSummaries.reduce((sum, s) => sum + s.total_committed, 0);
-      const total_paid_amount = financialSummaries.reduce((sum, s) => sum + s.total_paid, 0);
-      const balance_due = financialSummaries.reduce((sum, s) => sum + s.balance_due, 0);
-      const next_due = financialSummaries.reduce((min, s) => {
-        if (!s.next_due_amount) return min;
-        return min === null ? s.next_due_amount : Math.min(min, s.next_due_amount);
-      }, null as number | null);
-
-      return {
-        id: client.id,
-        contact_id: client.contact_id,
-        unit: client.unit,
-        contacts: client.contact ? {
-          id: client.contact.id,
-          first_name: client.contact.first_name,
-          last_name: client.contact.last_name,
-          full_name: client.contact.full_name,
-          email: client.contact.email,
-          phone: client.contact.phone,
-          company_name: client.contact.company_name,
-          linked_user: client.contact.linked_user_id ? {
-            id: client.contact.linked_user_id,
-            avatar_url: undefined,
-          } : null,
-        } : null,
-        role: client.role,
-        financialByCurrency,
-        total_committed_amount,
-        total_paid_amount,
-        balance_due,
-        next_due,
-      };
-    });
+    return mapToClientSummaries(dashboardData.clients, dashboardData.financialSummaries);
   }, [dashboardData]);
 
-  const clientPayments = dashboardData?.payments || [];
-
-  // Calculate KPIs
-  const totalClients = projectClients.length;
-  const totalPayments = clientPayments.length;
-  const totalCommittedAmount = projectClients.reduce((sum: number, client: any) => 
-    sum + (parseFloat(client.total_committed_amount) || 0), 0
-  );
-  const totalBalanceDue = projectClients.reduce((sum: number, client: any) => 
-    sum + (parseFloat(client.balance_due) || 0), 0
-  );
-
-  // Format currency
-  const formatCurrencyKPI = (amount: number) => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
+  // Calculate KPIs using mapper function
+  const kpis = useMemo(() => {
+    return calculateDashboardKPIs(projectClients, dashboardData?.payments || []);
+  }, [projectClients, dashboardData?.payments]);
 
   // Delete mutation using feature hook
   const deleteClientMutation = useDeleteProjectClient();
@@ -407,7 +282,7 @@ export default function ClientDashboardTab({ projectId, onTabChange }: ClientLis
             Clientes
           </StatCardTitle>
           <StatCardValue>
-            {totalClients}
+            {kpis.totalClients}
           </StatCardValue>
           <StatCardMeta>Total {activeProjectId ? 'en el proyecto' : 'en la organización'}</StatCardMeta>
         </StatCard>
@@ -422,7 +297,7 @@ export default function ClientDashboardTab({ projectId, onTabChange }: ClientLis
             Pagos
           </StatCardTitle>
           <StatCardValue>
-            {totalPayments}
+            {kpis.totalPayments}
           </StatCardValue>
           <StatCardMeta>Registros de pago</StatCardMeta>
         </StatCard>
@@ -437,7 +312,7 @@ export default function ClientDashboardTab({ projectId, onTabChange }: ClientLis
             Compromiso Total
           </StatCardTitle>
           <StatCardValue className="text-2xl md:text-3xl">
-            {formatCurrencyKPI(totalCommittedAmount)}
+            {formatCurrencyAmount(kpis.totalCommittedAmount)}
           </StatCardValue>
           <StatCardMeta>Monto comprometido</StatCardMeta>
         </StatCard>
@@ -451,8 +326,8 @@ export default function ClientDashboardTab({ projectId, onTabChange }: ClientLis
             <AlertCircle className="w-4 h-4 inline mr-1" />
             Balance Pendiente
           </StatCardTitle>
-          <StatCardValue className={`text-2xl md:text-3xl ${totalBalanceDue > 0 ? 'text-destructive' : 'text-green-600'}`}>
-            {formatCurrencyKPI(totalBalanceDue)}
+          <StatCardValue className={`text-2xl md:text-3xl ${kpis.totalBalanceDue > 0 ? 'text-destructive' : 'text-green-600'}`}>
+            {formatCurrencyAmount(kpis.totalBalanceDue)}
           </StatCardValue>
           <StatCardMeta>Saldo por cobrar</StatCardMeta>
         </StatCard>

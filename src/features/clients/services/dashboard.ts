@@ -39,7 +39,7 @@ export async function getClientDashboardData(
       commitments: [],
       payments: [],
       schedule: [],
-      financialSummaries: new Map(),
+      financialSummaries: [],
     };
   }
 
@@ -76,14 +76,14 @@ export async function getClientDashboardData(
  * @param commitments - Compromisos del proyecto
  * @param payments - Pagos del proyecto
  * @param schedule - Cronograma de pagos del proyecto
- * @returns Map de client_id a array de resúmenes financieros por moneda
+ * @returns Array de resúmenes financieros por cliente con sus respectivas monedas
  */
 function calculateFinancialSummaries(
   clientIds: string[],
   commitments: any[],
   payments: any[],
   schedule: any[]
-): Map<string, ClientFinancialSummary[]> {
+): Array<{ clientId: string; summaries: ClientFinancialSummary[] }> {
   const summariesMap = new Map<string, ClientFinancialSummary[]>();
 
   clientIds.forEach(clientId => {
@@ -180,5 +180,8 @@ function calculateFinancialSummaries(
     summariesMap.set(clientId, Array.from(currencyGroups.values()));
   });
 
-  return summariesMap;
+  return Array.from(summariesMap.entries()).map(([clientId, summaries]) => ({
+    clientId,
+    summaries,
+  }));
 }

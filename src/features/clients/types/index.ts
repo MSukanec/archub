@@ -189,7 +189,7 @@ export interface ClientDashboardData {
   commitments: ClientCommitmentWithRelations[];
   payments: ClientPaymentWithRelations[];
   schedule: ClientPaymentScheduleWithRelations[];
-  financialSummaries: Map<string, ClientFinancialSummary[]>; // key: client_id, value: array of summaries by currency
+  financialSummaries: Array<{ clientId: string; summaries: ClientFinancialSummary[] }>;
 }
 
 // ========== List View Types ==========
