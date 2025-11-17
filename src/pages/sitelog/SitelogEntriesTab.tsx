@@ -141,13 +141,16 @@ export default function SitelogEntriesTab({
 
   // Then apply additional local filters (mobile action bar and sorting)
   const filteredSiteLogs = storeFilteredLogs.filter((log: any) => {
-    const matchesSearch = log.comments?.toLowerCase().includes(searchValue.toLowerCase()) || "";
+    // Solo filtrar por búsqueda si hay un valor de búsqueda
+    if (searchValue && !log.comments?.toLowerCase().includes(searchValue.toLowerCase())) {
+      return false;
+    }
     
     if (filterByType !== "all" && log.entry_type !== filterByType) return false;
     if (favoritesOnly && !log.is_favorite) return false;
     if (publicOnly && !log.is_public) return false;
     
-    return matchesSearch;
+    return true;
   });
 
   // Ordenar bitácoras
