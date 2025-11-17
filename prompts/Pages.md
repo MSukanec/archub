@@ -46,6 +46,63 @@ return (
 
 ---
 
+## 1.1. Importación de Datos (Features Architecture)
+
+**IMPORTANTE:** Las páginas deben importar hooks y components desde `features/`, NO hacer queries directas.
+
+### ✅ CORRECTO: Importar desde feature
+
+```typescript
+import { Layout } from '@/components/layout/desktop/Layout';
+import { useSiteLogs } from '@/features/sitelog/hooks/use-site-logs';
+import { LogTimeline } from '@/features/sitelog/components/LogTimeline';
+import { SiteLogModal } from '@/features/sitelog';  // Desde barrel export
+
+export default function SitelogPage() {
+  const { data: siteLogs, isLoading } = useSiteLogs(projectId, orgId);
+  
+  const headerProps = {
+    title: "Bitácora",
+    icon: FileText,
+  };
+
+  return (
+    <Layout wide headerProps={headerProps}>
+      {isLoading ? <Skeleton /> : <LogTimeline logs={siteLogs} />}
+    </Layout>
+  );
+}
+```
+
+### ❌ INCORRECTO: Query directa en página
+
+```typescript
+// ❌ MAL - NO hacer queries directas
+export default function MyPage() {
+  const { data } = useQuery({
+    queryKey: ['site-logs'],
+    queryFn: async () => {
+      const { data } = await supabase.from('site_logs').select('*');  // ❌ MAL
+      return data;
+    }
+  });
+}
+```
+
+### ✅ Reglas:
+
+1. **Importa hooks** desde `features/<feature>/hooks/`
+2. **Importa components** desde `features/<feature>/components/`
+3. **Importa modales** desde `features/<feature>/modals/`
+4. **Usa barrel exports** cuando estén disponibles: `import { ... } from '@/features/sitelog';`
+5. **NO hagas queries** directas de Supabase en páginas
+
+### Referencias:
+- Ver `src/pages/sitelog/Sitelog.tsx` - Ejemplo correcto usando feature imports
+- Ver `src/ARCHITECTURE.MD` - Arquitectura completa de features
+
+---
+
 ## 2. Páginas con Tabs
 
 ### ✅ CORRECTO: Usar el componente Tabs personalizado

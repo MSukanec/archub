@@ -23,6 +23,117 @@
 
 ---
 
+## 🏗️ ARQUITECTURA: Dónde va la lógica de datos
+
+**CRÍTICO:** Los modales NUNCA deben hacer queries directas de Supabase. Hay DOS opciones arquitectónicas:
+
+### Opción A: Modales dentro de Features (PREFERIDO)
+
+Si el modal es específico de un feature (sitelog, clients, movements, etc.):
+
+1. **El modal va en**: `src/features/<feature>/modals/`
+2. **La lógica de datos va en**: `src/features/<feature>/services/`
+3. **Las mutations usan**: Services del feature
+
+**Estructura:**
+```
+src/features/sitelog/
+  services/
+    createSiteLog.ts       ← Función async pura con query de Supabase
+  modals/
+    SiteLogModal.tsx       ← Modal que usa el service
+```
+
+**Ejemplo:**
+
+```typescript
+// features/sitelog/services/createSiteLog.ts
+import { supabase } from '@/lib/supabase';
+
+export async function createSiteLog(data: CreateSiteLogData) {
+  const { error } = await supabase
+    .from('site_logs')
+    .insert({
+      title: data.title,
+      description: data.description,
+      organization_id: data.organizationId,
+      created_by: data.createdBy,
+    });
+  
+  if (error) throw error;
+}
+
+// features/sitelog/modals/SiteLogModal.tsx
+import { createSiteLog } from '../services/createSiteLog';
+import { useMutation } from '@tanstack/react-query';
+
+const createMutation = useMutation({
+  mutationFn: (data: FormData) => createSiteLog({
+    title: data.title,
+    description: data.description,
+    organizationId: userData.organization.id,
+    createdBy: userData.user.id,
+  }),
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['site-logs'] });
+    toast({ title: 'Creado exitosamente' });
+    handleClose();
+  },
+});
+```
+
+### Opción B: Modales Globales (Backend REST)
+
+Si el modal es genérico/global (admin, auth, configuración):
+
+1. **El modal va en**: `src/components/modal/modals/`
+2. **La lógica de datos va en**: `server/` (backend Express)
+3. **Las mutations usan**: `apiRequest` a endpoints REST
+
+**Ejemplo:**
+
+```typescript
+// src/components/modal/modals/admin/AnnouncementFormModal.tsx
+import { apiRequest } from '@/lib/queryClient';
+import { useMutation } from '@tanstack/react-query';
+
+const createMutation = useMutation({
+  mutationFn: async (data: FormData) => {
+    return await apiRequest('POST', '/api/admin/announcements', {
+      title: data.title,
+      description: data.description,
+      organization_id: userData.organization.id,
+    });
+  },
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['/api/admin/announcements'] });
+    toast({ title: 'Anuncio creado' });
+    handleClose();
+  },
+});
+```
+
+### ❌ LO QUE NUNCA DEBES HACER
+
+```typescript
+// ❌ INCORRECTO - Query directa de Supabase en modal
+const createMutation = useMutation({
+  mutationFn: async (data: FormData) => {
+    const { error } = await supabase  // ❌ MAL
+      .from('my_table')
+      .insert({...});
+  },
+});
+```
+
+### ✅ Reglas de decisión:
+
+- **¿Es específico de un feature?** → Opción A (service en feature)
+- **¿Es global/admin/auth?** → Opción B (REST endpoint)
+- **¿En duda?** → Opción A (siempre preferir features)
+
+---
+
 ## ⚠️ REGLA CRÍTICA: isEditing en FormModalLayout
 
 **SIEMPRE** que uses `FormModalLayout` para un modal de formulario CRUD (crear/editar), DEBES incluir `isEditing={true}`.
@@ -205,26 +316,19 @@ export function MyModal({ modalData, onClose }: MyModalProps) {
     onClose();
   };
 
-  // 7. MUTATION PARA CREAR
+  // 7. MUTATION - OPCIÓN A: Usando service (PREFERIDO para features)
+  // Si el modal está en features/<feature>/modals/
+  import { createEntity, updateEntity } from '../services'; // importar desde service
+  
   const createMutation = useMutation({
-    mutationFn: async (data: MyFormData) => {
-      if (!supabase || !userData?.user?.id) {
-        throw new Error('Supabase not initialized or user not found');
-      }
-      
-      const { error } = await supabase
-        .from('my_table')
-        .insert({
-          title: data.title,
-          description: data.description || null,
-          created_by: userData.user.id,
-          // ... más campos
-        });
-      
-      if (error) throw error;
-    },
+    mutationFn: (data: MyFormData) => createEntity({
+      title: data.title,
+      description: data.description,
+      organizationId: userData.organization.id,
+      createdBy: userData.user.id,
+    }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['my-entities'] });
+      queryClient.invalidateQueries({ queryKey: ['entities'] });
       toast({
         title: 'Creado exitosamente',
         description: 'El elemento se creó correctamente.'
@@ -241,24 +345,13 @@ export function MyModal({ modalData, onClose }: MyModalProps) {
     }
   });
 
-  // 8. MUTATION PARA ACTUALIZAR
   const updateMutation = useMutation({
-    mutationFn: async (data: MyFormData) => {
-      if (!supabase) throw new Error('Supabase not initialized');
-      
-      const { error } = await supabase
-        .from('my_table')
-        .update({
-          title: data.title,
-          description: data.description || null,
-          // ... más campos
-        })
-        .eq('id', entity!.id);
-      
-      if (error) throw error;
-    },
+    mutationFn: (data: MyFormData) => updateEntity(entity!.id, {
+      title: data.title,
+      description: data.description,
+    }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['my-entities'] });
+      queryClient.invalidateQueries({ queryKey: ['entities'] });
       toast({
         title: 'Actualizado exitosamente',
         description: 'Los cambios se guardaron correctamente.'
@@ -274,6 +367,68 @@ export function MyModal({ modalData, onClose }: MyModalProps) {
       });
     }
   });
+
+  // 8. MUTATION - OPCIÓN B: Usando REST endpoint (para modales globales/admin)
+  // Si el modal está en src/components/modal/modals/
+  import { apiRequest } from '@/lib/queryClient';
+  
+  const createMutation = useMutation({
+    mutationFn: async (data: MyFormData) => {
+      return await apiRequest('POST', '/api/entities', {
+        title: data.title,
+        description: data.description,
+        organization_id: userData.organization.id,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/entities'] });
+      toast({
+        title: 'Creado exitosamente',
+        description: 'El elemento se creó correctamente.'
+      });
+      handleClose();
+    },
+    onError: (error) => {
+      console.error('Error creating:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo crear el elemento. Inténtalo de nuevo.',
+        variant: 'destructive'
+      });
+    }
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: MyFormData) => {
+      return await apiRequest('PUT', `/api/entities/${entity!.id}`, {
+        title: data.title,
+        description: data.description,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/entities'] });
+      toast({
+        title: 'Actualizado exitosamente',
+        description: 'Los cambios se guardaron correctamente.'
+      });
+      handleClose();
+    },
+    onError: (error) => {
+      console.error('Error updating:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo actualizar el elemento. Inténtalo de nuevo.',
+        variant: 'destructive'
+      });
+    }
+  });
+
+  // ❌ OPCIÓN C (DEPRECATED): Query directa de Supabase en modal - NO USAR
+  // const createMutation = useMutation({
+  //   mutationFn: async (data: MyFormData) => {
+  //     const { error } = await supabase.from('my_table').insert({...}); // ❌ MAL
+  //   }
+  // });
 
   // 9. HANDLER DE SUBMIT
   const onSubmit = async (data: MyFormData) => {
