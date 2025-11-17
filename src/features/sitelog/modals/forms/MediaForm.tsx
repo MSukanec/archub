@@ -2,7 +2,7 @@ import React from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
-import { UploadGallery } from "@/components/ui-custom/media/UploadGallery";
+import { UploadMediaField } from "@/components/ui-custom/fields/UploadMediaField";
 import type { SiteLogFileInput } from '../../types';
 
 interface MediaFormProps {
@@ -61,14 +61,13 @@ export function MediaForm({
   };
 
   return (
-    <UploadGallery
+    <UploadMediaField
       existingFiles={siteLogFiles}
       filesToUpload={filesToUpload}
       onFilesChange={setFilesToUpload}
       onExistingFileDelete={handleExistingFileDelete}
-      title="Archivos y Media"
       emptyStateTitle="No hay archivos adjuntos"
-      emptyStateDescription="Los archivos que subas aparecerán aquí organizados en una galería visual"
+      emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
       uploadButtonText="Subir Archivos"
       newFileBadgeText="Nuevo"
       maxSize={50 * 1024 * 1024} // 50MB

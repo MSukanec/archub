@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { UploadGallery } from '@/components/ui-custom/media/UploadGallery'
+import { UploadMediaField } from '@/components/ui-custom/fields/UploadMediaField'
 import { 
   useContactAttachments, 
   useCreateContactAttachment, 
@@ -116,16 +116,13 @@ export function ContactAttachmentsForm({ contactId, contact }: ContactAttachment
   }
 
   return (
-    <UploadGallery
+    <UploadMediaField
       existingFiles={existingFiles}
       filesToUpload={filesToUpload}
       onFilesChange={handleFilesChange}
       onExistingFileDelete={handleExistingFileDelete}
-      onDownload={handleDownload}
-      onCopyLink={handleCopyLink}
-      title="Archivos y Media"
       emptyStateTitle="No hay archivos adjuntos"
-      emptyStateDescription="Los archivos que subas aparecerán aquí organizados en una galería visual"
+      emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
       uploadButtonText="Subir Archivos"
       newFileBadgeText="Nuevo"
       maxSize={10 * 1024 * 1024} // 10MB para contactos
