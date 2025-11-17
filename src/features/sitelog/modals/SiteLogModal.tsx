@@ -273,6 +273,14 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       // Los datos pueden venir anidados en data.data, normalizar
       const siteLogData = data.data || data;
       
+      console.log('🔄 Loading existing sitelog data:', {
+        hasData: !!data,
+        siteLogId: siteLogData.id,
+        entry_type_id: siteLogData.entry_type_id,
+        defaultType_id: defaultType?.id,
+        allData: siteLogData
+      });
+      
       // Si estamos editando, cargar los datos existentes
       const resetValues = {
         log_date: siteLogData.log_date || new Date().toISOString().split('T')[0],
@@ -287,7 +295,12 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         attendees: siteLogData.attendees || [],
         equipment: siteLogData.equipment || []
       };
+      
+      console.log('📝 Resetting form with values:', resetValues);
       form.reset(resetValues);
+      
+      console.log('✅ Form reset complete. Current entry_type_id:', form.getValues('entry_type_id'));
+      
       setEvents(siteLogData.events || []);
       setAttendees(siteLogData.attendees || []);
       setEquipment(siteLogData.equipment || []);
