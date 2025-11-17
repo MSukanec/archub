@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query'
 import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, CheckCircle2, AlertCircle, Calendar } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
@@ -13,9 +12,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
-import { apiRequest, queryClient } from '@/lib/queryClient'
+import { queryClient } from '@/lib/queryClient'
 import { ClientPaymentRow } from '@/components/ui/data-row'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/stat-card'
+import {
+  useClientPayments,
+  useDeleteClientPayment,
+  type ClientPaymentWithRelations,
+} from '@/features/clients'
 
 interface ClientPaymentsTabProps {
   projectId?: string;
@@ -26,7 +30,7 @@ interface ClientPayment {
   project_id: string;
   commitment_id: string | null;
   schedule_id: string | null;
-  contact_id: string;
+  contact_id: string | null;
   organization_id: string;
   client_id: string | null;
   amount: number;
@@ -42,12 +46,12 @@ interface ClientPayment {
   file_url: string | null;
   contact: {
     id: string;
-    first_name: string;
-    last_name: string;
-    full_name: string;
-    email: string;
-    phone?: string;
-    company_name?: string;
+    first_name: string | null;
+    last_name: string | null;
+    full_name: string | null;
+    email: string | null;
+    phone?: string | null;
+    company_name?: string | null;
     linked_user?: {
       id: string;
       avatar_url?: string;
@@ -117,26 +121,105 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   const [filterUnit, setFilterUnit] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
-  // Query to get client payments
-  // If activeProjectId is null, fetch ALL payments from the organization
-  const { data: paymentsResponse, isLoading } = useQuery<{ data: ClientPayment[] }>({
-    queryKey: activeProjectId
-      ? [`/api/projects/${activeProjectId}/client-payments?organization_id=${organizationId}`]
-      : [`/api/organizations/${organizationId}/client-payments`],
-    enabled: !!organizationId,
-    staleTime: 3 * 60 * 1000, // 3 minutes - data is prefetched and cached
-  });
+  // Use feature hook to get client payments
+  const { data: paymentsData, isLoading } = useClientPayments(activeProjectId || undefined, organizationId);
 
-  const allPayments = paymentsResponse?.data || [];
+  // Transform payments from feature data structure to component's expected structure
+  const allPayments = useMemo(() => {
+    if (!paymentsData) return [];
+    
+    return paymentsData.map((payment: ClientPaymentWithRelations) => ({
+      id: payment.id,
+      project_id: payment.project_id,
+      commitment_id: payment.commitment_id,
+      schedule_id: payment.schedule_id,
+      contact_id: payment.contact_id,
+      organization_id: payment.organization_id,
+      client_id: payment.client_id,
+      amount: payment.amount,
+      currency_id: payment.currency_id,
+      exchange_rate: payment.exchange_rate,
+      payment_date: payment.payment_date,
+      notes: payment.notes,
+      reference: payment.reference,
+      created_at: payment.created_at,
+      updated_at: payment.updated_at,
+      wallet_id: payment.wallet_id,
+      status: payment.status,
+      file_url: payment.file_url,
+      contact: payment.contact,
+      project_client: payment.client ? {
+        id: payment.client.id,
+        unit: payment.client.unit,
+      } : null,
+      currency: payment.currency,
+      wallet: payment.wallet,
+      commitment: payment.commitment,
+      schedule: payment.schedule,
+    }));
+  }, [paymentsData]);
 
-  // Query to get payment metrics
-  const { data: metricsData } = useQuery<PaymentMetrics>({
-    queryKey: activeProjectId
-      ? [`/api/projects/${activeProjectId}/client-payments/metrics?organization_id=${organizationId}`]
-      : [`/api/organizations/${organizationId}/client-payments/metrics`],
-    enabled: !!organizationId,
-    staleTime: 3 * 60 * 1000, // 3 minutes - same as payments query
-  });
+  // Calculate metrics client-side from payments data
+  const metricsData = useMemo<PaymentMetrics>(() => {
+    const currencyGroups = new Map<string, {
+      total_confirmed: number;
+      total_pending: number;
+      total_rejected: number;
+      count_confirmed: number;
+      count_pending: number;
+      count_rejected: number;
+    }>();
+
+    let latestPaymentDate: string | null = null;
+
+    allPayments.forEach(payment => {
+      if (!payment.currency) return;
+
+      const currencyId = payment.currency.id;
+      if (!currencyGroups.has(currencyId)) {
+        currencyGroups.set(currencyId, {
+          total_confirmed: 0,
+          total_pending: 0,
+          total_rejected: 0,
+          count_confirmed: 0,
+          count_pending: 0,
+          count_rejected: 0,
+        });
+      }
+
+      const group = currencyGroups.get(currencyId)!;
+      if (payment.status === 'confirmed') {
+        group.total_confirmed += payment.amount;
+        group.count_confirmed += 1;
+      } else if (payment.status === 'pending') {
+        group.total_pending += payment.amount;
+        group.count_pending += 1;
+      } else if (payment.status === 'rejected') {
+        group.total_rejected += payment.amount;
+        group.count_rejected += 1;
+      }
+
+      if (!latestPaymentDate || payment.payment_date > latestPaymentDate) {
+        latestPaymentDate = payment.payment_date;
+      }
+    });
+
+    const by_currency = Array.from(currencyGroups.entries()).map(([currencyId, group]) => {
+      const currency = allPayments.find(p => p.currency?.id === currencyId)?.currency;
+      return {
+        currency_id: currencyId,
+        currency_code: currency?.code || 'ARS',
+        currency_symbol: currency?.symbol || '$',
+        ...group,
+      };
+    });
+
+    return {
+      total_count: allPayments.length,
+      by_currency,
+      latest_payment_date: latestPaymentDate,
+    };
+  }, [allPayments]);
 
   // Extract unique values for filters
   const filterOptions = useMemo(() => {
@@ -200,34 +283,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     });
   }, [allPayments, filterWallet, filterCurrency, filterHasSchedule, filterHasCommitment, filterClient, filterUnit, filterStatus]);
 
-  // Delete payment mutation
-  const deletePaymentMutation = useMutation({
-    mutationFn: async (paymentId: string) => {
-      return await apiRequest('DELETE', `/api/projects/${activeProjectId}/client-payments/${paymentId}?organization_id=${organizationId}`);
-    },
-    onSuccess: () => {
-      // Invalidate both project and organization queries
-      if (activeProjectId) {
-        queryClient.invalidateQueries({ queryKey: [`/api/projects/${activeProjectId}/client-payments?organization_id=${organizationId}`] });
-        queryClient.invalidateQueries({ queryKey: [`/api/projects/${activeProjectId}/client-payments/metrics?organization_id=${organizationId}`] });
-      }
-      queryClient.invalidateQueries({ queryKey: [`/api/organizations/${organizationId}/client-payments`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/organizations/${organizationId}/client-payments/metrics`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${activeProjectId}/clients/summary`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/organizations/${organizationId}/clients/summary`] });
-      toast({
-        title: "Pago eliminado",
-        description: "El pago ha sido eliminado correctamente",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error al eliminar",
-        description: error.message || "No se pudo eliminar el pago",
-        variant: "destructive",
-      });
-    },
-  });
+  // Delete payment mutation using feature hook
+  const deletePaymentMutation = useDeleteClientPayment();
 
   const handleEdit = (payment: ClientPayment) => {
     openModal('client-payment', {
@@ -239,6 +296,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   };
 
   const handleDeletePayment = (payment: ClientPayment) => {
+    if (!organizationId || !activeProjectId) return;
+
     const clientName = payment.contact?.company_name || 
                       payment.contact?.full_name || 
                       `${payment.contact?.first_name || ''} ${payment.contact?.last_name || ''}`.trim();
@@ -252,7 +311,11 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       description: `¿Estás seguro de que querés eliminar este pago? Esta acción no se puede deshacer.`,
       itemName: paymentLabel,
       destructiveActionText: "Eliminar pago",
-      onDelete: () => deletePaymentMutation.mutate(payment.id),
+      onDelete: () => deletePaymentMutation.mutate({
+        paymentId: payment.id,
+        organizationId,
+        projectId: activeProjectId,
+      }),
       isLoading: deletePaymentMutation.isPending
     });
   };

@@ -1,7 +1,5 @@
-import React from 'react';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
+import React, { useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast'
-import { apiRequest } from '@/lib/queryClient'
 import { Users, Plus, Edit, Trash2, User, FileText, Calendar, DollarSign, CheckCircle2, AlertCircle, ListChecks } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
@@ -14,6 +12,12 @@ import { Link, useLocation } from 'wouter'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/stat-card'
+import {
+  useClientDashboard,
+  useDeleteProjectClient,
+  type ProjectClientWithRelations,
+  type ClientFinancialSummary,
+} from '@/features/clients'
 
 interface ClientListTabProps {
   projectId?: string;
@@ -43,12 +47,12 @@ interface ProjectClientSummary {
   unit: string | null;
   contacts: {
     id: string;
-    first_name: string;
-    last_name: string;
-    full_name: string;
-    email: string;
-    phone?: string;
-    company_name?: string;
+    first_name: string | null;
+    last_name: string | null;
+    full_name: string | null;
+    email: string | null;
+    phone?: string | null;
+    company_name?: string | null;
     linked_user?: {
       id: string;
       avatar_url?: string;
@@ -77,7 +81,6 @@ interface ClientSummaryResponse {
 
 export default function ClientListTab({ projectId }: ClientListTabProps) {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
@@ -87,51 +90,73 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
 
-  // Query to get project clients summary with financial data (plan-aware)
-  // If activeProjectId is null, fetch ALL clients from the organization
-  const { data: summaryResponse, isLoading } = useQuery<ClientSummaryResponse>({
-    queryKey: activeProjectId
-      ? [`/api/projects/${activeProjectId}/clients/summary?organization_id=${organizationId}`]
-      : [`/api/organizations/${organizationId}/clients/summary`],
-    enabled: !!organizationId,
-    staleTime: 3 * 60 * 1000, // 3 minutes - data is prefetched and cached
-  });
+  // Use feature hook to get dashboard data with financial summaries
+  const { data: dashboardData, isLoading } = useClientDashboard(activeProjectId || undefined, organizationId);
 
-  const projectClients = summaryResponse?.clients || [];
-  const planInfo = summaryResponse?.plan || { slug: 'FREE', isMultiCurrency: false };
+  // Transform dashboard data to match the current component's expected structure
+  const projectClients = useMemo(() => {
+    if (!dashboardData) return [];
 
-  // Delete mutation
-  const deleteClientMutation = useMutation({
-    mutationFn: async (clientId: string) => {
-      if (!activeProjectId || !organizationId) return;
+    return dashboardData.clients.map((client: ProjectClientWithRelations) => {
+      const financialSummaries = dashboardData.financialSummaries.get(client.id) || [];
+      
+      const financialByCurrency = financialSummaries.map((summary: ClientFinancialSummary) => ({
+        currency: summary.currency_id ? {
+          id: summary.currency_id,
+          code: 'ARS',
+          symbol: '$',
+        } : null,
+        total_committed_amount: summary.total_committed,
+        total_paid_amount: summary.total_paid,
+        balance_due: summary.balance_due,
+        next_due_date: summary.next_due_date,
+        next_due_amount: summary.next_due_amount,
+        last_payment_date: summary.last_payment_date,
+        total_schedule_items: summary.total_schedule_items,
+        schedule_paid: summary.schedule_paid,
+        schedule_overdue: summary.schedule_overdue,
+      }));
 
-      await apiRequest('DELETE', `/api/projects/${activeProjectId}/clients/${clientId}?organization_id=${organizationId}`);
-    },
-    onSuccess: () => {
-      // Invalidate both project and organization queries
-      queryClient.invalidateQueries({ 
-        predicate: (query) => {
-          const key = query.queryKey[0] as string;
-          return key?.includes('/clients/summary') || key?.includes('/clients');
-        }
-      });
-      toast({
-        title: 'Cliente eliminado',
-        description: 'El cliente ha sido eliminado del proyecto correctamente',
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Error al eliminar cliente',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
-  });
+      const total_committed_amount = financialSummaries.reduce((sum, s) => sum + s.total_committed, 0);
+      const total_paid_amount = financialSummaries.reduce((sum, s) => sum + s.total_paid, 0);
+      const balance_due = financialSummaries.reduce((sum, s) => sum + s.balance_due, 0);
+      const next_due = financialSummaries.reduce((min, s) => {
+        if (!s.next_due_amount) return min;
+        return min === null ? s.next_due_amount : Math.min(min, s.next_due_amount);
+      }, null as number | null);
 
-  const handleDelete = (client: ProjectClientSummary) => {
-    // Prevent deletion when viewing organization-wide data
-    if (!activeProjectId) {
+      return {
+        id: client.id,
+        contact_id: client.contact_id,
+        unit: client.unit,
+        contacts: client.contact ? {
+          id: client.contact.id,
+          first_name: client.contact.first_name,
+          last_name: client.contact.last_name,
+          full_name: client.contact.full_name,
+          email: client.contact.email,
+          phone: client.contact.phone,
+          company_name: client.contact.company_name,
+          linked_user: client.contact.linked_user_id ? {
+            id: client.contact.linked_user_id,
+            avatar_url: undefined,
+          } : null,
+        } : null,
+        role: client.role,
+        financialByCurrency,
+        total_committed_amount,
+        total_paid_amount,
+        balance_due,
+        next_due,
+      };
+    });
+  }, [dashboardData]);
+
+  // Delete mutation using feature hook
+  const deleteClientMutation = useDeleteProjectClient();
+
+  const handleDelete = async (client: ProjectClientSummary) => {
+    if (!activeProjectId || !organizationId) {
       toast({
         title: 'No disponible',
         description: 'Para eliminar un cliente, selecciona un proyecto específico',
@@ -150,8 +175,24 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       description: 'Se eliminará este cliente del proyecto. Esta acción no se puede deshacer.',
       itemName: clientName,
       itemType: 'cliente',
-      onConfirm: () => {
-        deleteClientMutation.mutate(client.id);
+      onConfirm: async () => {
+        try {
+          await deleteClientMutation.mutateAsync({
+            clientId: client.id,
+            organizationId,
+            projectId: activeProjectId!,
+          });
+          toast({
+            title: 'Cliente eliminado',
+            description: 'El cliente ha sido eliminado del proyecto correctamente',
+          });
+        } catch (error: any) {
+          toast({
+            title: 'Error al eliminar cliente',
+            description: error.message,
+            variant: 'destructive',
+          });
+        }
       },
     });
   };
@@ -208,41 +249,20 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   };
 
   // Helper function to render multi-currency amounts
-  // Helper function to render amounts - plan-aware
   const renderMultiCurrency = (client: ProjectClientSummary, field: keyof Pick<CurrencyFinancial, 'total_committed_amount' | 'total_paid_amount' | 'balance_due'>) => {
     if (client.financialByCurrency.length === 0) return '-';
     
-    // For PRO/TEAMS: Show single currency (commitment currency) with converted amount
-    if (planInfo.isMultiCurrency) {
-      const currencyData = client.financialByCurrency[0];
-      if (!currencyData) return '-';
-      
-      const amount = currencyData[field];
-      const hasConversionWarning = field === 'total_paid_amount' && (currencyData.payments_missing_rate || 0) > 0;
-      
-      return (
-        <div className="flex flex-col">
-          <span className="font-semibold" style={{ fontSize: '14px' }}>
-            {formatCurrency(amount, currencyData.currency)}
-          </span>
-          {hasConversionWarning && (
-            <span className="text-xs text-orange-500">
-              {currencyData.payments_missing_rate} pago(s) sin tasa de cambio
-            </span>
-          )}
-        </div>
-      );
-    }
+    // Always show first currency
+    const currencyData = client.financialByCurrency[0];
+    if (!currencyData) return '-';
     
-    // For FREE: Show multiple currencies if present
+    const amount = currencyData[field];
+    
     return (
-      <div className="flex flex-wrap gap-1">
-        {client.financialByCurrency.map((f, index) => (
-          <span key={index} className="whitespace-nowrap">
-            {formatCurrency(f[field], f.currency)}
-            {index < client.financialByCurrency.length - 1 && <span className="mx-1">+</span>}
-          </span>
-        ))}
+      <div className="flex flex-col">
+        <span className="font-semibold" style={{ fontSize: '14px' }}>
+          {formatCurrency(amount, currencyData.currency)}
+        </span>
       </div>
     );
   };
@@ -301,42 +321,21 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       render: (client: ProjectClientSummary) => {
         if (client.financialByCurrency.length === 0) return '-';
         
-        // For PRO/TEAMS: Show single currency (commitment currency) with converted balance
-        if (planInfo.isMultiCurrency) {
-          const currencyData = client.financialByCurrency[0];
-          if (!currencyData) return '-';
-          
-          const balance = currencyData.balance_due;
-          const className = balance > 0 
-            ? 'text-orange-600 dark:text-orange-400 font-semibold' 
-            : balance < 0
-            ? 'text-green-600 dark:text-green-400 font-semibold'
-            : 'font-semibold';
-          
-          return (
-            <span className={className} style={{ fontSize: '14px' }}>
-              {formatCurrency(balance, currencyData.currency)}
-            </span>
-          );
-        }
+        // Always show first currency
+        const currencyData = client.financialByCurrency[0];
+        if (!currencyData) return '-';
         
-        // For FREE: Show multiple currencies if present
+        const balance = currencyData.balance_due;
+        const className = balance > 0 
+          ? 'text-orange-600 dark:text-orange-400 font-semibold' 
+          : balance < 0
+          ? 'text-green-600 dark:text-green-400 font-semibold'
+          : 'font-semibold';
+        
         return (
-          <div className="flex flex-wrap gap-1">
-            {client.financialByCurrency.map((f, index) => {
-              const className = f.balance_due > 0 
-                ? 'text-orange-600 dark:text-orange-400 font-medium' 
-                : f.balance_due < 0
-                ? 'text-green-600 dark:text-green-400 font-medium'
-                : '';
-              return (
-                <span key={index} className={className + ' whitespace-nowrap'}>
-                  {formatCurrency(f.balance_due, f.currency)}
-                  {index < client.financialByCurrency.length - 1 && <span className="mx-1 text-muted-foreground">+</span>}
-                </span>
-              );
-            })}
-          </div>
+          <span className={className} style={{ fontSize: '14px' }}>
+            {formatCurrency(balance, currencyData.currency)}
+          </span>
         );
       },
     },

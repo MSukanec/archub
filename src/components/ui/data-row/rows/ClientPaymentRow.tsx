@@ -13,7 +13,7 @@ interface ClientPayment {
   reference: string | null;
   notes: string | null;
   file_url: string | null;
-  contact_id: string;
+  contact_id: string | null;
   client_id: string | null;
   wallet_id: string | null;
   currency_id: string;
@@ -23,12 +23,12 @@ interface ClientPayment {
   // Datos expandidos
   contact: {
     id: string;
-    first_name: string;
-    last_name: string;
-    full_name: string;
-    email: string;
-    phone?: string;
-    company_name?: string;
+    first_name: string | null;
+    last_name: string | null;
+    full_name: string | null;
+    email: string | null;
+    phone?: string | null;
+    company_name?: string | null;
     linked_user?: {
       id: string;
       avatar_url?: string;

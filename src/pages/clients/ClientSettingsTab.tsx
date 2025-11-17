@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
 import { Settings, Plus, Edit, Trash2, Shield, MoreVertical } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
@@ -28,15 +26,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-
-interface ClientRole {
-  id: string;
-  name: string;
-  is_default: boolean;
-  organization_id: string | null;
-  created_at: string;
-  updated_at: string;
-}
+import {
+  useClientRoles,
+  useCreateClientRole,
+  useUpdateClientRole,
+  useDeleteClientRole,
+  type ClientRole,
+} from '@/features/clients';
 
 const roleSchema = z.object({
   name: z.string().min(1, 'El nombre del rol es requerido').max(100, 'El nombre es demasiado largo'),
@@ -46,7 +42,6 @@ type RoleFormData = z.infer<typeof roleSchema>;
 
 export default function ClientSettingsTab() {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
 
@@ -60,77 +55,17 @@ export default function ClientSettingsTab() {
     },
   });
 
-  // Fetch client roles (organization_id is derived server-side)
-  const { data: clientRoles, isLoading } = useQuery<ClientRole[]>({
-    queryKey: [`/api/client-roles`],
-    enabled: !!organizationId
-  });
+  // Fetch client roles using feature hook
+  const { data: clientRoles, isLoading } = useClientRoles(organizationId);
 
-  // Create role mutation
-  const createRoleMutation = useMutation({
-    mutationFn: async (data: RoleFormData) => {
-      return await apiRequest('POST', '/api/client-roles', { name: data.name });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/client-roles`] });
-      toast({
-        title: 'Rol creado',
-        description: 'El rol de cliente ha sido creado correctamente',
-      });
-      handleClose();
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Error al crear rol',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
-  });
+  // Create role mutation using feature hook
+  const createRoleMutation = useCreateClientRole();
 
-  // Update role mutation
-  const updateRoleMutation = useMutation({
-    mutationFn: async (data: RoleFormData) => {
-      if (!editingRole) throw new Error('No role selected');
-      return await apiRequest('PATCH', `/api/client-roles/${editingRole.id}`, { name: data.name });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/client-roles`] });
-      toast({
-        title: 'Rol actualizado',
-        description: 'El rol de cliente ha sido actualizado correctamente',
-      });
-      handleClose();
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Error al actualizar rol',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
-  });
+  // Update role mutation using feature hook
+  const updateRoleMutation = useUpdateClientRole();
 
-  // Delete role mutation
-  const deleteRoleMutation = useMutation({
-    mutationFn: async (id: string) => {
-      return await apiRequest('DELETE', `/api/client-roles/${id}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/client-roles`] });
-      toast({
-        title: 'Rol eliminado',
-        description: 'El rol de cliente ha sido eliminado correctamente',
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Error al eliminar rol',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
-  });
+  // Delete role mutation using feature hook
+  const deleteRoleMutation = useDeleteClientRole();
 
   const handleOpenModal = (role?: ClientRole) => {
     if (role) {
@@ -150,14 +85,52 @@ export default function ClientSettingsTab() {
   };
 
   const onSubmit = async (data: RoleFormData) => {
-    if (editingRole) {
-      await updateRoleMutation.mutateAsync(data);
-    } else {
-      await createRoleMutation.mutateAsync(data);
+    if (!organizationId) return;
+    
+    if (!userData?.id) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo obtener el ID del usuario',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      if (editingRole) {
+        await updateRoleMutation.mutateAsync({
+          roleId: editingRole.id,
+          updates: { name: data.name },
+          organizationId,
+        });
+        toast({
+          title: 'Rol actualizado',
+          description: 'El rol de cliente ha sido actualizado correctamente',
+        });
+      } else {
+        await createRoleMutation.mutateAsync({
+          role: { name: data.name },
+          organizationId,
+          createdBy: userData.id,
+        });
+        toast({
+          title: 'Rol creado',
+          description: 'El rol de cliente ha sido creado correctamente',
+        });
+      }
+      handleClose();
+    } catch (error: any) {
+      toast({
+        title: editingRole ? 'Error al actualizar rol' : 'Error al crear rol',
+        description: error.message,
+        variant: 'destructive',
+      });
     }
   };
 
-  const handleDelete = (role: ClientRole) => {
+  const handleDelete = async (role: ClientRole) => {
+    if (!organizationId) return;
+
     if (role.is_default) {
       toast({
         title: 'No permitido',
@@ -168,7 +141,22 @@ export default function ClientSettingsTab() {
     }
 
     if (confirm(`¿Estás seguro de que quieres eliminar el rol "${role.name}"?`)) {
-      deleteRoleMutation.mutate(role.id);
+      try {
+        await deleteRoleMutation.mutateAsync({
+          roleId: role.id,
+          organizationId,
+        });
+        toast({
+          title: 'Rol eliminado',
+          description: 'El rol de cliente ha sido eliminado correctamente',
+        });
+      } catch (error: any) {
+        toast({
+          title: 'Error al eliminar rol',
+          description: error.message,
+          variant: 'destructive',
+        });
+      }
     }
   };
 

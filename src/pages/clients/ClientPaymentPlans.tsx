@@ -54,7 +54,18 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
   })
 
   // Fetch existing payment plan for the project
-  const { data: existingPaymentPlan, isLoading: paymentPlanLoading } = useQuery({
+  const { data: existingPaymentPlan, isLoading: paymentPlanLoading } = useQuery<{
+    id: string;
+    installments_count: number;
+    start_date: string;
+    frequency: string;
+    created_at: string;
+    payment_plans?: {
+      id: string;
+      name: string;
+      description: string;
+    };
+  } | null>({
     queryKey: ['project-payment-plan', projectId],
     queryFn: async () => {
       if (!supabase || !projectId) return null
@@ -70,7 +81,7 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
           frequency,
           start_date,
           created_at,
-          payment_plans(
+          payment_plans!inner(
             id,
             name,
             description
@@ -88,7 +99,19 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
         return null
       }
 
-      return data
+      // Transform payment_plans from array to object if needed
+      if (data && Array.isArray(data.payment_plans) && data.payment_plans.length > 0) {
+        return {
+          id: data.id,
+          installments_count: data.installments_count,
+          start_date: data.start_date,
+          frequency: data.frequency,
+          created_at: data.created_at,
+          payment_plans: data.payment_plans[0]
+        }
+      }
+
+      return data as any
     },
     enabled: !!projectId
   })
