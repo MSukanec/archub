@@ -256,20 +256,6 @@ export function Gallery({
                 </div>
               </PopoverContent>
             </Popover>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setGalleryStyle(galleryStyle === 'uniform' ? 'masonry' : 'uniform')}
-              className="h-8 px-3 text-xs"
-              title={galleryStyle === 'uniform' ? 'Cambiar a estilo mosaico' : 'Cambiar a estilo uniforme'}
-            >
-              {galleryStyle === 'uniform' ? (
-                <LayoutGrid className="mr-1 h-3 w-3" />
-              ) : (
-                <Grid3X3 className="mr-1 h-3 w-3" />
-              )}
-              Estilo
-            </Button>
             {activeFiltersCount > 0 && (
               <Button
                 variant="ghost"
