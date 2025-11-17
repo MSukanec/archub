@@ -1,13 +1,13 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { FileText, Plus, TrendingUp, Users, AlertTriangle, Package, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, CheckCircle, Search, Camera, StickyNote, CloudSun } from "lucide-react";
+import { FileText, Plus } from "lucide-react";
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from '@/stores/projectContext';
 import { useSiteLogTimeline } from "@/features/sitelog/hooks/use-sitelog-timeline";
+import { useSiteLogs } from "@/features/sitelog/hooks/use-site-logs";
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { supabase } from "@/lib/supabase";
@@ -15,124 +15,6 @@ import { useToast } from "@/hooks/use-toast";
 
 import SitelogEntriesTab from './SitelogEntriesTab';
 import SitelogChartsTab from './SitelogChartsTab';
-import { ENTRY_TYPES, WEATHER_TYPES } from '@/features/sitelog/constants';
-
-// Hook personalizado para obtener las bitácoras del proyecto
-function useSiteLogs(projectId: string | undefined, organizationId: string | undefined) {
-  return useQuery({
-    queryKey: ['site-logs', projectId, organizationId],
-    queryFn: async () => {
-      if (!supabase || !projectId || !organizationId) {
-        return [];
-      }
-
-      // First get the site logs
-      const { data: logsData, error } = await supabase
-        .from('site_logs')
-        .select(`
-          *,
-          creator:organization_members(
-            id,
-            user:users(
-              id,
-              full_name,
-              avatar_url
-            )
-          )
-        `)
-        .eq('project_id', projectId)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        throw error;
-      }
-
-      if (!logsData || logsData.length === 0) {
-        return [];
-      }
-
-      // Get log IDs for related data
-      const logIds = logsData?.map(log => log.id) || [];
-
-      if (logIds.length === 0) {
-        return [];
-      }
-
-      // Fetch events separately
-      const { data: eventsData, error: eventsError } = await supabase
-        .from('site_log_events')
-        .select(`
-          *,
-          event_type:event_types(
-            id,
-            name
-          )
-        `)
-        .in('site_log_id', logIds);
-      
-
-      // Fetch attendees separately from ATTENDEES table
-      const { data: attendeesData, error: attendeesError } = await supabase
-        .from('personnel_attendees')
-        .select(`
-          *,
-          personnel:project_personnel(
-            id,
-            notes,
-            contact:contacts(
-              id,
-              first_name,
-              last_name
-            )
-          )
-        `)
-        .in('site_log_id', logIds);
-
-      if (attendeesError) {
-
-      }
-
-      // Fetch equipment separately
-      const { data: equipmentData } = await supabase
-        .from('site_log_equipment')
-        .select(`
-          *,
-          equipment:equipment(
-            id,
-            name
-          )
-        `)
-        .in('site_log_id', logIds);
-
-      // Fetch files separately from project_media table
-      const { data: filesData } = await supabase
-        .from('project_media')
-        .select('*')
-        .in('site_log_id', logIds);
-
-      // Combine data and fix creator structure
-      const data = logsData.map(log => ({
-        ...log,
-        creator: log.creator?.user ? {
-          id: log.creator.user.id,
-          full_name: log.creator.user.full_name,
-          avatar_url: log.creator.user.avatar_url
-        } : null,
-        events: eventsData?.filter(event => event.site_log_id === log.id) || [],
-        attendees: attendeesData?.filter(attendee => attendee.site_log_id === log.id) || [],
-        equipment: equipmentData?.filter(equip => equip.site_log_id === log.id) || [],
-        files: filesData?.filter(file => file.site_log_id === log.id) || []
-      }));
-
-      if (error) {
-        throw error;
-      }
-
-      return data || [];
-    },
-    enabled: !!supabase && !!projectId && !!organizationId
-  });
-}
 
 export default function Sitelog() {
   const { openModal } = useGlobalModalStore();

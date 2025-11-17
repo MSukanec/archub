@@ -14,17 +14,14 @@ export async function uploadSiteLogFiles(
 
   for (const { file, title, description } of files) {
     try {
-      // Validate file first
       if (!file || file.size === 0) {
         console.error('Archivo vacío o inválido');
         continue;
       }
 
-      // Generate unique filename
       const extension = file.name.split('.').pop();
       const filePath = `${crypto.randomUUID()}.${extension}`;
 
-      // First upload to storage
       const { error: uploadError } = await supabase.storage
         .from('media')
         .upload(filePath, file, {
@@ -37,7 +34,6 @@ export async function uploadSiteLogFiles(
         throw uploadError;
       }
 
-      // Get the public URL after successful upload
       const { data: urlData } = supabase.storage
         .from('media')
         .getPublicUrl(filePath);
@@ -54,7 +50,7 @@ export async function uploadSiteLogFiles(
         created_by: createdBy,
         organization_id: organizationId,
         project_id: projectId,
-        site_log_id: siteLogId, // Esta es la diferencia clave con Gallery
+        site_log_id: siteLogId,
         visibility: 'organization'
       };
 
@@ -67,7 +63,6 @@ export async function uploadSiteLogFiles(
         siteLogId: siteLogId
       });
 
-      // Create the database record
       const { error: dbError } = await supabase
         .from('project_media')
         .insert(insertData);
@@ -80,7 +75,6 @@ export async function uploadSiteLogFiles(
           hint: dbError.hint,
           code: dbError.code
         });
-        // Clean up uploaded file if DB insertion failed
         await supabase.storage
           .from('media')
           .remove([filePath]);
