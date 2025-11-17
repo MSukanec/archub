@@ -26,7 +26,6 @@ export function LogEntryCard({
   imageUrls,
   lightbox
 }: LogEntryCardProps) {
-  const { openModal } = useGlobalModalStore();
   const entryTypeConfig = ENTRY_TYPES[siteLog.entry_type as keyof typeof ENTRY_TYPES];
   const weatherConfig = WEATHER_TYPES[siteLog.weather as keyof typeof WEATHER_TYPES];
 

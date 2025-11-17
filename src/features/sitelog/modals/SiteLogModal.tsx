@@ -21,6 +21,7 @@ import { useContacts } from "@/hooks/use-contacts";
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useProjectContext } from "@/stores/projectContext";
 import { FileUploader } from "@/components/ui-custom/FileUploader";
 import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 import { uploadSiteLogFiles } from "@/features/sitelog/services/uploadSiteLogFiles";
@@ -45,25 +46,25 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   const { closeModal } = useGlobalModalStore();
   const { currentPanel, setPanel, currentSubform, setCurrentSubform } = useModalPanelStore();
   const { data: currentUser } = useCurrentUser();
-  const { data: members = [] } = useOrganizationMembers(currentUser?.organization?.id);
+  const { selectedProjectId, currentOrganizationId } = useProjectContext();
+  const { data: members = [] } = useOrganizationMembers(currentOrganizationId);
   const { data: contacts = [] } = useContacts();
   
   // Plan features para restricciones
-  const organizationId = currentUser?.preferences?.last_organization_id;
-  const currentOrganization = currentUser?.organizations?.find(org => org.id === organizationId);
+  const currentOrganization = currentUser?.organizations?.find(org => org.id === currentOrganizationId);
   const currentPlanName = currentOrganization?.plan?.name?.toLowerCase() || 'free';
   const isPro = currentPlanName === 'pro' || currentPlanName === 'teams' || currentPlanName === 'enterprise';
   const isTeams = currentPlanName === 'teams' || currentPlanName === 'enterprise';
   
   // Query para obtener tipos de bitácora
   const { data: siteLogTypes = [], isLoading: typesLoading } = useSiteLogTypes(
-    currentUser?.organization?.id
+    currentOrganizationId
   );
   
   // Get project personnel only
   const { data: projectPersonnel = [], isLoading: personnelLoading } = useProjectPersonnel(
-    currentUser?.preferences?.last_project_id,
-    currentUser?.organization?.id
+    selectedProjectId || undefined,
+    currentOrganizationId
   );
   
   const [attendees, setAttendees] = useState<any[]>([]);
@@ -90,17 +91,17 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   // Query para obtener archivos existentes de la bitácora
   const { data: siteLogFiles = [], isLoading: filesLoading } = useSiteLogFiles(
     data?.id || data?.data?.id,
-    currentUser?.organization?.id
+    currentOrganizationId
   );
 
   // Mutación para subir archivos de bitácora
   const uploadFilesMutation = useMutation({
     mutationFn: async ({ files, siteLogId }: { files: SiteLogFileInput[], siteLogId: string }) => {
-      if (!currentUser?.organization?.id || !currentUser?.preferences?.last_project_id) {
+      if (!currentOrganizationId || !selectedProjectId) {
         throw new Error('No hay proyecto u organización seleccionada');
       }
 
-      const currentMember = members.find((m: any) => m.user_id === currentUser.user.id);
+      const currentMember = members.find((m: any) => m.user_id === currentUser?.user?.id);
       if (!currentMember) {
         throw new Error('No se encontró el miembro de la organización para el usuario actual');
       }
@@ -108,13 +109,13 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       await uploadSiteLogFiles(
         files,
         siteLogId,
-        currentUser.preferences.last_project_id,
-        currentUser.organization.id,
+        selectedProjectId,
+        currentOrganizationId,
         currentMember.id
       );
     },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['sitelog-files', variables.siteLogId, currentUser?.organization?.id] });
+      queryClient.invalidateQueries({ queryKey: ['sitelog-files', variables.siteLogId, currentOrganizationId] });
       queryClient.invalidateQueries({ queryKey: ['galleryFiles'] });
       setFilesToUpload([]);
       toast({
@@ -134,12 +135,12 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   // Mutación para crear/actualizar bitácoras
   const siteLogMutation = useMutation({
     mutationFn: async (formData: SiteLogFormData) => {
-      if (!currentUser?.organization?.id || !currentUser?.preferences?.last_project_id) {
+      if (!currentOrganizationId || !selectedProjectId) {
         throw new Error('No hay proyecto u organización seleccionada');
       }
 
       // Obtener el organization_member.id del usuario actual
-      const currentMember = members.find((m: any) => m.user_id === currentUser.user.id);
+      const currentMember = members.find((m: any) => m.user_id === currentUser?.user?.id);
       if (!currentMember) {
         throw new Error('No se encontró el miembro de la organización para el usuario actual');
       }
@@ -160,8 +161,8 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         comments: formData.comments,
         is_public: formData.is_public,
         is_favorite: false,
-        project_id: currentUser?.preferences?.last_project_id || '',
-        organization_id: currentUser?.organization?.id || ''
+        project_id: selectedProjectId,
+        organization_id: currentOrganizationId
       };
 
       const siteLogId = data?.data?.id || data?.id;
@@ -178,8 +179,8 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
             hours_worked: attendee.hours_worked || 8,
             description: attendee.description || attendee.notes || '',
             created_by: currentMember.id,
-            project_id: currentUser?.preferences?.last_project_id || '',
-            organization_id: currentUser?.organization?.id || ''
+            project_id: selectedProjectId,
+            organization_id: currentOrganizationId
           }))
         : [];
 
@@ -188,7 +189,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       return savedSiteLog;
     },
     onSuccess: async (savedSiteLog) => {
-      queryClient.invalidateQueries({ queryKey: ['site-logs', currentUser?.preferences?.last_project_id, currentUser?.organization?.id] });
+      queryClient.invalidateQueries({ queryKey: ['site-logs', selectedProjectId, currentOrganizationId] });
       
       // Si hay archivos para subir, subirlos después de guardar la bitácora
       if (filesToUpload.length > 0) {
