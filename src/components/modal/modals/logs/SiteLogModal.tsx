@@ -36,7 +36,7 @@ const siteLogSchema = z.object({
   entry_type_id: z.string().min(1, "El tipo de bitácora es requerido"),
   weather: z.enum(['sunny', 'partly_cloudy', 'cloudy', 'rain', 'storm', 'snow', 'fog', 'windy', 'hail', 'none']).nullable().optional(),
   severity: z.enum(['low', 'medium', 'high', 'critical'], { required_error: "La severidad es requerida" }),
-  status: z.enum(['pending_review', 'in_review', 'approved', 'closed']).optional(),
+  status: z.enum(['pending', 'review', 'approved', 'closed']).optional(),
   comments: z.string().optional(),
   files: z.array(z.string()).optional().default([]),
   events: z.array(z.object({
@@ -236,7 +236,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         entry_type_id: formData.entry_type_id,
         weather: formData.weather || null,
         severity: formData.severity,
-        status: formData.status || "pending_review",
+        status: formData.status || "approved",
         comments: formData.comments,
         is_public: formData.is_public,
         is_favorite: false,
@@ -517,7 +517,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         }}
         className="space-y-6"
       >
-        {/* Fila 1: Fecha / Público */}
+        {/* Fila 1: Fecha / Tipo */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -535,44 +535,20 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
 
           <FormField
             control={form.control}
-            name="is_public"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Público
-                  {!isTeams && <Badge variant="outline" className="ml-2 text-[10px]">TEAMS</Badge>}
-                </FormLabel>
-                <Select 
-                  onValueChange={(value) => field.onChange(value === "true")} 
-                  value={field.value ? "true" : "false"}
-                  disabled={!isTeams}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder={!isTeams ? "Requiere plan TEAMS" : "Seleccionar visibilidad"} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Visible por organización y clientes</SelectItem>
-                    <SelectItem value="false">Visible solo por la organización</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Fila 2: Tipo de Bitácora / Condición Climática */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
             name="entry_type_id"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
                   Tipo de Bitácora *
-                  {!isPro && <Badge variant="outline" className="ml-2 text-[10px]">PRO</Badge>}
+                  {!isPro && (
+                    <Badge 
+                      variant="outline" 
+                      className="ml-2 text-[10px] border-0 text-white" 
+                      style={{ backgroundColor: 'hsl(213, 100%, 33%)' }}
+                    >
+                      PRO
+                    </Badge>
+                  )}
                 </FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
@@ -600,7 +576,10 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
               </FormItem>
             )}
           />
+        </div>
 
+        {/* Fila 2: Clima / Severidad */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="weather"
@@ -630,10 +609,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
               </FormItem>
             )}
           />
-        </div>
 
-        {/* Fila 3: Severidad / Estado */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="severity"
@@ -657,6 +633,46 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
               </FormItem>
             )}
           />
+        </div>
+
+        {/* Fila 3: Público / Estado */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="is_public"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Público
+                  {!isTeams && (
+                    <Badge 
+                      variant="outline" 
+                      className="ml-2 text-[10px] border-0 text-white" 
+                      style={{ backgroundColor: 'hsl(271, 76%, 53%)' }}
+                    >
+                      TEAMS
+                    </Badge>
+                  )}
+                </FormLabel>
+                <Select 
+                  onValueChange={(value) => field.onChange(value === "true")} 
+                  value={field.value ? "true" : "false"}
+                  disabled={!isTeams}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={!isTeams ? "Requiere plan TEAMS" : "Seleccionar visibilidad"} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="true">Visible por organización y clientes</SelectItem>
+                    <SelectItem value="false">Visible solo por la organización</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
@@ -665,7 +681,15 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
               <FormItem>
                 <FormLabel>
                   Estado
-                  {!isTeams && <Badge variant="outline" className="ml-2 text-[10px]">TEAMS</Badge>}
+                  {!isTeams && (
+                    <Badge 
+                      variant="outline" 
+                      className="ml-2 text-[10px] border-0 text-white" 
+                      style={{ backgroundColor: 'hsl(271, 76%, 53%)' }}
+                    >
+                      TEAMS
+                    </Badge>
+                  )}
                 </FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
@@ -678,8 +702,8 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="pending_review">Pendiente de Revisión</SelectItem>
-                    <SelectItem value="in_review">En Revisión</SelectItem>
+                    <SelectItem value="pending">Pendiente</SelectItem>
+                    <SelectItem value="review">En Revisión</SelectItem>
                     <SelectItem value="approved">Aprobado</SelectItem>
                     <SelectItem value="closed">Cerrado</SelectItem>
                   </SelectContent>
