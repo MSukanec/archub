@@ -230,10 +230,24 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         throw new Error('No se encontró el miembro de la organización para el usuario actual');
       }
 
+      // Validar que entry_type_id sea un UUID válido
+      const entryTypeId = formData.entry_type_id || defaultType?.id;
+      if (!entryTypeId) {
+        throw new Error('Tipo de bitácora no especificado');
+      }
+
+      console.log('🔍 SiteLog Mutation Debug:', {
+        formData_entry_type_id: formData.entry_type_id,
+        defaultType_id: defaultType?.id,
+        final_entryTypeId: entryTypeId,
+        siteLogTypes_count: siteLogTypes.length,
+        isPro
+      });
+
       const siteLogData = {
         log_date: formData.log_date,
         created_by: currentMember.id, // Usar automáticamente el current user
-        entry_type_id: formData.entry_type_id,
+        entry_type_id: entryTypeId,
         weather: formData.weather || null,
         severity: formData.severity,
         status: formData.status || "approved",
