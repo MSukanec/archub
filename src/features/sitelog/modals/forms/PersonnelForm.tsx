@@ -5,18 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
-
-interface AttendeeData {
-  id: string;
-  personnel_id: string;
-  contact_type: string;
-  attendance_type: 'full' | 'half';
-  hours_worked: number;
-  description: string;
-  arrival_time: string;
-  departure_time: string;
-  notes: string;
-}
+import type { AttendeeData } from '../../types';
 
 interface PersonnelFormProps {
   attendees: AttendeeData[];
@@ -80,6 +69,7 @@ export function PersonnelForm({
                       setAttendees([...attendees, {
                         id: Date.now().toString(),
                         personnel_id: personnel.id,
+                        contact_id: personnel.contact_id || '',
                         contact_type: '',
                         attendance_type: 'full',
                         hours_worked: 8,

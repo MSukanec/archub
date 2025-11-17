@@ -8,19 +8,7 @@ import { LogRow } from "@/components/ui/data-row/rows";
 import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileContext";
 import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 import { LogTimeline } from "@/features/sitelog/components/LogTimeline";
-
-// Entry type options for filters
-const entryTypeOptions = [
-  { value: "avance_de_obra", label: "Avance de obra" },
-  { value: "visita_tecnica", label: "Visita técnica" },
-  { value: "problema_detectado", label: "Problema detectado" },
-  { value: "pedido_material", label: "Pedido material" },
-  { value: "nota_climatica", label: "Nota climática" },
-  { value: "decision", label: "Decisión" },
-  { value: "inspeccion", label: "Inspección" },
-  { value: "foto_diaria", label: "Foto diaria" },
-  { value: "registro_general", label: "Registro general" }
-];
+import { ENTRY_TYPE_OPTIONS } from '../constants';
 
 interface SitelogEntriesProps {
   siteLogs: any[];
@@ -98,7 +86,7 @@ export default function SitelogEntriesTab({
             onChange: setFilterByType,
             placeholder: 'Todos los tipos',
             allOptionLabel: 'Todos los tipos',
-            options: entryTypeOptions
+            options: ENTRY_TYPE_OPTIONS
           },
           {
             key: 'sort',

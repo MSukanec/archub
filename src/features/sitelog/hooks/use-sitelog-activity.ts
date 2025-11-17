@@ -1,22 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { subDays, format, startOfDay, endOfDay } from 'date-fns'
-import { useOrganizationMembers } from './use-organization-members'
+import { useOrganizationMembers } from '@/hooks/use-organization-members'
+import type { SiteLogActivity, ActivityTimePeriod } from '../types';
 
-interface SiteLogActivity {
-  date: string
-  users: {
-    user_id: string
-    full_name: string
-    avatar_url?: string
-    activity_count: number
-  }[]
-  total: number
-}
-
-type TimePeriod = 'week' | 'month' | 'year'
-
-export function useSiteLogActivity(organizationId: string | undefined, projectId: string | undefined, timePeriod: TimePeriod = 'week') {
+export function useSiteLogActivity(organizationId: string | undefined, projectId: string | undefined, timePeriod: ActivityTimePeriod = 'week') {
   // Use the hook to get organization members (which now uses API endpoint)
   const { data: membersData } = useOrganizationMembers(organizationId)
   
@@ -71,7 +59,7 @@ export function useSiteLogActivity(organizationId: string | undefined, projectId
 
         // Use members from the hook (already transformed)
         const memberMap = new Map()
-        membersData.forEach(member => {
+        membersData.forEach((member: any) => {
           memberMap.set(member.user_id, {
             id: member.user_id,
             full_name: member.full_name,

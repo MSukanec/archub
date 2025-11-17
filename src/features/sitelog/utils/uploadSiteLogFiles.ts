@@ -1,10 +1,5 @@
 import { supabase } from '@/lib/supabase';
-
-export interface SiteLogFileInput {
-  file: File;
-  title: string;
-  description?: string;
-}
+import type { SiteLogFileInput } from '../types';
 
 export async function uploadSiteLogFiles(
   files: SiteLogFileInput[],

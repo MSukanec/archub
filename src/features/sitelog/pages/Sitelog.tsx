@@ -15,31 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 
 import SitelogEntriesTab from './SitelogEntriesTab';
 import SitelogChartsTab from './SitelogChartsTab';
-
-// Entry types enum with their icons and labels
-const entryTypes = {
-  avance_de_obra: { icon: TrendingUp, label: "Avance de obra", color: "bg-green-100 text-green-800" },
-  visita_tecnica: { icon: Users, label: "Visita técnica", color: "bg-blue-100 text-blue-800" },
-  problema_detectado: { icon: AlertTriangle, label: "Problema detectado", color: "bg-red-100 text-red-800" },
-  pedido_material: { icon: Package, label: "Pedido material", color: "bg-orange-100 text-orange-800" },
-  nota_climatica: { icon: Sun, label: "Nota climática", color: "bg-yellow-100 text-yellow-800" },
-  decision: { icon: CheckCircle, label: "Decisión", color: "bg-purple-100 text-purple-800" },
-  inspeccion: { icon: Search, label: "Inspección", color: "bg-indigo-100 text-indigo-800" },
-  foto_diaria: { icon: Camera, label: "Foto diaria", color: "bg-gray-100 text-gray-800" },
-  registro_general: { icon: StickyNote, label: "Registro general", color: "bg-teal-100 text-teal-800" }
-};
-
-const weatherTypes = {
-  sunny: { icon: Sun, label: "Soleado" },
-  partly_cloudy: { icon: CloudSun, label: "Parcialmente nublado" },
-  cloudy: { icon: Cloud, label: "Nublado" },
-  rain: { icon: CloudRain, label: "Lluvia" },
-  storm: { icon: CloudLightning, label: "Tormenta" },
-  snow: { icon: CloudSnow, label: "Nieve" },
-  fog: { icon: CloudDrizzle, label: "Niebla" },
-  windy: { icon: Wind, label: "Ventoso" },
-  hail: { icon: CloudSnow, label: "Granizo" }
-};
+import { ENTRY_TYPES, WEATHER_TYPES } from '../constants';
 
 // Hook personalizado para obtener las bitácoras del proyecto
 function useSiteLogs(projectId: string | undefined, organizationId: string | undefined) {

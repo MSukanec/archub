@@ -78,9 +78,13 @@ export interface SiteLogActivity {
 
 export interface AttendeeData {
   id: string;
+  personnel_id: string;
   contact_id: string;
   contact_type: string;
-  arrival_time?: string;
-  departure_time?: string;
-  notes?: string;
+  attendance_type: 'full' | 'half';
+  hours_worked: number;
+  description: string;
+  arrival_time: string;
+  departure_time: string;
+  notes: string;
 }

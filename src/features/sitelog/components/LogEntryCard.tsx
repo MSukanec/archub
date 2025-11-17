@@ -6,31 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useImageLightbox } from "@/components/ui-custom/media/ImageLightbox";
-
-// Entry types enum with their icons and labels
-const entryTypes = {
-  avance_de_obra: { label: "Avance de obra", color: "bg-green-100 text-green-800" },
-  visita_tecnica: { label: "Visita técnica", color: "bg-blue-100 text-blue-800" },
-  problema_detectado: { label: "Problema detectado", color: "bg-red-100 text-red-800" },
-  pedido_material: { label: "Pedido material", color: "bg-orange-100 text-orange-800" },
-  nota_climatica: { label: "Nota climática", color: "bg-yellow-100 text-yellow-800" },
-  decision: { label: "Decisión", color: "bg-purple-100 text-purple-800" },
-  inspeccion: { label: "Inspección", color: "bg-indigo-100 text-indigo-800" },
-  foto_diaria: { label: "Foto diaria", color: "bg-gray-100 text-gray-800" },
-  registro_general: { label: "Registro general", color: "bg-teal-100 text-teal-800" }
-};
-
-const weatherTypes = {
-  sunny: { label: "Soleado" },
-  partly_cloudy: { label: "Parcialmente nublado" },
-  cloudy: { label: "Nublado" },
-  rain: { label: "Lluvia" },
-  storm: { label: "Tormenta" },
-  snow: { label: "Nieve" },
-  fog: { label: "Niebla" },
-  windy: { label: "Ventoso" },
-  hail: { label: "Granizo" }
-};
+import { ENTRY_TYPES, WEATHER_TYPES } from '../constants';
 
 interface LogEntryCardProps {
   siteLog: any;
@@ -50,8 +26,8 @@ export function LogEntryCard({
   lightbox
 }: LogEntryCardProps) {
   const { openModal } = useGlobalModalStore();
-  const entryTypeConfig = entryTypes[siteLog.entry_type as keyof typeof entryTypes];
-  const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
+  const entryTypeConfig = ENTRY_TYPES[siteLog.entry_type as keyof typeof ENTRY_TYPES];
+  const weatherConfig = WEATHER_TYPES[siteLog.weather as keyof typeof WEATHER_TYPES];
 
   return (
     <div className="group pl-12 py-3 hover:border hover:border-border rounded-md transition-all">

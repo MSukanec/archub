@@ -24,46 +24,12 @@ import { supabase } from "@/lib/supabase";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { FileUploader } from "@/components/ui-custom/FileUploader";
 import { EmptyState } from "@/components/ui-custom/security/EmptyState";
-import { uploadSiteLogFiles, type SiteLogFileInput } from "@/features/sitelog/utils/uploadSiteLogFiles";
+import { uploadSiteLogFiles } from "@/features/sitelog/utils/uploadSiteLogFiles";
 import { PersonnelForm } from "./forms/PersonnelForm";
 import { MediaForm } from "./forms/MediaForm";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
-
-// Schema actualizado según la nueva estructura de la tabla
-const siteLogSchema = z.object({
-  log_date: z.string().min(1, "La fecha es requerida"),
-  is_public: z.boolean().default(false),
-  entry_type_id: z.string().min(1, "El tipo de bitácora es requerido"),
-  weather: z.enum(['sunny', 'partly_cloudy', 'cloudy', 'rain', 'storm', 'snow', 'fog', 'windy', 'hail', 'none']).nullable().optional(),
-  severity: z.enum(['low', 'medium', 'high', 'critical'], { required_error: "La severidad es requerida" }),
-  status: z.enum(['pending', 'review', 'approved', 'closed']).nullable().optional(),
-  comments: z.string().optional(),
-  files: z.array(z.string()).optional().default([]),
-  events: z.array(z.object({
-    id: z.string(),
-    description: z.string(),
-    time: z.string(),
-    responsible: z.string().optional()
-  })).optional().default([]),
-  attendees: z.array(z.object({
-    id: z.string(),
-    contact_id: z.string(),
-    contact_type: z.string(),
-    arrival_time: z.string().optional(),
-    departure_time: z.string().optional(),
-    notes: z.string().optional()
-  })).optional().default([]),
-  equipment: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    quantity: z.number(),
-    condition: z.string().optional(),
-    operator: z.string().optional(),
-    notes: z.string().optional()
-  })).optional().default([])
-});
-
-type SiteLogFormData = z.infer<typeof siteLogSchema>;
+import { siteLogSchema, type SiteLogFormData } from '../schemas';
+import type { SiteLogFileInput } from '../types';
 
 interface SiteLogModalProps {
   data?: any;

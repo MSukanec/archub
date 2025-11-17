@@ -2,16 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { format, subDays, subWeeks, subMonths, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval, startOfWeek, startOfMonth, endOfWeek, endOfMonth, getDay, startOfQuarter, endOfQuarter, eachQuarterOfInterval } from 'date-fns'
 import { es } from 'date-fns/locale'
-
-interface SiteLogTimelineData {
-  date: string
-  files: number
-  events: number
-  attendees: number
-  equipment: number
-}
-
-type TimePeriod = 'days' | 'weeks' | 'months'
+import type { SiteLogTimelineData, TimePeriod } from '../types';
 
 export function useSiteLogTimeline(
   organizationId: string | undefined,
