@@ -352,7 +352,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       entry_type_id: defaultType?.id || "",
       weather: "none",
       severity: "low",
-      status: "pending_review",
+      status: "approved",
       comments: "",
       files: [],
       events: [],
@@ -382,7 +382,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         entry_type_id: siteLogData.entry_type_id || defaultType?.id || "",
         weather: siteLogData.weather || "none",
         severity: siteLogData.severity || "low",
-        status: siteLogData.status || "pending_review",
+        status: siteLogData.status || "approved",
         comments: siteLogData.comments || "",
         files: siteLogData.files || [],
         events: siteLogData.events || [],
@@ -538,19 +538,23 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
             name="is_public"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Público</FormLabel>
+                <FormLabel>
+                  Público
+                  {!isTeams && <Badge variant="outline" className="ml-2 text-[10px]">TEAMS</Badge>}
+                </FormLabel>
                 <Select 
                   onValueChange={(value) => field.onChange(value === "true")} 
                   value={field.value ? "true" : "false"}
+                  disabled={!isTeams}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar visibilidad" />
+                      <SelectValue placeholder={!isTeams ? "Requiere plan TEAMS" : "Seleccionar visibilidad"} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="true">Visible para todos los miembros</SelectItem>
-                    <SelectItem value="false">Solo visible para administradores</SelectItem>
+                    <SelectItem value="true">Visible por organización y clientes</SelectItem>
+                    <SelectItem value="false">Visible solo por la organización</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
