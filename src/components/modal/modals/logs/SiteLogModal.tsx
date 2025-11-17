@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
@@ -519,7 +518,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         className="space-y-6"
       >
         {/* Fila 1: Fecha / Público */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="log_date"
@@ -538,26 +537,30 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
             control={form.control}
             name="is_public"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                <div className="space-y-0.5">
-                  <FormLabel>Público</FormLabel>
-                  <div className="text-[0.8rem] text-muted-foreground">
-                    Visible para todos los miembros
-                  </div>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
+              <FormItem>
+                <FormLabel>Público</FormLabel>
+                <Select 
+                  onValueChange={(value) => field.onChange(value === "true")} 
+                  value={field.value ? "true" : "false"}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar visibilidad" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="true">Visible para todos los miembros</SelectItem>
+                    <SelectItem value="false">Solo visible para administradores</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
         {/* Fila 2: Tipo de Bitácora / Condición Climática */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="entry_type_id"
@@ -626,7 +629,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         </div>
 
         {/* Fila 3: Severidad / Estado */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="severity"
