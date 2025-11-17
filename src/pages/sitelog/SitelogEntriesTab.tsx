@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useMobile } from "@/hooks/use-mobile";
-import { LogRow } from "@/components/ui/data-row/rows";
+import SitelogRow from "@/features/sitelog/components/SitelogRow";
 import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileContext";
 import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 import { LogTimeline } from "@/features/sitelog/components/LogTimeline";
@@ -186,7 +186,7 @@ export default function SitelogEntriesTab({
       ) : isMobile ? (
         <div className="space-y-3">
           {filteredSiteLogs.map((siteLog: any) => (
-            <LogRow
+            <SitelogRow
               key={siteLog.id}
               siteLog={siteLog}
               onClick={() => handleViewSiteLog(siteLog)}
