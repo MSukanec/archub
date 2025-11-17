@@ -21,7 +21,10 @@ export async function getClientPayments(
   projectId: string,
   organizationId: string
 ): Promise<ClientPaymentWithRelations[]> {
+  console.log('🔍 getClientPayments called with:', { projectId, organizationId, hasSupabase: !!supabase });
+  
   if (!supabase || !organizationId || !projectId) {
+    console.log('⚠️ getClientPayments early return:', { supabase: !!supabase, organizationId, projectId });
     return [];
   }
 
