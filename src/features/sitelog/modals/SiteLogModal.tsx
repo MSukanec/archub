@@ -30,6 +30,9 @@ import { MediaForm } from "./forms/MediaForm";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 import { siteLogSchema, type SiteLogFormData } from '../schemas';
 import type { SiteLogFileInput } from '../types';
+import { useSiteLogTypes } from '../hooks/use-sitelog-types';
+import { useProjectPersonnel } from '../hooks/use-project-personnel';
+import { useSiteLogFiles } from '../hooks/use-sitelog-files';
 
 interface SiteLogModalProps {
   data?: any;
@@ -51,55 +54,15 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   const isTeams = currentPlanName === 'teams' || currentPlanName === 'enterprise';
   
   // Query para obtener tipos de bitácora
-  const { data: siteLogTypes = [], isLoading: typesLoading } = useQuery({
-    queryKey: ['site-log-types', currentUser?.organization?.id],
-    queryFn: async () => {
-      const organizationId = currentUser?.organization?.id;
-      if (!organizationId || !supabase) return [];
-      
-      const { data, error } = await supabase
-        .from('site_log_types')
-        .select('*')
-        .or(`organization_id.eq.${organizationId},organization_id.is.null`)
-        .order('is_default', { ascending: false })
-        .order('name');
-
-      if (error) {
-        console.error('Error loading site log types:', error);
-        throw error;
-      }
-      
-      console.log('✅ Site Log Types loaded:', data);
-      return data || [];
-    },
-    enabled: !!currentUser?.organization?.id && !!supabase
-  });
+  const { data: siteLogTypes = [], isLoading: typesLoading } = useSiteLogTypes(
+    currentUser?.organization?.id
+  );
   
   // Get project personnel only
-  const { data: projectPersonnel = [], isLoading: personnelLoading } = useQuery({
-    queryKey: ['project-personnel', currentUser?.preferences?.last_project_id],
-    queryFn: async () => {
-      const projectId = currentUser?.preferences?.last_project_id;
-      if (!projectId || !supabase) return [];
-      
-      const { data, error } = await supabase
-        .from('project_personnel')
-        .select(`
-          id,
-          contact_id,
-          contacts (
-            id,
-            first_name,
-            last_name
-          )
-        `)
-        .eq('project_id', projectId);
-
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!currentUser?.preferences?.last_project_id
-  })
+  const { data: projectPersonnel = [], isLoading: personnelLoading } = useProjectPersonnel(
+    currentUser?.preferences?.last_project_id,
+    currentUser?.organization?.id
+  );
   
   const [events, setEvents] = useState<any[]>([]);
   const [attendees, setAttendees] = useState<any[]>([]);
@@ -125,26 +88,10 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   }, [data, setPanel]);
 
   // Query para obtener archivos existentes de la bitácora
-  const { data: siteLogFiles = [], isLoading: filesLoading } = useQuery({
-    queryKey: ['site-log-files', data?.id || data?.data?.id],
-    queryFn: async () => {
-      const siteLogId = data?.id || data?.data?.id;
-      if (!siteLogId || !supabase) return [];
-      
-      const { data: files, error } = await supabase
-        .from('project_media')
-        .select('*')
-        .eq('site_log_id', siteLogId);
-
-      if (error) {
-        console.error('Error fetching site log files:', error);
-        return [];
-      }
-      
-      return files || [];
-    },
-    enabled: !!(data?.id || data?.data?.id) && !!supabase
-  });
+  const { data: siteLogFiles = [], isLoading: filesLoading } = useSiteLogFiles(
+    data?.id || data?.data?.id,
+    currentUser?.organization?.id
+  );
 
   // Mutación para subir archivos de bitácora
   const uploadFilesMutation = useMutation({
@@ -167,7 +114,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['site-log-files'] });
+      queryClient.invalidateQueries({ queryKey: ['sitelog-files'] });
       queryClient.invalidateQueries({ queryKey: ['galleryFiles'] });
       setFilesToUpload([]);
       toast({

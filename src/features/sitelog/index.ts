@@ -4,6 +4,9 @@ export { SiteLogModalView } from './modals/SiteLogModalView';
 export { useSiteLogTimeline } from './hooks/use-sitelog-timeline';
 export { useSiteLogActivity } from './hooks/use-sitelog-activity';
 export { useSiteLogs } from './hooks/use-site-logs';
+export { useSiteLogTypes } from './hooks/use-sitelog-types';
+export { useProjectPersonnel } from './hooks/use-project-personnel';
+export { useSiteLogFiles } from './hooks/use-sitelog-files';
 
 export { getSiteLogs } from './services/getSiteLogs';
 export { getTimelineData } from './services/getTimelineData';
