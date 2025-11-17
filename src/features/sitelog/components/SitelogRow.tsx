@@ -103,12 +103,18 @@ export default function SitelogRow({
   enableSwipe = true,
   className
 }: SitelogRowProps) {
-  console.log('📱 SitelogRow INIT:', siteLog.id);
+  console.log('📱 SitelogRow INIT:', {
+    id: siteLog.id,
+    entry_type: siteLog.entry_type
+  });
 
   const entryTypeConfig = entryTypes[siteLog.entry_type as keyof typeof entryTypes];
   const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
   
+  console.log('📱 EntryTypeConfig:', { id: siteLog.id, config: entryTypeConfig });
+  
   if (!entryTypeConfig) {
+    console.log('❌ NO entryTypeConfig, returning null for:', siteLog.id);
     return null;
   }
 
