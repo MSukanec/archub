@@ -175,26 +175,31 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       };
 
       const siteLogId = data?.data?.id || data?.id;
+      console.log('🚀 Saving site log...', { siteLogId, isUpdate: !!siteLogId });
+      
       const savedSiteLog = siteLogId
         ? await updateSiteLog(siteLogId, siteLogData)
         : await createSiteLog(siteLogData);
 
+      console.log('✅ Site log saved:', savedSiteLog.id);
 
-      // Guardar los attendees usando el service
-      if (formData.attendees && formData.attendees.length > 0) {
-        const attendeesToInsert = formData.attendees.map((attendee: any) => ({
-          site_log_id: savedSiteLog.id,
-          personnel_id: attendee.personnel_id,
-          attendance_type: attendee.attendance_type || 'full',
-          hours_worked: attendee.hours_worked || 8,
-          description: attendee.description || attendee.notes || '',
-          created_by: currentMember.id,
-          project_id: currentUser?.preferences?.last_project_id || '',
-          organization_id: currentUser?.organization?.id || ''
-        }));
+      // Siempre reemplazar attendees (para limpiar si se eliminaron todos)
+      const attendeesToInsert = formData.attendees && formData.attendees.length > 0
+        ? formData.attendees.map((attendee: any) => ({
+            site_log_id: savedSiteLog.id,
+            personnel_id: attendee.personnel_id,
+            attendance_type: attendee.attendance_type || 'full',
+            hours_worked: attendee.hours_worked || 8,
+            description: attendee.description || attendee.notes || '',
+            created_by: currentMember.id,
+            project_id: currentUser?.preferences?.last_project_id || '',
+            organization_id: currentUser?.organization?.id || ''
+          }))
+        : [];
 
-        await replaceSiteLogAttendees(savedSiteLog.id, attendeesToInsert);
-      }
+      console.log('🔄 Replacing attendees...', { count: attendeesToInsert.length });
+      await replaceSiteLogAttendees(savedSiteLog.id, attendeesToInsert);
+      console.log('✅ Attendees replaced');
 
       return savedSiteLog;
     },
