@@ -43,6 +43,7 @@ Preferred communication style: Simple, everyday language.
 - **Subscription System**: Complete organization subscription management with FREE, PRO, TEAMS, and ENTERPRISE plans, supporting multi-currency pricing.
 - **Media Uploads**: Standardized `UploadMediaField.tsx` component for media uploads, featuring integrated upload buttons, vertical card display with progress bars, and lightbox functionality.
 - **Sitelog Statistics & Filters**: Complete filtering system for construction site logs with Zustand-powered filter state (creator, date range, type, search), statistics dashboard with 4 metric cards (Total Logs with sparkline, Events, Personnel, Files), 14-day timeline visualization using MiniTrendChart, and client-side filtering optimized with useMemo.
+- **Media Lightbox System**: Unified lightbox for viewing images and videos in sitelog entries. Uses `yet-another-react-lightbox` with Video plugin to support both media types seamlessly. Video thumbnails display with Play badge overlay, clicking opens full-screen player with native controls. Gallery navigation works across all media types.
 
 ## External Dependencies
 - **Supabase**: Authentication.
@@ -64,3 +65,4 @@ Preferred communication style: Simple, everyday language.
 - **Vimeo**: Video hosting and integration.
 - **OpenAI**: GPT-4o for AI-powered features.
 - **Google Maps Platform**: For location services and interactive maps.
+- **yet-another-react-lightbox**: Unified media lightbox supporting images and videos with gallery navigation.

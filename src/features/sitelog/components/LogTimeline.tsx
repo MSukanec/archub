@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { format, parseISO } from "date-fns";
-import { useImageLightbox, ImageLightbox } from "@/components/ui-custom/media/ImageLightbox";
+import { useMediaLightbox, MediaLightbox, type MediaItem } from "@/components/ui-custom/media/ImageLightbox";
 import { DateSeparator } from "./DateSeparator";
 import { LogEntryCard } from "./LogEntryCard";
 
@@ -39,11 +39,18 @@ export function LogTimeline({
     }));
   }, [siteLogs]);
 
-  // Initialize lightbox with all images from all logs
-  const imageUrls = siteLogs.flatMap((log: any) => 
-    log.files?.filter((file: any) => file.file_type === 'image').map((file: any) => file.file_url) || []
-  );
-  const lightbox = useImageLightbox(imageUrls);
+  // Initialize lightbox with all images and videos from all logs
+  const mediaItems = useMemo(() => {
+    return siteLogs.flatMap((log: any) => 
+      log.files?.filter((file: any) => file.file_type === 'image' || file.file_type === 'video')
+        .map((file: any) => ({
+          type: file.file_type as 'image' | 'video',
+          src: file.file_url
+        })) || []
+    );
+  }, [siteLogs]);
+  
+  const lightbox = useMediaLightbox(mediaItems);
 
   return (
     <>
@@ -61,7 +68,7 @@ export function LogTimeline({
                   toggleFavorite={toggleFavorite}
                   handleEditSiteLog={handleEditSiteLog}
                   handleDeleteSiteLog={handleDeleteSiteLog}
-                  imageUrls={imageUrls}
+                  mediaItems={mediaItems}
                   lightbox={lightbox}
                 />
               ))}
@@ -69,8 +76,8 @@ export function LogTimeline({
           </div>
         ))}
       </div>
-      <ImageLightbox 
-        images={imageUrls}
+      <MediaLightbox 
+        media={mediaItems}
         currentIndex={lightbox.currentIndex}
         isOpen={lightbox.isOpen}
         onClose={lightbox.closeLightbox}

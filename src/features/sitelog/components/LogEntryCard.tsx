@@ -1,12 +1,10 @@
-import { useState } from "react";
 import { Star, Edit, Trash2, Image, Video, Play } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 
-import { useImageLightbox } from "@/components/ui-custom/media/ImageLightbox";
+import { useMediaLightbox, type MediaItem } from "@/components/ui-custom/media/ImageLightbox";
 import { ENTRY_TYPES, WEATHER_TYPES } from '../constants';
 
 interface LogEntryCardProps {
@@ -16,8 +14,8 @@ interface LogEntryCardProps {
   toggleFavorite: (siteLogId: string) => void;
   handleEditSiteLog: (siteLog: any) => void;
   handleDeleteSiteLog: (siteLog: any) => void;
-  imageUrls: string[];
-  lightbox: ReturnType<typeof useImageLightbox>;
+  mediaItems: MediaItem[];
+  lightbox: ReturnType<typeof useMediaLightbox>;
 }
 
 export function LogEntryCard({
@@ -25,13 +23,11 @@ export function LogEntryCard({
   toggleFavorite,
   handleEditSiteLog,
   handleDeleteSiteLog,
-  imageUrls,
+  mediaItems,
   lightbox
 }: LogEntryCardProps) {
   const entryTypeConfig = ENTRY_TYPES[siteLog.entry_type as keyof typeof ENTRY_TYPES];
   const weatherConfig = WEATHER_TYPES[siteLog.weather as keyof typeof WEATHER_TYPES];
-  
-  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
   return (
     <div className="group pl-12 py-3 hover:border hover:border-border rounded-md transition-all">
@@ -86,9 +82,9 @@ export function LogEntryCard({
                           alt={file.file_name}
                           className="w-16 h-16 object-cover rounded border-2 border-gray-200 hover:border-gray-300 transition-colors cursor-pointer"
                           onClick={() => {
-                            const imageIndex = imageUrls.indexOf(file.file_url);
-                            if (imageIndex !== -1) {
-                              lightbox.openLightbox(imageIndex);
+                            const mediaIndex = mediaItems.findIndex(m => m.src === file.file_url);
+                            if (mediaIndex !== -1) {
+                              lightbox.openLightbox(mediaIndex);
                             }
                           }}
                           onError={(e) => {
@@ -109,7 +105,12 @@ export function LogEntryCard({
                       <div 
                         key={index} 
                         className="relative w-16 h-16 cursor-pointer group/video"
-                        onClick={() => setSelectedVideo(file.file_url)}
+                        onClick={() => {
+                          const mediaIndex = mediaItems.findIndex(m => m.src === file.file_url);
+                          if (mediaIndex !== -1) {
+                            lightbox.openLightbox(mediaIndex);
+                          }
+                        }}
                       >
                         <video 
                           src={file.file_url}
@@ -207,20 +208,6 @@ export function LogEntryCard({
           </Button>
         </div>
       </div>
-
-      {/* Modal de Video */}
-      <Dialog open={!!selectedVideo} onOpenChange={() => setSelectedVideo(null)}>
-        <DialogContent className="max-w-4xl p-0">
-          {selectedVideo && (
-            <video 
-              src={selectedVideo}
-              controls
-              autoPlay
-              className="w-full h-auto rounded-lg"
-            />
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

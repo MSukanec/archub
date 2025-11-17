@@ -1,27 +1,46 @@
 import { useState } from 'react';
 import Lightbox from 'yet-another-react-lightbox';
+import Video from 'yet-another-react-lightbox/plugins/video';
 import 'yet-another-react-lightbox/styles.css';
 
-interface ImageLightboxProps {
-  images: string[];
+export interface MediaItem {
+  type: 'image' | 'video';
+  src: string;
+}
+
+interface MediaLightboxProps {
+  media: MediaItem[];
   currentIndex: number;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function ImageLightbox({
-  images,
+export function MediaLightbox({
+  media,
   currentIndex,
   isOpen,
   onClose
-}: ImageLightboxProps) {
-  if (!isOpen || images.length === 0) {
+}: MediaLightboxProps) {
+  if (!isOpen || media.length === 0) {
     return null;
   }
 
-  const slides = images.map((image) => ({
-    src: image,
-  }));
+  const slides = media.map((item) => {
+    if (item.type === 'video') {
+      return {
+        type: 'video' as const,
+        sources: [
+          {
+            src: item.src,
+            type: 'video/mp4',
+          },
+        ],
+      };
+    }
+    return {
+      src: item.src,
+    };
+  });
 
   return (
     <Lightbox
@@ -29,6 +48,7 @@ export function ImageLightbox({
       close={onClose}
       slides={slides}
       index={currentIndex}
+      plugins={[Video]}
       styles={{
         container: { backgroundColor: 'rgba(0, 0, 0, 0.9)' },
       }}
@@ -40,8 +60,8 @@ export function ImageLightbox({
   );
 }
 
-// Hook para facilitar el uso del lightbox
-export function useImageLightbox(images: string[]) {
+// Hook para facilitar el uso del lightbox con imágenes y videos
+export function useMediaLightbox(media: MediaItem[]) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -61,3 +81,12 @@ export function useImageLightbox(images: string[]) {
     closeLightbox
   };
 }
+
+// Mantener compatibilidad con el hook anterior (solo imágenes)
+export function useImageLightbox(images: string[]) {
+  const media = images.map(src => ({ type: 'image' as const, src }));
+  return useMediaLightbox(media);
+}
+
+// Re-exportar como ImageLightbox para compatibilidad
+export const ImageLightbox = MediaLightbox;
