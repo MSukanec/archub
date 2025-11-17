@@ -42,6 +42,7 @@ Preferred communication style: Simple, everyday language.
 - **Client Roles Management**: Organizations can create and manage custom client roles with full CRUD operations.
 - **Subscription System**: Complete organization subscription management with FREE, PRO, TEAMS, and ENTERPRISE plans, supporting multi-currency pricing.
 - **Media Uploads**: Standardized `UploadMediaField.tsx` component for media uploads, featuring integrated upload buttons, vertical card display with progress bars, and lightbox functionality.
+- **Sitelog Statistics & Filters**: Complete filtering system for construction site logs with Zustand-powered filter state (creator, date range, type, search), statistics dashboard with 4 metric cards (Total Logs with sparkline, Events, Personnel, Files), 14-day timeline visualization using MiniTrendChart, and client-side filtering optimized with useMemo.
 
 ## External Dependencies
 - **Supabase**: Authentication.
