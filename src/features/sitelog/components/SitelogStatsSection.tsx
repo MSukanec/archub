@@ -1,6 +1,6 @@
-import { FileText, Calendar, Users, Paperclip } from 'lucide-react';
+import { Calendar, Users, Paperclip } from 'lucide-react';
 
-import { StatCard, StatCardTitle, StatCardValue, StatCardContent } from '@/components/ui/stat-card';
+import { Card } from '@/components/ui/card';
 import { MiniTrendChart } from '@/components/charts/MiniTrendChart';
 
 import { useSitelogMetrics } from '../hooks/use-sitelog-metrics';
@@ -20,62 +20,71 @@ export function SitelogStatsSection({ siteLogs }: SitelogStatsSectionProps) {
   } = useSitelogMetrics(siteLogs);
 
   return (
-    <div className="space-y-4">
-      {/* Stats and Filters Row */}
-      <div className="flex flex-col lg:flex-row gap-4 items-start justify-between">
-        {/* Stats Grid */}
-        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-          {/* Total Logs - Large with Sparkline */}
-          <StatCard 
-            className="sm:col-span-2 lg:col-span-1"
-            data-testid="stat-card-total-logs"
-          >
-            <div className="flex items-center gap-2 text-xs font-normal text-muted-foreground uppercase tracking-wide">
-              <FileText className="h-4 w-4" />
-              <span>Total Bitácoras</span>
-            </div>
-            <StatCardValue>{totalLogs}</StatCardValue>
-            <StatCardContent>
-              <MiniTrendChart 
-                data={timeline}
-                color="var(--accent)"
-              />
-            </StatCardContent>
-          </StatCard>
-
-          {/* Total Events */}
-          <StatCard data-testid="stat-card-total-events">
-            <div className="flex items-center gap-2 text-xs font-normal text-muted-foreground uppercase tracking-wide">
-              <Calendar className="h-4 w-4" />
-              <span>Eventos</span>
-            </div>
-            <StatCardValue>{totalEvents}</StatCardValue>
-          </StatCard>
-
-          {/* Total Attendees */}
-          <StatCard data-testid="stat-card-total-attendees">
-            <div className="flex items-center gap-2 text-xs font-normal text-muted-foreground uppercase tracking-wide">
-              <Users className="h-4 w-4" />
-              <span>Personal</span>
-            </div>
-            <StatCardValue>{totalAttendees}</StatCardValue>
-          </StatCard>
-
-          {/* Total Files */}
-          <StatCard data-testid="stat-card-total-files">
-            <div className="flex items-center gap-2 text-xs font-normal text-muted-foreground uppercase tracking-wide">
-              <Paperclip className="h-4 w-4" />
-              <span>Archivos</span>
-            </div>
-            <StatCardValue>{totalFiles}</StatCardValue>
-          </StatCard>
+    <Card className="w-full p-6" data-testid="card-sitelog-stats">
+      {/* Header: Title/Value on left, Filters on right */}
+      <div className="flex flex-col lg:flex-row items-start justify-between gap-4 mb-6">
+        <div className="space-y-1">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            Total Bitácoras
+          </p>
+          <p className="text-4xl font-bold" data-testid="text-total-logs">
+            {totalLogs}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Registros de obra completos con datos de personal, eventos y archivos adjuntos
+          </p>
         </div>
-
-        {/* Filters Bar */}
-        <div className="lg:flex-shrink-0">
+        
+        {/* Filters */}
+        <div className="flex-shrink-0">
           <SitelogFiltersBar siteLogs={siteLogs} />
         </div>
       </div>
-    </div>
+
+      {/* Sparkline Chart */}
+      <div className="mb-6">
+        <MiniTrendChart 
+          data={timeline}
+          color="var(--accent)"
+          height={60}
+        />
+      </div>
+
+      {/* Secondary Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        {/* Events */}
+        <div className="space-y-1" data-testid="stat-events">
+          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <Calendar className="h-3.5 w-3.5" />
+            <span>Eventos</span>
+          </div>
+          <p className="text-2xl font-semibold" data-testid="text-total-events">
+            {totalEvents}
+          </p>
+        </div>
+
+        {/* Personnel */}
+        <div className="space-y-1" data-testid="stat-personnel">
+          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <Users className="h-3.5 w-3.5" />
+            <span>Personal</span>
+          </div>
+          <p className="text-2xl font-semibold" data-testid="text-total-attendees">
+            {totalAttendees}
+          </p>
+        </div>
+
+        {/* Files */}
+        <div className="space-y-1" data-testid="stat-files">
+          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <Paperclip className="h-3.5 w-3.5" />
+            <span>Archivos</span>
+          </div>
+          <p className="text-2xl font-semibold" data-testid="text-total-files">
+            {totalFiles}
+          </p>
+        </div>
+      </div>
+    </Card>
   );
 }

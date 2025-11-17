@@ -61,7 +61,7 @@ export function SitelogFiltersBar({ siteLogs }: SitelogFiltersBarProps) {
       <Popover>
         <PopoverTrigger asChild>
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             className="gap-2"
             data-testid="button-filter-creator"
@@ -138,7 +138,7 @@ export function SitelogFiltersBar({ siteLogs }: SitelogFiltersBarProps) {
       <Popover>
         <PopoverTrigger asChild>
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             className="gap-2"
             data-testid="button-filter-date-range"
@@ -195,7 +195,7 @@ export function SitelogFiltersBar({ siteLogs }: SitelogFiltersBarProps) {
       <Popover>
         <PopoverTrigger asChild>
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             className="gap-2"
             data-testid="button-filter-type"
