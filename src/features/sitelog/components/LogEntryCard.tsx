@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useImageLightbox } from "@/components/ui-custom/media/ImageLightbox";
 import { ENTRY_TYPES, WEATHER_TYPES } from '../constants';
 
@@ -13,6 +12,7 @@ interface LogEntryCardProps {
   isExpanded: boolean;
   onToggleExpand: (expanded: boolean) => void;
   toggleFavorite: (siteLogId: string) => void;
+  handleEditSiteLog: (siteLog: any) => void;
   handleDeleteSiteLog: (siteLog: any) => void;
   imageUrls: string[];
   lightbox: ReturnType<typeof useImageLightbox>;
@@ -21,6 +21,7 @@ interface LogEntryCardProps {
 export function LogEntryCard({
   siteLog,
   toggleFavorite,
+  handleEditSiteLog,
   handleDeleteSiteLog,
   imageUrls,
   lightbox
@@ -162,7 +163,7 @@ export function LogEntryCard({
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              openModal('site-log', { data: siteLog });
+              handleEditSiteLog(siteLog);
             }}
           >
             <Edit className="h-4 w-4 text-muted-foreground" />

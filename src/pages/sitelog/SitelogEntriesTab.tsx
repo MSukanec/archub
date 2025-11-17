@@ -22,6 +22,7 @@ interface SitelogEntriesProps {
 export default function SitelogEntriesTab({ 
   siteLogs, 
   toggleFavorite, 
+  handleEditSiteLog,
   handleDeleteSiteLog 
 }: SitelogEntriesProps) {
   const [searchValue, setSearchValue] = useState("");
@@ -203,6 +204,7 @@ export default function SitelogEntriesTab({
         <LogTimeline 
           siteLogs={filteredSiteLogs}
           toggleFavorite={toggleFavorite}
+          handleEditSiteLog={handleEditSiteLog}
           handleDeleteSiteLog={handleDeleteSiteLog}
         />
       )}
