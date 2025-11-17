@@ -48,7 +48,7 @@ import Contacts from "@/pages/professional/contacts/Contacts";
 import Calendar from "@/pages/professional/calendar/Calendar";
 
 // Media Pages (Lazy Loaded - incluye librerías pesadas de PDF)
-const Media = lazy(() => import("@/pages/professional/media/Media"));
+const Media = lazy(() => import("@/pages/media/Media"));
 
 import OrganizationDashboard from "@/pages/professional/organization/OrganizationDashboard";
 

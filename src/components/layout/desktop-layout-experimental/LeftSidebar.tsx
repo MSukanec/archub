@@ -221,6 +221,7 @@ export function LeftSidebar() {
         { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'coming_soon' },
         { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts', restricted: 'coming_soon' },
         { id: 'logs', label: 'Bitácora de Obra', icon: FileText, href: '/construction/logs', restricted: 'coming_soon' },
+        { id: 'media', label: 'Media', icon: FolderOpen, href: '/media' },
         { id: 'clients', label: 'Clientes', icon: Users, href: '/clients', restricted: 'coming_soon' },
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
