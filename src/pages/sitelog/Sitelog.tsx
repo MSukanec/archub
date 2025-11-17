@@ -113,6 +113,10 @@ export default function Sitelog() {
     toggleFavoriteMutation.mutate(siteLogId);
   };
 
+  const handleViewSiteLog = (siteLog: any) => {
+    openModal('site-log-view', { viewingSiteLog: siteLog });
+  };
+
   const handleEditSiteLog = (siteLog: any) => {
     openModal('site-log', { data: siteLog, isEditing: true });
   };
@@ -176,6 +180,7 @@ export default function Sitelog() {
           <SitelogEntriesTab 
             siteLogs={siteLogs}
             toggleFavorite={toggleFavorite}
+            handleViewSiteLog={handleViewSiteLog}
             handleEditSiteLog={handleEditSiteLog}
             handleDeleteSiteLog={handleDeleteSiteLog}
           />

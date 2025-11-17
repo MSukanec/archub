@@ -7,13 +7,15 @@ import { LogEntryCard } from "./LogEntryCard";
 interface LogTimelineProps {
   siteLogs: any[];
   toggleFavorite: (siteLogId: string) => void;
+  handleViewSiteLog: (siteLog: any) => void;
   handleEditSiteLog: (siteLog: any) => void;
   handleDeleteSiteLog: (siteLog: any) => void;
 }
 
 export function LogTimeline({ 
   siteLogs, 
-  toggleFavorite, 
+  toggleFavorite,
+  handleViewSiteLog,
   handleEditSiteLog,
   handleDeleteSiteLog 
 }: LogTimelineProps) {
@@ -66,6 +68,7 @@ export function LogTimeline({
                   isExpanded={false}
                   onToggleExpand={() => {}}
                   toggleFavorite={toggleFavorite}
+                  handleViewSiteLog={handleViewSiteLog}
                   handleEditSiteLog={handleEditSiteLog}
                   handleDeleteSiteLog={handleDeleteSiteLog}
                   mediaItems={mediaItems}

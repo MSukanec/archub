@@ -15,13 +15,15 @@ import { useSitelogFiltersStore } from "@/features/sitelog/stores/useSitelogFilt
 interface SitelogEntriesProps {
   siteLogs: any[];
   toggleFavorite: (siteLogId: string) => void;
+  handleViewSiteLog: (siteLog: any) => void;
   handleEditSiteLog: (siteLog: any) => void;
   handleDeleteSiteLog: (siteLog: any) => void;
 }
 
 export default function SitelogEntriesTab({ 
   siteLogs, 
-  toggleFavorite, 
+  toggleFavorite,
+  handleViewSiteLog,
   handleEditSiteLog,
   handleDeleteSiteLog 
 }: SitelogEntriesProps) {
@@ -35,11 +37,6 @@ export default function SitelogEntriesTab({
   const isMobile = useMobile();
   const { setActions, setShowActionBar, clearActions, setFilterConfig, searchValue: mobileSearchValue } = useActionBarMobile();
   const [, navigate] = useLocation();
-
-  // Función para abrir modal de vista (no edición)
-  const handleViewSiteLog = (siteLog: any) => {
-    openModal('site-log-view', { viewingSiteLog: siteLog });
-  };
 
   // Configure mobile action bar
   useEffect(() => {
@@ -204,6 +201,7 @@ export default function SitelogEntriesTab({
         <LogTimeline 
           siteLogs={filteredSiteLogs}
           toggleFavorite={toggleFavorite}
+          handleViewSiteLog={handleViewSiteLog}
           handleEditSiteLog={handleEditSiteLog}
           handleDeleteSiteLog={handleDeleteSiteLog}
         />

@@ -12,6 +12,7 @@ interface LogEntryCardProps {
   isExpanded: boolean;
   onToggleExpand: (expanded: boolean) => void;
   toggleFavorite: (siteLogId: string) => void;
+  handleViewSiteLog: (siteLog: any) => void;
   handleEditSiteLog: (siteLog: any) => void;
   handleDeleteSiteLog: (siteLog: any) => void;
   mediaItems: MediaItem[];
@@ -21,6 +22,7 @@ interface LogEntryCardProps {
 export function LogEntryCard({
   siteLog,
   toggleFavorite,
+  handleViewSiteLog,
   handleEditSiteLog,
   handleDeleteSiteLog,
   mediaItems,
@@ -30,7 +32,10 @@ export function LogEntryCard({
   const weatherConfig = WEATHER_TYPES[siteLog.weather as keyof typeof WEATHER_TYPES];
 
   return (
-    <div className="group pl-12 py-3 hover:border hover:border-border rounded-md transition-all">
+    <div 
+      className="group pl-12 py-3 hover:border hover:border-border rounded-md transition-all cursor-pointer"
+      onClick={() => handleViewSiteLog(siteLog)}
+    >
       <div className="flex gap-3">
         {/* Avatar */}
         <Avatar className="h-9 w-9 flex-shrink-0">
@@ -81,7 +86,8 @@ export function LogEntryCard({
                           src={file.file_url} 
                           alt={file.file_name}
                           className="w-16 h-16 object-cover rounded border-2 border-gray-200 hover:border-gray-300 transition-colors cursor-pointer"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             const mediaIndex = mediaItems.findIndex(m => m.src === file.file_url);
                             if (mediaIndex !== -1) {
                               lightbox.openLightbox(mediaIndex);
@@ -105,7 +111,8 @@ export function LogEntryCard({
                       <div 
                         key={index} 
                         className="relative w-16 h-16 cursor-pointer group/video"
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           const mediaIndex = mediaItems.findIndex(m => m.src === file.file_url);
                           if (mediaIndex !== -1) {
                             lightbox.openLightbox(mediaIndex);
