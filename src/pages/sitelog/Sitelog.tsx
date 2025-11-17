@@ -24,6 +24,7 @@ export default function Sitelog() {
 
   const { data: userData, isLoading } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId } = useProjectContext();
+  // Si selectedProjectId es null, mostrará todas las bitácoras de la organización
   const { data: siteLogs = [], isLoading: siteLogsLoading } = useSiteLogs(
     selectedProjectId || undefined,
     currentOrganizationId || undefined

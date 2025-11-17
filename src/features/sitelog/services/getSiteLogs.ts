@@ -1,24 +1,24 @@
 import { supabase } from '@/lib/supabase';
 
 /**
- * Obtiene todas las bitácoras de un proyecto con sus relaciones completas.
+ * Obtiene todas las bitácoras con sus relaciones completas.
  * 
  * Incluye:
  * - Eventos (site_log_events)
  * - Asistentes de personal (personnel_attendees)
  * - Archivos multimedia (project_media)
  * 
- * @param projectId - ID del proyecto
+ * @param projectId - ID del proyecto (opcional, si es undefined muestra todas las bitácoras de la organización)
  * @param organizationId - ID de la organización
  * @returns Array de site logs con todas las relaciones, o array vacío si no hay datos
  * @throws {Error} Si falla la query principal de Supabase
  */
-export async function getSiteLogs(projectId: string, organizationId: string) {
-  if (!supabase || !projectId || !organizationId) {
+export async function getSiteLogs(projectId: string | undefined, organizationId: string) {
+  if (!supabase || !organizationId) {
     return [];
   }
 
-  const { data: logsData, error } = await supabase
+  let query = supabase
     .from('site_logs')
     .select(`
       *,
@@ -31,9 +31,14 @@ export async function getSiteLogs(projectId: string, organizationId: string) {
         )
       )
     `)
-    .eq('project_id', projectId)
-    .eq('organization_id', organizationId)
-    .order('created_at', { ascending: false });
+    .eq('organization_id', organizationId);
+
+  // Solo filtrar por proyecto si projectId está definido
+  if (projectId) {
+    query = query.eq('project_id', projectId);
+  }
+
+  const { data: logsData, error } = await query.order('created_at', { ascending: false });
 
   if (error) {
     throw error;
@@ -53,7 +58,7 @@ export async function getSiteLogs(projectId: string, organizationId: string) {
     .from('site_log_events')
     .select(`
       *,
-      event_type:event_types(
+      event_type:site_log_event_types(
         id,
         name
       )

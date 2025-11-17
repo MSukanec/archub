@@ -7,7 +7,7 @@ export function useSiteLogs(
 ) {
   return useQuery({
     queryKey: ['site-logs', projectId, organizationId],
-    queryFn: () => getSiteLogs(projectId!, organizationId!),
-    enabled: !!projectId && !!organizationId
+    queryFn: () => getSiteLogs(projectId, organizationId!),
+    enabled: !!organizationId
   });
 }
