@@ -24,6 +24,17 @@ Preferred communication style: Simple, everyday language.
 - **Data Flow**: React Query for server state, Express.js for REST APIs, Drizzle ORM for database operations with cache invalidation.
 - **Performance Optimizations**: Code-splitting, lazy loading, database views, smart caching, and optimized backend endpoints. Sub-second page loads ("Gacela Mode").
 
+### Module Architecture (Feature-Sliced Design)
+- **CLIENTS Module** (November 2025): Complete refactor following Feature-Sliced Design architecture with strict separation of concerns:
+  - **Services** (`src/features/clients/services/`): Pure async functions that query Supabase tables directly (NO VIEWS), all queries filter by `organization_id` for multi-tenant security. Services include: projectClients, clientCommitments, clientPayments, clientPaymentSchedule, clientRoles, contacts, dashboard.
+  - **Hooks** (`src/features/clients/hooks/`): React Query hooks for caching and mutations. Hooks include: use-project-clients, use-client-commitments, use-client-payments, use-client-payment-schedule, use-client-roles, use-contacts, use-client-dashboard.
+  - **Types** (`src/features/clients/types/`): All interfaces use serializable data structures (arrays and plain objects, NO Maps) to ensure React Query caching compatibility.
+  - **Mappers** (`src/features/clients/mappers/`): Business logic and KPI calculations isolated from UI. Functions include: mapToClientSummaries, calculateDashboardKPIs, calculateObligationsKPIs, formatCurrencyAmount.
+  - **Pages** (`src/pages/clients/`): UI orchestration ONLY, no business logic or calculations. Pages include: Clients (main), ClientListTab, ClientDashboardTab, ClientObligationsTab, ClientPaymentsTab, ClientSettingsTab, ClientPaymentPlans.
+  - **Modals** (`src/components/modal/modals/clients/`): ClientCommitmentModal, ClientPaymentsModal using feature hooks.
+  - **Security**: All services enforce organization_id filtering. Future enhancement: Row Level Security (RLS) policies recommended for contacts and client_roles tables.
+  - **Data Quality**: All queries use TABLES directly (project_clients, client_commitments, client_payments, client_payment_schedule, client_roles, contacts), not SQL views.
+
 ### Feature Specifications
 - **Core Modules**: Home page, Project Management, Financial Management, Document Management, Learning Module, Community Map, and Notification System.
 - **Community Map**: Global interactive map showing all organization projects with location data, smart clustering, and simplified popups.
