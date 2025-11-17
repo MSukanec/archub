@@ -71,7 +71,7 @@ const PAGE_CONFIG: Record<string, { name: string; icon: any }> = {
   '/construction/materials': { name: 'Materiales', icon: Package },
   '/construction/indirects': { name: 'Indirectos', icon: Layers },
   '/construction/subcontracts': { name: 'Subcontratos', icon: FileText },
-  '/construction/logs': { name: 'Bitácora', icon: History },
+  '/construction/logs': { name: 'Bitácora de Obra', icon: FileText },
   '/clients': { name: 'Clientes', icon: Users },
   
   // Admin
