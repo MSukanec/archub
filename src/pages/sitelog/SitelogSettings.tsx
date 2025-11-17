@@ -34,19 +34,13 @@ export default function SitelogSettings() {
   const customTypes = siteLogTypes.filter(type => type.organization_id !== null);
 
   const handleAddType = () => {
-    openModal({
-      modalType: 'siteLogType',
-      modalData: { isEditing: false }
-    });
+    openModal('siteLogType', { isEditing: false });
   };
 
   const handleEditType = (type: SiteLogType) => {
-    openModal({
-      modalType: 'siteLogType',
-      modalData: { 
-        siteLogType: type,
-        isEditing: true 
-      }
+    openModal('siteLogType', { 
+      siteLogType: type,
+      isEditing: true 
     });
   };
 
