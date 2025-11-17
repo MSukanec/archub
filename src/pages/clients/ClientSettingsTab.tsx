@@ -86,15 +86,6 @@ export default function ClientSettingsTab() {
 
   const onSubmit = async (data: RoleFormData) => {
     if (!organizationId) return;
-    
-    if (!userData?.id) {
-      toast({
-        title: 'Error',
-        description: 'No se pudo obtener el ID del usuario',
-        variant: 'destructive',
-      });
-      return;
-    }
 
     try {
       if (editingRole) {
@@ -109,9 +100,12 @@ export default function ClientSettingsTab() {
         });
       } else {
         await createRoleMutation.mutateAsync({
-          role: { name: data.name },
+          role: { 
+            name: data.name,
+            description: null,
+            is_default: false,
+          },
           organizationId,
-          createdBy: userData.id,
         });
         toast({
           title: 'Rol creado',

@@ -35,12 +35,10 @@ export function useCreateClientRole() {
     mutationFn: ({
       role,
       organizationId,
-      createdBy,
     }: {
-      role: Omit<ClientRole, 'id' | 'created_at' | 'updated_at' | 'organization_id' | 'created_by'>;
+      role: Omit<ClientRole, 'id' | 'created_at' | 'updated_at' | 'organization_id'>;
       organizationId: string;
-      createdBy: string;
-    }) => createClientRole(role, organizationId, createdBy),
+    }) => createClientRole(role, organizationId),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: CLIENT_QUERY_KEYS.roles(data.organization_id),
@@ -59,7 +57,7 @@ export function useUpdateClientRole() {
       organizationId,
     }: {
       roleId: string;
-      updates: Partial<Omit<ClientRole, 'id' | 'created_at' | 'updated_at' | 'organization_id' | 'created_by'>>;
+      updates: Partial<Omit<ClientRole, 'id' | 'created_at' | 'updated_at' | 'organization_id'>>;
       organizationId: string;
     }) => updateClientRole(roleId, updates, organizationId),
     onSuccess: (data) => {

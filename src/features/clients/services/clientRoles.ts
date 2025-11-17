@@ -63,21 +63,18 @@ export async function getClientRoleById(
  * 
  * @param role - Datos del rol a crear
  * @param organizationId - ID de la organización
- * @param createdBy - ID del miembro de organización que crea el registro
  * @returns Rol creado
  * @throws {Error} Si falla la creación
  */
 export async function createClientRole(
-  role: Omit<ClientRole, 'id' | 'created_at' | 'updated_at' | 'organization_id' | 'created_by'>,
-  organizationId: string,
-  createdBy: string
+  role: Omit<ClientRole, 'id' | 'created_at' | 'updated_at' | 'organization_id'>,
+  organizationId: string
 ): Promise<ClientRole> {
   const { data, error } = await supabase
     .from('client_roles')
     .insert({
       ...role,
       organization_id: organizationId,
-      created_by: createdBy,
     })
     .select()
     .single();
@@ -100,7 +97,7 @@ export async function createClientRole(
  */
 export async function updateClientRole(
   roleId: string,
-  updates: Partial<Omit<ClientRole, 'id' | 'created_at' | 'updated_at' | 'organization_id' | 'created_by'>>,
+  updates: Partial<Omit<ClientRole, 'id' | 'created_at' | 'updated_at' | 'organization_id'>>,
   organizationId: string
 ): Promise<ClientRole> {
   const { data, error } = await supabase
