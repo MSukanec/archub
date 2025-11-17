@@ -99,7 +99,7 @@ export async function getGalleryFiles(
       created_by: file.created_by || 'Desconocido',
       description: file.description,
       file_path: file.file_path,
-      project_name: file.projects?.[0]?.name || 'Sin proyecto',
+      project_name: file.projects?.name || 'Sin proyecto',
       site_log_id: file.site_log_id || null
     }));
 
