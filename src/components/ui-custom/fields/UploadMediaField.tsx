@@ -186,49 +186,31 @@ export function UploadMediaField({
 
   return (
     <div className="space-y-4">
-      {/* Empty State with Upload Button */}
-      {allFiles.length === 0 ? (
-        <div
-          {...getRootProps()}
-          className={cn(
-            "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
-            isDragActive ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
-          )}
-        >
-          <input {...getInputProps()} />
-          <div className="flex flex-col items-center gap-4">
-            <div className="p-4 rounded-full bg-primary/10">
-              <Upload className="w-6 h-6 text-primary" />
-            </div>
-            <div className="space-y-2">
-              <p className="text-sm font-medium">{emptyStateTitle}</p>
-              <p className="text-xs text-muted-foreground">
-                {emptyStateDescription}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Tamaño máximo: {formatFileSize(maxSize)}
-              </p>
-            </div>
+      {/* Drag & Drop Area - ALWAYS VISIBLE */}
+      <div
+        {...getRootProps()}
+        className={cn(
+          "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
+          isDragActive ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+        )}
+      >
+        <input {...getInputProps()} />
+        <div className="flex flex-col items-center gap-2">
+          <div className="p-3 rounded-full bg-primary/10">
+            <Upload className="w-5 h-5 text-primary" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-medium">{emptyStateDescription}</p>
+            <p className="text-xs text-muted-foreground">
+              Tamaño máximo: {formatFileSize(maxSize)}
+            </p>
           </div>
         </div>
-      ) : (
-        <>
-          {/* Upload Button */}
-          <div {...getRootProps()} className="cursor-pointer">
-            <input {...getInputProps()} />
-            <Button 
-              variant="default" 
-              size="sm" 
-              className="w-full gap-2"
-              type="button"
-            >
-              <Upload className="w-4 h-4" />
-              {uploadButtonText}
-            </Button>
-          </div>
+      </div>
 
-          {/* File List */}
-          <div className="space-y-2">
+      {/* File List */}
+      {allFiles.length > 0 && (
+        <div className="space-y-2">
             {allFiles.map((file) => {
               const isDeleting = isUploading(file.id);
               const isFileUploading = !file.isExisting && (file.uploadProgress || 0) < 100;
@@ -315,8 +297,7 @@ export function UploadMediaField({
                 </div>
               );
             })}
-          </div>
-        </>
+        </div>
       )}
 
       {/* Image Lightbox */}
