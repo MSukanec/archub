@@ -50,33 +50,52 @@ export function MediaGallery() {
     openModal('gallery', { fileId: file.id });
   };
 
-  const handleDownload = (file: GalleryFile) => {
-    if (file.file_url) {
+  const handleDownload = async (file: GalleryFile) => {
+    if (!file.file_url) return;
+
+    try {
+      // Try to download via fetch first (works better with CORS)
+      const response = await fetch(file.file_url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = file.file_url;
-      link.download = file.file_name;
+      link.href = url;
+      link.download = file.file_name || 'download';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      // If download fails (CORS, etc), open in new window
+      console.warn('Download failed, opening in new window:', error);
+      window.open(file.file_url, '_blank');
     }
   };
 
   const handleDelete = (file: GalleryFile) => {
-    deleteFileMutation.mutate(file.id, {
-      onSuccess: () => {
-        toast({
-          title: 'Éxito',
-          description: 'Archivo eliminado correctamente',
+    openModal('delete-confirmation', {
+      mode: 'simple',
+      title: 'Eliminar archivo',
+      description: `¿Estás seguro de que deseas eliminar "${file.file_name}"? Esta acción no se puede deshacer.`,
+      destructiveActionText: 'Eliminar archivo',
+      onConfirm: () => {
+        deleteFileMutation.mutate(file.id, {
+          onSuccess: () => {
+            toast({
+              title: 'Éxito',
+              description: 'Archivo eliminado correctamente',
+            });
+          },
+          onError: (error) => {
+            toast({
+              title: 'Error',
+              description: 'No se pudo eliminar el archivo',
+              variant: 'destructive',
+            });
+            console.error('Delete error:', error);
+          },
         });
-      },
-      onError: (error) => {
-        toast({
-          title: 'Error',
-          description: 'No se pudo eliminar el archivo',
-          variant: 'destructive',
-        });
-        console.error('Delete error:', error);
-      },
+      }
     });
   };
 
