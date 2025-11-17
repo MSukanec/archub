@@ -37,38 +37,42 @@ create index IF not exists idx_client_commitments_created_at on public.client_co
 
 ---------- TABLA CLIENT_PAYMENT_SCHEDULE:
 
-create table public.client_commitments (
+create table public.client_payment_schedule (
   id uuid not null default gen_random_uuid (),
-  project_id uuid not null,
-  client_id uuid not null,
-  organization_id uuid not null,
+  commitment_id uuid not null,
+  due_date date not null,
   amount numeric(12, 2) not null,
   currency_id uuid not null,
-  exchange_rate numeric not null,
+  status text not null default 'pending'::text,
+  paid_at timestamp with time zone null,
+  payment_method text null,
+  notes text null,
+  organization_id uuid not null,
   created_at timestamp with time zone null default now(),
   updated_at timestamp with time zone null default now(),
-  contact_id uuid null,
-  created_by uuid null,
-  constraint project_client_commitments_pkey primary key (id),
-  constraint client_commitments_created_by_fkey foreign KEY (created_by) references organization_members (id),
-  constraint fk_commit_client foreign KEY (client_id) references project_clients (id) on delete set null,
-  constraint fk_commit_contact foreign KEY (contact_id) references contacts (id) on delete set null,
-  constraint fk_commit_org foreign KEY (organization_id) references organizations (id) on delete CASCADE,
-  constraint fk_commit_project foreign KEY (project_id) references projects (id) on delete CASCADE,
-  constraint fk_commit_currency foreign KEY (currency_id) references currencies (id) on delete set null,
-  constraint client_commitments_amount_positive check ((amount > (0)::numeric)),
-  constraint client_commitments_exchange_rate_positive check ((exchange_rate > (0)::numeric))
+  constraint client_payment_schedule_pkey primary key (id),
+  constraint client_payment_schedule_commitment_id_fkey foreign KEY (commitment_id) references client_commitments (id) on delete CASCADE,
+  constraint client_payment_schedule_currency_id_fkey foreign KEY (currency_id) references currencies (id) on delete RESTRICT,
+  constraint client_payment_schedule_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint client_payment_schedule_status_check check (
+    (
+      status = any (
+        array[
+          'pending'::text,
+          'paid'::text,
+          'overdue'::text,
+          'cancelled'::text
+        ]
+      )
+    )
+  )
 ) TABLESPACE pg_default;
 
-create index IF not exists idx_client_commitments_org_project on public.client_commitments using btree (organization_id, project_id) TABLESPACE pg_default;
+create index IF not exists client_payment_schedule_org_idx on public.client_payment_schedule using btree (organization_id) TABLESPACE pg_default;
 
-create index IF not exists idx_client_commitments_org on public.client_commitments using btree (organization_id) TABLESPACE pg_default;
+create index IF not exists client_payment_schedule_commitment_idx on public.client_payment_schedule using btree (commitment_id) TABLESPACE pg_default;
 
-create index IF not exists idx_client_commitments_client on public.client_commitments using btree (client_id) TABLESPACE pg_default;
-
-create index IF not exists idx_client_commitments_currency on public.client_commitments using btree (currency_id) TABLESPACE pg_default;
-
-create index IF not exists idx_client_commitments_created_at on public.client_commitments using btree (created_at) TABLESPACE pg_default;
+create index IF not exists client_payment_schedule_due_idx on public.client_payment_schedule using btree (due_date) TABLESPACE pg_default;
 
 ---------- TABLA CLIENT_PAYMENTS:
 
@@ -195,41 +199,41 @@ create index IF not exists idx_project_clients_created_at on public.project_clie
 
   ---------- TABLA CONTACTS:
 
-  create table public.contacts (
-    id uuid not null default gen_random_uuid (),
-    organization_id uuid null,
-    first_name text null,
-    email text null,
-    phone text null,
-    company_name text null,
-    location text null,
-    notes text null,
-    created_at timestamp with time zone null default now(),
-    last_name text null,
-    linked_user_id uuid null,
-    full_name text null,
-    updated_at timestamp with time zone null default now(),
-    national_id text null,
-    avatar_attachment_id uuid null,
-    avatar_updated_at timestamp with time zone null,
-    is_local boolean null default true,
-    display_name_override text null,
-    linked_at timestamp with time zone null,
-    sync_status text null default 'local'::text,
-    constraint contacts_pkey primary key (id),
-    constraint contacts_national_id_key unique (national_id),
-    constraint contacts_avatar_attachment_id_fkey foreign KEY (avatar_attachment_id) references contact_attachments (id) on delete set null,
-    constraint contacts_linked_user_id_fkey foreign KEY (linked_user_id) references users (id) on delete set null,
-    constraint contacts_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
-  ) TABLESPACE pg_default;
+ create table public.contacts (
+  id uuid not null default gen_random_uuid (),
+  organization_id uuid null,
+  first_name text null,
+  email text null,
+  phone text null,
+  company_name text null,
+  location text null,
+  notes text null,
+  created_at timestamp with time zone null default now(),
+  last_name text null,
+  linked_user_id uuid null,
+  full_name text null,
+  updated_at timestamp with time zone null default now(),
+  national_id text null,
+  avatar_attachment_id uuid null,
+  avatar_updated_at timestamp with time zone null,
+  is_local boolean null default true,
+  display_name_override text null,
+  linked_at timestamp with time zone null,
+  sync_status text null default 'local'::text,
+  constraint contacts_pkey primary key (id),
+  constraint contacts_national_id_key unique (national_id),
+  constraint contacts_avatar_attachment_id_fkey foreign KEY (avatar_attachment_id) references contact_attachments (id) on delete set null,
+  constraint contacts_linked_user_id_fkey foreign KEY (linked_user_id) references users (id) on delete set null,
+  constraint contacts_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
+) TABLESPACE pg_default;
 
-  create unique INDEX IF not exists uniq_contacts_org_linked_user on public.contacts using btree (organization_id, linked_user_id) TABLESPACE pg_default
-  where
-    (linked_user_id is not null);
+create unique INDEX IF not exists uniq_contacts_org_linked_user on public.contacts using btree (organization_id, linked_user_id) TABLESPACE pg_default
+where
+  (linked_user_id is not null);
 
-  create index IF not exists idx_contacts_org_email on public.contacts using btree (organization_id, email) TABLESPACE pg_default;
+create index IF not exists idx_contacts_org_email on public.contacts using btree (organization_id, email) TABLESPACE pg_default;
 
-  create trigger on_contact_link_user BEFORE INSERT
-  or
-  update OF email on contacts for EACH row
-  execute FUNCTION handle_contact_link_user ();
+create trigger on_contact_link_user BEFORE INSERT
+or
+update OF email on contacts for EACH row
+execute FUNCTION handle_contact_link_user ();
