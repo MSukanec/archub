@@ -1018,7 +1018,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   // Configurar header dinámico según el panel actual
   const getHeaderConfig = () => {
     if (currentPanel === 'subform') {
-      // Headers para subforms con botón de volver
+      // Headers para subforms - el botón de volver se agrega automáticamente por FormModalLayout
       const subformHeaders: Record<string, { icon: any; title: string; description: string }> = {
         'files': {
           icon: Camera,
@@ -1045,13 +1045,12 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       const config = subformHeaders[currentSubform || ''];
       if (!config) return null;
 
+      // Ya no necesitamos showBackButton ni onBackClick - FormModalLayout lo agrega automáticamente
       return (
         <FormModalHeader
           icon={config.icon}
           title={config.title}
           description={config.description}
-          showBackButton={true}
-          onBackClick={() => setPanel('edit')}
         />
       );
     }

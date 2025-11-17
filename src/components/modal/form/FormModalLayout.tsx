@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useRef, useCallback, useState } from "react";
+import React, { ReactNode, useEffect, useRef, useCallback, useState, cloneElement, isValidElement } from "react";
 import { X, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -398,7 +398,15 @@ export function FormModalLayout({
         {/* Header */}
         {headerContent && (
           <div className="shrink-0 relative">
-            {headerContent}
+            {/* Auto-inject back button for subforms */}
+            {effectivePanel === 'subform' && isValidElement(headerContent) ? (
+              cloneElement(headerContent, {
+                showBackButton: (headerContent.props as any).showBackButton ?? true,
+                onBackClick: (headerContent.props as any).onBackClick ?? (() => setPanel('edit')),
+              } as any)
+            ) : (
+              headerContent
+            )}
             <Button
               variant="ghost"
               size="icon-sm"
