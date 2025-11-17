@@ -735,6 +735,7 @@ import { useSiteLogs, LogTimeline, ENTRY_TYPES } from '@/features/sitelog';
 
 **Antes de dar por terminado un feature, verificar:**
 
+### 📦 Estructura de carpetas:
 - [ ] ¿Carpeta `services/` existe con funciones puras async?
 - [ ] ¿Carpeta `hooks/` existe y los hooks solo llaman services?
 - [ ] ¿Carpeta `mappers/` existe si hay transformaciones de datos?
@@ -743,11 +744,26 @@ import { useSiteLogs, LogTimeline, ENTRY_TYPES } from '@/features/sitelog';
 - [ ] ¿Carpeta `constants/` tiene enums y configuraciones?
 - [ ] ¿Carpeta `components/` tiene componentes específicos?
 - [ ] ¿Carpeta `modals/` y `modals/forms/` si hay formularios?
-- [ ] ¿Carpeta `tests/` existe (aunque esté vacía)?
+- [ ] ¿Carpeta `tests/` existe con al menos 2 tests de ejemplo?
 - [ ] ¿`index.ts` exporta todo lo necesario?
+
+### 📝 Calidad de código:
+- [ ] ¿Todos los services tienen JSDoc completo? (`@param`, `@returns`, `@throws`)
+- [ ] ¿Los services filtran por `organization_id` cuando aplica? (seguridad)
+- [ ] ¿Error handling es consistente? (throw en queries principales, console.error en secundarias)
+- [ ] ¿Los tests ejecutan exitosamente? (al menos 80% pass rate)
 - [ ] ¿NO hay queries de Supabase dentro de hooks?
 - [ ] ¿NO hay lógica de negocio en páginas?
+
+### 🧪 Testing:
+- [ ] ¿Existe al menos 1 test de service? (happy path, empty data, error)
+- [ ] ¿Existe al menos 1 test de hook? (fetch exitoso, parámetros undefined)
+- [ ] ¿Los mocks están completos y los tests pasan?
+
+### 🚫 Prohibiciones:
 - [ ] ¿NO hay carpetas `/api`?
+- [ ] ¿NO hay hooks de React en services?
+- [ ] ¿NO hay tipos/constantes duplicados?
 
 ---
 
