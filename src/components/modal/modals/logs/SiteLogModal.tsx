@@ -339,7 +339,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
     defaultValues: {
       log_date: new Date().toISOString().split('T')[0],
       entry_type_id: defaultType?.id || "",
-      weather: null,
+      weather: "none",
       severity: "normal",
       comments: "",
       files: [],
@@ -367,7 +367,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       const resetValues = {
         log_date: siteLogData.log_date || new Date().toISOString().split('T')[0],
         entry_type_id: siteLogData.entry_type_id || defaultType?.id || "",
-        weather: siteLogData.weather || null,
+        weather: siteLogData.weather || "none",
         severity: siteLogData.severity || "normal",
         comments: siteLogData.comments || "",
         files: siteLogData.files || [],
