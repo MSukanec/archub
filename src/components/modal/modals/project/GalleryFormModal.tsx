@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useToast } from '@/hooks/use-toast';
 import { uploadGalleryFiles, type GalleryFileInput } from '@/utils/uploadGalleryFiles';
+import { deleteMediaFile } from '@/features/media/services/deleteMediaFile';
 import { FormModalLayout } from '../../form/FormModalLayout';
 import { FormModalHeader } from '../../form/FormModalHeader';
 import { FormModalFooter } from '../../form/FormModalFooter';
@@ -28,10 +29,26 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
   const queryClient = useQueryClient();
   const { setPanel } = useModalPanelStore();
   const [filesToUpload, setFilesToUpload] = useState<any[]>([]);
+  const [existingFileDeleted, setExistingFileDeleted] = useState(false);
 
   useEffect(() => {
     setPanel('edit');
   }, [setPanel]);
+
+  const existingFiles = editingFile && !existingFileDeleted 
+    ? [{
+        id: editingFile.id,
+        file_name: editingFile.file_name,
+        file_type: editingFile.mime_type?.split('/')[0] || 'document',
+        file_size: editingFile.file_size || 0,
+        file_url: editingFile.file_url,
+        mime_type: editingFile.mime_type,
+      }]
+    : [];
+
+  const handleExistingFileDelete = async (fileId: string) => {
+    setExistingFileDeleted(true);
+  };
 
   const uploadMutation = useMutation({
     mutationFn: async () => {
@@ -43,49 +60,68 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
         throw new Error('No hay organización seleccionada');
       }
 
-      if (filesToUpload.length === 0) {
-        throw new Error('Debes seleccionar al menos un archivo');
+      // If there are files to upload, upload them FIRST before deleting anything
+      if (filesToUpload.length > 0) {
+        const galleryFiles: GalleryFileInput[] = filesToUpload.map((fileInput) => ({
+          file: fileInput.file,
+          title: fileInput.title || fileInput.file.name.replace(/\.[^/.]+$/, ''),
+          description: fileInput.description || '',
+        }));
+
+        const { data: memberData, error: memberError } = await supabase
+          .from('organization_members')
+          .select('id, user_id, organization_id, is_active')
+          .eq('organization_id', currentOrganizationId)
+          .eq('user_id', userData.user?.id)
+          .eq('is_active', true)
+          .single();
+        
+        if (memberError || !memberData?.id) {
+          throw new Error(`No se encontró la membresía activa. Error: ${memberError?.message || 'Member not found'}`);
+        }
+        
+        const createdByMemberId = memberData.id;
+
+        // Upload new files first - if this fails, the existing file remains intact
+        await uploadGalleryFiles(
+          galleryFiles,
+          selectedProjectId || null,
+          currentOrganizationId,
+          createdByMemberId,
+          'organization'
+        );
       }
 
-      const galleryFiles: GalleryFileInput[] = filesToUpload.map((fileInput) => ({
-        file: fileInput.file,
-        title: fileInput.title || fileInput.file.name.replace(/\.[^/.]+$/, ''),
-        description: fileInput.description || '',
-      }));
-
-      const { data: memberData, error: memberError } = await supabase
-        .from('organization_members')
-        .select('id, user_id, organization_id, is_active')
-        .eq('organization_id', currentOrganizationId)
-        .eq('user_id', userData.user?.id)
-        .eq('is_active', true)
-        .single();
-      
-      if (memberError || !memberData?.id) {
-        throw new Error(`No se encontró la membresía activa. Error: ${memberError?.message || 'Member not found'}`);
+      // Only delete the existing file AFTER new files have been uploaded successfully
+      // This ensures no data loss if the upload fails
+      if (existingFileDeleted && editingFile?.id) {
+        await deleteMediaFile(editingFile.id);
       }
-      
-      const createdByMemberId = memberData.id;
-
-      return uploadGalleryFiles(
-        galleryFiles,
-        selectedProjectId || null,
-        currentOrganizationId,
-        createdByMemberId,
-        'organization'
-      );
     },
     onSuccess: () => {
+      let description = '';
+      
+      if (existingFileDeleted && filesToUpload.length > 0) {
+        description = 'Archivo reemplazado correctamente';
+      } else if (existingFileDeleted) {
+        description = 'Archivo eliminado correctamente';
+      } else if (editingFile) {
+        description = 'Archivos agregados correctamente';
+      } else {
+        description = `${filesToUpload.length > 1 ? 'Archivos subidos' : 'Archivo subido'} correctamente`;
+      }
+      
       toast({
         title: 'Éxito',
-        description: editingFile 
-          ? 'Archivo actualizado correctamente'
-          : `${filesToUpload.length > 1 ? 'Archivos subidos' : 'Archivo subido'} correctamente`,
+        description,
       });
       queryClient.invalidateQueries({ queryKey: ['galleryFiles'] });
       handleClose();
     },
     onError: (error) => {
+      // Reset deletion flag so the modal shows the preserved existing file
+      setExistingFileDeleted(false);
+      
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Error al procesar archivos',
@@ -100,7 +136,9 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
   };
 
   const handleSubmit = () => {
-    if (filesToUpload.length === 0) {
+    const hasExistingFile = editingFile && !existingFileDeleted;
+    
+    if (filesToUpload.length === 0 && !hasExistingFile) {
       toast({
         title: 'Error',
         description: 'Debes seleccionar al menos un archivo',
@@ -117,9 +155,10 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
   const editPanel = (
     <div className="space-y-4">
       <UploadMediaField
-        existingFiles={[]}
+        existingFiles={existingFiles}
         filesToUpload={filesToUpload}
         onFilesChange={setFilesToUpload}
+        onExistingFileDelete={handleExistingFileDelete}
         acceptedTypes={{
           'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
           'video/*': ['.mp4', '.mov', '.avi', '.mkv']

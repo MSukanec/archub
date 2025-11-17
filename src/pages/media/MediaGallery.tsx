@@ -47,7 +47,7 @@ export function MediaGallery() {
 
   // Handlers
   const handleEdit = (file: GalleryFile) => {
-    openModal('gallery', { fileId: file.id });
+    openModal('gallery', { editingFile: file });
   };
 
   const handleDownload = async (file: GalleryFile) => {
