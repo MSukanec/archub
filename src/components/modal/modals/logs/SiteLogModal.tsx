@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
@@ -32,9 +33,11 @@ import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 // Schema actualizado según la nueva estructura de la tabla
 const siteLogSchema = z.object({
   log_date: z.string().min(1, "La fecha es requerida"),
+  is_public: z.boolean().default(false),
   entry_type_id: z.string().min(1, "El tipo de bitácora es requerido"),
   weather: z.enum(['sunny', 'partly_cloudy', 'cloudy', 'rain', 'storm', 'snow', 'fog', 'windy', 'hail', 'none']).nullable().optional(),
   severity: z.enum(['low', 'medium', 'high', 'critical'], { required_error: "La severidad es requerida" }),
+  status: z.enum(['pending_review', 'in_review', 'approved', 'closed']).optional(),
   comments: z.string().optional(),
   files: z.array(z.string()).optional().default([]),
   events: z.array(z.object({
@@ -74,6 +77,13 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   const { data: currentUser } = useCurrentUser();
   const { data: members = [] } = useOrganizationMembers(currentUser?.organization?.id);
   const { data: contacts = [] } = useContacts();
+  
+  // Plan features para restricciones
+  const organizationId = currentUser?.preferences?.last_organization_id;
+  const currentOrganization = currentUser?.organizations?.find(org => org.id === organizationId);
+  const currentPlanName = currentOrganization?.plan?.name?.toLowerCase() || 'free';
+  const isPro = currentPlanName === 'pro' || currentPlanName === 'teams' || currentPlanName === 'enterprise';
+  const isTeams = currentPlanName === 'teams' || currentPlanName === 'enterprise';
   
   // Query para obtener tipos de bitácora
   const { data: siteLogTypes = [], isLoading: typesLoading } = useQuery({
@@ -227,8 +237,9 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         entry_type_id: formData.entry_type_id,
         weather: formData.weather || null,
         severity: formData.severity,
+        status: formData.status || "pending_review",
         comments: formData.comments,
-        is_public: true,
+        is_public: formData.is_public,
         is_favorite: false,
         project_id: currentUser?.preferences?.last_project_id || '',
         organization_id: currentUser?.organization?.id || ''
@@ -338,9 +349,11 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
     resolver: zodResolver(siteLogSchema),
     defaultValues: {
       log_date: new Date().toISOString().split('T')[0],
+      is_public: false,
       entry_type_id: defaultType?.id || "",
       weather: "none",
       severity: "medium",
+      status: "pending_review",
       comments: "",
       files: [],
       events: [],
@@ -366,9 +379,11 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       // Si estamos editando, cargar los datos existentes
       const resetValues = {
         log_date: siteLogData.log_date || new Date().toISOString().split('T')[0],
+        is_public: siteLogData.is_public || false,
         entry_type_id: siteLogData.entry_type_id || defaultType?.id || "",
         weather: siteLogData.weather || "none",
         severity: siteLogData.severity || "medium",
+        status: siteLogData.status || "pending_review",
         comments: siteLogData.comments || "",
         files: siteLogData.files || [],
         events: siteLogData.events || [],
@@ -503,7 +518,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         }}
         className="space-y-6"
       >
-        {/* Fecha y Condición Climática en una sola fila */}
+        {/* Fila 1: Fecha / Público */}
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -514,6 +529,66 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
                 <FormControl>
                   <Input type="date" {...field} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="is_public"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                <div className="space-y-0.5">
+                  <FormLabel>Público</FormLabel>
+                  <div className="text-[0.8rem] text-muted-foreground">
+                    Visible para todos los miembros
+                  </div>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Fila 2: Tipo de Bitácora / Condición Climática */}
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="entry_type_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Tipo de Bitácora *
+                  {!isPro && <Badge variant="outline" className="ml-2 text-[10px]">PRO</Badge>}
+                </FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  value={field.value}
+                  disabled={typesLoading || !isPro}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={
+                        !isPro ? "Requiere plan PRO" : 
+                        typesLoading ? "Cargando..." : 
+                        "Seleccionar tipo"
+                      } />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {siteLogTypes.map((type: any) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -550,37 +625,8 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
           />
         </div>
 
-        {/* Tipo de Bitácora y Severidad en una sola fila */}
+        {/* Fila 3: Severidad / Estado */}
         <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="entry_type_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tipo de Bitácora *</FormLabel>
-                <Select 
-                  onValueChange={field.onChange} 
-                  value={field.value}
-                  disabled={typesLoading}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder={typesLoading ? "Cargando..." : "Seleccionar tipo"} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {siteLogTypes.map((type: any) => (
-                      <SelectItem key={type.id} value={type.id}>
-                        {type.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <FormField
             control={form.control}
             name="severity"
@@ -598,6 +644,37 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
                     <SelectItem value="medium">Media</SelectItem>
                     <SelectItem value="high">Alta</SelectItem>
                     <SelectItem value="critical">Crítica</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Estado
+                  {!isTeams && <Badge variant="outline" className="ml-2 text-[10px]">TEAMS</Badge>}
+                </FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  value={field.value}
+                  disabled={!isTeams}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={!isTeams ? "Requiere plan TEAMS" : "Seleccionar estado"} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="pending_review">Pendiente de Revisión</SelectItem>
+                    <SelectItem value="in_review">En Revisión</SelectItem>
+                    <SelectItem value="approved">Aprobado</SelectItem>
+                    <SelectItem value="closed">Cerrado</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

@@ -38,7 +38,6 @@ create table public.site_logs (
   ai_summary text null,
   ai_tags text[] null,
   ai_analyzed boolean not null default false,
-  location text null,
   constraint site_logs_pkey primary key (id),
   constraint site_logs_created_by_fkey1 foreign KEY (created_by) references organization_members (id) on delete set null,
   constraint site_logs_entry_type_id_fkey foreign KEY (entry_type_id) references organization_site_log_types (id),
