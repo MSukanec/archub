@@ -8,7 +8,7 @@ import { LogRow } from "@/components/ui/data-row/rows";
 import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileContext";
 import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 import { LogTimeline } from "@/features/sitelog/components/LogTimeline";
-import { ENTRY_TYPE_OPTIONS } from '../constants';
+import { ENTRY_TYPE_OPTIONS } from '@/features/sitelog/constants';
 
 interface SitelogEntriesProps {
   siteLogs: any[];

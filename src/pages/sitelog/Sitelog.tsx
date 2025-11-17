@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 
 import SitelogEntriesTab from './SitelogEntriesTab';
 import SitelogChartsTab from './SitelogChartsTab';
-import { ENTRY_TYPES, WEATHER_TYPES } from '../constants';
+import { ENTRY_TYPES, WEATHER_TYPES } from '@/features/sitelog/constants';
 
 // Hook personalizado para obtener las bitácoras del proyecto
 function useSiteLogs(projectId: string | undefined, organizationId: string | undefined) {

@@ -1,7 +1,3 @@
-export { default as Sitelog } from './pages/Sitelog';
-export { default as SitelogEntriesTab } from './pages/SitelogEntriesTab';
-export { default as SitelogChartsTab } from './pages/SitelogChartsTab';
-
 export { SiteLogModal } from './modals/SiteLogModal';
 export { SiteLogModalView } from './modals/SiteLogModalView';
 
