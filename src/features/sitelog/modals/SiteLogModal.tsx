@@ -72,8 +72,11 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
     if (isCreating) {
       // Si es creación, abrir en modo edición
       setPanel('edit');
+    } else if (data?.isEditing) {
+      // Si se pasó isEditing=true, abrir en modo edición
+      setPanel('edit');
     } else {
-      // Si es edición, abrir en modo visualización
+      // Por defecto, abrir en modo visualización
       setPanel('view');
     }
   }, [data, setPanel]);
