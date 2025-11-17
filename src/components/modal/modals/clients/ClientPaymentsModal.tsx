@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -19,13 +18,17 @@ import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
-import { useProjectClients } from '@/hooks/use-project-clients'
 import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
-import { apiRequest, queryClient } from '@/lib/queryClient'
 import { supabase } from '@/lib/supabase'
 import { formatContactName } from '@/utils/contacts'
+import { 
+  useProjectClients, 
+  useClientPayment, 
+  useCreateClientPayment, 
+  useUpdateClientPayment 
+} from '@/features/clients/hooks'
 
 const clientPaymentSchema = z.object({
   payment_date: z.date({
@@ -66,18 +69,14 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
   const [existingFileUrl, setExistingFileUrl] = useState<string | null>(null)
 
   // Fetch existing payment data for edit/view mode
-  const { data: existingPayment, isLoading: loadingPayment } = useQuery({
-    queryKey: [`/api/projects/${projectId}/client-payments?organization_id=${organizationId}`],
-    enabled: !!paymentId && (mode === 'edit' || mode === 'view'),
-    select: (response: any) => {
-      const payments = response?.data || []
-      return payments.find((p: any) => p.id === paymentId)
-    }
-  })
+  const { data: existingPayment, isLoading: loadingPayment } = useClientPayment(
+    paymentId,
+    organizationId
+  )
 
   // Hooks para obtener datos
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId)
-  const { data: projectClients, isLoading: clientsLoading } = useProjectClients(projectId)
+  const { data: projectClients, isLoading: clientsLoading } = useProjectClients(projectId, organizationId)
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId)
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId)
 
@@ -219,9 +218,12 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
     return publicUrl
   }
 
-  // Mutation for create/update
-  const savePaymentMutation = useMutation({
-    mutationFn: async (data: ClientPaymentForm) => {
+  // Mutations for create/update
+  const createPaymentMutation = useCreateClientPayment()
+  const updatePaymentMutation = useUpdateClientPayment()
+
+  const onSubmit = async (data: ClientPaymentForm) => {
+    try {
       let fileUrl = data.file_url || null
 
       // Upload file if there's a new one
@@ -236,37 +238,47 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
         }
       }
 
-      const paymentData = {
-        project_id: projectId,
-        organization_id: organizationId,
-        created_by: data.created_by,
-        contact_id: data.contact_id,
-        client_id: data.client_id || null,
-        wallet_id: data.wallet_id || null,
-        amount: data.amount,
-        currency_id: data.currency_id,
-        exchange_rate: data.exchange_rate || 1,
-        payment_date: format(data.payment_date, 'yyyy-MM-dd'),
-        status: data.status,
-        reference: data.reference || null,
-        notes: data.notes || null,
-        file_url: fileUrl,
-        commitment_id: null,
-        schedule_id: null,
-      }
-
       if (mode === 'edit' && paymentId) {
-        return await apiRequest('PATCH', `/api/projects/${projectId}/client-payments/${paymentId}?organization_id=${organizationId}`, paymentData)
+        await updatePaymentMutation.mutateAsync({
+          paymentId,
+          updates: {
+            contact_id: data.contact_id,
+            client_id: data.client_id || undefined,
+            wallet_id: data.wallet_id,
+            amount: data.amount,
+            currency_id: data.currency_id,
+            exchange_rate: data.exchange_rate || 1,
+            payment_date: format(data.payment_date, 'yyyy-MM-dd'),
+            status: data.status,
+            reference: data.reference || undefined,
+            notes: data.notes || undefined,
+            file_url: fileUrl || undefined,
+          },
+          organizationId,
+        })
       } else {
-        return await apiRequest('POST', `/api/projects/${projectId}/client-payments?organization_id=${organizationId}`, paymentData)
+        await createPaymentMutation.mutateAsync({
+          payment: {
+            contact_id: data.contact_id,
+            client_id: data.client_id || undefined,
+            wallet_id: data.wallet_id,
+            amount: data.amount,
+            currency_id: data.currency_id,
+            exchange_rate: data.exchange_rate || 1,
+            payment_date: format(data.payment_date, 'yyyy-MM-dd'),
+            status: data.status,
+            reference: data.reference || undefined,
+            notes: data.notes || undefined,
+            file_url: fileUrl || undefined,
+            commitment_id: undefined,
+            schedule_id: undefined,
+          },
+          projectId,
+          organizationId,
+          createdBy: data.created_by,
+        })
       }
-    },
-    onSuccess: () => {
-      // Invalidate both project and organization queries
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/client-payments?organization_id=${organizationId}`] })
-      queryClient.invalidateQueries({ queryKey: [`/api/organizations/${organizationId}/client-payments`] })
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/clients/summary`] })
-      queryClient.invalidateQueries({ queryKey: [`/api/organizations/${organizationId}/clients/summary`] })
+      
       toast({
         title: mode === 'edit' || mode === 'view' ? 'Pago actualizado' : 'Pago registrado',
         description: mode === 'edit' || mode === 'view'
@@ -274,18 +286,13 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
           : 'El pago ha sido registrado correctamente',
       })
       onClose()
-    },
-    onError: (error: any) => {
+    } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Error',
         description: `Error al ${mode === 'edit' ? 'actualizar' : 'registrar'} el pago: ${error.message || 'Error desconocido'}`,
       })
     }
-  })
-
-  const onSubmit = async (data: ClientPaymentForm) => {
-    await savePaymentMutation.mutateAsync(data)
   }
 
   const handleClose = () => {
@@ -731,8 +738,8 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
       onLeftClick={handleClose}
       submitText={mode === 'edit' ? "Guardar Cambios" : "Registrar Pago"}
       onSubmit={handleSubmitClick}
-      submitDisabled={savePaymentMutation.isPending || !currentMember || isLoading}
-      showLoadingSpinner={savePaymentMutation.isPending || isLoading}
+      submitDisabled={createPaymentMutation.isPending || updatePaymentMutation.isPending || !currentMember || isLoading}
+      showLoadingSpinner={createPaymentMutation.isPending || updatePaymentMutation.isPending || isLoading}
     />
   )
 

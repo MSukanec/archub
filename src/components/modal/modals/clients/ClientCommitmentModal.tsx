@@ -2,7 +2,6 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -18,11 +17,15 @@ import { DollarSign } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
-import { useProjectClients } from '@/hooks/use-project-clients'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
-import { apiRequest, queryClient } from '@/lib/queryClient'
 import { formatContactName } from '@/utils/contacts'
+import { 
+  useProjectClients, 
+  useClientCommitment, 
+  useCreateClientCommitment, 
+  useUpdateClientCommitment 
+} from '@/features/clients/hooks'
 
 const clientCommitmentSchema = z.object({
   created_by: z.string().min(1, 'Creador es requerido'),
@@ -52,18 +55,14 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
   const { setPanel } = useModalPanelStore()
 
   // Fetch existing commitment data for edit/view mode
-  const { data: existingCommitment, isLoading: loadingCommitment } = useQuery({
-    queryKey: [`/api/projects/${projectId}/client-commitments?organization_id=${organizationId}`],
-    enabled: !!commitmentId && (mode === 'edit' || mode === 'view'),
-    select: (response: any) => {
-      const commitments = response?.data || []
-      return commitments.find((c: any) => c.id === commitmentId)
-    }
-  })
+  const { data: existingCommitment, isLoading: loadingCommitment } = useClientCommitment(
+    commitmentId,
+    organizationId
+  )
 
   // Hooks para obtener datos
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId)
-  const { data: projectClients, isLoading: clientsLoading } = useProjectClients(projectId)
+  const { data: projectClients, isLoading: clientsLoading } = useProjectClients(projectId, organizationId)
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId)
 
   // Find current member
@@ -152,32 +151,39 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
     }
   }, [selectedContactId, projectClients, form])
 
-  // Mutation for create/update
-  const saveCommitmentMutation = useMutation({
-    mutationFn: async (data: ClientCommitmentForm) => {
-      const commitmentData = {
-        project_id: projectId,
-        organization_id: organizationId,
-        created_by: data.created_by,
-        contact_id: data.contact_id,
-        client_id: data.client_id,
-        amount: data.amount,
-        currency_id: data.currency_id,
-        exchange_rate: data.exchange_rate || 1,
-      }
+  // Mutations for create/update
+  const createCommitmentMutation = useCreateClientCommitment()
+  const updateCommitmentMutation = useUpdateClientCommitment()
 
+  const onSubmit = async (data: ClientCommitmentForm) => {
+    try {
       if (mode === 'edit' && commitmentId) {
-        return await apiRequest('PATCH', `/api/projects/${projectId}/client-commitments/${commitmentId}?organization_id=${organizationId}`, commitmentData)
+        await updateCommitmentMutation.mutateAsync({
+          commitmentId,
+          updates: {
+            contact_id: data.contact_id,
+            client_id: data.client_id,
+            amount: data.amount,
+            currency_id: data.currency_id,
+            exchange_rate: data.exchange_rate || 1,
+          },
+          organizationId,
+        })
       } else {
-        return await apiRequest('POST', `/api/projects/${projectId}/client-commitments?organization_id=${organizationId}`, commitmentData)
+        await createCommitmentMutation.mutateAsync({
+          commitment: {
+            contact_id: data.contact_id,
+            client_id: data.client_id,
+            amount: data.amount,
+            currency_id: data.currency_id,
+            exchange_rate: data.exchange_rate || 1,
+          },
+          projectId,
+          organizationId,
+          createdBy: data.created_by,
+        })
       }
-    },
-    onSuccess: () => {
-      // Invalidate both project and organization queries
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/client-commitments?organization_id=${organizationId}`] })
-      queryClient.invalidateQueries({ queryKey: [`/api/organizations/${organizationId}/client-commitments`] })
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/clients/summary`] })
-      queryClient.invalidateQueries({ queryKey: [`/api/organizations/${organizationId}/clients/summary`] })
+      
       toast({
         title: mode === 'edit' || mode === 'view' ? 'Compromiso actualizado' : 'Compromiso creado',
         description: mode === 'edit' || mode === 'view'
@@ -185,18 +191,13 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
           : 'El compromiso ha sido creado correctamente',
       })
       onClose()
-    },
-    onError: (error: any) => {
+    } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Error',
         description: `Error al ${mode === 'edit' ? 'actualizar' : 'crear'} el compromiso: ${error.message || 'Error desconocido'}`,
       })
     }
-  })
-
-  const onSubmit = async (data: ClientCommitmentForm) => {
-    await saveCommitmentMutation.mutateAsync(data)
   }
 
   const handleClose = () => {
@@ -382,8 +383,8 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
       onLeftClick={handleClose}
       rightLabel={mode === 'create' ? 'Crear Compromiso' : 'Guardar Cambios'}
       onRightClick={form.handleSubmit(onSubmit)}
-      isRightDisabled={!form.formState.isValid || saveCommitmentMutation.isPending || !currentMember?.id}
-      isRightLoading={saveCommitmentMutation.isPending}
+      isRightDisabled={!form.formState.isValid || createCommitmentMutation.isPending || updateCommitmentMutation.isPending || !currentMember?.id}
+      isRightLoading={createCommitmentMutation.isPending || updateCommitmentMutation.isPending}
     />
   )
 
