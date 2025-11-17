@@ -363,6 +363,12 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   };
 
   const onSubmit = async (formData: SiteLogFormData) => {
+    console.log('🎯 onSubmit called!', { 
+      hasData: !!data, 
+      siteLogId: data?.data?.id || data?.id,
+      formData 
+    });
+    
     // Agregar los datos adicionales al formulario
     const completeFormData = {
       ...formData,
@@ -371,6 +377,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       equipment: equipment
     };
     
+    console.log('📦 Complete form data:', completeFormData);
     siteLogMutation.mutate(completeFormData);
   };
 
@@ -1001,6 +1008,12 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   );
 
   const handleSubmit = () => {
+    console.log('🔘 handleSubmit button clicked!');
+    console.log('📋 Form state:', { 
+      isValid: form.formState.isValid,
+      errors: form.formState.errors,
+      isDirty: form.formState.isDirty
+    });
     form.handleSubmit(onSubmit)();
   };
 
