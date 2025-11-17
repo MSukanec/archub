@@ -367,9 +367,9 @@ export function FormModalLayout({
         className={cn(
           // Base: fullscreen en mobile
           "fixed inset-0 flex flex-col bg-background shadow-lg transition ease-in-out duration-250",
-          // Desktop: modal centrado con altura dinámica
+          // Desktop: modal centrado con altura dinámica (1.5x más ancho)
           "md:inset-auto md:top-1/2 md:left-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2",
-          "md:w-auto md:min-w-[500px] md:max-w-[90vw] md:max-h-[90vh] md:border md:rounded-lg",
+          "md:w-auto md:min-w-[750px] md:max-w-[90vw] md:max-h-[90vh] md:border md:rounded-lg",
           enableAnimations && "animate-in fade-in-0 zoom-in-95 md:slide-in-from-bottom-4 duration-200",
           className
         )}
