@@ -30,11 +30,10 @@ export function useSitelogMetrics(siteLogs: any[]): SitelogMetrics {
       const count = siteLogs.filter(log => {
         if (!log.log_date) return false;
         try {
-          const logDate = parseISO(log.log_date);
-          return isWithinInterval(logDate, {
-            start: startOfDay(date),
-            end: endOfDay(date)
-          });
+          // Parse log_date (formato "YYYY-MM-DD") añadiendo hora local para evitar problemas de zona horaria
+          const logDate = parseISO(log.log_date + 'T00:00:00');
+          const logDateStr = format(logDate, 'yyyy-MM-dd');
+          return logDateStr === dateStr;
         } catch {
           return false;
         }

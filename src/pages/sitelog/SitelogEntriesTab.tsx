@@ -162,17 +162,6 @@ export default function SitelogEntriesTab({
     filteredSiteLogs.sort((a: any, b: any) => a.entry_type.localeCompare(b.entry_type));
   }
 
-  // Debug logs
-  console.log('🔍 DEBUG SitelogEntriesTab:', {
-    isMobile,
-    totalSiteLogs: siteLogs?.length,
-    storeFilteredLogsCount: storeFilteredLogs.length,
-    filteredSiteLogsCount: filteredSiteLogs.length,
-    searchValue,
-    filterByType,
-    filteredSiteLogs: filteredSiteLogs.map(l => ({ id: l.id, entry_type: l.entry_type }))
-  });
-
   return (
     <>
       {filteredSiteLogs.length === 0 ? (
