@@ -16,10 +16,28 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, X, File, Images, Image as ImageIcon, FileVideo } from 'lucide-react';
+import { useProjectContext } from '@/stores/projectContext';
 
 import { supabase } from '@/lib/supabase';
 
-const gallerySchema = z.object({});
+const gallerySchema = z.object({
+  visibility: z.enum(['organization', 'project'], {
+    required_error: "La visibilidad es requerida"
+  }),
+  project_id: z.string().nullable().optional(),
+  description: z.string().optional(),
+}).refine(
+  (data) => {
+    if (data.visibility === 'project' && !data.project_id) {
+      return false;
+    }
+    return true;
+  },
+  {
+    message: "El proyecto es requerido cuando la visibilidad es 'proyecto'",
+    path: ["project_id"],
+  }
+);
 
 type GalleryFormData = z.infer<typeof gallerySchema>;
 
@@ -34,6 +52,7 @@ interface GalleryFormModalProps {
 export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) {
   const { editingFile, isEditing = false } = modalData || {};
   const { data: userData, isLoading: userLoading } = useCurrentUser();
+  const { selectedProjectId, currentOrganizationId } = useProjectContext();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { setPanel } = useModalPanelStore();
@@ -48,85 +67,64 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
 
   const form = useForm<GalleryFormData>({
     resolver: zodResolver(gallerySchema),
-    defaultValues: {},
+    defaultValues: {
+      visibility: selectedProjectId ? 'project' : 'organization',
+      project_id: selectedProjectId || null,
+      description: '',
+    },
   });
 
-  const { handleSubmit, reset, formState: { isSubmitting } } = form;
+  const { handleSubmit, reset, formState: { isSubmitting }, watch } = form;
+  
+  const selectedVisibility = watch('visibility');
 
   // Reset form when editing file changes or user data loads
   useEffect(() => {
     if (userData) {
-      reset({});
+      reset({
+        visibility: selectedProjectId ? 'project' : 'organization',
+        project_id: selectedProjectId || null,
+        description: '',
+      });
     }
-  }, [editingFile, reset, userData]);
+  }, [editingFile, reset, userData, selectedProjectId]);
 
   const uploadMutation = useMutation({
-    mutationFn: async (data: GalleryFormData) => {
-      // Verificar que tenemos los datos del usuario
+    mutationFn: async (formData: GalleryFormData) => {
       if (!userData) {
         throw new Error('No se han cargado los datos del usuario');
       }
 
-      // Usar organization_preferences.last_project_id o preferences.last_project_id como fallback
-      const projectId = userData.organization_preferences?.last_project_id || userData.preferences?.last_project_id;
-      const organizationId = userData.organization?.id || userData.preferences?.last_organization_id;
-
-      if (!projectId || !organizationId) {
-        throw new Error('No hay proyecto u organización seleccionada');
+      if (!currentOrganizationId) {
+        throw new Error('No hay organización seleccionada');
       }
 
       const galleryFiles: GalleryFileInput[] = files.map((file, index) => ({
         file,
         title: fileNames[index] || file.name.replace(/\.[^/.]+$/, ''),
-        description: undefined,
-        entry_type: 'registro_general',
+        description: formData.description,
       }));
 
-      // Obtener el organization_member ID consultando directamente
-      console.log('Searching for organization member:', {
-        organizationId,
-        userId: userData.user?.id
-      });
-      
       const { data: memberData, error: memberError } = await supabase
         .from('organization_members')
         .select('id, user_id, organization_id, is_active')
-        .eq('organization_id', organizationId)
+        .eq('organization_id', currentOrganizationId)
         .eq('user_id', userData.user?.id)
         .eq('is_active', true)
         .single();
       
-      console.log('Member query result:', { memberData, memberError });
-      
       if (memberError || !memberData?.id) {
-        // Fallback: try to find any active member for this user
-        const { data: fallbackData } = await supabase
-          .from('organization_members')
-          .select('*')
-          .eq('user_id', userData.user?.id)
-          .eq('is_active', true);
-        
-        console.log('Fallback member search:', fallbackData);
         throw new Error(`No se encontró la membresía activa. Error: ${memberError?.message || 'Member not found'}`);
       }
       
       const createdByMemberId = memberData.id;
-      
-      console.log('Final upload data check:', {
-        projectId,
-        organizationId,
-        createdBy: createdByMemberId,
-        filesCount: galleryFiles.length,
-        memberData: memberData,
-        userId: userData.user?.id,
-        memberExists: !!memberData?.id
-      });
 
       return uploadGalleryFiles(
         galleryFiles,
-        projectId,
-        organizationId,
-        createdByMemberId
+        formData.project_id || null,
+        currentOrganizationId,
+        createdByMemberId,
+        formData.visibility
       );
     },
     onSuccess: () => {
@@ -231,6 +229,80 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
   const editPanel = (
     <Form {...form}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Visibility Field */}
+        <FormField
+          control={form.control}
+          name="visibility"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Visibilidad *</FormLabel>
+              <Select 
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  if (value === 'organization') {
+                    form.setValue('project_id', null);
+                  } else if (value === 'project' && selectedProjectId) {
+                    form.setValue('project_id', selectedProjectId);
+                  }
+                }}
+                value={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar visibilidad" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="organization">Organización (sin proyecto específico)</SelectItem>
+                  <SelectItem value="project">Proyecto específico</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Project ID Field - Only shown when visibility is 'project' */}
+        {selectedVisibility === 'project' && (
+          <FormField
+            control={form.control}
+            name="project_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Proyecto *</FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field} 
+                    value={field.value || ''} 
+                    disabled
+                    placeholder={selectedProjectId || "No hay proyecto seleccionado"}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {/* Description Field */}
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Descripción general de los archivos..."
+                  className="min-h-[80px]"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         {/* File Upload Section */}
         {!editingFile && (
           <div className="space-y-4">

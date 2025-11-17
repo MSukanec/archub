@@ -8,9 +8,10 @@ export interface GalleryFileInput {
 
 export async function uploadGalleryFiles(
   files: GalleryFileInput[],
-  projectId: string,
+  projectId: string | null,
   organizationId: string,
-  createdBy: string
+  createdBy: string,
+  visibility: 'organization' | 'project' = 'organization'
 ): Promise<void> {
   if (!files || files.length === 0) {
     throw new Error('No hay archivos para subir');
@@ -60,7 +61,7 @@ export async function uploadGalleryFiles(
         created_by: createdBy,
         organization_id: organizationId,
         project_id: projectId,
-        visibility: 'organization'
+        visibility: visibility
       };
 
       console.log('Insertando en DB después de subir archivo:', insertData);
