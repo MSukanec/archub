@@ -23,7 +23,7 @@ import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
-import { useProjectClients } from '@/hooks/use-project-clients'
+import { useProjectClients } from '@/features/clients'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
@@ -81,7 +81,7 @@ export function ClientPaymentModal({ modalData, onClose }: ClientPaymentModalPro
 
   // Hooks para obtener datos
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId)
-  const { data: projectClients, isLoading: clientsLoading } = useProjectClients(projectId)
+  const { data: projectClients, isLoading: clientsLoading } = useProjectClients(projectId, organizationId)
   const { data: members, isLoading: membersLoading } = useOrganizationMembers(organizationId)
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId)
   

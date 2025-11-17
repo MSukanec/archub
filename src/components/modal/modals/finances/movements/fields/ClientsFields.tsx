@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Building } from 'lucide-react'
-import { useProjectClients } from '@/hooks/use-project-clients'
+import { useProjectClients } from '@/features/clients'
 import { useProjectInstallments } from '@/hooks/use-project-installments'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
@@ -32,7 +32,7 @@ export const ClientsFields: React.FC<ClientsFieldsProps> = ({
 
   const { data: projectClients = [], isLoading: clientsLoading } = useProjectClients(
     projectId,
-    { enabled: !!projectId && !!organizationId }
+    organizationId
   )
 
   const { data: projectInstallments = [], isLoading: installmentsLoading } = useProjectInstallments(
