@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FileText, Plus } from "lucide-react";
 
 import { Layout } from '@/components/layout/desktop/Layout';
@@ -14,10 +14,13 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 
 import SitelogEntriesTab from './SitelogEntriesTab';
+import SitelogMedia from './SitelogMedia';
+import SitelogSettings from './SitelogSettings';
 import { SitelogStatsSection } from '@/features/sitelog/components/SitelogStatsSection';
 
 export default function Sitelog() {
   const { openModal } = useGlobalModalStore();
+  const [activeTab, setActiveTab] = useState<'entradas' | 'multimedia' | 'ajustes'>('entradas');
 
   const { data: userData, isLoading } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId } = useProjectContext();
@@ -123,11 +126,17 @@ export default function Sitelog() {
     organizationId: currentOrganizationId,
     showMembers: true,
     showProjectSelector: true,
-    actionButton: {
+    tabs: [
+      { id: 'entradas', label: 'Entradas', isActive: activeTab === 'entradas' },
+      { id: 'multimedia', label: 'Multimedia', isActive: activeTab === 'multimedia' },
+      { id: 'ajustes', label: 'Ajustes', isActive: activeTab === 'ajustes' }
+    ],
+    onTabChange: (tabId: string) => setActiveTab(tabId as 'entradas' | 'multimedia' | 'ajustes'),
+    actionButton: activeTab === 'entradas' ? {
       label: 'Nueva Bitácora',
       icon: Plus,
       onClick: () => openModal('site-log')
-    }
+    } : undefined
   };
 
   if (isLoading || siteLogsLoading) {
@@ -143,16 +152,24 @@ export default function Sitelog() {
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Stats Section */}
-        <SitelogStatsSection siteLogs={siteLogs} />
+        {/* Stats Section - Solo mostrar si hay datos y estamos en tab de entradas */}
+        {activeTab === 'entradas' && siteLogs.length > 0 && (
+          <SitelogStatsSection siteLogs={siteLogs} />
+        )}
 
-        {/* Entries Tab */}
-        <SitelogEntriesTab 
-          siteLogs={siteLogs}
-          toggleFavorite={toggleFavorite}
-          handleEditSiteLog={handleEditSiteLog}
-          handleDeleteSiteLog={handleDeleteSiteLog}
-        />
+        {/* Render active tab content */}
+        {activeTab === 'entradas' && (
+          <SitelogEntriesTab 
+            siteLogs={siteLogs}
+            toggleFavorite={toggleFavorite}
+            handleEditSiteLog={handleEditSiteLog}
+            handleDeleteSiteLog={handleDeleteSiteLog}
+          />
+        )}
+
+        {activeTab === 'multimedia' && <SitelogMedia />}
+        
+        {activeTab === 'ajustes' && <SitelogSettings />}
       </div>
     </Layout>
   );
