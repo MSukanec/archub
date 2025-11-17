@@ -18,7 +18,7 @@ create table public.site_log_types (
   constraint site_log_types_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
 ) TABLESPACE pg_default;
 
----------- TABLA SITE_LOG_FILES:
+---------- TABLA SITE_LOGS:
 
 create table public.site_logs (
   id uuid not null default gen_random_uuid (),
@@ -39,7 +39,6 @@ create table public.site_logs (
   ai_tags text[] null,
   ai_analyzed boolean not null default false,
   location text null,
-  log_time time without time zone null,
   constraint site_logs_pkey primary key (id),
   constraint site_logs_created_by_fkey1 foreign KEY (created_by) references organization_members (id) on delete set null,
   constraint site_logs_entry_type_id_fkey foreign KEY (entry_type_id) references organization_site_log_types (id),
