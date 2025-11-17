@@ -607,6 +607,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
+                    <SelectItem value="none">Sin Especificar</SelectItem>
                     <SelectItem value="sunny">☀️ Soleado</SelectItem>
                     <SelectItem value="partly_cloudy">⛅ Parcialmente Nublado</SelectItem>
                     <SelectItem value="cloudy">☁️ Nublado</SelectItem>
@@ -616,7 +617,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
                     <SelectItem value="fog">🌫️ Niebla</SelectItem>
                     <SelectItem value="windy">💨 Ventoso</SelectItem>
                     <SelectItem value="hail">🧊 Granizo</SelectItem>
-                    <SelectItem value="none">Sin Especificar</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
