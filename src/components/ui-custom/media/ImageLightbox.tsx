@@ -83,10 +83,33 @@ export function useMediaLightbox(media: MediaItem[]) {
 }
 
 // Mantener compatibilidad con el hook anterior (solo imágenes)
-export function useImageLightbox(images: string[]) {
+export function useImageLightbox(images: string[] = []) {
   const media = images.map(src => ({ type: 'image' as const, src }));
   return useMediaLightbox(media);
 }
 
-// Re-exportar como ImageLightbox para compatibilidad
-export const ImageLightbox = MediaLightbox;
+// Componente wrapper para compatibilidad con arrays de strings
+interface ImageLightboxProps {
+  images: string[];
+  currentIndex: number;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function ImageLightbox({
+  images = [],
+  currentIndex,
+  isOpen,
+  onClose
+}: ImageLightboxProps) {
+  const media = images.map(src => ({ type: 'image' as const, src }));
+  
+  return (
+    <MediaLightbox
+      media={media}
+      currentIndex={currentIndex}
+      isOpen={isOpen}
+      onClose={onClose}
+    />
+  );
+}
