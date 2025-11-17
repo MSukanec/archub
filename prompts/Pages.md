@@ -494,11 +494,88 @@ Antes de crear una página, verifica:
 ```
 
 ### Loading States
+
+**REGLA CRÍTICA:** SIEMPRE usar el componente `LoadingSpinner` para estados de carga de páginas completas. NUNCA usar texto "Cargando..." ni spinners genéricos.
+
+#### ✅ CORRECTO: Usar LoadingSpinner con logo
+
 ```typescript
-{loading ? (
-  <Skeleton className="h-32" />
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+
+// Para páginas completas en estado de carga
+if (isLoading) {
+  return (
+    <Layout wide headerProps={headerProps}>
+      <div className="flex items-center justify-center h-64">
+        <LoadingSpinner size="lg" />
+      </div>
+    </Layout>
+  );
+}
+
+// Para secciones dentro de una página
+{isLoading ? (
+  <div className="flex items-center justify-center h-32">
+    <LoadingSpinner size="md" />
+  </div>
 ) : (
   <ActualContent />
+)}
+```
+
+**Props de LoadingSpinner:**
+- `size`: 'sm' | 'md' | 'lg' | 'xl' (default: 'md')
+- `fullScreen`: boolean (default: false) - Para usar en páginas de loading completas
+
+#### ❌ INCORRECTO: Usar texto "Cargando..." o spinners genéricos
+
+```typescript
+// ❌ MAL - Texto plano
+<div className="text-muted-foreground">Cargando datos...</div>
+
+// ❌ MAL - Spinner genérico sin logo
+<div className="animate-spin rounded-full h-12 w-12 border-b-2"></div>
+
+// ❌ MAL - Skeleton para páginas completas
+{isLoading && <Skeleton className="h-32" />}
+```
+
+**Cuándo usar cada uno:**
+
+| Caso | Componente |
+|------|-----------|
+| **Página completa cargando** | `<LoadingSpinner size="lg" />` |
+| **Sección/Tab cargando** | `<LoadingSpinner size="md" />` |
+| **Lista/Tabla con skeleton** | `<Skeleton />` (para items individuales) |
+| **Fullscreen loading** | `<LoadingSpinner fullScreen />` |
+
+**Ejemplos:**
+
+```typescript
+// Página completa
+export default function MyPage() {
+  const { data, isLoading } = useMyData();
+
+  if (isLoading) {
+    return (
+      <Layout wide headerProps={headerProps}>
+        <div className="flex items-center justify-center h-64">
+          <LoadingSpinner size="lg" />
+        </div>
+      </Layout>
+    );
+  }
+
+  return <Layout wide headerProps={headerProps}>...</Layout>;
+}
+
+// Tab/Sección
+{isLoading ? (
+  <div className="flex items-center justify-center h-32">
+    <LoadingSpinner size="md" />
+  </div>
+) : (
+  <TabContent data={data} />
 )}
 ```
 
