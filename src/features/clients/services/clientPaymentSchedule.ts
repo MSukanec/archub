@@ -78,7 +78,6 @@ export async function getClientPaymentSchedule(
             name,
             description,
             is_default,
-            created_by,
             created_at,
             updated_at
           )
@@ -219,7 +218,6 @@ export async function getClientPaymentScheduleById(
             name,
             description,
             is_default,
-            created_by,
             created_at,
             updated_at
           )
@@ -360,7 +358,6 @@ export async function createClientPaymentSchedule(
             name,
             description,
             is_default,
-            created_by,
             created_at,
             updated_at
           )
@@ -493,7 +490,6 @@ export async function updateClientPaymentSchedule(
             name,
             description,
             is_default,
-            created_by,
             created_at,
             updated_at
           )

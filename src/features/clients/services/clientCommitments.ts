@@ -67,7 +67,6 @@ export async function getClientCommitments(
           name,
           description,
           is_default,
-          created_by,
           created_at,
           updated_at
         )
@@ -193,7 +192,6 @@ export async function getClientCommitmentById(
           name,
           description,
           is_default,
-          created_by,
           created_at,
           updated_at
         )
@@ -318,7 +316,6 @@ export async function createClientCommitment(
           name,
           description,
           is_default,
-          created_by,
           created_at,
           updated_at
         )
@@ -435,7 +432,6 @@ export async function updateClientCommitment(
           name,
           description,
           is_default,
-          created_by,
           created_at,
           updated_at
         )

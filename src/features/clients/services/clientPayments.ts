@@ -21,10 +21,7 @@ export async function getClientPayments(
   projectId: string,
   organizationId: string
 ): Promise<ClientPaymentWithRelations[]> {
-  console.log('🔍 getClientPayments called with:', { projectId, organizationId, hasSupabase: !!supabase });
-  
   if (!supabase || !organizationId || !projectId) {
-    console.log('⚠️ getClientPayments early return:', { supabase: !!supabase, organizationId, projectId });
     return [];
   }
 
@@ -73,7 +70,6 @@ export async function getClientPayments(
           name,
           description,
           is_default,
-          created_by,
           created_at,
           updated_at
         )
@@ -238,7 +234,6 @@ export async function getClientPaymentById(
           name,
           description,
           is_default,
-          created_by,
           created_at,
           updated_at
         )
@@ -399,7 +394,6 @@ export async function createClientPayment(
           name,
           description,
           is_default,
-          created_by,
           created_at,
           updated_at
         )
@@ -552,7 +546,6 @@ export async function updateClientPayment(
           name,
           description,
           is_default,
-          created_by,
           created_at,
           updated_at
         )

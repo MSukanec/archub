@@ -37,7 +37,6 @@ export interface ClientRole {
   name: string;
   description: string | null;
   is_default: boolean;
-  created_by: string;
   created_at: string;
   updated_at: string | null;
 }

@@ -17,10 +17,7 @@ export async function getProjectClients(
   projectId: string,
   organizationId: string
 ): Promise<ProjectClientWithRelations[]> {
-  console.log('🔍 getProjectClients called with:', { projectId, organizationId, hasSupabase: !!supabase });
-  
   if (!supabase || !organizationId || !projectId) {
-    console.log('⚠️ getProjectClients early return:', { supabase: !!supabase, organizationId, projectId });
     return [];
   }
 
@@ -56,7 +53,6 @@ export async function getProjectClients(
         name,
         description,
         is_default,
-        created_by,
         created_at,
         updated_at
       )
@@ -64,12 +60,6 @@ export async function getProjectClients(
     .eq('organization_id', organizationId)
     .eq('project_id', projectId)
     .order('created_at', { ascending: false });
-
-  console.log('📊 getProjectClients result:', { 
-    count: clientsData?.length || 0, 
-    error: error?.message,
-    firstRow: clientsData?.[0]
-  });
 
   if (error) {
     throw error;
@@ -140,7 +130,6 @@ export async function getProjectClientById(
         name,
         description,
         is_default,
-        created_by,
         created_at,
         updated_at
       )
@@ -218,7 +207,6 @@ export async function createProjectClient(
         name,
         description,
         is_default,
-        created_by,
         created_at,
         updated_at
       )
@@ -288,7 +276,6 @@ export async function updateProjectClient(
         name,
         description,
         is_default,
-        created_by,
         created_at,
         updated_at
       )
