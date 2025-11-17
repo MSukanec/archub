@@ -95,6 +95,19 @@ export async function getTimelineData(
       .in('site_log_id', siteLogIds)
   ]);
 
+  if (filesResult.error) {
+    console.error('Error fetching project media:', filesResult.error);
+  }
+  if (eventsResult.error) {
+    console.error('Error fetching site log events:', eventsResult.error);
+  }
+  if (attendeesResult.error) {
+    console.error('Error fetching personnel attendees:', attendeesResult.error);
+  }
+  if (equipmentResult.error) {
+    console.error('Error fetching site log equipment:', equipmentResult.error);
+  }
+
   const filesByLogId = (filesResult.data || []).reduce((acc, file) => {
     acc[file.site_log_id] = (acc[file.site_log_id] || 0) + 1;
     return acc;

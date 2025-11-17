@@ -33,6 +33,7 @@ export async function getSiteLogs(projectId: string, organizationId: string) {
       )
     `)
     .eq('project_id', projectId)
+    .eq('organization_id', organizationId)
     .order('created_at', { ascending: false });
 
   if (error) {

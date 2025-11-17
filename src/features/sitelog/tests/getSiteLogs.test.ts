@@ -15,18 +15,26 @@ describe('getSiteLogs service', () => {
 
   it('should return site logs with relations for valid project', async () => {
     const mockSiteLogs = [
-      { id: '1', log_date: '2025-11-17', comments: 'Test log' }
+      { id: '1', log_date: '2025-11-17', comments: 'Test log', creator: null }
     ];
     
-    const mockFrom = vi.fn().mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          order: vi.fn().mockResolvedValue({ 
-            data: mockSiteLogs, 
-            error: null 
+    const mockFrom = vi.fn((table: string) => {
+      if (table === 'site_logs') {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                order: vi.fn().mockResolvedValue({ data: mockSiteLogs, error: null })
+              })
+            })
           })
+        };
+      }
+      return {
+        select: vi.fn().mockReturnValue({
+          in: vi.fn().mockResolvedValue({ data: [], error: null })
         })
-      })
+      };
     });
     
     (supabase.from as any) = mockFrom;
@@ -41,9 +49,11 @@ describe('getSiteLogs service', () => {
     const mockFrom = vi.fn().mockReturnValue({
       select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
-          order: vi.fn().mockResolvedValue({ 
-            data: [], 
-            error: null 
+          eq: vi.fn().mockReturnValue({
+            order: vi.fn().mockResolvedValue({ 
+              data: [], 
+              error: null 
+            })
           })
         })
       })
@@ -60,9 +70,11 @@ describe('getSiteLogs service', () => {
     const mockFrom = vi.fn().mockReturnValue({
       select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
-          order: vi.fn().mockResolvedValue({ 
-            data: null, 
-            error: mockError 
+          eq: vi.fn().mockReturnValue({
+            order: vi.fn().mockResolvedValue({ 
+              data: null, 
+              error: mockError 
+            })
           })
         })
       })
