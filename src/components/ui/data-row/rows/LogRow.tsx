@@ -43,7 +43,6 @@ interface SiteLog {
   files?: any[];
   events?: any[];
   attendees?: any[];
-  equipment?: any[];
 }
 
 interface LogRowProps {
@@ -121,9 +120,8 @@ export default function LogRow({
   const totalFiles = siteLog.files?.length || 0;
   const totalEvents = siteLog.events?.length || 0;
   const totalAttendees = siteLog.attendees?.length || 0;
-  const totalEquipment = siteLog.equipment?.length || 0;
   
-  const hasAttachments = totalFiles > 0 || totalEvents > 0 || totalAttendees > 0 || totalEquipment > 0;
+  const hasAttachments = totalFiles > 0 || totalEvents > 0 || totalAttendees > 0;
 
   // Filtrar solo imágenes de los archivos
   const imageFiles = siteLog.files?.filter(file => 

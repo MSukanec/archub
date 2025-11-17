@@ -275,31 +275,6 @@ export function SiteLogModalView({ modalData, onClose, onEdit, onDelete }: SiteL
         </>
       )}
 
-      {/* Equipos utilizados */}
-      {siteLog.equipment && siteLog.equipment.length > 0 && (
-        <>
-          <Separator />
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <Wrench className="h-4 w-4 text-accent" />
-              Maquinaria y Equipos ({siteLog.equipment.length})
-            </div>
-            <div className="space-y-3">
-              {siteLog.equipment.map((equipment: any, index: number) => (
-                <div key={equipment.id || index} className="p-3 bg-muted/20 rounded-md">
-                  <div className="text-sm font-medium">{equipment.name}</div>
-                  {equipment.description && (
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {equipment.description}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
-
     </div>
   )
 

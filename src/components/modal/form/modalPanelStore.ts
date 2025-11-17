@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 type PanelType = 'view' | 'edit' | 'subform';
-type SubformType = 'personal' | 'events' | 'files' | 'equipment' | 'tasks' | 'attachments' | null;
+type SubformType = 'personal' | 'events' | 'files' | 'attachments' | null;
 
 interface ModalPanelState {
   currentPanel: PanelType;
