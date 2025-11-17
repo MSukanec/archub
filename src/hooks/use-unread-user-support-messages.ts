@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { getUserByAuthId } from '@/lib/supabase-helpers';
 
 /**
  * Hook para contar mensajes de soporte sin leer para el usuario normal
@@ -13,12 +14,7 @@ export function useUnreadUserSupportMessages(userId: string | undefined) {
       if (!supabase || !userId) return 0;
 
       // Primero obtener el user_id de la tabla users usando el auth_id
-      const { data: userData } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_id', userId)
-        .single();
-
+      const userData = await getUserByAuthId(userId);
       if (!userData) return 0;
 
       // Contar mensajes del admin (sender='admin') que no han sido leídos por el usuario

@@ -24,6 +24,7 @@ import { useUnreadUserSupportMessages } from '@/hooks/use-unread-user-support-me
 import { useEffect } from 'react';
 import { queryClient } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
+import { getUserByAuthId } from '@/lib/supabase-helpers';
 
 export function RightSidebar() {
   const { isDark, toggleTheme } = useThemeStore();
@@ -87,11 +88,7 @@ export function RightSidebar() {
 
     const setupRealtimeSubscription = async () => {
       // Obtener el user_id de la tabla users
-      const { data: userData } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_id', userId)
-        .single();
+      const userData = await getUserByAuthId(userId);
 
       if (!userData) return;
 

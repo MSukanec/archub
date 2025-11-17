@@ -1,6 +1,7 @@
 import { useMemo, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { getUserByAuthId } from '@/lib/supabase-helpers'
 import { queryClient } from '@/lib/queryClient'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui/stat-card'
 import { BookOpen, CheckCircle, Clock, FileText, Bookmark, Megaphone, Info, PlayCircle, Play } from 'lucide-react'
@@ -85,11 +86,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       const { data: { user: authUser } } = await supabase.auth.getUser();
       if (!authUser?.email) return { total_seconds: 0 };
 
-      const { data: userRecord } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_id', authUser.id)
-        .single();
+      const userRecord = await getUserByAuthId(authUser.id);
 
       if (!userRecord) return { total_seconds: 0 };
 
@@ -132,13 +129,13 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
   });
 
   // Get latest 3 notes (OPTIMIZED with backend endpoint)
-  const { data: recentNotes = [] } = useQuery({
+  const { data: recentNotes = [] } = useQuery<any[]>({
     queryKey: [`/api/courses/${courseId}/recent-notes`],
     enabled: !!courseId
   });
 
   // Get latest 3 markers (OPTIMIZED with backend endpoint)
-  const { data: recentMarkers = [] } = useQuery({
+  const { data: recentMarkers = [] } = useQuery<any[]>({
     queryKey: [`/api/courses/${courseId}/recent-markers`],
     enabled: !!courseId
   });
@@ -190,11 +187,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       const { data: { user: authUser } } = await supabase.auth.getUser();
       if (!authUser?.email) return null;
 
-      const { data: userRecord } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_id', authUser.id)
-        .single();
+      const userRecord = await getUserByAuthId(authUser.id);
 
       if (!userRecord) return null;
 
@@ -226,11 +219,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       const { data: { user: authUser } } = await supabase.auth.getUser();
       if (!authUser?.email) return null;
 
-      const { data: userRecord } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_id', authUser.id)
-        .single();
+      const userRecord = await getUserByAuthId(authUser.id);
 
       if (!userRecord) return null;
 

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { getUserByAuthId } from "@/lib/supabase-helpers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -320,13 +321,9 @@ export default function SubscriptionCheckout() {
       } = await supabase.auth.getUser();
       if (!authUser) throw new Error("No se pudo obtener el usuario autenticado");
 
-      const { data: userRecord, error: eUser } = await supabase
-        .from("users")
-        .select("id")
-        .eq("auth_id", authUser.id)
-        .single();
+      const userRecord = await getUserByAuthId(authUser.id);
 
-      if (eUser || !userRecord?.id) {
+      if (!userRecord?.id) {
         throw new Error("No se pudo obtener el ID interno del usuario");
       }
 
@@ -423,11 +420,7 @@ export default function SubscriptionCheckout() {
         throw new Error("No se pudo obtener el usuario");
       }
 
-      const { data: userRecord } = await supabase
-        .from("users")
-        .select("id")
-        .eq("auth_id", authUser.id)
-        .single();
+      const userRecord = await getUserByAuthId(authUser.id);
 
       if (!userRecord) {
         throw new Error("No se pudo obtener el ID del usuario");

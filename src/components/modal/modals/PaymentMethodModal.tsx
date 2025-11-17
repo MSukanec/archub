@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { getUserByAuthId } from "@/lib/supabase-helpers";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -243,13 +244,9 @@ export default function PaymentMethodModal({
       if (!authUser)
         throw new Error("No se pudo obtener el usuario autenticado");
 
-      const { data: userRecord, error: eUser } = await supabase
-        .from("users")
-        .select("id")
-        .eq("auth_id", authUser.id)
-        .single();
+      const userRecord = await getUserByAuthId(authUser.id);
 
-      if (eUser || !userRecord?.id) {
+      if (!userRecord?.id) {
         throw new Error("No se pudo obtener el ID interno del usuario");
       }
 
@@ -340,11 +337,7 @@ export default function PaymentMethodModal({
         throw new Error("No se pudo obtener el usuario");
       }
 
-      const { data: userRecord } = await supabase
-        .from("users")
-        .select("id")
-        .eq("auth_id", authUser.id)
-        .single();
+      const userRecord = await getUserByAuthId(authUser.id);
 
       if (!userRecord) {
         throw new Error("No se pudo obtener el ID del usuario");

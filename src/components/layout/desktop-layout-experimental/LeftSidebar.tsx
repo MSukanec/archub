@@ -12,6 +12,7 @@ import { useProjectContext } from '@/stores/projectContext';
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { supabase } from '@/lib/supabase';
+import { getUserByAuthId } from '@/lib/supabase-helpers';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -410,11 +411,7 @@ export function LeftSidebar() {
 
     const setupRealtimeSubscription = async () => {
       // Obtener el user_id de la tabla users
-      const { data: userData } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_id', userId)
-        .single();
+      const userData = await getUserByAuthId(userId);
 
       if (!userData) return;
 

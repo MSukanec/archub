@@ -13,6 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowUp, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
+import { getUserByAuthId } from '@/lib/supabase-helpers';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { queryClient } from '@/lib/queryClient';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -93,11 +94,7 @@ export function SupportPanel({ userId, userFullName, userAvatarUrl, onClose }: S
 
     // Obtener el user_id de la tabla users (necesario para el filtro)
     const setupRealtimeSubscription = async () => {
-      const { data: userData } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_id', userId)
-        .single();
+      const userData = await getUserByAuthId(userId);
 
       if (!userData) return;
 
