@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useProjectContext } from '@/stores/projectContext';
+import { usePartnerMovements } from '@/features/finances';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -7,28 +8,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { formatDate } from '@/lib/date-utils';
 import { Users } from 'lucide-react';
-
-// Temporary mock type - will be replaced with actual type when table schema is defined
-interface PartnerMovement {
-  id: string;
-  payment_date: string;
-  partner_id: string | null;
-  partner_name: string | null;
-  partner_avatar: string | null;
-  movement_type: 'income' | 'expense';
-  wallet_name: string;
-  amount: number;
-  currency_symbol: string;
-  exchange_rate: number;
-}
+import type { FinancialMovementWithRelations } from '@/features/finances';
 
 export function PartnerMovementsTab() {
-  const { selectedProjectId } = useProjectContext();
+  const { currentOrganizationId, selectedProjectId } = useProjectContext();
   
-  // Temporary mock data - will be replaced with actual hook when service is ready
-  const movements: PartnerMovement[] = [];
-  const isLoading = false;
-  const error = null;
+  // Fetch partner movements (contributions and withdrawals)
+  const { data: movements = [], isLoading, error } = usePartnerMovements(
+    currentOrganizationId || undefined,
+    selectedProjectId || undefined
+  );
 
   // Format currency helper
   const formatCurrency = (amount: number, currencySymbol: string = '$') => {
@@ -53,7 +42,7 @@ export function PartnerMovementsTab() {
     {
       key: 'payment_date',
       label: 'Fecha',
-      render: (item: PartnerMovement) => (
+      render: (item: FinancialMovementWithRelations) => (
         <span className="text-sm">{formatDate(item.payment_date)}</span>
       ),
     },
@@ -61,17 +50,16 @@ export function PartnerMovementsTab() {
     {
       key: 'partner',
       label: 'Socio',
-      render: (item: PartnerMovement) => (
+      render: (item: FinancialMovementWithRelations) => (
         <div className="flex items-center gap-2">
-          {item.partner_id ? (
+          {item.partner ? (
             <>
               <Avatar className="h-8 w-8">
-                <AvatarImage src={item.partner_avatar || undefined} />
                 <AvatarFallback className="text-xs">
-                  {getPartnerInitials(item.partner_name)}
+                  {getPartnerInitials(item.partner.name)}
                 </AvatarFallback>
               </Avatar>
-              <span className="text-sm">{item.partner_name || 'Sin nombre'}</span>
+              <span className="text-sm">{item.partner.name}</span>
             </>
           ) : (
             <span className="text-sm text-muted-foreground">Sin socio</span>
@@ -83,8 +71,9 @@ export function PartnerMovementsTab() {
     {
       key: 'movement_type',
       label: 'Tipo',
-      render: (item: PartnerMovement) => {
-        if (item.movement_type === 'income') {
+      render: (item: FinancialMovementWithRelations) => {
+        const isContribution = item.movement_type === 'partner_contribution';
+        if (isContribution) {
           return (
             <Badge className="text-xs bg-green-600 text-white border-0">
               Ingresos
@@ -98,20 +87,20 @@ export function PartnerMovementsTab() {
     {
       key: 'wallet',
       label: 'Billetera',
-      render: (item: PartnerMovement) => (
-        <span className="text-sm">{item.wallet_name || '-'}</span>
+      render: (item: FinancialMovementWithRelations) => (
+        <span className="text-sm">{item.wallet?.name || '-'}</span>
       ),
     },
     // 5. Monto (con cotización abajo, alineado a la derecha)
     {
       key: 'amount',
       label: 'Monto',
-      render: (item: PartnerMovement) => {
-        const isPositive = item.movement_type === 'income';
+      render: (item: FinancialMovementWithRelations) => {
+        const isPositive = item.amount >= 0;
         return (
           <div className="flex flex-col items-end">
             <span className={`text-sm font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-              {formatCurrency(item.amount, item.currency_symbol)}
+              {formatCurrency(Math.abs(item.amount), item.currency?.symbol)}
             </span>
             {item.exchange_rate && item.exchange_rate !== 1 && (
               <span className="text-xs text-muted-foreground">
