@@ -36,17 +36,18 @@ Preferred communication style: Simple, everyday language.
   - **Data Quality**: All queries use TABLES directly (project_clients, client_commitments, client_payments, client_payment_schedule, client_roles, contacts), not SQL views.
 
 - **COURSE-LANDING Module** (November 2025): Scalable course landing page system following Feature-Sliced Design architecture:
-  - **Services** (`src/features/course-landing/services/`): Public async functions that query courses, modules, lessons, and FAQs from Supabase (NO AUTH required for public landing pages). Filters by `is_active` and `visibility='public'` for security.
-  - **Hooks** (`src/features/course-landing/hooks/`): React Query hook `useCourseLanding(slug)` for fetching complete landing data with 1-minute cache (landing pages rarely change).
+  - **Services** (`src/features/course-landing/services/`): Public async functions that query courses, modules, lessons, and FAQs from Supabase (NO AUTH required for public landing pages). Filters by `is_active` and `visibility='public'` for security. Includes `getAllPublicCourses()` for catalog listing.
+  - **Hooks** (`src/features/course-landing/hooks/`): React Query hooks: `useCourseLanding(slug)` for individual landing data, `useAllCourses()` for catalog listing. Both with 1-minute cache (landing pages rarely change).
   - **Types** (`src/features/course-landing/types/`): `CourseLandingData`, `ModuleWithLessons`, `CourseStats` - all serializable for React Query caching.
   - **Mappers** (`src/features/course-landing/mappers/`): Business logic isolated from UI. Functions: `mapModulesWithLessons`, `calculateCourseStats`, `formatMinutesToTime`, `formatDuration`.
-  - **Components** (`src/features/course-landing/components/`): Modular landing sections (HeroSection, InstructorSection, ModulesSection, FeaturesSection, FAQSection, CTAFooter) replicating Domestika-style design.
-  - **Pages** (`src/pages/public/CourseLanding.tsx`): SEO-optimized public page at `/cursos/:slug` with meta tags, JSON-LD structured data, and Open Graph tags for social sharing.
-  - **Dual Routing Pattern**: Public landing `/cursos/:slug` for marketing/SEO + Private dashboard `/learning/courses/{id}` for enrolled users.
+  - **Components** (`src/features/course-landing/components/`): Modular landing sections (HeroSection, InstructorSection, ModulesSection, FeaturesSection, FAQSection, CTAFooter) replicating Domestika-style design. Catalog components: CourseCard, CourseGrid with responsive layouts and loading states.
+  - **Pages**: SEO-optimized public pages at `/cursos` (catalog) and `/cursos/:slug` (individual landing) with meta tags, JSON-LD structured data, and Open Graph tags for social sharing.
+  - **Dual Routing Pattern**: Public landing `/cursos/:slug` for marketing/SEO + Private dashboard `/learning/courses/{id}` for enrolled users. Catalog page `/cursos` lists all available courses with navigation to individual landings.
   - **SEO Strategy**: Replicating user's WordPress site (ranks #2 on Google for "curso de archicad") with comprehensive SEO including structured data, keywords, and social meta tags.
   - **SEO Pattern (CRITICAL)**: All meta tags MUST be passed via PublicLayout's `seo` prop (keywords, ogImage, twitterImage) to ensure they render in document `<head>`. Never inject meta tags directly in JSX body - crawlers and social scrapers will miss them.
   - **Architecture Goal**: Template system where admins create courses → landing pages auto-generate (scalable like Domestika).
   - **Admin Interface**: CourseFormModal updated with 9 marketing fields (instructor, marketing, SEO sections) with array handling for highlights and keywords.
+  - **Complete User Flow**: Catalog (/cursos) → Individual landing (/cursos/:slug) → Enrollment → Private dashboard (/learning/courses/{id}) with seamless navigation between all pages.
 
 ### Feature Specifications
 - **Core Modules**: Home page, Project Management, Financial Management, Document Management, Learning Module, Community Map, and Notification System.
