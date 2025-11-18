@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { PublicHeader } from "./PublicHeader";
-import { Footer } from "../desktop/Footer";
+import { PublicFooter } from "./PublicFooter";
 
 interface SEOProps {
   title: string;
@@ -109,16 +109,16 @@ export function PublicLayout({
   }, [seo]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <PublicHeader 
         rightContent={headerRightContent}
         navigation={headerNavigation}
         actions={headerActions}
       />
-      <div className="container mx-auto px-6 py-12">
+      <div className="container mx-auto px-6 py-12 flex-1">
         {children}
       </div>
-      <Footer />
+      <PublicFooter />
     </div>
   );
 }
