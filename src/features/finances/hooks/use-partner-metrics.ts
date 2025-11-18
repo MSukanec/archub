@@ -1,6 +1,14 @@
 import { useMemo } from 'react';
 import type { FinancialMovementWithRelations } from '../types';
 
+interface PartnerBalance {
+  partnerId: string;
+  partnerName: string;
+  balance: number;
+  contributions: number;
+  withdrawals: number;
+}
+
 interface PartnerMetrics {
   totalInPrimaryCurrency: number;
   totalContributions: number;
@@ -12,6 +20,7 @@ interface PartnerMetrics {
     withdrawals: number;
     balance: number;
   }>;
+  balanceByPartner: PartnerBalance[];
 }
 
 export function usePartnerMetrics(
@@ -93,11 +102,51 @@ export function usePartnerMetrics(
         }, 0)
     );
 
+    // Calcular balance por socio (en moneda principal)
+    const partnerMap = new Map<string, {
+      partnerId: string;
+      partnerName: string;
+      contributions: number;
+      withdrawals: number;
+    }>();
+
+    movements.forEach(movement => {
+      // Get partner info from movement
+      const partnerId = movement.partner_id || 'sin-socio';
+      const partnerName = movement.partner?.name || movement.movement_category || 'Sin Socio';
+
+      if (!partnerMap.has(partnerId)) {
+        partnerMap.set(partnerId, {
+          partnerId,
+          partnerName,
+          contributions: 0,
+          withdrawals: 0,
+        });
+      }
+
+      const partner = partnerMap.get(partnerId)!;
+      const convertedAmount = convertToPrimaryCurrency(movement);
+
+      if (movement.amount >= 0) {
+        partner.contributions += convertedAmount;
+      } else {
+        partner.withdrawals += Math.abs(convertedAmount);
+      }
+    });
+
+    const balanceByPartner = Array.from(partnerMap.values())
+      .map(p => ({
+        ...p,
+        balance: p.contributions - p.withdrawals,
+      }))
+      .sort((a, b) => b.balance - a.balance);
+
     return {
       totalInPrimaryCurrency,
       totalContributions,
       totalWithdrawals,
       balanceByCurrency,
+      balanceByPartner,
     };
   }, [movements, primaryCurrencyCode]);
 }
