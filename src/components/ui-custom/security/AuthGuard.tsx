@@ -13,6 +13,8 @@ interface AuthGuardProps {
 // Define route types for clarity
 const PUBLIC_ROUTES = ['/', '/login', '/register', '/forgot-password'];
 const ONBOARDING_ROUTES = ['/onboarding', '/select-mode'];
+// Routes where authenticated users should be redirected to /home
+const AUTH_REDIRECT_ROUTES = ['/login', '/register', '/forgot-password'];
 
 export function AuthGuard({ children }: AuthGuardProps) {
   const { 
@@ -136,8 +138,9 @@ export function AuthGuard({ children }: AuthGuardProps) {
     // User doesn't need onboarding or mode selection, reset tracking
     lastNavigationRef.current = null;
     
-    // CASE 4: Redirect authenticated users away from public routes (only after onboarding check passes)
-    if (isPublicRoute) {
+    // CASE 4: Redirect authenticated users away from auth routes (login/register)
+    // Allow landing page "/" to be viewed by authenticated users
+    if (AUTH_REDIRECT_ROUTES.includes(location)) {
       navigate('/home');
       return;
     }
