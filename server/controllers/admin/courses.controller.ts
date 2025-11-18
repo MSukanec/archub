@@ -3,6 +3,7 @@ import { supabaseAdmin } from "../../lib/supabase/admin.js";
 import { verifyAdminUser, HttpError } from "../../lib/auth/helpers.js";
 import {
   listCourses,
+  getCourse,
   createCourse,
   updateCourse,
   deleteCourse
@@ -14,6 +15,25 @@ export async function getCourses(req: Request, res: Response) {
     
     const ctx = { supabase: supabaseAdmin };
     const result = await listCourses(ctx);
+    
+    return result.success 
+      ? res.json(result.data)
+      : res.status(500).json({ error: result.error });
+  } catch (error: any) {
+    if (error instanceof HttpError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "Internal error" });
+  }
+}
+
+export async function getSingleCourse(req: Request, res: Response) {
+  try {
+    await verifyAdminUser(req.headers.authorization);
+    
+    const ctx = { supabase: supabaseAdmin };
+    const { id } = req.params;
+    const result = await getCourse(ctx, { id });
     
     return result.success 
       ? res.json(result.data)

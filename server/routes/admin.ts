@@ -28,6 +28,7 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
 
   // ==================== COURSES ====================
   app.get("/api/admin/courses", coursesController.getCourses);
+  app.get("/api/admin/courses/:id", coursesController.getSingleCourse);
   app.post("/api/admin/courses", coursesController.postCourse);
   app.patch("/api/admin/courses/:id", coursesController.patchCourse);
   app.delete("/api/admin/courses/:id", coursesController.removeCourse);
