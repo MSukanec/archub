@@ -11,6 +11,7 @@ export * from './services/getAllFinancialMovements';
 // Hooks
 export * from './hooks/use-financial-movements';
 export * from './hooks/use-financial-metrics';
+export * from './hooks/use-partner-movements';
 
 // Mappers
 export * from './mappers';

@@ -1,15 +1,30 @@
 import { getClientPayments } from '@/features/clients/services/clientPayments';
+import { getPartnerContributions } from './getPartnerContributions';
+import { getPartnerWithdrawals } from './getPartnerWithdrawals';
 import { supabase } from '@/lib/supabase';
 import type { FinancialMovementWithRelations } from '../types';
-import { mapClientPaymentsToFinancialMovements } from '../mappers';
+import { 
+  mapClientPaymentsToFinancialMovements,
+  mapPartnerContributionsToFinancialMovements,
+  mapPartnerWithdrawalsToFinancialMovements 
+} from '../mappers';
 
 /**
  * Obtiene TODOS los movimientos financieros de una organización o proyecto.
  * 
- * Por ahora solo trae de client_payments usando el service existente,
- * pero eventualmente agregará datos de material_payments, personnel_payments, etc.
+ * Incluye:
+ * - client_payments (Pagos de clientes)
+ * - partner_contributions (Aportes de socios)
+ * - partner_withdrawals (Retiros de socios)
  * 
- * En el futuro esto se reemplazará por una VISTA de base de datos
+ * En el futuro agregará:
+ * - material_payments
+ * - personnel_payments
+ * - indirect_payments
+ * - subcontract_payments
+ * - general_cost_payments
+ * 
+ * Eventualmente esto se reemplazará por una VISTA de base de datos
  * que agregue todas las tablas *_payments automáticamente.
  * 
  * @param organizationId - ID de la organización
@@ -172,6 +187,15 @@ export async function getAllFinancialMovements(
 
     const clientMovements = mapClientPaymentsToFinancialMovements(paymentsWithRelations);
 
+    // Get partner movements (contributions and withdrawals)
+    const [partnerContributions, partnerWithdrawals] = await Promise.all([
+      getPartnerContributions(organizationId, projectId || undefined),
+      getPartnerWithdrawals(organizationId, projectId || undefined),
+    ]);
+    
+    const contributionMovements = mapPartnerContributionsToFinancialMovements(partnerContributions);
+    const withdrawalMovements = mapPartnerWithdrawalsToFinancialMovements(partnerWithdrawals);
+
     // TODO: Agregar pagos de otros tipos aquí
     // const materialMovements = await getMaterialPayments(organizationId);
     // const personnelMovements = await getPersonnelPayments(organizationId);
@@ -180,6 +204,8 @@ export async function getAllFinancialMovements(
     // Combine all movements
     const allMovements = [
       ...clientMovements,
+      ...contributionMovements,
+      ...withdrawalMovements,
       // ...materialMovements,
       // ...personnelMovements,
       // etc.
