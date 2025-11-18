@@ -1,0 +1,3 @@
+# Mappers
+# Funciones puras que transforman datos entre formatos
+# Ejemplo: mapMovementFromSupabase.ts, mapBalanceToChart.ts

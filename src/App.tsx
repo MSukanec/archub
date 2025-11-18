@@ -100,6 +100,9 @@ import Notifications from "@/pages/settings/Notifications";
 // Home
 import Home from "@/pages/Home";
 
+// Finances Pages
+import FinancesPage from "@/pages/finances/Finances";
+
 // Settings Pages
 import PricingPlan from "@/pages/settings/PricingPlan";
 import Billing from "@/pages/settings/Billing";
@@ -161,7 +164,10 @@ function Router() {
         <Route path="/contacts" component={Contacts} />
         <Route path="/notifications" component={Notifications} />
         <Route path="/organization/projects" component={Projects} />
+        
+        {/* Finances Routes */}
         <Route path="/finances/general-costs" component={GeneralCosts} />
+        <Route path="/finances" component={FinancesPage} />
         
         <Route path="/organization" component={OrganizationDashboard} />
 

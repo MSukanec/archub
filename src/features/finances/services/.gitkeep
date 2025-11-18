@@ -1,0 +1,3 @@
+# Services
+# Funciones puras async/await que consultan Supabase
+# Ejemplo: getFinancialMovements.ts, getAccountBalance.ts
