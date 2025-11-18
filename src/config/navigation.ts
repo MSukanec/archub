@@ -100,6 +100,20 @@ export const CONTEXT_BUTTONS: ContextButton[] = [
     href: '/admin/dashboard',
     adminOnly: true,
   },
+  {
+    id: 'user',
+    label: 'Usuario',
+    icon: User,
+    testId: 'button-sidebar-user',
+    href: '/profile',
+  },
+  {
+    id: 'settings',
+    label: 'Ajustes',
+    icon: Settings,
+    testId: 'button-sidebar-settings',
+    href: '/settings/organization-basic-data',
+  },
 ];
 
 export const ORGANIZATION_NAVIGATION: NavigationItem[] = [
@@ -182,7 +196,7 @@ export function getSettingsNavigation(organizationName: string, userFullName: st
   ];
 }
 
-export type SidebarLevel = 'general' | 'organization' | 'project' | 'admin' | 'community' | 'learning' | 'user' | 'settings';
+export type SidebarLevel = 'general' | 'organization' | 'project' | 'construction' | 'finances' | 'library' | 'provider' | 'admin' | 'community' | 'learning' | 'user' | 'settings';
 
 export interface GetNavigationItemsParams {
   sidebarLevel: SidebarLevel;

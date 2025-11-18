@@ -5,26 +5,22 @@ import {
   Building,
   FolderOpen,
   Home,
-  Activity,
-  Users,
-  Settings,
-  DollarSign,
-  Calculator,
-  Package,
-  FileText,
   ChevronDown,
-  History,
   Crown,
   GraduationCap,
-  Layers,
-  ListTodo,
-  BookOpen,
-  MessageCircle,
-  Wallet,
   ChevronLeft,
-  Headphones,
-  BarChart3,
+  Globe,
 } from "lucide-react";
+import { 
+  getNavigationItems, 
+  getDividerInfo, 
+  getContextTitle,
+  CONTEXT_BUTTONS,
+  type NavigationItem,
+  type NavigationSection,
+  type NavigationEntry,
+  type SidebarLevel
+} from "@/config/navigation";
 import { MobileMenuButton } from "./MobileMenuButton";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -47,14 +43,6 @@ import { useUnreadSupportMessages } from "@/hooks/use-unread-support-messages";
 interface MobileMenuProps {
   onClose: () => void;
   isOpen: boolean;
-}
-
-interface SidebarItem {
-  id: string;
-  label: string;
-  icon: React.ComponentType<any>;
-  href: string;
-  restricted?: "coming_soon" | string;
 }
 
 export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
@@ -143,60 +131,18 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     projectMutation.mutate(projectId);
   };
 
-  // Navegación según el nivel del sidebar (igual que desktop)
-  const getNavigationItems = (): SidebarItem[] => {
-    if (sidebarLevel === 'organization') {
-      return [
-        { id: 'dashboard', label: 'Visión General', icon: Home, href: '/organization/dashboard' },
-        { id: 'projects', label: 'Gestión de Proyectos', icon: Building, href: '/organization/projects' },
-        { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts' },
-        { id: 'analysis', label: 'Análisis de Costos', icon: FileText, href: '/analysis' },
-        { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements' },
-        { id: 'capital', label: 'Capital', icon: Calculator, href: '/finances/capital' },
-        { id: 'expenses', label: 'Gastos Generales', icon: FolderOpen, href: '/finances/general-costs' },
-        { id: 'activity', label: 'Actividad', icon: Activity, href: '/organization/activity', restricted: 'coming_soon' },
-        { id: 'preferences', label: 'Preferencias', icon: Settings, href: '/organization/preferences' },
-      ];
-    } else if (sidebarLevel === 'project' && selectedProjectId) {
-      return [
-        { id: 'dashboard', label: 'Visión General', icon: Home, href: '/project/dashboard' },
-        { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets' },
-        { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel', restricted: 'coming_soon' },
-        { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials', restricted: 'coming_soon' },
-        { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'coming_soon' },
-        { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts', restricted: 'coming_soon' },
-        { id: 'logs', label: 'Bitácora', icon: History, href: '/construction/logs', restricted: 'coming_soon' },
-        { id: 'clients', label: 'Clientes', icon: Users, href: '/clients', restricted: 'coming_soon' },
-      ];
-    } else if (sidebarLevel === 'admin' && isAdmin) {
-      return [
-        { id: 'dashboard', label: 'Analytics', icon: BarChart3, href: '/admin/dashboard' },
-        { id: 'administration', label: 'Administración', icon: Settings, href: '/admin/administration' },
-        { id: 'support', label: 'Soporte', icon: Headphones, href: '/admin/support' },
-        { id: 'payments', label: 'Pagos', icon: Wallet, href: '/admin/payments' },
-        { id: 'courses', label: 'Cursos', icon: BookOpen, href: '/admin/courses' },
-        { id: 'layout', label: 'Layout', icon: Layers, href: '/admin/layout' },
-        { id: 'general', label: 'General', icon: Settings, href: '/admin/general' },
-        { id: 'tasks', label: 'Tareas', icon: ListTodo, href: '/admin/tasks' },
-        { id: 'costs', label: 'Costos', icon: DollarSign, href: '/admin/costs' },
-        { id: 'products', label: 'Productos', icon: Package, href: '/providers/products' },
-      ];
-    } else if (sidebarLevel === 'community') {
-      return [
-        { id: 'dashboard', label: 'Visión General', icon: Home, href: '/community/dashboard' },
-      ];
-    } else if (sidebarLevel === 'learning') {
-      return [
-        { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/learning/dashboard' },
-        { id: 'courses', label: 'Cursos', icon: GraduationCap, href: '/learning/courses' },
-        { id: 'community', label: 'Comunidad Discord', icon: MessageCircle, href: 'https://discord.com/channels/868615664070443008' },
-      ];
-    }
-    
-    return [];
-  };
+  // Usuario info para settings
+  const organizationName = userData?.organization?.name || 'Organización';
+  const userFullName = userData?.user?.full_name || userData?.user?.first_name || 'Usuario';
 
-  const navigationItems = getNavigationItems();
+  // Obtener items de navegación usando config compartida
+  const navigationItems = getNavigationItems({
+    sidebarLevel: sidebarLevel as SidebarLevel,
+    selectedProjectId,
+    isAdmin,
+    organizationName,
+    userFullName,
+  });
 
   const { closeMenu } = useMobileMenuStore();
   
@@ -207,46 +153,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     }
     closeMenu();
     onClose();
-  };
-
-  // Función para obtener el título del menú según el nivel
-  const getMenuTitle = (): string => {
-    switch (sidebarLevel) {
-      case 'general':
-        return 'Menú';
-      case 'organization':
-        return 'Organización';
-      case 'project':
-        return 'Proyecto';
-      case 'community':
-        return 'Comunidad';
-      case 'learning':
-        return 'Capacitaciones';
-      case 'admin':
-        return 'Administración';
-      default:
-        return 'Menú';
-    }
-  };
-
-  // Configuración de divisores con texto (igual que desktop)
-  const getDividerInfo = (item: SidebarItem, index: number) => {
-    if (sidebarLevel === 'organization') {
-      if (item.id === 'dashboard') return { show: true, text: 'Gestión' };
-      if (item.id === 'analysis') return { show: true, text: 'Finanzas' };
-      if (item.id === 'activity') return { show: true, text: 'Organización' };
-    } else if (sidebarLevel === 'project') {
-      if (item.id === 'dashboard') return { show: true, text: 'Planificación' };
-      if (item.id === 'budgets') return { show: true, text: 'Recursos' };
-      if (item.id === 'subcontracts') return { show: true, text: 'Ejecución' };
-      if (item.id === 'clients') return { show: true, text: 'Comercialización' };
-    } else if (sidebarLevel === 'learning') {
-      if (item.id === 'dashboard') return { show: true, text: 'Capacitaciones' };
-    } else if (sidebarLevel === 'admin') {
-      if (item.id === 'community') return { show: true, text: 'Administración' };
-      if (item.id === 'general') return { show: true, text: 'Construcción' };
-    }
-    return { show: false, text: '' };
   };
 
   const menuContent = (
@@ -273,7 +179,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 >
                   <ChevronLeft className="h-5 w-5 text-[var(--main-sidebar-fg)]" />
                   <h1 className="text-lg font-semibold !text-white">
-                    {getMenuTitle()}
+                    {getContextTitle(sidebarLevel as SidebarLevel)}
                   </h1>
                 </button>
                 <button
@@ -286,7 +192,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             ) : (
               <>
                 <h1 className="text-lg font-semibold flex-1 !text-white">
-                  {getMenuTitle()}
+                  {getContextTitle(sidebarLevel as SidebarLevel)}
                 </h1>
                 <button
                   onClick={handleCloseMenu}
@@ -302,102 +208,166 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           <div className="flex-1 overflow-y-auto">
             <nav>
               {sidebarLevel === 'general' ? (
-                /* MENU GENERAL - NIVEL 1 */
+                /* MENU GENERAL - NIVEL 1 - Dynamic rendering using CONTEXT_BUTTONS */
                 <>
-                  <MobileMenuButton
-                    icon={Home}
-                    label="Inicio"
-                    onClick={() => {
-                      navigate('/home');
-                      handleCloseMenu();
-                    }}
-                    isActive={location === '/home'}
-                    showChevron={false}
-                    testId="button-mobile-home"
-                  />
+                  {CONTEXT_BUTTONS.map((contextButton) => {
+                    // Skip admin button if user is not admin
+                    if (contextButton.adminOnly && !isAdmin) {
+                      return null;
+                    }
 
-                  <MobileMenuButton
-                    icon={Building}
-                    label="Organización"
-                    onClick={() => {
-                      setSidebarLevel('organization');
-                    }}
-                    isActive={location.startsWith('/organization') || location.startsWith('/contacts') || location.startsWith('/movements') || location.startsWith('/finances') || location.startsWith('/analysis')}
-                    showChevron={true}
-                    testId="button-mobile-organization"
-                  />
+                    // Handle "general" button (Inicio)
+                    if (contextButton.id === 'general') {
+                      const isActive = contextButton.href ? isButtonActive(contextButton.href) : false;
+                      return (
+                        <MobileMenuButton
+                          key={contextButton.id}
+                          icon={contextButton.icon}
+                          label={contextButton.label}
+                          onClick={() => {
+                            if (contextButton.href) {
+                              navigate(contextButton.href);
+                              handleCloseMenu();
+                            }
+                          }}
+                          isActive={isActive}
+                          showChevron={false}
+                          testId={contextButton.testId.replace('sidebar', 'mobile')}
+                        />
+                      );
+                    }
 
-                  <MobileMenuButton
-                    icon={FolderOpen}
-                    label="Proyecto"
-                    onClick={() => {
-                      if (!projectsData || projectsData.length === 0) {
-                        toast({
-                          title: "No hay proyectos creados",
-                          description: "Crea un proyecto primero desde Organización",
-                          variant: "destructive"
-                        });
-                        return;
-                      }
-                      if (!selectedProjectId) {
-                        toast({
-                          title: "No hay proyecto seleccionado",
-                          description: "Selecciona un proyecto primero",
-                          variant: "destructive"
-                        });
-                        return;
-                      }
-                      setSidebarLevel('project');
-                    }}
-                    isActive={location.startsWith('/project') || location.startsWith('/budgets') || location.startsWith('/construction') || location.startsWith('/clients')}
-                    showChevron={true}
-                    disabled={!projectsData || projectsData.length === 0}
-                    testId="button-mobile-project"
-                  />
+                    // Handle project button with validation
+                    if (contextButton.id === 'project') {
+                      const hasProjects = projectsData && projectsData.length > 0;
+                      const isActive = contextButton.href ? isButtonActive(contextButton.href) : 
+                        location.startsWith('/project') || location.startsWith('/budgets') || 
+                        location.startsWith('/construction') || location.startsWith('/clients');
+                      
+                      const button = (
+                        <MobileMenuButton
+                          key={contextButton.id}
+                          icon={contextButton.icon}
+                          label={contextButton.label}
+                          onClick={() => {
+                            if (!hasProjects) {
+                              toast({
+                                title: "No hay proyectos creados",
+                                description: "Crea un proyecto primero desde Organización",
+                                variant: "destructive"
+                              });
+                              return;
+                            }
+                            if (!selectedProjectId) {
+                              toast({
+                                title: "No hay proyecto seleccionado",
+                                description: "Selecciona un proyecto primero",
+                                variant: "destructive"
+                              });
+                              return;
+                            }
+                            setSidebarLevel('project');
+                          }}
+                          isActive={isActive}
+                          showChevron={true}
+                          disabled={!hasProjects}
+                          testId={contextButton.testId.replace('sidebar', 'mobile')}
+                        />
+                      );
 
-                  <PlanRestricted reason="coming_soon">
-                    <MobileMenuButton
-                      icon={Users}
-                      label="Comunidad"
-                      onClick={() => {
-                        setSidebarLevel('community');
-                      }}
-                      isActive={location.startsWith('/community')}
-                      showChevron={true}
-                      testId="button-mobile-community"
-                    />
-                  </PlanRestricted>
+                      return button;
+                    }
 
-                  <MobileMenuButton
-                    icon={GraduationCap}
-                    label="Capacitaciones"
-                    onClick={() => {
-                      setSidebarLevel('learning');
-                    }}
-                    isActive={location.startsWith('/learning')}
-                    showChevron={true}
-                    testId="button-mobile-learning"
-                  />
+                    // Determine if button is active based on current location
+                    const isActive = contextButton.href ? isButtonActive(contextButton.href) :
+                      location.startsWith(`/${contextButton.id}`);
 
-                  {isAdmin && (
-                    <MobileMenuButton
-                      icon={Crown}
-                      label="Administración"
-                      onClick={() => {
-                        setSidebarLevel('admin');
-                      }}
-                      isActive={location.startsWith('/admin')}
-                      showChevron={true}
-                      testId="button-mobile-admin"
-                    />
-                  )}
+                    // Handle navigation
+                    const handleClick = () => {
+                      setSidebarLevel(contextButton.id);
+                    };
+
+                    const button = (
+                      <MobileMenuButton
+                        key={contextButton.id}
+                        icon={contextButton.icon}
+                        label={contextButton.label}
+                        onClick={handleClick}
+                        isActive={isActive}
+                        showChevron={true}
+                        testId={contextButton.testId.replace('sidebar', 'mobile')}
+                      />
+                    );
+
+                    // Wrap in PlanRestricted if needed
+                    if (contextButton.restricted) {
+                      return (
+                        <PlanRestricted key={contextButton.id} reason={contextButton.restricted}>
+                          {button}
+                        </PlanRestricted>
+                      );
+                    }
+
+                    return button;
+                  })}
                 </>
               ) : (
                 /* MENU ESPECÍFICO - NIVEL 2 */
                 <>
-                  {navigationItems.map((item, index) => {
+                  {navigationItems.map((entry, index) => {
+                    // Type guard: check if entry is NavigationSection
+                    if ('type' in entry && entry.type === 'section') {
+                      const section = entry as NavigationSection;
+                      return (
+                        <div key={`section-${index}`}>
+                          {/* Section Title */}
+                          <div className="px-4 py-2 text-xs font-medium uppercase tracking-wider text-[var(--main-sidebar-fg)] opacity-60">
+                            {section.title}
+                          </div>
+                          {/* Section Items */}
+                          {section.items.map((item) => {
+                            const isActive = isButtonActive(item.href);
+                            const isExternal = item.href.startsWith('http');
+                            
+                            const button = (
+                              <MobileMenuButton
+                                icon={item.icon}
+                                label={item.label}
+                                onClick={() => {
+                                  if (isExternal) {
+                                    window.open(item.href, '_blank');
+                                  } else {
+                                    navigate(item.href);
+                                    handleCloseMenu();
+                                  }
+                                }}
+                                isActive={isActive}
+                                showChevron={false}
+                                testId={item.testId || `button-mobile-${item.id}`}
+                                badgeCount={item.id === 'support' && isAdmin ? unreadSupportCount : undefined}
+                              />
+                            );
+                            
+                            return (
+                              <div key={item.id}>
+                                {item.restricted ? (
+                                  <PlanRestricted reason={item.restricted}>
+                                    {button}
+                                  </PlanRestricted>
+                                ) : (
+                                  button
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    }
+                    
+                    // Otherwise it's a NavigationItem
+                    const item = entry as NavigationItem;
                     const isActive = isButtonActive(item.href);
-                    const dividerInfo = getDividerInfo(item, index);
+                    const dividerInfo = getDividerInfo(sidebarLevel as SidebarLevel, item, index);
                     const isExternal = item.href.startsWith('http');
                     
                     const button = (
@@ -414,7 +384,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                         }}
                         isActive={isActive}
                         showChevron={false}
-                        testId={`button-mobile-${item.id}`}
+                        testId={item.testId || `button-mobile-${item.id}`}
                         badgeCount={item.id === 'support' && isAdmin ? unreadSupportCount : undefined}
                       />
                     );
@@ -519,8 +489,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 </div>
               )}
 
-              {/* Spacer para admin, community y learning (sin selector) */}
-              {(sidebarLevel === 'admin' || sidebarLevel === 'community' || sidebarLevel === 'learning' || sidebarLevel === 'general') && (
+              {/* Spacer para admin, community, learning, settings, user (sin selector) */}
+              {(sidebarLevel === 'admin' || sidebarLevel === 'community' || sidebarLevel === 'learning' || sidebarLevel === 'general' || sidebarLevel === 'settings' || sidebarLevel === 'user') && (
                 <div className="flex-1" />
               )}
 
