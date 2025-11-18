@@ -24,16 +24,69 @@ export function MovementsTab() {
     }).format(amount)}`;
   };
 
-  // Columns matching the old MovementsList.tsx structure
-  const columns = useMemo(() => [
-    {
-      key: 'payment_date',
-      label: 'Fecha',
+  // Determinar si está en vista de organización
+  const isOrganizationView = !selectedProjectId;
+
+  // Columns in the new order requested
+  const columns = useMemo(() => {
+    const baseColumns = [
+      // 1. Fecha
+      {
+        key: 'payment_date',
+        label: 'Fecha',
+        render: (item: FinancialMovementWithRelations) => (
+          <span className="text-sm">{formatDate(item.payment_date)}</span>
+        ),
+      },
+    ];
+
+    // 2. Contexto (Proyecto) - Solo si está en vista de organización
+    if (isOrganizationView) {
+      baseColumns.push({
+        key: 'project',
+        label: 'Contexto',
+        render: (item: FinancialMovementWithRelations) => (
+          <span className="text-sm">{item.project?.name || '-'}</span>
+        ),
+      });
+    }
+
+    // 3. Creador
+    baseColumns.push({
+      key: 'creator',
+      label: 'Creador',
       render: (item: FinancialMovementWithRelations) => (
-        <span className="text-sm">{formatDate(item.payment_date)}</span>
+        <span className="text-sm">{item.creator?.full_name || item.creator?.email || '-'}</span>
       ),
-    },
-    {
+    });
+
+    // 4. Tipo - Badge con contenido blanco y fondo de color
+    baseColumns.push({
+      key: 'movement_type',
+      label: 'Tipo',
+      render: (item: FinancialMovementWithRelations) => {
+        const typeConfig = MOVEMENT_TYPES[item.movement_type as keyof typeof MOVEMENT_TYPES];
+        const colorMap: Record<string, string> = {
+          green: 'bg-green-600',
+          blue: 'bg-blue-600',
+          orange: 'bg-orange-600',
+          purple: 'bg-purple-600',
+          indigo: 'bg-indigo-600',
+          red: 'bg-red-600',
+          teal: 'bg-teal-600',
+        };
+        const bgColor = colorMap[typeConfig?.color] || 'bg-gray-600';
+        
+        return (
+          <Badge className={`text-xs ${bgColor} text-white border-0`}>
+            {typeConfig?.label || item.movement_type}
+          </Badge>
+        );
+      },
+    });
+
+    // 5. Descripción
+    baseColumns.push({
       key: 'description',
       label: 'Descripción',
       render: (item: FinancialMovementWithRelations) => (
@@ -44,46 +97,10 @@ export function MovementsTab() {
           )}
         </div>
       ),
-    },
-    {
-      key: 'movement_type',
-      label: 'Tipo',
-      render: (item: FinancialMovementWithRelations) => {
-        const typeConfig = MOVEMENT_TYPES[item.movement_type as keyof typeof MOVEMENT_TYPES];
-        return (
-          <Badge variant="outline" className="text-xs">
-            {typeConfig?.label || item.movement_type}
-          </Badge>
-        );
-      },
-    },
-    {
-      key: 'movement_category',
-      label: 'Categoría',
-      render: (item: FinancialMovementWithRelations) => (
-        <span className="text-sm">{item.movement_category || '-'}</span>
-      ),
-    },
-    {
-      key: 'movement_subcategory',
-      label: 'Subcategoría',
-      render: (item: FinancialMovementWithRelations) => (
-        <span className="text-sm text-muted-foreground">{item.movement_subcategory || '-'}</span>
-      ),
-    },
-    {
-      key: 'amount',
-      label: 'Monto',
-      render: (item: FinancialMovementWithRelations) => {
-        const isPositive = item.amount >= 0;
-        return (
-          <span className={`text-sm font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-            {formatCurrency(Math.abs(item.amount), item.currency?.symbol)}
-          </span>
-        );
-      },
-    },
-    {
+    });
+
+    // 6. Moneda
+    baseColumns.push({
       key: 'currency',
       label: 'Moneda',
       render: (item: FinancialMovementWithRelations) => (
@@ -91,29 +108,40 @@ export function MovementsTab() {
           {item.currency?.code || 'N/A'}
         </span>
       ),
-    },
-    {
+    });
+
+    // 7. Billetera
+    baseColumns.push({
       key: 'wallet',
       label: 'Billetera',
       render: (item: FinancialMovementWithRelations) => (
         <span className="text-sm">{item.wallet?.name || '-'}</span>
       ),
-    },
-    {
-      key: 'project',
-      label: 'Proyecto',
-      render: (item: FinancialMovementWithRelations) => (
-        <span className="text-sm">{item.project?.name || '-'}</span>
-      ),
-    },
-    {
-      key: 'creator',
-      label: 'Creador',
-      render: (item: FinancialMovementWithRelations) => (
-        <span className="text-sm">{item.creator?.full_name || item.creator?.email || '-'}</span>
-      ),
-    },
-    {
+    });
+
+    // 8. Monto - con cotización abajo
+    baseColumns.push({
+      key: 'amount',
+      label: 'Monto',
+      render: (item: FinancialMovementWithRelations) => {
+        const isPositive = item.amount >= 0;
+        return (
+          <div className="flex flex-col">
+            <span className={`text-sm font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+              {formatCurrency(Math.abs(item.amount), item.currency?.symbol)}
+            </span>
+            {item.exchange_rate && item.exchange_rate !== 1 && (
+              <span className="text-xs text-muted-foreground">
+                Cotiz: {item.exchange_rate.toFixed(2)}
+              </span>
+            )}
+          </div>
+        );
+      },
+    });
+
+    // 9. Estado
+    baseColumns.push({
       key: 'status',
       label: 'Estado',
       render: (item: FinancialMovementWithRelations) => {
@@ -127,8 +155,10 @@ export function MovementsTab() {
           </Badge>
         );
       },
-    },
-  ], []);
+    });
+
+    return baseColumns;
+  }, [isOrganizationView]);
 
   if (isLoading) {
     return (
