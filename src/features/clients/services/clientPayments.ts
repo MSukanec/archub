@@ -138,7 +138,9 @@ export async function getClientPayments(
         wallets:wallet_id(
           id,
           name,
-          currency_id
+          is_active,
+          created_at,
+          updated_at
         )
       )
     `)
@@ -308,7 +310,9 @@ export async function getClientPaymentById(
         wallets:wallet_id(
           id,
           name,
-          currency_id
+          is_active,
+          created_at,
+          updated_at
         )
       )
     `)
@@ -474,7 +478,9 @@ export async function createClientPayment(
         wallets:wallet_id(
           id,
           name,
-          currency_id
+          is_active,
+          created_at,
+          updated_at
         )
       )
     `)
@@ -632,7 +638,9 @@ export async function updateClientPayment(
         wallets:wallet_id(
           id,
           name,
-          currency_id
+          is_active,
+          created_at,
+          updated_at
         )
       )
     `)
