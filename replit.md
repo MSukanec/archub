@@ -44,7 +44,9 @@ Preferred communication style: Simple, everyday language.
   - **Pages** (`src/pages/public/CourseLanding.tsx`): SEO-optimized public page at `/cursos/:slug` with meta tags, JSON-LD structured data, and Open Graph tags for social sharing.
   - **Dual Routing Pattern**: Public landing `/cursos/:slug` for marketing/SEO + Private dashboard `/learning/courses/{id}` for enrolled users.
   - **SEO Strategy**: Replicating user's WordPress site (ranks #2 on Google for "curso de archicad") with comprehensive SEO including structured data, keywords, and social meta tags.
+  - **SEO Pattern (CRITICAL)**: All meta tags MUST be passed via PublicLayout's `seo` prop (keywords, ogImage, twitterImage) to ensure they render in document `<head>`. Never inject meta tags directly in JSX body - crawlers and social scrapers will miss them.
   - **Architecture Goal**: Template system where admins create courses → landing pages auto-generate (scalable like Domestika).
+  - **Admin Interface**: CourseFormModal updated with 9 marketing fields (instructor, marketing, SEO sections) with array handling for highlights and keywords.
 
 ### Feature Specifications
 - **Core Modules**: Home page, Project Management, Financial Management, Document Management, Learning Module, Community Map, and Notification System.
