@@ -168,6 +168,18 @@ export interface ClientPaymentWithRelations extends ClientPayment {
       updated_at: string;
     } | null;
   } | null;
+  creator: {
+    id: string;
+    email: string;
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null;
+  project: {
+    id: string;
+    name: string;
+    code: string | null;
+    color: string;
+  } | null;
 }
 
 // ========== Dashboard & Analytics Types ==========

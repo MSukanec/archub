@@ -5,6 +5,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { formatDate } from '@/lib/date-utils';
@@ -39,12 +40,27 @@ export function MovementsTab() {
   // Columns in the new order requested
   const columns = useMemo(() => {
     const baseColumns = [
-      // 1. Fecha
+      // 1. Fecha (con creador en segunda fila si es TEAMS)
       {
         key: 'payment_date',
         label: 'Fecha',
         render: (item: FinancialMovementWithRelations) => (
-          <span className="text-sm">{formatDate(item.payment_date)}</span>
+          <div className="flex flex-col gap-1">
+            <span className="text-sm">{formatDate(item.payment_date)}</span>
+            {isTeamsPlan && item.creator && (
+              <div className="flex items-center gap-2">
+                <Avatar className="h-5 w-5">
+                  <AvatarImage src={item.creator.avatar_url || undefined} />
+                  <AvatarFallback className="text-[10px]">
+                    {item.creator.full_name?.charAt(0) || item.creator.email?.charAt(0) || '?'}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-xs text-muted-foreground">
+                  {item.creator.full_name || item.creator.email || '-'}
+                </span>
+              </div>
+            )}
+          </div>
         ),
       },
     ];
@@ -60,18 +76,7 @@ export function MovementsTab() {
       });
     }
 
-    // 3. Creador - Solo visible en plan TEAMS
-    if (isTeamsPlan) {
-      baseColumns.push({
-        key: 'creator',
-        label: 'Creador',
-        render: (item: FinancialMovementWithRelations) => (
-          <span className="text-sm">{item.creator?.full_name || item.creator?.email || '-'}</span>
-        ),
-      });
-    }
-
-    // 4. Tipo - Badge con contenido blanco y fondo de color
+    // 3. Tipo - Badge con contenido blanco y fondo de color
     baseColumns.push({
       key: 'movement_type',
       label: 'Tipo',
@@ -96,32 +101,21 @@ export function MovementsTab() {
       },
     });
 
-    // 5. Descripción
+    // 4. Descripción (más ancha, sin restricción de ancho)
     baseColumns.push({
       key: 'description',
       label: 'Descripción',
       render: (item: FinancialMovementWithRelations) => (
-        <div className="max-w-[200px]">
-          <p className="text-sm font-medium truncate">{item.description}</p>
+        <div>
+          <p className="text-sm font-medium">{item.description}</p>
           {item.reference && (
-            <p className="text-xs text-muted-foreground truncate">Ref: {item.reference}</p>
+            <p className="text-xs text-muted-foreground">Ref: {item.reference}</p>
           )}
         </div>
       ),
     });
 
-    // 6. Moneda
-    baseColumns.push({
-      key: 'currency',
-      label: 'Moneda',
-      render: (item: FinancialMovementWithRelations) => (
-        <span className="text-xs text-muted-foreground">
-          {item.currency?.code || 'N/A'}
-        </span>
-      ),
-    });
-
-    // 7. Billetera
+    // 5. Billetera
     baseColumns.push({
       key: 'wallet',
       label: 'Billetera',
@@ -130,7 +124,7 @@ export function MovementsTab() {
       ),
     });
 
-    // 8. Monto - con cotización abajo, alineado a la derecha
+    // 6. Monto - con cotización abajo, alineado a la derecha
     baseColumns.push({
       key: 'amount',
       label: 'Monto',
@@ -151,7 +145,7 @@ export function MovementsTab() {
       },
     });
 
-    // 9. Estado
+    // 7. Estado
     baseColumns.push({
       key: 'status',
       label: 'Estado',

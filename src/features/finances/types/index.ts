@@ -69,6 +69,7 @@ export interface FinancialMovementWithRelations extends FinancialMovement {
   project: {
     id: string;
     name: string;
+    code: string | null;
     color: string;
   } | null;
   

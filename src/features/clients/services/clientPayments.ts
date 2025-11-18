@@ -119,6 +119,21 @@ export async function getClientPayments(
           created_at,
           updated_at
         )
+      ),
+      creator:organization_members!created_by(
+        id,
+        user:users(
+          id,
+          email,
+          full_name,
+          avatar_url
+        )
+      ),
+      project:projects(
+        id,
+        name,
+        code,
+        color
       )
     `)
     .eq('organization_id', organizationId)
@@ -144,6 +159,13 @@ export async function getClientPayments(
     schedule: payment.schedule || null,
     currency: payment.currency || null,
     wallet: payment.wallet || null,
+    creator: payment.creator?.user ? {
+      id: payment.creator.user.id,
+      email: payment.creator.user.email,
+      full_name: payment.creator.user.full_name,
+      avatar_url: payment.creator.user.avatar_url,
+    } : null,
+    project: payment.project || null,
   }));
 
   return data;
