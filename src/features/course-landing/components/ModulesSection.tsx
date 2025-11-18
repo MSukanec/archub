@@ -1,0 +1,128 @@
+import { useState } from 'react';
+import { ChevronDown, ChevronUp, PlayCircle, Lock, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { Badge } from '@/components/ui/badge';
+import { formatMinutesToTime } from '../mappers';
+import type { ModuleWithLessons } from '../types';
+
+interface ModulesSectionProps {
+  modules: ModuleWithLessons[];
+}
+
+export function ModulesSection({ modules }: ModulesSectionProps) {
+  const [openModules, setOpenModules] = useState<Set<string>>(new Set([modules[0]?.id]));
+
+  const toggleModule = (moduleId: string) => {
+    setOpenModules((prev) => {
+      const next = new Set(prev);
+      if (next.has(moduleId)) {
+        next.delete(moduleId);
+      } else {
+        next.add(moduleId);
+      }
+      return next;
+    });
+  };
+
+  if (modules.length === 0) return null;
+
+  return (
+    <section className="py-16 sm:py-20 bg-muted/30">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+            Módulos y Lecciones
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Contenido estructurado paso a paso para tu aprendizaje
+          </p>
+        </div>
+
+        <div className="max-w-4xl mx-auto space-y-4">
+          {modules.map((module, idx) => {
+            const isOpen = openModules.has(module.id);
+            return (
+              <Collapsible
+                key={module.id}
+                open={isOpen}
+                onOpenChange={() => toggleModule(module.id)}
+              >
+                <div className="bg-background rounded-lg border shadow-sm">
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="w-full px-6 py-6 h-auto flex items-center justify-between hover:bg-muted/50"
+                    >
+                      <div className="flex items-start gap-4 text-left flex-1">
+                        <span className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">
+                          {idx + 1}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-lg font-semibold mb-1">{module.title}</h3>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <PlayCircle className="w-4 h-4" />
+                              {module.lessons.length} lecciones
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-4 h-4" />
+                              {formatMinutesToTime(module.total_duration_min)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      {isOpen ? (
+                        <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0 ml-2" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0 ml-2" />
+                      )}
+                    </Button>
+                  </CollapsibleTrigger>
+
+                  <CollapsibleContent>
+                    <div className="border-t">
+                      {module.lessons.map((lesson) => (
+                        <div
+                          key={lesson.id}
+                          className="flex items-center gap-4 px-6 py-4 hover:bg-muted/30 border-b last:border-b-0"
+                        >
+                          <div className="flex-shrink-0">
+                            {lesson.free_preview ? (
+                              <PlayCircle className="w-5 h-5 text-primary" />
+                            ) : (
+                              <Lock className="w-5 h-5 text-muted-foreground" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm">{lesson.title}</p>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {lesson.free_preview && (
+                              <Badge variant="outline" className="text-xs">
+                                Vista Previa
+                              </Badge>
+                            )}
+                            {lesson.duration_sec && (
+                              <span className="text-sm text-muted-foreground">
+                                {formatMinutesToTime(lesson.duration_sec / 60)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CollapsibleContent>
+                </div>
+              </Collapsible>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}

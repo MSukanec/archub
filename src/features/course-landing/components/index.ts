@@ -1,0 +1,6 @@
+export { HeroSection } from './HeroSection';
+export { InstructorSection } from './InstructorSection';
+export { ModulesSection } from './ModulesSection';
+export { FeaturesSection } from './FeaturesSection';
+export { FAQSection } from './FAQSection';
+export { CTAFooter } from './CTAFooter';
