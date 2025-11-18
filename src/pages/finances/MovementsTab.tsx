@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useFinancialMovements, PAYMENT_STATUS, MOVEMENT_TYPES } from '@/features/finances';
 import { useProjectContext } from '@/stores/projectContext';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,10 +12,14 @@ import type { FinancialMovementWithRelations } from '@/features/finances';
 
 export function MovementsTab() {
   const { currentOrganizationId, selectedProjectId } = useProjectContext();
+  const { data: userData } = useCurrentUser();
   const { data: movements = [], isLoading, error } = useFinancialMovements(
     currentOrganizationId || undefined,
     selectedProjectId
   );
+  
+  // Verificar si el plan es TEAMS
+  const isTeamsPlan = userData?.organization?.plan?.name === 'Teams';
 
   // Format currency helper
   const formatCurrency = (amount: number, currencySymbol: string = '$') => {
@@ -51,14 +56,16 @@ export function MovementsTab() {
       });
     }
 
-    // 3. Creador
-    baseColumns.push({
-      key: 'creator',
-      label: 'Creador',
-      render: (item: FinancialMovementWithRelations) => (
-        <span className="text-sm">{item.creator?.full_name || item.creator?.email || '-'}</span>
-      ),
-    });
+    // 3. Creador - Solo visible en plan TEAMS
+    if (isTeamsPlan) {
+      baseColumns.push({
+        key: 'creator',
+        label: 'Creador',
+        render: (item: FinancialMovementWithRelations) => (
+          <span className="text-sm">{item.creator?.full_name || item.creator?.email || '-'}</span>
+        ),
+      });
+    }
 
     // 4. Tipo - Badge con contenido blanco y fondo de color
     baseColumns.push({
@@ -119,14 +126,14 @@ export function MovementsTab() {
       ),
     });
 
-    // 8. Monto - con cotización abajo
+    // 8. Monto - con cotización abajo, alineado a la derecha
     baseColumns.push({
       key: 'amount',
       label: 'Monto',
       render: (item: FinancialMovementWithRelations) => {
         const isPositive = item.amount >= 0;
         return (
-          <div className="flex flex-col">
+          <div className="flex flex-col items-end">
             <span className={`text-sm font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
               {formatCurrency(Math.abs(item.amount), item.currency?.symbol)}
             </span>
@@ -158,7 +165,7 @@ export function MovementsTab() {
     });
 
     return baseColumns;
-  }, [isOrganizationView]);
+  }, [isOrganizationView, isTeamsPlan]);
 
   if (isLoading) {
     return (
