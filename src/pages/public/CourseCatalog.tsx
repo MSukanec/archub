@@ -9,6 +9,11 @@ export default function CourseCatalog() {
   if (error) {
     return (
       <PublicLayout
+        headerNavigation={[
+          { label: "Cursos", href: "/cursos" },
+          { label: "Características", href: "/#features" },
+          { label: "Capacidades", href: "/#capabilities" }
+        ]}
         seo={{
           title: "Cursos Online | Seencel",
           description: "Explora nuestro catálogo de cursos profesionales. Aprende a tu ritmo con los mejores instructores.",
@@ -29,6 +34,11 @@ export default function CourseCatalog() {
 
   return (
     <PublicLayout
+      headerNavigation={[
+        { label: "Cursos", href: "/cursos" },
+        { label: "Características", href: "/#features" },
+        { label: "Capacidades", href: "/#capabilities" }
+      ]}
       seo={{
         title: "Cursos Online | Seencel",
         description: "Explora nuestro catálogo de cursos profesionales. Aprende a tu ritmo con los mejores instructores.",

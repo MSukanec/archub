@@ -63,7 +63,11 @@ export default function Privacy() {
 
   return (
     <PublicLayout 
-      headerRightContent="Última actualización: Noviembre 2025"
+      headerNavigation={[
+        { label: "Cursos", href: "/cursos" },
+        { label: "Características", href: "/#features" },
+        { label: "Capacidades", href: "/#capabilities" }
+      ]}
       seo={{
         title: "Política de Privacidad - Seencel",
         description: "Política de privacidad de Seencel. Información sobre cómo recopilamos, usamos, compartimos y protegemos tus datos personales. Cumplimiento con Google OAuth y normativas de privacidad.",

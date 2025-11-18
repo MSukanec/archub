@@ -53,7 +53,9 @@ export default function CourseLanding() {
   return (
     <PublicLayout
       headerNavigation={[
-        { label: 'Ver todos los cursos', href: '/cursos' }
+        { label: "Cursos", href: "/cursos" },
+        { label: "Características", href: "/#features" },
+        { label: "Capacidades", href: "/#capabilities" }
       ]}
       seo={{
         title: seoTitle,
