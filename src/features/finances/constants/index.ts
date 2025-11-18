@@ -50,10 +50,15 @@ export const MOVEMENT_TYPES = {
     icon: "CreditCard",
     color: "red" 
   },
-  partner_payment: { 
-    label: "Pago a Socio", 
-    icon: "Handshake",
-    color: "teal" 
+  partner_contribution: { 
+    label: "Aporte de Socio", 
+    icon: "TrendingUp",
+    color: "green" 
+  },
+  partner_withdrawal: { 
+    label: "Retiro de Socio", 
+    icon: "TrendingDown",
+    color: "red" 
   },
 } as const;
 
