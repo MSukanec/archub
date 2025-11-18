@@ -13,7 +13,6 @@ interface ClientPayment {
   reference: string | null;
   notes: string | null;
   file_url: string | null;
-  contact_id: string | null;
   client_id: string | null;
   wallet_id: string | null;
   currency_id: string;
@@ -21,22 +20,22 @@ interface ClientPayment {
   organization_id: string;
   
   // Datos expandidos
-  contact: {
-    id: string;
-    first_name: string | null;
-    last_name: string | null;
-    full_name: string | null;
-    email: string | null;
-    phone?: string | null;
-    company_name?: string | null;
-    linked_user?: {
-      id: string;
-      avatar_url?: string;
-    } | null;
-  } | null;
   project_client: {
     id: string;
     unit: string | null;
+    contact: {
+      id: string;
+      first_name: string | null;
+      last_name: string | null;
+      full_name: string | null;
+      email: string | null;
+      phone?: string | null;
+      company_name?: string | null;
+      linked_user?: {
+        id: string;
+        avatar_url?: string;
+      } | null;
+    } | null;
   } | null;
   currency: {
     id: string;
@@ -45,7 +44,15 @@ interface ClientPayment {
   } | null;
   wallet: {
     id: string;
-    name: string | null;
+    organization_id: string;
+    wallet_id: string;
+    is_active: boolean;
+    is_default: boolean;
+    wallets: {
+      id: string;
+      name: string;
+      is_active: boolean;
+    } | null;
   } | null;
   projects?: {
     id: string;
@@ -76,7 +83,7 @@ const formatPaymentAmount = (amount: number, currencySymbol?: string): string =>
 
 // Helper para obtener el nombre del cliente
 const getClientName = (payment: ClientPayment): string => {
-  const contact = payment.contact;
+  const contact = payment.project_client?.contact;
   
   if (!contact) return 'Sin cliente';
   
@@ -97,7 +104,7 @@ const getClientName = (payment: ClientPayment): string => {
 
 // Helper para obtener las iniciales del cliente
 const getClientInitials = (payment: ClientPayment): string => {
-  const contact = payment.contact;
+  const contact = payment.project_client?.contact;
   
   if (!contact) return 'C';
   
@@ -146,7 +153,7 @@ export default function ClientPaymentRow({
 
   // Obtener avatar del cliente
   const getClientAvatar = () => {
-    return payment.contact?.linked_user?.avatar_url;
+    return payment.project_client?.contact?.linked_user?.avatar_url;
   };
 
   // Formatear fecha de pago
@@ -182,7 +189,7 @@ export default function ClientPaymentRow({
         <div className="text-muted-foreground text-sm truncate">
           {payment.project_client?.unit 
             ? `Unidad: ${payment.project_client.unit}`
-            : payment.wallet?.name || 'Sin billetera'
+            : payment.wallet?.wallets?.name || 'Sin billetera'
           }
         </div>
         {/* Línea 3: Fecha de pago */}

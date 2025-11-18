@@ -35,8 +35,7 @@ const clientPaymentSchema = z.object({
     required_error: "Fecha de pago es requerida",
   }),
   created_by: z.string().min(1, 'Creador es requerido'),
-  contact_id: z.string().min(1, 'Cliente es requerido'),
-  client_id: z.string().optional(),
+  client_id: z.string().min(1, 'Cliente es requerido'),
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
   currency_id: z.string().min(1, 'Moneda es requerida'),
@@ -96,8 +95,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
     defaultValues: {
       payment_date: new Date(),
       created_by: '',
-      contact_id: '',
-      client_id: undefined,
+      client_id: '',
       wallet_id: '',
       amount: 0,
       currency_id: '',
@@ -130,8 +128,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
       form.reset({
         payment_date: paymentDate,
         created_by: existingPayment.created_by || currentMember?.id || '',
-        contact_id: existingPayment.contact_id || '',
-        client_id: existingPayment.client_id || undefined,
+        client_id: existingPayment.client_id || '',
         wallet_id: existingPayment.wallet_id || '',
         amount: existingPayment.amount || 0,
         currency_id: existingPayment.currency_id || '',
@@ -184,17 +181,6 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
     }
   }, [selectedCurrency, mode, currencies, form])
 
-  // Find client_id from contact_id
-  const selectedContactId = form.watch('contact_id')
-  React.useEffect(() => {
-    if (selectedContactId && projectClients) {
-      const projectClient = projectClients.find(pc => pc.contact?.id === selectedContactId)
-      if (projectClient) {
-        form.setValue('client_id', projectClient.id)
-      }
-    }
-  }, [selectedContactId, projectClients, form])
-
   // File upload handler
   const handleFileUpload = async (file: File): Promise<string> => {
     const fileExt = file.name.split('.').pop()
@@ -242,36 +228,34 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
         await updatePaymentMutation.mutateAsync({
           paymentId,
           updates: {
-            contact_id: data.contact_id,
-            client_id: data.client_id || undefined,
+            client_id: data.client_id,
             wallet_id: data.wallet_id,
             amount: data.amount,
             currency_id: data.currency_id,
             exchange_rate: data.exchange_rate || 1,
             payment_date: format(data.payment_date, 'yyyy-MM-dd'),
             status: data.status,
-            reference: data.reference || undefined,
-            notes: data.notes || undefined,
-            file_url: fileUrl || undefined,
+            reference: data.reference || null,
+            notes: data.notes || null,
+            file_url: fileUrl || null,
           },
           organizationId,
         })
       } else {
         await createPaymentMutation.mutateAsync({
           payment: {
-            contact_id: data.contact_id,
-            client_id: data.client_id || undefined,
+            client_id: data.client_id,
             wallet_id: data.wallet_id,
             amount: data.amount,
             currency_id: data.currency_id,
             exchange_rate: data.exchange_rate || 1,
             payment_date: format(data.payment_date, 'yyyy-MM-dd'),
             status: data.status,
-            reference: data.reference || undefined,
-            notes: data.notes || undefined,
-            file_url: fileUrl || undefined,
-            commitment_id: undefined,
-            schedule_id: undefined,
+            reference: data.reference || null,
+            notes: data.notes || null,
+            file_url: fileUrl || null,
+            commitment_id: null,
+            schedule_id: null,
           },
           projectId,
           organizationId,
@@ -309,10 +293,10 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Cliente</h4>
           <div className="flex flex-col">
             <span className="text-base font-semibold">
-              {formatContactName(existingPayment.contact) || '-'}
+              {formatContactName(existingPayment.client?.contact) || '-'}
             </span>
-            {existingPayment.project_client?.unit && (
-              <span className="text-sm text-muted-foreground">Unidad: {existingPayment.project_client.unit}</span>
+            {existingPayment.client?.unit && (
+              <span className="text-sm text-muted-foreground">Unidad: {existingPayment.client.unit}</span>
             )}
           </div>
         </div>
@@ -338,7 +322,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Billetera</h4>
           <span className="text-sm font-medium">
-            {existingPayment.wallet?.name || '-'}
+            {existingPayment.wallet?.wallets?.name || '-'}
           </span>
         </div>
         <div>
@@ -464,7 +448,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
 
             <FormField
               control={form.control}
-              name="contact_id"
+              name="client_id"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Cliente *</FormLabel>
@@ -475,7 +459,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
                       </SelectTrigger>
                       <SelectContent>
                         {projectClients?.map((client) => (
-                          <SelectItem key={client.contact.id} value={client.contact.id}>
+                          <SelectItem key={client.id} value={client.id}>
                             {formatContactName(client.contact)}
                             {client.unit && ` - ${client.unit}`}
                           </SelectItem>

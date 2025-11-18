@@ -8,7 +8,6 @@ import type { ClientPayment, ClientPaymentWithRelations } from '../types';
  * - Cliente (project_clients con contact y role)
  * - Compromiso (client_commitments)
  * - Cronograma (client_payment_schedule)
- * - Contacto directo (contacts)
  * - Moneda (currencies)
  * - Billetera (organization_wallets)
  * 
@@ -101,28 +100,6 @@ export async function getClientPayments(
         created_at,
         updated_at
       ),
-      contact:contacts(
-        id,
-        organization_id,
-        first_name,
-        last_name,
-        full_name,
-        email,
-        phone,
-        company_name,
-        location,
-        notes,
-        national_id,
-        avatar_attachment_id,
-        avatar_updated_at,
-        is_local,
-        display_name_override,
-        linked_user_id,
-        linked_at,
-        sync_status,
-        created_at,
-        updated_at
-      ),
       currency:currencies(
         id,
         code,
@@ -165,7 +142,6 @@ export async function getClientPayments(
     } : null,
     commitment: payment.commitment || null,
     schedule: payment.schedule || null,
-    contact: payment.contact || null,
     currency: payment.currency || null,
     wallet: payment.wallet || null,
   }));
@@ -180,7 +156,6 @@ export async function getClientPayments(
  * - Cliente (project_clients con contact y role)
  * - Compromiso (client_commitments)
  * - Cronograma (client_payment_schedule)
- * - Contacto directo (contacts)
  * - Moneda (currencies)
  * - Billetera (organization_wallets)
  * 
@@ -273,28 +248,6 @@ export async function getClientPaymentById(
         created_at,
         updated_at
       ),
-      contact:contacts(
-        id,
-        organization_id,
-        first_name,
-        last_name,
-        full_name,
-        email,
-        phone,
-        company_name,
-        location,
-        notes,
-        national_id,
-        avatar_attachment_id,
-        avatar_updated_at,
-        is_local,
-        display_name_override,
-        linked_user_id,
-        linked_at,
-        sync_status,
-        created_at,
-        updated_at
-      ),
       currency:currencies(
         id,
         code,
@@ -337,7 +290,6 @@ export async function getClientPaymentById(
     } : null,
     commitment: data.commitment || null,
     schedule: data.schedule || null,
-    contact: data.contact || null,
     currency: data.currency || null,
     wallet: data.wallet || null,
   };
@@ -441,28 +393,6 @@ export async function createClientPayment(
         created_at,
         updated_at
       ),
-      contact:contacts(
-        id,
-        organization_id,
-        first_name,
-        last_name,
-        full_name,
-        email,
-        phone,
-        company_name,
-        location,
-        notes,
-        national_id,
-        avatar_attachment_id,
-        avatar_updated_at,
-        is_local,
-        display_name_override,
-        linked_user_id,
-        linked_at,
-        sync_status,
-        created_at,
-        updated_at
-      ),
       currency:currencies(
         id,
         code,
@@ -499,7 +429,6 @@ export async function createClientPayment(
     } : null,
     commitment: data.commitment || null,
     schedule: data.schedule || null,
-    contact: data.contact || null,
     currency: data.currency || null,
     wallet: data.wallet || null,
   };
@@ -601,28 +530,6 @@ export async function updateClientPayment(
         created_at,
         updated_at
       ),
-      contact:contacts(
-        id,
-        organization_id,
-        first_name,
-        last_name,
-        full_name,
-        email,
-        phone,
-        company_name,
-        location,
-        notes,
-        national_id,
-        avatar_attachment_id,
-        avatar_updated_at,
-        is_local,
-        display_name_override,
-        linked_user_id,
-        linked_at,
-        sync_status,
-        created_at,
-        updated_at
-      ),
       currency:currencies(
         id,
         code,
@@ -659,7 +566,6 @@ export async function updateClientPayment(
     } : null,
     commitment: data.commitment || null,
     schedule: data.schedule || null,
-    contact: data.contact || null,
     currency: data.currency || null,
     wallet: data.wallet || null,
   };

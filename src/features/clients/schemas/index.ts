@@ -34,7 +34,6 @@ export const clientPaymentSchema = z.object({
   client_id: z.string().nullable().optional(),
   commitment_id: z.string().nullable().optional(),
   schedule_id: z.string().nullable().optional(),
-  contact_id: z.string().nullable().optional(),
   amount: z.number().min(0.01, 'El monto debe ser mayor a 0'),
   currency_id: z.string().min(1, 'La moneda es requerida'),
   exchange_rate: z.number().min(0.0001, 'El tipo de cambio debe ser mayor a 0'),

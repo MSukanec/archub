@@ -30,7 +30,6 @@ interface ClientPayment {
   project_id: string;
   commitment_id: string | null;
   schedule_id: string | null;
-  contact_id: string | null;
   organization_id: string;
   client_id: string | null;
   amount: number;
@@ -44,22 +43,22 @@ interface ClientPayment {
   wallet_id: string | null;
   status: 'confirmed' | 'pending' | 'rejected' | 'void';
   file_url: string | null;
-  contact: {
-    id: string;
-    first_name: string | null;
-    last_name: string | null;
-    full_name: string | null;
-    email: string | null;
-    phone?: string | null;
-    company_name?: string | null;
-    linked_user?: {
-      id: string;
-      avatar_url?: string;
-    } | null;
-  } | null;
   project_client: {
     id: string;
     unit: string | null;
+    contact: {
+      id: string;
+      first_name: string | null;
+      last_name: string | null;
+      full_name: string | null;
+      email: string | null;
+      phone?: string | null;
+      company_name?: string | null;
+      linked_user?: {
+        id: string;
+        avatar_url?: string;
+      } | null;
+    } | null;
   } | null;
   currency: {
     id: string;
@@ -68,7 +67,15 @@ interface ClientPayment {
   } | null;
   wallet: {
     id: string;
-    name: string | null;
+    organization_id: string;
+    wallet_id: string;
+    is_active: boolean;
+    is_default: boolean;
+    wallets: {
+      id: string;
+      name: string;
+      is_active: boolean;
+    } | null;
   } | null;
   commitment: {
     id: string;
@@ -133,7 +140,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       project_id: payment.project_id,
       commitment_id: payment.commitment_id,
       schedule_id: payment.schedule_id,
-      contact_id: payment.contact_id,
       organization_id: payment.organization_id,
       client_id: payment.client_id,
       amount: payment.amount,
@@ -147,10 +153,10 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       wallet_id: payment.wallet_id,
       status: payment.status,
       file_url: payment.file_url,
-      contact: payment.contact,
       project_client: payment.client ? {
         id: payment.client.id,
         unit: payment.client.unit,
+        contact: payment.client.contact,
       } : null,
       currency: payment.currency,
       wallet: payment.wallet,
@@ -229,12 +235,12 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     const units = new Set<string>();
 
     allPayments.forEach(payment => {
-      if (payment.wallet?.name) wallets.add(payment.wallet.name);
+      if (payment.wallet?.wallets?.name) wallets.add(payment.wallet.wallets.name);
       if (payment.currency?.code) currencies.add(payment.currency.code);
-      if (payment.contact) {
-        const clientName = payment.contact.company_name || 
-                          payment.contact.full_name || 
-                          `${payment.contact.first_name || ''} ${payment.contact.last_name || ''}`.trim();
+      if (payment.project_client?.contact) {
+        const clientName = payment.project_client.contact.company_name || 
+                          payment.project_client.contact.full_name || 
+                          `${payment.project_client.contact.first_name || ''} ${payment.project_client.contact.last_name || ''}`.trim();
         if (clientName) clients.add(clientName);
       }
       if (payment.project_client?.unit) units.add(payment.project_client.unit);
@@ -252,7 +258,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   const clientPayments = useMemo(() => {
     return allPayments.filter(payment => {
       // Filter by wallet
-      if (filterWallet !== 'all' && payment.wallet?.name !== filterWallet) return false;
+      if (filterWallet !== 'all' && payment.wallet?.wallets?.name !== filterWallet) return false;
       
       // Filter by currency
       if (filterCurrency !== 'all' && payment.currency?.code !== filterCurrency) return false;
@@ -267,9 +273,9 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       
       // Filter by client
       if (filterClient !== 'all') {
-        const clientName = payment.contact?.company_name || 
-                          payment.contact?.full_name || 
-                          `${payment.contact?.first_name || ''} ${payment.contact?.last_name || ''}`.trim();
+        const clientName = payment.project_client?.contact?.company_name || 
+                          payment.project_client?.contact?.full_name || 
+                          `${payment.project_client?.contact?.first_name || ''} ${payment.project_client?.contact?.last_name || ''}`.trim();
         if (clientName !== filterClient) return false;
       }
       
@@ -298,9 +304,9 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   const handleDeletePayment = (payment: ClientPayment) => {
     if (!organizationId || !activeProjectId) return;
 
-    const clientName = payment.contact?.company_name || 
-                      payment.contact?.full_name || 
-                      `${payment.contact?.first_name || ''} ${payment.contact?.last_name || ''}`.trim();
+    const clientName = payment.project_client?.contact?.company_name || 
+                      payment.project_client?.contact?.full_name || 
+                      `${payment.project_client?.contact?.first_name || ''} ${payment.project_client?.contact?.last_name || ''}`.trim();
     const symbol = payment.currency?.symbol || '$';
     const formattedAmount = `${symbol} ${payment.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     const paymentLabel = `${clientName} - ${formattedAmount}`;
@@ -416,14 +422,14 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       sortable: true,
       width: '220px',
       render: (payment: ClientPayment) => {
-        const avatarUrl = payment.contact?.linked_user?.avatar_url;
-        const initials = payment.contact?.first_name?.[0] && payment.contact?.last_name?.[0]
-          ? `${payment.contact.first_name[0]}${payment.contact.last_name[0]}`
-          : payment.contact?.first_name?.[0] || '?';
+        const avatarUrl = payment.project_client?.contact?.linked_user?.avatar_url;
+        const initials = payment.project_client?.contact?.first_name?.[0] && payment.project_client?.contact?.last_name?.[0]
+          ? `${payment.project_client.contact.first_name[0]}${payment.project_client.contact.last_name[0]}`
+          : payment.project_client?.contact?.first_name?.[0] || '?';
         
-        const displayName = payment.contact?.company_name || 
-                           payment.contact?.full_name || 
-                           `${payment.contact?.first_name || ''} ${payment.contact?.last_name || ''}`.trim();
+        const displayName = payment.project_client?.contact?.company_name || 
+                           payment.project_client?.contact?.full_name || 
+                           `${payment.project_client?.contact?.first_name || ''} ${payment.project_client?.contact?.last_name || ''}`.trim();
         
         const unit = payment.project_client?.unit;
         
@@ -495,7 +501,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       sortable: true,
       align: 'right' as const,
       cellClassName: 'font-bold',
-      render: (payment: ClientPayment) => payment.wallet?.name || '-',
+      render: (payment: ClientPayment) => payment.wallet?.wallets?.name || '-',
     },
     {
       key: 'amount',

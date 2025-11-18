@@ -128,7 +128,6 @@ export interface ClientPayment {
   client_id: string | null;
   commitment_id: string | null;
   schedule_id: string | null;
-  contact_id: string | null;
   organization_id: string;
   amount: number;
   currency_id: string;
@@ -149,7 +148,6 @@ export interface ClientPaymentWithRelations extends ClientPayment {
   client: ProjectClientWithRelations | null;
   commitment: ClientCommitmentWithRelations | null;
   schedule: ClientPaymentScheduleWithRelations | null;
-  contact: Contact | null;
   currency: {
     id: string;
     code: string;
@@ -158,7 +156,17 @@ export interface ClientPaymentWithRelations extends ClientPayment {
   } | null;
   wallet: {
     id: string;
-    name: string;
+    organization_id: string;
+    wallet_id: string;
+    is_active: boolean;
+    is_default: boolean;
+    wallets: {
+      id: string;
+      name: string;
+      is_active: boolean;
+      created_at: string;
+      updated_at: string;
+    } | null;
   } | null;
 }
 
