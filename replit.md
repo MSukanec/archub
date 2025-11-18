@@ -46,7 +46,7 @@ Preferred communication style: Simple, everyday language.
   - **SEO Strategy**: Replicating user's WordPress site (ranks #2 on Google for "curso de archicad") with comprehensive SEO including structured data, keywords, and social meta tags.
   - **SEO Pattern (CRITICAL)**: All meta tags MUST be passed via PublicLayout's `seo` prop (keywords, ogImage, twitterImage) to ensure they render in document `<head>`. Never inject meta tags directly in JSX body - crawlers and social scrapers will miss them.
   - **Architecture Goal**: Template system where admins create courses → landing pages auto-generate (scalable like Domestika).
-  - **Admin Interface**: CourseFormModal updated with 9 marketing fields (instructor, marketing, SEO sections) with array handling for highlights and keywords.
+  - **Admin Interface**: AdminCourseView with dedicated Marketing/Landing tab (`AdminCourseMarketingTab.tsx`) featuring auto-save functionality for all landing page fields (instructor info, marketing highlights, SEO keywords). CourseFormModal updated with 9 marketing fields (instructor, marketing, SEO sections) with array handling for highlights and keywords. GET `/api/admin/courses/:id` endpoint for individual course retrieval.
   - **Complete User Flow**: Catalog (/cursos) → Individual landing (/cursos/:slug) → Enrollment → Private dashboard (/learning/courses/{id}) with seamless navigation between all pages.
 
 ### Feature Specifications
