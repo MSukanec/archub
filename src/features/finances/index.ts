@@ -10,6 +10,7 @@ export * from './services/getAllFinancialMovements';
 
 // Hooks
 export * from './hooks/use-financial-movements';
+export * from './hooks/use-financial-metrics';
 
 // Mappers
 export * from './mappers';
@@ -20,8 +21,7 @@ export * from './constants';
 export * from './schemas';
 
 // Components
-// TODO: Export components when created
-// export * from './components/FinancialMovementsTable';
+export * from './components/FinancialStatsSection';
 
 // Modals
 // TODO: Export modals when created

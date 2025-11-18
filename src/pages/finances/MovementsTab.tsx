@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
-import { useFinancialMovements, PAYMENT_STATUS, MOVEMENT_TYPES } from '@/features/finances';
+import { useFinancialMovements, PAYMENT_STATUS, MOVEMENT_TYPES, FinancialStatsSection } from '@/features/finances';
 import { useProjectContext } from '@/stores/projectContext';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,6 +18,9 @@ export function MovementsTab() {
     currentOrganizationId || undefined,
     selectedProjectId
   );
+  
+  // Obtener moneda principal de la organización
+  const { data: primaryCurrency } = useOrganizationDefaultCurrency(currentOrganizationId || undefined);
   
   // Verificar si el plan es TEAMS
   const isTeamsPlan = userData?.organization?.plan?.name === 'Teams';
@@ -197,21 +201,16 @@ export function MovementsTab() {
     );
   }
 
-  // Determinar si está filtrando por proyecto
-  const isFilteredByProject = !!selectedProjectId;
-  const scope = isFilteredByProject ? 'del proyecto actual' : 'de toda la organización';
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold">Movimientos Financieros</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Auditoría unificada de todos los pagos {scope} ({movements.length} registros)
-          </p>
-        </div>
-      </div>
+      {/* Financial Stats Section */}
+      <FinancialStatsSection 
+        movements={movements}
+        primaryCurrencyCode={primaryCurrency?.code}
+        primaryCurrencySymbol={primaryCurrency?.symbol}
+      />
 
+      {/* Movements Table */}
       <Table
         data={movements}
         columns={columns}
