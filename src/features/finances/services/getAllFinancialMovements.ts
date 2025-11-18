@@ -4,7 +4,7 @@ import type { FinancialMovementWithRelations } from '../types';
 import { mapClientPaymentsToFinancialMovements } from '../mappers';
 
 /**
- * Obtiene TODOS los movimientos financieros de una organización.
+ * Obtiene TODOS los movimientos financieros de una organización o proyecto.
  * 
  * Por ahora solo trae de client_payments usando el service existente,
  * pero eventualmente agregará datos de material_payments, personnel_payments, etc.
@@ -13,11 +13,13 @@ import { mapClientPaymentsToFinancialMovements } from '../mappers';
  * que agregue todas las tablas *_payments automáticamente.
  * 
  * @param organizationId - ID de la organización
+ * @param projectId - ID del proyecto (opcional). Si se provee, filtra por proyecto. Si es null, muestra toda la organización.
  * @returns Array de movimientos financieros unificados
  * @throws {Error} Si falla la query principal
  */
 export async function getAllFinancialMovements(
-  organizationId: string
+  organizationId: string,
+  projectId?: string | null
 ): Promise<FinancialMovementWithRelations[]> {
   if (!organizationId) {
     return [];
@@ -28,9 +30,119 @@ export async function getAllFinancialMovements(
   // O mejor aún, usar una VISTA de base de datos que agregue todo
   
   try {
-    // Get all client payments using the existing CLIENTS module service
-    // This follows the Feature-Sliced Design pattern by reusing the service layer
-    const clientPayments = await getClientPayments(organizationId);
+    // If projectId is provided, get payments for that specific project
+    // Otherwise, get all payments from the organization
+    let clientPayments;
+    
+    if (projectId) {
+      // Get payments for specific project using the existing CLIENTS module service
+      clientPayments = await getClientPayments(projectId, organizationId);
+    } else {
+      // Get ALL payments from the organization (across all projects)
+      const { data: paymentsData, error } = await supabase
+        .from('client_payments')
+        .select(`
+          *,
+          client:project_clients(
+            id,
+            project_id,
+            contact_id,
+            organization_id,
+            unit,
+            is_primary,
+            notes,
+            status,
+            client_role_id,
+            created_by,
+            created_at,
+            updated_at,
+            contact:contacts(
+              id,
+              organization_id,
+              first_name,
+              last_name,
+              full_name,
+              email,
+              phone,
+              company_name,
+              location,
+              notes,
+              national_id,
+              avatar_attachment_id,
+              avatar_updated_at,
+              is_local,
+              display_name_override,
+              linked_user_id,
+              linked_at,
+              sync_status,
+              created_at,
+              updated_at
+            ),
+            role:client_roles(
+              id,
+              organization_id,
+              name,
+              description,
+              is_default,
+              created_at,
+              updated_at
+            )
+          ),
+          commitment:client_commitments(
+            id,
+            project_id,
+            client_id,
+            contact_id,
+            organization_id,
+            amount,
+            currency_id,
+            exchange_rate,
+            created_by,
+            created_at,
+            updated_at
+          ),
+          schedule:client_payment_schedule(
+            id,
+            commitment_id,
+            organization_id,
+            due_date,
+            amount,
+            currency_id,
+            status,
+            paid_at,
+            payment_method,
+            notes,
+            created_at,
+            updated_at
+          ),
+          currency:currencies(
+            id,
+            code,
+            symbol,
+            name
+          ),
+          wallet:organization_wallets(
+            id,
+            organization_id,
+            wallet_id,
+            is_active,
+            is_default,
+            wallets:wallet_id(
+              id,
+              name,
+              is_active,
+              created_at,
+              updated_at
+            )
+          )
+        `)
+        .eq('organization_id', organizationId)
+        .order('payment_date', { ascending: false });
+
+      if (error) throw error;
+      
+      clientPayments = paymentsData || [];
+    }
 
     // Hydrate project and creator data for each payment
     // TODO: In the future, create a database VIEW that includes these joins automatically

@@ -10,8 +10,11 @@ import { DollarSign } from 'lucide-react';
 import type { FinancialMovementWithRelations } from '@/features/finances';
 
 export function MovementsTab() {
-  const { currentOrganizationId } = useProjectContext();
-  const { data: movements = [], isLoading, error } = useFinancialMovements(currentOrganizationId || undefined);
+  const { currentOrganizationId, selectedProjectId } = useProjectContext();
+  const { data: movements = [], isLoading, error } = useFinancialMovements(
+    currentOrganizationId || undefined,
+    selectedProjectId
+  );
 
   // Format currency helper
   const formatCurrency = (amount: number, currencySymbol: string = '$') => {
@@ -157,13 +160,17 @@ export function MovementsTab() {
     );
   }
 
+  // Determinar si está filtrando por proyecto
+  const isFilteredByProject = !!selectedProjectId;
+  const scope = isFilteredByProject ? 'del proyecto actual' : 'de toda la organización';
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-semibold">Movimientos Financieros</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Auditoría unificada de todos los pagos ({movements.length} registros)
+            Auditoría unificada de todos los pagos {scope} ({movements.length} registros)
           </p>
         </div>
       </div>

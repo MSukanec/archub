@@ -27,7 +27,15 @@ Preferred communication style: Simple, everyday language.
 ### Module Architecture (Feature-Sliced Design)
 - **CLIENTS Module**: Refactored with strict separation of concerns for services, hooks, types, mappers, pages, and modals. Services query Supabase tables directly with `organization_id` filtering for multi-tenancy.
 - **COURSE-LANDING Module**: Scalable course landing page system with public services for courses, modules, lessons, and FAQs (no auth required). Includes React Query hooks for caching, mappers for business logic, and modular components. Features SEO-optimized public pages (`/cursos`, `/cursos/:slug`) with meta tags, JSON-LD, and Open Graph. Implements a dual routing pattern for public landing and private dashboard. Admin interface includes auto-save for landing page fields.
-- **FINANCES Module**: Unified financial movements audit system. Services compose existing entity services (e.g., from CLIENTS module) for `getAllFinancialMovements`. Uses React Query hook `useFinancialMovements`. Defines a `FinancialMovement` interface to normalize various payment tables (e.g., client_payments, material_payments).
+- **FINANCES Module** (November 2025): Unified financial movements audit system following Feature-Sliced Design architecture:
+  - **Services** (`src/features/finances/services/`): `getAllFinancialMovements` composes existing CLIENTS module service (getClientPayments) instead of duplicating queries. Supports optional projectId parameter for filtering by project or showing all organization data.
+  - **Hooks** (`src/features/finances/hooks/`): `useFinancialMovements(organizationId, projectId)` with React Query caching. Query key includes projectId for proper cache invalidation.
+  - **Types** (`src/features/finances/types/`): Unified `FinancialMovement` interface normalizing all *_payments tables with movement_type discriminator.
+  - **Mappers** (`src/features/finances/mappers/`): Transform entity-specific payments into unified format. Currently supports client_payments; future expansion for material_payments, personnel_payments, etc.
+  - **Constants** (`src/features/finances/constants/`): FINANCIAL_QUERY_KEYS, MOVEMENT_TYPES, PAYMENT_STATUS (only valid ShadCN variants: default, secondary, destructive, outline).
+  - **Pages** (`src/pages/finances/`): Finances main page with MovementsTab displaying unified table. Header includes OrganizationMembers (ExpandableAvatarGroup) and ProjectSelectorButton for filtering.
+  - **Smart Filtering**: When projectId selected → filters by project. When no project selected (organization view) → shows all organization data.
+  - **Navigation**: Accessible via "Finanzas" button in experimental project sidebar (coming_soon restriction).
 
 ### Feature Specifications
 - **Core Modules**: Home, Project Management, Financial Management, Document Management, Learning Module, Community Map, Notification System.
