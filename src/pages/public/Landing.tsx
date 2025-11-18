@@ -196,6 +196,7 @@ export default function Landing() {
   return (
     <PublicLayout
       headerNavigation={[
+        { label: "Cursos", href: "/cursos" },
         { label: "Características", href: "#features" },
         { label: "Capacidades", href: "#capabilities" }
       ]}
