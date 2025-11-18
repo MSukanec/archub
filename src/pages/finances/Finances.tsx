@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Layout } from "@/components/layout/desktop/Layout";
 import { DollarSign } from "lucide-react";
 import { MovementsTab } from "./MovementsTab";
+import { PartnerMovementsTab } from "./PartnerMovementsTab";
 import { useCurrentUser } from "@/hooks/use-current-user";
 
 export default function Finances() {
@@ -10,6 +11,7 @@ export default function Finances() {
 
   const tabs = [
     { id: "movements", label: "Movimientos", isActive: activeTab === "movements" },
+    { id: "partner_movements", label: "Movimientos de Socios", isActive: activeTab === "partner_movements" },
   ];
 
   return (
@@ -26,6 +28,7 @@ export default function Finances() {
       }}
     >
       {activeTab === "movements" && <MovementsTab />}
+      {activeTab === "partner_movements" && <PartnerMovementsTab />}
     </Layout>
   );
 }
