@@ -3,6 +3,7 @@ import { supabaseAdmin } from "../../lib/supabase/admin.js";
 import { verifyAdminUser, HttpError } from "../../lib/auth/helpers.js";
 import {
   listEnrollments,
+  createEnrollment,
   updateEnrollment,
   deleteEnrollment
 } from "../../lib/handlers/admin/enrollments.js";
@@ -18,6 +19,24 @@ export async function getEnrollments(req: Request, res: Response) {
       ctx,
       course_id ? { course_id: course_id as string } : undefined
     );
+    
+    return result.success 
+      ? res.json(result.data)
+      : res.status(500).json({ error: result.error });
+  } catch (error: any) {
+    if (error instanceof HttpError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "Internal error" });
+  }
+}
+
+export async function postEnrollment(req: Request, res: Response) {
+  try {
+    await verifyAdminUser(req.headers.authorization);
+    
+    const ctx = { supabase: supabaseAdmin };
+    const result = await createEnrollment(ctx, req.body);
     
     return result.success 
       ? res.json(result.data)

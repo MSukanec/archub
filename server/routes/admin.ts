@@ -47,6 +47,7 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
 
   // ==================== ENROLLMENTS ====================
   app.get("/api/admin/enrollments", enrollmentsController.getEnrollments);
+  app.post("/api/admin/enrollments", enrollmentsController.postEnrollment);
   app.patch("/api/admin/enrollments/:id", enrollmentsController.patchEnrollment);
   app.delete("/api/admin/enrollments/:id", enrollmentsController.removeEnrollment);
 }
