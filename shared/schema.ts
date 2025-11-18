@@ -923,6 +923,18 @@ export const courses = pgTable("courses", {
   created_at: timestamp("created_at").notNull().defaultNow(),
   updated_at: timestamp("updated_at").notNull().defaultNow(),
   price: numeric("price", { precision: 10, scale: 2 }), // Price in USD (like plans table)
+  // 🎓 Instructor fields for landing pages
+  instructor_name: text("instructor_name"),
+  instructor_title: text("instructor_title"),
+  instructor_bio: text("instructor_bio"),
+  instructor_photo_url: text("instructor_photo_url"),
+  // 🎨 Marketing fields for landing pages
+  badge_text: text("badge_text"),
+  highlights: text("highlights").array(),
+  preview_video_id: text("preview_video_id"),
+  // 🔍 SEO fields for landing pages
+  seo_keywords: text("seo_keywords").array(),
+  og_image_url: text("og_image_url"),
 });
 
 export const course_modules = pgTable("course_modules", {
@@ -976,6 +988,16 @@ export const course_lesson_notes = pgTable("course_lesson_notes", {
   user_lesson_note_type_unique: unique().on(table.user_id, table.lesson_id, table.note_type),
 }));
 
+export const course_faqs = pgTable("course_faqs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  course_id: uuid("course_id").notNull(),
+  question: text("question").notNull(),
+  answer: text("answer").notNull(),
+  sort_index: integer("sort_index").notNull().default(0),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Schemas for courses
 export const insertCourseSchema = createInsertSchema(courses).omit({
   id: true,
@@ -1008,6 +1030,12 @@ export const insertCourseLessonNoteSchema = createInsertSchema(course_lesson_not
   updated_at: true,
 });
 
+export const insertCourseFaqSchema = createInsertSchema(course_faqs).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
 // Types for courses
 export type Course = typeof courses.$inferSelect;
 export type InsertCourse = z.infer<typeof insertCourseSchema>;
@@ -1019,6 +1047,8 @@ export type CourseLessonProgress = typeof course_lesson_progress.$inferSelect;
 export type InsertCourseLessonProgress = z.infer<typeof insertCourseLessonProgressSchema>;
 export type CourseLessonNote = typeof course_lesson_notes.$inferSelect;
 export type InsertCourseLessonNote = z.infer<typeof insertCourseLessonNoteSchema>;
+export type CourseFaq = typeof course_faqs.$inferSelect;
+export type InsertCourseFaq = z.infer<typeof insertCourseFaqSchema>;
 
 // Payment Tables
 export const payments = pgTable("payments", {
