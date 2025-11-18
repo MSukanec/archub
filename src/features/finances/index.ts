@@ -6,27 +6,23 @@
  */
 
 // Services
-// export * from './services/getFinancialMovements';
-// export * from './services/getAccountBalance';
+export * from './services/getAllFinancialMovements';
 
 // Hooks
-// export * from './hooks/use-financial-movements';
-// export * from './hooks/use-account-balance';
+export * from './hooks/use-financial-movements';
 
-// Components
-// export * from './components/MovementCard';
-// export * from './components/BalanceChart';
-
-// Modals
-// export * from './modals/FinancialMovementModal';
+// Mappers
+export * from './mappers';
 
 // Types, Constants, Schemas
 export * from './types';
 export * from './constants';
 export * from './schemas';
 
-// Mappers
-// export * from './mappers/financialMovementMapper';
+// Components
+// TODO: Export components when created
+// export * from './components/FinancialMovementsTable';
 
-// Utils
-// export * from './utils/calculateTotal';
+// Modals
+// TODO: Export modals when created
+// export * from './modals/FinancialMovementModal';
