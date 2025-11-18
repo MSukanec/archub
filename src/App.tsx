@@ -107,6 +107,7 @@ import FinancesPage from "@/pages/finances/Finances";
 import PricingPlan from "@/pages/settings/PricingPlan";
 import Billing from "@/pages/settings/Billing";
 import Members from "@/pages/settings/Members";
+import Partners from "@/pages/settings/Partners";
 import Finances from "@/pages/settings/Finances";
 import OrganizationBasicData from "@/pages/settings/OrganizationBasicData";
 import OrganizationActivity from "@/pages/settings/OrganizationActivity";
@@ -219,6 +220,7 @@ function Router() {
         {/* Settings Routes */}
         <Route path="/settings/billing" component={Billing} />
         <Route path="/settings/members" component={Members} />
+        <Route path="/settings/partners" component={Partners} />
         <Route path="/settings/finances" component={Finances} />
         <Route path="/settings/organization-basic-data" component={OrganizationBasicData} />
         <Route path="/settings/organization-activity" component={OrganizationActivity} />
