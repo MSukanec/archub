@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
-import { TrendingUp, Plus, HandHeart } from 'lucide-react'
+import { TrendingUp, Plus } from 'lucide-react'
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
@@ -15,7 +15,6 @@ import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
 import { CapitalMembersSummaryTab } from './CapitalMembersSummaryTab'
 import { CapitalHistoryTab } from './CapitalHistoryTab'
 import CapitalFinancialSummaryTab from './CapitalFinancialSummaryTab'
-import { CapitalPartnersTab } from './CapitalPartnersTab'
 
 interface CapitalMovement {
   id: string
@@ -311,32 +310,11 @@ export default function FinancesCapitalMovements() {
       id: "details",
       label: "Detalle de Aportes/Retiros",
       isActive: activeTab === "details"
-    },
-    {
-      id: "partners",
-      label: "Socios",
-      isActive: activeTab === "partners"
     }
   ]
 
   // Get header actions based on active tab
   const getHeaderActions = () => {
-    if (activeTab === 'partners') {
-      return [
-        <Button
-          key="add-partner"
-          variant="default"
-          size="sm"
-          onClick={() => openModal('partner')}
-          className="h-8 px-3 text-xs font-normal"
-          data-testid="button-add-partner"
-        >
-          <HandHeart className="w-4 h-4 mr-1" />
-          Agregar Socio
-        </Button>
-      ];
-    }
-    
     if (movements.length > 0) {
       return [
         <Button
@@ -420,10 +398,6 @@ export default function FinancesCapitalMovements() {
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
-          )}
-
-          {activeTab === "partners" && (
-            <CapitalPartnersTab />
           )}
         </div>
       )}
