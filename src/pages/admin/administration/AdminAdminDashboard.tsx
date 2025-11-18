@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Card } from '@/components/ui/card'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card'
-import { Clock, TrendingUp } from 'lucide-react'
+import { Clock, TrendingUp, UserPlus } from 'lucide-react'
 import { format, subMonths, startOfMonth, endOfMonth, isAfter, isBefore } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
@@ -199,45 +199,20 @@ export default function AdminAdminDashboard() {
     refetchInterval: 30000 // Auto-refresh cada 30 segundos
   })
 
-  // Organizaciones más activas (por última actividad) - OPTIMIZADO
-  const { data: activeOrganizations, isLoading: loadingOrgs } = useQuery({
-    queryKey: ['most-active-organizations'],
+  // Últimas organizaciones registradas - OPTIMIZADO
+  const { data: recentOrganizations, isLoading: loadingOrgs } = useQuery({
+    queryKey: ['recently-registered-organizations'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not available')
 
-      // ✅ OPTIMIZACIÓN: Un solo query con JOIN y GROUP BY
-      // Obtener organizaciones con su última actividad en una sola consulta
+      // Obtener las últimas organizaciones registradas ordenadas por created_at
       const { data } = await supabase
-        .from('user_presence')
-        .select(`
-          org_id,
-          last_seen_at,
-          organizations!inner(id, name, is_active)
-        `)
-        .eq('organizations.is_active', true)
-        .order('last_seen_at', { ascending: false })
+        .from('organizations')
+        .select('id, name, created_at')
+        .order('created_at', { ascending: false })
+        .limit(10)
 
-      if (!data) return []
-
-      // Agrupar por org_id y tomar solo la más reciente de cada una
-      const orgMap = new Map<string, any>()
-      
-      for (const item of data) {
-        const orgId = item.org_id
-        const org = item.organizations as any
-        if (!orgMap.has(orgId)) {
-          orgMap.set(orgId, {
-            id: org.id,
-            name: org.name,
-            last_seen_at: item.last_seen_at
-          })
-        }
-      }
-
-      // Convertir a array, ordenar y tomar top 5
-      return Array.from(orgMap.values())
-        .sort((a, b) => new Date(b.last_seen_at).getTime() - new Date(a.last_seen_at).getTime())
-        .slice(0, 5)
+      return data || []
     },
     enabled: !!supabase,
     staleTime: 30000, // Cache 30 segundos
@@ -403,12 +378,12 @@ export default function AdminAdminDashboard() {
           )}
         </Card>
 
-        {/* Organizaciones Más Activas */}
-        <Card className="p-4" data-testid="card-organizaciones-activas">
+        {/* Últimos Registrados */}
+        <Card className="p-4" data-testid="card-organizaciones-recientes">
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="h-4 w-4" />
+            <UserPlus className="h-4 w-4" />
             <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-              Organizaciones Más Activas
+              Últimos Registrados
             </p>
           </div>
           {loadingOrgs ? (
@@ -417,27 +392,40 @@ export default function AdminAdminDashboard() {
                 <Skeleton key={i} className="h-16" />
               ))}
             </div>
-          ) : activeOrganizations && activeOrganizations.length > 0 ? (
-            <div className="space-y-3">
-              {activeOrganizations.map((org: any, index: number) => (
-                <div key={org.id} className="flex items-start justify-between p-3 rounded-lg border">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <span className="text-sm font-bold text-primary">{index + 1}</span>
-                    </div>
+          ) : recentOrganizations && recentOrganizations.length > 0 ? (
+            <>
+              <div className="space-y-2">
+                {recentOrganizations.map((org: any) => (
+                  <div key={org.id} className="flex items-start justify-between gap-3 p-2 rounded-lg border hover:bg-muted/30 transition-colors">
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{org.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Última actividad: {format(new Date(org.last_seen_at), "d 'de' MMMM, HH:mm", { locale: es })}
+                      <p className="font-semibold truncate text-sm">{org.name}</p>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">
+                        Organización
                       </p>
                     </div>
+                    <div className="flex-shrink-0">
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {format(new Date(org.created_at), "d 'de' MMM, HH:mm", { locale: es })}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+              <a 
+                href="/admin/administration" 
+                onClick={(e) => {
+                  e.preventDefault()
+                  window.location.href = '/admin/administration'
+                }}
+                className="block mt-4 pt-3 border-t text-center text-sm hover:underline transition-all"
+                style={{ color: 'hsl(var(--accent))' }}
+              >
+                Ver más organizaciones
+              </a>
+            </>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-8">
-              No hay datos de organizaciones activas
+              No hay organizaciones registradas
             </p>
           )}
         </Card>
