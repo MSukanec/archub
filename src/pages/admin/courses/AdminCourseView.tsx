@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { Layout } from '@/components/layout/desktop/Layout';
 import AdminCourseDataTab from './view/AdminCourseDataTab';
 import AdminCourseContentTab from './view/AdminCourseContentTab';
+import AdminCourseMarketingTab from './view/AdminCourseMarketingTab';
 import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
@@ -105,6 +106,11 @@ export default function AdminCourseView() {
       isActive: activeTab === 'Datos del Curso'
     },
     {
+      id: 'Marketing/Landing',
+      label: 'Marketing/Landing',
+      isActive: activeTab === 'Marketing/Landing'
+    },
+    {
       id: 'Contenido del Curso',
       label: 'Contenido del Curso',
       isActive: activeTab === 'Contenido del Curso'
@@ -172,6 +178,8 @@ export default function AdminCourseView() {
     switch (activeTab) {
       case 'Datos del Curso':
         return <AdminCourseDataTab courseId={id} />;
+      case 'Marketing/Landing':
+        return <AdminCourseMarketingTab courseId={id} />;
       case 'Contenido del Curso':
         return <AdminCourseContentTab courseId={id} modules={modules} lessons={lessons} />;
       default:
