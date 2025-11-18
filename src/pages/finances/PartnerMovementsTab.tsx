@@ -21,7 +21,7 @@ export function PartnerMovementsTab() {
   );
   
   // Obtener moneda principal de la organización
-  const { data: primaryCurrency } = useOrganizationDefaultCurrency(currentOrganizationId || undefined);
+  const { data: primaryCurrency, isLoading: isLoadingCurrency } = useOrganizationDefaultCurrency(currentOrganizationId || undefined);
 
   // Format currency helper
   const formatCurrency = (amount: number, currencySymbol: string = '$') => {
@@ -154,6 +154,7 @@ export function PartnerMovementsTab() {
         movements={movements}
         primaryCurrencyCode={primaryCurrency?.code}
         primaryCurrencySymbol={primaryCurrency?.symbol}
+        isLoadingCurrency={isLoadingCurrency}
       />
 
       {/* Movements Table */}

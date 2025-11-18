@@ -21,7 +21,9 @@ export function usePartnerMetrics(
   return useMemo(() => {
     // Helper: Convert amount to primary currency using exchange rate
     const convertToPrimaryCurrency = (movement: FinancialMovementWithRelations): number => {
-      if (!primaryCurrencyCode) return movement.amount;
+      // If no primary currency is provided, we cannot safely convert
+      // Return 0 to avoid mixing currencies
+      if (!primaryCurrencyCode) return 0;
       
       // If already in primary currency, return as-is
       if (movement.currency?.code === primaryCurrencyCode) {

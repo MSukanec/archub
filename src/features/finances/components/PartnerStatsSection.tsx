@@ -1,5 +1,6 @@
 import { TrendingUp, TrendingDown, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { usePartnerMetrics } from '../hooks/use-partner-metrics';
 import type { FinancialMovementWithRelations } from '../types';
 
@@ -7,12 +8,14 @@ interface PartnerStatsSectionProps {
   movements: FinancialMovementWithRelations[];
   primaryCurrencyCode?: string;
   primaryCurrencySymbol?: string;
+  isLoadingCurrency?: boolean;
 }
 
 export function PartnerStatsSection({ 
   movements, 
   primaryCurrencyCode,
-  primaryCurrencySymbol = '$'
+  primaryCurrencySymbol = '$',
+  isLoadingCurrency = false
 }: PartnerStatsSectionProps) {
   const { 
     totalInPrimaryCurrency, 
@@ -31,6 +34,19 @@ export function PartnerStatsSection({
   };
 
   const isPositive = totalInPrimaryCurrency >= 0;
+
+  // Show skeletons while currency is loading
+  if (isLoadingCurrency) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i} className="p-6">
+            <Skeleton className="h-24" />
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
