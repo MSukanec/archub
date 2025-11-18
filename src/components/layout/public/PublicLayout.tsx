@@ -14,17 +14,13 @@ interface SEOProps {
 
 interface PublicLayoutProps {
   children: React.ReactNode;
-  headerRightContent?: React.ReactNode;
   headerNavigation?: Array<{ label: string; href: string }>;
-  headerActions?: React.ReactNode;
   seo?: SEOProps;
 }
 
 export function PublicLayout({ 
   children, 
-  headerRightContent, 
   headerNavigation,
-  headerActions,
   seo 
 }: PublicLayoutProps) {
   useEffect(() => {
@@ -138,11 +134,7 @@ export function PublicLayout({
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <PublicHeader 
-        rightContent={headerRightContent}
-        navigation={headerNavigation}
-        actions={headerActions}
-      />
+      <PublicHeader navigation={headerNavigation} />
       <div className="container mx-auto px-6 py-12 flex-1">
         {children}
       </div>

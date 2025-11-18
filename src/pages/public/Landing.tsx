@@ -1,7 +1,5 @@
 import { Link } from "wouter";
-import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Building, 
   Users, 
@@ -13,7 +11,6 @@ import {
   Shield,
   CheckCircle,
   ArrowRight,
-  LogOut,
   Calculator,
   ClipboardList,
   Folder,
@@ -23,7 +20,6 @@ import {
   Zap,
   Package
 } from "lucide-react";
-import { useAuthStore } from "@/stores/authStore";
 import { PublicLayout } from "@/components/layout/public/PublicLayout";
 
 const coreFeatures = [
@@ -135,64 +131,6 @@ const capabilities = [
 ];
 
 export default function Landing() {
-  const { user, loading, initialized, initialize, logout } = useAuthStore();
-
-  useEffect(() => {
-    if (!initialized && !loading) {
-      initialize();
-    }
-  }, [initialize, initialized, loading]);
-
-  const getUserInitials = (user: any) => {
-    if (!user) return "U";
-    const name = user.user_metadata?.full_name || user.email || "Usuario";
-    return name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
-  };
-
-  const renderHeaderActions = () => {
-    return !loading && (
-      user ? (
-        <div className="flex items-center space-x-3">
-          <Link href="/home">
-            <Button size="sm" className="h-8 px-3">
-              Ingresar
-            </Button>
-          </Link>
-          <div className="flex items-center space-x-2 group relative">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={user.user_metadata?.avatar_url} />
-              <AvatarFallback className="text-xs bg-card">
-                {getUserInitials(user)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="hidden group-hover:block absolute top-full right-0 mt-2 w-48 py-2 rounded-md shadow-lg z-50 bg-popover border">
-              <button
-                onClick={logout}
-                className="flex items-center w-full px-4 py-2 text-sm hover:opacity-80"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Cerrar sesión
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="flex items-center space-x-3">
-          <Link href="/login">
-            <Button variant="ghost" size="sm" className="h-8 px-3">
-              Iniciar Sesión
-            </Button>
-          </Link>
-          <Link href="/register">
-            <Button size="sm" className="h-8 px-3">
-              Comenzar Gratis
-            </Button>
-          </Link>
-        </div>
-      )
-    );
-  };
-
   return (
     <PublicLayout
       headerNavigation={[
@@ -200,7 +138,6 @@ export default function Landing() {
         { label: "Características", href: "#features" },
         { label: "Capacidades", href: "#capabilities" }
       ]}
-      headerActions={renderHeaderActions()}
     >
 
       {/* Hero Section */}
