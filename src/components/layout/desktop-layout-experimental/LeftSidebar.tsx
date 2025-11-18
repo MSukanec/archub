@@ -224,6 +224,7 @@ export function LeftSidebar() {
         { id: 'logs', label: 'Bitácora de Obra', icon: FileText, href: '/construction/logs', restricted: 'coming_soon' },
         { id: 'media', label: 'Archivos y Media', icon: FolderOpen, href: '/media', restricted: 'coming_soon' },
         { id: 'clients', label: 'Clientes', icon: Users, href: '/clients', restricted: 'coming_soon' },
+        { id: 'finances', label: 'Finanzas', icon: DollarSign, href: '/finances', restricted: 'coming_soon' },
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
       return [
