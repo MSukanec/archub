@@ -57,6 +57,9 @@ export default function CourseLanding() {
         description: seoDescription,
         ogTitle: seoTitle,
         ogDescription: seoDescription,
+        keywords: seoKeywords || undefined,
+        ogImage: ogImage || undefined,
+        twitterImage: ogImage || undefined,
       }}
     >
       {/* Structured Data (JSON-LD) for SEO */}
@@ -94,17 +97,6 @@ export default function CourseLanding() {
           }),
         }}
       />
-
-      {/* SEO Keywords Meta (added via head) */}
-      {seoKeywords && (
-        <meta name="keywords" content={seoKeywords} />
-      )}
-      {ogImage && (
-        <>
-          <meta property="og:image" content={ogImage} />
-          <meta name="twitter:image" content={ogImage} />
-        </>
-      )}
 
       {/* Landing Sections */}
       <div className="space-y-0">

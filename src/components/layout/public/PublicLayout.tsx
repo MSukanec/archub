@@ -7,6 +7,9 @@ interface SEOProps {
   description: string;
   ogTitle?: string;
   ogDescription?: string;
+  keywords?: string;
+  ogImage?: string;
+  twitterImage?: string;
 }
 
 interface PublicLayoutProps {
@@ -72,10 +75,35 @@ export function PublicLayout({
       }
     };
 
+    const setMetaName = (name: string, content: string) => {
+      let tag = document.querySelector(`meta[name="${name}"]`);
+      if (tag) {
+        tag.setAttribute("content", content);
+      } else {
+        tag = document.createElement("meta");
+        tag.setAttribute("name", name);
+        tag.setAttribute("content", content);
+        document.head.appendChild(tag);
+        createdTags.push(tag);
+      }
+    };
+
     setMetaTag("og:title", seo.ogTitle || seo.title);
     setMetaTag("og:description", seo.ogDescription || seo.description);
     setMetaTag("og:type", "website");
     setMetaTag("og:url", window.location.href);
+
+    if (seo.keywords) {
+      setMetaName("keywords", seo.keywords);
+    }
+
+    if (seo.ogImage) {
+      setMetaTag("og:image", seo.ogImage);
+    }
+
+    if (seo.twitterImage) {
+      setMetaName("twitter:image", seo.twitterImage);
+    }
 
     return () => {
       document.title = originalTitle;

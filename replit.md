@@ -35,6 +35,17 @@ Preferred communication style: Simple, everyday language.
   - **Security**: All services enforce organization_id filtering. Future enhancement: Row Level Security (RLS) policies recommended for contacts and client_roles tables.
   - **Data Quality**: All queries use TABLES directly (project_clients, client_commitments, client_payments, client_payment_schedule, client_roles, contacts), not SQL views.
 
+- **COURSE-LANDING Module** (November 2025): Scalable course landing page system following Feature-Sliced Design architecture:
+  - **Services** (`src/features/course-landing/services/`): Public async functions that query courses, modules, lessons, and FAQs from Supabase (NO AUTH required for public landing pages). Filters by `is_active` and `visibility='public'` for security.
+  - **Hooks** (`src/features/course-landing/hooks/`): React Query hook `useCourseLanding(slug)` for fetching complete landing data with 1-minute cache (landing pages rarely change).
+  - **Types** (`src/features/course-landing/types/`): `CourseLandingData`, `ModuleWithLessons`, `CourseStats` - all serializable for React Query caching.
+  - **Mappers** (`src/features/course-landing/mappers/`): Business logic isolated from UI. Functions: `mapModulesWithLessons`, `calculateCourseStats`, `formatMinutesToTime`, `formatDuration`.
+  - **Components** (`src/features/course-landing/components/`): Modular landing sections (HeroSection, InstructorSection, ModulesSection, FeaturesSection, FAQSection, CTAFooter) replicating Domestika-style design.
+  - **Pages** (`src/pages/public/CourseLanding.tsx`): SEO-optimized public page at `/cursos/:slug` with meta tags, JSON-LD structured data, and Open Graph tags for social sharing.
+  - **Dual Routing Pattern**: Public landing `/cursos/:slug` for marketing/SEO + Private dashboard `/learning/courses/{id}` for enrolled users.
+  - **SEO Strategy**: Replicating user's WordPress site (ranks #2 on Google for "curso de archicad") with comprehensive SEO including structured data, keywords, and social meta tags.
+  - **Architecture Goal**: Template system where admins create courses → landing pages auto-generate (scalable like Domestika).
+
 ### Feature Specifications
 - **Core Modules**: Home page, Project Management, Financial Management, Document Management, Learning Module, Community Map, and Notification System.
 - **Community Map**: Global interactive map showing all organization projects with location data, smart clustering, and simplified popups.
