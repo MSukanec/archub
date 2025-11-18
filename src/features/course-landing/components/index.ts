@@ -4,3 +4,5 @@ export { ModulesSection } from './ModulesSection';
 export { FeaturesSection } from './FeaturesSection';
 export { FAQSection } from './FAQSection';
 export { CTAFooter } from './CTAFooter';
+export { CourseCard } from './CourseCard';
+export { CourseGrid } from './CourseGrid';

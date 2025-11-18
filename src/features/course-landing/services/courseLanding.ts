@@ -58,3 +58,24 @@ export async function fetchCourseLandingBySlug(slug: string) {
     faqs: (faqs || []) as CourseFaq[],
   };
 }
+
+/**
+ * Fetch all public courses (NO AUTH required)
+ * Used for course catalog page
+ */
+export async function getAllPublicCourses() {
+  if (!supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  const { data: courses, error } = await supabase
+    .from('courses')
+    .select('id, slug, title, short_description, cover_url, price, badge_text, instructor_name, instructor_title')
+    .eq('is_active', true)
+    .eq('visibility', 'public')
+    .order('created_at', { ascending: false });
+
+  if (error) throw new Error(`Failed to fetch courses: ${error.message}`);
+
+  return (courses || []) as Course[];
+}

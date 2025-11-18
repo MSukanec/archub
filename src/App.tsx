@@ -16,6 +16,7 @@ import Register from "@/pages/public/Register";
 import ForgotPassword from "@/pages/public/ForgotPassword";
 import Privacy from "@/pages/Privacy";
 import CourseLanding from "@/pages/public/CourseLanding";
+import CourseCatalog from "@/pages/public/CourseCatalog";
 
 // Protected Pages
 
@@ -137,6 +138,7 @@ function Router() {
       <Switch>
         {/* Public Routes */}
         <Route path="/" component={Landing} />
+        <Route path="/cursos" component={CourseCatalog} />
         <Route path="/cursos/:slug" component={CourseLanding} />
         <Route path="/privacy" component={Privacy} />
         <Route path="/login" component={Login} />
