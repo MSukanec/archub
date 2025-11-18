@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useLocation } from "wouter";
 import { PublicHeader } from "./PublicHeader";
 import { PublicFooter } from "./PublicFooter";
 
@@ -23,6 +24,26 @@ export function PublicLayout({
   headerNavigation,
   seo 
 }: PublicLayoutProps) {
+  const [location] = useLocation();
+
+  // Handle hash scrolling after SPA navigation
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        const element = document.querySelector(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    } else {
+      // Scroll to top when navigating to a page without hash
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [location]);
+
+  // Handle SEO meta tags
   useEffect(() => {
     if (!seo) return;
 

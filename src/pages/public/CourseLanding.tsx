@@ -14,9 +14,15 @@ export default function CourseLanding() {
   const { slug } = useParams<{ slug: string }>();
   const { data, isLoading, error } = useCourseLanding(slug || '');
 
+  const navigationLinks = [
+    { label: "Cursos", href: "/cursos" },
+    { label: "Características", href: "/#features" },
+    { label: "Capacidades", href: "/#capabilities" }
+  ];
+
   if (isLoading) {
     return (
-      <PublicLayout>
+      <PublicLayout headerNavigation={navigationLinks}>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center space-y-4">
             <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
@@ -29,7 +35,7 @@ export default function CourseLanding() {
 
   if (error || !data) {
     return (
-      <PublicLayout>
+      <PublicLayout headerNavigation={navigationLinks}>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center space-y-4">
             <h1 className="text-2xl font-bold">Curso no encontrado</h1>
@@ -52,11 +58,7 @@ export default function CourseLanding() {
 
   return (
     <PublicLayout
-      headerNavigation={[
-        { label: "Cursos", href: "/cursos" },
-        { label: "Características", href: "/#features" },
-        { label: "Capacidades", href: "/#capabilities" }
-      ]}
+      headerNavigation={navigationLinks}
       seo={{
         title: seoTitle,
         description: seoDescription,

@@ -97,16 +97,35 @@ export function PublicHeader({ navigation }: PublicHeaderProps) {
           {/* Desktop Navigation */}
           {navigation && navigation.length > 0 && (
             <nav className="hidden md:flex items-center space-x-6">
-              {navigation.map((item) => (
-                <a 
-                  key={item.href}
-                  href={item.href} 
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                  data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                >
-                  {item.label}
-                </a>
-              ))}
+              {navigation.map((item) => {
+                // Only use <a> for same-page hash anchors (starting with # without /)
+                // Use <Link> for everything else (routes and cross-page hashes like /#features)
+                const isSamePageAnchor = item.href.startsWith('#') && !item.href.includes('/');
+                
+                if (isSamePageAnchor) {
+                  return (
+                    <a 
+                      key={item.href}
+                      href={item.href} 
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                    >
+                      {item.label}
+                    </a>
+                  );
+                }
+                
+                return (
+                  <Link 
+                    key={item.href}
+                    href={item.href}
+                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
             </nav>
           )}
         </div>
@@ -131,17 +150,37 @@ export function PublicHeader({ navigation }: PublicHeaderProps) {
                   <SheetTitle>Menú</SheetTitle>
                 </SheetHeader>
                 <nav className="flex flex-col gap-4 mt-8">
-                  {navigation.map((item) => (
-                    <a
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setOpen(false)}
-                      className="text-lg font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
-                      data-testid={`link-mobile-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                    >
-                      {item.label}
-                    </a>
-                  ))}
+                  {navigation.map((item) => {
+                    // Only use <a> for same-page hash anchors (starting with # without /)
+                    // Use <Link> for everything else (routes and cross-page hashes like /#features)
+                    const isSamePageAnchor = item.href.startsWith('#') && !item.href.includes('/');
+                    
+                    if (isSamePageAnchor) {
+                      return (
+                        <a
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setOpen(false)}
+                          className="text-lg font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+                          data-testid={`link-mobile-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                        >
+                          {item.label}
+                        </a>
+                      );
+                    }
+                    
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setOpen(false)}
+                        className="text-lg font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+                        data-testid={`link-mobile-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })}
                 </nav>
               </SheetContent>
             </Sheet>
