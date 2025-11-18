@@ -104,20 +104,21 @@ export function MovementsTab() {
       ),
     },
     {
+      key: 'creator',
+      label: 'Creador',
+      render: (item: FinancialMovementWithRelations) => (
+        <span className="text-sm">{item.creator?.full_name || item.creator?.email || '-'}</span>
+      ),
+    },
+    {
       key: 'status',
       label: 'Estado',
       render: (item: FinancialMovementWithRelations) => {
         const statusConfig = PAYMENT_STATUS[item.status as keyof typeof PAYMENT_STATUS];
-        const variantMap = {
-          success: 'default',
-          warning: 'secondary',
-          destructive: 'destructive',
-          secondary: 'secondary',
-        } as const;
         return (
           <Badge 
-            variant={variantMap[statusConfig?.variant] || 'secondary'} 
-            className={`text-xs ${statusConfig?.variant === 'success' ? 'bg-green-100 text-green-800' : ''}`}
+            variant={statusConfig?.variant || 'secondary'} 
+            className={`text-xs ${statusConfig?.variant === 'default' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' : ''}`}
           >
             {statusConfig?.label || item.status}
           </Badge>
@@ -139,7 +140,7 @@ export function MovementsTab() {
   if (error) {
     return (
       <EmptyState
-        icon={DollarSign as any}
+        icon={<DollarSign className="w-12 h-12" />}
         title="Error al cargar movimientos"
         description="Hubo un problema al cargar los movimientos financieros."
       />
@@ -149,7 +150,7 @@ export function MovementsTab() {
   if (movements.length === 0) {
     return (
       <EmptyState
-        icon={DollarSign as any}
+        icon={<DollarSign className="w-12 h-12" />}
         title="No hay movimientos"
         description="No se encontraron movimientos financieros en esta organización."
       />
@@ -172,7 +173,7 @@ export function MovementsTab() {
         columns={columns}
         emptyState={
           <EmptyState
-            icon={DollarSign as any}
+            icon={<DollarSign className="w-12 h-12" />}
             title="No hay movimientos"
             description="No se encontraron movimientos financieros."
           />

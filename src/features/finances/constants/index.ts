@@ -59,15 +59,19 @@ export const MOVEMENT_TYPES = {
 
 // ========== Payment Status ==========
 
+/**
+ * Payment status configurations.
+ * Only using valid ShadCN badge variants: default, secondary, destructive, outline
+ */
 export const PAYMENT_STATUS = {
   confirmed: { 
     label: "Confirmado", 
-    variant: "success" as const,
+    variant: "default" as const,
     color: "green" 
   },
   pending: { 
     label: "Pendiente", 
-    variant: "warning" as const,
+    variant: "secondary" as const,
     color: "yellow" 
   },
   rejected: { 
@@ -77,7 +81,7 @@ export const PAYMENT_STATUS = {
   },
   void: { 
     label: "Anulado", 
-    variant: "secondary" as const,
+    variant: "outline" as const,
     color: "gray" 
   },
 } as const;

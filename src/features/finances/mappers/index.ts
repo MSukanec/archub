@@ -65,8 +65,13 @@ export function mapClientPaymentToFinancialMovement(
     general_cost_id: null,
     partner_id: null,
     
-    // Relations - Project (note: project relation not included in client_payments, will be null)
-    project: null, // TODO: Fetch project data separately or use a database view
+    // Relations - Project (hydrated by service)
+    project: clientPayment.project ? {
+      id: clientPayment.project.id,
+      name: clientPayment.project.name,
+      code: clientPayment.project.code,
+      color: clientPayment.project.color,
+    } : null,
     
     // Relations - Currency
     currency: clientPayment.currency ? {
@@ -82,8 +87,13 @@ export function mapClientPaymentToFinancialMovement(
       name: clientPayment.wallet.wallets.name,
     } : null,
     
-    // Relations - Creator (note: creator relation not included in client_payments, will be null)
-    creator: null, // TODO: Fetch creator data separately or use a database view
+    // Relations - Creator (hydrated by service)
+    creator: clientPayment.creator ? {
+      id: clientPayment.creator.id,
+      email: clientPayment.creator.email,
+      full_name: clientPayment.creator.full_name,
+      avatar_url: clientPayment.creator.avatar_url,
+    } : null,
     
     // Relations - Client (already populated)
     client: clientPayment.client ? {

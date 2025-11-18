@@ -1,12 +1,13 @@
 import { getClientPayments } from '@/features/clients/services/clientPayments';
+import { supabase } from '@/lib/supabase';
 import type { FinancialMovementWithRelations } from '../types';
 import { mapClientPaymentsToFinancialMovements } from '../mappers';
 
 /**
  * Obtiene TODOS los movimientos financieros de una organización.
  * 
- * Por ahora solo trae de client_payments, pero eventualmente
- * agregará datos de material_payments, personnel_payments, etc.
+ * Por ahora solo trae de client_payments usando el service existente,
+ * pero eventualmente agregará datos de material_payments, personnel_payments, etc.
  * 
  * En el futuro esto se reemplazará por una VISTA de base de datos
  * que agregue todas las tablas *_payments automáticamente.
@@ -27,131 +28,37 @@ export async function getAllFinancialMovements(
   // O mejor aún, usar una VISTA de base de datos que agregue todo
   
   try {
-    // Get all client payments for the organization (all projects)
-    // We'll need to get payments from all projects, so we'll query without project filter
-    const { data: clientPaymentsData, error } = await (await import('@/lib/supabase')).supabase
-      .from('client_payments')
-      .select(`
-        *,
-        client:project_clients(
-          id,
-          project_id,
-          contact_id,
-          organization_id,
-          unit,
-          is_primary,
-          notes,
-          status,
-          client_role_id,
-          created_by,
-          created_at,
-          updated_at,
-          contact:contacts(
-            id,
-            organization_id,
-            first_name,
-            last_name,
-            full_name,
-            email,
-            phone,
-            company_name,
-            location,
-            notes,
-            national_id,
-            avatar_attachment_id,
-            avatar_updated_at,
-            is_local,
-            display_name_override,
-            linked_user_id,
-            linked_at,
-            sync_status,
-            created_at,
-            updated_at
-          ),
-          role:client_roles(
-            id,
-            organization_id,
-            name,
-            description,
-            is_default,
-            created_at,
-            updated_at
-          )
-        ),
-        commitment:client_commitments(
-          id,
-          project_id,
-          client_id,
-          contact_id,
-          organization_id,
-          amount,
-          currency_id,
-          exchange_rate,
-          created_by,
-          created_at,
-          updated_at
-        ),
-        schedule:client_payment_schedule(
-          id,
-          commitment_id,
-          organization_id,
-          due_date,
-          amount,
-          currency_id,
-          status,
-          paid_at,
-          payment_method,
-          notes,
-          created_at,
-          updated_at
-        ),
-        currency:currencies(
-          id,
-          code,
-          symbol,
-          name
-        ),
-        wallet:organization_wallets(
-          id,
-          organization_id,
-          wallet_id,
-          is_active,
-          is_default,
-          wallets:wallet_id(
-            id,
-            name,
-            is_active,
-            created_at,
-            updated_at
-          )
-        )
-      `)
-      .eq('organization_id', organizationId)
-      .order('payment_date', { ascending: false });
+    // Get all client payments using the existing CLIENTS module service
+    // This follows the Feature-Sliced Design pattern by reusing the service layer
+    const clientPayments = await getClientPayments(organizationId);
 
-    if (error) {
-      throw error;
-    }
+    // Hydrate project and creator data for each payment
+    // TODO: In the future, create a database VIEW that includes these joins automatically
+    const paymentsWithRelations = await Promise.all(
+      clientPayments.map(async (payment) => {
+        // Fetch project data
+        const { data: projectData } = await supabase
+          .from('projects')
+          .select('id, name, code, color')
+          .eq('id', payment.project_id)
+          .single();
 
-    if (!clientPaymentsData || clientPaymentsData.length === 0) {
-      return [];
-    }
+        // Fetch creator data
+        const { data: creatorData } = await supabase
+          .from('users')
+          .select('id, email, full_name, avatar_url')
+          .eq('id', payment.created_by)
+          .single();
 
-    // Transform to unified format
-    const clientPaymentsFormatted = clientPaymentsData.map(payment => ({
-      ...payment,
-      client: payment.client ? {
-        ...payment.client,
-        contact: payment.client.contact || null,
-        role: payment.client.role || null,
-      } : null,
-      commitment: payment.commitment || null,
-      schedule: payment.schedule || null,
-      currency: payment.currency || null,
-      wallet: payment.wallet || null,
-    }));
+        return {
+          ...payment,
+          project: projectData || null,
+          creator: creatorData || null,
+        };
+      })
+    );
 
-    const clientMovements = mapClientPaymentsToFinancialMovements(clientPaymentsFormatted);
+    const clientMovements = mapClientPaymentsToFinancialMovements(paymentsWithRelations);
 
     // TODO: Agregar pagos de otros tipos aquí
     // const materialMovements = await getMaterialPayments(organizationId);
