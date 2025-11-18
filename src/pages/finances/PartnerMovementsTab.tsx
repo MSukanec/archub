@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useProjectContext } from '@/stores/projectContext';
-import { usePartnerMovements } from '@/features/finances';
+import { usePartnerMovements, PartnerStatsSection } from '@/features/finances';
+import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -18,6 +19,9 @@ export function PartnerMovementsTab() {
     currentOrganizationId || undefined,
     selectedProjectId || undefined
   );
+  
+  // Obtener moneda principal de la organización
+  const { data: primaryCurrency } = useOrganizationDefaultCurrency(currentOrganizationId || undefined);
 
   // Format currency helper
   const formatCurrency = (amount: number, currencySymbol: string = '$') => {
@@ -145,6 +149,13 @@ export function PartnerMovementsTab() {
 
   return (
     <div className="space-y-6">
+      {/* Partner Stats Section */}
+      <PartnerStatsSection 
+        movements={movements}
+        primaryCurrencyCode={primaryCurrency?.code}
+        primaryCurrencySymbol={primaryCurrency?.symbol}
+      />
+
       {/* Movements Table */}
       <Table
         data={movements}
