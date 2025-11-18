@@ -11,7 +11,8 @@ interface AuthGuardProps {
 }
 
 // Define route types for clarity
-const PUBLIC_ROUTES = ['/', '/login', '/register', '/forgot-password'];
+const PUBLIC_ROUTES = ['/', '/login', '/register', '/forgot-password', '/privacy'];
+const PUBLIC_ROUTE_PREFIXES = ['/cursos'];
 const ONBOARDING_ROUTES = ['/onboarding', '/select-mode'];
 // Routes where authenticated users should be redirected to /home
 const AUTH_REDIRECT_ROUTES = ['/login', '/register', '/forgot-password'];
@@ -48,7 +49,8 @@ export function AuthGuard({ children }: AuthGuardProps) {
       return;
     }
 
-    const isPublicRoute = PUBLIC_ROUTES.includes(location);
+    const isPublicRoute = PUBLIC_ROUTES.includes(location) || 
+      PUBLIC_ROUTE_PREFIXES.some(prefix => location.startsWith(prefix));
     const isOnboardingRoute = ONBOARDING_ROUTES.includes(location);
 
     // CASE 1: No user - Handle unauthenticated state
@@ -162,7 +164,10 @@ export function AuthGuard({ children }: AuthGuardProps) {
   }
 
   // Auth modal for unauthenticated users on protected routes
-  if (!user && showAuthModal && !PUBLIC_ROUTES.includes(location)) {
+  const isPublicRoute = PUBLIC_ROUTES.includes(location) || 
+    PUBLIC_ROUTE_PREFIXES.some(prefix => location.startsWith(prefix));
+  
+  if (!user && showAuthModal && !isPublicRoute) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <AuthModal open={true} onOpenChange={setShowAuthModal} />
@@ -171,7 +176,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
   }
 
   // Show loading while userData is being fetched for authenticated users on protected routes
-  const isPublicRoute = PUBLIC_ROUTES.includes(location);
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(location);
   
   if (user && userDataLoading && !isPublicRoute && !isOnboardingRoute) {
