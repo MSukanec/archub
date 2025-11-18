@@ -131,7 +131,15 @@ export async function getClientPayments(
       ),
       wallet:organization_wallets(
         id,
-        name
+        organization_id,
+        wallet_id,
+        is_active,
+        is_default,
+        wallets:wallet_id(
+          id,
+          name,
+          currency_id
+        )
       )
     `)
     .eq('organization_id', organizationId)
@@ -293,7 +301,15 @@ export async function getClientPaymentById(
       ),
       wallet:organization_wallets(
         id,
-        name
+        organization_id,
+        wallet_id,
+        is_active,
+        is_default,
+        wallets:wallet_id(
+          id,
+          name,
+          currency_id
+        )
       )
     `)
     .eq('id', paymentId)
@@ -451,7 +467,15 @@ export async function createClientPayment(
       ),
       wallet:organization_wallets(
         id,
-        name
+        organization_id,
+        wallet_id,
+        is_active,
+        is_default,
+        wallets:wallet_id(
+          id,
+          name,
+          currency_id
+        )
       )
     `)
     .single();
@@ -601,7 +625,15 @@ export async function updateClientPayment(
       ),
       wallet:organization_wallets(
         id,
-        name
+        organization_id,
+        wallet_id,
+        is_active,
+        is_default,
+        wallets:wallet_id(
+          id,
+          name,
+          currency_id
+        )
       )
     `)
     .single();
