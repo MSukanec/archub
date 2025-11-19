@@ -72,11 +72,18 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
   });
 
   // Query to get existing client data when editing - with cache optimization
-  const { data: existingClientResponse } = useQuery<any>({
+  const { data: existingClientResponse, isLoading: existingClientLoading } = useQuery<any>({
     queryKey: [`/api/projects/${projectId}/clients/${clientId}?organization_id=${organizationId}`],
     enabled: !!clientId && !!projectId && !!organizationId,
     staleTime: 2 * 60 * 1000, // 2 minutes - use cached data if available
   });
+
+  // Debug: Log the raw response
+  useEffect(() => {
+    console.log('📦 Raw API Response:', existingClientResponse);
+    console.log('🔍 existingClient enabled:', !!clientId && !!projectId && !!organizationId);
+    console.log('🔍 Loading:', existingClientLoading);
+  }, [existingClientResponse, clientId, projectId, organizationId, existingClientLoading]);
 
   // Unwrap the API response to get just the client data
   const existingClient = existingClientResponse?.data || null;
