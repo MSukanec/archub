@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Users, Plus, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -6,16 +5,6 @@ import { useClientRoles, useDeleteClientRole } from '@/features/clients';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import type { ClientRole } from '@/features/clients/types';
 
 export default function ClientSettingsTab() {
@@ -26,8 +15,6 @@ export default function ClientSettingsTab() {
   
   const { data: clientRoles = [], isLoading } = useClientRoles(organizationId);
   const deleteMutation = useDeleteClientRole();
-
-  const [roleToDelete, setRoleToDelete] = useState<ClientRole | null>(null);
 
   const systemRoles = clientRoles.filter(role => role.is_default === true);
   const customRoles = clientRoles.filter(role => role.is_default === false);
@@ -43,28 +30,37 @@ export default function ClientSettingsTab() {
     });
   };
 
-  const handleDeleteRole = async () => {
-    if (!roleToDelete || !organizationId) return;
+  const handleDeleteRole = (role: ClientRole) => {
+    openModal('delete-confirmation', {
+      mode: 'simple',
+      title: '¿Eliminar rol de cliente?',
+      description: `Esta acción eliminará permanentemente el rol "${role.name}". Los clientes existentes con este rol no se verán afectados.`,
+      itemName: role.name,
+      itemType: 'rol',
+      destructiveActionText: 'Eliminar Rol',
+      onConfirm: async () => {
+        if (!organizationId) return;
 
-    try {
-      await deleteMutation.mutateAsync({
-        roleId: roleToDelete.id,
-        organizationId
-      });
+        try {
+          await deleteMutation.mutateAsync({
+            roleId: role.id,
+            organizationId
+          });
 
-      toast({
-        title: 'Rol eliminado',
-        description: 'El rol de cliente se eliminó correctamente'
-      });
-      setRoleToDelete(null);
-    } catch (error) {
-      console.error('Error deleting client role:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo eliminar el rol de cliente',
-        variant: 'destructive'
-      });
-    }
+          toast({
+            title: 'Rol eliminado',
+            description: 'El rol de cliente se eliminó correctamente'
+          });
+        } catch (error) {
+          console.error('Error deleting client role:', error);
+          toast({
+            title: 'Error',
+            description: 'No se pudo eliminar el rol de cliente',
+            variant: 'destructive'
+          });
+        }
+      }
+    });
   };
 
   if (isLoading) {
@@ -159,7 +155,7 @@ export default function ClientSettingsTab() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setRoleToDelete(role)}
+                      onClick={() => handleDeleteRole(role)}
                       data-testid={`button-delete-role-${role.id}`}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -179,30 +175,6 @@ export default function ClientSettingsTab() {
           </div>
         )}
       </div>
-
-      <AlertDialog open={!!roleToDelete} onOpenChange={() => setRoleToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar rol de cliente?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción eliminará permanentemente el rol "{roleToDelete?.name}".
-              Los clientes existentes con este rol no se verán afectados.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel data-testid="button-cancel-delete">
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteRole}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              data-testid="button-confirm-delete"
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
