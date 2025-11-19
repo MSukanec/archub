@@ -42,7 +42,7 @@ interface ClientDataModalProps {
 }
 
 export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps) {
-  const { projectId, clientId } = modalData || {};
+  const { projectId, clientId, mode } = modalData || {};
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const queryClient = useQueryClient();
@@ -51,7 +51,8 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
   const [, setLocation] = useLocation();
 
   const organizationId = userData?.organization?.id;
-  const isEditing = !!clientId;
+  const isEditing = !!clientId && mode !== 'view';
+  const isViewMode = mode === 'view';
 
   // Query to get available contacts
   const { data: contacts = [], isLoading: contactsLoading } = useQuery<any[]>({
@@ -70,6 +71,11 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
   // Query to get existing client data when editing - with cache optimization
   const { data: existingClient } = useQuery<any>({
     queryKey: CLIENT_QUERY_KEYS.projectClient(projectId, clientId, organizationId),
+    queryFn: async () => {
+      const response = await fetch(`/api/projects/${projectId}/clients/${clientId}?organization_id=${organizationId}`);
+      if (!response.ok) throw new Error('Failed to fetch client');
+      return response.json();
+    },
     enabled: !!clientId && !!projectId && !!organizationId,
     staleTime: 2 * 60 * 1000, // 2 minutes - use cached data if available
   });
@@ -226,7 +232,7 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
                       searchPlaceholder="Buscar contacto..."
                       emptyMessage="No se encontraron contactos."
                       className="w-full"
-                      disabled={isEditing || contactsLoading}
+                      disabled={isEditing || isViewMode || contactsLoading}
                     />
                   )}
                 </FormControl>
@@ -241,7 +247,7 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Rol del Cliente (Opcional)</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value} disabled={clientRolesLoading}>
+                <Select onValueChange={field.onChange} value={field.value} disabled={isViewMode || clientRolesLoading}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder={clientRolesLoading ? "Cargando roles..." : "Seleccionar rol..."} />
@@ -276,6 +282,7 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
                   <Input
                     {...field}
                     placeholder="Ej: Dpto 101"
+                    disabled={isViewMode}
                   />
                 </FormControl>
                 <FormMessage />
@@ -289,7 +296,7 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Estado (Opcional)</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select onValueChange={field.onChange} value={field.value} disabled={isViewMode}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar estado..." />
@@ -315,7 +322,7 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
             render={({ field }) => (
               <FormItem>
                 <FormLabel>¿Cliente Principal?</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select onValueChange={field.onChange} value={field.value} disabled={isViewMode}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar..." />
@@ -344,6 +351,7 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
                   {...field}
                   placeholder="Agregar notas o comentarios adicionales..."
                   rows={3}
+                  disabled={isViewMode}
                 />
               </FormControl>
               <FormMessage />
@@ -356,15 +364,22 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
 
   const headerContent = (
     <FormModalHeader
-      title={isEditing ? "Editar Cliente" : "Agregar Cliente"}
-      description={isEditing 
-        ? "Modifica la información del cliente del proyecto"
-        : "Selecciona un contacto para agregarlo como cliente del proyecto"}
+      title={isViewMode ? "Ver Cliente" : isEditing ? "Editar Cliente" : "Agregar Cliente"}
+      description={isViewMode 
+        ? "Información del cliente del proyecto"
+        : isEditing 
+          ? "Modifica la información del cliente del proyecto"
+          : "Selecciona un contacto para agregarlo como cliente del proyecto"}
       icon={Users}
     />
   );
 
-  const footerContent = (
+  const footerContent = isViewMode ? (
+    <FormModalFooter
+      submitText="Cerrar"
+      onSubmit={handleClose}
+    />
+  ) : (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
