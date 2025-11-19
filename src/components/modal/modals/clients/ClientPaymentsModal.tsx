@@ -12,7 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { DollarSign, Upload, X, FileText, CalendarIcon } from 'lucide-react'
+import { DollarSign, FileText, CalendarIcon } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { Button } from '@/components/ui/button'
@@ -24,6 +24,7 @@ import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { supabase } from '@/lib/supabase'
 import { formatContactName } from '@/utils/contacts'
+import { UploadSingleFileField } from '@/components/ui-custom/fields/UploadSingleFileField'
 import { 
   useProjectClients, 
   useClientPayment, 
@@ -64,9 +65,9 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
   const { setPanel } = useModalPanelStore()
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
+  const [filesToUpload, setFilesToUpload] = useState<any[]>([])
+  const [existingFiles, setExistingFiles] = useState<any[]>([])
   const [isUploading, setIsUploading] = useState(false)
-  const [existingFileUrl, setExistingFileUrl] = useState<string | null>(null)
 
   // Fetch existing payment data for edit/view mode
   const { data: existingPayment, isLoading: loadingPayment } = useClientPayment(
@@ -141,7 +142,14 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
       })
       
       if (existingPayment.file_url) {
-        setExistingFileUrl(existingPayment.file_url)
+        setExistingFiles([{
+          id: 'existing',
+          file_name: existingPayment.file_url.split('/').pop() || 'Archivo adjunto',
+          file_type: 'document',
+          file_size: 0,
+          file_url: existingPayment.file_url,
+          isExisting: true,
+        }])
       }
     }
   }, [existingPayment, mode, form, currentMember?.id])
@@ -214,15 +222,18 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
       let fileUrl = data.file_url || null
 
       // Upload file if there's a new one
-      if (uploadedFile) {
+      if (filesToUpload.length > 0 && filesToUpload[0].file) {
         setIsUploading(true)
         try {
-          fileUrl = await handleFileUpload(uploadedFile)
+          fileUrl = await handleFileUpload(filesToUpload[0].file)
         } catch (error: any) {
           throw new Error(error.message || 'Error al subir el archivo')
         } finally {
           setIsUploading(false)
         }
+      } else if (existingFiles.length === 0) {
+        // Si no hay archivos existentes ni nuevos, eliminar la URL
+        fileUrl = null
       }
 
       if (mode === 'edit' && paymentId) {
@@ -662,56 +673,27 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
           {/* Row 6: Adjuntar Archivo */}
           <div className="space-y-2">
             <FormLabel>Adjuntar Archivo (opcional)</FormLabel>
-            {existingFileUrl && !uploadedFile && (
-              <div className="flex items-center gap-2 p-3 bg-muted rounded-md">
-                <FileText className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm flex-1 truncate">{existingFileUrl.split('/').pop()}</span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setExistingFileUrl(null)
-                    form.setValue('file_url', '')
-                  }}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-            {uploadedFile && (
-              <div className="flex items-center gap-2 p-3 bg-muted rounded-md">
-                <FileText className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm flex-1 truncate">{uploadedFile.name}</span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setUploadedFile(null)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-            {!existingFileUrl && !uploadedFile && (
-              <div className="flex items-center gap-2">
-                <Input
-                  type="file"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) {
-                      setUploadedFile(file)
-                    }
-                  }}
-                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx"
-                  className="flex-1"
-                />
-                <Upload className="h-4 w-4 text-muted-foreground" />
-              </div>
-            )}
-            <p className="text-xs text-muted-foreground">
-              Formatos aceptados: PDF, JPG, PNG, DOC, DOCX, XLS, XLSX
-            </p>
+            <UploadSingleFileField
+              existingFiles={existingFiles}
+              filesToUpload={filesToUpload}
+              onFilesChange={setFilesToUpload}
+              maxSize={10 * 1024 * 1024}
+              acceptedTypes={{
+                'application/pdf': ['.pdf'],
+                'image/*': ['.png', '.jpg', '.jpeg'],
+                'application/msword': ['.doc'],
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+                'application/vnd.ms-excel': ['.xls'],
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
+              }}
+              onExistingFileDelete={async (fileId) => {
+                setExistingFiles([])
+                form.setValue('file_url', '')
+              }}
+              emptyStateTitle="Sin archivo adjunto"
+              emptyStateDescription="Arrastra un archivo o haz clic para seleccionar"
+              newFileBadgeText="Nuevo"
+            />
           </div>
         </form>
       </Form>
