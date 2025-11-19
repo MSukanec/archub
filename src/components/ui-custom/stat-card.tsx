@@ -69,7 +69,7 @@ const StatCardTitle = ({ children, className, showArrow = true, ...props }: Stat
   return (
     <div className="flex items-center gap-2" {...props}>
       <p className={cn(
-        "text-xs font-normal text-muted-foreground uppercase tracking-wide",
+        "text-xs font-semibold text-muted-foreground",
         "group-hover:underline transition-all",
         className
       )}>
@@ -87,7 +87,7 @@ interface StatCardValueProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const StatCardValue = ({ children, className, ...props }: StatCardValueProps) => (
-  <div className={cn("text-3xl font-bold text-foreground tracking-tight leading-none mt-2", className)} {...props}>
+  <div className={cn("text-6xl font-bold text-foreground tracking-tight leading-none mt-2", className)} {...props}>
     {children}
   </div>
 )
