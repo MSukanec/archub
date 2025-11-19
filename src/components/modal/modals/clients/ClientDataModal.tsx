@@ -8,6 +8,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { supabase } from '@/lib/supabase';
+import { CLIENT_QUERY_KEYS } from '@/features/clients/constants';
 import { FormModalHeader } from '../../form/FormModalHeader';
 import { FormModalFooter } from '../../form/FormModalFooter';
 import { FormModalLayout } from '../../form/FormModalLayout';
@@ -50,32 +51,7 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
   const [, setLocation] = useLocation();
 
   const organizationId = userData?.organization?.id;
-  const userId = userData?.user?.id;
   const isEditing = !!clientId;
-
-  // Query to get organization_member_id for created_by field
-  const { data: organizationMember } = useQuery<any>({
-    queryKey: ['organization-member', organizationId, userId],
-    queryFn: async () => {
-      if (!supabase || !organizationId || !userId) return null;
-      
-      const { data, error } = await supabase
-        .from('organization_members')
-        .select('id')
-        .eq('organization_id', organizationId)
-        .eq('user_id', userId)
-        .eq('is_active', true)
-        .maybeSingle();
-        
-      if (error) {
-        console.error('Error fetching organization member:', error);
-        return null;
-      }
-      
-      return data;
-    },
-    enabled: !!organizationId && !!userId && !isEditing,
-  });
 
   // Query to get available contacts
   const { data: contacts = [], isLoading: contactsLoading } = useQuery<any[]>({
@@ -88,12 +64,14 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
   const { data: clientRoles = [], isLoading: clientRolesLoading } = useQuery<any[]>({
     queryKey: [`/api/client-roles`],
     enabled: !!organizationId,
+    staleTime: 5 * 60 * 1000, // 5 minutes - cache client roles for better UX
   });
 
-  // Query to get existing client data when editing
+  // Query to get existing client data when editing - with cache optimization
   const { data: existingClient } = useQuery<any>({
-    queryKey: [`/api/projects/${projectId}/clients/${clientId}?organization_id=${organizationId}`],
+    queryKey: ['/api/projects', projectId, 'clients', clientId, { organizationId }],
     enabled: !!clientId && !!projectId && !!organizationId,
+    staleTime: 2 * 60 * 1000, // 2 minutes - use cached data if available
   });
 
   const form = useForm<ClientFormData>({
@@ -103,7 +81,7 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
       unit: '',
       clientRoleId: '',
       status: 'active',
-      isPrimary: 'no',
+      isPrimary: 'yes',
       notes: '',
     },
   });
@@ -125,7 +103,7 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
         unit: '',
         clientRoleId: '',
         status: 'active',
-        isPrimary: 'no',
+        isPrimary: 'yes',
         notes: '',
       });
     }
@@ -148,39 +126,31 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
         // Update existing client
         return await apiRequest('PATCH', `/api/projects/${projectId}/clients/${clientId}`, payload);
       } else {
-        // Create new client - include contact_id and created_by
-        const organizationMemberId = organizationMember?.id;
+        // Create new client - backend derives created_by from session
         return await apiRequest('POST', `/api/projects/${projectId}/clients`, {
           ...payload,
           contact_id: data.contactId,
-          created_by: organizationMemberId || null,
         });
       }
     },
     onSuccess: async () => {
-      // Invalidate ALL client-related queries to ensure UI updates
-      console.log('🔄 Invalidating all client queries after save...');
-      
-      // Invalidate queries that start with 'clients' (e.g., ['clients', 'dashboard', projectId])
-      await queryClient.invalidateQueries({
-        predicate: (query) => {
-          const firstKey = query.queryKey[0];
-          return firstKey === 'clients';
-        }
-      });
-      
-      // Also invalidate API queries that include '/clients'
-      await queryClient.invalidateQueries({
-        predicate: (query) => {
-          const firstKey = query.queryKey[0];
-          if (typeof firstKey === 'string') {
-            return firstKey.includes('/clients') || firstKey.includes('project-clients');
-          }
-          return false;
-        }
-      });
-      
-      console.log('✅ All client queries invalidated');
+      // Targeted cache invalidation in parallel for optimal performance
+      await Promise.all([
+        // Invalidate client dashboard KPIs
+        queryClient.invalidateQueries({
+          queryKey: CLIENT_QUERY_KEYS.dashboard(projectId),
+        }),
+        // Invalidate project clients list
+        queryClient.invalidateQueries({
+          queryKey: [`/api/projects/${projectId}/clients`],
+        }),
+        // Invalidate specific client if editing (array-based key for consistency)
+        ...(isEditing && clientId && organizationId ? [
+          queryClient.invalidateQueries({
+            queryKey: ['/api/projects', projectId, 'clients', clientId, { organizationId }],
+          })
+        ] : []),
+      ]);
       
       toast({
         title: isEditing ? 'Cliente actualizado' : 'Cliente agregado',

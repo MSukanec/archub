@@ -52,7 +52,8 @@ export const PAYMENT_FREQUENCY_OPTIONS = Object.values(PAYMENT_FREQUENCY);
 export const CLIENT_QUERY_KEYS = {
   all: ['clients'] as const,
   projectClients: (projectId?: string) => ['clients', 'project', projectId] as const,
-  projectClient: (clientId?: string) => ['clients', 'project-client', clientId] as const,
+  projectClient: (projectId?: string, clientId?: string, organizationId?: string) => 
+    ['clients', 'project', projectId, 'client', clientId, organizationId] as const,
   commitments: (projectId?: string) => ['clients', 'commitments', projectId] as const,
   commitment: (commitmentId?: string) => ['clients', 'commitment', commitmentId] as const,
   payments: (projectId?: string) => ['clients', 'payments', projectId] as const,

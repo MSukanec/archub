@@ -21,13 +21,14 @@ export function useProjectClients(
 }
 
 export function useProjectClient(
+  projectId: string | undefined,
   clientId: string | undefined,
   organizationId: string | undefined
 ) {
   return useQuery({
-    queryKey: CLIENT_QUERY_KEYS.projectClient(clientId),
+    queryKey: CLIENT_QUERY_KEYS.projectClient(projectId, clientId, organizationId),
     queryFn: () => getProjectClientById(clientId!, organizationId!),
-    enabled: !!clientId && !!organizationId,
+    enabled: !!projectId && !!clientId && !!organizationId,
   });
 }
 
@@ -75,7 +76,7 @@ export function useUpdateProjectClient() {
         queryKey: CLIENT_QUERY_KEYS.projectClients(data.project_id),
       });
       queryClient.invalidateQueries({
-        queryKey: CLIENT_QUERY_KEYS.projectClient(data.id),
+        queryKey: CLIENT_QUERY_KEYS.projectClient(data.project_id, data.id, data.organization_id),
       });
       queryClient.invalidateQueries({
         queryKey: CLIENT_QUERY_KEYS.dashboard(data.project_id),
