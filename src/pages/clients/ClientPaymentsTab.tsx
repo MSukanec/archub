@@ -135,13 +135,14 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       }
       
       // If payment has no exchange_rate and is in different currency, cannot convert
-      if (!payment.exchange_rate) {
+      if (!payment.exchange_rate || payment.exchange_rate === 0) {
         return { amount: 0, skipped: true }; // Mark as skipped
       }
       
       // Convert using exchange_rate
-      // The exchange_rate is a multiplier that converts from payment currency to base currency
-      return { amount: payment.amount * payment.exchange_rate, skipped: false };
+      // The exchange_rate represents "cotización": how many units of payment currency per 1 unit of commitment currency
+      // Example: if payment is 10,000 ARS and exchange_rate is 1000 (1 USD = 1000 ARS), result is 10,000 / 1000 = 10 USD
+      return { amount: payment.amount / payment.exchange_rate, skipped: false };
     };
 
     let totalConfirmed = 0;
