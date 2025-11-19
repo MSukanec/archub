@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { toast } from '@/hooks/use-toast'
+import { GENERAL_COSTS_QUERY_KEYS } from '@/features/general-costs/constants'
 
 export interface GeneralCostPayment {
   id: string
@@ -51,7 +52,7 @@ export interface GeneralCostPayment {
 
 export function useGeneralCostsPayments(organizationId: string | undefined) {
   return useQuery({
-    queryKey: ['general-costs-payments', organizationId],
+    queryKey: GENERAL_COSTS_QUERY_KEYS.paymentsList(organizationId || null),
     queryFn: async () => {
       if (!organizationId) return []
 
@@ -124,7 +125,8 @@ export function useDeleteGeneralCostPayment() {
       return { paymentId }
     },
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['general-costs-payments', variables.organizationId] })
+      queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.payments() })
+      queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.lists() })
       toast({
         title: "Pago eliminado",
         description: "El pago se eliminó correctamente",

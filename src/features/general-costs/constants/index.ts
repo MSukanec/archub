@@ -5,6 +5,7 @@ export const GENERAL_COSTS_QUERY_KEYS = {
   details: () => [...GENERAL_COSTS_QUERY_KEYS.all, 'detail'] as const,
   detail: (id: string | null) => [...GENERAL_COSTS_QUERY_KEYS.details(), id] as const,
   payments: () => [...GENERAL_COSTS_QUERY_KEYS.all, 'payment'] as const,
+  paymentsList: (organizationId: string | null) => [...GENERAL_COSTS_QUERY_KEYS.payments(), organizationId] as const,
   payment: (id: string | null) => [...GENERAL_COSTS_QUERY_KEYS.payments(), id] as const,
 } as const;
 

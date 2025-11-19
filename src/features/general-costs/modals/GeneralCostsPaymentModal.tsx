@@ -26,7 +26,7 @@ import { useGeneralCostPayment } from '../hooks/use-general-cost-payment'
 import { useCreateGeneralCostPayment } from '../hooks/use-create-general-cost-payment'
 import { useUpdateGeneralCostPayment } from '../hooks/use-update-general-cost-payment'
 import { generalCostPaymentSchema, type GeneralCostPaymentFormData } from '../schemas'
-import { UploadMediaField } from '@/components/ui-custom/fields/UploadMediaField'
+import { UploadSingleFileField } from '@/components/ui-custom/fields/UploadSingleFileField'
 import { supabase } from '@/lib/supabase'
 
 interface GeneralCostsPaymentModalProps {
@@ -535,25 +535,14 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
           {/* Row 6: Adjunto */}
           <div className="space-y-2">
             <FormLabel>Adjunto (opcional)</FormLabel>
-            <UploadMediaField
+            <UploadSingleFileField
               existingFiles={existingFiles}
               filesToUpload={filesToUpload}
-              onFilesChange={(files) => {
-                // Limitar a un solo archivo
-                setFilesToUpload(files.slice(0, 1))
-              }}
+              onFilesChange={setFilesToUpload}
               emptyStateTitle="Sin archivo adjunto"
               emptyStateDescription="Arrastra un archivo o haz clic para seleccionar"
               newFileBadgeText="Nuevo"
               maxSize={10 * 1024 * 1024}
-              acceptedTypes={{
-                'application/pdf': ['.pdf'],
-                'image/*': ['.png', '.jpg', '.jpeg'],
-                'application/msword': ['.doc'],
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-                'application/vnd.ms-excel': ['.xls'],
-                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
-              }}
             />
           </div>
         </form>

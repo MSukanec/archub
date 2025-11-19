@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/stat-card'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard'
 import { Users, Calendar, Shield, TrendingUp } from 'lucide-react'
 import { startOfWeek, endOfWeek, isWithinInterval, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'

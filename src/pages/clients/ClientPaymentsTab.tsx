@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { queryClient } from '@/lib/queryClient'
 import { ClientPaymentRow } from '@/components/ui/data-row'
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/stat-card'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard'
 import {
   useClientPayments,
   useDeleteClientPayment,

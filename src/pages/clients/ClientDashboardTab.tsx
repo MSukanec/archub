@@ -11,7 +11,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { Link, useLocation } from 'wouter'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/stat-card'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard'
 import {
   useClientDashboard,
   useDeleteProjectClient,
