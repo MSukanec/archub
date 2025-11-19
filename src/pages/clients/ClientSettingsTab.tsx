@@ -77,28 +77,27 @@ export default function ClientSettingsTab() {
 
   return (
     <div className="p-6 space-y-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div>
-          <div className="flex items-center gap-2 mb-6">
-            <Users className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="text-lg font-semibold">Roles de Cliente</h2>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Gestiona los roles disponibles para clasificar a tus clientes. 
-            Los roles del sistema son predefinidos y no se pueden modificar. 
-            Puedes crear roles personalizados para adaptar la gestión de clientes a las necesidades de tu organización.
-          </p>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <Users className="h-5 w-5 text-[var(--accent)]" />
+          <h2 className="text-lg font-semibold">Roles de Cliente</h2>
         </div>
+        <Button 
+          onClick={handleAddRole}
+          data-testid="button-add-client-role"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Agregar Rol
+        </Button>
+      </div>
 
-        <div className="space-y-6">
-          <Button 
-            onClick={handleAddRole}
-            className="w-full sm:w-auto"
-            data-testid="button-add-client-role"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Agregar Rol
-          </Button>
+      <p className="text-sm text-muted-foreground max-w-3xl">
+        Gestiona los roles disponibles para clasificar a tus clientes. 
+        Los roles del sistema son predefinidos y no se pueden modificar. 
+        Puedes crear roles personalizados para adaptar la gestión de clientes a las necesidades de tu organización.
+      </p>
+
+      <div className="space-y-6">
 
           {systemRoles.length > 0 && (
             <div className="space-y-3">
@@ -171,15 +170,14 @@ export default function ClientSettingsTab() {
             </div>
           )}
 
-          {customRoles.length === 0 && (
-            <div className="p-8 text-center rounded-lg border border-dashed border-border">
-              <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground mb-4">
-                No hay roles personalizados. Crea uno para adaptar la gestión de clientes a tus necesidades.
-              </p>
-            </div>
-          )}
-        </div>
+        {customRoles.length === 0 && (
+          <div className="p-8 text-center rounded-lg border border-dashed border-border">
+            <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground mb-4">
+              No hay roles personalizados. Crea uno para adaptar la gestión de clientes a tus necesidades.
+            </p>
+          </div>
+        )}
       </div>
 
       <AlertDialog open={!!roleToDelete} onOpenChange={() => setRoleToDelete(null)}>
