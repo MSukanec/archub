@@ -159,7 +159,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
       reference: data.reference || null,
       general_cost_id: data.general_cost_id || null,
       status: data.status || 'confirmed',
-      created_by: userData?.memberships?.find(m => m.organization_id === userData?.organization?.id)?.id || null,
+      created_by: userData?.memberships?.find(m => m.organization_id === userData?.organization?.id)?.membership_id || null,
     }
 
     try {

@@ -83,17 +83,8 @@ export function GeneralCostsModal({ modalData, onClose }: GeneralCostsModalProps
           }
         })
       } else {
-        // Modo creación - usar userData.organization.id directamente como en ClientPaymentModal
-        const matchingMembership = userData?.memberships?.find(m => m.organization_id === userData?.organization?.id)
-        const createdBy = matchingMembership?.id || null
-        
-        console.log('🔍 DEBUGGING created_by:', {
-          'userData.organization.id': userData?.organization?.id,
-          'matchingMembership (FULL OBJECT)': matchingMembership,
-          'matchingMembership.id': matchingMembership?.id,
-          'createdBy (final value)': createdBy,
-          'all memberships': userData?.memberships
-        })
+        // Modo creación - usar membership_id (NO id)
+        const createdBy = userData?.memberships?.find(m => m.organization_id === userData?.organization?.id)?.membership_id || null
         
         await createGeneralCost.mutateAsync({
           organization_id: organizationId,

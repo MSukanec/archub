@@ -130,6 +130,7 @@ export interface UserData {
     [key: string]: any
   }[] | null
   memberships: {
+    membership_id: string
     organization_id: string
     organization_name: string
     is_active: boolean

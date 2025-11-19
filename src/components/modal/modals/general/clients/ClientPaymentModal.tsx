@@ -253,7 +253,7 @@ export function ClientPaymentModal({ modalData, onClose }: ClientPaymentModalPro
         category_id: subcategory.parent_id,
         subcategory_id: data.subcategory_id,
         contact_id: data.contact_id, // Campo contact_id directo
-        created_by: userData?.memberships?.find(m => m.organization_id === userData?.organization?.id)?.id || null, // Usar el ID del miembro de la organización
+        created_by: userData?.memberships?.find(m => m.organization_id === userData?.organization?.id)?.membership_id || null, // Usar el membership_id del miembro de la organización
       }
 
 
