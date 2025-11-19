@@ -26,9 +26,6 @@ export async function getGeneralCosts(organizationId: string): Promise<GeneralCo
       organization_id,
       name,
       description,
-      category,
-      is_active,
-      unit,
       created_at,
       updated_at
     `)

@@ -17,12 +17,10 @@ import { GeneralCostsKPIs } from "@/features/general-costs/components/GeneralCos
 import type { GeneralCost } from "@/features/general-costs/types";
 
 interface GeneralCostsListProps {
-  filterByCategory?: string;
-  filterByStatus?: string;
   onNewGeneralCost?: () => void;
 }
 
-export default function GeneralCostsList({ filterByCategory = 'all', filterByStatus = 'all', onNewGeneralCost }: GeneralCostsListProps) {
+export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListProps) {
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const deleteGeneralCost = useDeleteGeneralCost();
@@ -42,24 +40,15 @@ export default function GeneralCostsList({ filterByCategory = 'all', filterBySta
   
   const { data: generalCosts = [], isLoading } = useGeneralCosts(userData?.organization?.id || null);
 
-  // Filtrar gastos generales por búsqueda y filtros
+  // Filtrar gastos generales por búsqueda
   const filteredGeneralCosts = generalCosts.filter(generalCost => {
     // Búsqueda por texto
     const searchLower = searchQuery.toLowerCase();
     const nameMatch = generalCost.name?.toLowerCase().includes(searchLower);
     const descriptionMatch = generalCost.description?.toLowerCase().includes(searchLower);
-    const categoryMatch = generalCost.category?.toLowerCase().includes(searchLower);
-    const searchMatch = !searchQuery || nameMatch || descriptionMatch || categoryMatch;
+    const searchMatch = !searchQuery || nameMatch || descriptionMatch;
     
-    // Filtro por categoría
-    const categoryFilterMatch = filterByCategory === 'all' || generalCost.category === filterByCategory;
-    
-    // Filtro por estado
-    const statusFilterMatch = filterByStatus === 'all' || 
-      (filterByStatus === 'active' && generalCost.is_active) ||
-      (filterByStatus === 'inactive' && !generalCost.is_active);
-    
-    return searchMatch && categoryFilterMatch && statusFilterMatch;
+    return searchMatch;
   });
 
   // Router navigation
@@ -107,44 +96,15 @@ export default function GeneralCostsList({ filterByCategory = 'all', filterBySta
       )
     },
     {
-      key: 'category',
-      label: 'Categoría',
-      render: (generalCost: GeneralCost) => (
-        <div>
-          {generalCost.category ? (
-            <Badge variant="outline">{generalCost.category}</Badge>
-          ) : (
-            <span className="text-muted-foreground text-sm">Sin categoría</span>
-          )}
-        </div>
-      )
-    },
-    {
       key: 'created_at',
       label: 'Fecha de Creación',
+      align: 'right' as const,
       render: (generalCost: GeneralCost) => (
         <div>
           {generalCost.created_at && (
-            <div className="text-xs">
+            <div className="text-sm">
               {format(new Date(generalCost.created_at), 'dd/MM/yyyy', { locale: es })}
             </div>
-          )}
-        </div>
-      )
-    },
-    {
-      key: 'status',
-      label: 'Estado',
-      render: (generalCost: GeneralCost) => (
-        <div>
-          {generalCost.is_active ? (
-            <Badge style={{ backgroundColor: 'var(--accent)', color: 'white', border: 'none' }}>
-              Activo
-            </Badge>
-          ) : (
-            <Badge variant="outline" style={{ color: '#6b7280' }}>
-              Inactivo
-            </Badge>
           )}
         </div>
       )

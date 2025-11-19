@@ -3,9 +3,6 @@ export interface GeneralCost {
   organization_id: string;
   name: string;
   description: string | null;
-  category: string | null;
-  is_active: boolean;
-  unit: string | null;
   created_at: string;
   updated_at: string | null;
 }
@@ -14,9 +11,6 @@ export interface InsertGeneralCost {
   organization_id: string;
   name: string;
   description?: string | null;
-  category?: string | null;
-  is_active?: boolean;
-  unit?: string | null;
 }
 
 export interface GeneralCostValue {
