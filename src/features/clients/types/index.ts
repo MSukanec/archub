@@ -58,6 +58,8 @@ export interface ProjectClient {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  is_deleted: boolean;
+  deleted_at: string | null;
 }
 
 // Project Client with relations

@@ -153,7 +153,7 @@ create table public.client_roles (
 create table public.project_clients (
   id uuid not null default gen_random_uuid (),
   project_id uuid not null,
-  contact_id uuid not null,
+  contact_id uuid null,
   created_at timestamp with time zone null default now(),
   updated_at timestamp with time zone null default now(),
   organization_id uuid not null,
@@ -163,6 +163,8 @@ create table public.project_clients (
   status text not null default 'active'::text,
   client_role_id uuid null,
   created_by uuid null,
+  is_deleted boolean not null default false,
+  deleted_at timestamp with time zone null,
   constraint project_clients_pkey primary key (id),
   constraint project_clients_contact_id_fkey foreign KEY (contact_id) references contacts (id) on delete set null,
   constraint project_clients_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,

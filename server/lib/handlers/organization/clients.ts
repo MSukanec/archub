@@ -89,7 +89,8 @@ export async function getOrganizationClientsSummary(
           is_default
         )
       `)
-      .eq('organization_id', params.organizationId);
+      .eq('organization_id', params.organizationId)
+      .or('is_deleted.is.null,is_deleted.eq.false');
 
     if (clientsError) {
       console.error('Error fetching clients:', clientsError);

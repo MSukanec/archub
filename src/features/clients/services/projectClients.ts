@@ -59,6 +59,7 @@ export async function getProjectClients(
     `)
     .eq('organization_id', organizationId)
     .eq('project_id', projectId)
+    .or('is_deleted.is.null,is_deleted.eq.false')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -136,6 +137,7 @@ export async function getProjectClientById(
     `)
     .eq('id', clientId)
     .eq('organization_id', organizationId)
+    .or('is_deleted.is.null,is_deleted.eq.false')
     .single();
 
   if (error) {
@@ -176,6 +178,7 @@ export async function createProjectClient(
       project_id: projectId,
       organization_id: organizationId,
       created_by: createdBy,
+      is_deleted: false,
     })
     .select(`
       *,
@@ -235,7 +238,7 @@ export async function createProjectClient(
  */
 export async function updateProjectClient(
   clientId: string,
-  updates: Partial<Omit<ProjectClient, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>>,
+  updates: Partial<Omit<ProjectClient, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by' | 'is_deleted' | 'deleted_at'>>,
   organizationId: string
 ): Promise<ProjectClientWithRelations> {
   const { data, error } = await supabase
@@ -294,10 +297,10 @@ export async function updateProjectClient(
 }
 
 /**
- * Elimina un cliente de proyecto.
+ * Elimina un cliente de proyecto (soft delete).
  * 
- * Nota: Esta operación es permanente y eliminará en cascada los registros relacionados
- * (compromisos, pagos, cronogramas) según la configuración de la base de datos.
+ * Nota: Esta operación marca el cliente como eliminado sin borrarlo físicamente.
+ * Los registros relacionados (compromisos, pagos) se mantienen para datos históricos.
  * 
  * @param clientId - ID del cliente a eliminar
  * @param organizationId - ID de la organización
@@ -310,7 +313,10 @@ export async function deleteProjectClient(
 ): Promise<boolean> {
   const { error } = await supabase
     .from('project_clients')
-    .delete()
+    .update({
+      is_deleted: true,
+      deleted_at: new Date().toISOString()
+    })
     .eq('id', clientId)
     .eq('organization_id', organizationId);
 

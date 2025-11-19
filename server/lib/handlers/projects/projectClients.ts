@@ -23,10 +23,7 @@ export interface CreateClientParams {
   organizationId: string;
   clientData: {
     contact_id: string;
-    committed_amount?: number | null;
-    currency_id?: string | null;
     unit?: string | null;
-    exchange_rate?: number | null;
     client_role_id?: string | null;
     status?: string;
     is_primary?: boolean;
@@ -40,9 +37,6 @@ export interface UpdateClientParams {
   organizationId: string;
   clientData: {
     unit?: string | null;
-    committed_amount?: number | null;
-    currency_id?: string | null;
-    exchange_rate?: number | null;
     client_role_id?: string | null;
     status?: string;
     is_primary?: boolean;
@@ -137,6 +131,7 @@ export async function listClients(
       `)
       .eq('project_id', params.projectId)
       .eq('organization_id', params.organizationId)
+      .or('is_deleted.is.null,is_deleted.eq.false')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -242,7 +237,8 @@ export async function getClientsSummary(
         )
       `)
       .eq('project_id', params.projectId)
-      .eq('organization_id', params.organizationId);
+      .eq('organization_id', params.organizationId)
+      .or('is_deleted.is.null,is_deleted.eq.false');
 
     if (clientsError) {
       console.error('Error fetching clients:', clientsError);
@@ -469,6 +465,7 @@ export async function getClient(
       .eq('id', params.clientId)
       .eq('project_id', params.projectId)
       .eq('organization_id', params.organizationId)
+      .or('is_deleted.is.null,is_deleted.eq.false')
       .maybeSingle();
 
     if (error) {
@@ -532,14 +529,12 @@ export async function createClient(
         organization_id: params.organizationId,
         created_by: orgAccessResult.memberId,
         contact_id: params.clientData.contact_id,
-        committed_amount: params.clientData.committed_amount || null,
-        currency_id: params.clientData.currency_id || null,
         unit: params.clientData.unit || null,
-        exchange_rate: params.clientData.exchange_rate || null,
         client_role_id: params.clientData.client_role_id || null,
         status: params.clientData.status || 'active',
         is_primary: params.clientData.is_primary || false,
-        notes: params.clientData.notes || null
+        notes: params.clientData.notes || null,
+        is_deleted: false
       })
       .select(`
         *,
@@ -556,10 +551,10 @@ export async function createClient(
             avatar_url
           )
         ),
-        currency:currencies!currency_id (
+        client_roles!client_role_id (
           id,
-          code,
-          symbol
+          name,
+          is_default
         )
       `)
       .maybeSingle();
@@ -612,6 +607,27 @@ export async function updateClient(
       return { success: false, error: 'Forbidden: Project does not belong to organization' };
     }
 
+    // Verify the client exists and is not deleted
+    const { data: existingClient, error: fetchError } = await supabase
+      .from('project_clients')
+      .select('id, organization_id, is_deleted')
+      .eq('id', params.clientId)
+      .or('is_deleted.is.null,is_deleted.eq.false')
+      .maybeSingle();
+
+    if (fetchError) {
+      console.error('Error fetching project client:', fetchError);
+      return { success: false, error: 'Failed to fetch project client' };
+    }
+
+    if (!existingClient) {
+      return { success: false, error: 'Project client not found or has been deleted' };
+    }
+
+    if (existingClient.organization_id !== params.organizationId) {
+      return { success: false, error: 'Cannot update clients from other organizations' };
+    }
+
     // Build update object with only provided fields
     const updates: any = {
       updated_at: new Date().toISOString()
@@ -619,15 +635,6 @@ export async function updateClient(
 
     if (params.clientData.hasOwnProperty('unit')) {
       updates.unit = params.clientData.unit || null;
-    }
-    if (params.clientData.hasOwnProperty('committed_amount')) {
-      updates.committed_amount = params.clientData.committed_amount || null;
-    }
-    if (params.clientData.hasOwnProperty('currency_id')) {
-      updates.currency_id = params.clientData.currency_id || null;
-    }
-    if (params.clientData.hasOwnProperty('exchange_rate')) {
-      updates.exchange_rate = params.clientData.exchange_rate || null;
     }
     if (params.clientData.hasOwnProperty('client_role_id')) {
       updates.client_role_id = params.clientData.client_role_id || null;
@@ -708,10 +715,34 @@ export async function deleteClient(
       return { success: false, error: 'Forbidden: Project does not belong to organization' };
     }
 
-    // Delete the project_client relationship
+    // Verify the client exists and is not already deleted
+    const { data: existingClient, error: fetchError } = await supabase
+      .from('project_clients')
+      .select('id, organization_id, is_deleted')
+      .eq('id', params.clientId)
+      .or('is_deleted.is.null,is_deleted.eq.false')
+      .maybeSingle();
+
+    if (fetchError) {
+      console.error('Error fetching project client:', fetchError);
+      return { success: false, error: 'Failed to fetch project client' };
+    }
+
+    if (!existingClient) {
+      return { success: false, error: 'Project client not found or already deleted' };
+    }
+
+    if (existingClient.organization_id !== params.organizationId) {
+      return { success: false, error: 'Cannot delete clients from other organizations' };
+    }
+
+    // Soft delete the project_client relationship
     const { error } = await supabase
       .from('project_clients')
-      .delete()
+      .update({
+        is_deleted: true,
+        deleted_at: new Date().toISOString()
+      })
       .eq('id', params.clientId)
       .eq('project_id', params.projectId)
       .eq('organization_id', params.organizationId);
