@@ -443,7 +443,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
 
   return (
     <FormModalLayout 
-      columns={2}
+      columns={1}
       viewPanel={<div></div>}
       editPanel={editPanel}
       headerContent={headerContent}
