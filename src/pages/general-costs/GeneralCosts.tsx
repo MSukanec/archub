@@ -3,6 +3,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { CreditCard, Plus } from 'lucide-react'
 import GeneralCostsList from './GeneralCostsList'
+import GeneralCostsPaymentsTab from './GeneralCostsPaymentsTab'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
@@ -24,6 +25,11 @@ export default function GeneralCosts() {
       id: "lista",
       label: "Lista", 
       isActive: activeTab === "lista"
+    },
+    {
+      id: "pagos",
+      label: "Pagos",
+      isActive: activeTab === "pagos"
     }
   ]
 
@@ -50,6 +56,7 @@ export default function GeneralCosts() {
   return (
     <Layout headerProps={headerProps} wide>
       {activeTab === "lista" && <GeneralCostsList onNewGeneralCost={handleNewGeneralCost} />}
+      {activeTab === "pagos" && <GeneralCostsPaymentsTab />}
     </Layout>
   )
 }
