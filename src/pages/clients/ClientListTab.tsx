@@ -1,12 +1,13 @@
 import React, { useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast'
-import { Users, Plus, Edit, Trash2, User, Eye } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, User, Eye, UserCheck, FileText, Calendar } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { Link, useLocation } from 'wouter'
 import { format } from 'date-fns'
@@ -41,6 +42,32 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   const projectClients = useMemo(() => {
     if (!dashboardData) return [];
     return mapToClientSummaries(dashboardData.clients, dashboardData.financialSummaries);
+  }, [dashboardData]);
+
+  // Calculate metrics
+  const metrics = useMemo(() => {
+    if (!dashboardData) {
+      return {
+        totalClients: 0,
+        activeCommitments: 0,
+        recentPayments: 0,
+      };
+    }
+
+    const now = new Date();
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(now.getMonth() - 1);
+
+    const recentPayments = dashboardData.payments.filter(payment => {
+      const paymentDate = new Date(payment.payment_date);
+      return paymentDate >= oneMonthAgo && paymentDate <= now;
+    });
+
+    return {
+      totalClients: dashboardData.clients.length,
+      activeCommitments: dashboardData.commitments.length,
+      recentPayments: recentPayments.length,
+    };
   }, [dashboardData]);
 
   // Delete mutation using feature hook
@@ -269,6 +296,53 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
 
   return (
     <div className="space-y-6">
+      {/* 3 KPIs con datos reales */}
+      {projectClients.length > 0 && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* KPI 1: Total Clientes - Ocupa 2 columnas */}
+          <StatCard data-testid="stat-card-total-clients" className="col-span-2">
+            <StatCardTitle showArrow={false}>
+              <Users className="w-4 h-4 inline mr-1" />
+              Total Clientes
+            </StatCardTitle>
+            <StatCardValue>
+              {metrics.totalClients}
+            </StatCardValue>
+            <StatCardMeta>
+              Clientes en el proyecto
+            </StatCardMeta>
+          </StatCard>
+
+          {/* KPI 2: Compromisos Activos - Ocupa 1 columna */}
+          <StatCard data-testid="stat-card-active-commitments">
+            <StatCardTitle showArrow={false}>
+              <FileText className="w-4 h-4 inline mr-1" />
+              Compromisos
+            </StatCardTitle>
+            <StatCardValue>
+              {metrics.activeCommitments}
+            </StatCardValue>
+            <StatCardMeta>
+              Compromisos activos
+            </StatCardMeta>
+          </StatCard>
+
+          {/* KPI 3: Pagos Recientes - Ocupa 1 columna */}
+          <StatCard data-testid="stat-card-recent-payments">
+            <StatCardTitle showArrow={false}>
+              <Calendar className="w-4 h-4 inline mr-1" />
+              Recientes
+            </StatCardTitle>
+            <StatCardValue>
+              {metrics.recentPayments}
+            </StatCardValue>
+            <StatCardMeta>
+              Pagos del último mes
+            </StatCardMeta>
+          </StatCard>
+        </div>
+      )}
+
       <Table
         columns={columns}
         data={projectClients}
