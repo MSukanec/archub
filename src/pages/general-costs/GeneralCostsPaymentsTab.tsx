@@ -534,16 +534,16 @@ export default function GeneralCostsPaymentsTab() {
             </div>
           ),
         }}
+        leadingRowAction={(payment: GeneralCostPayment) => payment.file_url ? {
+          label: 'Ver Adjunto',
+          icon: Paperclip,
+          onClick: () => window.open(payment.file_url!, '_blank'),
+        } : null}
         primaryRowAction={(payment: GeneralCostPayment) => ({
           label: 'Ver',
           onClick: () => handleView(payment),
         })}
         rowActions={(payment: GeneralCostPayment) => [
-          ...(payment.file_url ? [{
-            label: 'Ver Adjunto',
-            icon: Paperclip,
-            onClick: () => window.open(payment.file_url!, '_blank'),
-          }] : []),
           {
             label: 'Editar Pago',
             icon: Edit,

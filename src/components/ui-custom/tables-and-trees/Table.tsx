@@ -222,6 +222,12 @@ interface TableProps<T = any> {
     label: string;
     onClick: () => void;
   } | null;
+  // 🆕 ACCIÓN ADICIONAL QUE APARECE ANTES DE TODO (para cosas como "Ver Adjunto")
+  leadingRowAction?: (item: T) => {
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    onClick: () => void;
+  } | null;
   // 🆕 SOPORTE PARA ELEMENTOS INACTIVOS CON SEPARACIÓN VISUAL
   getIsInactive?: (item: T) => boolean;
   inactiveSeparatorLabel?: string;
@@ -260,6 +266,7 @@ export function Table<T = any>({
   // 🆕 SISTEMA DE ACCIONES CON MENÚ DE TRES PUNTOS
   rowActions,
   primaryRowAction,
+  leadingRowAction,
   // 🆕 SOPORTE PARA ELEMENTOS INACTIVOS
   getIsInactive,
   inactiveSeparatorLabel = "Completados",
@@ -1117,8 +1124,25 @@ export function Table<T = any>({
                         </div>
                       );
                     })}
-                    {(rowActions || primaryRowAction) && (
+                    {(rowActions || primaryRowAction || leadingRowAction) && (
                       <div className="flex items-center justify-end gap-2">
+                        {leadingRowAction && (() => {
+                          const action = leadingRowAction(item);
+                          return action ? (
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              className="h-6 w-6"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                action.onClick();
+                              }}
+                              title={action.label}
+                            >
+                              <action.icon className="h-4 w-4" />
+                            </Button>
+                          ) : null;
+                        })()}
                         {primaryRowAction && (() => {
                           const action = primaryRowAction(item);
                           return action ? (
@@ -1254,8 +1278,25 @@ export function Table<T = any>({
                     </div>
                   );
                 })}
-                {(rowActions || primaryRowAction) && (
+                {(rowActions || primaryRowAction || leadingRowAction) && (
                   <div className="flex items-center justify-end gap-2">
+                    {leadingRowAction && (() => {
+                      const action = leadingRowAction(item);
+                      return action ? (
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className="h-6 w-6"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            action.onClick();
+                          }}
+                          title={action.label}
+                        >
+                          <action.icon className="h-4 w-4" />
+                        </Button>
+                      ) : null;
+                    })()}
                     {primaryRowAction && (() => {
                       const action = primaryRowAction(item);
                       return action ? (
