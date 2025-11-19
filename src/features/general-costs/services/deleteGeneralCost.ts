@@ -1,14 +1,14 @@
 import { supabase } from '@/lib/supabase';
 
 /**
- * Deletes a general cost from the database.
+ * Soft deletes a general cost from the database.
  * 
- * Permanently removes the general cost record. This action cannot be undone.
- * Related records (like values) may be cascade deleted depending on database constraints.
+ * Marks the general cost as deleted by setting is_deleted to true and deleted_at to current timestamp.
+ * This maintains historical integrity and preserves data for audit purposes.
  * 
  * @param generalCostId - The ID of the general cost to delete
  * @returns The ID of the deleted general cost
- * @throws {Error} If the delete fails or Supabase client is not initialized
+ * @throws {Error} If the update fails or Supabase client is not initialized
  */
 export async function deleteGeneralCost(generalCostId: string): Promise<string> {
   if (!supabase) {
@@ -17,7 +17,10 @@ export async function deleteGeneralCost(generalCostId: string): Promise<string> 
 
   const { error } = await supabase
     .from('general_costs')
-    .delete()
+    .update({
+      is_deleted: true,
+      deleted_at: new Date().toISOString()
+    })
     .eq('id', generalCostId);
 
   if (error) {

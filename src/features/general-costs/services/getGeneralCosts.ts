@@ -27,9 +27,12 @@ export async function getGeneralCosts(organizationId: string): Promise<GeneralCo
       name,
       description,
       created_at,
-      updated_at
+      updated_at,
+      is_deleted,
+      deleted_at
     `)
     .eq('organization_id', organizationId)
+    .eq('is_deleted', false)
     .order('created_at', { ascending: false });
 
   if (error) {
