@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
 import { useQueryClient } from '@tanstack/react-query'
+import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useCreateGeneralCost } from '@/features/general-costs/hooks/use-create-general-cost'
 import { useUpdateGeneralCost } from '@/features/general-costs/hooks/use-update-general-cost'
 import { useGeneralCost } from '@/features/general-costs/hooks/use-general-cost'
@@ -35,6 +36,9 @@ export function GeneralCostsModal({ modalData, onClose }: GeneralCostsModalProps
 
   const organizationId = modalData?.organizationId || userData?.organization?.id
   const isEditing = modalData?.isEditing || false
+
+  // Fetch organization members to get current member ID
+  const { data: members = [] } = useOrganizationMembers(organizationId || undefined)
 
   // Fetch existing general cost data if editing
   const { data: existingGeneralCost, isLoading: isLoadingGeneralCost } = useGeneralCost(isEditing ? modalData?.generalCostId || null : null)
@@ -83,14 +87,22 @@ export function GeneralCostsModal({ modalData, onClose }: GeneralCostsModalProps
           }
         })
       } else {
-        // Modo creación - usar membership_id (NO id)
-        const createdBy = userData?.memberships?.find(m => m.organization_id === userData?.organization?.id)?.membership_id || null
+        // Modo creación - buscar currentMember como lo hace SiteLogModal
+        const currentMember = members.find((m: any) => m.user_id === userData?.user?.id)
+        if (!currentMember) {
+          toast({
+            title: 'Error',
+            description: 'No se encontró el miembro de la organización para el usuario actual',
+            variant: 'destructive'
+          })
+          return
+        }
         
         await createGeneralCost.mutateAsync({
           organization_id: organizationId,
           name: data.name,
           description: data.description || undefined,
-          created_by: createdBy
+          created_by: currentMember.id
         })
       }
       
