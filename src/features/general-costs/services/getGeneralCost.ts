@@ -27,11 +27,10 @@ export async function getGeneralCost(generalCostId: string): Promise<GeneralCost
       organization_id,
       name,
       description,
-      category,
-      is_active,
-      unit,
       created_at,
-      updated_at
+      updated_at,
+      is_deleted,
+      deleted_at
     `)
     .eq('id', generalCostId)
     .single();
