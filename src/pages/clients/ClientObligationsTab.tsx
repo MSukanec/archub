@@ -14,10 +14,9 @@ import { es } from 'date-fns/locale'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard'
 import {
   useClientDashboard,
+  useClientCommitments,
   useDeleteProjectClient,
   mapToClientSummaries,
-  calculateObligationsKPIs,
-  formatCurrencyAmount,
   type ProjectClientSummary,
   type CurrencyFinancial,
 } from '@/features/clients'
@@ -37,14 +36,49 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
 
-  // Use feature hook to get dashboard data with financial summaries
+  // Use feature hooks to get dashboard data and commitments
   const { data: dashboardData, isLoading } = useClientDashboard(activeProjectId || undefined, organizationId);
+  const { data: commitmentsData } = useClientCommitments(activeProjectId || undefined, organizationId);
 
   // Transform dashboard data using mappers (no inline calculations)
   const projectClients = useMemo(() => {
     if (!dashboardData) return [];
     return mapToClientSummaries(dashboardData.clients, dashboardData.financialSummaries);
   }, [dashboardData]);
+
+  // Determine the commitment currency (the most common currency in commitments)
+  const commitmentCurrency = useMemo(() => {
+    if (!commitmentsData || commitmentsData.length === 0) return null;
+    
+    // Count occurrences of each currency in commitments
+    const currencyCount = new Map<string, { count: number; currency: NonNullable<typeof commitmentsData[0]['currency']> }>();
+    
+    commitmentsData.forEach(commitment => {
+      if (!commitment.currency) return;
+      
+      const currencyId = commitment.currency.id;
+      const existing = currencyCount.get(currencyId);
+      
+      if (existing) {
+        existing.count += 1;
+      } else {
+        currencyCount.set(currencyId, {
+          count: 1,
+          currency: commitment.currency,
+        });
+      }
+    });
+    
+    // Find the most common currency
+    const entries = Array.from(currencyCount.values());
+    if (entries.length === 0) return null;
+    
+    const mostCommon = entries.reduce((max, entry) => 
+      entry.count > max.count ? entry : max
+    );
+    
+    return mostCommon.currency;
+  }, [commitmentsData]);
 
   // Delete mutation using feature hook
   const deleteClientMutation = useDeleteProjectClient();
@@ -139,23 +173,62 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   // Helper function to format currency
   const formatCurrency = (amount: number, currency: CurrencyFinancial['currency']) => {
     if (!currency) return `$${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    return `${currency.symbol}${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `${currency.symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  // Helper function to render multi-currency amounts
+  // Format currency for KPIs
+  const formatCurrencyKPI = (amount: number) => {
+    if (!commitmentCurrency) return '-';
+    const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return `${commitmentCurrency.symbol} ${formattedAmount}`;
+  };
+
+  // Format currency breakdown by original currency
+  const formatCurrencyBreakdown = (currencyData: Array<{ symbol: string; amount: number }>) => {
+    if (!currencyData || currencyData.length === 0) return '-';
+    
+    return currencyData.map(({ symbol, amount }) => {
+      const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return `${symbol} ${formattedAmount}`;
+    }).join(' + ');
+  };
+
+  // Helper function to render multi-currency amounts with conversion
   const renderMultiCurrency = (client: ProjectClientSummary, field: keyof Pick<CurrencyFinancial, 'total_committed_amount' | 'total_paid_amount' | 'balance_due'>) => {
-    if (client.financialByCurrency.length === 0) return '-';
+    if (client.financialByCurrency.length === 0 || !commitmentCurrency) return '-';
     
-    // Always show first currency
-    const currencyData = client.financialByCurrency[0];
-    if (!currencyData) return '-';
-    
-    const amount = currencyData[field];
+    // Build map of exchange rates from commitments
+    const exchangeRateMap = new Map<string, number>();
+    commitmentsData?.forEach(commitment => {
+      if (commitment.currency && commitment.exchange_rate) {
+        exchangeRateMap.set(commitment.currency.id, commitment.exchange_rate);
+      }
+    });
+
+    // Convert all currency amounts to commitment currency
+    let totalInCommitmentCurrency = 0;
+
+    client.financialByCurrency.forEach(financial => {
+      if (!financial.currency) return;
+      
+      const amount = financial[field];
+      
+      // If already in commitment currency, add as-is
+      if (financial.currency.id === commitmentCurrency.id) {
+        totalInCommitmentCurrency += amount;
+      } else {
+        // Convert using exchange_rate
+        const exchangeRate = exchangeRateMap.get(financial.currency.id);
+        if (exchangeRate && exchangeRate > 0) {
+          totalInCommitmentCurrency += amount / exchangeRate;
+        }
+      }
+    });
     
     return (
       <div className="flex flex-col">
         <span className="font-semibold" style={{ fontSize: '14px' }}>
-          {formatCurrency(amount, currencyData.currency)}
+          {formatCurrency(totalInCommitmentCurrency, commitmentCurrency)}
         </span>
       </div>
     );
@@ -212,26 +285,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       key: 'balance_due',
       label: 'Saldo pendiente',
       sortable: true,
-      render: (client: ProjectClientSummary) => {
-        if (client.financialByCurrency.length === 0) return '-';
-        
-        // Always show first currency
-        const currencyData = client.financialByCurrency[0];
-        if (!currencyData) return '-';
-        
-        const balance = currencyData.balance_due;
-        const className = balance > 0 
-          ? 'text-orange-600 dark:text-orange-400 font-semibold' 
-          : balance < 0
-          ? 'text-green-600 dark:text-green-400 font-semibold'
-          : 'font-semibold';
-        
-        return (
-          <span className={className} style={{ fontSize: '14px' }}>
-            {formatCurrency(balance, currencyData.currency)}
-          </span>
-        );
-      },
+      render: (client: ProjectClientSummary) => renderMultiCurrency(client, 'balance_due'),
     },
     {
       key: 'next_due',
@@ -261,10 +315,101 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     },
   ];
 
-  // Calculate KPIs using mapper function
+  // Calculate KPIs with currency conversion
   const kpis = useMemo(() => {
-    return calculateObligationsKPIs(projectClients);
-  }, [projectClients]);
+    if (!dashboardData || !commitmentCurrency) {
+      return {
+        totalCommittedAmount: 0,
+        totalPaidAmount: 0,
+        totalBalanceDue: 0,
+        paidPercentage: 0,
+        balancePercentage: 0,
+        totalScheduleItems: 0,
+        totalSchedulePaid: 0,
+        schedulePercentage: 0,
+        committedByOriginalCurrency: [] as Array<{ symbol: string; amount: number }>,
+        paidByOriginalCurrency: [] as Array<{ symbol: string; amount: number }>,
+        balanceByOriginalCurrency: [] as Array<{ symbol: string; amount: number }>,
+      };
+    }
+
+    // Helper: Convert amount to commitment currency using exchange_rate
+    const convertToCommitmentCurrency = (amount: number, currency: CurrencyFinancial['currency'], exchangeRate: number | null): number => {
+      if (!currency) return 0;
+      
+      // If already in commitment currency, return as-is
+      if (currency.id === commitmentCurrency.id) {
+        return amount;
+      }
+      
+      // If no exchange rate, cannot convert
+      if (!exchangeRate || exchangeRate === 0) {
+        return 0; // Skip
+      }
+      
+      // Convert using exchange_rate (divide by cotización)
+      return amount / exchangeRate;
+    };
+
+    let totalCommitted = 0;
+    let totalPaid = 0;
+    let totalBalance = 0;
+    let totalScheduleItems = 0;
+    let totalSchedulePaid = 0;
+
+    const committedByCurrency = new Map<string, number>();
+    const paidByCurrency = new Map<string, number>();
+    const balanceByCurrency = new Map<string, number>();
+
+    // Process commitments to get exchange rates
+    const exchangeRateMap = new Map<string, number>();
+    commitmentsData?.forEach(commitment => {
+      if (commitment.currency && commitment.exchange_rate) {
+        exchangeRateMap.set(commitment.currency.id, commitment.exchange_rate);
+      }
+    });
+
+    // Sum up all financial data with conversion
+    projectClients.forEach(client => {
+      client.financialByCurrency.forEach(financial => {
+        if (!financial.currency) return;
+
+        const exchangeRate = exchangeRateMap.get(financial.currency.id) || null;
+        const currencySymbol = financial.currency.symbol;
+
+        // Track by original currency
+        committedByCurrency.set(currencySymbol, (committedByCurrency.get(currencySymbol) || 0) + financial.total_committed_amount);
+        paidByCurrency.set(currencySymbol, (paidByCurrency.get(currencySymbol) || 0) + financial.total_paid_amount);
+        balanceByCurrency.set(currencySymbol, (balanceByCurrency.get(currencySymbol) || 0) + financial.balance_due);
+
+        // Convert and sum
+        totalCommitted += convertToCommitmentCurrency(financial.total_committed_amount, financial.currency, exchangeRate);
+        totalPaid += convertToCommitmentCurrency(financial.total_paid_amount, financial.currency, exchangeRate);
+        totalBalance += convertToCommitmentCurrency(financial.balance_due, financial.currency, exchangeRate);
+        
+        totalScheduleItems += financial.total_schedule_items || 0;
+        totalSchedulePaid += financial.schedule_paid || 0;
+      });
+    });
+
+    const paidPercentage = totalCommitted > 0 ? (totalPaid / totalCommitted) * 100 : 0;
+    const balancePercentage = totalCommitted > 0 ? (totalBalance / totalCommitted) * 100 : 0;
+    const schedulePercentage = totalScheduleItems > 0 ? (totalSchedulePaid / totalScheduleItems) * 100 : 0;
+
+    return {
+      totalCommittedAmount: totalCommitted,
+      totalPaidAmount: totalPaid,
+      totalBalanceDue: totalBalance,
+      paidPercentage,
+      balancePercentage,
+      totalScheduleItems,
+      totalSchedulePaid,
+      schedulePercentage,
+      committedByOriginalCurrency: Array.from(committedByCurrency.entries()).map(([symbol, amount]) => ({ symbol, amount })),
+      paidByOriginalCurrency: Array.from(paidByCurrency.entries()).map(([symbol, amount]) => ({ symbol, amount })),
+      balanceByOriginalCurrency: Array.from(balanceByCurrency.entries()).map(([symbol, amount]) => ({ symbol, amount })),
+    };
+  }, [projectClients, dashboardData, commitmentCurrency, commitmentsData]);
 
   return (
     <div className="space-y-6">
@@ -277,9 +422,11 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             Compromiso Total
           </StatCardTitle>
           <StatCardValue className="text-2xl md:text-3xl">
-            {formatCurrencyAmount(kpis.totalCommittedAmount)}
+            {commitmentCurrency ? formatCurrencyKPI(kpis.totalCommittedAmount) : '-'}
           </StatCardValue>
-          <StatCardMeta>100% del total comprometido</StatCardMeta>
+          <StatCardMeta>
+            {commitmentCurrency ? formatCurrencyBreakdown(kpis.committedByOriginalCurrency) : 'Sin compromisos registrados'}
+          </StatCardMeta>
         </StatCard>
 
         {/* 2. Pagado */}
@@ -288,10 +435,12 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             <CheckCircle2 className="w-4 h-4 inline mr-1" />
             Pagado
           </StatCardTitle>
-          <StatCardValue className="text-2xl md:text-3xl text-green-600 dark:text-green-400">
-            {formatCurrencyAmount(kpis.totalPaidAmount)}
+          <StatCardValue className="text-2xl md:text-3xl">
+            {commitmentCurrency ? formatCurrencyKPI(kpis.totalPaidAmount) : '-'}
           </StatCardValue>
-          <StatCardMeta>{kpis.paidPercentage.toFixed(1)}% del compromiso</StatCardMeta>
+          <StatCardMeta>
+            {commitmentCurrency ? formatCurrencyBreakdown(kpis.paidByOriginalCurrency) : 'Sin compromisos registrados'}
+          </StatCardMeta>
         </StatCard>
 
         {/* 3. Saldo */}
@@ -300,10 +449,12 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             <AlertCircle className="w-4 h-4 inline mr-1" />
             Saldo
           </StatCardTitle>
-          <StatCardValue className={`text-2xl md:text-3xl ${kpis.totalBalanceDue > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-green-600'}`}>
-            {formatCurrencyAmount(kpis.totalBalanceDue)}
+          <StatCardValue className="text-2xl md:text-3xl">
+            {commitmentCurrency ? formatCurrencyKPI(kpis.totalBalanceDue) : '-'}
           </StatCardValue>
-          <StatCardMeta>{kpis.balancePercentage.toFixed(1)}% pendiente</StatCardMeta>
+          <StatCardMeta>
+            {commitmentCurrency ? formatCurrencyBreakdown(kpis.balanceByOriginalCurrency) : 'Sin compromisos registrados'}
+          </StatCardMeta>
         </StatCard>
 
         {/* 4. Items de Pago */}
