@@ -27,6 +27,7 @@ import { ConstructionPhaseFormModal } from '../modals/construction/ConstructionP
 
 import ClientPaymentsModal from '../modals/clients/ClientPaymentsModal';
 import { ClientCommitmentModal } from '../modals/clients/ClientCommitmentModal';
+import { ClientRoleModal } from '../modals/clients/ClientRoleModal';
 import ClientPaymentPlans from '../modals/general/clients/ClientPaymentPlans';
 import ClientInstallment from '../modals/general/clients/ClientInstallment';
 import { MaterialFormModal } from '../modals/admin/MaterialFormModal'
@@ -241,6 +242,8 @@ export function ModalFactory() {
       return <ClientPaymentPlans modalData={data || undefined} onClose={closeModal} />;
     case 'client-installment':
       return <ClientInstallment modalData={data || undefined} onClose={closeModal} />;
+    case 'clientRole':
+      return <ClientRoleModal modalData={data || undefined} onClose={closeModal} />;
     case 'pdf-exporter':
       return <PDFExporterModal modalData={data || undefined} onClose={closeModal} />;
     case 'provider-product':
