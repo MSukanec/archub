@@ -72,18 +72,14 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
   });
 
   // Query to get existing client data when editing - with cache optimization
-  const { data: existingClient } = useQuery<any>({
-    queryKey: CLIENT_QUERY_KEYS.projectClient(projectId, clientId, organizationId),
-    queryFn: async () => {
-      const response = await fetch(`/api/projects/${projectId}/clients/${clientId}?organization_id=${organizationId}`);
-      if (!response.ok) throw new Error('Failed to fetch client');
-      const json = await response.json();
-      if (!json.success) throw new Error(json.error || 'Failed to fetch client');
-      return json.data; // Return only the data, not the wrapper
-    },
+  const { data: existingClientResponse } = useQuery<any>({
+    queryKey: [`/api/projects/${projectId}/clients/${clientId}?organization_id=${organizationId}`],
     enabled: !!clientId && !!projectId && !!organizationId,
     staleTime: 2 * 60 * 1000, // 2 minutes - use cached data if available
   });
+
+  // Unwrap the API response to get just the client data
+  const existingClient = existingClientResponse?.data || null;
 
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
