@@ -16,19 +16,12 @@ export function GeneralCostsKPIs({ generalCosts }: GeneralCostsKPIsProps) {
 
     const totalGeneralCosts = generalCosts.length;
     const activeGeneralCosts = generalCosts.filter(gc => gc.is_active);
-    const costsWithValues = generalCosts.filter(gc => (gc as any).current_value?.amount);
     
     const categoryCounts = generalCosts.reduce((acc, cost) => {
       const category = cost.category || 'Sin categoría';
       acc[category] = (acc[category] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-
-    const totalValueARS = generalCosts.reduce((sum, cost) => {
-      return sum + ((cost as any).current_value?.amount || 0);
-    }, 0);
-
-    const totalValueUSD = totalValueARS / 1125;
 
     const categoryDistribution = Object.entries(categoryCounts).map(([name, count]) => ({
       name,
@@ -39,11 +32,6 @@ export function GeneralCostsKPIs({ generalCosts }: GeneralCostsKPIsProps) {
     return {
       totalGeneralCosts,
       activeCount: activeGeneralCosts.length,
-      costsWithValuesCount: costsWithValues.length,
-      totalValues: {
-        ars: totalValueARS,
-        usd: totalValueUSD
-      },
       categoryDistribution,
       categoryCounts
     };

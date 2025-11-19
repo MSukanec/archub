@@ -3,18 +3,9 @@ export interface GeneralCost {
   organization_id: string;
   name: string;
   description: string | null;
-  category?: string;
-  unit?: {
-    id: string;
-    name: string;
-    symbol: string;
-  };
-  current_value?: {
-    amount: number;
-    currency_id: string;
-    valid_from: string;
-  };
+  category: string | null;
   is_active: boolean;
+  unit: string | null;
   created_at: string;
   updated_at: string | null;
 }
@@ -22,12 +13,17 @@ export interface GeneralCost {
 export interface InsertGeneralCost {
   organization_id: string;
   name: string;
-  description?: string | undefined;
+  description?: string | null;
+  category?: string | null;
+  is_active?: boolean;
+  unit?: string | null;
 }
 
 export interface GeneralCostValue {
-  general_cost_id?: string;
+  id?: string;
+  general_cost_id: string;
   amount: number;
   currency_id: string;
   valid_from: string;
+  created_at?: string;
 }

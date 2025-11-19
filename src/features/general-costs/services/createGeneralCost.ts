@@ -26,11 +26,5 @@ export async function createGeneralCost(generalCost: InsertGeneralCost): Promise
     throw error;
   }
 
-  return {
-    ...data,
-    is_active: true,
-    category: 'General',
-    current_value: undefined,
-    unit: undefined
-  };
+  return data;
 }

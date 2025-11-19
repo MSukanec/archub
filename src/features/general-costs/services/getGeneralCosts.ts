@@ -4,8 +4,7 @@ import type { GeneralCost } from '../types';
 /**
  * Fetches all general costs for an organization.
  * 
- * This service retrieves general costs with basic information. Extended data like
- * current values and units can be added in future iterations.
+ * This service retrieves general costs with all their actual database columns.
  * 
  * @param organizationId - The ID of the organization
  * @returns Array of general costs or empty array if none found
@@ -27,6 +26,9 @@ export async function getGeneralCosts(organizationId: string): Promise<GeneralCo
       organization_id,
       name,
       description,
+      category,
+      is_active,
+      unit,
       created_at,
       updated_at
     `)
@@ -41,11 +43,5 @@ export async function getGeneralCosts(organizationId: string): Promise<GeneralCo
     return [];
   }
 
-  return data.map(cost => ({
-    ...cost,
-    is_active: true,
-    category: 'General',
-    current_value: undefined,
-    unit: undefined
-  }));
+  return data;
 }

@@ -27,6 +27,9 @@ export async function getGeneralCost(generalCostId: string): Promise<GeneralCost
       organization_id,
       name,
       description,
+      category,
+      is_active,
+      unit,
       created_at,
       updated_at
     `)
@@ -41,11 +44,5 @@ export async function getGeneralCost(generalCostId: string): Promise<GeneralCost
     return null;
   }
 
-  return {
-    ...data,
-    is_active: true,
-    category: 'General',
-    current_value: undefined,
-    unit: undefined
-  };
+  return data;
 }

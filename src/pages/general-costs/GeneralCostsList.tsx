@@ -14,6 +14,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useGeneralCosts } from "@/features/general-costs/hooks/use-general-costs";
 import { useDeleteGeneralCost } from "@/features/general-costs/hooks/use-delete-general-cost";
 import { GeneralCostsKPIs } from "@/features/general-costs/components/GeneralCostsKPIs";
+import type { GeneralCost } from "@/features/general-costs/types";
 
 interface GeneralCostsListProps {
   filterByCategory?: string;
@@ -56,7 +57,7 @@ export default function GeneralCostsList({ filterByCategory = 'all', filterBySta
     // Filtro por estado
     const statusFilterMatch = filterByStatus === 'all' || 
       (filterByStatus === 'active' && generalCost.is_active) ||
-      (filterByStatus === 'with_values' && (generalCost as any).current_value?.amount);
+      (filterByStatus === 'inactive' && !generalCost.is_active);
     
     return searchMatch && categoryFilterMatch && statusFilterMatch;
   });
@@ -65,7 +66,7 @@ export default function GeneralCostsList({ filterByCategory = 'all', filterBySta
   const [, setLocation] = useLocation();
 
   // Función para editar gasto general
-  const handleEdit = (generalCost: any) => {
+  const handleEdit = (generalCost: GeneralCost) => {
     openModal('general-costs', {
       organizationId: userData?.organization?.id,
       isEditing: true,
@@ -74,7 +75,7 @@ export default function GeneralCostsList({ filterByCategory = 'all', filterBySta
   };
 
   // Función para eliminar gasto general
-  const handleDelete = (generalCost: any) => {
+  const handleDelete = (generalCost: GeneralCost) => {
     openModal('delete-confirmation', {
       title: 'Eliminar Gasto General',
       message: `¿Estás seguro de que quieres eliminar el gasto general "${generalCost.name}"? Esta acción no se puede deshacer.`,
@@ -96,7 +97,7 @@ export default function GeneralCostsList({ filterByCategory = 'all', filterBySta
     {
       key: 'name',
       label: 'Gasto General',
-      render: (generalCost: any) => (
+      render: (generalCost: GeneralCost) => (
         <div>
           <div className="font-medium">{generalCost.name}</div>
           {generalCost.description && (
@@ -108,7 +109,7 @@ export default function GeneralCostsList({ filterByCategory = 'all', filterBySta
     {
       key: 'category',
       label: 'Categoría',
-      render: (generalCost: any) => (
+      render: (generalCost: GeneralCost) => (
         <div>
           {generalCost.category ? (
             <Badge variant="outline">{generalCost.category}</Badge>
@@ -121,7 +122,7 @@ export default function GeneralCostsList({ filterByCategory = 'all', filterBySta
     {
       key: 'created_at',
       label: 'Fecha de Creación',
-      render: (generalCost: any) => (
+      render: (generalCost: GeneralCost) => (
         <div>
           {generalCost.created_at && (
             <div className="text-xs">
@@ -134,7 +135,7 @@ export default function GeneralCostsList({ filterByCategory = 'all', filterBySta
     {
       key: 'status',
       label: 'Estado',
-      render: (generalCost: any) => (
+      render: (generalCost: GeneralCost) => (
         <div>
           {generalCost.is_active ? (
             <Badge style={{ backgroundColor: 'var(--accent)', color: 'white', border: 'none' }}>
