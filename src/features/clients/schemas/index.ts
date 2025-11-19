@@ -71,18 +71,3 @@ export const clientRoleSchema = z.object({
 });
 
 export type ClientRoleFormData = z.infer<typeof clientRoleSchema>;
-
-// ========== Payment Plan Generation Schema ==========
-
-export const paymentPlanGenerationSchema = z.object({
-  commitment_id: z.string().min(1, 'El compromiso es requerido'),
-  installments_count: z.number().min(1, 'Debe haber al menos 1 cuota').max(100, 'Máximo 100 cuotas'),
-  frequency: z.enum(['quincenal', 'mensual', 'trimestral'], {
-    required_error: 'Selecciona la frecuencia de pago'
-  }),
-  start_date: z.date({
-    required_error: 'Selecciona la fecha de la primera cuota'
-  }),
-});
-
-export type PaymentPlanGenerationFormData = z.infer<typeof paymentPlanGenerationSchema>;

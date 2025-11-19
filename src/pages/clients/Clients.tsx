@@ -1,23 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import { Receipt, Plus, Users, Home, Bell, Search, Filter } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
 import { Layout } from '@/layout/desktop/Layout'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { supabase } from '@/lib/supabase'
 import ClientDashboardTab from './ClientDashboardTab'
 import ClientListTab from './ClientListTab'
 import ClientObligationsTab from './ClientObligationsTab'
 import ClientPaymentsTab from './ClientPaymentsTab'
 import ClientSettingsTab from './ClientSettingsTab'
-import { ClientPaymentPlans } from './ClientPaymentPlans'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
 import { useLocation, useSearch } from 'wouter'
-import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
 import { useProjectContext } from '@/stores/projectContext'
-import { queryClient } from '@/lib/queryClient'
 
 export function Clients() {
   const searchParams = useSearch();
@@ -105,42 +100,6 @@ export function Clients() {
   const projectId = selectedProjectId
   const organizationId = userData?.organization?.id
 
-  // Fetch existing payment plan for the project to determine button text
-  const { data: existingPaymentPlan } = useQuery({
-    queryKey: ['project-payment-plan', projectId],
-    queryFn: async () => {
-      if (!supabase || !projectId) return null
-      
-      const { data, error } = await supabase
-        .from('project_payment_plans')
-        .select(`
-          *,
-          payment_plans(
-            id,
-            name,
-            description
-          )
-        `)
-        .eq('project_id', projectId)
-        .single()
-
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // No rows found - no payment plan exists
-          return null
-        }
-        console.error('Error fetching payment plan:', error)
-        return null
-      }
-
-      return data
-    },
-    enabled: !!projectId,
-    staleTime: 5 * 60 * 1000, // 5 minutes - payment plans don't change often
-  })
-
-  // Note: Prefetching removed - feature hooks handle caching automatically
-
   // Crear tabs para el header
   const headerTabs = [
     {
@@ -162,11 +121,6 @@ export function Clients() {
       id: "obligations",
       label: "Compromisos de Pago",
       isActive: activeTab === "obligations"
-    },
-    {
-      id: "monthly-installments",
-      label: "Plan de Pagos",
-      isActive: activeTab === "monthly-installments"
     },
     {
       id: "settings",
@@ -227,25 +181,13 @@ export function Clients() {
         })
       }
     }),
-    ...(activeTab === "monthly-installments" && {
-      actionButton: {
-        label: existingPaymentPlan ? "Cambiar Plan de Pago" : "Nuevo Plan de Pagos",
-        icon: Plus,
-        onClick: () => openModal('client-payment-plans', {
-          projectId,
-          organizationId,
-          existingPaymentPlan
-        })
-      }
-    }),
     ...(activeTab === "details" && {
       actionButton: {
         label: "Nuevo Pago",
         icon: Plus,
-        onClick: () => openModal('installment', {
+        onClick: () => openModal('client-payment', {
           projectId,
-          organizationId,
-          subcategoryId: 'f3b96eda-15d5-4c96-ade7-6f53685115d3' // Subcategoría para Aportes de Terceros
+          organizationId
         })
       }
     })
@@ -287,15 +229,6 @@ export function Clients() {
           <ClientPaymentsTab 
             projectId={projectId || undefined}
           />
-        )}
-
-        {activeTab === "monthly-installments" && (
-          <PlanRestricted reason="coming_soon">
-            <ClientPaymentPlans 
-              projectId={projectId || ''}
-              organizationId={organizationId}
-            />
-          </PlanRestricted>
         )}
 
         {activeTab === "settings" && (

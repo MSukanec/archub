@@ -5,7 +5,6 @@ export interface MovementProjectClientAssignment {
   id: string
   movement_id: string
   project_client_id: string
-  project_installment_id?: string
   created_at: string
   updated_at?: string
   project_clients?: {
@@ -25,21 +24,15 @@ export interface MovementProjectClientAssignment {
       full_name: string
     }
   }
-  project_installments?: {
-    id: string
-    number: number
-  }
 }
 
 export interface CreateMovementProjectClientAssignment {
   movement_id: string
   project_client_id: string
-  project_installment_id?: string
 }
 
 export interface UpdateMovementProjectClientAssignment {
   project_client_id: string
-  project_installment_id?: string
 }
 
 // Hook para obtener asignaciones de clientes de un movimiento
@@ -71,7 +64,6 @@ export function useMovementProjectClients(movementId?: string) {
         id: payment.movement_client_id,
         movement_id: payment.movement_id,
         project_client_id: payment.project_client_id,
-        project_installment_id: payment.project_installment_id,
         created_at: new Date().toISOString(), // Vista no incluye fechas
         updated_at: new Date().toISOString(),
         project_clients: {
@@ -90,11 +82,7 @@ export function useMovementProjectClients(movementId?: string) {
             phone: '',
             full_name: payment.client_name
           }
-        },
-        project_installments: payment.project_installment_id ? {
-          id: payment.project_installment_id,
-          number: payment.installment_number
-        } : null
+        }
       }))
       
       return transformedData as MovementProjectClientAssignment[]
@@ -118,10 +106,7 @@ export function useCreateMovementProjectClients() {
 
       const { data, error } = await supabase
         .from('movement_clients')
-        .insert(assignments.map(assignment => ({
-          ...assignment,
-          project_installment_id: assignment.project_installment_id || null
-        })))
+        .insert(assignments)
         .select()
 
       if (error) {
@@ -177,8 +162,7 @@ export function useUpdateMovementProjectClients() {
           .from('movement_clients')
           .insert(assignments.map(assignment => ({
             movement_id: movementId,
-            project_client_id: assignment.project_client_id,
-            project_installment_id: assignment.project_installment_id || null
+            project_client_id: assignment.project_client_id
           })))
           .select()
 

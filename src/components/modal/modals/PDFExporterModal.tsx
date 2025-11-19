@@ -54,7 +54,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     coverPage: true,
     header: true,
     constructionTasks: true,
-    paymentPlan: true,
     footer: true,
   });
 
@@ -82,7 +81,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
 
   // Header configuration with pre-populated data
   const [headerConfig, setHeaderConfig] = useState({
-    title: 'Plan de Pagos',
+    title: 'Presupuesto',
     subtitle: '',
     organizationName: userData?.organization?.name || '',
     projectName: '',
@@ -99,24 +98,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     layout: 'row' as 'row' | 'column',
   });
 
-  // Payment plan configuration
-  const [paymentPlanConfig, setPaymentPlanConfig] = useState({
-    showSchedule: true, // Cronograma de cuotas
-    showDetailTable: true, // Tabla detallada por unidad
-    showPlanInfo: true, // Información del plan
-    maxInstallmentFilter: null as number | null, // Filtro de cuotas: null = todas
-    oneUnitPerPage: true, // Una unidad por página
-  });
-
-  // Generate dynamic filename based on payment plan config
-  const filename = useMemo(() => {
-    if (paymentPlanConfig.maxInstallmentFilter) {
-      // Replace .pdf with filter info and .pdf
-      const nameWithoutExtension = baseFilename.replace(/\.pdf$/, '');
-      return `${nameWithoutExtension}-hasta-cuota-${paymentPlanConfig.maxInstallmentFilter}.pdf`;
-    }
-    return baseFilename;
-  }, [baseFilename, paymentPlanConfig.maxInstallmentFilter]);
+  const filename = baseFilename;
 
   // Expanded section for accordion (only one at a time)
   const [expandedSection, setExpandedSection] = useState<string>('general');
@@ -214,7 +196,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
         if (block.type === 'tableHeader') return sections.constructionTasks;
         if (block.type === 'tableContent') return sections.constructionTasks;
         if (block.type === 'totals') return sections.constructionTasks;
-        if (block.type === 'paymentPlan') return sections.paymentPlan;
         if (block.type === 'footer') return sections.footer;
         return true;
       }).map(block => {
@@ -229,26 +210,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           };
         }
         
-        // Override payment plan data with paymentPlanConfig and filter installments
-        if (block.type === 'paymentPlan') {
-          // Filter installments based on maxInstallmentFilter
-          let filteredInstallments = block.data?.installments || [];
-          if (paymentPlanConfig.maxInstallmentFilter) {
-            filteredInstallments = filteredInstallments.filter((inst: any) => 
-              inst.number <= paymentPlanConfig.maxInstallmentFilter!
-            );
-          }
-          
-          return {
-            ...block,
-            data: {
-              ...block.data,
-              installments: filteredInstallments
-            },
-            config: paymentPlanConfig
-          }
-        }
-        
         return block;
       });
       
@@ -260,7 +221,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       console.error('Error generating PDF:', error);
       throw error;
     }
-  }, [blocks, sections, debouncedPdfConfig, debouncedFooterConfig, debouncedTableConfig, debouncedHeaderConfig, paymentPlanConfig]);
+  }, [blocks, sections, debouncedPdfConfig, debouncedFooterConfig, debouncedTableConfig, debouncedHeaderConfig]);
 
   // Load PDF using pdfjs-dist
   const loadPdf = useCallback(async () => {
@@ -898,147 +859,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           )}
         </div>
         
-        {/* Plan de Pago Section */}
-        <div 
-          className="border border-border rounded-lg overflow-hidden bg-card"
-          data-section-id="paymentPlan"
-        >
-          {/* Section Header */}
-          <div 
-            className="flex items-center justify-between p-3 cursor-pointer hover:bg-accent/50 transition-colors"
-            onClick={() => toggleExpanded('paymentPlan')}
-          >
-            <div className="flex items-center gap-3">
-              {/* Drag Handle - for future use */}
-              <div className="text-muted-foreground cursor-grab">
-                <GripVertical className="h-4 w-4" />
-              </div>
-              
-              {/* Icon */}
-              <Calendar className="h-4 w-4 text-accent" />
-              
-              {/* Label */}
-              <span className="text-sm font-medium">Plan de Pagos</span>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              {/* Switch */}
-              <Switch
-                checked={sections.paymentPlan}
-                onCheckedChange={() => toggleSection('paymentPlan')}
-                className="data-[state=checked]:bg-accent"
-                onClick={(e) => e.stopPropagation()}
-              />
-              
-              {/* Expand Chevron */}
-              {expandedSection === 'paymentPlan' ? (
-                <ChevronUp className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              )}
-            </div>
-          </div>
-          
-          {/* Expanded Content */}
-          {expandedSection === 'paymentPlan' && (
-            <div className="px-3 pb-3 pt-0 border-t border-border/50">
-              <p className="text-xs text-muted-foreground mt-2 mb-4">
-                Tabla detallada del plan de pagos con cronograma de cuotas e información del plan
-              </p>
-              
-              {/* Payment Plan Configuration Controls */}
-              <div className="space-y-4 mt-3">
-                {/* Plan Information */}
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs font-medium">Información del Plan</Label>
-                  <Switch
-                    checked={paymentPlanConfig.showPlanInfo}
-                    onCheckedChange={(checked) => setPaymentPlanConfig(prev => ({ ...prev, showPlanInfo: checked }))}
-                    className="data-[state=checked]:bg-accent"
-                  />
-                </div>
-
-                {/* Schedule Table */}
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs font-medium">Cronograma de Cuotas</Label>
-                  <Switch
-                    checked={paymentPlanConfig.showSchedule}
-                    onCheckedChange={(checked) => setPaymentPlanConfig(prev => ({ ...prev, showSchedule: checked }))}
-                    className="data-[state=checked]:bg-accent"
-                  />
-                </div>
-
-                {/* Detailed Table */}
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs font-medium">Tabla Detallada por Unidad</Label>
-                  <Switch
-                    checked={paymentPlanConfig.showDetailTable}
-                    onCheckedChange={(checked) => setPaymentPlanConfig(prev => ({ ...prev, showDetailTable: checked }))}
-                    className="data-[state=checked]:bg-accent"
-                  />
-                </div>
-
-                {/* Filtro de Cuotas */}
-                <div className="space-y-2">
-                  <Label className="text-xs font-medium">Filtro de Cuotas</Label>
-                  <Select
-                    value={paymentPlanConfig.maxInstallmentFilter?.toString() || "all"}
-                    onValueChange={(value) => 
-                      setPaymentPlanConfig(prev => ({
-                        ...prev, 
-                        maxInstallmentFilter: value === "all" ? null : parseInt(value)
-                      }))
-                    }
-                  >
-                    <SelectTrigger className="h-8 text-xs">
-                      <SelectValue placeholder="Seleccionar cuotas" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas las Cuotas</SelectItem>
-                      {(() => {
-                        // Get installments from blocks data
-                        const paymentBlock = blocks.find(block => block.type === 'paymentPlan');
-                        const installments = paymentBlock?.data?.installments || [];
-                        return installments.map((installment: any) => (
-                          <SelectItem key={installment.id} value={installment.number.toString()}>
-                            Hasta Cuota {installment.number.toString().padStart(2, '0')}
-                          </SelectItem>
-                        ));
-                      })()}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Distribución de Unidades */}
-                <div className="space-y-2">
-                  <Label className="text-xs font-medium">Distribución de Unidades</Label>
-                  <Select
-                    value={paymentPlanConfig.oneUnitPerPage ? "separate" : "continuous"}
-                    onValueChange={(value) => 
-                      setPaymentPlanConfig(prev => ({
-                        ...prev, 
-                        oneUnitPerPage: value === "separate"
-                      }))
-                    }
-                  >
-                    <SelectTrigger className="h-8 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="separate">Una unidad por página</SelectItem>
-                      <SelectItem value="continuous">Unidades continuas</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="text-xs text-muted-foreground p-2 bg-muted/20 rounded">
-                  La tabla detallada incluye: Actualización, Valor de Cuota, Pagos y Saldos por unidad funcional
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-        
         {/* Footer Section - Custom with text controls */}
         <div 
           className="border border-border rounded-lg overflow-hidden bg-card"
@@ -1260,7 +1080,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
               if (block.type === 'tableHeader') return sections.constructionTasks;
               if (block.type === 'tableContent') return sections.constructionTasks;
               if (block.type === 'totals') return sections.constructionTasks;
-              if (block.type === 'paymentPlan') return sections.paymentPlan;
               if (block.type === 'footer') return sections.footer;
               return true;
             }).map(block => {
@@ -1273,26 +1092,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
                     showDivider: debouncedFooterConfig.showDivider
                   }
                 };
-              }
-              
-              // Override payment plan data with paymentPlanConfig and filter installments
-              if (block.type === 'paymentPlan') {
-                // Filter installments based on maxInstallmentFilter
-                let filteredInstallments = block.data?.installments || [];
-                if (paymentPlanConfig.maxInstallmentFilter) {
-                  filteredInstallments = filteredInstallments.filter((inst: any) => 
-                    inst.number <= paymentPlanConfig.maxInstallmentFilter!
-                  );
-                }
-                
-                return {
-                  ...block,
-                  data: {
-                    ...block.data,
-                    installments: filteredInstallments
-                  },
-                  config: paymentPlanConfig
-                }
               }
               
               return block;

@@ -586,7 +586,6 @@ export const movement_clients = pgTable("movement_clients", {
   id: uuid("id").primaryKey().defaultRandom(),
   movement_id: uuid("movement_id").notNull(),
   project_client_id: uuid("project_client_id").notNull(),
-  project_installment_id: uuid("project_installment_id"),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });
@@ -655,17 +654,6 @@ export const movement_general_costs = pgTable("movement_general_costs", {
   id: uuid("id").primaryKey().defaultRandom(),
   movement_id: uuid("movement_id").notNull(),
   general_cost_id: uuid("general_cost_id").notNull(),
-  created_at: timestamp("created_at").defaultNow(),
-});
-
-// Project Installments Table
-export const project_installments = pgTable("project_installments", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  project_id: uuid("project_id").notNull(),
-  organization_id: uuid("organization_id").notNull(),
-  date: text("date").notNull(), // Fecha de vencimiento de la cuota
-  number: integer("number").notNull(), // Número de cuota
-  index_reference: integer("index_reference").default(0), // Índice de la cuota
   created_at: timestamp("created_at").defaultNow(),
 });
 
@@ -767,11 +755,6 @@ export const insertMovementGeneralCostSchema = createInsertSchema(movement_gener
   created_at: true,
 });
 
-export const insertProjectInstallmentSchema = createInsertSchema(project_installments).omit({
-  id: true,
-  created_at: true,
-});
-
 export const insertProjectPersonnelSchema = createInsertSchema(project_personnel).omit({
   id: true,
   created_at: true,
@@ -836,8 +819,6 @@ export type InsertProjectPersonnel = z.infer<typeof insertProjectPersonnelSchema
 export type PersonnelRate = typeof personnel_rates.$inferSelect;
 export type InsertPersonnelRate = z.infer<typeof insertPersonnelRatesSchema>;
 export type InsertMovementGeneralCost = z.infer<typeof insertMovementGeneralCostSchema>;
-export type ProjectInstallment = typeof project_installments.$inferSelect;
-export type InsertProjectInstallment = z.infer<typeof insertProjectInstallmentSchema>;
 
 
 // Subcontracts tables

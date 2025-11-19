@@ -350,17 +350,10 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           if (fullName) clientName = fullName
         }
 
-        const installmentNumber = client.project_installments?.number
-        const installmentDisplay = installmentNumber ? 
-          `Cuota ${installmentNumber.toString().padStart(2, '0')}` : 
-          'Sin cuota'
-
         return {
           project_client_id: client.project_client_id,
           unit: client.project_clients?.unit || 'N/A',
-          client_name: clientName,
-          project_installment_id: client.project_installment_id,
-          installment_display: installmentDisplay
+          client_name: clientName
         }
       })
       setSelectedClients(transformedClients)
@@ -940,7 +933,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         .from('movement_clients')
         .select(`
           project_client_id,
-          project_installment_id,
           project_clients:project_client_id (
             id,
             unit,
@@ -950,10 +942,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
               last_name,
               full_name
             )
-          ),
-          project_installments:project_installment_id (
-            id,
-            number
           )
         `)
         .eq('movement_id', movementId)
@@ -967,21 +955,12 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           const clientName = contact?.full_name || 
             `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || 'Sin nombre'
 
-          const installmentNumber = assignment.project_installments?.number
-          const installmentDisplay = installmentNumber ? 
-            `Cuota ${installmentNumber.toString().padStart(2, '0')}` : 
-            'Sin cuota'
-
           return {
             project_client_id: assignment.project_client_id,
             unit: projectClient?.unit || 'N/A',
-            client_name: clientName,
-            project_installment_id: assignment.project_installment_id,
-            installment_display: installmentDisplay
+            client_name: clientName
           }
         })
-
-
 
         setSelectedClients(formattedClients)
       }
@@ -1215,8 +1194,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         
         const projectClientsData = selectedClients.map(client => ({
           movement_id: result.id,
-          project_client_id: client.project_client_id,
-          project_installment_id: client.project_installment_id || null
+          project_client_id: client.project_client_id
         }))
 
         const { error: projectClientsError } = await supabase
