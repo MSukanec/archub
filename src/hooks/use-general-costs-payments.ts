@@ -85,15 +85,6 @@ export function useGeneralCostsPayments(organizationId: string | undefined) {
               name,
               is_active
             )
-          ),
-          creator:organization_members!general_costs_payments_created_by_fkey(
-            id,
-            users(
-              id,
-              full_name,
-              email,
-              avatar_url
-            )
           )
         `)
         .eq('organization_id', organizationId)
@@ -104,13 +95,7 @@ export function useGeneralCostsPayments(organizationId: string | undefined) {
         throw error
       }
 
-      // Transform creator data
-      const transformedData = (data || []).map(payment => ({
-        ...payment,
-        creator: payment.creator?.users || null
-      }))
-
-      return transformedData as GeneralCostPayment[]
+      return (data || []) as GeneralCostPayment[]
     },
     enabled: !!organizationId,
   })
