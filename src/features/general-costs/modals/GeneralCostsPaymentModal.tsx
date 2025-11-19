@@ -191,7 +191,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
       return
     }
 
-    let fileUrl = editingPayment?.file_url || null
+    let fileUrl = existingPayment?.file_url || null
 
     // Si hay archivos nuevos para subir
     if (filesToUpload.length > 0) {
@@ -321,40 +321,45 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
             <FormField
               control={form.control}
               name="payment_date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fecha *</FormLabel>
-                  <FormControl>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <div className="relative">
-                            <Input
-                              placeholder="Seleccionar fecha"
-                              value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
-                              className="pr-10 cursor-pointer"
-                              readOnly
-                            />
-                            <CalendarIcon className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-                          </div>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) =>
-                            date > new Date() || date < new Date('1900-01-01')
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                const [open, setOpen] = React.useState(false);
+                return (
+                  <FormItem>
+                    <FormLabel>Fecha *</FormLabel>
+                    <FormControl>
+                      <Popover open={open} onOpenChange={setOpen}>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <div className="relative">
+                              <Input
+                                placeholder="Seleccionar fecha"
+                                value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
+                                className="pr-10 cursor-pointer"
+                                readOnly
+                              />
+                              <CalendarIcon className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                            </div>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date > new Date() || date < new Date('1900-01-01')
+                            }
+                            initialFocus
+                            autoClose
+                            onClose={() => setOpen(false)}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
 
             <FormField

@@ -6,7 +6,11 @@ import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 import { Button } from "@/components/ui/button"
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>
+export type CalendarProps = Omit<React.ComponentProps<typeof DayPicker>, 'onSelect'> & {
+  autoClose?: boolean;
+  onClose?: () => void;
+  onSelect?: any;
+}
 
 type ViewMode = 'days' | 'months' | 'years'
 
@@ -19,6 +23,9 @@ function Calendar({
   showOutsideDays = true,
   month: controlledMonth,
   onMonthChange,
+  autoClose = false,
+  onClose,
+  onSelect,
   ...props
 }: CalendarProps) {
   const [viewMode, setViewMode] = React.useState<ViewMode>('days')
@@ -73,7 +80,7 @@ function Calendar({
 
   // Custom Navigation Header
   const CustomNavigationHeader = () => (
-    <div className="flex items-center justify-center gap-2 px-2 pb-3 border-b border-border mb-3">
+    <div className="flex items-center justify-center gap-1 px-2 pb-3 border-b border-border mb-3">
       <button
         className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
         onClick={() => navigateYear('prev')}
@@ -90,14 +97,14 @@ function Calendar({
       </button>
 
       <button
-        className="h-7 px-3 text-xs font-medium rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors min-w-[90px]"
+        className="h-7 px-2 text-xs font-medium rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors min-w-[70px]"
         onClick={() => setViewMode('months')}
         type="button"
       >
         {MONTHS_FULL[currentMonthIndex]}
       </button>
       <button
-        className="h-7 px-3 text-xs font-medium rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors min-w-[60px]"
+        className="h-7 px-2 text-xs font-medium rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors min-w-[50px]"
         onClick={() => setViewMode('years')}
         type="button"
       >
@@ -194,26 +201,39 @@ function Calendar({
     )
   }
 
+  // Interceptar selección de día para autoClose
+  const handleDaySelect = React.useCallback((day: any) => {
+    if (onSelect) {
+      (onSelect as any)(day);
+    }
+    if (autoClose && day && onClose) {
+      // Pequeño delay para que se vea la selección antes de cerrar
+      setTimeout(() => {
+        onClose();
+      }, 150);
+    }
+  }, [onSelect, autoClose, onClose]);
+
   // Days View (normal calendar)
-  const DaysView = () => (
-    <div className="min-h-[280px]">
-      <CustomNavigationHeader />
-      <DayPicker
-        showOutsideDays={showOutsideDays}
-        className={cn("p-0", className)}
-        month={currentMonth}
-        onMonthChange={handleMonthChange}
-        classNames={{
+  const DaysView = () => {
+    const dayPickerProps = {
+      showOutsideDays,
+      className: cn("p-0", className),
+      month: currentMonth,
+      onMonthChange: handleMonthChange,
+      ...props,
+      onSelect: handleDaySelect,
+      classNames: {
           months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
           month: "space-y-4",
           caption: "hidden", // Hide default caption since we use custom header
           caption_label: "text-sm font-medium",
           nav: "hidden", // Hide default navigation
           table: "w-full border-collapse space-y-1",
-          head_row: "flex",
+          head_row: "flex justify-center",
           head_cell:
             "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
-          row: "flex w-full mt-2",
+          row: "flex w-full mt-2 justify-center",
           cell: "h-9 w-9 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
           day: cn(
             buttonVariants({ variant: "ghost" }),
@@ -230,15 +250,20 @@ function Calendar({
             "aria-selected:bg-accent aria-selected:text-accent-foreground",
           day_hidden: "invisible",
           ...classNames,
-        }}
-        {...props}
-      />
-    </div>
-  )
+        },
+    };
+    
+    return (
+      <div className="min-h-[280px]">
+        <CustomNavigationHeader />
+        <DayPicker {...(dayPickerProps as any)} />
+      </div>
+    );
+  };
 
   return (
-    <div className={cn("p-3 flex items-center justify-center", className)}>
-      <div className="w-full max-w-sm">
+    <div className={cn("p-3 flex justify-center", className)}>
+      <div className="inline-block">
         {viewMode === 'days' && <DaysView />}
         {viewMode === 'months' && <MonthSelectionView />}
         {viewMode === 'years' && <YearSelectionView />}
