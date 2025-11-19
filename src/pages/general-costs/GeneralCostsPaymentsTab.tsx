@@ -326,7 +326,7 @@ export default function GeneralCostsPaymentsTab() {
         <EmptyState
           icon={<DollarSign className="w-8 h-8 text-muted-foreground" />}
           title="No hay pagos registrados"
-          description="Los pagos a gastos generales aparecerán aquí"
+          description="Comienza agregando tus pagos de gastos generales para llevar un registro detallado de los egresos de la organización. Los pagos incluyen información de monto, billetera, fecha, estado y archivos adjuntos."
           action={
             <Button onClick={handleAddPayment} data-testid="button-add-payment">
               <Plus className="w-4 h-4 mr-2" />

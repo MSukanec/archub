@@ -6,6 +6,7 @@ import GeneralCostsList from './GeneralCostsList'
 import GeneralCostsPaymentsTab from './GeneralCostsPaymentsTab'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useGeneralCosts } from '@/features/general-costs/hooks/use-general-costs'
 
 export default function GeneralCosts() {
   const { setSidebarContext } = useNavigationStore()
@@ -13,6 +14,10 @@ export default function GeneralCosts() {
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
   const [activeTab, setActiveTab] = useState("lista")
+  
+  // Get general costs to check if we should disable the Pagos tab
+  const { data: generalCosts = [] } = useGeneralCosts(organizationId ?? null)
+  const hasGeneralCosts = generalCosts.length > 0
 
   // Set sidebar context on mount
   useEffect(() => {
@@ -29,7 +34,8 @@ export default function GeneralCosts() {
     {
       id: "pagos",
       label: "Pagos",
-      isActive: activeTab === "pagos"
+      isActive: activeTab === "pagos",
+      isDisabled: !hasGeneralCosts
     }
   ]
 
