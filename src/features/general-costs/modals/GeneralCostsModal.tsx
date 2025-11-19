@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { Receipt } from 'lucide-react'
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
@@ -17,14 +16,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCreateGeneralCost } from '@/features/general-costs/hooks/use-create-general-cost'
 import { useUpdateGeneralCost } from '@/features/general-costs/hooks/use-update-general-cost'
 import { useGeneralCost } from '@/features/general-costs/hooks/use-general-cost'
-
-// Schema de validación
-const generalCostSchema = z.object({
-  name: z.string().min(1, 'El nombre es requerido'),
-  description: z.string().optional()
-})
-
-type GeneralCostForm = z.infer<typeof generalCostSchema>
+import { generalCostSchema, type GeneralCostFormData } from '../schemas'
 
 interface GeneralCostsModalProps {
   modalData?: {
@@ -47,7 +39,7 @@ export function GeneralCostsModal({ modalData, onClose }: GeneralCostsModalProps
   // Fetch existing general cost data if editing
   const { data: existingGeneralCost } = useGeneralCost(isEditing ? modalData?.generalCostId || null : null)
 
-  const form = useForm<GeneralCostForm>({
+  const form = useForm<GeneralCostFormData>({
     resolver: zodResolver(generalCostSchema),
     defaultValues: {
       name: '',
@@ -66,7 +58,7 @@ export function GeneralCostsModal({ modalData, onClose }: GeneralCostsModalProps
   const createGeneralCost = useCreateGeneralCost()
   const updateGeneralCost = useUpdateGeneralCost()
 
-  const onSubmit = async (data: GeneralCostForm) => {
+  const onSubmit = async (data: GeneralCostFormData) => {
     if (!organizationId) {
       toast({
         title: 'Error',
@@ -91,11 +83,9 @@ export function GeneralCostsModal({ modalData, onClose }: GeneralCostsModalProps
       } else {
         // Modo creación
         await createGeneralCost.mutateAsync({
-          generalCost: {
-            organization_id: organizationId,
-            name: data.name,
-            description: data.description || undefined
-          }
+          organization_id: organizationId,
+          name: data.name,
+          description: data.description || undefined
         })
       }
       
@@ -168,7 +158,7 @@ export function GeneralCostsModal({ modalData, onClose }: GeneralCostsModalProps
       onLeftClick={onClose}
       rightLabel={isEditing ? 'Actualizar' : 'Crear'}
       onRightClick={form.handleSubmit(onSubmit)}
-      isRightLoading={isSubmitting}
+      isSubmitting={isSubmitting}
       showLoadingSpinner={isSubmitting}
     />
   )

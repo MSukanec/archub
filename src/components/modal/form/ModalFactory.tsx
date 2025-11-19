@@ -68,7 +68,7 @@ import { ProviderProductModal } from '../modals/providers/ProviderProductModal';
 import { ProductModal } from '../modals/analysis/ProductModal';
 import { AdminProductModal } from '../modals/admin/AdminProductModal';
 import { IndirectModal } from '../modals/construction/IndirectModal';
-import { GeneralCostsModal } from '../modals/organizations/GeneralCostsModal';
+import { GeneralCostsModal } from '@/features/general-costs/modals/GeneralCostsModal';
 import { AdminLaborModal } from '../modals/admin/AdminLaborModal';
 import { CostModal } from '../modals/admin/CostModal';
 import { CourseFormModal } from '../modals/admin/CourseFormModal';
