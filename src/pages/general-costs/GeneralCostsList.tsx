@@ -50,6 +50,12 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
 
   // Función para editar gasto general
   const handleEdit = (generalCost: GeneralCost) => {
+    console.log('🔧 handleEdit called with:', {
+      generalCost,
+      id: generalCost.id,
+      hasId: !!generalCost.id
+    });
+    
     openModal('general-costs', {
       organizationId: userData?.organization?.id,
       isEditing: true,
