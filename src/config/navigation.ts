@@ -120,10 +120,10 @@ export const ORGANIZATION_NAVIGATION: NavigationItem[] = [
   { id: 'dashboard', label: 'Visión General', icon: Home, href: '/organization/dashboard', testId: 'nav-org-dashboard' },
   { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects', testId: 'nav-org-projects' },
   { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts', testId: 'nav-org-contacts' },
+  { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs', testId: 'nav-org-expenses' },
   { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', testId: 'nav-org-analysis' },
   { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements', restricted: 'coming_soon', testId: 'nav-org-finances' },
   { id: 'capital', label: 'Capital', icon: TrendingUp, href: '/finances/capital', restricted: 'coming_soon', testId: 'nav-org-capital' },
-  { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs', restricted: 'coming_soon', testId: 'nav-org-expenses' },
 ];
 
 export const PROJECT_NAVIGATION: NavigationItem[] = [
