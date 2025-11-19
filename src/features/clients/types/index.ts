@@ -135,7 +135,7 @@ export interface ClientPayment {
   organization_id: string;
   amount: number;
   currency_id: string;
-  exchange_rate: number;
+  exchange_rate: number | null;
   payment_date: string;
   notes: string | null;
   reference: string | null;

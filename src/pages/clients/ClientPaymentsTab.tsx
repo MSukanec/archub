@@ -20,77 +20,10 @@ import {
   useDeleteClientPayment,
   type ClientPaymentWithRelations,
 } from '@/features/clients'
+import { getClientPaymentStatusBadgeConfig } from '@/features/clients/utils/statusBadge'
 
 interface ClientPaymentsTabProps {
   projectId?: string;
-}
-
-interface ClientPayment {
-  id: string;
-  project_id: string;
-  commitment_id: string | null;
-  schedule_id: string | null;
-  organization_id: string;
-  client_id: string | null;
-  amount: number;
-  currency_id: string;
-  exchange_rate: number;
-  payment_date: string;
-  notes: string | null;
-  reference: string | null;
-  created_at: string;
-  updated_at: string;
-  wallet_id: string | null;
-  status: 'confirmed' | 'pending' | 'rejected' | 'void';
-  file_url: string | null;
-  project_client: {
-    id: string;
-    unit: string | null;
-    contact: {
-      id: string;
-      first_name: string | null;
-      last_name: string | null;
-      full_name: string | null;
-      email: string | null;
-      phone?: string | null;
-      company_name?: string | null;
-      linked_user?: {
-        id: string;
-        avatar_url?: string;
-      } | null;
-    } | null;
-  } | null;
-  currency: {
-    id: string;
-    code: string;
-    symbol: string;
-  } | null;
-  wallet: {
-    id: string;
-    organization_id: string;
-    wallet_id: string;
-    is_active: boolean;
-    is_default: boolean;
-    wallets: {
-      id: string;
-      name: string;
-      is_active: boolean;
-    } | null;
-  } | null;
-  commitment: {
-    id: string;
-    amount: number;
-  } | null;
-  schedule: {
-    id: string;
-    due_date: string;
-    amount: number;
-  } | null;
-  projects?: {
-    id: string;
-    name: string;
-    color: string;
-  } | null;
 }
 
 interface PaymentMetrics {
@@ -131,38 +64,10 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   // Use feature hook to get client payments
   const { data: paymentsData, isLoading } = useClientPayments(activeProjectId || undefined, organizationId);
 
-  // Transform payments from feature data structure to component's expected structure
+  // Use payments data directly
   const allPayments = useMemo(() => {
     if (!paymentsData) return [];
-    
-    return paymentsData.map((payment: ClientPaymentWithRelations) => ({
-      id: payment.id,
-      project_id: payment.project_id,
-      commitment_id: payment.commitment_id,
-      schedule_id: payment.schedule_id,
-      organization_id: payment.organization_id,
-      client_id: payment.client_id,
-      amount: payment.amount,
-      currency_id: payment.currency_id,
-      exchange_rate: payment.exchange_rate,
-      payment_date: payment.payment_date,
-      notes: payment.notes,
-      reference: payment.reference,
-      created_at: payment.created_at,
-      updated_at: payment.updated_at,
-      wallet_id: payment.wallet_id,
-      status: payment.status,
-      file_url: payment.file_url,
-      project_client: payment.client ? {
-        id: payment.client.id,
-        unit: payment.client.unit,
-        contact: payment.client.contact,
-      } : null,
-      currency: payment.currency,
-      wallet: payment.wallet,
-      commitment: payment.commitment,
-      schedule: payment.schedule,
-    }));
+    return paymentsData;
   }, [paymentsData]);
 
   // Calculate metrics client-side from payments data
@@ -237,13 +142,13 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     allPayments.forEach(payment => {
       if (payment.wallet?.wallets?.name) wallets.add(payment.wallet.wallets.name);
       if (payment.currency?.code) currencies.add(payment.currency.code);
-      if (payment.project_client?.contact) {
-        const clientName = payment.project_client.contact.company_name || 
-                          payment.project_client.contact.full_name || 
-                          `${payment.project_client.contact.first_name || ''} ${payment.project_client.contact.last_name || ''}`.trim();
+      if (payment.client?.contact) {
+        const clientName = payment.client.contact.company_name || 
+                          payment.client.contact.full_name || 
+                          `${payment.client.contact.first_name || ''} ${payment.client.contact.last_name || ''}`.trim();
         if (clientName) clients.add(clientName);
       }
-      if (payment.project_client?.unit) units.add(payment.project_client.unit);
+      if (payment.client?.unit) units.add(payment.client.unit);
     });
 
     return {
@@ -273,14 +178,14 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       
       // Filter by client
       if (filterClient !== 'all') {
-        const clientName = payment.project_client?.contact?.company_name || 
-                          payment.project_client?.contact?.full_name || 
-                          `${payment.project_client?.contact?.first_name || ''} ${payment.project_client?.contact?.last_name || ''}`.trim();
+        const clientName = payment.client?.contact?.company_name || 
+                          payment.client?.contact?.full_name || 
+                          `${payment.client?.contact?.first_name || ''} ${payment.client?.contact?.last_name || ''}`.trim();
         if (clientName !== filterClient) return false;
       }
       
       // Filter by unit
-      if (filterUnit !== 'all' && payment.project_client?.unit !== filterUnit) return false;
+      if (filterUnit !== 'all' && payment.client?.unit !== filterUnit) return false;
       
       // Filter by status
       if (filterStatus !== 'all' && payment.status !== filterStatus) return false;
@@ -292,7 +197,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   // Delete payment mutation using feature hook
   const deletePaymentMutation = useDeleteClientPayment();
 
-  const handleEdit = (payment: ClientPayment) => {
+  const handleEdit = (payment: ClientPaymentWithRelations) => {
     openModal('client-payment', {
       projectId: activeProjectId,
       organizationId: organizationId,
@@ -301,12 +206,12 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     });
   };
 
-  const handleDeletePayment = (payment: ClientPayment) => {
+  const handleDeletePayment = (payment: ClientPaymentWithRelations) => {
     if (!organizationId || !activeProjectId) return;
 
-    const clientName = payment.project_client?.contact?.company_name || 
-                      payment.project_client?.contact?.full_name || 
-                      `${payment.project_client?.contact?.first_name || ''} ${payment.project_client?.contact?.last_name || ''}`.trim();
+    const clientName = payment.client?.contact?.company_name || 
+                      payment.client?.contact?.full_name || 
+                      `${payment.client?.contact?.first_name || ''} ${payment.client?.contact?.last_name || ''}`.trim();
     const symbol = payment.currency?.symbol || '$';
     const formattedAmount = `${symbol} ${payment.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     const paymentLabel = `${clientName} - ${formattedAmount}`;
@@ -356,16 +261,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     return `${symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  // Get status badge configuration
-  const getStatusBadge = (status: 'confirmed' | 'pending' | 'rejected' | 'void') => {
-    const statusConfig = {
-      confirmed: { label: 'Confirmado', className: 'bg-green-600 text-white hover:bg-green-600' },
-      pending: { label: 'Pendiente', className: 'bg-orange-600 text-white hover:bg-orange-600' },
-      rejected: { label: 'Rechazado', className: 'bg-red-600 text-white hover:bg-red-600' },
-      void: { label: 'Anulado', className: 'bg-gray-600 text-white hover:bg-gray-600' },
-    };
-    return statusConfig[status];
-  };
 
   // Format currency for KPIs - groups by currency
   const formatCurrencyKPI = (currencyData: Array<{ currency_symbol: string; amount: number }>) => {
@@ -381,7 +276,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   const columns: Array<{
     key: string;
     label: string;
-    render?: (item: ClientPayment) => React.ReactNode;
+    render?: (item: ClientPaymentWithRelations) => React.ReactNode;
     sortable?: boolean;
     sortType?: "string" | "number" | "date";
     width?: string;
@@ -393,7 +288,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       label: 'Fecha de Pago',
       sortable: true,
       align: 'right' as const,
-      render: (payment: ClientPayment) => formatDate(payment.payment_date, 'dd/MM/yyyy'),
+      render: (payment: ClientPaymentWithRelations) => formatDate(payment.payment_date, 'dd/MM/yyyy'),
     },
     // Project column - only shown when viewing organization-wide data
     ...(activeProjectId ? [] : [{
@@ -401,17 +296,17 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       label: 'Proyecto',
       sortable: true,
       width: '200px',
-      render: (payment: ClientPayment) => {
-        if (!payment.projects) return '-';
+      render: (payment: ClientPaymentWithRelations) => {
+        if (!payment.project) return '-';
         return (
           <Badge 
             className="font-medium whitespace-nowrap"
             style={{ 
-              backgroundColor: payment.projects.color,
+              backgroundColor: payment.project.color,
               color: 'white'
             }}
           >
-            {payment.projects.name}
+            {payment.project.name}
           </Badge>
         );
       },
@@ -421,22 +316,20 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       label: 'Cliente',
       sortable: true,
       width: '220px',
-      render: (payment: ClientPayment) => {
-        const avatarUrl = payment.project_client?.contact?.linked_user?.avatar_url;
-        const initials = payment.project_client?.contact?.first_name?.[0] && payment.project_client?.contact?.last_name?.[0]
-          ? `${payment.project_client.contact.first_name[0]}${payment.project_client.contact.last_name[0]}`
-          : payment.project_client?.contact?.first_name?.[0] || '?';
+      render: (payment: ClientPaymentWithRelations) => {
+        const initials = payment.client?.contact?.first_name?.[0] && payment.client?.contact?.last_name?.[0]
+          ? `${payment.client.contact.first_name[0]}${payment.client.contact.last_name[0]}`
+          : payment.client?.contact?.first_name?.[0] || '?';
         
-        const displayName = payment.project_client?.contact?.company_name || 
-                           payment.project_client?.contact?.full_name || 
-                           `${payment.project_client?.contact?.first_name || ''} ${payment.project_client?.contact?.last_name || ''}`.trim();
+        const displayName = payment.client?.contact?.company_name || 
+                           payment.client?.contact?.full_name || 
+                           `${payment.client?.contact?.first_name || ''} ${payment.client?.contact?.last_name || ''}`.trim();
         
-        const unit = payment.project_client?.unit;
+        const unit = payment.client?.unit;
         
         return (
           <div className="flex items-center gap-3">
             <Avatar className="h-8 w-8">
-              {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
               <AvatarFallback>
                 {initials}
               </AvatarFallback>
@@ -454,7 +347,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       label: 'Notas',
       sortable: true,
       width: '400px',
-      render: (payment: ClientPayment) => (
+      render: (payment: ClientPaymentWithRelations) => (
         <div className="max-w-full truncate" title={payment.notes || ''}>
           {payment.notes || '-'}
         </div>
@@ -465,14 +358,14 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       label: 'Referencia',
       sortable: true,
       align: 'right' as const,
-      render: (payment: ClientPayment) => payment.reference || '-',
+      render: (payment: ClientPaymentWithRelations) => payment.reference || '-',
     },
     {
       key: 'commitment_id',
       label: 'Compromiso',
       sortable: true,
       align: 'right' as const,
-      render: (payment: ClientPayment) => {
+      render: (payment: ClientPaymentWithRelations) => {
         if (!payment.commitment) return '-';
         return (
           <span className="text-xs text-muted-foreground">
@@ -486,7 +379,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       label: 'Cuota',
       sortable: true,
       align: 'right' as const,
-      render: (payment: ClientPayment) => {
+      render: (payment: ClientPaymentWithRelations) => {
         if (!payment.schedule) return '-';
         return (
           <span className="text-xs text-muted-foreground">
@@ -501,19 +394,21 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       sortable: true,
       align: 'right' as const,
       cellClassName: 'font-bold',
-      render: (payment: ClientPayment) => payment.wallet?.wallets?.name || '-',
+      render: (payment: ClientPaymentWithRelations) => payment.wallet?.wallets?.name || '-',
     },
     {
       key: 'amount',
       label: 'Monto',
       sortable: true,
       sortType: 'number' as const,
-      render: (payment: ClientPayment) => (
+      render: (payment: ClientPaymentWithRelations) => (
         <div className="flex flex-col items-end">
           <span className="font-bold">{formatAmount(payment.amount, payment.currency?.symbol)}</span>
-          <span className="text-xs text-muted-foreground" style={{ fontSize: '12px' }}>
-            Cot. {payment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
-          </span>
+          {payment.exchange_rate && (
+            <span className="text-xs text-muted-foreground" style={{ fontSize: '12px' }}>
+              Cot. {payment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
+            </span>
+          )}
         </div>
       ),
     },
@@ -521,10 +416,10 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'status',
       label: 'Estado',
       sortable: true,
-      render: (payment: ClientPayment) => {
-        const statusInfo = getStatusBadge(payment.status);
+      render: (payment: ClientPaymentWithRelations) => {
+        const statusInfo = getClientPaymentStatusBadgeConfig(payment.status);
         return (
-          <Badge className={statusInfo.className}>
+          <Badge variant={statusInfo.variant} className={statusInfo.className}>
             {statusInfo.label}
           </Badge>
         );
@@ -536,7 +431,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       sortable: false,
       align: 'center' as const,
       width: '50px',
-      render: (payment: ClientPayment) => {
+      render: (payment: ClientPaymentWithRelations) => {
         const attachmentCount = payment.file_url ? 1 : 0;
         return (
           <span className={attachmentCount > 0 ? 'font-medium' : 'text-muted-foreground'}>
@@ -566,7 +461,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     setFilterStatus('all');
   };
 
-  const handleViewPayment = (payment: ClientPayment) => {
+  const handleViewPayment = (payment: ClientPaymentWithRelations) => {
     openModal('client-payment', {
       projectId: activeProjectId,
       organizationId: organizationId,
@@ -779,11 +674,11 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
             </div>
           ),
         }}
-        primaryRowAction={(payment: ClientPayment) => ({
+        primaryRowAction={(payment: ClientPaymentWithRelations) => ({
           label: 'Ver',
           onClick: () => handleViewPayment(payment),
         })}
-        rowActions={(payment: ClientPayment) => [
+        rowActions={(payment: ClientPaymentWithRelations) => [
           {
             label: 'Editar Pago',
             icon: Edit,
@@ -796,7 +691,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
             variant: 'destructive' as const,
           },
         ]}
-        renderCard={(payment: ClientPayment) => (
+        renderCard={(payment: ClientPaymentWithRelations) => (
           <ClientPaymentRow
             payment={payment}
             onClick={() => handleViewPayment(payment)}

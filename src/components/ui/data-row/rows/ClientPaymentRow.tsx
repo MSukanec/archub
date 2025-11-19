@@ -1,68 +1,10 @@
 import DataRowCard from '../DataRowCard';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-
-// Interface para client payment
-interface ClientPayment {
-  id: string;
-  payment_date: string;
-  created_at: string;
-  amount: number;
-  exchange_rate: number;
-  status: 'confirmed' | 'pending' | 'rejected' | 'void';
-  reference: string | null;
-  notes: string | null;
-  file_url: string | null;
-  client_id: string | null;
-  wallet_id: string | null;
-  currency_id: string;
-  project_id: string;
-  organization_id: string;
-  
-  // Datos expandidos
-  project_client: {
-    id: string;
-    unit: string | null;
-    contact: {
-      id: string;
-      first_name: string | null;
-      last_name: string | null;
-      full_name: string | null;
-      email: string | null;
-      phone?: string | null;
-      company_name?: string | null;
-      linked_user?: {
-        id: string;
-        avatar_url?: string;
-      } | null;
-    } | null;
-  } | null;
-  currency: {
-    id: string;
-    code: string;
-    symbol: string;
-  } | null;
-  wallet: {
-    id: string;
-    organization_id: string;
-    wallet_id: string;
-    is_active: boolean;
-    is_default: boolean;
-    wallets: {
-      id: string;
-      name: string;
-      is_active: boolean;
-    } | null;
-  } | null;
-  projects?: {
-    id: string;
-    name: string;
-    color: string;
-  } | null;
-}
+import type { ClientPaymentWithRelations } from '@/features/clients';
 
 interface ClientPaymentRowProps {
-  payment: ClientPayment;
+  payment: ClientPaymentWithRelations;
   onClick?: () => void;
   selected?: boolean;
   density?: 'compact' | 'normal' | 'comfortable';
@@ -82,8 +24,8 @@ const formatPaymentAmount = (amount: number, currencySymbol?: string): string =>
 };
 
 // Helper para obtener el nombre del cliente
-const getClientName = (payment: ClientPayment): string => {
-  const contact = payment.project_client?.contact;
+const getClientName = (payment: ClientPaymentWithRelations): string => {
+  const contact = payment.client?.contact;
   
   if (!contact) return 'Sin cliente';
   
@@ -103,8 +45,8 @@ const getClientName = (payment: ClientPayment): string => {
 };
 
 // Helper para obtener las iniciales del cliente
-const getClientInitials = (payment: ClientPayment): string => {
-  const contact = payment.project_client?.contact;
+const getClientInitials = (payment: ClientPaymentWithRelations): string => {
+  const contact = payment.client?.contact;
   
   if (!contact) return 'C';
   
@@ -133,7 +75,7 @@ export default function ClientPaymentRow({
 }: ClientPaymentRowProps) {
   
   // Determinar el color del borde basado en el estado del pago
-  const getBorderColor = (payment: ClientPayment): 'success' | 'warning' | 'danger' | 'neutral' => {
+  const getBorderColor = (payment: ClientPaymentWithRelations): 'success' | 'warning' | 'danger' | 'neutral' => {
     switch (payment.status) {
       case 'confirmed':
         return 'success';
@@ -151,9 +93,9 @@ export default function ClientPaymentRow({
   const formattedAmount = formatPaymentAmount(payment.amount, payment.currency?.symbol);
   const currencyCode = payment.currency?.code || 'ARS';
 
-  // Obtener avatar del cliente
+  // Obtener avatar del cliente - no disponible en este tipo
   const getClientAvatar = () => {
-    return payment.project_client?.contact?.linked_user?.avatar_url;
+    return undefined;
   };
 
   // Formatear fecha de pago
@@ -187,8 +129,8 @@ export default function ClientPaymentRow({
         </div>
         {/* Línea 2: Unidad funcional o billetera */}
         <div className="text-muted-foreground text-sm truncate">
-          {payment.project_client?.unit 
-            ? `Unidad: ${payment.project_client.unit}`
+          {payment.client?.unit 
+            ? `Unidad: ${payment.client.unit}`
             : payment.wallet?.wallets?.name || 'Sin billetera'
           }
         </div>
@@ -203,16 +145,16 @@ export default function ClientPaymentRow({
         {/* Línea 1: Moneda y monto */}
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">{currencyCode}</span>
-          <span className="font-mono text-sm font-bold text-green-600">
+          <span className="font-mono text-sm font-bold text-green-700 dark:text-green-400">
             {formattedAmount}
           </span>
         </div>
         
         {/* Línea 2: Estado */}
         <div className={`text-sm font-medium ${
-          payment.status === 'confirmed' ? 'text-green-600' :
-          payment.status === 'pending' ? 'text-orange-600' :
-          payment.status === 'rejected' || payment.status === 'void' ? 'text-red-600' :
+          payment.status === 'confirmed' ? 'text-green-700 dark:text-green-400' :
+          payment.status === 'pending' ? 'text-orange-700 dark:text-orange-400' :
+          payment.status === 'rejected' || payment.status === 'void' ? 'text-destructive' :
           'text-muted-foreground'
         }`}>
           {getStatusLabel(payment.status)}
@@ -236,6 +178,3 @@ export default function ClientPaymentRow({
     </DataRowCard>
   );
 }
-
-// Export del tipo para uso externo
-export type { ClientPayment };

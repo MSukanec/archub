@@ -31,6 +31,7 @@ import {
   useCreateClientPayment, 
   useUpdateClientPayment 
 } from '@/features/clients/hooks'
+import { getClientPaymentStatusBadgeConfig } from '@/features/clients/utils/statusBadge'
 
 const clientPaymentSchema = z.object({
   payment_date: z.date({
@@ -41,7 +42,7 @@ const clientPaymentSchema = z.object({
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
   currency_id: z.string().min(1, 'Moneda es requerida'),
-  exchange_rate: z.number().min(0.0001, 'Tipo de cambio debe ser mayor a 0').optional(),
+  exchange_rate: z.number().min(0.0001, 'Tipo de cambio debe ser mayor a 0').optional().nullable(),
   status: z.enum(['confirmed', 'pending', 'rejected', 'void']),
   reference: z.string().optional(),
   notes: z.string().optional(),
@@ -66,8 +67,6 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
   const { toast } = useToast()
   const { setPanel } = useModalPanelStore()
   const [filesToUpload, setFilesToUpload] = useState<any[]>([])
-  const [existingFiles, setExistingFiles] = useState<any[]>([])
-  const [isUploading, setIsUploading] = useState(false)
 
   // Fetch existing payment data for edit/view mode
   const { data: existingPayment, isLoading: loadingPayment } = useClientPayment(
@@ -88,8 +87,8 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
 
   // Get default exchange rate for selected currency
   const getCurrencyExchangeRate = (currencyId: string) => {
-    // Default exchange rate is 1 (user can change it manually if needed)
-    return 1
+    // No default exchange rate - user can set it manually if needed
+    return undefined
   }
 
   const form = useForm<ClientPaymentForm>({
@@ -101,7 +100,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
       wallet_id: '',
       amount: 0,
       currency_id: '',
-      exchange_rate: 1,
+      exchange_rate: undefined,
       status: 'confirmed',
       reference: '',
       notes: '',
@@ -134,25 +133,29 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
         wallet_id: existingPayment.wallet_id || '',
         amount: existingPayment.amount || 0,
         currency_id: existingPayment.currency_id || '',
-        exchange_rate: existingPayment.exchange_rate || 1,
+        exchange_rate: existingPayment.exchange_rate || undefined,
         status: existingPayment.status || 'confirmed',
         reference: existingPayment.reference || '',
         notes: existingPayment.notes || '',
         file_url: existingPayment.file_url || '',
       })
-      
-      if (existingPayment.file_url) {
-        setExistingFiles([{
-          id: 'existing',
-          file_name: existingPayment.file_url.split('/').pop() || 'Archivo adjunto',
-          file_type: 'document',
-          file_size: 0,
-          file_url: existingPayment.file_url,
-          isExisting: true,
-        }])
-      }
     }
   }, [existingPayment, mode, form, currentMember?.id])
+  
+  // Build existing files array from file_url
+  const existingFiles = React.useMemo(() => {
+    const fileUrl = form.watch('file_url')
+    if (!fileUrl) return []
+    
+    return [{
+      id: 'existing',
+      file_name: fileUrl.split('/').pop() || 'Archivo adjunto',
+      file_type: 'document',
+      file_size: 0,
+      file_url: fileUrl,
+      isExisting: true,
+    }]
+  }, [form.watch('file_url')])
 
   // Initialize default values for create mode (including created_by)
   React.useEffect(() => {
@@ -223,16 +226,13 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
 
       // Upload file if there's a new one
       if (filesToUpload.length > 0 && filesToUpload[0].file) {
-        setIsUploading(true)
         try {
           fileUrl = await handleFileUpload(filesToUpload[0].file)
         } catch (error: any) {
           throw new Error(error.message || 'Error al subir el archivo')
-        } finally {
-          setIsUploading(false)
         }
-      } else if (existingFiles.length === 0) {
-        // Si no hay archivos existentes ni nuevos, eliminar la URL
+      } else if (!data.file_url) {
+        // Si no hay archivo existente ni nuevo, eliminar la URL
         fileUrl = null
       }
 
@@ -244,7 +244,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
             wallet_id: data.wallet_id,
             amount: data.amount,
             currency_id: data.currency_id,
-            exchange_rate: data.exchange_rate || 1,
+            exchange_rate: data.exchange_rate || null,
             payment_date: format(data.payment_date, 'yyyy-MM-dd'),
             status: data.status,
             reference: data.reference || null,
@@ -260,7 +260,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
             wallet_id: data.wallet_id,
             amount: data.amount,
             currency_id: data.currency_id,
-            exchange_rate: data.exchange_rate || 1,
+            exchange_rate: data.exchange_rate || null,
             payment_date: format(data.payment_date, 'yyyy-MM-dd'),
             status: data.status,
             reference: data.reference || null,
@@ -314,7 +314,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
         </div>
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Monto</h4>
-          <span className="text-base font-bold text-green-600 dark:text-green-500">
+          <span className="text-base font-bold text-green-700 dark:text-green-400">
             {existingPayment.currency?.symbol} {existingPayment.amount?.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
           <div className="text-xs text-muted-foreground mt-1">
@@ -339,17 +339,14 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
         </div>
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Estado</h4>
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            existingPayment.status === 'confirmed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-            existingPayment.status === 'pending' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' :
-            existingPayment.status === 'rejected' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
-            'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-          }`}>
-            {existingPayment.status === 'confirmed' ? 'Confirmado' :
-             existingPayment.status === 'pending' ? 'Pendiente' :
-             existingPayment.status === 'rejected' ? 'Rechazado' :
-             existingPayment.status === 'void' ? 'Anulado' : '-'}
-          </span>
+          {(() => {
+            const statusConfig = getClientPaymentStatusBadgeConfig(existingPayment.status);
+            return (
+              <Badge variant={statusConfig.variant} className={statusConfig.className}>
+                {statusConfig.label}
+              </Badge>
+            );
+          })()}
         </div>
       </div>
 
@@ -596,9 +593,12 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
                       type="number"
                       step="0.0001"
                       min="0.0001"
-                      placeholder="1.0000"
+                      placeholder="Dejar vacío si no aplica"
                       value={field.value || ''}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 1)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === '' ? undefined : parseFloat(value) || undefined);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -687,7 +687,6 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
               }}
               onExistingFileDelete={async (fileId) => {
-                setExistingFiles([])
                 form.setValue('file_url', '')
               }}
               emptyStateTitle="Sin archivo adjunto"
