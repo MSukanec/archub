@@ -73,57 +73,51 @@ function Calendar({
 
   // Custom Navigation Header
   const CustomNavigationHeader = () => (
-    <div className="flex items-center justify-between px-2 pb-3 border-b border-border mb-3">
-      <div className="flex items-center gap-1">
-        <button
-          className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
-          onClick={() => navigateYear('prev')}
-          type="button"
-        >
-          <ChevronsLeft className="h-4 w-4" />
-        </button>
-        <button
-          className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
-          onClick={() => navigateMonth('prev')}
-          type="button"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-      </div>
+    <div className="flex items-center justify-center gap-2 px-2 pb-3 border-b border-border mb-3">
+      <button
+        className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
+        onClick={() => navigateYear('prev')}
+        type="button"
+      >
+        <ChevronsLeft className="h-4 w-4" />
+      </button>
+      <button
+        className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
+        onClick={() => navigateMonth('prev')}
+        type="button"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
 
-      <div className="flex items-center gap-2">
-        <button
-          className="h-7 px-3 text-xs font-medium rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
-          onClick={() => setViewMode('months')}
-          type="button"
-        >
-          {MONTHS_FULL[currentMonthIndex]}
-        </button>
-        <button
-          className="h-7 px-3 text-xs font-medium rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
-          onClick={() => setViewMode('years')}
-          type="button"
-        >
-          {currentYear}
-        </button>
-      </div>
+      <button
+        className="h-7 px-3 text-xs font-medium rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors min-w-[90px]"
+        onClick={() => setViewMode('months')}
+        type="button"
+      >
+        {MONTHS_FULL[currentMonthIndex]}
+      </button>
+      <button
+        className="h-7 px-3 text-xs font-medium rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors min-w-[60px]"
+        onClick={() => setViewMode('years')}
+        type="button"
+      >
+        {currentYear}
+      </button>
 
-      <div className="flex items-center gap-1">
-        <button
-          className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
-          onClick={() => navigateMonth('next')}
-          type="button"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
-        <button
-          className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
-          onClick={() => navigateYear('next')}
-          type="button"
-        >
-          <ChevronsRight className="h-4 w-4" />
-        </button>
-      </div>
+      <button
+        className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
+        onClick={() => navigateMonth('next')}
+        type="button"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+      <button
+        className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
+        onClick={() => navigateYear('next')}
+        type="button"
+      >
+        <ChevronsRight className="h-4 w-4" />
+      </button>
     </div>
   )
 
@@ -243,10 +237,12 @@ function Calendar({
   )
 
   return (
-    <div className={cn("p-3", className)}>
-      {viewMode === 'days' && <DaysView />}
-      {viewMode === 'months' && <MonthSelectionView />}
-      {viewMode === 'years' && <YearSelectionView />}
+    <div className={cn("p-3 flex items-center justify-center", className)}>
+      <div className="w-full max-w-sm">
+        {viewMode === 'days' && <DaysView />}
+        {viewMode === 'months' && <MonthSelectionView />}
+        {viewMode === 'years' && <YearSelectionView />}
+      </div>
     </div>
   )
 }
