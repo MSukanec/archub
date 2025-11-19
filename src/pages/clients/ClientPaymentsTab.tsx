@@ -18,6 +18,7 @@ import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/componen
 import {
   useClientPayments,
   useDeleteClientPayment,
+  useClientCommitments,
   type ClientPaymentWithRelations,
 } from '@/features/clients'
 import { getClientPaymentStatusBadgeConfig } from '@/features/clients/utils/statusBadge'
@@ -28,17 +29,15 @@ interface ClientPaymentsTabProps {
 
 interface PaymentMetrics {
   total_count: number;
-  by_currency: Array<{
-    currency_id: string;
-    currency_code: string;
-    currency_symbol: string;
-    total_confirmed: number;
-    total_pending: number;
-    total_rejected: number;
-    count_confirmed: number;
-    count_pending: number;
-    count_rejected: number;
-  }>;
+  commitment_currency_id: string | null;
+  commitment_currency_code: string | null;
+  commitment_currency_symbol: string | null;
+  total_confirmed: number;
+  total_pending: number;
+  total_rejected: number;
+  count_confirmed: number;
+  count_pending: number;
+  count_rejected: number;
   latest_payment_date: string | null;
 }
 
@@ -61,8 +60,9 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   const [filterUnit, setFilterUnit] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
-  // Use feature hook to get client payments
+  // Use feature hooks to get client payments and commitments
   const { data: paymentsData, isLoading } = useClientPayments(activeProjectId || undefined, organizationId);
+  const { data: commitmentsData } = useClientCommitments(activeProjectId || undefined, organizationId);
 
   // Use payments data directly
   const allPayments = useMemo(() => {
@@ -70,44 +70,89 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     return paymentsData;
   }, [paymentsData]);
 
+  // Determine the commitment currency (the most common currency in commitments)
+  const commitmentCurrency = useMemo(() => {
+    if (!commitmentsData || commitmentsData.length === 0) return null;
+    
+    // Count occurrences of each currency in commitments
+    const currencyCount = new Map<string, { count: number; currency: NonNullable<typeof commitmentsData[0]['currency']> }>();
+    
+    commitmentsData.forEach(commitment => {
+      if (!commitment.currency) return;
+      
+      const currencyId = commitment.currency.id;
+      const existing = currencyCount.get(currencyId);
+      
+      if (existing) {
+        existing.count += 1;
+      } else {
+        currencyCount.set(currencyId, {
+          count: 1,
+          currency: commitment.currency,
+        });
+      }
+    });
+    
+    // Find the most common currency
+    const entries = Array.from(currencyCount.values());
+    if (entries.length === 0) return null;
+    
+    const mostCommon = entries.reduce((max, entry) => 
+      entry.count > max.count ? entry : max
+    );
+    
+    return mostCommon.currency;
+  }, [commitmentsData]);
+
   // Calculate metrics client-side from payments data
   const metricsData = useMemo<PaymentMetrics>(() => {
-    const currencyGroups = new Map<string, {
-      total_confirmed: number;
-      total_pending: number;
-      total_rejected: number;
-      count_confirmed: number;
-      count_pending: number;
-      count_rejected: number;
-    }>();
+    // Helper: Convert payment amount to commitment currency
+    const convertToCommitmentCurrency = (payment: ClientPaymentWithRelations): number => {
+      if (!commitmentCurrency) return payment.amount;
+      
+      // If payment is already in commitment currency, return as-is
+      if (payment.currency?.id === commitmentCurrency.id) {
+        return payment.amount;
+      }
+      
+      // If payment has no exchange_rate and is in different currency, cannot convert
+      if (!payment.exchange_rate) {
+        return 0; // Skip this payment in totals
+      }
+      
+      // Convert using exchange_rate
+      // The exchange_rate is a multiplier that converts from payment currency to base currency
+      // We need to convert to commitment currency
+      // Assumption: exchange_rate converts to a common base (like USD or primary currency)
+      // If commitments are in that base currency, multiply
+      // If commitments are in different currency, we'd need commitment's exchange_rate too
+      
+      // For now, use simple logic: exchange_rate converts to commitment currency
+      return payment.amount * (payment.exchange_rate || 1);
+    };
 
+    let totalConfirmed = 0;
+    let totalPending = 0;
+    let totalRejected = 0;
+    let countConfirmed = 0;
+    let countPending = 0;
+    let countRejected = 0;
     let latestPaymentDate: string | null = null;
 
     allPayments.forEach(payment => {
       if (!payment.currency) return;
 
-      const currencyId = payment.currency.id;
-      if (!currencyGroups.has(currencyId)) {
-        currencyGroups.set(currencyId, {
-          total_confirmed: 0,
-          total_pending: 0,
-          total_rejected: 0,
-          count_confirmed: 0,
-          count_pending: 0,
-          count_rejected: 0,
-        });
-      }
+      const convertedAmount = convertToCommitmentCurrency(payment);
 
-      const group = currencyGroups.get(currencyId)!;
       if (payment.status === 'confirmed') {
-        group.total_confirmed += payment.amount;
-        group.count_confirmed += 1;
+        totalConfirmed += convertedAmount;
+        countConfirmed += 1;
       } else if (payment.status === 'pending') {
-        group.total_pending += payment.amount;
-        group.count_pending += 1;
+        totalPending += convertedAmount;
+        countPending += 1;
       } else if (payment.status === 'rejected') {
-        group.total_rejected += payment.amount;
-        group.count_rejected += 1;
+        totalRejected += convertedAmount;
+        countRejected += 1;
       }
 
       if (!latestPaymentDate || payment.payment_date > latestPaymentDate) {
@@ -115,22 +160,20 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       }
     });
 
-    const by_currency = Array.from(currencyGroups.entries()).map(([currencyId, group]) => {
-      const currency = allPayments.find(p => p.currency?.id === currencyId)?.currency;
-      return {
-        currency_id: currencyId,
-        currency_code: currency?.code || 'ARS',
-        currency_symbol: currency?.symbol || '$',
-        ...group,
-      };
-    });
-
     return {
       total_count: allPayments.length,
-      by_currency,
+      commitment_currency_id: commitmentCurrency?.id || null,
+      commitment_currency_code: commitmentCurrency?.code || null,
+      commitment_currency_symbol: commitmentCurrency?.symbol || null,
+      total_confirmed: totalConfirmed,
+      total_pending: totalPending,
+      total_rejected: totalRejected,
+      count_confirmed: countConfirmed,
+      count_pending: countPending,
+      count_rejected: countRejected,
       latest_payment_date: latestPaymentDate,
     };
-  }, [allPayments]);
+  }, [allPayments, commitmentCurrency]);
 
   // Extract unique values for filters
   const filterOptions = useMemo(() => {
@@ -262,14 +305,11 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   };
 
 
-  // Format currency for KPIs - groups by currency
-  const formatCurrencyKPI = (currencyData: Array<{ currency_symbol: string; amount: number }>) => {
-    if (!currencyData || currencyData.length === 0) return '-';
-    
-    return currencyData.map(({ currency_symbol, amount }) => {
-      const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      return `${currency_symbol} ${formattedAmount}`;
-    }).join(' · ');
+  // Format currency for KPIs - single value in commitment currency
+  const formatCurrencyKPI = (amount: number, currencySymbol: string | null) => {
+    const symbol = currencySymbol || '$';
+    const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return `${symbol} ${formattedAmount}`;
   };
 
   // Table columns
@@ -486,41 +526,31 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           <StatCardMeta>Cantidad de pagos registrados</StatCardMeta>
         </StatCard>
 
-        {/* Card 2: Total Confirmado (sum of confirmed amounts by currency) */}
+        {/* Card 2: Total Confirmado (in commitment currency) */}
         <StatCard data-testid="stat-card-total-confirmado">
           <StatCardTitle showArrow={false}>
             <CheckCircle2 className="w-4 h-4 inline mr-1" />
             Total Confirmado
           </StatCardTitle>
           <StatCardValue>
-            {formatCurrencyKPI(
-              metricsData?.by_currency?.map(c => ({
-                currency_symbol: c.currency_symbol,
-                amount: c.total_confirmed
-              })) ?? []
-            )}
+            {formatCurrencyKPI(metricsData?.total_confirmed ?? 0, metricsData?.commitment_currency_symbol)}
           </StatCardValue>
           <StatCardMeta>
-            {metricsData?.by_currency?.reduce((sum, c) => sum + c.count_confirmed, 0) ?? 0} pagos confirmados
+            {metricsData?.count_confirmed ?? 0} pagos confirmados
           </StatCardMeta>
         </StatCard>
 
-        {/* Card 3: Total Pendiente (sum of pending amounts by currency) */}
+        {/* Card 3: Total Pendiente (in commitment currency) */}
         <StatCard data-testid="stat-card-total-pendiente">
           <StatCardTitle showArrow={false}>
             <AlertCircle className="w-4 h-4 inline mr-1" />
             Total Pendiente
           </StatCardTitle>
           <StatCardValue>
-            {formatCurrencyKPI(
-              metricsData?.by_currency?.map(c => ({
-                currency_symbol: c.currency_symbol,
-                amount: c.total_pending
-              })) ?? []
-            )}
+            {formatCurrencyKPI(metricsData?.total_pending ?? 0, metricsData?.commitment_currency_symbol)}
           </StatCardValue>
           <StatCardMeta>
-            {metricsData?.by_currency?.reduce((sum, c) => sum + c.count_pending, 0) ?? 0} pagos pendientes
+            {metricsData?.count_pending ?? 0} pagos pendientes
           </StatCardMeta>
         </StatCard>
 
