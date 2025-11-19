@@ -69,7 +69,7 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
 
   // Query to get existing client data when editing - with cache optimization
   const { data: existingClient } = useQuery<any>({
-    queryKey: ['/api/projects', projectId, 'clients', clientId, { organizationId }],
+    queryKey: CLIENT_QUERY_KEYS.projectClient(projectId, clientId, organizationId),
     enabled: !!clientId && !!projectId && !!organizationId,
     staleTime: 2 * 60 * 1000, // 2 minutes - use cached data if available
   });
@@ -142,12 +142,12 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
         }),
         // Invalidate project clients list
         queryClient.invalidateQueries({
-          queryKey: [`/api/projects/${projectId}/clients`],
+          queryKey: CLIENT_QUERY_KEYS.projectClients(projectId),
         }),
-        // Invalidate specific client if editing (array-based key for consistency)
+        // Invalidate specific client if editing
         ...(isEditing && clientId && organizationId ? [
           queryClient.invalidateQueries({
-            queryKey: ['/api/projects', projectId, 'clients', clientId, { organizationId }],
+            queryKey: CLIENT_QUERY_KEYS.projectClient(projectId, clientId, organizationId),
           })
         ] : []),
       ]);
