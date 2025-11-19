@@ -333,11 +333,11 @@ function LayoutContent({
           <div className="flex-shrink-0 p-1">
             <RightSidebar />
           </div>
-
-          {/* Floating AI Chat - Desktop y Mobile en rutas de trabajo */}
-          {shouldShowAIChat && <FloatingAIChat />}
         </div>
       )}
+
+      {/* Floating AI Chat - Desktop y Mobile en rutas de trabajo */}
+      {shouldShowAIChat && <FloatingAIChat />}
 
       {/* Mobile Action Bar - Only visible on mobile when enabled */}
       {isMobile && <ActionBarMobile />}
