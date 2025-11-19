@@ -75,83 +75,77 @@ function Calendar({
   const CustomNavigationHeader = () => (
     <div className="flex items-center justify-between px-2 pb-3 border-b border-border mb-3">
       <div className="flex items-center gap-1">
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-7 w-7"
+        <button
+          className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
           onClick={() => navigateYear('prev')}
           type="button"
         >
           <ChevronsLeft className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-7 w-7"
+        </button>
+        <button
+          className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
           onClick={() => navigateMonth('prev')}
           type="button"
         >
           <ChevronLeft className="h-4 w-4" />
-        </Button>
+        </button>
       </div>
 
       <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          className="h-7 px-3 text-xs font-medium"
+        <button
+          className="h-7 px-3 text-xs font-medium rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
           onClick={() => setViewMode('months')}
           type="button"
         >
           {MONTHS_FULL[currentMonthIndex]}
-        </Button>
-        <Button
-          variant="outline"
-          className="h-7 px-3 text-xs font-medium"
+        </button>
+        <button
+          className="h-7 px-3 text-xs font-medium rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
           onClick={() => setViewMode('years')}
           type="button"
         >
           {currentYear}
-        </Button>
+        </button>
       </div>
 
       <div className="flex items-center gap-1">
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-7 w-7"
+        <button
+          className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
           onClick={() => navigateMonth('next')}
           type="button"
         >
           <ChevronRight className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-7 w-7"
+        </button>
+        <button
+          className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
           onClick={() => navigateYear('next')}
           type="button"
         >
           <ChevronsRight className="h-4 w-4" />
-        </Button>
+        </button>
       </div>
     </div>
   )
 
   // Month Selection View
   const MonthSelectionView = () => (
-    <div className="p-3">
+    <div className="p-3 min-h-[280px]">
       <CustomNavigationHeader />
       <div className="grid grid-cols-3 gap-2">
         {MONTHS_SHORT.map((month, index) => (
-          <Button
+          <button
             key={month}
-            variant={index === currentMonthIndex ? "default" : "outline"}
-            className="h-9 text-xs"
+            className={cn(
+              "h-auto py-2 px-3 text-xs font-medium rounded-md border transition-colors",
+              index === currentMonthIndex
+                ? "bg-accent text-white border-accent"
+                : "bg-transparent border-border text-foreground hover:bg-accent/10"
+            )}
             onClick={() => selectMonth(index)}
             type="button"
           >
             {month}
-          </Button>
+          </button>
         ))}
       </div>
     </div>
@@ -162,44 +156,44 @@ function Calendar({
     const years = generateYearRange()
     
     return (
-      <div className="p-3">
+      <div className="p-3 min-h-[280px]">
         <div className="flex items-center justify-between px-2 pb-3 border-b border-border mb-3">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-7 w-7"
+          <button
+            className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
             onClick={() => navigateYearGrid('prev')}
             type="button"
           >
             <ChevronsLeft className="h-4 w-4" />
-          </Button>
+          </button>
 
           <div className="text-sm font-medium">
             {years[0]} - {years[years.length - 1]}
           </div>
 
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-7 w-7"
+          <button
+            className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
             onClick={() => navigateYearGrid('next')}
             type="button"
           >
             <ChevronsRight className="h-4 w-4" />
-          </Button>
+          </button>
         </div>
 
         <div className="grid grid-cols-3 gap-2">
           {years.map((year) => (
-            <Button
+            <button
               key={year}
-              variant={year === currentYear ? "default" : "outline"}
-              className="h-9 text-xs"
+              className={cn(
+                "h-auto py-2 px-3 text-xs font-medium rounded-md border transition-colors",
+                year === currentYear
+                  ? "bg-accent text-white border-accent"
+                  : "bg-transparent border-border text-foreground hover:bg-accent/10"
+              )}
               onClick={() => selectYear(year)}
               type="button"
             >
               {year}
-            </Button>
+            </button>
           ))}
         </div>
       </div>
@@ -208,7 +202,7 @@ function Calendar({
 
   // Days View (normal calendar)
   const DaysView = () => (
-    <div>
+    <div className="min-h-[280px]">
       <CustomNavigationHeader />
       <DayPicker
         showOutsideDays={showOutsideDays}
@@ -233,7 +227,7 @@ function Calendar({
           ),
           day_range_end: "day-range-end",
           day_selected:
-            "!bg-transparent !text-foreground border-[3px] [border-color:var(--accent)] rounded-md hover:!bg-transparent hover:!text-foreground focus:!bg-transparent focus:!text-foreground font-semibold",
+            "!bg-accent !text-white rounded-md hover:!bg-accent hover:!text-white focus:!bg-accent focus:!text-white font-semibold",
           day_today: "bg-accent text-accent-foreground font-semibold",
           day_outside:
             "day-outside text-muted-foreground opacity-40 aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
