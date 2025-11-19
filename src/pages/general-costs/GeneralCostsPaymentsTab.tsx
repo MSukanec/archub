@@ -269,21 +269,6 @@ export default function GeneralCostsPaymentsTab() {
         );
       },
     },
-    {
-      key: 'attachments',
-      label: (<Paperclip className="h-4 w-4" />) as any,
-      sortable: false,
-      align: 'center' as const,
-      width: '50px',
-      render: (payment: GeneralCostPayment) => {
-        const attachmentCount = payment.file_url ? 1 : 0;
-        return (
-          <span className={attachmentCount > 0 ? 'font-medium' : 'text-muted-foreground'}>
-            {attachmentCount}
-          </span>
-        );
-      },
-    },
   ];
 
   const isFilterActive = 
@@ -509,6 +494,11 @@ export default function GeneralCostsPaymentsTab() {
           onClick: () => handleView(payment),
         })}
         rowActions={(payment: GeneralCostPayment) => [
+          ...(payment.file_url ? [{
+            label: 'Ver Adjunto',
+            icon: Paperclip,
+            onClick: () => window.open(payment.file_url!, '_blank'),
+          }] : []),
           {
             label: 'Editar Pago',
             icon: Edit,
