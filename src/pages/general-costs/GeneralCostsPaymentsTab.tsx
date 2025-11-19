@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, Calendar, TrendingUp } from 'lucide-react';
+import { useMemo, useState, useEffect } from 'react';
+import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, Calendar, TrendingUp, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -15,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { GeneralCostPaymentRow } from '@/components/ui/data-row';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
+import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
+import { useMobile } from '@/hooks/use-mobile';
 
 export default function GeneralCostsPaymentsTab() {
   const { data: userData } = useCurrentUser();
@@ -33,6 +35,15 @@ export default function GeneralCostsPaymentsTab() {
   const { data: allPayments = [], isLoading } = useGeneralCostsPayments(organizationId);
   const deletePaymentMutation = useDeleteGeneralCostPayment();
   const { data: defaultCurrency = null } = useOrganizationDefaultCurrency(organizationId);
+
+  // Mobile Action Bar
+  const {
+    setActions,
+    setShowActionBar,
+    clearActions,
+    setFilterConfig
+  } = useActionBarMobile();
+  const isMobile = useMobile();
 
   // Extract unique values for filters
   const filterOptions = useMemo(() => {
@@ -171,6 +182,83 @@ export default function GeneralCostsPaymentsTab() {
     const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     return `${symbol} ${formattedAmount}`;
   };
+
+  // Configure Mobile Action Bar
+  useEffect(() => {
+    if (!isMobile) return;
+
+    setActions({
+      create: {
+        id: 'create',
+        icon: Plus,
+        label: 'Nuevo Pago',
+        onClick: handleAddPayment,
+        variant: 'primary'
+      },
+      filter: {
+        id: 'filter',
+        icon: Filter,
+        label: 'Filtros',
+        onClick: () => { }, // Popover is handled in ActionBarMobile
+      },
+    });
+    setShowActionBar(true);
+
+    // Cleanup when component unmounts
+    return () => {
+      clearActions();
+      setShowActionBar(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile]);
+
+  // Configure filters for Mobile Action Bar
+  useEffect(() => {
+    if (isMobile && filterOptions.wallets.length > 0) {
+      setFilterConfig({
+        filters: [
+          {
+            label: 'Gasto General',
+            value: filterGeneralCost,
+            onChange: setFilterGeneralCost,
+            placeholder: 'Todos',
+            allOptionLabel: 'Todos',
+            options: filterOptions.generalCosts.map(gc => ({ value: gc, label: gc }))
+          },
+          {
+            label: 'Billetera',
+            value: filterWallet,
+            onChange: setFilterWallet,
+            placeholder: 'Todas',
+            allOptionLabel: 'Todas',
+            options: filterOptions.wallets.map(wallet => ({ value: wallet, label: wallet }))
+          },
+          {
+            label: 'Moneda',
+            value: filterCurrency,
+            onChange: setFilterCurrency,
+            placeholder: 'Todas',
+            allOptionLabel: 'Todas',
+            options: filterOptions.currencies.map(currency => ({ value: currency, label: currency }))
+          },
+          {
+            label: 'Estado',
+            value: filterStatus,
+            onChange: setFilterStatus,
+            placeholder: 'Todos',
+            allOptionLabel: 'Todos',
+            options: [
+              { value: 'confirmed', label: 'Confirmado' },
+              { value: 'pending', label: 'Pendiente' },
+              { value: 'rejected', label: 'Rechazado' },
+              { value: 'void', label: 'Anulado' }
+            ]
+          }
+        ]
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile, filterOptions, filterGeneralCost, filterWallet, filterCurrency, filterStatus]);
 
   const columns = [
     {

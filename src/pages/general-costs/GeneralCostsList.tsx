@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { CreditCard, Plus, Edit, Trash2, DollarSign, Receipt, Calendar } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { CreditCard, Plus, Edit, Trash2, DollarSign, Receipt, Calendar, Search } from "lucide-react";
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
@@ -14,6 +14,8 @@ import { useDeleteGeneralCost } from "@/features/general-costs/hooks/use-delete-
 import { useGeneralCostsPayments } from "@/hooks/use-general-costs-payments";
 import GeneralCostRow from "@/components/ui/data-row/rows/GeneralCostRow";
 import type { GeneralCost } from "@/features/general-costs/types";
+import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
+import { useMobile } from '@/hooks/use-mobile';
 
 interface GeneralCostsListProps {
   onNewGeneralCost?: () => void;
@@ -25,6 +27,23 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
   const deleteGeneralCost = useDeleteGeneralCost();
   
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Mobile Action Bar
+  const {
+    setActions,
+    setShowActionBar,
+    clearActions,
+    searchValue: mobileSearchValue,
+    setSearchValue: setMobileSearchValue
+  } = useActionBarMobile();
+  const isMobile = useMobile();
+
+  // Sync search values between mobile and desktop
+  useEffect(() => {
+    if (isMobile && mobileSearchValue !== searchQuery) {
+      setSearchQuery(mobileSearchValue);
+    }
+  }, [mobileSearchValue, isMobile]);
 
   const handleCreateGeneralCost = () => {
     if (onNewGeneralCost) {
@@ -40,6 +59,36 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
   const organizationId = userData?.organization?.id;
   const { data: generalCosts = [], isLoading } = useGeneralCosts(organizationId || null);
   const { data: payments = [] } = useGeneralCostsPayments(organizationId);
+
+  // Configure Mobile Action Bar
+  useEffect(() => {
+    if (!isMobile) return;
+
+    setActions({
+      search: {
+        id: 'search',
+        icon: Search,
+        label: 'Buscar',
+        onClick: () => { }, // Popover is handled in ActionBarMobile
+      },
+      create: {
+        id: 'create',
+        icon: Plus,
+        label: 'Nuevo Gasto',
+        onClick: handleCreateGeneralCost,
+        variant: 'primary'
+      },
+    });
+    setShowActionBar(true);
+
+    // Cleanup when component unmounts
+    return () => {
+      clearActions();
+      setShowActionBar(false);
+      setMobileSearchValue('');
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile]);
 
   // Calcular métricas reales
   const metrics = useMemo(() => {
