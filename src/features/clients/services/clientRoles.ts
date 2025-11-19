@@ -19,6 +19,7 @@ export async function getClientRoles(
     .from('client_roles')
     .select('*')
     .or(`organization_id.eq.${organizationId},is_default.eq.true`)
+    .eq('is_deleted', false)
     .order('name', { ascending: true });
 
   if (error) {
@@ -67,7 +68,7 @@ export async function getClientRoleById(
  * @throws {Error} Si falla la creación
  */
 export async function createClientRole(
-  role: Omit<ClientRole, 'id' | 'created_at' | 'updated_at' | 'organization_id'>,
+  role: Omit<ClientRole, 'id' | 'created_at' | 'updated_at' | 'organization_id' | 'is_deleted' | 'deleted_at'>,
   organizationId: string
 ): Promise<ClientRole> {
   const { data, error } = await supabase
@@ -75,6 +76,7 @@ export async function createClientRole(
     .insert({
       ...role,
       organization_id: organizationId,
+      is_deleted: false,
     })
     .select()
     .single();
@@ -97,7 +99,7 @@ export async function createClientRole(
  */
 export async function updateClientRole(
   roleId: string,
-  updates: Partial<Omit<ClientRole, 'id' | 'created_at' | 'updated_at' | 'organization_id'>>,
+  updates: Partial<Omit<ClientRole, 'id' | 'created_at' | 'updated_at' | 'organization_id' | 'is_deleted' | 'deleted_at'>>,
   organizationId: string
 ): Promise<ClientRole> {
   const { data, error } = await supabase
@@ -119,15 +121,15 @@ export async function updateClientRole(
 }
 
 /**
- * Elimina un rol de cliente.
+ * Elimina un rol de cliente (soft delete).
  * 
- * Nota: Esta operación fallará si existen clientes usando este rol.
- * Primero deben reasignarse los clientes a otro rol o establecer client_role_id en null.
+ * Marca el rol como eliminado estableciendo is_deleted en true y deleted_at con la fecha actual.
+ * Esto mantiene la integridad histórica y preserva los datos para propósitos de auditoría.
  * 
  * @param roleId - ID del rol a eliminar
  * @param organizationId - ID de la organización
  * @returns true si se eliminó correctamente
- * @throws {Error} Si falla la eliminación o si hay clientes usando este rol
+ * @throws {Error} Si falla la actualización
  */
 export async function deleteClientRole(
   roleId: string,
@@ -135,7 +137,10 @@ export async function deleteClientRole(
 ): Promise<boolean> {
   const { error } = await supabase
     .from('client_roles')
-    .delete()
+    .update({
+      is_deleted: true,
+      deleted_at: new Date().toISOString()
+    })
     .eq('id', roleId)
     .eq('organization_id', organizationId);
 

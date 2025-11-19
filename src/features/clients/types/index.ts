@@ -39,6 +39,8 @@ export interface ClientRole {
   is_default: boolean;
   created_at: string;
   updated_at: string | null;
+  is_deleted: boolean;
+  deleted_at: string | null;
 }
 
 // ========== Project Client Types ==========

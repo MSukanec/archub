@@ -141,7 +141,9 @@ create table public.client_roles (
   description text null,
   is_default boolean null default true,
   created_at timestamp with time zone null default now(),
-  updated_at timestamp with time zone null default now(),
+  updated_at timestamp with time zone not null default now(),
+  is_deleted boolean not null default false,
+  deleted_at timestamp with time zone null,
   constraint client_roles_pkey primary key (id),
   constraint client_roles_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
 ) TABLESPACE pg_default;
