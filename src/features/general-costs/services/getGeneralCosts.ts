@@ -32,7 +32,7 @@ export async function getGeneralCosts(organizationId: string): Promise<GeneralCo
       deleted_at
     `)
     .eq('organization_id', organizationId)
-    .eq('is_deleted', false)
+    .or('is_deleted.is.null,is_deleted.eq.false')
     .order('created_at', { ascending: false });
 
   if (error) {
