@@ -396,11 +396,11 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
                           <Input
                             placeholder="Selecciona fecha"
                             value={field.value ? format(new Date(field.value), 'dd/MM/yyyy', { locale: es }) : ''}
-                            className="pl-10"
+                            className="pr-10 cursor-pointer"
                             readOnly
                             data-testid="date-coupon-starts"
                           />
-                          <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                          <CalendarIcon className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                         </div>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -435,11 +435,11 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
                           <Input
                             placeholder="Selecciona fecha"
                             value={field.value ? format(new Date(field.value), 'dd/MM/yyyy', { locale: es }) : ''}
-                            className="pl-10"
+                            className="pr-10 cursor-pointer"
                             readOnly
                             data-testid="date-coupon-expires"
                           />
-                          <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                          <CalendarIcon className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                         </div>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">

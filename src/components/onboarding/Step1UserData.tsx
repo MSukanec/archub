@@ -126,10 +126,10 @@ export function Step1UserData({ onFinish }: Step1UserDataProps = {}) {
                   <Input
                     placeholder="Seleccionar fecha"
                     value={getBirthdateValue() ? format(getBirthdateValue()!, 'dd/MM/yyyy', { locale: es }) : ''}
-                    className="h-11 border-gray-300 bg-white text-gray-900 pl-10"
+                    className="h-11 border-gray-300 bg-white text-gray-900 pr-10 cursor-pointer"
                     readOnly
                   />
-                  <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <CalendarIcon className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                 </div>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">

@@ -254,10 +254,10 @@ export function ConstructionTaskScheduleModal({
                 <Input
                   placeholder="Seleccionar fecha"
                   value={watch('start_date') ? format(new Date(watch('start_date')!), 'dd/MM/yyyy', { locale: es }) : ''}
-                  className="pl-10"
+                  className="pr-10 cursor-pointer"
                   readOnly
                 />
-                <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <CalendarIcon className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               </div>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
