@@ -15,10 +15,10 @@ export async function getClientRoles(
     return [];
   }
 
-  const { data, error } = await supabase
+  const { data, error} = await supabase
     .from('client_roles')
     .select('*')
-    .eq('organization_id', organizationId)
+    .or(`organization_id.eq.${organizationId},is_default.eq.true`)
     .order('name', { ascending: true });
 
   if (error) {
