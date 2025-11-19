@@ -78,9 +78,10 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
   });
 
   // Query to get available contacts
-  const { data: contacts = [] } = useQuery<any[]>({
+  const { data: contacts = [], isLoading: contactsLoading } = useQuery<any[]>({
     queryKey: [`/api/contacts?organization_id=${organizationId}`],
     enabled: !!organizationId,
+    staleTime: 5 * 60 * 1000, // 5 minutes - cache contacts for better UX
   });
 
   // Query to get client roles (organization_id is derived server-side)
@@ -226,132 +227,139 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="contactId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Contacto</FormLabel>
-              <FormControl>
-                {contacts.length === 0 ? (
-                  <MiniEmptyState
-                    message="Aún no tienes contactos creados. Crea tu primer contacto para poder agregarlo como cliente."
-                    buttonText="Ir a Contactos"
-                    onClick={handleGoToContacts}
-                    icon={UserPlus}
-                    sidebarLevel="organization"
+        {/* Row 1: Contacto / Rol del Cliente (2 columns on desktop, 1 on mobile) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="contactId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Contacto</FormLabel>
+                <FormControl>
+                  {!contactsLoading && contacts.length === 0 ? (
+                    <MiniEmptyState
+                      message="Aún no tienes contactos creados. Crea tu primer contacto para poder agregarlo como cliente."
+                      buttonText="Ir a Contactos"
+                      onClick={handleGoToContacts}
+                      icon={UserPlus}
+                      sidebarLevel="organization"
+                    />
+                  ) : (
+                    <ComboBox
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      options={contactOptions}
+                      placeholder={contactsLoading ? "Cargando contactos..." : "Seleccionar contacto..."}
+                      searchPlaceholder="Buscar contacto..."
+                      emptyMessage="No se encontraron contactos."
+                      className="w-full"
+                      disabled={isEditing || contactsLoading}
+                    />
+                  )}
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="clientRoleId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Rol del Cliente (Opcional)</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value} disabled={clientRolesLoading}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={clientRolesLoading ? "Cargando roles..." : "Seleccionar rol..."} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="">Sin rol</SelectItem>
+                    {clientRoles && clientRoles.length > 0 ? (
+                      clientRoles.map((role: any) => (
+                        <SelectItem key={role.id} value={role.id}>
+                          {role.name}
+                        </SelectItem>
+                      ))
+                    ) : null}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Row 2: Unidad Funcional / Estado / Cliente Principal (3 columns on desktop, 1 on mobile) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FormField
+            control={form.control}
+            name="unit"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Unidad Funcional (Opcional)</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder="Ej: Dpto 101"
                   />
-                ) : (
-                  <ComboBox
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    options={contactOptions}
-                    placeholder="Seleccionar contacto..."
-                    searchPlaceholder="Buscar contacto..."
-                    emptyMessage="No se encontraron contactos."
-                    className="w-full"
-                    disabled={isEditing}
-                  />
-                )}
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="unit"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Unidad Funcional (Opcional)</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Ej: Departamento 101, Casa 5, etc."
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="clientRoleId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Rol del Cliente (Opcional)</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} disabled={clientRolesLoading}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder={clientRolesLoading ? "Cargando roles..." : "Seleccionar rol..."} />
-                  </SelectTrigger>
                 </FormControl>
-                <SelectContent>
-                  <SelectItem value="">Sin rol</SelectItem>
-                  {clientRoles && clientRoles.length > 0 ? (
-                    clientRoles.map((role: any) => (
-                      <SelectItem key={role.id} value={role.id}>
-                        {role.name}
-                      </SelectItem>
-                    ))
-                  ) : null}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Estado (Opcional)</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar estado..." />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="active">Activo</SelectItem>
-                  <SelectItem value="inactive">Inactivo</SelectItem>
-                  <SelectItem value="potential">Potencial</SelectItem>
-                  <SelectItem value="rejected">Rechazado</SelectItem>
-                  <SelectItem value="completed">Completado</SelectItem>
-                  <SelectItem value="deleted">Eliminado</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Estado (Opcional)</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar estado..." />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="active">Activo</SelectItem>
+                    <SelectItem value="inactive">Inactivo</SelectItem>
+                    <SelectItem value="potential">Potencial</SelectItem>
+                    <SelectItem value="rejected">Rechazado</SelectItem>
+                    <SelectItem value="completed">Completado</SelectItem>
+                    <SelectItem value="deleted">Eliminado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="isPrimary"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>¿Cliente Principal?</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar..." />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="yes">Sí</SelectItem>
-                  <SelectItem value="no">No</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="isPrimary"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>¿Cliente Principal?</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar..." />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="yes">Sí</SelectItem>
+                    <SelectItem value="no">No</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
+        {/* Row 3: Notas (full width) */}
         <FormField
           control={form.control}
           name="notes"
