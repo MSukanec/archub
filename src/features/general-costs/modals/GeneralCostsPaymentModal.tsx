@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { nanoid } from 'nanoid'
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
@@ -24,6 +25,8 @@ import { useGeneralCosts } from '../hooks/use-general-costs'
 import { useCreateGeneralCostPayment } from '../hooks/use-create-general-cost-payment'
 import { useUpdateGeneralCostPayment } from '../hooks/use-update-general-cost-payment'
 import { generalCostPaymentSchema, type GeneralCostPaymentFormData } from '../schemas'
+import { UploadMediaField } from '@/components/ui-custom/fields/UploadMediaField'
+import { supabase } from '@/lib/supabase'
 
 interface GeneralCostsPaymentModalProps {
   modalData: {
@@ -38,6 +41,9 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
   const { setPanel } = useModalPanelStore()
+
+  const [filesToUpload, setFilesToUpload] = React.useState<any[]>([])
+  const [existingFiles, setExistingFiles] = React.useState<any[]>([])
 
   const form = useForm<GeneralCostPaymentFormData>({
     resolver: zodResolver(generalCostPaymentSchema),
@@ -88,6 +94,20 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
         reference: editingPayment.reference || '',
         status: editingPayment.status || 'confirmed',
       })
+
+      // Cargar archivo existente si existe
+      if (editingPayment?.file_url) {
+        setExistingFiles([{
+          id: nanoid(),
+          file_name: 'Archivo adjunto',
+          file_url: editingPayment.file_url,
+          file_type: 'document',
+          file_size: 0,
+          isExisting: true
+        }])
+      } else {
+        setExistingFiles([])
+      }
     }
   }, [editingPayment, form, currencies])
 
@@ -161,6 +181,40 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
       return
     }
 
+    let fileUrl = editingPayment?.file_url || null
+
+    // Si hay archivos nuevos para subir
+    if (filesToUpload.length > 0) {
+      const file = filesToUpload[0].file
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${nanoid()}.${fileExt}`
+      const filePath = `${fileName}`
+
+      // Subir a Supabase Storage
+      const { error: uploadError } = await supabase!.storage
+        .from('general-cost-payments-attachments')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
+
+      if (uploadError) {
+        toast({
+          title: 'Error al subir archivo',
+          description: uploadError.message,
+          variant: 'destructive',
+        })
+        return
+      }
+
+      // Obtener URL pública
+      const { data: urlData } = supabase!.storage
+        .from('general-cost-payments-attachments')
+        .getPublicUrl(filePath)
+
+      fileUrl = urlData.publicUrl
+    }
+
     const paymentData = {
       organization_id: userData.organization.id,
       payment_date: data.payment_date.toISOString().split('T')[0],
@@ -172,7 +226,8 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
       reference: data.reference || null,
       general_cost_id: data.general_cost_id || null,
       status: data.status || 'confirmed',
-      created_by: currentMember.id, // Usar organization_member.id
+      created_by: currentMember.id,
+      file_url: fileUrl,
     }
 
     try {
@@ -219,6 +274,19 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
           {editingPayment.notes || 'Sin notas'}
         </p>
       </div>
+      {editingPayment.file_url && (
+        <div>
+          <h4 className="font-medium text-foreground mb-2">Archivo Adjunto</h4>
+          <a 
+            href={editingPayment.file_url} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-sm text-primary hover:underline"
+          >
+            Ver archivo
+          </a>
+        </div>
+      )}
     </div>
   ) : null
 
@@ -306,7 +374,60 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
             />
           </div>
 
-          {/* Row 2: currency_id | wallet_id */}
+          {/* Row 2: wallet_id | amount */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="wallet_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Billetera *</FormLabel>
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar billetera" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {wallets?.map((orgWallet) => (
+                          <SelectItem 
+                            key={`wallet-${orgWallet.id}`} 
+                            value={orgWallet.id || ''}
+                          >
+                            {orgWallet.wallets?.name || 'Sin nombre'}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Monto *</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      {...field}
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* Row 3: currency_id | exchange_rate */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -338,59 +459,6 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
 
             <FormField
               control={form.control}
-              name="wallet_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Billetera *</FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar billetera" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {wallets?.map((orgWallet) => (
-                          <SelectItem 
-                            key={`wallet-${orgWallet.id}`} 
-                            value={orgWallet.id || ''}
-                          >
-                            {orgWallet.wallets?.name || 'Sin nombre'}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Row 3: amount | exchange_rate */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Monto *</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="0.00"
-                      {...field}
-                      value={field.value || ''}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="exchange_rate"
               render={({ field }) => (
                 <FormItem>
@@ -410,25 +478,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
             />
           </div>
 
-          {/* Row 4: reference */}
-          <FormField
-            control={form.control}
-            name="reference"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Referencia (opcional)</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Número de recibo, factura, etc."
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Row 5: notes */}
+          {/* Row 4: notes */}
           <FormField
             control={form.control}
             name="notes"
@@ -446,6 +496,49 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
               </FormItem>
             )}
           />
+
+          {/* Row 5: reference */}
+          <FormField
+            control={form.control}
+            name="reference"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Referencia (opcional)</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Número de recibo, factura, etc."
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Row 6: Adjunto */}
+          <div className="space-y-2">
+            <FormLabel>Adjunto (opcional)</FormLabel>
+            <UploadMediaField
+              existingFiles={existingFiles}
+              filesToUpload={filesToUpload}
+              onFilesChange={(files) => {
+                // Limitar a un solo archivo
+                setFilesToUpload(files.slice(0, 1))
+              }}
+              emptyStateTitle="Sin archivo adjunto"
+              emptyStateDescription="Arrastra un archivo o haz clic para seleccionar"
+              newFileBadgeText="Nuevo"
+              maxSize={10 * 1024 * 1024}
+              acceptedTypes={{
+                'application/pdf': ['.pdf'],
+                'image/*': ['.png', '.jpg', '.jpeg'],
+                'application/msword': ['.doc'],
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+                'application/vnd.ms-excel': ['.xls'],
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
+              }}
+            />
+          </div>
         </form>
       </Form>
     )
