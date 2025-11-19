@@ -61,7 +61,8 @@ export async function getClientCommitments(
           name
         )
       `)
-      .eq('organization_id', organizationId);
+      .eq('organization_id', organizationId)
+      .eq('is_deleted', false);
 
     // Filter by project if specified
     if (projectName) {
