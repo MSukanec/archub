@@ -215,7 +215,7 @@ export default function GeneralCostsPaymentsTab() {
       width: '220px',
       render: (payment: GeneralCostPayment) => (
         <div>
-          <div className="font-medium">{payment.general_cost?.name || 'Sin categoría'}</div>
+          <div className="font-bold">{payment.general_cost?.name || 'Sin categoría'}</div>
           {payment.general_cost?.description && (
             <div className="text-xs text-muted-foreground line-clamp-1">{payment.general_cost.description}</div>
           )}
@@ -228,7 +228,7 @@ export default function GeneralCostsPaymentsTab() {
       sortable: true,
       width: '400px',
       render: (payment: GeneralCostPayment) => (
-        <div className="max-w-full truncate" title={payment.notes || ''}>
+        <div className="max-w-full truncate text-xs" title={payment.notes || ''}>
           {payment.notes || '-'}
         </div>
       ),
