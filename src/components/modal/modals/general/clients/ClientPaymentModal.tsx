@@ -240,6 +240,12 @@ export function ClientPaymentModal({ modalData, onClose }: ClientPaymentModalPro
         throw new Error(`Organization wallet not found for wallet ID: ${data.wallet_id}`)
       }
 
+      // Obtener el organization_member.id del usuario actual (patrón de SiteLogModal)
+      const currentMember = members?.find((m: any) => m.user_id === userData?.user?.id)
+      if (!currentMember) {
+        throw new Error('No se encontró el miembro de la organización para el usuario actual')
+      }
+
       const movementData = {
         organization_id: userData?.organization?.id,
         project_id: projectId,
@@ -253,7 +259,7 @@ export function ClientPaymentModal({ modalData, onClose }: ClientPaymentModalPro
         category_id: subcategory.parent_id,
         subcategory_id: data.subcategory_id,
         contact_id: data.contact_id, // Campo contact_id directo
-        created_by: userData?.memberships?.find(m => m.organization_id === userData?.organization?.id)?.membership_id || null, // Usar el membership_id del miembro de la organización
+        created_by: currentMember.id, // Usar organization_member.id
       }
 
 

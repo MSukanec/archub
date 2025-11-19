@@ -23,6 +23,78 @@
 
 ---
 
+## 🔑 PATRÓN PARA `created_by` - CRÍTICO
+
+**SIEMPRE** usa este patrón para obtener el `created_by` (organization_member.id):
+
+```typescript
+import { useOrganizationMembers } from '@/hooks/use-organization-members'
+import { useCurrentUser } from '@/hooks/use-current-user'
+
+// En el componente:
+const { data: userData } = useCurrentUser()
+const { data: members = [] } = useOrganizationMembers(organizationId)
+
+// Al crear/actualizar registro:
+const currentMember = members.find((m: any) => m.user_id === userData?.user?.id)
+if (!currentMember) {
+  throw new Error('No se encontró el miembro de la organización para el usuario actual')
+}
+
+const dataToInsert = {
+  // ... otros campos
+  created_by: currentMember.id, // ← ESTE es el valor correcto
+}
+```
+
+### ❌ NUNCA uses estos patrones INCORRECTOS:
+
+```typescript
+// ❌ INCORRECTO - NO EXISTE el campo .id en userData.memberships
+created_by: userData?.memberships?.find(m => m.organization_id === organizationId)?.id
+
+// ❌ INCORRECTO - membership_id NO es el campo correcto
+created_by: userData?.memberships?.find(m => m.organization_id === organizationId)?.membership_id
+
+// ❌ INCORRECTO - userData.user.id es el user_id, NO el organization_member.id
+created_by: userData?.user?.id
+```
+
+### ✅ Ejemplo completo (de SiteLogModal):
+
+```typescript
+export function MyModal({ modalData }: MyModalProps) {
+  const { data: userData } = useCurrentUser()
+  const { data: members = [] } = useOrganizationMembers(organizationId)
+
+  const createMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      // Obtener el organization_member.id del usuario actual
+      const currentMember = members.find((m: any) => m.user_id === userData?.user?.id)
+      if (!currentMember) {
+        throw new Error('No se encontró el miembro de la organización para el usuario actual')
+      }
+
+      const dataToInsert = {
+        name: formData.name,
+        organization_id: organizationId,
+        created_by: currentMember.id, // ← organization_member.id correcto
+      }
+
+      return await createMyRecord(dataToInsert)
+    },
+  })
+}
+```
+
+**Por qué este patrón:**
+- `userData.memberships` NO contiene el campo `id` que necesitamos
+- `useOrganizationMembers` devuelve los `organization_members` completos
+- Buscamos el miembro por `user_id` para obtener su `organization_member.id`
+- Este `id` es el que se guarda en `created_by`
+
+---
+
 ## 🏗️ ARQUITECTURA: Dónde va la lógica de datos
 
 **CRÍTICO:** Los modales NUNCA deben hacer queries directas de Supabase. Hay DOS opciones arquitectónicas:

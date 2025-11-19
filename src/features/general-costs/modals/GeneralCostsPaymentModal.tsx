@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
+import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { useGeneralCosts } from '../hooks/use-general-costs'
 import { useCreateGeneralCostPayment } from '../hooks/use-create-general-cost-payment'
@@ -57,6 +58,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId)
   const { data: generalCosts, isLoading: generalCostsLoading } = useGeneralCosts(organizationId)
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId)
+  const { data: members = [] } = useOrganizationMembers(organizationId)
   
   // Loading state for all necessary data
   const isLoading = currenciesLoading || generalCostsLoading || walletsLoading
@@ -148,6 +150,17 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
       return
     }
 
+    // Obtener el organization_member.id del usuario actual (patrón de SiteLogModal)
+    const currentMember = members.find((m: any) => m.user_id === userData?.user?.id)
+    if (!currentMember) {
+      toast({
+        title: 'Error',
+        description: 'No se encontró el miembro de la organización para el usuario actual',
+        variant: 'destructive',
+      })
+      return
+    }
+
     const paymentData = {
       organization_id: userData.organization.id,
       payment_date: data.payment_date.toISOString().split('T')[0],
@@ -159,7 +172,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
       reference: data.reference || null,
       general_cost_id: data.general_cost_id || null,
       status: data.status || 'confirmed',
-      created_by: userData?.memberships?.find(m => m.organization_id === userData?.organization?.id)?.membership_id || null,
+      created_by: currentMember.id, // Usar organization_member.id
     }
 
     try {
