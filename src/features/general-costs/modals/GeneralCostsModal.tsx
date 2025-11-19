@@ -50,8 +50,10 @@ export function GeneralCostsModal({ modalData, onClose }: GeneralCostsModalProps
   // Reset form when existing data is loaded
   useEffect(() => {
     if (existingGeneralCost) {
-      form.setValue('name', existingGeneralCost.name || '')
-      form.setValue('description', existingGeneralCost.description || '')
+      form.reset({
+        name: existingGeneralCost.name || '',
+        description: existingGeneralCost.description || ''
+      })
     }
   }, [existingGeneralCost, form])
 
