@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Receipt, Plus, Edit, Trash2 } from "lucide-react";
+import { CreditCard, Plus, Edit, Trash2 } from "lucide-react";
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
@@ -108,9 +108,9 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
     return (
       <div className="h-full flex items-center justify-center">
         <EmptyState
-          icon={<Receipt className="w-8 h-8 text-muted-foreground" />}
-          title="No hay gastos generales"
-          description="Comienza agregando tu primer gasto general para el análisis financiero"
+          icon={<CreditCard className="w-8 h-8 text-muted-foreground" />}
+          title="No hay conceptos de gastos generales"
+          description="Comienza agregando tu primer concepto de gasto general para el análisis financiero, por ejemplo: Alquiler, Servicios, Honorarios, etc."
           action={
             <Button onClick={handleCreateGeneralCost}>
               <Plus className="w-4 h-4 mr-2" />

@@ -50,7 +50,7 @@ export default function GeneralCosts() {
   const getActionButton = () => {
     if (activeTab === "lista") {
       return {
-        label: "Crear Gasto General",
+        label: "Nuevo Gasto General",
         icon: Plus,
         onClick: handleNewGeneralCost
       }
