@@ -199,7 +199,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     {
       key: 'full_name',
       label: 'Cliente',
-      width: '250px',
+      width: '220px',
       sortable: true,
       render: (client: ProjectClientSummary) => {
         const avatarUrl = client.contacts?.linked_user?.avatar_url;
@@ -234,7 +234,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     {
       key: 'email',
       label: 'Mail',
-      width: '200px',
       sortable: true,
       render: (client: ProjectClientSummary) => {
         return client.contacts?.email || '-';
@@ -243,7 +242,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     {
       key: 'phone',
       label: 'Teléfono',
-      width: '150px',
       sortable: true,
       render: (client: ProjectClientSummary) => {
         return client.contacts?.phone || '-';
@@ -252,12 +250,12 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     {
       key: 'notes',
       label: 'Notas',
-      width: '250px',
+      width: '400px',
       sortable: false,
       render: (client: ProjectClientSummary) => {
         if (!client.notes) return '-';
-        const truncated = client.notes.length > 80 
-          ? client.notes.substring(0, 80) + '...' 
+        const truncated = client.notes.length > 100 
+          ? client.notes.substring(0, 100) + '...' 
           : client.notes;
         return <span className="text-muted-foreground">{truncated}</span>;
       },
@@ -266,7 +264,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       key: 'is_primary',
       label: 'Primario',
       sortable: true,
-      width: '100px',
       align: 'center' as const,
       render: (client: ProjectClientSummary) => {
         return client.is_primary ? (
@@ -280,7 +277,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       key: 'status',
       label: 'Estado',
       sortable: true,
-      width: '120px',
       render: (client: ProjectClientSummary) => {
         const statusMap: Record<string, { label: string; color: string }> = {
           active: { label: 'Activo', color: 'text-green-600 dark:text-green-400' },
