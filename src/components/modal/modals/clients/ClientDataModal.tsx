@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -369,24 +369,27 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
     </Form>
   );
 
-  // Helper para obtener datos del contacto actual
-  const getContactInfo = () => {
+  // Helper para obtener datos del contacto actual - recalcula cuando existingClient cambia
+  const contactInfo = useMemo(() => {
+    console.log('🔄 Calculando contactInfo, existingClient:', existingClient);
     if (!existingClient?.contacts) return null;
     const contact = existingClient.contacts;
     const fullName = contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
     const initials = fullName.split(' ').map((n: string) => n.charAt(0)).join('').toUpperCase().slice(0, 2);
-    return { ...contact, fullName, initials };
-  };
+    const result = { ...contact, fullName, initials };
+    console.log('✅ contactInfo calculado:', result);
+    return result;
+  }, [existingClient]);
 
-  // Helper para obtener rol del cliente
-  const getRoleInfo = () => {
+  // Helper para obtener rol del cliente - recalcula cuando existingClient o clientRoles cambian
+  const roleInfo = useMemo(() => {
     if (!existingClient?.client_role_id) return null;
     const role = clientRoles.find((r: any) => r.id === existingClient.client_role_id);
     return role;
-  };
+  }, [existingClient, clientRoles]);
 
-  // Helper para obtener badge de estado
-  const getStatusBadge = () => {
+  // Helper para obtener badge de estado - recalcula cuando existingClient cambia
+  const statusBadge = useMemo(() => {
     const status = existingClient?.status || 'active';
     const badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
       active: { label: 'Activo', variant: 'default' },
@@ -397,11 +400,7 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
       deleted: { label: 'Eliminado', variant: 'destructive' },
     };
     return badges[status] || badges.active;
-  };
-
-  const contactInfo = getContactInfo();
-  const roleInfo = getRoleInfo();
-  const statusBadge = getStatusBadge();
+  }, [existingClient]);
 
   const viewPanel = (
     <div className="space-y-6">
