@@ -151,3 +151,16 @@ create index IF not exists idx_partner_withdrawals_date on public.partner_withdr
 create index IF not exists idx_partner_withdrawals_view_project on public.partner_withdrawals using btree (project_id, withdrawal_date desc) TABLESPACE pg_default;
 
 create index IF not exists idx_partner_withdrawals_view_org on public.partner_withdrawals using btree (organization_id, withdrawal_date desc) TABLESPACE pg_default;
+
+---------- TABLA PARTNER_WITHDRAWALS:
+
+create table public.general_costs (
+  id uuid not null default gen_random_uuid (),
+  organization_id uuid not null,
+  name text not null,
+  description text null,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  constraint general_costs_pkey primary key (id),
+  constraint general_costs_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
+) TABLESPACE pg_default;
