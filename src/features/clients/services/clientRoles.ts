@@ -5,7 +5,7 @@ import type { ClientRole } from '../types';
  * Obtiene todos los roles de cliente de una organización.
  * 
  * @param organizationId - ID de la organización
- * @returns Array de roles de cliente, o array vacío si no hay datos
+ * @returns Array de roles de cliente no eliminados, o array vacío si no hay datos
  * @throws {Error} Si falla la query de Supabase
  */
 export async function getClientRoles(
@@ -19,7 +19,7 @@ export async function getClientRoles(
     .from('client_roles')
     .select('*')
     .or(`organization_id.eq.${organizationId},is_default.eq.true`)
-    .eq('is_deleted', false)
+    .or('is_deleted.is.null,is_deleted.eq.false')
     .order('name', { ascending: true });
 
   if (error) {
@@ -34,7 +34,7 @@ export async function getClientRoles(
  * 
  * @param roleId - ID del rol de cliente
  * @param organizationId - ID de la organización
- * @returns Rol de cliente, o null si no existe
+ * @returns Rol de cliente, o null si no existe o está eliminado
  * @throws {Error} Si falla la query de Supabase
  */
 export async function getClientRoleById(
@@ -50,6 +50,7 @@ export async function getClientRoleById(
     .select('*')
     .eq('id', roleId)
     .eq('organization_id', organizationId)
+    .or('is_deleted.is.null,is_deleted.eq.false')
     .single();
 
   if (error) {
