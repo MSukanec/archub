@@ -21,3 +21,36 @@ export interface GeneralCostValue {
   valid_from: string;
   created_at?: string;
 }
+
+export interface GeneralCostPayment {
+  id: string;
+  organization_id: string;
+  amount: number;
+  currency_id: string;
+  exchange_rate: number;
+  payment_date: string;
+  notes: string | null;
+  reference: string | null;
+  created_at: string;
+  updated_at: string | null;
+  wallet_id: string | null;
+  general_cost_id: string | null;
+  status: string;
+  created_by: string | null;
+  file_url: string | null;
+}
+
+export interface InsertGeneralCostPayment {
+  organization_id: string;
+  amount: number;
+  currency_id: string;
+  exchange_rate: number;
+  payment_date: string;
+  notes?: string | null;
+  reference?: string | null;
+  wallet_id?: string | null;
+  general_cost_id?: string | null;
+  status?: string;
+  created_by?: string | null;
+  file_url?: string | null;
+}

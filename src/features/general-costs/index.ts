@@ -7,6 +7,10 @@ export * from './services/getGeneralCost';
 export * from './services/createGeneralCost';
 export * from './services/updateGeneralCost';
 export * from './services/deleteGeneralCost';
+export * from './services/createGeneralCostPayment';
+export * from './services/updateGeneralCostPayment';
+export * from './services/deleteGeneralCostPayment';
+export * from './services/getGeneralCostPayment';
 
 export * from './hooks/use-general-costs';
 export * from './hooks/use-general-cost';
@@ -14,7 +18,12 @@ export * from './hooks/use-create-general-cost';
 export * from './hooks/use-update-general-cost';
 export * from './hooks/use-delete-general-cost';
 export * from './hooks/use-general-costs-metrics';
+export * from './hooks/use-create-general-cost-payment';
+export * from './hooks/use-update-general-cost-payment';
+export * from './hooks/use-delete-general-cost-payment';
+export * from './hooks/use-general-cost-payment';
 
 export * from './components/GeneralCostsStatsSection';
 
 export * from './modals/GeneralCostsModal';
+export * from './modals/GeneralCostsPaymentModal';

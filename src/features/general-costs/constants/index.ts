@@ -4,6 +4,8 @@ export const GENERAL_COSTS_QUERY_KEYS = {
   list: (organizationId: string | null) => [...GENERAL_COSTS_QUERY_KEYS.lists(), organizationId] as const,
   details: () => [...GENERAL_COSTS_QUERY_KEYS.all, 'detail'] as const,
   detail: (id: string | null) => [...GENERAL_COSTS_QUERY_KEYS.details(), id] as const,
+  payments: () => [...GENERAL_COSTS_QUERY_KEYS.all, 'payment'] as const,
+  payment: (id: string | null) => [...GENERAL_COSTS_QUERY_KEYS.payments(), id] as const,
 } as const;
 
 export const STATUS_LABELS = {
