@@ -59,7 +59,7 @@ const PAGE_CONFIG: Record<string, { name: string; icon: any }> = {
   '/analysis': { name: 'Análisis de Costos', icon: FileText },
   '/movements': { name: 'Movimientos', icon: DollarSign },
   '/finances/capital': { name: 'Capital', icon: Calculator },
-  '/finances/general-costs': { name: 'Gastos Generales', icon: FolderOpen },
+  '/general-costs': { name: 'Gastos Generales', icon: FolderOpen },
   '/organization/activity': { name: 'Actividad', icon: Activity },
   '/organization/preferences': { name: 'Preferencias', icon: Settings },
   

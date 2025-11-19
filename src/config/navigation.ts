@@ -123,7 +123,7 @@ export const ORGANIZATION_NAVIGATION: NavigationItem[] = [
   { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', testId: 'nav-org-analysis' },
   { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements', restricted: 'coming_soon', testId: 'nav-org-finances' },
   { id: 'capital', label: 'Capital', icon: TrendingUp, href: '/finances/capital', restricted: 'coming_soon', testId: 'nav-org-capital' },
-  { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/finances/general-costs', restricted: 'coming_soon', testId: 'nav-org-expenses' },
+  { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs', restricted: 'coming_soon', testId: 'nav-org-expenses' },
 ];
 
 export const PROJECT_NAVIGATION: NavigationItem[] = [

@@ -32,7 +32,7 @@ function mapRouteToView(path: string): string {
   if (path.startsWith('/contacts')) return 'contacts';
   if (path.startsWith('/movements')) return 'movements';
   if (path.startsWith('/finances/capital')) return 'capital';
-  if (path.startsWith('/finances/general-costs')) return 'general_costs';
+  if (path.startsWith('/general-costs')) return 'general_costs';
   if (path.startsWith('/analysis')) return 'analysis';
   
   // Learning

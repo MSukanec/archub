@@ -211,7 +211,7 @@ export function LeftSidebar() {
         { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis' },
         { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements', restricted: 'coming_soon' },
         { id: 'capital', label: 'Capital', icon: TrendingUp, href: '/finances/capital', restricted: 'coming_soon' },
-        { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/finances/general-costs', restricted: 'coming_soon' },
+        { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs', restricted: 'coming_soon' },
       ];
     } else if (sidebarLevel === 'project' && selectedProjectId) {
       return [
