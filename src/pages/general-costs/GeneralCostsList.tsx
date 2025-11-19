@@ -1,8 +1,5 @@
 import { useState } from "react";
 import { Receipt, Plus, Edit, Trash2 } from "lucide-react";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
-import { useLocation } from "wouter";
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
@@ -51,9 +48,6 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
     return searchMatch;
   });
 
-  // Router navigation
-  const [, setLocation] = useLocation();
-
   // Función para editar gasto general
   const handleEdit = (generalCost: GeneralCost) => {
     openModal('general-costs', {
@@ -81,25 +75,15 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
       key: 'name',
       label: 'Gasto General',
       render: (generalCost: GeneralCost) => (
-        <div>
-          <div className="font-medium">{generalCost.name}</div>
-          {generalCost.description && (
-            <div className="text-xs text-muted-foreground line-clamp-1">{generalCost.description}</div>
-          )}
-        </div>
+        <div className="font-medium">{generalCost.name}</div>
       )
     },
     {
-      key: 'created_at',
-      label: 'Fecha de Creación',
-      align: 'right' as const,
+      key: 'description',
+      label: 'Descripción',
       render: (generalCost: GeneralCost) => (
-        <div>
-          {generalCost.created_at && (
-            <div className="text-sm">
-              {format(new Date(generalCost.created_at), 'dd/MM/yyyy', { locale: es })}
-            </div>
-          )}
+        <div className="text-sm text-muted-foreground line-clamp-2">
+          {generalCost.description || '-'}
         </div>
       )
     }
