@@ -63,7 +63,10 @@ export function Clients() {
           id: 'create',
           icon: Plus,
           label: 'Nuevo Compromiso',
-          onClick: () => openModal('project-client'),
+          onClick: () => openModal('client-commitment', {
+            projectId: selectedProjectId,
+            organizationId: userData?.organization?.id
+          }),
           variant: 'primary'
         },
         filter: {
