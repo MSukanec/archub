@@ -40,6 +40,9 @@ interface PaymentMetrics {
   count_rejected: number;
   count_skipped: number; // Payments skipped due to missing exchange_rate
   latest_payment_date: string | null;
+  // Breakdown by original currency (not converted)
+  confirmed_by_currency: Array<{ currency_symbol: string; amount: number }>;
+  pending_by_currency: Array<{ currency_symbol: string; amount: number }>;
 }
 
 export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps) {
@@ -124,6 +127,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         latest_payment_date: allPayments.length > 0 
           ? allPayments.reduce((latest, p) => p.payment_date > latest ? p.payment_date : latest, allPayments[0].payment_date)
           : null,
+        confirmed_by_currency: [],
+        pending_by_currency: [],
       };
     }
 
@@ -154,10 +159,15 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     let countSkipped = 0;
     let latestPaymentDate: string | null = null;
 
+    // Track totals by original currency for breakdown
+    const confirmedByCurrency = new Map<string, { symbol: string; amount: number }>();
+    const pendingByCurrency = new Map<string, { symbol: string; amount: number }>();
+
     allPayments.forEach(payment => {
       if (!payment.currency) return;
 
       const { amount: convertedAmount, skipped } = convertToCommitmentCurrency(payment);
+      const currencySymbol = payment.currency.symbol;
       
       // Count skipped payments separately
       if (skipped) {
@@ -167,9 +177,25 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         if (payment.status === 'confirmed') {
           totalConfirmed += convertedAmount;
           countConfirmed += 1;
+          
+          // Track by original currency
+          const existing = confirmedByCurrency.get(currencySymbol);
+          if (existing) {
+            existing.amount += payment.amount;
+          } else {
+            confirmedByCurrency.set(currencySymbol, { symbol: currencySymbol, amount: payment.amount });
+          }
         } else if (payment.status === 'pending') {
           totalPending += convertedAmount;
           countPending += 1;
+          
+          // Track by original currency
+          const existing = pendingByCurrency.get(currencySymbol);
+          if (existing) {
+            existing.amount += payment.amount;
+          } else {
+            pendingByCurrency.set(currencySymbol, { symbol: currencySymbol, amount: payment.amount });
+          }
         } else if (payment.status === 'rejected') {
           totalRejected += convertedAmount;
           countRejected += 1;
@@ -194,6 +220,14 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       count_rejected: countRejected,
       count_skipped: countSkipped,
       latest_payment_date: latestPaymentDate,
+      confirmed_by_currency: Array.from(confirmedByCurrency.values()).map(c => ({
+        currency_symbol: c.symbol,
+        amount: c.amount,
+      })),
+      pending_by_currency: Array.from(pendingByCurrency.values()).map(c => ({
+        currency_symbol: c.symbol,
+        amount: c.amount,
+      })),
     };
   }, [allPayments, commitmentCurrency]);
 
@@ -335,6 +369,16 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     }
     const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     return `${currencySymbol} ${formattedAmount}`;
+  };
+
+  // Format currency breakdown by original currency
+  const formatCurrencyBreakdown = (currencyData: Array<{ currency_symbol: string; amount: number }>) => {
+    if (!currencyData || currencyData.length === 0) return '-';
+    
+    return currencyData.map(({ currency_symbol, amount }) => {
+      const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return `${currency_symbol} ${formattedAmount}`;
+    }).join(' + ');
   };
 
   // Table columns
@@ -565,16 +609,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           </StatCardValue>
           <StatCardMeta>
             {metricsData?.commitment_currency_symbol 
-              ? (
-                <>
-                  {metricsData.count_confirmed} pagos confirmados
-                  {metricsData.count_skipped > 0 && (
-                    <span className="text-orange-600 dark:text-orange-400 text-xs ml-1">
-                      ({metricsData.count_skipped} sin tipo de cambio)
-                    </span>
-                  )}
-                </>
-              )
+              ? formatCurrencyBreakdown(metricsData.confirmed_by_currency)
               : 'Sin compromisos registrados'
             }
           </StatCardMeta>
@@ -594,16 +629,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           </StatCardValue>
           <StatCardMeta>
             {metricsData?.commitment_currency_symbol 
-              ? (
-                <>
-                  {metricsData.count_pending} pagos pendientes
-                  {metricsData.count_skipped > 0 && (
-                    <span className="text-orange-600 dark:text-orange-400 text-xs ml-1">
-                      ({metricsData.count_skipped} sin tipo de cambio)
-                    </span>
-                  )}
-                </>
-              )
+              ? formatCurrencyBreakdown(metricsData.pending_by_currency)
               : 'Sin compromisos registrados'
             }
           </StatCardMeta>

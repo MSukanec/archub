@@ -87,7 +87,7 @@ interface StatCardValueProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const StatCardValue = ({ children, className, ...props }: StatCardValueProps) => (
-  <div className={cn("text-5xl font-bold text-foreground tracking-tight leading-none mt-2", className)} {...props}>
+  <div className={cn("text-4xl font-bold text-foreground tracking-tight leading-none mt-2", className)} {...props}>
     {children}
   </div>
 )
