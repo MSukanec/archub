@@ -59,7 +59,7 @@ export async function getProjectClients(
     `)
     .eq('organization_id', organizationId)
     .eq('project_id', projectId)
-    .or('is_deleted.is.null,is_deleted.eq.false')
+    .eq('is_deleted', false)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -137,7 +137,7 @@ export async function getProjectClientById(
     `)
     .eq('id', clientId)
     .eq('organization_id', organizationId)
-    .or('is_deleted.is.null,is_deleted.eq.false')
+    .eq('is_deleted', false)
     .single();
 
   if (error) {

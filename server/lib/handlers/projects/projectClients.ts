@@ -122,16 +122,11 @@ export async function listClients(
             id,
             avatar_url
           )
-        ),
-        currency:currencies!currency_id (
-          id,
-          code,
-          symbol
         )
       `)
       .eq('project_id', params.projectId)
       .eq('organization_id', params.organizationId)
-      .or('is_deleted.is.null,is_deleted.eq.false')
+      .eq('is_deleted', false)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -238,7 +233,7 @@ export async function getClientsSummary(
       `)
       .eq('project_id', params.projectId)
       .eq('organization_id', params.organizationId)
-      .or('is_deleted.is.null,is_deleted.eq.false');
+      .eq('is_deleted', false);
 
     if (clientsError) {
       console.error('Error fetching clients:', clientsError);
@@ -465,7 +460,7 @@ export async function getClient(
       .eq('id', params.clientId)
       .eq('project_id', params.projectId)
       .eq('organization_id', params.organizationId)
-      .or('is_deleted.is.null,is_deleted.eq.false')
+      .eq('is_deleted', false)
       .maybeSingle();
 
     if (error) {
@@ -612,7 +607,7 @@ export async function updateClient(
       .from('project_clients')
       .select('id, organization_id, is_deleted')
       .eq('id', params.clientId)
-      .or('is_deleted.is.null,is_deleted.eq.false')
+      .eq('is_deleted', false)
       .maybeSingle();
 
     if (fetchError) {
@@ -720,7 +715,7 @@ export async function deleteClient(
       .from('project_clients')
       .select('id, organization_id, is_deleted')
       .eq('id', params.clientId)
-      .or('is_deleted.is.null,is_deleted.eq.false')
+      .eq('is_deleted', false)
       .maybeSingle();
 
     if (fetchError) {
