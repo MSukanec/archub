@@ -454,7 +454,14 @@ export async function getClient(
           id,
           first_name,
           last_name,
-          email
+          full_name,
+          email,
+          phone,
+          company_name,
+          linked_user:users!linked_user_id (
+            id,
+            avatar_url
+          )
         )
       `)
       .eq('id', params.clientId)

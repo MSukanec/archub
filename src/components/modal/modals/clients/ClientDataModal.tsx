@@ -19,7 +19,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
 import { MiniEmptyState } from '@/components/ui-custom/fields/MiniEmptyState';
-import { Users, UserPlus } from 'lucide-react';
+import { Users, UserPlus, Building2, FileText, User, Mail, Phone, Badge as BadgeIcon } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const clientSchema = z.object({
   contactId: z.string().min(1, 'Debe seleccionar un contacto'),
@@ -74,7 +77,9 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
     queryFn: async () => {
       const response = await fetch(`/api/projects/${projectId}/clients/${clientId}?organization_id=${organizationId}`);
       if (!response.ok) throw new Error('Failed to fetch client');
-      return response.json();
+      const json = await response.json();
+      if (!json.success) throw new Error(json.error || 'Failed to fetch client');
+      return json.data; // Return only the data, not the wrapper
     },
     enabled: !!clientId && !!projectId && !!organizationId,
     staleTime: 2 * 60 * 1000, // 2 minutes - use cached data if available
@@ -94,16 +99,18 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
 
   // Load existing data when editing
   useEffect(() => {
-    if (existingClient) {
+    if (existingClient && isEditing) {
+      console.log('🔍 Loading client data for edit:', existingClient);
       form.reset({
-        contactId: existingClient.contact_id,
+        contactId: existingClient.contact_id || '',
         unit: existingClient.unit || '',
         clientRoleId: existingClient.client_role_id || '',
         status: existingClient.status || 'active',
         isPrimary: existingClient.is_primary ? 'yes' : 'no',
         notes: existingClient.notes || '',
       });
-    } else if (!isEditing) {
+      console.log('✅ Form reset with values:', form.getValues());
+    } else if (!isEditing && !isViewMode) {
       form.reset({
         contactId: '',
         unit: '',
@@ -113,7 +120,7 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
         notes: '',
       });
     }
-  }, [existingClient, isEditing, form]);
+  }, [existingClient, isEditing, isViewMode, form]);
 
   const saveClientMutation = useMutation({
     mutationFn: async (data: ClientFormData) => {
@@ -362,6 +369,152 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
     </Form>
   );
 
+  // Helper para obtener datos del contacto actual
+  const getContactInfo = () => {
+    if (!existingClient?.contacts) return null;
+    const contact = existingClient.contacts;
+    const fullName = contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
+    const initials = fullName.split(' ').map((n: string) => n.charAt(0)).join('').toUpperCase().slice(0, 2);
+    return { ...contact, fullName, initials };
+  };
+
+  // Helper para obtener rol del cliente
+  const getRoleInfo = () => {
+    if (!existingClient?.client_role_id) return null;
+    const role = clientRoles.find((r: any) => r.id === existingClient.client_role_id);
+    return role;
+  };
+
+  // Helper para obtener badge de estado
+  const getStatusBadge = () => {
+    const status = existingClient?.status || 'active';
+    const badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+      active: { label: 'Activo', variant: 'default' },
+      inactive: { label: 'Inactivo', variant: 'secondary' },
+      potential: { label: 'Potencial', variant: 'outline' },
+      rejected: { label: 'Rechazado', variant: 'destructive' },
+      completed: { label: 'Completado', variant: 'default' },
+      deleted: { label: 'Eliminado', variant: 'destructive' },
+    };
+    return badges[status] || badges.active;
+  };
+
+  const contactInfo = getContactInfo();
+  const roleInfo = getRoleInfo();
+  const statusBadge = getStatusBadge();
+
+  const viewPanel = (
+    <div className="space-y-6">
+      {/* Header con avatar y nombre */}
+      <div className="text-center pt-4 pb-6">
+        <div className="flex justify-center mb-4">
+          <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
+            {contactInfo?.linked_user?.avatar_url && (
+              <AvatarImage 
+                src={contactInfo.linked_user.avatar_url} 
+                alt={`Avatar de ${contactInfo.fullName}`}
+                className="object-cover"
+              />
+            )}
+            <AvatarFallback className="text-2xl font-bold bg-accent text-white">
+              {contactInfo?.initials || '??'}
+            </AvatarFallback>
+          </Avatar>
+        </div>
+
+        <h2 className="text-2xl font-bold text-foreground mb-2">
+          {contactInfo?.fullName || 'Sin nombre'}
+        </h2>
+
+        {/* Rol del cliente */}
+        {roleInfo && (
+          <div className="flex flex-wrap gap-2 justify-center mb-4">
+            <Badge className="bg-accent text-white">
+              {roleInfo.name}
+            </Badge>
+          </div>
+        )}
+
+        {/* Estado */}
+        <div className="flex items-center justify-center gap-1">
+          <Badge variant={statusBadge.variant}>
+            {statusBadge.label}
+          </Badge>
+          {existingClient?.is_primary && (
+            <Badge variant="default" className="bg-green-600 text-white">
+              Cliente Principal
+            </Badge>
+          )}
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Información de contacto */}
+      <div className="grid grid-cols-1 gap-4">
+        {contactInfo?.email && (
+          <div className="flex items-start gap-3 p-3 rounded-lg border bg-card">
+            <div className="p-2 bg-accent/10 rounded-lg">
+              <Mail className="h-5 w-5 text-accent" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">Email</p>
+              <p className="font-medium text-sm truncate" title={contactInfo.email}>
+                {contactInfo.email}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {contactInfo?.phone && (
+          <div className="flex items-start gap-3 p-3 rounded-lg border bg-card">
+            <div className="p-2 bg-accent/10 rounded-lg">
+              <Phone className="h-5 w-5 text-accent" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">Teléfono</p>
+              <p className="font-medium text-sm truncate" title={contactInfo.phone}>
+                {contactInfo.phone}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {existingClient?.unit && (
+          <div className="flex items-start gap-3 p-3 rounded-lg border bg-card">
+            <div className="p-2 bg-accent/10 rounded-lg">
+              <Building2 className="h-5 w-5 text-accent" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">Unidad Funcional</p>
+              <p className="font-medium text-sm truncate" title={existingClient.unit}>
+                {existingClient.unit}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Notas */}
+      {existingClient?.notes && (
+        <>
+          <Separator />
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+              <FileText className="h-4 w-4 text-accent" />
+              Notas
+            </h3>
+            <div className="p-3 rounded-lg border bg-card">
+              <p className="text-sm text-foreground leading-relaxed">
+                {existingClient.notes}
+              </p>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
   const headerContent = (
     <FormModalHeader
       title={isViewMode ? "Ver Cliente" : isEditing ? "Editar Cliente" : "Agregar Cliente"}
@@ -393,11 +546,12 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
   return (
     <FormModalLayout
       columns={1}
-      editPanel={editPanel}
+      viewPanel={isViewMode ? viewPanel : null}
+      editPanel={!isViewMode ? editPanel : null}
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={handleClose}
-      forcedPanel="edit"
+      forcedPanel={isViewMode ? "view" : "edit"}
     />
   );
 }
