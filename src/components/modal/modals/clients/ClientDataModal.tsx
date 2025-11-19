@@ -72,21 +72,12 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
   });
 
   // Query to get existing client data when editing - with cache optimization
-  const { data: existingClientResponse, isLoading: existingClientLoading } = useQuery<any>({
+  // Note: The API returns the client object directly (not wrapped in {success, data})
+  const { data: existingClient, isLoading: existingClientLoading } = useQuery<any>({
     queryKey: [`/api/projects/${projectId}/clients/${clientId}?organization_id=${organizationId}`],
     enabled: !!clientId && !!projectId && !!organizationId,
     staleTime: 2 * 60 * 1000, // 2 minutes - use cached data if available
   });
-
-  // Debug: Log the raw response
-  useEffect(() => {
-    console.log('📦 Raw API Response:', existingClientResponse);
-    console.log('🔍 existingClient enabled:', !!clientId && !!projectId && !!organizationId);
-    console.log('🔍 Loading:', existingClientLoading);
-  }, [existingClientResponse, clientId, projectId, organizationId, existingClientLoading]);
-
-  // Unwrap the API response to get just the client data
-  const existingClient = existingClientResponse?.data || null;
 
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
@@ -103,7 +94,6 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
   // Load existing data when editing
   useEffect(() => {
     if (existingClient && isEditing) {
-      console.log('🔍 Loading client data for edit:', existingClient);
       form.reset({
         contactId: existingClient.contact_id || '',
         unit: existingClient.unit || '',
@@ -112,7 +102,6 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
         isPrimary: existingClient.is_primary ? 'yes' : 'no',
         notes: existingClient.notes || '',
       });
-      console.log('✅ Form reset with values:', form.getValues());
     } else if (!isEditing && !isViewMode) {
       form.reset({
         contactId: '',
@@ -374,14 +363,11 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
 
   // Helper para obtener datos del contacto actual - recalcula cuando existingClient cambia
   const contactInfo = useMemo(() => {
-    console.log('🔄 Calculando contactInfo, existingClient:', existingClient);
     if (!existingClient?.contacts) return null;
     const contact = existingClient.contacts;
     const fullName = contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
     const initials = fullName.split(' ').map((n: string) => n.charAt(0)).join('').toUpperCase().slice(0, 2);
-    const result = { ...contact, fullName, initials };
-    console.log('✅ contactInfo calculado:', result);
-    return result;
+    return { ...contact, fullName, initials };
   }, [existingClient]);
 
   // Helper para obtener rol del cliente - recalcula cuando existingClient o clientRoles cambian
