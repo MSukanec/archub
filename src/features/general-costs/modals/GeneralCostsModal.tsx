@@ -37,7 +37,17 @@ export function GeneralCostsModal({ modalData, onClose }: GeneralCostsModalProps
   const isEditing = modalData?.isEditing || false
 
   // Fetch existing general cost data if editing
-  const { data: existingGeneralCost } = useGeneralCost(isEditing ? modalData?.generalCostId || null : null)
+  const { data: existingGeneralCost, isLoading: isLoadingGeneralCost } = useGeneralCost(isEditing ? modalData?.generalCostId || null : null)
+
+  // Debug logs
+  useEffect(() => {
+    console.log('🔍 GeneralCostsModal Debug:', {
+      isEditing,
+      generalCostId: modalData?.generalCostId,
+      existingGeneralCost,
+      isLoadingGeneralCost
+    })
+  }, [isEditing, modalData?.generalCostId, existingGeneralCost, isLoadingGeneralCost])
 
   const form = useForm<GeneralCostFormData>({
     resolver: zodResolver(generalCostSchema),
@@ -150,6 +160,7 @@ export function GeneralCostsModal({ modalData, onClose }: GeneralCostsModalProps
   const headerContent = (
     <FormModalHeader
       title={isEditing ? 'Editar Gasto General' : 'Nuevo Gasto General'}
+      description={isEditing ? 'Modifica los datos del gasto general' : 'Agrega un nuevo concepto de gasto general para tu organización'}
       icon={Receipt}
     />
   )
