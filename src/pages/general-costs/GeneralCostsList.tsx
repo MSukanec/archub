@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Receipt, Plus, Edit, Trash2, Eye } from "lucide-react";
+import { Receipt, Plus, Edit, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useLocation } from "wouter";
@@ -75,12 +75,6 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
     });
   };
 
-  // Función para ver detalle
-  const handleView = (id: string) => {
-    // TODO: Implementar vista de detalle cuando esté disponible
-    console.log('Ver detalle de gasto general:', id);
-  };
-
   // Configuración de las columnas de la tabla
   const columns = [
     {
@@ -151,11 +145,6 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
           showSearch: true
         }}
         rowActions={(generalCost) => [
-          {
-            icon: Eye,
-            label: 'Ver detalle',
-            onClick: () => handleView(generalCost.id)
-          },
           {
             icon: Edit,
             label: 'Editar',
