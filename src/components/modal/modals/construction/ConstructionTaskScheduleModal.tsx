@@ -7,9 +7,14 @@ import { supabase } from "@/lib/supabase";
 import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar } from "lucide-react";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
 import { useConstructionProjectPhases } from "@/hooks/use-construction-phases";
@@ -243,11 +248,32 @@ export function ConstructionTaskScheduleModal({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="start_date">Fecha de Inicio</Label>
-          <Input
-            type="date"
-            id="start_date"
-            {...register('start_date')}
-          />
+          <Popover>
+            <PopoverTrigger asChild>
+              <div className="relative">
+                <Input
+                  placeholder="Seleccionar fecha"
+                  value={watch('start_date') ? format(new Date(watch('start_date')!), 'dd/MM/yyyy', { locale: es }) : ''}
+                  className="pl-10"
+                  readOnly
+                />
+                <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              </div>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={watch('start_date') ? new Date(watch('start_date')!) : undefined}
+                onSelect={(date) => {
+                  if (date) {
+                    setValue('start_date', date.toISOString().split('T')[0]);
+                  }
+                }}
+                initialFocus
+                locale={es}
+              />
+            </PopoverContent>
+          </Popover>
           {errors.start_date && (
             <p className="text-sm text-destructive">{errors.start_date.message}</p>
           )}
@@ -290,7 +316,7 @@ export function ConstructionTaskScheduleModal({
   const headerContent = (
     <FormModalHeader 
       title="Cronograma de Tarea"
-      icon={Calendar}
+      icon={CalendarIcon}
     />
   );
 

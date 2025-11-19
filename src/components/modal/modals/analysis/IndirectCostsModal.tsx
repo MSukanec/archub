@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Building, DollarSign } from 'lucide-react';
+import { Building, DollarSign, CalendarIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
@@ -12,6 +14,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ComboBox } from "@/components/ui-custom/fields/ComboBoxWriteField";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
 import { useUnits } from "@/hooks/use-units";
 import { useCurrencies } from "@/hooks/use-currencies";
@@ -259,18 +263,45 @@ export function IndirectCostsModal({ modalData, onClose }: IndirectCostsModalPro
           <FormField
             control={form.control}
             name="valid_from"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Válido desde</FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const dateValue = field.value ? new Date(field.value) : undefined;
+              return (
+                <FormItem>
+                  <FormLabel>Válido desde</FormLabel>
+                  <FormControl>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              placeholder="Seleccionar fecha"
+                              value={dateValue ? format(dateValue, 'dd/MM/yyyy', { locale: es }) : ''}
+                              className="pl-10"
+                              readOnly
+                            />
+                            <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                          </div>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={dateValue}
+                          onSelect={(date) => {
+                            if (date) {
+                              field.onChange(date.toISOString().split('T')[0]);
+                            }
+                          }}
+                          initialFocus
+                          locale={es}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
         </div>
       </form>

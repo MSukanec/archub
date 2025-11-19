@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Calendar, Shield, Upload } from 'lucide-react'
+import { CalendarIcon, Shield, Upload } from 'lucide-react'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
@@ -13,7 +15,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import DatePicker from '@/components/ui-custom/fields/DatePickerField'
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
 
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
@@ -301,37 +304,89 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
           <FormField
             control={form.control}
             name="coverage_start"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fecha de Inicio *</FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    value={field.value ? field.value.toISOString().split('T')[0] : ''}
-                    onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const dateValue = field.value;
+              return (
+                <FormItem>
+                  <FormLabel>Fecha de Inicio *</FormLabel>
+                  <FormControl>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              placeholder="Seleccionar fecha"
+                              value={dateValue ? format(dateValue, 'dd/MM/yyyy', { locale: es }) : ''}
+                              className="pl-10"
+                              readOnly
+                            />
+                            <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                          </div>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={dateValue}
+                          onSelect={(date) => {
+                            if (date) {
+                              field.onChange(date);
+                            }
+                          }}
+                          initialFocus
+                          locale={es}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <FormField
             control={form.control}
             name="coverage_end"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fecha de Vencimiento *</FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    value={field.value ? field.value.toISOString().split('T')[0] : ''}
-                    onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const dateValue = field.value;
+              return (
+                <FormItem>
+                  <FormLabel>Fecha de Vencimiento *</FormLabel>
+                  <FormControl>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              placeholder="Seleccionar fecha"
+                              value={dateValue ? format(dateValue, 'dd/MM/yyyy', { locale: es }) : ''}
+                              className="pl-10"
+                              readOnly
+                            />
+                            <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                          </div>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={dateValue}
+                          onSelect={(date) => {
+                            if (date) {
+                              field.onChange(date);
+                            }
+                          }}
+                          initialFocus
+                          locale={es}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
         </div>
 
@@ -421,8 +476,8 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
       onLeftClick={onClose}
       rightLabel={isEdit ? 'Actualizar' : 'Crear'}
       onRightClick={form.handleSubmit(onSubmit)}
-      rightDisabled={createInsurance.isPending || updateInsurance.isPending}
-      rightLoading={createInsurance.isPending || updateInsurance.isPending}
+      submitDisabled={createInsurance.isPending || updateInsurance.isPending}
+      showLoadingSpinner={createInsurance.isPending || updateInsurance.isPending}
     />
   )
 
