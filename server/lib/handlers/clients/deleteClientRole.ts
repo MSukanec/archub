@@ -7,11 +7,12 @@ export async function deleteClientRole(
 ) {
   const { supabase } = context;
 
-  // First verify the role belongs to this organization and is not a default role
+  // First verify the role belongs to this organization and is not a default role or deleted
   const { data: existingRole, error: fetchError } = await supabase
     .from('client_roles')
-    .select('id, organization_id, is_default')
+    .select('id, organization_id, is_default, is_deleted')
     .eq('id', roleId)
+    .or('is_deleted.is.null,is_deleted.eq.false')
     .single();
 
   if (fetchError) {
@@ -45,10 +46,13 @@ export async function deleteClientRole(
     throw new Error('Cannot delete role that is currently assigned to clients');
   }
 
-  // Delete the role
+  // Soft delete the role
   const { error } = await supabase
     .from('client_roles')
-    .delete()
+    .update({
+      is_deleted: true,
+      deleted_at: new Date().toISOString()
+    })
     .eq('id', roleId)
     .eq('organization_id', organizationId);
 

@@ -18,11 +18,14 @@ export async function handleGetClientRoles(
       };
     }
 
-    // Get client roles for the organization (including global roles)
+    // Get client roles for the organization (including system roles), excluding soft-deleted ones
+    // Query returns roles that match:
+    // 1. (organization_id = X AND (is_deleted IS NULL OR is_deleted = false))
+    // 2. (is_default = true AND (is_deleted IS NULL OR is_deleted = false))
     const { data: roles, error } = await supabase
       .from('client_roles')
       .select('*')
-      .or(`organization_id.eq.${organizationId},organization_id.is.null`)
+      .or(`and(organization_id.eq.${organizationId},or(is_deleted.is.null,is_deleted.eq.false)),and(is_default.eq.true,or(is_deleted.is.null,is_deleted.eq.false))`)
       .order('is_default', { ascending: false })
       .order('name', { ascending: true });
 
