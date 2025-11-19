@@ -4,6 +4,10 @@ import type { ClientRole } from '../types';
 /**
  * Obtiene todos los roles de cliente de una organización.
  * 
+ * Retorna roles que cumplen CUALQUIERA de estas condiciones:
+ * 1. Pertenecen a la organización Y no están eliminados
+ * 2. Son roles del sistema (is_default=true) Y no están eliminados
+ * 
  * @param organizationId - ID de la organización
  * @returns Array de roles de cliente no eliminados, o array vacío si no hay datos
  * @throws {Error} Si falla la query de Supabase
@@ -15,11 +19,13 @@ export async function getClientRoles(
     return [];
   }
 
+  // Combinar todas las condiciones en un solo OR para prevenir sobrescritura
+  // WHERE (org_id = X AND (deleted IS NULL OR deleted = false)) 
+  //    OR (is_default = true AND (deleted IS NULL OR deleted = false))
   const { data, error} = await supabase
     .from('client_roles')
     .select('*')
-    .or(`organization_id.eq.${organizationId},is_default.eq.true`)
-    .or('is_deleted.is.null,is_deleted.eq.false')
+    .or(`and(organization_id.eq.${organizationId},or(is_deleted.is.null,is_deleted.eq.false)),and(is_default.eq.true,or(is_deleted.is.null,is_deleted.eq.false))`)
     .order('name', { ascending: true });
 
   if (error) {
