@@ -144,7 +144,7 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
             <Calendar className="w-4 h-4 inline mr-1" />
             Recientes
           </StatCardTitle>
-          <StatCardValue className="text-2xl md:text-3xl">
+          <StatCardValue>
             12
           </StatCardValue>
           <StatCardMeta>
@@ -157,7 +157,7 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
             <TrendingUp className="w-4 h-4 inline mr-1" />
             Tendencia
           </StatCardTitle>
-          <StatCardValue className="text-2xl md:text-3xl text-green-600 dark:text-green-400">
+          <StatCardValue className="text-green-600 dark:text-green-400">
             +15%
           </StatCardValue>
           <StatCardMeta>
@@ -170,7 +170,7 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
             <Users className="w-4 h-4 inline mr-1" />
             Activos
           </StatCardTitle>
-          <StatCardValue className="text-2xl md:text-3xl">
+          <StatCardValue>
             {generalCosts.length}
           </StatCardValue>
           <StatCardMeta>

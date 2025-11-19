@@ -87,7 +87,7 @@ interface StatCardValueProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const StatCardValue = ({ children, className, ...props }: StatCardValueProps) => (
-  <div className={cn("text-3xl md:text-5xl font-bold text-foreground tracking-tight leading-none mt-2", className)} {...props}>
+  <div className={cn("text-3xl font-bold text-foreground tracking-tight leading-none mt-2", className)} {...props}>
     {children}
   </div>
 )
@@ -97,7 +97,7 @@ interface StatCardMetaProps extends React.HTMLAttributes<HTMLParagraphElement> {
 }
 
 const StatCardMeta = ({ children, className, ...props }: StatCardMetaProps) => (
-  <p className={cn("text-sm text-muted-foreground mt-2", className)} {...props}>
+  <p className={cn("text-[11px] text-muted-foreground mt-2", className)} {...props}>
     {children}
   </p>
 )
