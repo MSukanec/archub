@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, Calendar, TrendingUp, Filter } from 'lucide-react';
+import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, Calendar, TrendingUp, Filter, Search, Bell } from 'lucide-react';
 import { format } from 'date-fns';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -183,11 +183,17 @@ export default function GeneralCostsPaymentsTab() {
     return `${symbol} ${formattedAmount}`;
   };
 
-  // Configure Mobile Action Bar
+  // Configure Mobile Action Bar - Always show 5 buttons
   useEffect(() => {
     if (!isMobile) return;
 
     setActions({
+      search: {
+        id: 'search',
+        icon: Search,
+        label: 'Buscar',
+        onClick: () => { }, // Popover is handled in ActionBarMobile
+      },
       create: {
         id: 'create',
         icon: Plus,
@@ -201,6 +207,12 @@ export default function GeneralCostsPaymentsTab() {
         label: 'Filtros',
         onClick: () => { }, // Popover is handled in ActionBarMobile
       },
+      notifications: {
+        id: 'notifications',
+        icon: Bell,
+        label: 'Notificaciones',
+        onClick: () => { }, // Popover is handled in ActionBarMobile
+      },
     });
     setShowActionBar(true);
 
@@ -211,6 +223,14 @@ export default function GeneralCostsPaymentsTab() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobile]);
+
+  // Handler to clear all filters
+  const handleClearFilters = () => {
+    setFilterWallet('all');
+    setFilterCurrency('all');
+    setFilterGeneralCost('all');
+    setFilterStatus('all');
+  };
 
   // Configure filters for Mobile Action Bar
   useEffect(() => {
@@ -254,7 +274,8 @@ export default function GeneralCostsPaymentsTab() {
               { value: 'void', label: 'Anulado' }
             ]
           }
-        ]
+        ],
+        onClearFilters: handleClearFilters
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -335,13 +356,6 @@ export default function GeneralCostsPaymentsTab() {
     filterCurrency !== 'all' || 
     filterGeneralCost !== 'all' ||
     filterStatus !== 'all';
-
-  const handleClearFilters = () => {
-    setFilterWallet('all');
-    setFilterCurrency('all');
-    setFilterGeneralCost('all');
-    setFilterStatus('all');
-  };
 
   if (!organizationId) {
     return (

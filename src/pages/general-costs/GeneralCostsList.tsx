@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { CreditCard, Plus, Edit, Trash2, DollarSign, Receipt, Calendar, Search } from "lucide-react";
+import { CreditCard, Plus, Edit, Trash2, DollarSign, Receipt, Calendar, Search, Filter, Bell } from "lucide-react";
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
@@ -60,7 +60,7 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
   const { data: generalCosts = [], isLoading } = useGeneralCosts(organizationId || null);
   const { data: payments = [] } = useGeneralCostsPayments(organizationId);
 
-  // Configure Mobile Action Bar
+  // Configure Mobile Action Bar - Always show 5 buttons
   useEffect(() => {
     if (!isMobile) return;
 
@@ -77,6 +77,18 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
         label: 'Nuevo Gasto',
         onClick: handleCreateGeneralCost,
         variant: 'primary'
+      },
+      filter: {
+        id: 'filter',
+        icon: Filter,
+        label: 'Filtros',
+        onClick: () => { }, // Popover is handled in ActionBarMobile
+      },
+      notifications: {
+        id: 'notifications',
+        icon: Bell,
+        label: 'Notificaciones',
+        onClick: () => { }, // Popover is handled in ActionBarMobile
       },
     });
     setShowActionBar(true);
