@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { CreditCard, Plus, Edit, Trash2, DollarSign, TrendingUp, Users, Calendar } from "lucide-react";
+import { useState, useMemo } from "react";
+import { CreditCard, Plus, Edit, Trash2, DollarSign, Receipt, Calendar } from "lucide-react";
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
@@ -11,6 +11,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useGeneralCosts } from "@/features/general-costs/hooks/use-general-costs";
 import { useDeleteGeneralCost } from "@/features/general-costs/hooks/use-delete-general-cost";
+import { useGeneralCostsPayments } from "@/hooks/use-general-costs-payments";
 import GeneralCostRow from "@/components/ui/data-row/rows/GeneralCostRow";
 import type { GeneralCost } from "@/features/general-costs/types";
 
@@ -36,7 +37,27 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
     }
   };
   
-  const { data: generalCosts = [], isLoading } = useGeneralCosts(userData?.organization?.id || null);
+  const organizationId = userData?.organization?.id;
+  const { data: generalCosts = [], isLoading } = useGeneralCosts(organizationId || null);
+  const { data: payments = [] } = useGeneralCostsPayments(organizationId);
+
+  // Calcular métricas reales
+  const metrics = useMemo(() => {
+    const now = new Date();
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(now.getMonth() - 1);
+
+    const recentPayments = payments.filter(payment => {
+      const paymentDate = new Date(payment.payment_date);
+      return paymentDate >= oneMonthAgo && paymentDate <= now;
+    });
+
+    return {
+      totalConcepts: generalCosts.length,
+      totalPayments: payments.length,
+      recentPayments: recentPayments.length,
+    };
+  }, [generalCosts, payments]);
 
   // Filtrar y ordenar gastos generales por búsqueda y orden alfabético
   const filteredGeneralCosts = generalCosts
@@ -124,57 +145,47 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
 
   return (
     <div className="space-y-6">
-      {/* 4 KPIs usando StatCard por defecto */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard data-testid="stat-card-total-costs">
+      {/* 3 KPIs con datos reales */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* KPI 1: Total Conceptos - Ocupa 2 columnas */}
+        <StatCard data-testid="stat-card-total-concepts" className="col-span-2">
           <StatCardTitle showArrow={false}>
-            <DollarSign className="w-4 h-4 inline mr-1" />
-            Total Gastos
+            <CreditCard className="w-4 h-4 inline mr-1" />
+            Total Conceptos
           </StatCardTitle>
           <StatCardValue>
-            {generalCosts.length}
+            {metrics.totalConcepts}
           </StatCardValue>
           <StatCardMeta>
             Conceptos de gastos generales
           </StatCardMeta>
         </StatCard>
 
+        {/* KPI 2: Pagos Totales - Ocupa 1 columna */}
+        <StatCard data-testid="stat-card-total-payments">
+          <StatCardTitle showArrow={false}>
+            <Receipt className="w-4 h-4 inline mr-1" />
+            Pagos Totales
+          </StatCardTitle>
+          <StatCardValue>
+            {metrics.totalPayments}
+          </StatCardValue>
+          <StatCardMeta>
+            Cantidad de pagos realizados
+          </StatCardMeta>
+        </StatCard>
+
+        {/* KPI 3: Recientes - Ocupa 1 columna */}
         <StatCard data-testid="stat-card-recent">
           <StatCardTitle showArrow={false}>
             <Calendar className="w-4 h-4 inline mr-1" />
             Recientes
           </StatCardTitle>
           <StatCardValue>
-            12
+            {metrics.recentPayments}
           </StatCardValue>
           <StatCardMeta>
-            Gastos del último mes
-          </StatCardMeta>
-        </StatCard>
-
-        <StatCard data-testid="stat-card-trending">
-          <StatCardTitle showArrow={false}>
-            <TrendingUp className="w-4 h-4 inline mr-1" />
-            Tendencia
-          </StatCardTitle>
-          <StatCardValue className="text-green-600 dark:text-green-400">
-            +15%
-          </StatCardValue>
-          <StatCardMeta>
-            Crecimiento este trimestre
-          </StatCardMeta>
-        </StatCard>
-
-        <StatCard data-testid="stat-card-active">
-          <StatCardTitle showArrow={false}>
-            <Users className="w-4 h-4 inline mr-1" />
-            Activos
-          </StatCardTitle>
-          <StatCardValue>
-            {generalCosts.length}
-          </StatCardValue>
-          <StatCardMeta>
-            Gastos activos en el sistema
+            Pagos del último mes
           </StatCardMeta>
         </StatCard>
       </div>
