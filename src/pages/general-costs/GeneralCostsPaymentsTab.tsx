@@ -234,13 +234,6 @@ export default function GeneralCostsPaymentsTab() {
       ),
     },
     {
-      key: 'reference',
-      label: 'Referencia',
-      sortable: true,
-      align: 'right' as const,
-      render: (payment: GeneralCostPayment) => payment.reference || '-',
-    },
-    {
       key: 'wallet',
       label: 'Billetera',
       sortable: true,
