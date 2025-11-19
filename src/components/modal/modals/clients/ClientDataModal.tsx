@@ -158,26 +158,29 @@ export function ProjectClientModal({ modalData, onClose }: ClientDataModalProps)
       }
     },
     onSuccess: async () => {
-      // Force refetch ALL client-related queries to ensure UI updates immediately
-      // Using refetchQueries instead of invalidateQueries for immediate update
-      console.log('🔄 Refetching all client queries after save...');
+      // Invalidate ALL client-related queries to ensure UI updates
+      console.log('🔄 Invalidating all client queries after save...');
       
-      await queryClient.refetchQueries({ 
+      // Invalidate queries that start with 'clients' (e.g., ['clients', 'dashboard', projectId])
+      await queryClient.invalidateQueries({
         predicate: (query) => {
-          const key = query.queryKey[0];
-          if (typeof key === 'string') {
-            const shouldRefetch = key.includes('/clients') || key.includes('project-clients');
-            if (shouldRefetch) {
-              console.log('🔄 Refetching query:', key);
-            }
-            return shouldRefetch;
-          }
-          return false;
-        },
-        type: 'active' // Only refetch active queries that are currently being watched
+          const firstKey = query.queryKey[0];
+          return firstKey === 'clients';
+        }
       });
       
-      console.log('✅ All client queries refetched');
+      // Also invalidate API queries that include '/clients'
+      await queryClient.invalidateQueries({
+        predicate: (query) => {
+          const firstKey = query.queryKey[0];
+          if (typeof firstKey === 'string') {
+            return firstKey.includes('/clients') || firstKey.includes('project-clients');
+          }
+          return false;
+        }
+      });
+      
+      console.log('✅ All client queries invalidated');
       
       toast({
         title: isEditing ? 'Cliente actualizado' : 'Cliente agregado',
