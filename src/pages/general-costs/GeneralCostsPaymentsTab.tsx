@@ -14,7 +14,7 @@ import { useGeneralCostsPayments, useDeleteGeneralCostPayment, type GeneralCostP
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { GeneralCostPaymentRow } from '@/components/ui/data-row';
-import { useCurrencies } from '@/hooks/use-currencies';
+import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 
 export default function GeneralCostsPaymentsTab() {
   const { data: userData } = useCurrentUser();
@@ -32,13 +32,7 @@ export default function GeneralCostsPaymentsTab() {
 
   const { data: allPayments = [], isLoading } = useGeneralCostsPayments(organizationId);
   const deletePaymentMutation = useDeleteGeneralCostPayment();
-  const { data: currencies = [] } = useCurrencies(organizationId);
-  
-  // Get default currency info
-  const defaultCurrency = useMemo(() => {
-    if (!defaultCurrencyId) return null;
-    return currencies.find(c => c.currency?.id === defaultCurrencyId)?.currency || null;
-  }, [currencies, defaultCurrencyId]);
+  const { data: defaultCurrency = null } = useOrganizationDefaultCurrency(organizationId);
 
   // Extract unique values for filters
   const filterOptions = useMemo(() => {
@@ -299,8 +293,8 @@ export default function GeneralCostsPaymentsTab() {
     <div className="space-y-6">
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {/* Total Pagos */}
-        <StatCard data-testid="stat-card-total-pagos">
+        {/* Total Pagos (2 columnas) */}
+        <StatCard data-testid="stat-card-total-pagos" className="col-span-2">
           <StatCardTitle showArrow={false}>
             <DollarSign className="w-4 h-4 inline mr-1" />
             Total Pagos
@@ -309,21 +303,6 @@ export default function GeneralCostsPaymentsTab() {
             {metricsData?.total_count ?? 0}
           </StatCardValue>
           <StatCardMeta>Cantidad de pagos registrados</StatCardMeta>
-        </StatCard>
-
-        {/* Último Pago */}
-        <StatCard data-testid="stat-card-ultimo-pago">
-          <StatCardTitle showArrow={false}>
-            <Calendar className="w-4 h-4 inline mr-1" />
-            Último Pago
-          </StatCardTitle>
-          <StatCardValue>
-            {metricsData?.latest_payment_date 
-              ? format(new Date(metricsData.latest_payment_date), 'd/M/yyyy')
-              : '-'
-            }
-          </StatCardValue>
-          <StatCardMeta>Fecha del último pago registrado</StatCardMeta>
         </StatCard>
 
         {/* Pagos a la Fecha (2 columnas) */}
