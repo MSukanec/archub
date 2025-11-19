@@ -370,11 +370,13 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="">Sin asignar</SelectItem>
-                        {generalCosts?.map((gc) => (
-                          <SelectItem key={`general-cost-${gc.id}`} value={gc.id}>
-                            {gc.name}
-                          </SelectItem>
-                        ))}
+                        {generalCosts
+                          ?.sort((a, b) => a.name.localeCompare(b.name))
+                          .map((gc) => (
+                            <SelectItem key={`general-cost-${gc.id}`} value={gc.id}>
+                              {gc.name}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   </FormControl>
