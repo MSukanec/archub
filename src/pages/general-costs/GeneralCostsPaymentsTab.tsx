@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, CheckCircle2, AlertCircle, Calendar } from 'lucide-react';
+import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, Calendar, TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -14,6 +14,7 @@ import { useGeneralCostsPayments, useDeleteGeneralCostPayment, type GeneralCostP
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { GeneralCostPaymentRow } from '@/components/ui/data-row';
+import { useCurrencies } from '@/hooks/use-currencies';
 
 export default function GeneralCostsPaymentsTab() {
   const { data: userData } = useCurrentUser();
@@ -21,6 +22,7 @@ export default function GeneralCostsPaymentsTab() {
   const { showDeleteConfirmation } = useDeleteConfirmation();
   
   const organizationId = userData?.organization?.id;
+  const defaultCurrencyId = userData?.organization_preferences?.default_currency_id;
 
   // Filter states
   const [filterWallet, setFilterWallet] = useState<string>('all');
@@ -30,6 +32,13 @@ export default function GeneralCostsPaymentsTab() {
 
   const { data: allPayments = [], isLoading } = useGeneralCostsPayments(organizationId);
   const deletePaymentMutation = useDeleteGeneralCostPayment();
+  const { data: currencies = [] } = useCurrencies(organizationId);
+  
+  // Get default currency info
+  const defaultCurrency = useMemo(() => {
+    if (!defaultCurrencyId) return null;
+    return currencies.find(c => c.currency?.id === defaultCurrencyId)?.currency || null;
+  }, [currencies, defaultCurrencyId]);
 
   // Extract unique values for filters
   const filterOptions = useMemo(() => {
@@ -63,65 +72,36 @@ export default function GeneralCostsPaymentsTab() {
 
   // Calculate metrics
   const metricsData = useMemo(() => {
-    const currencyGroups = new Map<string, {
-      total_confirmed: number;
-      total_pending: number;
-      total_rejected: number;
-      count_confirmed: number;
-      count_pending: number;
-      count_rejected: number;
-    }>();
-
     let latestPaymentDate: string | null = null;
+    let totalConfirmedInDefaultCurrency = 0;
 
     allPayments.forEach(payment => {
-      if (!payment.currency) return;
-
-      const currencyId = payment.currency.id;
-      if (!currencyGroups.has(currencyId)) {
-        currencyGroups.set(currencyId, {
-          total_confirmed: 0,
-          total_pending: 0,
-          total_rejected: 0,
-          count_confirmed: 0,
-          count_pending: 0,
-          count_rejected: 0,
-        });
-      }
-
-      const group = currencyGroups.get(currencyId)!;
-      if (payment.status === 'confirmed') {
-        group.total_confirmed += payment.amount;
-        group.count_confirmed += 1;
-      } else if (payment.status === 'pending') {
-        group.total_pending += payment.amount;
-        group.count_pending += 1;
-      } else if (payment.status === 'rejected') {
-        group.total_rejected += payment.amount;
-        group.count_rejected += 1;
-      }
-
+      // Track latest payment date
       if (!latestPaymentDate || payment.payment_date > latestPaymentDate) {
         latestPaymentDate = payment.payment_date;
       }
-    });
 
-    const by_currency = Array.from(currencyGroups.entries()).map(([currencyId, group]) => {
-      const currency = allPayments.find(p => p.currency?.id === currencyId)?.currency;
-      return {
-        currency_id: currencyId,
-        currency_code: currency?.code || 'ARS',
-        currency_symbol: currency?.symbol || '$',
-        ...group,
-      };
+      // Calculate total confirmed in default currency
+      if (payment.status === 'confirmed') {
+        if (!defaultCurrency) {
+          // If no default currency, just sum in original currency (fallback)
+          totalConfirmedInDefaultCurrency += payment.amount;
+        } else if (payment.currency?.id === defaultCurrency.id) {
+          // Same currency, no conversion needed
+          totalConfirmedInDefaultCurrency += payment.amount;
+        } else {
+          // Different currency, convert using exchange_rate
+          totalConfirmedInDefaultCurrency += payment.amount * payment.exchange_rate;
+        }
+      }
     });
 
     return {
       total_count: allPayments.length,
-      by_currency,
+      total_confirmed_default_currency: totalConfirmedInDefaultCurrency,
       latest_payment_date: latestPaymentDate,
     };
-  }, [allPayments]);
+  }, [allPayments, defaultCurrency]);
 
   const handleEdit = (payment: GeneralCostPayment) => {
     if (!organizationId) return;
@@ -192,13 +172,10 @@ export default function GeneralCostsPaymentsTab() {
     return statusConfig[status];
   };
 
-  const formatCurrencyKPI = (currencyData: Array<{ currency_symbol: string; amount: number }>) => {
-    if (!currencyData || currencyData.length === 0) return '-';
-    
-    return currencyData.map(({ currency_symbol, amount }) => {
-      const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      return `${currency_symbol} ${formattedAmount}`;
-    }).join(' · ');
+  const formatCurrencyAmount = (amount: number, currencySymbol?: string) => {
+    const symbol = currencySymbol || '$';
+    const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return `${symbol} ${formattedAmount}`;
   };
 
   const columns = [
@@ -322,65 +299,48 @@ export default function GeneralCostsPaymentsTab() {
     <div className="space-y-6">
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {/* Total Pagos */}
         <StatCard data-testid="stat-card-total-pagos">
           <StatCardTitle showArrow={false}>
             <DollarSign className="w-4 h-4 inline mr-1" />
             Total Pagos
           </StatCardTitle>
-          <StatCardValue className="text-2xl md:text-3xl">
+          <StatCardValue>
             {metricsData?.total_count ?? 0}
           </StatCardValue>
           <StatCardMeta>Cantidad de pagos registrados</StatCardMeta>
         </StatCard>
 
-        <StatCard data-testid="stat-card-total-confirmado">
-          <StatCardTitle showArrow={false}>
-            <CheckCircle2 className="w-4 h-4 inline mr-1" />
-            Total Confirmado
-          </StatCardTitle>
-          <StatCardValue className="text-2xl md:text-3xl text-green-600 dark:text-green-400">
-            {formatCurrencyKPI(
-              metricsData?.by_currency?.map(c => ({
-                currency_symbol: c.currency_symbol,
-                amount: c.total_confirmed
-              })) ?? []
-            )}
-          </StatCardValue>
-          <StatCardMeta>
-            {metricsData?.by_currency?.reduce((sum, c) => sum + c.count_confirmed, 0) ?? 0} pagos confirmados
-          </StatCardMeta>
-        </StatCard>
-
-        <StatCard data-testid="stat-card-total-pendiente">
-          <StatCardTitle showArrow={false}>
-            <AlertCircle className="w-4 h-4 inline mr-1" />
-            Total Pendiente
-          </StatCardTitle>
-          <StatCardValue className="text-2xl md:text-3xl text-orange-600 dark:text-orange-400">
-            {formatCurrencyKPI(
-              metricsData?.by_currency?.map(c => ({
-                currency_symbol: c.currency_symbol,
-                amount: c.total_pending
-              })) ?? []
-            )}
-          </StatCardValue>
-          <StatCardMeta>
-            {metricsData?.by_currency?.reduce((sum, c) => sum + c.count_pending, 0) ?? 0} pagos pendientes
-          </StatCardMeta>
-        </StatCard>
-
+        {/* Último Pago */}
         <StatCard data-testid="stat-card-ultimo-pago">
           <StatCardTitle showArrow={false}>
             <Calendar className="w-4 h-4 inline mr-1" />
             Último Pago
           </StatCardTitle>
-          <StatCardValue className="text-2xl md:text-3xl">
+          <StatCardValue>
             {metricsData?.latest_payment_date 
               ? format(new Date(metricsData.latest_payment_date), 'd/M/yyyy')
               : '-'
             }
           </StatCardValue>
           <StatCardMeta>Fecha del último pago registrado</StatCardMeta>
+        </StatCard>
+
+        {/* Pagos a la Fecha (2 columnas) */}
+        <StatCard data-testid="stat-card-pagos-fecha" className="col-span-2">
+          <StatCardTitle showArrow={false}>
+            <TrendingUp className="w-4 h-4 inline mr-1" />
+            Pagos a la Fecha
+          </StatCardTitle>
+          <StatCardValue>
+            {metricsData?.total_confirmed_default_currency 
+              ? formatCurrencyAmount(metricsData.total_confirmed_default_currency, defaultCurrency?.symbol)
+              : '-'
+            }
+          </StatCardValue>
+          <StatCardMeta>
+            Total de pagos confirmados en {defaultCurrency?.code || 'moneda principal'}
+          </StatCardMeta>
         </StatCard>
       </div>
 
