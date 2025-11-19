@@ -192,7 +192,14 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
                 {initials}
               </AvatarFallback>
             </Avatar>
-            <span className="font-semibold">{displayName || '-'}</span>
+            <div className="flex flex-col">
+              <span className="font-semibold">{displayName || '-'}</span>
+              {client.role?.name && (
+                <span className="text-muted-foreground" style={{ fontSize: '12px', fontWeight: 'normal' }}>
+                  {client.role.name}
+                </span>
+              )}
+            </div>
           </div>
         );
       },
@@ -216,21 +223,14 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       },
     },
     {
-      key: 'role',
-      label: 'Rol',
-      sortable: true,
-      render: (client: ProjectClientSummary) => {
-        return client.role?.name || '-';
-      },
-    },
-    {
       key: 'notes',
       label: 'Notas',
+      width: '250px',
       sortable: false,
       render: (client: ProjectClientSummary) => {
         if (!client.notes) return '-';
-        const truncated = client.notes.length > 50 
-          ? client.notes.substring(0, 50) + '...' 
+        const truncated = client.notes.length > 80 
+          ? client.notes.substring(0, 80) + '...' 
           : client.notes;
         return <span className="text-muted-foreground">{truncated}</span>;
       },
