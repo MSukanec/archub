@@ -13,7 +13,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import DatePickerField from '@/components/ui-custom/fields/DatePickerField';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { CalendarIcon } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
 const subcontractSchema = z.object({
   date: z.string().min(1, "La fecha es obligatoria"),
@@ -130,15 +134,32 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
           <Label htmlFor="date" className="text-xs font-medium">
             Fecha *
           </Label>
-          <DatePickerField
-            value={form.watch('date') ? new Date(form.watch('date')) : undefined}
-            onChange={(date) => {
-              if (date) {
-                form.setValue('date', date.toISOString().split('T')[0]);
-              }
-            }}
-            placeholder="Seleccionar fecha..."
-          />
+          <Popover>
+            <PopoverTrigger asChild>
+              <div className="relative">
+                <Input
+                  placeholder="Seleccionar fecha..."
+                  value={form.watch('date') ? format(new Date(form.watch('date')), 'dd/MM/yyyy', { locale: es }) : ''}
+                  className="pl-10"
+                  readOnly
+                />
+                <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              </div>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={form.watch('date') ? new Date(form.watch('date')) : undefined}
+                onSelect={(date) => {
+                  if (date) {
+                    form.setValue('date', date.toISOString().split('T')[0]);
+                  }
+                }}
+                initialFocus
+                locale={es}
+              />
+            </PopoverContent>
+          </Popover>
           {form.formState.errors.date && (
             <p className="text-xs text-destructive">{form.formState.errors.date.message}</p>
           )}

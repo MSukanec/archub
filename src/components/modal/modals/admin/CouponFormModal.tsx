@@ -17,7 +17,11 @@ import { supabase } from '@/lib/supabase';
 import { apiRequest } from '@/lib/queryClient';
 import { useEffect, useState } from 'react';
 import { Separator } from '@/components/ui/separator';
-import DatePickerField from '@/components/ui-custom/fields/DatePickerField';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { CalendarIcon } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
 const couponSchema = z.object({
   code: z.string()
@@ -386,12 +390,29 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
                 <FormItem>
                   <FormLabel>Fecha de Inicio</FormLabel>
                   <FormControl>
-                    <DatePickerField
-                      value={field.value ? new Date(field.value) : undefined}
-                      onChange={(date) => field.onChange(date?.toISOString())}
-                      placeholder="Selecciona fecha"
-                      data-testid="date-coupon-starts"
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <div className="relative">
+                          <Input
+                            placeholder="Selecciona fecha"
+                            value={field.value ? format(new Date(field.value), 'dd/MM/yyyy', { locale: es }) : ''}
+                            className="pl-10"
+                            readOnly
+                            data-testid="date-coupon-starts"
+                          />
+                          <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value ? new Date(field.value) : undefined}
+                          onSelect={(date) => field.onChange(date?.toISOString())}
+                          initialFocus
+                          locale={es}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </FormControl>
                   <FormDescription className="text-xs">
                     Opcional - Deja vacío para que sea válido desde ahora
@@ -408,12 +429,29 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
                 <FormItem>
                   <FormLabel>Fecha de Vencimiento</FormLabel>
                   <FormControl>
-                    <DatePickerField
-                      value={field.value ? new Date(field.value) : undefined}
-                      onChange={(date) => field.onChange(date?.toISOString())}
-                      placeholder="Selecciona fecha"
-                      data-testid="date-coupon-expires"
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <div className="relative">
+                          <Input
+                            placeholder="Selecciona fecha"
+                            value={field.value ? format(new Date(field.value), 'dd/MM/yyyy', { locale: es }) : ''}
+                            className="pl-10"
+                            readOnly
+                            data-testid="date-coupon-expires"
+                          />
+                          <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value ? new Date(field.value) : undefined}
+                          onSelect={(date) => field.onChange(date?.toISOString())}
+                          initialFocus
+                          locale={es}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </FormControl>
                   <FormDescription className="text-xs">
                     Opcional - Deja vacío para que nunca venza

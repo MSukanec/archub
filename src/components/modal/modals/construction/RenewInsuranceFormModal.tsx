@@ -12,7 +12,11 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import DatePicker from '@/components/ui-custom/fields/DatePickerField'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
+import { CalendarIcon } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 
 import { useRenewInsurance, useUploadCertificate } from '@/hooks/useInsurances'
 import { Insurance } from '@/services/insurances'
@@ -161,11 +165,28 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
             <FormItem>
               <FormLabel>Nueva Fecha de Vencimiento *</FormLabel>
               <FormControl>
-                <DatePickerField
-                  date={field.value}
-                  onDateChange={field.onChange}
-                  placeholder="Seleccionar nueva fecha..."
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="relative">
+                      <Input
+                        placeholder="Seleccionar nueva fecha..."
+                        value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
+                        className="pl-10"
+                        readOnly
+                      />
+                      <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      initialFocus
+                      locale={es}
+                    />
+                  </PopoverContent>
+                </Popover>
               </FormControl>
               <FormMessage />
             </FormItem>

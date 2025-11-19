@@ -4,8 +4,11 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { Upload, Link as LinkIcon, LogOut, Crown, MessageCircle, Camera, User, Settings, Building, Package, Hammer, Eye } from 'lucide-react'
-import DatePickerField from '@/components/ui-custom/fields/DatePickerField'
+import { Upload, Link as LinkIcon, LogOut, Crown, MessageCircle, Camera, User, Settings, Building, Package, Hammer, Eye, CalendarIcon } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 import { useState, useEffect } from 'react'
 import { useLocation } from 'wouter'
@@ -325,12 +328,29 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Fecha de nacimiento</Label>
-                <DatePickerField
-                  value={birthdate}
-                  onChange={handleBirthdateChange}
-                  placeholder="Seleccionar fecha"
-                  disableFuture={true}
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="relative">
+                      <Input
+                        placeholder="Seleccionar fecha"
+                        value={birthdate ? format(birthdate, 'dd/MM/yyyy', { locale: es }) : ''}
+                        className="pl-10"
+                        readOnly
+                      />
+                      <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={birthdate}
+                      onSelect={handleBirthdateChange}
+                      disabled={(date) => date > new Date()}
+                      initialFocus
+                      locale={es}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           </div>

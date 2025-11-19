@@ -14,8 +14,12 @@ import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
 
-import DatePicker from '@/components/ui-custom/fields/DatePickerField'
 import { CascadingSelect } from '@/components/ui-custom/fields/CascadingSelectField'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
+import { CalendarIcon } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
 import ProjectSelectorField from '@/components/ui-custom/fields/ProjectSelectorField'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
@@ -1715,11 +1719,28 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             <FormItem>
               <FormLabel>Fecha *</FormLabel>
               <FormControl>
-                <DatePicker
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Seleccionar fecha..."
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="relative">
+                      <Input
+                        placeholder="Seleccionar fecha..."
+                        value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
+                        className="pl-10"
+                        readOnly
+                      />
+                      <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      initialFocus
+                      locale={es}
+                    />
+                  </PopoverContent>
+                </Popover>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -1823,11 +1844,28 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             <FormItem>
               <FormLabel>Fecha *</FormLabel>
               <FormControl>
-                <DatePicker
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Seleccionar fecha..."
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="relative">
+                      <Input
+                        placeholder="Seleccionar fecha..."
+                        value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
+                        className="pl-10"
+                        readOnly
+                      />
+                      <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      initialFocus
+                      locale={es}
+                    />
+                  </PopoverContent>
+                </Popover>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -1910,11 +1948,28 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
               <FormItem>
                 <FormLabel>Fecha *</FormLabel>
                 <FormControl>
-                  <DatePicker
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Seleccionar fecha..."
-                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <div className="relative">
+                        <Input
+                          placeholder="Seleccionar fecha..."
+                          value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
+                          className="pl-10"
+                          readOnly
+                        />
+                        <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        initialFocus
+                        locale={es}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -2004,11 +2059,28 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             <FormItem>
               <FormLabel>Fecha *</FormLabel>
               <FormControl>
-                <DatePicker
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Seleccionar fecha..."
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="relative">
+                      <Input
+                        placeholder="Seleccionar fecha..."
+                        value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
+                        className="pl-10"
+                        readOnly
+                      />
+                      <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      initialFocus
+                      locale={es}
+                    />
+                  </PopoverContent>
+                </Popover>
               </FormControl>
               <FormMessage />
             </FormItem>

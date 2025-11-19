@@ -14,8 +14,12 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
+import { CalendarIcon } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 
-import DatePickerField from '@/components/ui-custom/fields/DatePickerField'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { apiRequest, queryClient as globalQueryClient } from '@/lib/queryClient'
@@ -376,13 +380,29 @@ export function PersonnelRatesModal({ modalData, onClose }: PersonnelRatesModalP
                 <FormItem>
                   <FormLabel>Válido Desde</FormLabel>
                   <FormControl>
-                    <DatePickerField
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="Seleccionar fecha de inicio"
-                      disableFuture={false}
-                      minDate={new Date("1900-01-01")}
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <div className="relative">
+                          <Input
+                            placeholder="Seleccionar fecha de inicio"
+                            value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
+                            className="pl-10"
+                            readOnly
+                          />
+                          <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < new Date("1900-01-01")}
+                          initialFocus
+                          locale={es}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -396,13 +416,29 @@ export function PersonnelRatesModal({ modalData, onClose }: PersonnelRatesModalP
                 <FormItem>
                   <FormLabel>Válido Hasta (opcional)</FormLabel>
                   <FormControl>
-                    <DatePickerField
-                      value={field.value ?? undefined}
-                      onChange={field.onChange}
-                      placeholder="Sin fecha de fin"
-                      disableFuture={false}
-                      minDate={new Date("1900-01-01")}
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <div className="relative">
+                          <Input
+                            placeholder="Sin fecha de fin"
+                            value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
+                            className="pl-10"
+                            readOnly
+                          />
+                          <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={field.value ?? undefined}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < new Date("1900-01-01")}
+                          initialFocus
+                          locale={es}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

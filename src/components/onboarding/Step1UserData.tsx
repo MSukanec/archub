@@ -3,9 +3,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOnboardingStore } from "@/stores/onboardingStore";
-import DatePickerField from "@/components/ui-custom/fields/DatePickerField";
-import { Loader2 } from "lucide-react";
+import { Loader2, CalendarIcon } from "lucide-react";
 import { useCountries } from "@/hooks/use-countries";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 interface Step1UserDataProps {
   onFinish?: () => void;
@@ -117,13 +120,29 @@ export function Step1UserData({ onFinish }: Step1UserDataProps = {}) {
             <Label htmlFor="birthdate" className="text-xs font-medium leading-none">
               Fecha de Nacimiento <span style={{ color: 'var(--accent)' }}>*</span>
             </Label>
-            <DatePickerField
-              value={getBirthdateValue()}
-              onChange={handleBirthdateChange}
-              placeholder="Seleccionar fecha"
-              disableFuture={true}
-              className="h-11 border-gray-300 bg-white text-gray-900"
-            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="relative">
+                  <Input
+                    placeholder="Seleccionar fecha"
+                    value={getBirthdateValue() ? format(getBirthdateValue()!, 'dd/MM/yyyy', { locale: es }) : ''}
+                    className="h-11 border-gray-300 bg-white text-gray-900 pl-10"
+                    readOnly
+                  />
+                  <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={getBirthdateValue()}
+                  onSelect={handleBirthdateChange}
+                  disabled={(date) => date > new Date()}
+                  initialFocus
+                  locale={es}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 

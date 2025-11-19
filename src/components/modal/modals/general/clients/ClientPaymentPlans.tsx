@@ -8,8 +8,12 @@ import { FormModalFooter } from '../../../form/FormModalFooter'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import DatePicker from '@/components/ui-custom/fields/DatePickerField'
 import { Callout } from '@/components/ui-custom/general/Callout'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
+import { CalendarIcon } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
@@ -355,12 +359,28 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
                 <FormItem>
                   <FormLabel>Fecha de Primera Cuota</FormLabel>
                   <FormControl>
-                    <DatePickerField
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="Selecciona la fecha"
-                      className="w-full"
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <div className="relative">
+                          <Input
+                            placeholder="Selecciona la fecha"
+                            value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
+                            className="pl-10 w-full"
+                            readOnly
+                          />
+                          <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                          locale={es}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
