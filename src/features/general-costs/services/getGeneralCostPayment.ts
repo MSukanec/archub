@@ -22,7 +22,12 @@ export async function getGeneralCostPayment(
 
   const { data, error } = await supabase
     .from('general_costs_payments')
-    .select('*')
+    .select(`
+      *,
+      currency:currencies(*),
+      wallet:organization_wallets(*, wallets(*)),
+      general_cost:general_costs(*)
+    `)
     .eq('id', id)
     .eq('organization_id', organizationId)
     .single();

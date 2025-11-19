@@ -99,7 +99,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
         currency_id: existingPayment.currency_id || '',
         wallet_id: existingPayment.wallet_id || '',
         amount: existingPayment.amount || 0,
-        exchange_rate: existingPayment.exchange_rate || undefined,
+        exchange_rate: existingPayment.exchange_rate ?? undefined,
         notes: existingPayment.notes || '',
         reference: existingPayment.reference || '',
         status: existingPayment.status || 'confirmed',
@@ -232,7 +232,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
       wallet_id: data.wallet_id,
       amount: data.amount,
       notes: data.notes || null,
-      exchange_rate: data.exchange_rate || 1,
+      exchange_rate: data.exchange_rate ?? undefined,
       reference: data.reference || null,
       general_cost_id: data.general_cost_id || null,
       status: data.status || 'confirmed',
@@ -262,6 +262,8 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
   }
 
   // Panel de vista (solo lectura)
+  // Type assertion to access joined relations (currency, wallet, general_cost)
+  const paymentWithRelations = existingPayment as any;
   const viewPanel = existingPayment ? (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -275,6 +277,46 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
           <h4 className="font-medium text-foreground mb-2">Monto</h4>
           <span className="text-sm font-medium">
             {existingPayment.amount?.toLocaleString()}
+          </span>
+        </div>
+        <div>
+          <h4 className="font-medium text-foreground mb-2">Moneda</h4>
+          <span className="text-sm">
+            {paymentWithRelations.currency?.name || '-'}
+          </span>
+        </div>
+        <div>
+          <h4 className="font-medium text-foreground mb-2">Cotización</h4>
+          <span className="text-sm">
+            {existingPayment.exchange_rate !== undefined 
+              ? existingPayment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })
+              : 'No especificada'}
+          </span>
+        </div>
+        <div>
+          <h4 className="font-medium text-foreground mb-2">Billetera</h4>
+          <span className="text-sm">
+            {paymentWithRelations.wallet?.wallets?.name || '-'}
+          </span>
+        </div>
+        <div>
+          <h4 className="font-medium text-foreground mb-2">Gasto General</h4>
+          <span className="text-sm">
+            {paymentWithRelations.general_cost?.name || 'Sin asignar'}
+          </span>
+        </div>
+        <div>
+          <h4 className="font-medium text-foreground mb-2">Estado</h4>
+          <span className="text-sm">
+            {existingPayment.status === 'confirmed' ? 'Confirmado' : 
+             existingPayment.status === 'pending' ? 'Pendiente' :
+             existingPayment.status === 'rejected' ? 'Rechazado' : 'Anulado'}
+          </span>
+        </div>
+        <div>
+          <h4 className="font-medium text-foreground mb-2">Referencia</h4>
+          <span className="text-sm">
+            {existingPayment.reference || '-'}
           </span>
         </div>
       </div>

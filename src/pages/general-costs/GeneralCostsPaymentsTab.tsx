@@ -95,8 +95,9 @@ export default function GeneralCostsPaymentsTab() {
           // Same currency, no conversion needed
           totalConfirmedInDefaultCurrency += payment.amount;
         } else {
-          // Different currency, convert using exchange_rate
-          totalConfirmedInDefaultCurrency += payment.amount * payment.exchange_rate;
+          // Different currency, convert using exchange_rate (use 1 as fallback if not specified)
+          const rate = payment.exchange_rate ?? 1;
+          totalConfirmedInDefaultCurrency += payment.amount * rate;
         }
       }
     });
@@ -143,7 +144,8 @@ export default function GeneralCostsPaymentsTab() {
     if (!organizationId) return;
     openModal('general-costs-payment', {
       organizationId,
-      editingPayment: payment,
+      paymentId: payment.id,
+      mode: 'view',
     });
   };
 
@@ -330,9 +332,11 @@ export default function GeneralCostsPaymentsTab() {
       render: (payment: GeneralCostPayment) => (
         <div className="flex flex-col items-end">
           <span className="font-bold">{formatAmount(payment.amount, payment.currency?.symbol)}</span>
-          <span className="text-xs text-muted-foreground" style={{ fontSize: '12px' }}>
-            Cot. {payment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
-          </span>
+          {payment.exchange_rate !== undefined && (
+            <span className="text-xs text-muted-foreground" style={{ fontSize: '12px' }}>
+              Cot. {payment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
+            </span>
+          )}
         </div>
       ),
     },
