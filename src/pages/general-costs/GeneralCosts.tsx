@@ -80,7 +80,7 @@ export default function GeneralCosts() {
   }
 
   return (
-    <Layout headerProps={headerProps} wide>
+    <Layout headerProps={headerProps} wide={false}>
       {activeTab === "lista" && <GeneralCostsList onNewGeneralCost={handleNewGeneralCost} />}
       {activeTab === "pagos" && <GeneralCostsPaymentsTab />}
     </Layout>
