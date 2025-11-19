@@ -1,16 +1,16 @@
 import { useState } from "react";
-import { CreditCard, Plus, Edit, Trash2 } from "lucide-react";
+import { CreditCard, Plus, Edit, Trash2, DollarSign, TrendingUp, Users, Calendar } from "lucide-react";
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/stat-card';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useGeneralCosts } from "@/features/general-costs/hooks/use-general-costs";
 import { useDeleteGeneralCost } from "@/features/general-costs/hooks/use-delete-general-cost";
-import { GeneralCostsStatsSection } from "@/features/general-costs/components/GeneralCostsStatsSection";
 import GeneralCostRow from "@/components/ui/data-row/rows/GeneralCostRow";
 import type { GeneralCost } from "@/features/general-costs/types";
 
@@ -124,7 +124,60 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
 
   return (
     <div className="space-y-6">
-      <GeneralCostsStatsSection generalCosts={generalCosts} />
+      {/* 4 KPIs usando StatCard por defecto */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard data-testid="stat-card-total-costs">
+          <StatCardTitle showArrow={false}>
+            <DollarSign className="w-4 h-4 inline mr-1" />
+            Total Gastos
+          </StatCardTitle>
+          <StatCardValue>
+            {generalCosts.length}
+          </StatCardValue>
+          <StatCardMeta>
+            Conceptos de gastos generales
+          </StatCardMeta>
+        </StatCard>
+
+        <StatCard data-testid="stat-card-recent">
+          <StatCardTitle showArrow={false}>
+            <Calendar className="w-4 h-4 inline mr-1" />
+            Recientes
+          </StatCardTitle>
+          <StatCardValue className="text-2xl md:text-3xl">
+            12
+          </StatCardValue>
+          <StatCardMeta>
+            Gastos del último mes
+          </StatCardMeta>
+        </StatCard>
+
+        <StatCard data-testid="stat-card-trending">
+          <StatCardTitle showArrow={false}>
+            <TrendingUp className="w-4 h-4 inline mr-1" />
+            Tendencia
+          </StatCardTitle>
+          <StatCardValue className="text-2xl md:text-3xl text-green-600 dark:text-green-400">
+            +15%
+          </StatCardValue>
+          <StatCardMeta>
+            Crecimiento este trimestre
+          </StatCardMeta>
+        </StatCard>
+
+        <StatCard data-testid="stat-card-active">
+          <StatCardTitle showArrow={false}>
+            <Users className="w-4 h-4 inline mr-1" />
+            Activos
+          </StatCardTitle>
+          <StatCardValue className="text-2xl md:text-3xl">
+            {generalCosts.length}
+          </StatCardValue>
+          <StatCardMeta>
+            Gastos activos en el sistema
+          </StatCardMeta>
+        </StatCard>
+      </div>
 
       <Table
         data={filteredGeneralCosts}
