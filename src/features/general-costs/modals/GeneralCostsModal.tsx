@@ -39,16 +39,6 @@ export function GeneralCostsModal({ modalData, onClose }: GeneralCostsModalProps
   // Fetch existing general cost data if editing
   const { data: existingGeneralCost, isLoading: isLoadingGeneralCost } = useGeneralCost(isEditing ? modalData?.generalCostId || null : null)
 
-  // Debug logs
-  useEffect(() => {
-    console.log('🔍 GeneralCostsModal Debug:', {
-      isEditing,
-      generalCostId: modalData?.generalCostId,
-      existingGeneralCost,
-      isLoadingGeneralCost
-    })
-  }, [isEditing, modalData?.generalCostId, existingGeneralCost, isLoadingGeneralCost])
-
   const form = useForm<GeneralCostFormData>({
     resolver: zodResolver(generalCostSchema),
     defaultValues: {
@@ -97,7 +87,8 @@ export function GeneralCostsModal({ modalData, onClose }: GeneralCostsModalProps
         await createGeneralCost.mutateAsync({
           organization_id: organizationId,
           name: data.name,
-          description: data.description || undefined
+          description: data.description || undefined,
+          created_by: userData?.memberships?.find(m => m.organization_id === userData?.organization?.id)?.id || null
         })
       }
       

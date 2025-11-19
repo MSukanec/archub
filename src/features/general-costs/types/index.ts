@@ -5,12 +5,16 @@ export interface GeneralCost {
   description: string | null;
   created_at: string;
   updated_at: string | null;
+  is_deleted?: boolean | null;
+  deleted_at?: string | null;
+  created_by?: string | null;
 }
 
 export interface InsertGeneralCost {
   organization_id: string;
   name: string;
   description?: string | null;
+  created_by?: string | null;
 }
 
 export interface GeneralCostValue {
