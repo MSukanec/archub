@@ -585,7 +585,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
             <DollarSign className="w-4 h-4 inline mr-1" />
             Total Pagos
           </StatCardTitle>
-          <StatCardValue className="text-2xl md:text-3xl">
+          <StatCardValue>
             {metricsData?.total_count ?? 0}
           </StatCardValue>
           <StatCardMeta>Cantidad de pagos registrados</StatCardMeta>
@@ -597,7 +597,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
             <CheckCircle2 className="w-4 h-4 inline mr-1" />
             Total Confirmado
           </StatCardTitle>
-          <StatCardValue className="text-2xl md:text-3xl text-green-600 dark:text-green-400">
+          <StatCardValue>
             {formatCurrencyKPI(
               metricsData?.by_currency?.map(c => ({
                 currency_symbol: c.currency_symbol,
@@ -616,7 +616,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
             <AlertCircle className="w-4 h-4 inline mr-1" />
             Total Pendiente
           </StatCardTitle>
-          <StatCardValue className="text-2xl md:text-3xl text-orange-600 dark:text-orange-400">
+          <StatCardValue>
             {formatCurrencyKPI(
               metricsData?.by_currency?.map(c => ({
                 currency_symbol: c.currency_symbol,
@@ -635,7 +635,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
             <Calendar className="w-4 h-4 inline mr-1" />
             Último Pago
           </StatCardTitle>
-          <StatCardValue className="text-2xl md:text-3xl">
+          <StatCardValue>
             {metricsData?.latest_payment_date 
               ? format(new Date(metricsData.latest_payment_date), 'd/M/yyyy')
               : '-'
