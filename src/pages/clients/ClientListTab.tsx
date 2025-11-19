@@ -12,6 +12,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { Link, useLocation } from 'wouter'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   useClientDashboard,
   useDeleteProjectClient,
@@ -31,9 +32,23 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   const { openModal } = useGlobalModalStore();
   const { setSidebarLevel } = useNavigationStore();
   const [, navigate] = useLocation();
+  const queryClient = useQueryClient();
   
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
+
+  // Prefetch contacts and client roles for faster modal opening
+  useQuery({
+    queryKey: [`/api/contacts?organization_id=${organizationId}`],
+    enabled: !!organizationId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  useQuery({
+    queryKey: [`/api/client-roles`],
+    enabled: !!organizationId,
+    staleTime: 5 * 60 * 1000,
+  });
 
   // Use feature hook to get dashboard data with financial summaries
   const { data: dashboardData, isLoading } = useClientDashboard(activeProjectId || undefined, organizationId);
@@ -116,6 +131,14 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   };
 
   const handleView = (client: ProjectClientSummary) => {
+    // Prefetch client data before opening modal for instant display
+    if (activeProjectId && organizationId) {
+      queryClient.prefetchQuery({
+        queryKey: [`/api/projects/${activeProjectId}/clients/${client.id}?organization_id=${organizationId}`],
+        staleTime: 2 * 60 * 1000,
+      });
+    }
+    
     openModal('project-client', {
       projectId: activeProjectId,
       clientId: client.id,
@@ -124,6 +147,14 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   };
 
   const handleEdit = (client: ProjectClientSummary) => {
+    // Prefetch client data before opening modal for instant display
+    if (activeProjectId && organizationId) {
+      queryClient.prefetchQuery({
+        queryKey: [`/api/projects/${activeProjectId}/clients/${client.id}?organization_id=${organizationId}`],
+        staleTime: 2 * 60 * 1000,
+      });
+    }
+    
     openModal('project-client', {
       projectId: activeProjectId,
       clientId: client.id,
