@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Layout } from '@/components/layout/desktop/Layout';
+import { Layout } from '@/layout/desktop/Layout';
 import { MediaDocumentation } from './MediaDocumentation';
 import { MediaGallery } from './MediaGallery';
 import { FileText, Images, Upload, Plus } from 'lucide-react';

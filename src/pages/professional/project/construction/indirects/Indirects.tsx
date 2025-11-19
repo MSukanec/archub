@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { TrendingUp, Plus, Home, Search, Filter, Bell } from "lucide-react";
 
-import { Layout } from '@/components/layout/desktop/Layout';
+import { Layout } from '@/layout/desktop/Layout';
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
+import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext';
 import { useMobile } from '@/hooks/use-mobile';
 import { useNavigationStore } from '@/stores/navigationStore';
 

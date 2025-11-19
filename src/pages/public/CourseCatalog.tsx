@@ -1,4 +1,4 @@
-import { PublicLayout } from '@/components/layout/public/PublicLayout';
+import { PublicLayout } from '@/layout/public/PublicLayout';
 import { useAllCourses } from '@/features/course-landing/hooks';
 import { CourseGrid } from '@/features/course-landing/components';
 import { BookOpen, GraduationCap } from 'lucide-react';

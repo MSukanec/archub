@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Settings, Plus } from 'lucide-react';
-import { Layout } from '@/components/layout/desktop/Layout';
+import { Layout } from '@/layout/desktop/Layout';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import AdminGeneralMovementConcepts from './AdminGeneralMovementConcepts';
 import AdminGeneralUnitPresentations from './AdminGeneralUnitPresentations';

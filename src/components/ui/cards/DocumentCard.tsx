@@ -1,7 +1,7 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { FileText, FileImage, FileSpreadsheet, File, Eye, Edit, Trash2 } from 'lucide-react';
-import SwipeableCard from '@/components/layout/mobile/SwipeableCard';
+import SwipeableCard from '@/layout/mobile/SwipeableCard';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 

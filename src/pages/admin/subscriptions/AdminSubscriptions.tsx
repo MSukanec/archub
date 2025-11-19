@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CreditCard, Plus } from 'lucide-react';
-import { Layout } from '@/components/layout/desktop/Layout';
+import { Layout } from '@/layout/desktop/Layout';
 import { Button } from '@/components/ui/button';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';

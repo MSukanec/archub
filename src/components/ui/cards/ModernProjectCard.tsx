@@ -11,7 +11,7 @@ import {
   Trash2,
   Edit
 } from 'lucide-react';
-import SwipeableCard from '@/components/layout/mobile/SwipeableCard';
+import SwipeableCard from '@/layout/mobile/SwipeableCard';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { getProjectInitials } from '@/utils/initials';
 import { getProjectImageUrl, getProjectImageSrcSet } from '@/lib/storage/projectImages';

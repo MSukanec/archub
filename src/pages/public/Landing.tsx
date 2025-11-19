@@ -20,7 +20,7 @@ import {
   Zap,
   Package
 } from "lucide-react";
-import { PublicLayout } from "@/components/layout/public/PublicLayout";
+import { PublicLayout } from "@/layout/public/PublicLayout";
 
 const coreFeatures = [
   {

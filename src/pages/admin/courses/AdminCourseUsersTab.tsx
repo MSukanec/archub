@@ -11,7 +11,7 @@ import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { queryClient } from '@/lib/queryClient'
 import AdminCourseStudentRow from '@/components/ui/data-row/rows/AdminCourseStudentRow'
-import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
+import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
 import { useEffect, useState, useMemo } from 'react'
 

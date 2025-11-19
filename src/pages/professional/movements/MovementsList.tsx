@@ -41,7 +41,7 @@ import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 
 import { TransferGroup } from "@/components/ui/data-row";
 import { MovementRow, ConversionRow, TransferRow } from "@/components/ui/data-row";
-import SwipeableCard from "@/components/layout/mobile/SwipeableCard";
+import SwipeableCard from "@/layout/mobile/SwipeableCard";
 import { Star } from "lucide-react";
 
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
@@ -55,7 +55,7 @@ import { useProjectsMap } from "@/hooks/use-projects";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileContext";
+import { useActionBarMobile } from "@/layout/mobile/ActionBarMobileContext";
 import { useMobile } from "@/hooks/use-mobile";
 import { useProjectContext } from "@/stores/projectContext";
 import { FILTER_LABELS } from "@/constants/actionBarConstants";

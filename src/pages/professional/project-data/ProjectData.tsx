@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { FileText, Share2, Copy, MessageCircle, Mail, MapPin, Home, Bell } from 'lucide-react';
-import { Layout } from '@/components/layout/desktop/Layout';
+import { Layout } from '@/layout/desktop/Layout';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useProjectContext } from '@/stores/projectContext';
 import { useQuery } from '@tanstack/react-query';
@@ -10,7 +10,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { BottomSheet, BottomSheetContent, BottomSheetHeader, BottomSheetTitle, BottomSheetBody } from '@/components/ui/bottom-sheet';
-import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
+import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext';
 import { useMobile } from '@/hooks/use-mobile';
 import { useLocation } from 'wouter';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';

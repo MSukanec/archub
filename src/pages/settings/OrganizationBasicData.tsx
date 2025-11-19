@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Building2, FileText, Users, MapPin, Globe } from 'lucide-react';
 
-import { Layout } from '@/components/layout/desktop/Layout';
+import { Layout } from '@/layout/desktop/Layout';
 import { AvatarUploader } from '@/components/ui-custom/AvatarUploader';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';

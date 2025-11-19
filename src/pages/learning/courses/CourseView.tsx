@@ -8,7 +8,7 @@ import { useCoursePlayerStore } from '@/stores/coursePlayerStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 
-import { Layout } from '@/components/layout/desktop/Layout';
+import { Layout } from '@/layout/desktop/Layout';
 import CourseDashboardTab from './view/CourseDashboardTab';
 import CourseContentTab from './view/CourseContentTab';
 import CoursePlayerTab from './view/CoursePlayerTab';

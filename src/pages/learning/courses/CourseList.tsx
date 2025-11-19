@@ -1,4 +1,4 @@
-import { Layout } from '@/components/layout/desktop/Layout'
+import { Layout } from '@/layout/desktop/Layout'
 import { useState, useEffect, useMemo } from 'react'
 import { useCourses } from '@/hooks/use-courses'
 import { BookOpen, Clock } from 'lucide-react'

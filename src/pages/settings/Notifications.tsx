@@ -1,4 +1,4 @@
-import { Layout } from '@/components/layout/desktop/Layout'
+import { Layout } from '@/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'

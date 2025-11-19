@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Layout } from '@/components/layout/desktop/Layout'
+import { Layout } from '@/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useProjectContext } from '@/stores/projectContext'
 import { Info } from 'lucide-react'

@@ -1,5 +1,5 @@
 import { useParams } from 'wouter';
-import { PublicLayout } from '@/components/layout/public/PublicLayout';
+import { PublicLayout } from '@/layout/public/PublicLayout';
 import { useCourseLanding } from '@/features/course-landing';
 import {
   HeroSection,

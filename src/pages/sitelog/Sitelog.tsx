@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { FileText, Plus } from "lucide-react";
 
-import { Layout } from '@/components/layout/desktop/Layout';
+import { Layout } from '@/layout/desktop/Layout';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
 import { useCurrentUser } from "@/hooks/use-current-user";

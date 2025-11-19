@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Layout } from "@/components/layout/desktop/Layout";
+import { Layout } from "@/layout/desktop/Layout";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

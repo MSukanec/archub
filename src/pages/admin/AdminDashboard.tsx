@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { BarChart3, Users, Clock, TrendingUp, Activity, Eye } from 'lucide-react'
-import { Layout } from '@/components/layout/desktop/Layout'
+import { Layout } from '@/layout/desktop/Layout'
 import { Tabs } from '@/components/ui-custom/Tabs'
 import { startOfDay, subDays } from 'date-fns'
 

@@ -14,7 +14,7 @@ import ProjectItemCard from '@/components/cards/ProjectItemCard'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
-import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
+import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
 
 export default function ProjectActives() {

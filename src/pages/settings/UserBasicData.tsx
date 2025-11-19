@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { User } from 'lucide-react';
 
-import { Layout } from '@/components/layout/desktop/Layout';
+import { Layout } from '@/layout/desktop/Layout';
 import { ProfileBasicData } from '@/pages/profile/ProfileBasicData';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ListTodo, Plus } from 'lucide-react';
-import { Layout } from '@/components/layout/desktop/Layout';
+import { Layout } from '@/layout/desktop/Layout';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import AdminTaskList from './AdminTaskList';
 import AdminTaskCategories from './AdminTaskCategories';

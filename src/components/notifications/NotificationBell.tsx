@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { NotificationDropdown } from './NotificationDropdown';
-import ButtonSidebar from '@/components/layout/desktop/ButtonSidebar';
+import ButtonSidebar from '@/layout/desktop/ButtonSidebar';
 
 interface NotificationBellProps {
   isExpanded: boolean;

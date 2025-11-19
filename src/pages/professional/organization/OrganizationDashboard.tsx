@@ -11,7 +11,7 @@ import {
 import { useLocation } from 'wouter';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { Layout } from '@/components/layout/desktop/Layout';
+import { Layout } from '@/layout/desktop/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import ProjectItemCard from '@/components/cards/ProjectItemCard';
@@ -28,7 +28,7 @@ import { useProjectContext } from '@/stores/projectContext';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useToast } from '@/hooks/use-toast';
 import type { UserData } from "@/hooks/use-current-user";
-import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
+import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext';
 import { useMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/lib/supabase';
 import { format } from "date-fns";

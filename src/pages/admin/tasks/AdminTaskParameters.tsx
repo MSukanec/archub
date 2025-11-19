@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
-import { ActionBar } from '@/components/layout/desktop/ActionBar';
+import { ActionBar } from '@/layout/desktop/ActionBar';
 
 import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameterOption, TaskParameterWithOptions } from '@/hooks/use-task-parameters-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';

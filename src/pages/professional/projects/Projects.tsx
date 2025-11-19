@@ -1,4 +1,4 @@
-import { Layout } from '@/components/layout/desktop/Layout'
+import { Layout } from '@/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'

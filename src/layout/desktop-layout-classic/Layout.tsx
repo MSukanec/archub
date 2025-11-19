@@ -15,11 +15,11 @@ import {
   useCourseSidebarStore,
 } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
-import { ActionBarMobile } from "@/components/layout/mobile/ActionBarMobile";
-import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileContext";
+import { ActionBarMobile } from "@/layout/mobile/ActionBarMobile";
+import { useActionBarMobile } from "@/layout/mobile/ActionBarMobileContext";
 import { useMobile } from "@/hooks/use-mobile";
-import { HeaderMobile } from "@/components/layout/mobile/HeaderMobile";
-import { CourseSidebar } from "@/components/layout/CourseSidebar";
+import { HeaderMobile } from "@/layout/mobile/HeaderMobile";
+import { CourseSidebar } from "@/layout/CourseSidebar";
 import { useProjectAccentColor } from "@/hooks/use-project-accent-color";
 import { useContentBackground } from "@/hooks/use-content-background";
 import { FloatingAIChat } from "@/components/ui-custom/layout/FloatingAIChat";

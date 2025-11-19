@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Layout as LayoutIcon } from 'lucide-react';
-import { Layout } from '@/components/layout/desktop/Layout';
+import { Layout } from '@/layout/desktop/Layout';
 import AdminLayoutTab from './AdminLayoutTab';
 
 const AdminLayout = () => {

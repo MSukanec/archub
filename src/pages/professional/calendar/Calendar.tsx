@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Layout } from '@/components/layout/desktop/Layout';
+import { Layout } from '@/layout/desktop/Layout';
 import { KanbanBox } from '@/components/ui-custom/KanbanBox';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckSquare, Plus, Kanban, Edit, Trash2, List, Search, Filter, X } from 'lucide-react';
-import { ActionBar } from '@/components/layout/desktop/ActionBar';
+import { ActionBar } from '@/layout/desktop/ActionBar';
 
 import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useUpdateKanbanBoard, useDeleteKanbanBoard, useDeleteKanbanList, useDeleteKanbanCard, useUpdateLastKanbanBoard } from '@/hooks/use-kanban';
 import { useToast } from '@/hooks/use-toast';
@@ -16,8 +16,8 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useNavigationStore } from '@/stores/navigationStore';
 
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
-import { ActionBarMobileProvider, useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
-import { ActionBarMobile } from '@/components/layout/mobile/ActionBarMobile';
+import { ActionBarMobileProvider, useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext';
+import { ActionBarMobile } from '@/layout/mobile/ActionBarMobile';
 
 import { Card } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';

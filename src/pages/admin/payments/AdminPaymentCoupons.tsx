@@ -10,7 +10,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import AdminCourseCouponRow from '@/components/ui/data-row/rows/AdminCourseCouponRow'
-import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
+import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
 import { useEffect, useState, useMemo } from 'react'
 

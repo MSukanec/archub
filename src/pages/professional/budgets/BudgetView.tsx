@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { DollarSign, Plus } from 'lucide-react';
 
-import { Layout } from '@/components/layout/desktop/Layout';
+import { Layout } from '@/layout/desktop/Layout';
 import { BudgetListTab } from './view/BudgetListTab';
 import { BudgetMaterialsTab } from './view/BudgetMaterialsTab';
 import { useBudgets } from "@/hooks/use-budgets";

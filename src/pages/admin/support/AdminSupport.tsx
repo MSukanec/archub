@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Headphones, Plus } from 'lucide-react';
-import { Layout } from '@/components/layout/desktop/Layout';
+import { Layout } from '@/layout/desktop/Layout';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import AdminSupportAnnouncementsTab from './AdminSupportAnnouncementsTab';
 import AdminSupportNotificationsTab from './AdminSupportNotificationsTab';

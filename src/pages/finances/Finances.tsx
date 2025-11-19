@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Layout } from "@/components/layout/desktop/Layout";
+import { Layout } from "@/layout/desktop/Layout";
 import { DollarSign } from "lucide-react";
 import { MovementsTab } from "./MovementsTab";
 import { PartnerMovementsTab } from "./PartnerMovementsTab";

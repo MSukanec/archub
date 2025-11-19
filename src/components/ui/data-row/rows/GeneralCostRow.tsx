@@ -1,6 +1,6 @@
 import React from 'react';
 import DataRowCard from '../DataRowCard';
-import SwipeableCard from '@/components/layout/mobile/SwipeableCard';
+import SwipeableCard from '@/layout/mobile/SwipeableCard';
 import { Edit, Trash2 } from 'lucide-react';
 import type { GeneralCost } from '@/features/general-costs/types';
 
