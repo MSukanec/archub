@@ -80,7 +80,7 @@ const Products = lazy(() => import("@/pages/providers/products/Products"));
 import Analysis from "@/pages/professional/analysis/Analysis";
 import TaskView from "@/pages/professional/analysis/TaskView";
 import MaterialsView from "@/pages/professional/analysis/material-costs/MaterialsView";
-import GeneralCosts from "@/pages/professional/finances/general-costs/GeneralCosts";
+import GeneralCosts from "@/pages/general-costs/GeneralCosts";
 
 // Community Pages
 import Community from "@/pages/community/Community";
@@ -166,8 +166,10 @@ function Router() {
         <Route path="/notifications" component={Notifications} />
         <Route path="/organization/projects" component={Projects} />
         
+        {/* General Costs Route */}
+        <Route path="/general-costs" component={GeneralCosts} />
+        
         {/* Finances Routes */}
-        <Route path="/finances/general-costs" component={GeneralCosts} />
         <Route path="/finances" component={FinancesPage} />
         
         <Route path="/organization" component={OrganizationDashboard} />

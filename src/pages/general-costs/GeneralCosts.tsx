@@ -41,15 +41,10 @@ export default function GeneralCosts() {
     icon: CreditCard,
     organizationId,
     showMembers: true,
+    showProjectSelector: true,
     tabs: headerTabs,
     onTabChange: (tabId: string) => {
       setActiveTab(tabId)
-    },
-    actionButton: {
-      label: "Nuevo Gasto General",
-      icon: Plus,
-      onClick: handleNewGeneralCost,
-      variant: "default" as const
     }
   }
 

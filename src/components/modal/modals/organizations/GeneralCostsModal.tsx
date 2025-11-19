@@ -14,7 +14,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
 import { useQueryClient } from '@tanstack/react-query'
-import { useCreateGeneralCost, useUpdateGeneralCost, useGeneralCost } from '@/hooks/use-general-costs'
+import { useCreateGeneralCost } from '@/features/general-costs/hooks/use-create-general-cost'
+import { useUpdateGeneralCost } from '@/features/general-costs/hooks/use-update-general-cost'
+import { useGeneralCost } from '@/features/general-costs/hooks/use-general-cost'
 
 // Schema de validación
 const generalCostSchema = z.object({
