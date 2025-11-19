@@ -13,6 +13,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useGeneralCostsPayments, useDeleteGeneralCostPayment, type GeneralCostPayment } from '@/hooks/use-general-costs-payments';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { GeneralCostPaymentRow } from '@/components/ui/data-row';
 
 export default function GeneralCostsPaymentsTab() {
   const { data: userData } = useCurrentUser();
@@ -409,6 +410,12 @@ export default function GeneralCostsPaymentsTab() {
         data={filteredPayments}
         isLoading={isLoading}
         showDoubleHeader={false}
+        renderCard={(payment: GeneralCostPayment) => (
+          <GeneralCostPaymentRow
+            payment={payment}
+            onClick={() => handleView(payment)}
+          />
+        )}
         emptyStateConfig={{
           icon: <DollarSign className="h-12 w-12 text-muted-foreground" />,
           title: 'No hay pagos registrados',

@@ -13,6 +13,9 @@ export type { ClientObligation } from './ClientObligationRow';
 export { default as ClientPaymentRow } from './ClientPaymentRow';
 export type { ClientPayment } from './ClientPaymentRow';
 
+export { default as GeneralCostPaymentRow } from './GeneralCostPaymentRow';
+export type { GeneralCostPayment } from './GeneralCostPaymentRow';
+
 export { default as SubcontractRow } from './SubcontractRow';
 export type { Subcontract } from './SubcontractRow';
 
