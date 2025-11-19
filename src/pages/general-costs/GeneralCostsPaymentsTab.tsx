@@ -123,8 +123,11 @@ export default function GeneralCostsPaymentsTab() {
   }, [allPayments]);
 
   const handleEdit = (payment: GeneralCostPayment) => {
-    // TODO: Implementar modal de edición
-    console.log('Editar pago:', payment.id);
+    if (!organizationId) return;
+    openModal('general-costs-payment', {
+      organizationId,
+      editingPayment: payment,
+    });
   };
 
   const handleDelete = (payment: GeneralCostPayment) => {
@@ -150,13 +153,18 @@ export default function GeneralCostsPaymentsTab() {
   };
 
   const handleView = (payment: GeneralCostPayment) => {
-    // TODO: Implementar modal de vista
-    console.log('Ver pago:', payment.id);
+    if (!organizationId) return;
+    openModal('general-costs-payment', {
+      organizationId,
+      editingPayment: payment,
+    });
   };
 
   const handleAddPayment = () => {
-    // TODO: Implementar modal de creación
-    console.log('Agregar nuevo pago');
+    if (!organizationId) return;
+    openModal('general-costs-payment', {
+      organizationId,
+    });
   };
 
   const formatDate = (dateString: string) => {

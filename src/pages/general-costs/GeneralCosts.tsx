@@ -40,6 +40,12 @@ export default function GeneralCosts() {
     })
   }
 
+  const handleNewPayment = () => {
+    openModal('general-costs-payment', {
+      organizationId: userData?.organization?.id,
+    })
+  }
+
   // Action button based on active tab
   const getActionButton = () => {
     if (activeTab === "lista") {
@@ -47,6 +53,13 @@ export default function GeneralCosts() {
         label: "Crear Gasto General",
         icon: Plus,
         onClick: handleNewGeneralCost
+      }
+    }
+    if (activeTab === "pagos") {
+      return {
+        label: "Nuevo Pago",
+        icon: Plus,
+        onClick: handleNewPayment
       }
     }
     return undefined

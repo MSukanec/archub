@@ -69,6 +69,7 @@ import { ProductModal } from '../modals/analysis/ProductModal';
 import { AdminProductModal } from '../modals/admin/AdminProductModal';
 import { IndirectModal } from '../modals/construction/IndirectModal';
 import { GeneralCostsModal } from '@/features/general-costs/modals/GeneralCostsModal';
+import { GeneralCostsPaymentModal } from '@/features/general-costs/modals/GeneralCostsPaymentModal';
 import { AdminLaborModal } from '../modals/admin/AdminLaborModal';
 import { CostModal } from '../modals/admin/CostModal';
 import { CourseFormModal } from '../modals/admin/CourseFormModal';
@@ -250,6 +251,8 @@ export function ModalFactory() {
       return <IndirectModal modalData={data || {}} onClose={closeModal} />;
     case 'general-costs':
       return <GeneralCostsModal modalData={data || {}} onClose={closeModal} />;
+    case 'general-costs-payment':
+      return <GeneralCostsPaymentModal modalData={data || {}} onClose={closeModal} />;
     case 'labor-type-form':
       return <AdminLaborModal modalData={data || {}} onClose={closeModal} />;
     case 'cost-modal':
