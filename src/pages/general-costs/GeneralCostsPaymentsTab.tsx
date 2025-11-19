@@ -127,7 +127,8 @@ export default function GeneralCostsPaymentsTab() {
     if (!organizationId) return;
     openModal('general-costs-payment', {
       organizationId,
-      editingPayment: payment,
+      paymentId: payment.id,
+      mode: 'edit',
     });
   };
 

@@ -22,6 +22,7 @@ import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { useGeneralCosts } from '../hooks/use-general-costs'
+import { useGeneralCostPayment } from '../hooks/use-general-cost-payment'
 import { useCreateGeneralCostPayment } from '../hooks/use-create-general-cost-payment'
 import { useUpdateGeneralCostPayment } from '../hooks/use-update-general-cost-payment'
 import { generalCostPaymentSchema, type GeneralCostPaymentFormData } from '../schemas'
@@ -31,19 +32,26 @@ import { supabase } from '@/lib/supabase'
 interface GeneralCostsPaymentModalProps {
   modalData: {
     organizationId: string
-    editingPayment?: any
+    paymentId?: string
+    mode?: 'create' | 'edit' | 'view'
   }
   onClose: () => void
 }
 
 export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPaymentModalProps) {
-  const { organizationId, editingPayment } = modalData
+  const { organizationId, paymentId, mode = 'create' } = modalData
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
   const { setPanel } = useModalPanelStore()
 
   const [filesToUpload, setFilesToUpload] = React.useState<any[]>([])
   const [existingFiles, setExistingFiles] = React.useState<any[]>([])
+
+  // Fetch existing payment data for edit/view mode
+  const { data: existingPayment, isLoading: loadingPayment } = useGeneralCostPayment(
+    paymentId,
+    organizationId
+  )
 
   const form = useForm<GeneralCostPaymentFormData>({
     resolver: zodResolver(generalCostPaymentSchema),
@@ -67,40 +75,42 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
   const { data: members = [] } = useOrganizationMembers(organizationId)
   
   // Loading state for all necessary data
-  const isLoading = currenciesLoading || generalCostsLoading || walletsLoading
+  const isLoading = currenciesLoading || generalCostsLoading || walletsLoading || ((mode === 'edit' || mode === 'view') && loadingPayment)
 
-  // Inicializar panel en modo edit para nuevos pagos
+  // Set panel mode based on the mode prop
   React.useEffect(() => {
-    if (editingPayment) {
+    if (mode === 'view') {
       setPanel('view')
+    } else if (mode === 'edit') {
+      setPanel('edit')
     } else {
       setPanel('edit')
     }
-  }, [editingPayment, setPanel])
+  }, [setPanel, mode])
 
-  // Cargar datos del pago en edición
+  // Load existing payment data
   React.useEffect(() => {
-    if (editingPayment && currencies) {
-      const paymentDate = editingPayment.payment_date ? new Date(editingPayment.payment_date) : new Date()
+    if (existingPayment && (mode === 'edit' || mode === 'view')) {
+      const paymentDate = existingPayment.payment_date ? new Date(existingPayment.payment_date) : new Date()
       
       form.reset({
         payment_date: paymentDate,
-        general_cost_id: editingPayment.general_cost_id || '',
-        currency_id: editingPayment.currency_id || '',
-        wallet_id: editingPayment.wallet_id || '',
-        amount: editingPayment.amount || 0,
-        exchange_rate: editingPayment.exchange_rate || undefined,
-        notes: editingPayment.notes || '',
-        reference: editingPayment.reference || '',
-        status: editingPayment.status || 'confirmed',
+        general_cost_id: existingPayment.general_cost_id || '',
+        currency_id: existingPayment.currency_id || '',
+        wallet_id: existingPayment.wallet_id || '',
+        amount: existingPayment.amount || 0,
+        exchange_rate: existingPayment.exchange_rate || undefined,
+        notes: existingPayment.notes || '',
+        reference: existingPayment.reference || '',
+        status: existingPayment.status || 'confirmed',
       })
 
       // Cargar archivo existente si existe
-      if (editingPayment?.file_url) {
+      if (existingPayment?.file_url) {
         setExistingFiles([{
           id: nanoid(),
           file_name: 'Archivo adjunto',
-          file_url: editingPayment.file_url,
+          file_url: existingPayment.file_url,
           file_type: 'document',
           file_size: 0,
           isExisting: true
@@ -109,11 +119,11 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
         setExistingFiles([])
       }
     }
-  }, [editingPayment, form, currencies])
+  }, [existingPayment, mode, form])
 
-  // Inicializar valores por defecto
+  // Initialize default values for create mode
   React.useEffect(() => {
-    if (!editingPayment) {
+    if (mode === 'create' && !paymentId) {
       // Usar la primera moneda disponible por defecto
       if (currencies && currencies.length > 0) {
         const defaultCurrency = currencies.find(c => c.is_default)?.currency?.id
@@ -134,7 +144,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
         }
       }
     }
-  }, [currencies, wallets, editingPayment, form])
+  }, [currencies, wallets, mode, paymentId, form])
 
   // Mutaciones
   const createPaymentMutation = useCreateGeneralCostPayment()
@@ -231,9 +241,9 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
     }
 
     try {
-      if (editingPayment) {
+      if (mode === 'edit' && paymentId) {
         await updatePaymentMutation.mutateAsync({
-          id: editingPayment.id,
+          id: paymentId,
           organizationId: userData.organization.id,
           updates: paymentData,
         })
@@ -252,33 +262,33 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
   }
 
   // Panel de vista (solo lectura)
-  const viewPanel = editingPayment ? (
+  const viewPanel = existingPayment ? (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <h4 className="font-medium text-foreground mb-2">Fecha de Pago</h4>
           <span className="text-sm">
-            {editingPayment.payment_date ? format(new Date(editingPayment.payment_date), 'PPP', { locale: es }) : 'No especificada'}
+            {existingPayment.payment_date ? format(new Date(existingPayment.payment_date), 'PPP', { locale: es }) : 'No especificada'}
           </span>
         </div>
         <div>
           <h4 className="font-medium text-foreground mb-2">Monto</h4>
           <span className="text-sm font-medium">
-            {editingPayment.amount?.toLocaleString()}
+            {existingPayment.amount?.toLocaleString()}
           </span>
         </div>
       </div>
       <div>
         <h4 className="font-medium text-foreground mb-2">Notas</h4>
         <p className="text-sm text-muted-foreground">
-          {editingPayment.notes || 'Sin notas'}
+          {existingPayment.notes || 'Sin notas'}
         </p>
       </div>
-      {editingPayment.file_url && (
+      {existingPayment.file_url && (
         <div>
           <h4 className="font-medium text-foreground mb-2">Archivo Adjunto</h4>
           <a 
-            href={editingPayment.file_url} 
+            href={existingPayment.file_url} 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-sm text-primary hover:underline"
@@ -546,8 +556,8 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
 
   const headerContent = (
     <FormModalHeader
-      title={editingPayment ? "Editar Pago" : "Nuevo Pago"}
-      description={editingPayment 
+      title={mode === 'edit' ? "Editar Pago" : "Nuevo Pago"}
+      description={mode === 'edit'
         ? 'Modifica los datos del pago de gasto general seleccionado'
         : 'Registra un nuevo pago de gasto general de la organización'}
       icon={DollarSign}
@@ -562,7 +572,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel={editingPayment ? "Actualizar" : "Guardar Pago"}
+      rightLabel={mode === 'edit' ? "Actualizar" : "Guardar Pago"}
       onRightClick={handleSubmitClick}
       showLoadingSpinner={createPaymentMutation.isPending || updatePaymentMutation.isPending}
     />
