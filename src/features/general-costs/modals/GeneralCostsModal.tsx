@@ -84,15 +84,17 @@ export function GeneralCostsModal({ modalData, onClose }: GeneralCostsModalProps
         })
       } else {
         // Modo creación
-        const createdBy = userData?.memberships?.find(m => m.organization_id === userData?.organization?.id)?.id || null
+        const createdBy = userData?.memberships?.find(m => m.organization_id === organizationId)?.id || null
         
         console.log('📝 Creating general cost with:', {
           organization_id: organizationId,
           name: data.name,
           description: data.description,
           created_by: createdBy,
-          userData: userData,
-          memberships: userData?.memberships
+          'userData.organization.id': userData?.organization?.id,
+          'organizationId (using this)': organizationId,
+          memberships: userData?.memberships,
+          'membership match': userData?.memberships?.find(m => m.organization_id === organizationId)
         })
         
         await createGeneralCost.mutateAsync({
