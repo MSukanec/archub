@@ -13,7 +13,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useGeneralCosts } from "@/features/general-costs/hooks/use-general-costs";
 import { useDeleteGeneralCost } from "@/features/general-costs/hooks/use-delete-general-cost";
-import { GeneralCostsKPIs } from "@/features/general-costs/components/GeneralCostsKPIs";
+import { GeneralCostsStatsSection } from "@/features/general-costs/components/GeneralCostsStatsSection";
 import type { GeneralCost } from "@/features/general-costs/types";
 
 interface GeneralCostsListProps {
@@ -140,7 +140,7 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
 
   return (
     <div className="space-y-6">
-      <GeneralCostsKPIs generalCosts={generalCosts} />
+      <GeneralCostsStatsSection generalCosts={generalCosts} />
 
       <Table
         data={filteredGeneralCosts}

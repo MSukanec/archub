@@ -13,7 +13,8 @@ export * from './hooks/use-general-cost';
 export * from './hooks/use-create-general-cost';
 export * from './hooks/use-update-general-cost';
 export * from './hooks/use-delete-general-cost';
+export * from './hooks/use-general-costs-metrics';
 
-export * from './components/GeneralCostsKPIs';
+export * from './components/GeneralCostsStatsSection';
 
 export * from './modals/GeneralCostsModal';

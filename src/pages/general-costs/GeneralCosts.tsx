@@ -40,6 +40,18 @@ export default function GeneralCosts() {
     })
   }
 
+  // Action button based on active tab
+  const getActionButton = () => {
+    if (activeTab === "lista") {
+      return {
+        label: "Crear Gasto General",
+        icon: Plus,
+        onClick: handleNewGeneralCost
+      }
+    }
+    return undefined
+  }
+
   // Header configuration
   const headerProps = {
     title: "Gastos Generales",
@@ -50,7 +62,8 @@ export default function GeneralCosts() {
     tabs: headerTabs,
     onTabChange: (tabId: string) => {
       setActiveTab(tabId)
-    }
+    },
+    actionButton: getActionButton()
   }
 
   return (
