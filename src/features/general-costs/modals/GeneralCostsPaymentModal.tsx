@@ -105,10 +105,10 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
       // Usar la billetera por defecto
       if (wallets && wallets.length > 0) {
         const defaultWallet = wallets.find(w => w.is_default)
-        if (defaultWallet && defaultWallet.wallets?.id) {
-          form.setValue('wallet_id', defaultWallet.wallets.id)
-        } else if (wallets[0].wallets?.id) {
-          form.setValue('wallet_id', wallets[0].wallets.id)
+        if (defaultWallet && defaultWallet.id) {
+          form.setValue('wallet_id', defaultWallet.id)
+        } else if (wallets[0].id) {
+          form.setValue('wallet_id', wallets[0].id)
         }
       }
     }
@@ -138,7 +138,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
       return
     }
 
-    const selectedWallet = wallets?.find(w => w.wallets?.id === data.wallet_id)
+    const selectedWallet = wallets?.find(w => w.id === data.wallet_id)
     if (!selectedWallet) {
       toast({
         title: 'Error',
@@ -148,23 +148,11 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
       return
     }
 
-    // El wallet_id del formulario es el ID real de la billetera, pero general_costs_payments.wallet_id
-    // referencia a organization_wallets.id, no a wallets.id
-    const organizationWallet = wallets?.find(w => w.wallets?.id === data.wallet_id)
-    if (!organizationWallet) {
-      toast({
-        title: 'Error',
-        description: `Organization wallet not found for wallet ID: ${data.wallet_id}`,
-        variant: 'destructive',
-      })
-      return
-    }
-
     const paymentData = {
       organization_id: userData.organization.id,
       payment_date: data.payment_date.toISOString().split('T')[0],
       currency_id: data.currency_id,
-      wallet_id: organizationWallet.id,
+      wallet_id: data.wallet_id,
       amount: data.amount,
       notes: data.notes || null,
       exchange_rate: data.exchange_rate || 1,
@@ -349,8 +337,8 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
                       <SelectContent>
                         {wallets?.map((orgWallet) => (
                           <SelectItem 
-                            key={`wallet-${orgWallet.wallets?.id}`} 
-                            value={orgWallet.wallets?.id || ''}
+                            key={`wallet-${orgWallet.id}`} 
+                            value={orgWallet.id || ''}
                           >
                             {orgWallet.wallets?.name || 'Sin nombre'}
                           </SelectItem>
