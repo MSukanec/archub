@@ -11,6 +11,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useGeneralCosts } from "@/features/general-costs/hooks/use-general-costs";
 import { useDeleteGeneralCost } from "@/features/general-costs/hooks/use-delete-general-cost";
 import { GeneralCostsStatsSection } from "@/features/general-costs/components/GeneralCostsStatsSection";
+import GeneralCostRow from "@/components/ui/data-row/rows/GeneralCostRow";
 import type { GeneralCost } from "@/features/general-costs/types";
 
 interface GeneralCostsListProps {
@@ -37,16 +38,21 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
   
   const { data: generalCosts = [], isLoading } = useGeneralCosts(userData?.organization?.id || null);
 
-  // Filtrar gastos generales por búsqueda
-  const filteredGeneralCosts = generalCosts.filter(generalCost => {
-    // Búsqueda por texto
-    const searchLower = searchQuery.toLowerCase();
-    const nameMatch = generalCost.name?.toLowerCase().includes(searchLower);
-    const descriptionMatch = generalCost.description?.toLowerCase().includes(searchLower);
-    const searchMatch = !searchQuery || nameMatch || descriptionMatch;
-    
-    return searchMatch;
-  });
+  // Filtrar y ordenar gastos generales por búsqueda y orden alfabético
+  const filteredGeneralCosts = generalCosts
+    .filter(generalCost => {
+      // Búsqueda por texto
+      const searchLower = searchQuery.toLowerCase();
+      const nameMatch = generalCost.name?.toLowerCase().includes(searchLower);
+      const descriptionMatch = generalCost.description?.toLowerCase().includes(searchLower);
+      const searchMatch = !searchQuery || nameMatch || descriptionMatch;
+      
+      return searchMatch;
+    })
+    .sort((a, b) => {
+      // Ordenar alfabéticamente por nombre
+      return a.name.localeCompare(b.name, 'es', { sensitivity: 'base' });
+    });
 
   // Función para editar gasto general
   const handleEdit = (generalCost: GeneralCost) => {
@@ -141,6 +147,14 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
             variant: 'destructive' as const
           }
         ]}
+        renderCard={(generalCost) => (
+          <GeneralCostRow
+            generalCost={generalCost}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            enableSwipe={true}
+          />
+        )}
       />
     </div>
   );
