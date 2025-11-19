@@ -288,7 +288,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
         <div>
           <h4 className="font-medium text-foreground mb-2">Cotización</h4>
           <span className="text-sm">
-            {existingPayment.exchange_rate !== undefined 
+            {existingPayment.exchange_rate != null
               ? existingPayment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })
               : 'No especificada'}
           </span>
