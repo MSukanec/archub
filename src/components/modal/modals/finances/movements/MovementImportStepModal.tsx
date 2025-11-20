@@ -20,7 +20,7 @@ import { useOrganizationMovementConcepts } from '@/hooks/use-organization-moveme
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useProjects } from '@/hooks/use-projects'
+import { useProjects } from '@/features/projects'
 import { useToast } from '@/hooks/use-toast'
 import UserSelectorField from '@/components/ui-custom/fields/UserSelectorField'
 import { cn } from '@/lib/utils'

@@ -17,7 +17,7 @@ import { Search, Filter, Home, Bell, Lock } from 'lucide-react'
 import { useLocation } from 'wouter'
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useProjectsLite } from '@/hooks/use-projects-lite'
+import { useProjectsLite } from '@/features/projects'
 
 export function ActionBarMobile() {
   const [, navigate] = useLocation()

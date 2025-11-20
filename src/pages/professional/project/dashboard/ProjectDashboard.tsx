@@ -9,7 +9,7 @@ import { es } from "date-fns/locale";
 
 import { useProjectContext } from '@/stores/projectContext';
 import { useNavigationStore } from '@/stores/navigationStore';
-import { useProjects } from '@/hooks/use-projects';
+import { useProjects } from '@/features/projects';
 import { useCurrentUser } from '@/hooks/use-current-user';
 
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card';

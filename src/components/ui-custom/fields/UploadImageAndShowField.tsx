@@ -4,7 +4,7 @@ import { Camera, Upload, X, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { uploadProjectImage, deleteProjectImage, updateProjectImageUrl } from '@/lib/storage/uploadProjectImage';
+import { uploadProjectImage, deleteProjectImage, updateProjectImageUrl } from '@/features/projects';
 
 interface ImageUploadAndShowFieldProps {
   projectId?: string;

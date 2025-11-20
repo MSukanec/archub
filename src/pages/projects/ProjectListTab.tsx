@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useProjects } from '@/hooks/use-projects'
+import { useProjects } from '@/features/projects'
 import { useUserOrganizationPreferences } from '@/features/organization'
 import { Folder, Edit, Trash2, Plus, CheckCircle2, Search, Filter, Bell } from 'lucide-react'
 import { supabase } from '@/lib/supabase'

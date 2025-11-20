@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useProjects } from '@/hooks/use-projects'
+import { useProjects } from '@/features/projects'
 import { useUserOrganizationPreferences } from '@/features/organization'
 import { Folder, Plus, Bell, Search, Filter } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'

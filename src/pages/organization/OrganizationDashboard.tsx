@@ -20,7 +20,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui-custom/KPICard';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useProjects } from '@/hooks/use-projects';
+import { useProjects } from '@/features/projects';
 import { useContacts } from '@/features/contacts';
 import { useMovements } from '@/hooks/use-movements';
 import { useUserOrganizationPreferences } from '@/features/organization';
