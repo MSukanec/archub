@@ -23,6 +23,16 @@ export default function Projects() {
     if (activeTab === 'settings') {
       return [
         <Button
+          key="add-project-modality"
+          onClick={() => openModal('projectModality', { isEditing: false })}
+          className="h-8 px-3 text-xs"
+          disabled={!organizationId}
+          variant="outline"
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          Agregar Modalidad
+        </Button>,
+        <Button
           key="add-project-type"
           onClick={() => openModal('projectType', { isEditing: false })}
           className="h-8 px-3 text-xs"

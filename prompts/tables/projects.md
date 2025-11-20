@@ -82,3 +82,32 @@ create unique INDEX IF not exists project_types_org_name_uniq on public.project_
 create trigger project_types_set_updated_at BEFORE
 update on project_types for EACH row
 execute FUNCTION set_timestamp ();
+
+---------- TABLA PROJECT_MODALITIES:
+
+create table public.project_modalities (
+  id uuid not null default gen_random_uuid (),
+  name text not null,
+  is_default boolean null default true,
+  created_at timestamp with time zone null default now(),
+  organization_id uuid null,
+  is_deleted boolean not null default false,
+  deleted_at timestamp with time zone null,
+  updated_at timestamp with time zone not null default now(),
+  created_by uuid null,
+  constraint project_modalities_pkey primary key (id),
+  constraint project_modalities_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
+  constraint project_modalities_org_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create index IF not exists project_modalities_org_idx on public.project_modalities using btree (organization_id) TABLESPACE pg_default;
+
+create index IF not exists project_modalities_not_deleted_idx on public.project_modalities using btree (is_deleted) TABLESPACE pg_default
+where
+  (is_deleted = false);
+
+create unique INDEX IF not exists project_modalities_org_name_uniq on public.project_modalities using btree (organization_id, lower(name)) TABLESPACE pg_default;
+
+create trigger project_modalities_set_updated_at BEFORE
+update on project_modalities for EACH row
+execute FUNCTION set_timestamp ();

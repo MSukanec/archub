@@ -1,0 +1,42 @@
+import { supabase } from '@/lib/supabase';
+
+export interface ProjectModality {
+  id: string;
+  name: string;
+  is_default: boolean;
+  created_at: string;
+  organization_id: string | null;
+  updated_at: string;
+  created_by: string | null;
+  is_deleted: boolean;
+  deleted_at: string | null;
+}
+
+/**
+ * Obtiene las modalidades de proyecto disponibles para una organización.
+ * 
+ * Incluye modalidades globales (organization_id = null) y modalidades específicas de la organización.
+ * Solo devuelve modalidades que no han sido eliminadas (is_deleted = false).
+ * Las modalidades se ordenan primero por is_default (descendente) y luego por nombre.
+ * 
+ * @param organizationId - ID de la organización
+ * @returns Array de modalidades de proyecto ordenadas, o array vacío
+ * @throws {Error} Si falla la query de Supabase
+ */
+export async function getProjectModalities(organizationId: string): Promise<ProjectModality[]> {
+  if (!supabase || !organizationId) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from('project_modalities')
+    .select('*')
+    .eq('is_deleted', false)
+    .or(`organization_id.eq.${organizationId},organization_id.is.null`)
+    .order('is_default', { ascending: false })
+    .order('name');
+
+  if (error) throw error;
+  
+  return data || [];
+}

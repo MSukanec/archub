@@ -1,7 +1,8 @@
-import { Tag, Edit2, Trash2 } from 'lucide-react';
+import { Tag, Edit2, Trash2, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectTypes, useDeleteProjectType } from '@/features/project-types/hooks/use-project-types';
+import { useProjectModalities, useDeleteProjectModality } from '@/features/project-modalities/hooks/use-project-modalities';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
@@ -17,6 +18,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useState } from 'react';
 import type { ProjectType } from '@/features/project-types/services/getProjectTypes';
+import type { ProjectModality } from '@/features/project-modalities/services/getProjectModalities';
 
 export default function ProjectSettingsTab() {
   const { toast } = useToast();
@@ -24,14 +26,21 @@ export default function ProjectSettingsTab() {
   const organizationId = userData?.organization?.id;
   const { openModal } = useGlobalModalStore();
   
-  const { data: projectTypes = [], isLoading } = useProjectTypes(organizationId);
-  const deleteMutation = useDeleteProjectType();
+  const { data: projectTypes = [], isLoading: typesLoading } = useProjectTypes(organizationId);
+  const { data: projectModalities = [], isLoading: modalitiesLoading } = useProjectModalities(organizationId);
+  const deleteTypeMutation = useDeleteProjectType();
+  const deleteModalityMutation = useDeleteProjectModality();
 
   const [typeToDelete, setTypeToDelete] = useState<ProjectType | null>(null);
+  const [modalityToDelete, setModalityToDelete] = useState<ProjectModality | null>(null);
 
   // Separar tipos del sistema y de la organización
   const systemTypes = projectTypes.filter(type => type.organization_id === null);
   const customTypes = projectTypes.filter(type => type.organization_id !== null);
+
+  // Separar modalidades del sistema y de la organización
+  const systemModalities = projectModalities.filter(modality => modality.organization_id === null);
+  const customModalities = projectModalities.filter(modality => modality.organization_id !== null);
 
   const handleEditType = (type: ProjectType) => {
     if (!organizationId) {
@@ -48,11 +57,26 @@ export default function ProjectSettingsTab() {
     });
   };
 
+  const handleEditModality = (modality: ProjectModality) => {
+    if (!organizationId) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo obtener la información de la organización',
+        variant: 'destructive'
+      });
+      return;
+    }
+    openModal('projectModality', { 
+      projectModality: modality,
+      isEditing: true 
+    });
+  };
+
   const handleDeleteType = async () => {
     if (!typeToDelete || !organizationId) return;
 
     try {
-      await deleteMutation.mutateAsync({
+      await deleteTypeMutation.mutateAsync({
         typeId: typeToDelete.id,
         organizationId
       });
@@ -72,7 +96,31 @@ export default function ProjectSettingsTab() {
     }
   };
 
-  if (isLoading) {
+  const handleDeleteModality = async () => {
+    if (!modalityToDelete || !organizationId) return;
+
+    try {
+      await deleteModalityMutation.mutateAsync({
+        modalityId: modalityToDelete.id,
+        organizationId
+      });
+
+      toast({
+        title: 'Modalidad eliminada',
+        description: 'La modalidad de proyecto se eliminó correctamente'
+      });
+      setModalityToDelete(null);
+    } catch (error) {
+      console.error('Error deleting project modality:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo eliminar la modalidad de proyecto',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  if (typesLoading || modalitiesLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <LoadingSpinner />
@@ -198,7 +246,101 @@ export default function ProjectSettingsTab() {
         </div>
       </div>
 
-      {/* Alert Dialog para confirmar eliminación */}
+      {/* Sección: Modalidades de Proyecto */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column - Descripción */}
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <Layers className="h-5 w-5 text-[var(--accent)]" />
+            <h2 className="text-lg font-semibold">Modalidades de Proyecto</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Gestiona las modalidades de proyecto disponibles. 
+            Las modalidades del sistema son predefinidas y no se pueden modificar. 
+            Puedes crear modalidades personalizadas para categorizar tus proyectos según su fase o enfoque.
+          </p>
+        </div>
+
+        {/* Right Column - Contenido */}
+        <div className="space-y-6">
+          {/* Modalidades del Sistema */}
+          {systemModalities.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium text-muted-foreground">Modalidades del Sistema</h3>
+              {systemModalities.map((modality) => (
+                <div 
+                  key={modality.id}
+                  className="flex items-center justify-between p-4 rounded-lg border border-border bg-card"
+                  data-testid={`card-project-modality-${modality.id}`}
+                >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{modality.name}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 ml-4">
+                    <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                      Sistema
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Modalidades Personalizadas */}
+          {customModalities.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium text-muted-foreground">Modalidades Personalizadas</h3>
+              {customModalities.map((modality) => (
+                <div 
+                  key={modality.id}
+                  className="flex items-center justify-between p-4 rounded-lg border border-border bg-card"
+                  data-testid={`card-project-modality-${modality.id}`}
+                >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{modality.name}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 ml-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEditModality(modality)}
+                      data-testid={`button-edit-modality-${modality.id}`}
+                      disabled={!organizationId}
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setModalityToDelete(modality)}
+                      data-testid={`button-delete-modality-${modality.id}`}
+                      disabled={!organizationId}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Estado vacío para modalidades personalizadas */}
+          {customModalities.length === 0 && (
+            <div className="p-8 text-center rounded-lg border border-dashed border-border">
+              <Layers className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground mb-4">
+                No hay modalidades personalizadas. Crea una para categorizar tus proyectos de manera única.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Alert Dialog para confirmar eliminación de tipo */}
       <AlertDialog open={!!typeToDelete} onOpenChange={() => setTypeToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -212,6 +354,28 @@ export default function ProjectSettingsTab() {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDeleteType}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Alert Dialog para confirmar eliminación de modalidad */}
+      <AlertDialog open={!!modalityToDelete} onOpenChange={() => setModalityToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar modalidad de proyecto?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción eliminará permanentemente la modalidad "{modalityToDelete?.name}".
+              Los proyectos existentes con esta modalidad no se verán afectados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteModality}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Eliminar
