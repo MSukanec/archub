@@ -314,10 +314,10 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   // Table columns
   const columns = [
     {
-      key: 'avatar',
-      label: '',
-      width: '60px',
-      sortable: false,
+      key: 'clientName',
+      label: 'Cliente',
+      width: '220px',
+      sortable: true,
       render: (client: EnrichedClient) => {
         const avatarUrl = client.contacts?.linked_user?.avatar_url;
         const initials = client.contacts?.first_name?.[0] && client.contacts?.last_name?.[0]
@@ -325,20 +325,17 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
           : client.contacts?.first_name?.[0] || '?';
         
         return (
-          <Avatar className="h-8 w-8">
-            {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
-            <AvatarFallback>
-              {initials}
-            </AvatarFallback>
-          </Avatar>
+          <div className="flex items-center gap-3">
+            <Avatar className="h-8 w-8">
+              {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
+              <AvatarFallback>
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <span className="font-semibold">{client.clientName}</span>
+          </div>
         );
       },
-    },
-    {
-      key: 'clientName',
-      label: 'Cliente',
-      sortable: true,
-      cellClassName: 'font-semibold',
     },
     {
       key: 'total_committed_amount',

@@ -207,7 +207,7 @@ export function Clients() {
   }
 
   return (
-    <Layout headerProps={headerProps} wide={true}>
+    <Layout headerProps={headerProps} wide={false}>
       <div className="space-y-4">
         {activeTab === "dashboard" && (
           <ClientDashboardTab 
