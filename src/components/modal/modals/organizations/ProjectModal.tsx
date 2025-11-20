@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import ProjectColorAdvanced from "@/components/projects/ProjectColorAdvanced";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useOrganizationMembers } from "@/hooks/use-organization-members";
+import { useOrganizationMembers } from "@/features/organization";
 import { useProjectTypes } from "@/hooks/use-project-types";
 import { useProjectModalities } from "@/hooks/use-project-modalities";
 import { useProjectContext } from "@/stores/projectContext";

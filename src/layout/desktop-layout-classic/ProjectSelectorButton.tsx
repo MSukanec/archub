@@ -8,14 +8,15 @@ import { useProjectsLite } from "@/hooks/use-projects-lite";
 import { useProjectContext } from "@/stores/projectContext";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useUpdateUserOrganizationPreferences } from "@/hooks/use-user-organization-preferences";
+import { useUpdateUserOrganizationPreferences } from "@/features/organization";
 import { cn } from "@/lib/utils";
 
 export function ProjectSelectorButton() {
   const { data: projectsLite = [] } = useProjectsLite();
   const { selectedProjectId, setSelectedProject, currentOrganizationId } = useProjectContext();
   const { data: userData } = useCurrentUser();
-  const updatePreferencesMutation = useUpdateUserOrganizationPreferences();
+  const userId = userData?.user?.id;
+  const updatePreferencesMutation = useUpdateUserOrganizationPreferences(userId);
   const [open, setOpen] = useState(false);
   const [, navigate] = useLocation();
 

@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Users } from "lucide-react";
-import { useOrganizationMembers } from "@/hooks/use-organization-members";
+import { useOrganizationMembers } from "@/features/organization";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { cn } from "@/lib/utils";
 

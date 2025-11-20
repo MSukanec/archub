@@ -48,7 +48,7 @@ import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMovements, useToggleMovementFavorite } from "@/hooks/use-movements";
 import { useOrganizationDefaultCurrency, useOrganizationCurrencies } from "@/hooks/use-currencies";
-import { useOrganizationWallets } from "@/hooks/use-organization-wallets";
+import { useOrganizationWallets } from "@/features/organization";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useProjectsMap } from "@/hooks/use-projects";
 

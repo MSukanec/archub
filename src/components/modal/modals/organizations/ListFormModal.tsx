@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useCreateKanbanList, useUpdateKanbanList } from "@/hooks/use-kanban";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useOrganizationMembers } from "@/hooks/use-organization-members";
+import { useOrganizationMembers } from "@/features/organization";
 import { useToast } from "@/hooks/use-toast";
 import { useModalPanelStore } from "../../form/modalPanelStore";
 

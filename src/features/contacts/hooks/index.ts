@@ -9,8 +9,6 @@ export * from './use-update-contact-type';
 export * from './use-delete-contact-type';
 export * from './use-contact-attachments';
 export * from './use-upload-attachment';
-export * from './use-delete-attachment';
-export * from './use-set-avatar';
 export * from './use-create-contact-attachment';
 export * from './use-delete-contact-attachment';
 export * from './use-set-contact-avatar';

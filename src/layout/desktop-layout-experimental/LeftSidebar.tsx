@@ -5,7 +5,7 @@ import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useProjectsLite } from "@/hooks/use-projects-lite";
 import { useProject } from "@/hooks/use-projects";
 import { useUserMode } from "@/hooks/use-user-mode";
-import { useUserOrganizationPreferences } from "@/hooks/use-user-organization-preferences";
+import { useUserOrganizationPreferences } from "@/features/organization";
 import { isButtonExcluded } from "@/config/modes";
 import { cn } from "@/lib/utils";
 import { useProjectContext } from '@/stores/projectContext';
@@ -120,7 +120,7 @@ export function LeftSidebar() {
   const currentProjectName = currentProject?.name || "Seleccionar Proyecto";
   
   // Get user preferences to check if they explicitly chose "Organization" view
-  const { data: userPreferences, isLoading: preferencesLoading } = useUserOrganizationPreferences(currentOrganizationId || undefined);
+  const { data: userPreferences, isLoading: preferencesLoading } = useUserOrganizationPreferences(userId, currentOrganizationId || undefined);
   
   // Helper to check if there are projects available
   const hasProjects = projectsLite.length > 0;

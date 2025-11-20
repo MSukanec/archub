@@ -15,7 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import UserSelectorField from "@/components/ui-custom/fields/UserSelectorField";
 import { useCreateKanbanCard, useUpdateKanbanCard } from "@/hooks/use-kanban";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useOrganizationMembers } from "@/hooks/use-organization-members";
+import { useOrganizationMembers } from "@/features/organization";
 import { useToast } from "@/hooks/use-toast";
 
 const cardSchema = z.object({
