@@ -13,6 +13,7 @@
 export { useLearningDashboard } from './use-learning-dashboard';
 export { useLearningDashboardFast } from './use-learning-dashboard-fast';
 export { useLearningCourses } from './use-learning-courses';
+export { useAdminCourses } from './use-admin-courses';
 export { useCourseOverview } from './use-course-overview';
 export { useCourseStructure } from './use-course-structure';
 export { useCourseProgress } from './use-course-progress';
@@ -35,6 +36,7 @@ export { useCourseRecentMarkers } from './use-course-recent-markers';
 
 // ========== PRICING (QUERIES) ==========
 export { useCoursePricing } from './use-course-pricing';
+export { useCoursePrice } from './use-course-price';
 
 // ========== MUTATIONS - PROGRESS ==========
 export { useUpdateLessonProgress } from './use-update-lesson-progress';
