@@ -21,7 +21,7 @@ import CourseCatalog from "@/pages/public/CourseCatalog";
 // Protected Pages
 
 
-import Projects from "@/pages/professional/projects/Projects";
+import Projects from "@/pages/projects/Projects";
 
 
 

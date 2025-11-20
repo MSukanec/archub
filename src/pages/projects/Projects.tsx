@@ -8,6 +8,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
 import ProjectActivesTab from './ProjectActivesTab'
 import ProjectListTab from './ProjectListTab'
+import ProjectSettingsTab from './ProjectSettingsTab'
 
 export default function Projects() {
   const { openModal } = useGlobalModalStore()
@@ -37,6 +38,11 @@ export default function Projects() {
         id: 'list',
         label: 'Lista de Proyectos',
         isActive: activeTab === 'list'
+      },
+      {
+        id: 'settings',
+        label: 'Ajustes',
+        isActive: activeTab === 'settings'
       },
     ],
     onTabChange: (tabId: string) => setActiveTab(tabId),
@@ -73,6 +79,7 @@ export default function Projects() {
       <div className="space-y-6">
         {activeTab === 'actives' && <ProjectActivesTab />}
         {activeTab === 'list' && <ProjectListTab />}
+        {activeTab === 'settings' && <ProjectSettingsTab />}
       </div>
     </Layout>
   )
