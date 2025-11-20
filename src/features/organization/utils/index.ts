@@ -1,74 +1,21 @@
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
 import { ACTIVITY_ACTIONS } from '@/utils/logActivity';
+import type { ActivityLog, ActivityDisplayInfo } from '../types';
 
-export interface ActivityLog {
-  id: string;
-  organization_id: string;
-  user_id: string;
-  action: string;
-  target_table: string;
-  target_id: string;
-  metadata: Record<string, any>;
-  created_at: string;
-  user?: {
-    id: string;
-    full_name: string;
-    avatar_url?: string;
-    email: string;
-  };
-}
-
-export function useOrganizationActivityLogs(organizationId: string | undefined) {
-  return useQuery({
-    queryKey: ['organization-activity-logs', organizationId],
-    queryFn: async (): Promise<ActivityLog[]> => {
-      if (!organizationId) return [];
-
-      console.log('Fetching organization activity logs for:', organizationId);
-
-      const { data, error } = await supabase
-        .from('organization_activity_logs')
-        .select(`
-          id,
-          organization_id,
-          user_id,
-          action,
-          target_table,
-          target_id,
-          metadata,
-          created_at,
-          users (
-            id,
-            full_name,
-            avatar_url,
-            email
-          )
-        `)
-        .eq('organization_id', organizationId)
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (error) {
-        console.error('Error fetching activity logs:', error);
-        return [];
-      }
-
-      console.log('Activity logs fetched:', data?.length || 0);
-      
-      return data?.map((log: any) => ({
-        ...log,
-        user: Array.isArray(log.users) ? log.users[0] : log.users
-      })) as ActivityLog[] || [];
-    },
-    enabled: !!organizationId
-  });
-}
-
-export function getActivityDisplayInfo(log: ActivityLog) {
+/**
+ * Obtiene información de display para un log de actividad.
+ * 
+ * Transforma el log de actividad en información visual que incluye:
+ * - Icono apropiado según el tipo de acción
+ * - Label descriptivo de la acción
+ * - Color para UI
+ * - Descripción detallada basada en metadata
+ * 
+ * @param log - Log de actividad a procesar
+ * @returns Información de display con icon, label, color, description y title
+ */
+export function getActivityDisplayInfo(log: ActivityLog): ActivityDisplayInfo {
   const { action, target_table, metadata } = log;
 
-  // Mapeo de acciones a información de display
   const actionInfo: Record<string, { icon: string; label: string; color: string }> = {
     [ACTIVITY_ACTIONS.CREATE_MOVEMENT]: { icon: '💰', label: 'Movimiento Creado', color: 'blue' },
     [ACTIVITY_ACTIONS.UPDATE_MOVEMENT]: { icon: '✏️', label: 'Movimiento Editado', color: 'yellow' },
@@ -102,7 +49,6 @@ export function getActivityDisplayInfo(log: ActivityLog) {
 
   const info = actionInfo[action] || { icon: '📊', label: 'Actividad', color: 'gray' };
 
-  // Generar descripción basada en metadata
   let description = '';
   
   switch (action) {
