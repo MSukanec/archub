@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tantml:react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { setContactAvatar } from '../services';
 import { CONTACT_QUERY_KEYS } from '../constants';
 import { useToast } from '@/hooks/use-toast';
