@@ -27,7 +27,7 @@ Preferred communication style: Simple, everyday language.
 ### System Design Choices
 - **Module Architecture**: Feature-Sliced Design adopted for modules like CLIENTS, COURSE-LANDING, FINANCES, CONTACTS, ORGANIZATION, and LEARNING, ensuring strict separation of concerns.
 - **Multi-tenancy**: Services consistently filter data by `organization_id`.
-- **Soft Delete**: Implemented for key entities like contacts, contact types, and projects.
+- **Soft Delete**: Implemented for key entities like contacts, contact types, projects, and project types.
 - **Financial Management**: Unified financial movements audit system with multi-currency conversion, KPI calculation, and detailed transaction views.
 - **Contacts Management**: Comprehensive CRUD operations for contacts and contact types, including attachment management and avatar uploads.
 - **Organization Dashboard**: Provides an overview of organization members, stats, activity logs, and wallets.
@@ -44,6 +44,7 @@ Preferred communication style: Simple, everyday language.
 - **Media Uploads**: Unified `UploadImageAndShowField` component for project image uploads with dual-mode support (normal upload mode for existing projects, preview mode for new projects), 2MB size limit, drag-and-drop, and inline editing capabilities.
 - **Sitelog Statistics & Filters**: Complete filtering system for construction site logs with statistics dashboard and timeline visualization.
 - **Media Lightbox System**: Unified lightbox for viewing images and videos in sitelog entries.
+- **Project Types Management**: Complete Feature-Sliced Design implementation for managing project types. System includes global types (organization_id = null) and organization-specific custom types. ProjectSettingsTab allows creating, editing, and soft-deleting custom project types with color, icon, and category support. Services validate organizationId and prevent operations on system types. Modal follows ProjectTypeModal pattern with validation guards.
 
 ## External Dependencies
 - **Supabase**: Authentication.
