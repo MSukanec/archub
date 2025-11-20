@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
-import { useCourses } from '@/hooks/use-courses';
+import { useAdminCourses } from '@/hooks/use-admin-courses';
 
 const courseModuleSchema = z.object({
   course_id: z.string().min(1, 'El curso es requerido'),
@@ -49,7 +49,7 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
-  const { data: courses = [] } = useCourses();
+  const { data: courses = [] } = useAdminCourses();
 
   const form = useForm<CourseModuleFormData>({
     resolver: zodResolver(courseModuleSchema),

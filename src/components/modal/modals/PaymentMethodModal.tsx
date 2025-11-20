@@ -25,7 +25,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import mercadoPagoLogo from "/MercadoPago_logo.png";
 import paypalLogo from "/Paypal_2014_logo.png";
-import { useCoursePrice } from "@/hooks/useCoursePrice";
+import { useCoursePricing } from "@/features/learning/hooks/use-course-pricing";
 import { getApiBase } from "@/utils/apiBase";
 
 // Helper para hacer fetch con timeout y evitar requests colgadas
@@ -73,7 +73,7 @@ export default function PaymentMethodModal({
     selectedMethod === "paypal" ? "paypal" : "mercadopago";
   const currentCurrency = selectedMethod === "paypal" ? "USD" : "ARS";
 
-  const { price: priceData, loading: priceLoading } = useCoursePrice(
+  const { data: priceData, isLoading: priceLoading } = useCoursePricing(
     courseSlug,
     currentCurrency,
     currentProvider,
@@ -123,8 +123,8 @@ export default function PaymentMethodModal({
       const { data, error } = await supabase.rpc("validate_coupon", {
         p_code: couponCode.trim(),
         p_course_id: courseData.id,
-        p_price: priceData.amount,
-        p_currency: priceData.currency_code,
+        p_price: priceData.price,
+        p_currency: priceData.currency,
       });
 
       if (error) {
@@ -204,7 +204,7 @@ export default function PaymentMethodModal({
       // Si el cupón deja el precio en 0 → inscripción directa
       const currentFinalPrice = appliedCoupon
         ? appliedCoupon.final_price
-        : priceData?.amount || 0;
+        : priceData?.price || 0;
       if (currentFinalPrice === 0) {
         const API_BASE = getApiBase();
         const response = await fetch(`${API_BASE}/api/checkout/free-enroll`, {
@@ -254,7 +254,7 @@ export default function PaymentMethodModal({
         user_id: userRecord.id,
         course_slug: courseSlug,
         currency: "ARS",
-        months: priceData?.months || 12,
+        months: 12,
       };
 
       console.log("[MP] Creando preferencia…", requestBody);
@@ -506,7 +506,7 @@ Enviá el comprobante a: pagos@archub.com.ar`;
 
   const finalPrice = appliedCoupon
     ? appliedCoupon.final_price
-    : priceData?.amount || 0;
+    : priceData?.price || 0;
   const hasDiscount = appliedCoupon && appliedCoupon.discount > 0;
 
   const headerContent = (
@@ -773,8 +773,8 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                             Precio original
                           </span>
                           <span className="text-muted-foreground line-through">
-                            {priceData.currency_code === "ARS" ? "$" : "USD"}{" "}
-                            {priceData.amount.toLocaleString()}
+                            {priceData.currency === "ARS" ? "$" : "USD"}{" "}
+                            {priceData.price.toLocaleString()}
                           </span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
@@ -782,7 +782,7 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                             Cupón ({appliedCoupon.code})
                           </span>
                           <span style={{ color: "var(--accent)" }}>
-                            −{priceData.currency_code === "ARS" ? "$" : "USD"}{" "}
+                            −{priceData.currency === "ARS" ? "$" : "USD"}{" "}
                             {appliedCoupon.discount.toLocaleString()}
                           </span>
                         </div>
@@ -790,7 +790,7 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                       </div>
                     )}
                     <p className="text-2xl font-bold mt-1">
-                      {priceData.currency_code === "ARS" ? "$" : "USD"}{" "}
+                      {priceData.currency === "ARS" ? "$" : "USD"}{" "}
                       {finalPrice.toLocaleString()}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">

@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
-import { useCourses } from '@/hooks/use-courses';
+import { useAdminCourses } from '@/hooks/use-admin-courses';
 
 const lessonSchema = z.object({
   module_id: z.string().min(1, 'El módulo es requerido'),
@@ -57,7 +57,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState<string>('');
-  const { data: courses = [] } = useCourses();
+  const { data: courses = [] } = useAdminCourses();
 
   const { data: modules = [] } = useQuery({
     queryKey: ['/api/course-modules', selectedCourseId],

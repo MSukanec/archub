@@ -37,7 +37,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useCoursePrice } from "@/hooks/useCoursePrice";
+import { useCoursePricing } from "@/features/learning/hooks/use-course-pricing";
 import { getApiBase } from "@/utils/apiBase";
 import { toE164, fromE164 } from "@/utils/phone";
 import { orderedMethods, getPaymentButtonText } from "@/utils/paymentOrder";
@@ -107,7 +107,7 @@ export default function CheckoutPage() {
   const currentProvider = selectedMethod === "paypal" ? "paypal" : "mercadopago";
   const currentCurrency = selectedMethod === "paypal" ? "USD" : "ARS";
 
-  const { price: priceData, loading: priceLoading } = useCoursePrice(
+  const { data: priceData, isLoading: priceLoading } = useCoursePricing(
     courseSlug,
     currentCurrency,
     currentProvider
@@ -311,8 +311,8 @@ export default function CheckoutPage() {
       const { data, error } = await supabase.rpc("validate_coupon", {
         p_code: couponCode.trim(),
         p_course_id: courseData.id,
-        p_price: priceData.amount,
-        p_currency: priceData.currency_code,
+        p_price: priceData.price,
+        p_currency: priceData.currency,
       });
 
       if (error) {
@@ -389,7 +389,7 @@ export default function CheckoutPage() {
       // Si el cupón deja el precio en 0 → inscripción directa
       const currentFinalPrice = appliedCoupon
         ? appliedCoupon.final_price
-        : priceData?.amount || 0;
+        : priceData?.price || 0;
       if (currentFinalPrice === 0) {
         const API_BASE = getApiBase();
         const response = await fetch(`${API_BASE}/api/checkout/free-enroll`, {
@@ -439,7 +439,7 @@ export default function CheckoutPage() {
         user_id: userRecord.id,
         course_slug: courseSlug,
         currency: "ARS",
-        months: priceData?.months || 12,
+        months: 12,
         ...(appliedCoupon && { code: appliedCoupon.code }),
       };
 
@@ -709,7 +709,7 @@ Titular: Matias Esteban Sukanec`;
       // Calcular precio con descuento de cupón
       const priceWithCoupon = appliedCoupon
         ? appliedCoupon.final_price
-        : priceData?.amount || 0;
+        : priceData?.price || 0;
       
       // Calcular descuento de transferencia (5%)
       const transferDiscount = priceWithCoupon * (TRANSFER_DISCOUNT_PERCENT / 100);
@@ -1103,7 +1103,7 @@ Titular: Matias Esteban Sukanec`;
   const TRANSFER_DISCOUNT_PERCENT = 5.0; // 5%
   
   // Calcular precio con descuento de cupón primero
-  const priceAfterCoupon = appliedCoupon ? appliedCoupon.final_price : priceData?.amount || 0;
+  const priceAfterCoupon = appliedCoupon ? appliedCoupon.final_price : priceData?.price || 0;
   
   // Calcular descuento de transferencia si el método seleccionado es "transfer"
   const transferDiscountAmount = selectedMethod === "transfer" 
@@ -1875,7 +1875,7 @@ Titular: Matias Esteban Sukanec`;
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Precio</span>
                         <span className="font-medium">
-                          {currentCurrency} ${priceData?.amount?.toLocaleString("es-AR") || "0"}
+                          {currentCurrency} ${priceData?.price?.toLocaleString("es-AR") || "0"}
                         </span>
                       </div>
 
