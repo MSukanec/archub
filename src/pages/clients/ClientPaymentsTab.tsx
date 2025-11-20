@@ -516,7 +516,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         <div className="flex flex-col items-end">
           <span className="font-bold">{formatAmount(payment.amount, payment.currency?.symbol)}</span>
           {payment.exchange_rate && (
-            <span className="text-xs text-muted-foreground" style={{ fontSize: '12px' }}>
+            <span className="text-xs text-muted-foreground">
               Cot. {payment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
             </span>
           )}

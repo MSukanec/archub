@@ -524,7 +524,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             <DollarSign className="w-4 h-4 inline mr-1" />
             Compromiso Total
           </StatCardTitle>
-          <StatCardValue className="text-2xl md:text-3xl">
+          <StatCardValue>
             {commitmentCurrency ? formatCurrencyKPI(kpis.totalCommittedAmount) : <span>-</span>}
           </StatCardValue>
           <StatCardMeta>
@@ -538,7 +538,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             <CheckCircle2 className="w-4 h-4 inline mr-1" />
             Pagado
           </StatCardTitle>
-          <StatCardValue className="text-2xl md:text-3xl">
+          <StatCardValue>
             {commitmentCurrency ? formatCurrencyKPI(kpis.totalPaidAmount) : <span>-</span>}
           </StatCardValue>
           <StatCardMeta>
@@ -552,7 +552,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             <AlertCircle className="w-4 h-4 inline mr-1" />
             Saldo
           </StatCardTitle>
-          <StatCardValue className="text-2xl md:text-3xl">
+          <StatCardValue>
             {commitmentCurrency ? formatCurrencyKPI(kpis.totalBalanceDue) : <span>-</span>}
           </StatCardValue>
           <StatCardMeta>
@@ -566,7 +566,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             <ListChecks className="w-4 h-4 inline mr-1" />
             Items de Pago
           </StatCardTitle>
-          <StatCardValue className="text-2xl md:text-3xl">
+          <StatCardValue>
             {kpis.totalSchedulePaid}/{kpis.totalScheduleItems}
           </StatCardValue>
           <StatCardMeta>{kpis.schedulePercentage.toFixed(1)}% completado</StatCardMeta>
