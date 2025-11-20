@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { FolderPlus, Check, Upload, X, ImageIcon } from "lucide-react";
+import { FolderPlus, Check, Upload, X } from "lucide-react";
 import chroma from "chroma-js";
 
 import { FormModalLayout } from "../../form/FormModalLayout";
@@ -388,27 +388,6 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
         <div className="space-y-4">
-          {/* Image Upload - Unified component for both creating and editing */}
-          <div className="space-y-2">
-            <FormLabel className="flex items-center gap-2">
-              <ImageIcon className="h-4 w-4 text-[var(--accent)]" />
-              Imagen Principal
-              {!isEditing && <span className="text-xs text-muted-foreground font-normal">(opcional)</span>}
-            </FormLabel>
-            
-            <UploadImageAndShowField
-              projectId={isEditing ? editingProject?.id : undefined}
-              organizationId={organizationId}
-              currentImageUrl={isEditing ? (editingProject?.project_data as any)?.project_image_url || null : null}
-              previewMode={!isEditing}
-              previewUrl={imagePreviewUrl}
-              onFileSelect={!isEditing ? handleFileSelect : undefined}
-              onImageUpdate={isEditing ? () => {
-                queryClient.invalidateQueries({ queryKey: ['projects'] });
-              } : undefined}
-            />
-          </div>
-
           {/* Nombre y Estado en 2 columnas */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
@@ -502,6 +481,26 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
                   <FormMessage />
                 </FormItem>
               )}
+            />
+          </div>
+
+          {/* Image Upload - Unified component for both creating and editing */}
+          <div className="space-y-2">
+            <FormLabel>
+              Imagen Principal
+              {!isEditing && <span className="text-xs text-muted-foreground font-normal"> (opcional)</span>}
+            </FormLabel>
+            
+            <UploadImageAndShowField
+              projectId={isEditing ? editingProject?.id : undefined}
+              organizationId={organizationId}
+              currentImageUrl={isEditing ? (editingProject?.project_data as any)?.project_image_url || null : null}
+              previewMode={!isEditing}
+              previewUrl={imagePreviewUrl}
+              onFileSelect={!isEditing ? handleFileSelect : undefined}
+              onImageUpdate={isEditing ? () => {
+                queryClient.invalidateQueries({ queryKey: ['projects'] });
+              } : undefined}
             />
           </div>
 
