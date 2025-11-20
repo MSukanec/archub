@@ -50,3 +50,35 @@ create index IF not exists idx_projects_code on public.projects using btree (cod
 create trigger projects_set_updated_at BEFORE
 update on projects for EACH row
 execute FUNCTION set_timestamp ();
+
+---------- TABLA PROJECT_TYPES:
+
+create table public.project_types (
+  id uuid not null default gen_random_uuid (),
+  name text not null,
+  category text null,
+  icon text null,
+  color text null,
+  created_at timestamp with time zone null default now(),
+  is_default boolean not null default false,
+  organization_id uuid null,
+  is_deleted boolean not null default false,
+  deleted_at timestamp with time zone null,
+  updated_at timestamp with time zone not null default now(),
+  created_by uuid null,
+  constraint project_types_pkey primary key (id),
+  constraint project_types_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
+  constraint project_types_org_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create index IF not exists project_types_not_deleted_idx on public.project_types using btree (is_deleted) TABLESPACE pg_default
+where
+  (is_deleted = false);
+
+create index IF not exists project_types_org_idx on public.project_types using btree (organization_id) TABLESPACE pg_default;
+
+create unique INDEX IF not exists project_types_org_name_uniq on public.project_types using btree (organization_id, lower(name)) TABLESPACE pg_default;
+
+create trigger project_types_set_updated_at BEFORE
+update on project_types for EACH row
+execute FUNCTION set_timestamp ();

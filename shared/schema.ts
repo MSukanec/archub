@@ -273,6 +273,33 @@ export const project_data = pgTable("project_data", {
 export type ProjectData = typeof project_data.$inferSelect;
 export type InsertProjectData = typeof project_data.$inferInsert;
 
+// Project Types Table
+export const project_types = pgTable("project_types", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  category: text("category"),
+  icon: text("icon"),
+  color: text("color"),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  is_default: boolean("is_default").notNull().default(false),
+  organization_id: uuid("organization_id"),
+  is_deleted: boolean("is_deleted").notNull().default(false),
+  deleted_at: timestamp("deleted_at", { withTimezone: true }),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  created_by: uuid("created_by"),
+});
+
+export const insertProjectTypeSchema = createInsertSchema(project_types).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+  is_deleted: true,
+  deleted_at: true,
+});
+
+export type ProjectType = typeof project_types.$inferSelect;
+export type InsertProjectType = z.infer<typeof insertProjectTypeSchema>;
+
 export type InsertOrganizationInvitation = z.infer<typeof insertOrganizationInvitationSchema>;
 
 // Notifications Table

@@ -16,6 +16,7 @@ import { useLocation } from 'wouter';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import ProjectBasicDataTab from './ProjectBasicDataTab';
 import ProjectLocationTab from './ProjectLocationTab';
+import ProjectSettingsTab from '../projects/ProjectSettingsTab';
 
 export default function ProjectData() {
   const [activeTab, setActiveTab] = useState('basic');
@@ -215,6 +216,11 @@ Generado desde Seencel`);
       id: 'location',
       label: 'Ubicación',
       isActive: activeTab === 'location'
+    },
+    {
+      id: 'settings',
+      label: 'Configuración',
+      isActive: activeTab === 'settings'
     }
   ];
 
@@ -294,6 +300,8 @@ Generado desde Seencel`);
         return <ProjectBasicDataTab />;
       case 'location':
         return <ProjectLocationTab />;
+      case 'settings':
+        return <ProjectSettingsTab />;
       default:
         return <ProjectBasicDataTab />;
     }

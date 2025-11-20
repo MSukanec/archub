@@ -1,0 +1,45 @@
+import { supabase } from '@/lib/supabase';
+
+export interface ProjectType {
+  id: string;
+  name: string;
+  category: string | null;
+  icon: string | null;
+  color: string | null;
+  is_default: boolean;
+  created_at: string;
+  organization_id: string | null;
+  updated_at: string;
+  created_by: string | null;
+  is_deleted: boolean;
+  deleted_at: string | null;
+}
+
+/**
+ * Obtiene los tipos de proyecto disponibles para una organización.
+ * 
+ * Incluye tipos globales (organization_id = null) y tipos específicos de la organización.
+ * Solo devuelve tipos que no han sido eliminados (is_deleted = false).
+ * Los tipos se ordenan primero por is_default (descendente) y luego por nombre.
+ * 
+ * @param organizationId - ID de la organización
+ * @returns Array de tipos de proyecto ordenados, o array vacío
+ * @throws {Error} Si falla la query de Supabase
+ */
+export async function getProjectTypes(organizationId: string): Promise<ProjectType[]> {
+  if (!supabase || !organizationId) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from('project_types')
+    .select('*')
+    .eq('is_deleted', false)
+    .or(`organization_id.eq.${organizationId},organization_id.is.null`)
+    .order('is_default', { ascending: false })
+    .order('name');
+
+  if (error) throw error;
+  
+  return data || [];
+}

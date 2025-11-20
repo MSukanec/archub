@@ -48,6 +48,7 @@ import { ChangelogFormModal } from '../modals/admin/ChangelogFormModal';
 import { SiteLogModal } from '@/features/sitelog/modals/SiteLogModal';
 import { SiteLogModalView } from '@/features/sitelog/modals/SiteLogModalView';
 import { SiteLogTypeModal } from '@/features/sitelog/modals/SiteLogTypeModal';
+import { ProjectTypeModal } from '@/features/project-types/modals/ProjectTypeModal';
 import { PersonnelAttendanceModal } from '../modals/personnel/PersonnelAttendanceModal';
 import { PersonnelAddModal } from '../modals/personnel/PersonnelAddModal';
 import { PersonnelDataModal } from '../modals/personnel/PersonnelDataModal';
@@ -207,6 +208,8 @@ export function ModalFactory() {
       return <SiteLogModalView modalData={data || {}} onClose={closeModal} />;
     case 'siteLogType':
       return <SiteLogTypeModal modalData={data || undefined} onClose={closeModal} />;
+    case 'projectType':
+      return <ProjectTypeModal modalData={data || undefined} onClose={closeModal} />;
     case 'attendance':
       return <PersonnelAttendanceModal modalData={data || undefined} onClose={closeModal} />;
     case 'personnel':

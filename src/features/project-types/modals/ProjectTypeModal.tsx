@@ -1,0 +1,306 @@
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Tag } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
+import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
+import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { createProjectType } from '../services/createProjectType';
+import { updateProjectType } from '../services/updateProjectType';
+import type { ProjectType } from '../services/getProjectTypes';
+
+// Schema de validación
+const projectTypeSchema = z.object({
+  name: z.string().min(1, 'El nombre es requerido').max(100, 'Máximo 100 caracteres'),
+  category: z.string().max(100, 'Máximo 100 caracteres').optional(),
+  icon: z.string().max(50, 'Máximo 50 caracteres').optional(),
+  color: z.string()
+    .refine(
+      (val) => !val || /^#[0-9A-Fa-f]{6}$/.test(val),
+      'Debe ser un color hexadecimal válido (#RRGGBB)'
+    )
+    .optional(),
+});
+
+type ProjectTypeFormData = z.infer<typeof projectTypeSchema>;
+
+interface ProjectTypeModalProps {
+  modalData?: {
+    projectType?: ProjectType;
+    isEditing?: boolean;
+  };
+  onClose: () => void;
+}
+
+export function ProjectTypeModal({ modalData, onClose }: ProjectTypeModalProps) {
+  const { projectType, isEditing = false } = modalData || {};
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { data: userData } = useCurrentUser();
+
+  const form = useForm<ProjectTypeFormData>({
+    resolver: zodResolver(projectTypeSchema),
+    defaultValues: {
+      name: '',
+      category: '',
+      icon: '',
+      color: undefined,
+    }
+  });
+
+  // Cargar datos si es edición
+  useEffect(() => {
+    if (projectType) {
+      form.reset({
+        name: projectType.name || '',
+        category: projectType.category || '',
+        icon: projectType.icon || '',
+        color: projectType.color || undefined,
+      });
+    } else {
+      form.reset({
+        name: '',
+        category: '',
+        icon: '',
+        color: undefined,
+      });
+    }
+  }, [projectType, form]);
+
+  const handleClose = () => {
+    form.reset();
+    onClose();
+  };
+
+  // Define mutations inline siguiendo el patrón GOLD STANDARD
+  const createMutation = useMutation({
+    mutationFn: createProjectType,
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['project-types', variables.organizationId] });
+      toast({
+        title: 'Tipo creado',
+        description: 'El tipo de proyecto se creó correctamente'
+      });
+      handleClose();
+    },
+    onError: (error) => {
+      console.error('Error creating project type:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo crear el tipo de proyecto',
+        variant: 'destructive'
+      });
+    }
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ typeId, organizationId, data }: {
+      typeId: string;
+      organizationId: string;
+      data: any;
+    }) => updateProjectType(typeId, organizationId, data),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['project-types', variables.organizationId] });
+      toast({
+        title: 'Tipo actualizado',
+        description: 'El tipo de proyecto se actualizó correctamente'
+      });
+      handleClose();
+    },
+    onError: (error) => {
+      console.error('Error updating project type:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo actualizar el tipo de proyecto',
+        variant: 'destructive'
+      });
+    }
+  });
+
+  const onSubmit = (data: ProjectTypeFormData) => {
+    if (!userData?.organization?.id) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo obtener la información de la organización',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (isEditing && projectType) {
+      updateMutation.mutate({
+        typeId: projectType.id,
+        organizationId: userData.organization.id,
+        data: {
+          name: data.name,
+          category: data.category || null,
+          icon: data.icon || null,
+          color: data.color || null,
+        }
+      });
+    } else {
+      createMutation.mutate({
+        name: data.name,
+        category: data.category || null,
+        icon: data.icon || null,
+        color: data.color || null,
+        organizationId: userData.organization.id,
+      });
+    }
+  };
+
+  const editPanel = (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Nombre <span className="text-red-500">*</span>
+              </FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Ej: Edificio Residencial" 
+                  {...field}
+                  data-testid="input-project-type-name"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="category"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Categoría (opcional)</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Ej: Residencial" 
+                  {...field}
+                  data-testid="input-project-type-category"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="icon"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Icono (opcional)</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Ej: building" 
+                    {...field}
+                    data-testid="input-project-type-icon"
+                  />
+                </FormControl>
+                <p className="text-xs text-muted-foreground">
+                  Nombre del icono de Lucide React
+                </p>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="color"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Color (opcional)</FormLabel>
+                <div className="flex gap-2">
+                  {field.value && (
+                    <FormControl>
+                      <Input 
+                        type="color" 
+                        value={field.value}
+                        onChange={field.onChange}
+                        className="w-16 h-10 p-1 cursor-pointer"
+                        data-testid="input-project-type-color"
+                      />
+                    </FormControl>
+                  )}
+                  {!field.value && (
+                    <div 
+                      onClick={() => field.onChange('#84cc16')}
+                      className="w-16 h-10 border border-input rounded-md flex items-center justify-center cursor-pointer hover:bg-accent"
+                      data-testid="button-project-type-color-placeholder"
+                    >
+                      <div className="w-6 h-6 rounded border border-border bg-muted" />
+                    </div>
+                  )}
+                  <Input 
+                    placeholder="#84cc16" 
+                    value={field.value || ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '') {
+                        field.onChange(undefined);
+                      } else if (/^#[0-9A-Fa-f]{0,6}$/.test(val)) {
+                        field.onChange(val);
+                      }
+                    }}
+                    className="flex-1"
+                    maxLength={7}
+                  />
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </form>
+    </Form>
+  );
+
+  const headerContent = (
+    <FormModalHeader 
+      title={isEditing ? 'Editar Tipo' : 'Nuevo Tipo'}
+      description={isEditing 
+        ? 'Modifica los detalles del tipo de proyecto'
+        : 'Crea un nuevo tipo de proyecto personalizado para tu organización'
+      }
+      icon={Tag}
+    />
+  );
+
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={handleClose}
+      rightLabel={isEditing ? 'Guardar Cambios' : 'Crear Tipo'}
+      onRightClick={form.handleSubmit(onSubmit)}
+      isSubmitting={isSubmitting}
+    />
+  );
+
+  return (
+    <FormModalLayout
+      columns={1}
+      viewPanel={<div></div>}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      onClose={handleClose}
+      isEditing={true}
+    />
+  );
+}
