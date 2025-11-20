@@ -6,17 +6,6 @@ import { useProjectModalities, useDeleteProjectModality } from '@/features/proje
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { useState } from 'react';
 import type { ProjectType } from '@/features/project-types/services/getProjectTypes';
 import type { ProjectModality } from '@/features/project-modalities/services/getProjectModalities';
 
@@ -30,9 +19,6 @@ export default function ProjectSettingsTab() {
   const { data: projectModalities = [], isLoading: modalitiesLoading } = useProjectModalities(organizationId);
   const deleteTypeMutation = useDeleteProjectType();
   const deleteModalityMutation = useDeleteProjectModality();
-
-  const [typeToDelete, setTypeToDelete] = useState<ProjectType | null>(null);
-  const [modalityToDelete, setModalityToDelete] = useState<ProjectModality | null>(null);
 
   // Separar tipos del sistema y de la organización
   const systemTypes = projectTypes.filter(type => type.organization_id === null);
@@ -83,63 +69,74 @@ export default function ProjectSettingsTab() {
     });
   };
 
-  const handleDeleteType = async () => {
-    if (!typeToDelete || !organizationId) return;
+  const handleDeleteType = (type: ProjectType) => {
+    if (!organizationId) return;
 
-    try {
-      await deleteTypeMutation.mutateAsync({
-        typeId: typeToDelete.id,
-        organizationId
-      });
+    openModal('delete-confirmation', {
+      mode: 'simple',
+      title: '¿Eliminar tipo de proyecto?',
+      description: `Se eliminará el tipo "${type.name}". Los proyectos existentes con este tipo no se verán afectados.`,
+      onConfirm: async () => {
+        try {
+          await deleteTypeMutation.mutateAsync({
+            typeId: type.id,
+            organizationId
+          });
 
-      toast({
-        title: 'Tipo eliminado',
-        description: 'El tipo de proyecto se eliminó correctamente'
-      });
-      setTypeToDelete(null);
-    } catch (error) {
-      console.error('Error deleting project type:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo eliminar el tipo de proyecto',
-        variant: 'destructive'
-      });
-    }
+          toast({
+            title: 'Tipo eliminado',
+            description: 'El tipo de proyecto se eliminó correctamente'
+          });
+        } catch (error) {
+          console.error('Error deleting project type:', error);
+          toast({
+            title: 'Error',
+            description: 'No se pudo eliminar el tipo de proyecto',
+            variant: 'destructive'
+          });
+        }
+      }
+    });
   };
 
-  const handleDeleteModality = async () => {
-    if (!modalityToDelete || !organizationId) return;
+  const handleDeleteModality = (modality: ProjectModality) => {
+    if (!organizationId) return;
 
     // Validar que no se intente eliminar una modalidad del sistema
-    if (modalityToDelete.organization_id === null) {
+    if (modality.organization_id === null) {
       toast({
         title: 'Operación no permitida',
         description: 'No se pueden eliminar las modalidades del sistema',
         variant: 'destructive'
       });
-      setModalityToDelete(null);
       return;
     }
 
-    try {
-      await deleteModalityMutation.mutateAsync({
-        modalityId: modalityToDelete.id,
-        organizationId
-      });
+    openModal('delete-confirmation', {
+      mode: 'simple',
+      title: '¿Eliminar modalidad de proyecto?',
+      description: `Se eliminará la modalidad "${modality.name}". Los proyectos existentes con esta modalidad no se verán afectados.`,
+      onConfirm: async () => {
+        try {
+          await deleteModalityMutation.mutateAsync({
+            modalityId: modality.id,
+            organizationId
+          });
 
-      toast({
-        title: 'Modalidad eliminada',
-        description: 'La modalidad de proyecto se eliminó correctamente'
-      });
-      setModalityToDelete(null);
-    } catch (error) {
-      console.error('Error deleting project modality:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo eliminar la modalidad de proyecto',
-        variant: 'destructive'
-      });
-    }
+          toast({
+            title: 'Modalidad eliminada',
+            description: 'La modalidad de proyecto se eliminó correctamente'
+          });
+        } catch (error) {
+          console.error('Error deleting project modality:', error);
+          toast({
+            title: 'Error',
+            description: 'No se pudo eliminar la modalidad de proyecto',
+            variant: 'destructive'
+          });
+        }
+      }
+    });
   };
 
   if (typesLoading || modalitiesLoading) {
@@ -186,27 +183,20 @@ export default function ProjectSettingsTab() {
               {systemTypes.map((type) => (
                 <div 
                   key={type.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-border bg-card"
+                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
                   data-testid={`card-project-type-${type.id}`}
                 >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
                     {type.color && (
                       <div 
-                        className="w-4 h-4 rounded-full flex-shrink-0"
+                        className="w-3 h-3 rounded-full flex-shrink-0"
                         style={{ backgroundColor: type.color }}
                       />
                     )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{type.name}</p>
-                      {type.category && (
-                        <p className="text-sm text-muted-foreground truncate">
-                          {type.category}
-                        </p>
-                      )}
-                    </div>
+                    <p className="text-sm font-medium truncate">{type.name}</p>
                   </div>
                   <div className="flex items-center gap-2 ml-4">
-                    <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
                       Sistema
                     </span>
                   </div>
@@ -221,26 +211,19 @@ export default function ProjectSettingsTab() {
               {customTypes.map((type) => (
                 <div 
                   key={type.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-border bg-card"
+                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
                   data-testid={`card-project-type-${type.id}`}
                 >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
                     {type.color && (
                       <div 
-                        className="w-4 h-4 rounded-full flex-shrink-0"
+                        className="w-3 h-3 rounded-full flex-shrink-0"
                         style={{ backgroundColor: type.color }}
                       />
                     )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{type.name}</p>
-                      {type.category && (
-                        <p className="text-sm text-muted-foreground truncate">
-                          {type.category}
-                        </p>
-                      )}
-                    </div>
+                    <p className="text-sm font-medium truncate">{type.name}</p>
                   </div>
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="flex items-center gap-1 ml-4">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -248,16 +231,16 @@ export default function ProjectSettingsTab() {
                       data-testid={`button-edit-type-${type.id}`}
                       disabled={!organizationId}
                     >
-                      <Edit2 className="h-4 w-4" />
+                      <Edit2 className="h-3.5 w-3.5" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setTypeToDelete(type)}
+                      onClick={() => handleDeleteType(type)}
                       data-testid={`button-delete-type-${type.id}`}
                       disabled={!organizationId}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </div>
@@ -311,16 +294,14 @@ export default function ProjectSettingsTab() {
               {systemModalities.map((modality) => (
                 <div 
                   key={modality.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-border bg-card"
+                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
                   data-testid={`card-project-modality-${modality.id}`}
                 >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{modality.name}</p>
-                    </div>
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{modality.name}</p>
                   </div>
                   <div className="flex items-center gap-2 ml-4">
-                    <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
                       Sistema
                     </span>
                   </div>
@@ -335,15 +316,13 @@ export default function ProjectSettingsTab() {
               {customModalities.map((modality) => (
                 <div 
                   key={modality.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-border bg-card"
+                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
                   data-testid={`card-project-modality-${modality.id}`}
                 >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{modality.name}</p>
-                    </div>
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{modality.name}</p>
                   </div>
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="flex items-center gap-1 ml-4">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -351,16 +330,16 @@ export default function ProjectSettingsTab() {
                       data-testid={`button-edit-modality-${modality.id}`}
                       disabled={!organizationId}
                     >
-                      <Edit2 className="h-4 w-4" />
+                      <Edit2 className="h-3.5 w-3.5" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setModalityToDelete(modality)}
+                      onClick={() => handleDeleteModality(modality)}
                       data-testid={`button-delete-modality-${modality.id}`}
                       disabled={!organizationId}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </div>
@@ -379,50 +358,6 @@ export default function ProjectSettingsTab() {
           )}
         </div>
       </div>
-
-      {/* Alert Dialog para confirmar eliminación de tipo */}
-      <AlertDialog open={!!typeToDelete} onOpenChange={() => setTypeToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar tipo de proyecto?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción eliminará permanentemente el tipo "{typeToDelete?.name}".
-              Los proyectos existentes con este tipo no se verán afectados.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteType}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Alert Dialog para confirmar eliminación de modalidad */}
-      <AlertDialog open={!!modalityToDelete} onOpenChange={() => setModalityToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar modalidad de proyecto?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción eliminará permanentemente la modalidad "{modalityToDelete?.name}".
-              Los proyectos existentes con esta modalidad no se verán afectados.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteModality}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
