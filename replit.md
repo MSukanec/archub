@@ -27,7 +27,7 @@ Preferred communication style: Simple, everyday language.
 ### System Design Choices
 - **Module Architecture**: Feature-Sliced Design adopted for modules like CLIENTS, COURSE-LANDING, FINANCES, CONTACTS, ORGANIZATION, and LEARNING, ensuring strict separation of concerns.
 - **Multi-tenancy**: Services consistently filter data by `organization_id`.
-- **Soft Delete**: Implemented for key entities like contacts and contact types.
+- **Soft Delete**: Implemented for key entities like contacts, contact types, and projects.
 - **Financial Management**: Unified financial movements audit system with multi-currency conversion, KPI calculation, and detailed transaction views.
 - **Contacts Management**: Comprehensive CRUD operations for contacts and contact types, including attachment management and avatar uploads.
 - **Organization Dashboard**: Provides an overview of organization members, stats, activity logs, and wallets.
@@ -41,7 +41,7 @@ Preferred communication style: Simple, everyday language.
 - **AI Integration**: GPT-4o-powered intelligent assistant with function-calling tools.
 - **User Presence & Analytics**: Dual-layer tracking for real-time presence and historical usage.
 - **Project Data Management**: Organized project information with map integration and auto-save.
-- **Media Uploads**: Standardized component for media uploads with progress bars and lightbox.
+- **Media Uploads**: Unified `UploadImageAndShowField` component for project image uploads with dual-mode support (normal upload mode for existing projects, preview mode for new projects), 2MB size limit, drag-and-drop, and inline editing capabilities.
 - **Sitelog Statistics & Filters**: Complete filtering system for construction site logs with statistics dashboard and timeline visualization.
 - **Media Lightbox System**: Unified lightbox for viewing images and videos in sitelog entries.
 

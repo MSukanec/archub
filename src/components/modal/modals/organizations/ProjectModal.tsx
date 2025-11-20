@@ -28,7 +28,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from 'wouter';
 import { uploadProjectImage, updateProjectImageUrl } from "@/lib/storage/uploadProjectImage";
-import ImageUploadAndShowField from "@/components/ui-custom/fields/ImageUploadAndShowField";
+import UploadImageAndShowField from "@/components/ui-custom/fields/UploadImageAndShowField";
 
 // Paleta de colores predefinidos
 const PRESET_COLORS = [
@@ -113,7 +113,6 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
   // Image upload states
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
-  const [dragActive, setDragActive] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   // Encontrar el member_id del usuario actual
@@ -164,29 +163,11 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
     setPanel('edit');
   }, [editingProject, form, setPanel]);
 
-  // Image handlers
-  const handleFileSelect = (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    
-    const file = files[0];
-    
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast({
-        title: "Error",
-        description: "Solo se permiten archivos de imagen",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      toast({
-        title: "Error", 
-        description: "La imagen no puede superar los 10MB",
-        variant: "destructive"
-      });
+  // Image handlers - simplified for preview mode
+  const handleFileSelect = (file: File | null) => {
+    if (!file) {
+      setSelectedImageFile(null);
+      setImagePreviewUrl(null);
       return;
     }
     
@@ -198,28 +179,6 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       setImagePreviewUrl(reader.result as string);
     };
     reader.readAsDataURL(file);
-  };
-
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    handleFileSelect(e.dataTransfer.files);
-  };
-
-  const handleRemoveImage = () => {
-    setSelectedImageFile(null);
-    setImagePreviewUrl(null);
   };
 
   const createProjectMutation = useMutation({
@@ -359,7 +318,6 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
     // Clean up image state
     setSelectedImageFile(null);
     setImagePreviewUrl(null);
-    setDragActive(false);
     onClose();
   };
 
@@ -430,104 +388,26 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
         <div className="space-y-4">
-          {/* Image Upload - Show for creating or editing */}
-          {!isEditing ? (
-            <div className="space-y-2">
-              <FormLabel className="flex items-center gap-2">
-                <ImageIcon className="h-4 w-4 text-[var(--accent)]" />
-                Imagen Principal
-                <span className="text-xs text-muted-foreground font-normal">(opcional)</span>
-              </FormLabel>
-              
-              <div 
-                className={`relative w-full h-48 rounded-lg overflow-hidden transition-colors ${
-                  dragActive ? 'bg-primary/10' : 'bg-muted/30'
-                }`}
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-              >
-                {imagePreviewUrl ? (
-                  <>
-                    <img
-                      src={imagePreviewUrl}
-                      alt="Vista previa de la imagen del proyecto"
-                      className="w-full h-full object-cover"
-                    />
-                    
-                    <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="default"
-                          onClick={() => document.getElementById('project-image-input')?.click()}
-                        >
-                          <Upload className="h-4 w-4 mr-1" />
-                          Cambiar
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="default"
-                          onClick={handleRemoveImage}
-                          className="bg-red-500 hover:bg-red-600 text-white"
-                        >
-                          <X className="h-4 w-4 mr-1" />
-                          Eliminar
-                        </Button>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div 
-                    className="w-full h-full flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-[var(--accent)]/40 hover:border-[var(--accent)] transition-colors rounded-lg"
-                    onClick={() => document.getElementById('project-image-input')?.click()}
-                  >
-                    <div className="text-center space-y-3 p-6">
-                      <div className="w-12 h-12 mx-auto bg-muted/50 rounded-full flex items-center justify-center border border-muted-foreground/20">
-                        <Upload className="h-6 w-6 text-muted-foreground" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-sm text-muted-foreground">
-                          Arrastra una imagen aquí o haz clic para seleccionar
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          JPG, PNG, WebP • Máx. 10MB
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <input
-                id="project-image-input"
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileSelect(e.target.files)}
-                className="hidden"
-              />
-            </div>
-          ) : (
-            editingProject && organizationId && (
-              <div className="space-y-2">
-                <FormLabel className="flex items-center gap-2">
-                  <ImageIcon className="h-4 w-4 text-[var(--accent)]" />
-                  Imagen Principal
-                </FormLabel>
-                <ImageUploadAndShowField
-                  projectId={editingProject.id}
-                  organizationId={organizationId}
-                  currentImageUrl={(editingProject.project_data as any)?.project_image_url || null}
-                  onImageUpdate={() => {
-                    queryClient.invalidateQueries({ queryKey: ['projects'] });
-                  }}
-                />
-              </div>
-            )
-          )}
+          {/* Image Upload - Unified component for both creating and editing */}
+          <div className="space-y-2">
+            <FormLabel className="flex items-center gap-2">
+              <ImageIcon className="h-4 w-4 text-[var(--accent)]" />
+              Imagen Principal
+              {!isEditing && <span className="text-xs text-muted-foreground font-normal">(opcional)</span>}
+            </FormLabel>
+            
+            <UploadImageAndShowField
+              projectId={isEditing ? editingProject?.id : undefined}
+              organizationId={organizationId}
+              currentImageUrl={isEditing ? (editingProject?.project_data as any)?.project_image_url || null : null}
+              previewMode={!isEditing}
+              previewUrl={imagePreviewUrl}
+              onFileSelect={!isEditing ? handleFileSelect : undefined}
+              onImageUpdate={isEditing ? () => {
+                queryClient.invalidateQueries({ queryKey: ['projects'] });
+              } : undefined}
+            />
+          </div>
 
           {/* Nombre y Estado en 2 columnas */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

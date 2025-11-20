@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ImageIcon, Palette, Settings } from 'lucide-react'
-import ImageUploadAndShowField from '@/components/ui-custom/fields/ImageUploadAndShowField'
+import UploadImageAndShowField from '@/components/ui-custom/fields/UploadImageAndShowField'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useProjectTypes } from '@/hooks/use-project-types'
@@ -300,7 +300,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
         {/* Right Column - Imagen Principal Content */}
         <div>
           {activeProjectId && organizationId && (
-            <ImageUploadAndShowField
+            <UploadImageAndShowField
               projectId={activeProjectId}
               organizationId={organizationId}
               currentImageUrl={projectImageUrl}

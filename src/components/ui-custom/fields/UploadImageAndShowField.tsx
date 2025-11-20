@@ -7,17 +7,23 @@ import { useToast } from '@/hooks/use-toast';
 import { uploadProjectImage, deleteProjectImage, updateProjectImageUrl } from '@/lib/storage/uploadProjectImage';
 
 interface ImageUploadAndShowFieldProps {
-  projectId: string;
-  organizationId: string;
+  projectId?: string;
+  organizationId?: string;
   currentImageUrl?: string | null;
   onImageUpdate?: (imageUrl: string | null) => void;
+  previewMode?: boolean;
+  onFileSelect?: (file: File | null) => void;
+  previewUrl?: string | null;
 }
 
 export default function ImageUploadAndShowField({
   projectId,
   organizationId,
   currentImageUrl,
-  onImageUpdate
+  onImageUpdate,
+  previewMode = false,
+  onFileSelect,
+  previewUrl
 }: ImageUploadAndShowFieldProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -26,6 +32,10 @@ export default function ImageUploadAndShowField({
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
+      if (!projectId || !organizationId) {
+        throw new Error('Project ID and Organization ID are required');
+      }
+      
       setIsUploading(true);
       
       // Upload image to storage
@@ -44,9 +54,11 @@ export default function ImageUploadAndShowField({
       onImageUpdate?.(imageUrl);
       // Invalidate multiple cache keys to update all views
       queryClient.invalidateQueries({ queryKey: ['projects'] });
-      queryClient.invalidateQueries({ queryKey: ['project', projectId] });
-      queryClient.invalidateQueries({ queryKey: ['project-data', projectId] });
-      queryClient.invalidateQueries({ queryKey: ['project-info', projectId] });
+      if (projectId) {
+        queryClient.invalidateQueries({ queryKey: ['project', projectId] });
+        queryClient.invalidateQueries({ queryKey: ['project-data', projectId] });
+        queryClient.invalidateQueries({ queryKey: ['project-info', projectId] });
+      }
       setIsUploading(false);
     },
     onError: (error: any) => {
@@ -61,6 +73,10 @@ export default function ImageUploadAndShowField({
 
   const removeMutation = useMutation({
     mutationFn: async () => {
+      if (!projectId || !organizationId) {
+        throw new Error('Project ID and Organization ID are required');
+      }
+      
       if (currentImageUrl) {
         // Extract file path from URL for deletion
         const urlParts = currentImageUrl.split('/');
@@ -78,9 +94,11 @@ export default function ImageUploadAndShowField({
       onImageUpdate?.(null);
       // Invalidate multiple cache keys to update all views
       queryClient.invalidateQueries({ queryKey: ['projects'] });
-      queryClient.invalidateQueries({ queryKey: ['project', projectId] });
-      queryClient.invalidateQueries({ queryKey: ['project-data', projectId] });
-      queryClient.invalidateQueries({ queryKey: ['project-info', projectId] });
+      if (projectId) {
+        queryClient.invalidateQueries({ queryKey: ['project', projectId] });
+        queryClient.invalidateQueries({ queryKey: ['project-data', projectId] });
+        queryClient.invalidateQueries({ queryKey: ['project-info', projectId] });
+      }
     },
     onError: (error: any) => {
       toast({
@@ -106,17 +124,26 @@ export default function ImageUploadAndShowField({
       return;
     }
     
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
       toast({
         title: "Error", 
-        description: "La imagen no puede superar los 10MB",
+        description: "La imagen no puede superar los 2MB",
         variant: "destructive"
       });
       return;
     }
     
-    uploadMutation.mutate(file);
+    // Preview mode: just notify parent with file
+    if (previewMode && onFileSelect) {
+      onFileSelect(file);
+      return;
+    }
+    
+    // Normal mode: upload immediately
+    if (projectId && organizationId) {
+      uploadMutation.mutate(file);
+    }
   };
 
   const handleDrag = (e: React.DragEvent) => {
@@ -140,6 +167,15 @@ export default function ImageUploadAndShowField({
     handleFileSelect(e.target.files);
   };
 
+  const displayUrl = previewMode ? previewUrl : currentImageUrl;
+  const handleRemove = () => {
+    if (previewMode && onFileSelect) {
+      onFileSelect(null);
+    } else if (!previewMode) {
+      removeMutation.mutate();
+    }
+  };
+
   return (
     <div className="w-full">
       {/* Hero Image Container */}
@@ -152,14 +188,14 @@ export default function ImageUploadAndShowField({
         onDragOver={handleDrag}
         onDrop={handleDrop}
       >
-        {currentImageUrl ? (
+        {displayUrl ? (
           <>
             {/* Existing Image */}
             <img
-              src={currentImageUrl}
+              src={displayUrl}
               alt="Imagen principal del proyecto"
               className="w-full h-full object-cover"
-              key={currentImageUrl} // Force re-render when URL changes
+              key={displayUrl} // Force re-render when URL changes
             />
             
             {/* Overlay with actions */}
@@ -170,7 +206,7 @@ export default function ImageUploadAndShowField({
                   size="sm"
                   variant="default"
                   onClick={() => document.getElementById('hero-image-input')?.click()}
-                  disabled={isUploading}
+                  disabled={isUploading && !previewMode}
                 >
                   <Camera className="h-4 w-4 mr-1" />
                   Cambiar
@@ -179,8 +215,8 @@ export default function ImageUploadAndShowField({
                   type="button"
                   size="sm"
                   variant="default"
-                  onClick={() => removeMutation.mutate()}
-                  disabled={removeMutation.isPending}
+                  onClick={handleRemove}
+                  disabled={removeMutation.isPending && !previewMode}
                   className="bg-red-500 hover:bg-red-600 text-white"
                 >
                   <X className="h-4 w-4 mr-1" />
@@ -205,7 +241,7 @@ export default function ImageUploadAndShowField({
                     Arrastra una imagen aquí o haz clic para seleccionar la imagen principal de tu proyecto
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Formatos: JPG, PNG, WebP • Tamaño máximo: 10MB
+                    Formatos: JPG, PNG, WebP • Tamaño máximo: 2MB
                   </p>
                 </div>
                 <Button disabled={isUploading} variant="default">
