@@ -1,4 +1,4 @@
-import { Tag, Edit2, Trash2, Layers } from 'lucide-react';
+import { Tag, Edit2, Trash2, Layers, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectTypes, useDeleteProjectType } from '@/features/project-types/hooks/use-project-types';
@@ -156,9 +156,20 @@ export default function ProjectSettingsTab() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column - Descripción */}
         <div>
-          <div className="flex items-center gap-2 mb-6">
-            <Tag className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="text-lg font-semibold">Tipos de Proyecto</h2>
+          <div className="flex items-center justify-between gap-2 mb-6">
+            <div className="flex items-center gap-2">
+              <Tag className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Tipos de Proyecto</h2>
+            </div>
+            <Button
+              onClick={() => openModal('projectType', { isEditing: false })}
+              size="sm"
+              disabled={!organizationId}
+              data-testid="button-add-project-type"
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Agregar Tipo
+            </Button>
           </div>
           <p className="text-sm text-muted-foreground">
             Gestiona los tipos de proyecto disponibles para clasificar tus proyectos. 
@@ -168,11 +179,10 @@ export default function ProjectSettingsTab() {
         </div>
 
         {/* Right Column - Contenido */}
-        <div className="space-y-6">
+        <div className="space-y-3">
           {/* Tipos del Sistema */}
           {systemTypes.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-muted-foreground">Tipos del Sistema</h3>
+            <>
               {systemTypes.map((type) => (
                 <div 
                   key={type.id}
@@ -202,13 +212,12 @@ export default function ProjectSettingsTab() {
                   </div>
                 </div>
               ))}
-            </div>
+            </>
           )}
 
           {/* Tipos Personalizados */}
           {customTypes.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-muted-foreground">Tipos Personalizados</h3>
+            <>
               {customTypes.map((type) => (
                 <div 
                   key={type.id}
@@ -253,11 +262,11 @@ export default function ProjectSettingsTab() {
                   </div>
                 </div>
               ))}
-            </div>
+            </>
           )}
 
           {/* Estado vacío para tipos personalizados */}
-          {customTypes.length === 0 && (
+          {customTypes.length === 0 && systemTypes.length === 0 && (
             <div className="p-8 text-center rounded-lg border border-dashed border-border">
               <Tag className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-sm text-muted-foreground mb-4">
@@ -272,9 +281,20 @@ export default function ProjectSettingsTab() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column - Descripción */}
         <div>
-          <div className="flex items-center gap-2 mb-6">
-            <Layers className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="text-lg font-semibold">Modalidades de Proyecto</h2>
+          <div className="flex items-center justify-between gap-2 mb-6">
+            <div className="flex items-center gap-2">
+              <Layers className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Modalidades de Proyecto</h2>
+            </div>
+            <Button
+              onClick={() => openModal('projectModality', { isEditing: false })}
+              size="sm"
+              disabled={!organizationId}
+              data-testid="button-add-project-modality"
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Agregar Modalidad
+            </Button>
           </div>
           <p className="text-sm text-muted-foreground">
             Gestiona las modalidades de proyecto disponibles. 
@@ -284,11 +304,10 @@ export default function ProjectSettingsTab() {
         </div>
 
         {/* Right Column - Contenido */}
-        <div className="space-y-6">
+        <div className="space-y-3">
           {/* Modalidades del Sistema */}
           {systemModalities.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-muted-foreground">Modalidades del Sistema</h3>
+            <>
               {systemModalities.map((modality) => (
                 <div 
                   key={modality.id}
@@ -307,13 +326,12 @@ export default function ProjectSettingsTab() {
                   </div>
                 </div>
               ))}
-            </div>
+            </>
           )}
 
           {/* Modalidades Personalizadas */}
           {customModalities.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-muted-foreground">Modalidades Personalizadas</h3>
+            <>
               {customModalities.map((modality) => (
                 <div 
                   key={modality.id}
@@ -347,11 +365,11 @@ export default function ProjectSettingsTab() {
                   </div>
                 </div>
               ))}
-            </div>
+            </>
           )}
 
           {/* Estado vacío para modalidades personalizadas */}
-          {customModalities.length === 0 && (
+          {customModalities.length === 0 && systemModalities.length === 0 && (
             <div className="p-8 text-center rounded-lg border border-dashed border-border">
               <Layers className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-sm text-muted-foreground mb-4">
