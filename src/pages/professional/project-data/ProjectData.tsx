@@ -16,7 +16,7 @@ import { useLocation } from 'wouter';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import ProjectBasicDataTab from './ProjectBasicDataTab';
 import ProjectLocationTab from './ProjectLocationTab';
-import ProjectSettingsTab from '../projects/ProjectSettingsTab';
+import ProjectSettingsTab from '@/pages/projects/ProjectSettingsTab';
 
 export default function ProjectData() {
   const [activeTab, setActiveTab] = useState('basic');

@@ -1,4 +1,4 @@
-import { Tag, Plus, Edit2, Trash2 } from 'lucide-react';
+import { Tag, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectTypes, useDeleteProjectType } from '@/features/project-types/hooks/use-project-types';
@@ -32,18 +32,6 @@ export default function ProjectSettingsTab() {
   // Separar tipos del sistema y de la organización
   const systemTypes = projectTypes.filter(type => type.organization_id === null);
   const customTypes = projectTypes.filter(type => type.organization_id !== null);
-
-  const handleAddType = () => {
-    if (!organizationId) {
-      toast({
-        title: 'Error',
-        description: 'No se pudo obtener la información de la organización',
-        variant: 'destructive'
-      });
-      return;
-    }
-    openModal('projectType', { isEditing: false });
-  };
 
   const handleEditType = (type: ProjectType) => {
     if (!organizationId) {
