@@ -406,7 +406,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'project',
       label: 'Proyecto',
       sortable: true,
-      width: '200px',
       render: (payment: ClientPaymentWithRelations) => {
         if (!payment.project) return '-';
         return (
@@ -426,7 +425,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'contact',
       label: 'Cliente',
       sortable: true,
-      width: '220px',
+      width: '280px',
       render: (payment: ClientPaymentWithRelations) => {
         const initials = payment.client?.contact?.first_name?.[0] && payment.client?.contact?.last_name?.[0]
           ? `${payment.client.contact.first_name[0]}${payment.client.contact.last_name[0]}`
@@ -452,17 +451,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           </div>
         );
       },
-    },
-    {
-      key: 'notes',
-      label: 'Notas',
-      sortable: true,
-      width: '400px',
-      render: (payment: ClientPaymentWithRelations) => (
-        <div className="max-w-full truncate" title={payment.notes || ''}>
-          {payment.notes || '-'}
-        </div>
-      ),
     },
     {
       key: 'reference',
@@ -533,21 +521,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           <Badge variant={statusInfo.variant} className={statusInfo.className}>
             {statusInfo.label}
           </Badge>
-        );
-      },
-    },
-    {
-      key: 'attachments',
-      label: (<Paperclip className="h-4 w-4" />) as any,
-      sortable: false,
-      align: 'center' as const,
-      width: '50px',
-      render: (payment: ClientPaymentWithRelations) => {
-        const attachmentCount = payment.file_url ? 1 : 0;
-        return (
-          <span className={attachmentCount > 0 ? 'font-medium' : 'text-muted-foreground'}>
-            {attachmentCount}
-          </span>
         );
       },
     },
@@ -787,6 +760,11 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
             </div>
           ),
         }}
+        leadingRowAction={(payment: ClientPaymentWithRelations) => payment.file_url ? {
+          label: 'Ver Adjunto',
+          icon: Paperclip,
+          onClick: () => window.open(payment.file_url!, '_blank'),
+        } : null}
         primaryRowAction={(payment: ClientPaymentWithRelations) => ({
           label: 'Ver',
           onClick: () => handleViewPayment(payment),
