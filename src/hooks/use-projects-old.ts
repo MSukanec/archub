@@ -72,6 +72,7 @@ export function useProjects(organizationId: string | undefined) {
         `)
         .eq('organization_id', organizationId)
         .eq('is_active', true)
+        .eq('is_deleted', false)
         .order('created_at', { ascending: false })
       
       if (error) {
@@ -162,6 +163,7 @@ export function useProject(projectId: string | undefined) {
         `)
         .eq('id', projectId)
         .eq('is_active', true)
+        .eq('is_deleted', false)
         .single()
       
       if (error) {

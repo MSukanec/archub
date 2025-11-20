@@ -141,6 +141,7 @@ export async function updateProject(
       .from('projects')
       .select('organization_id')
       .eq('id', params.projectId)
+      .eq('is_deleted', false)
       .maybeSingle();
 
     if (projectFetchError) {
@@ -168,7 +169,8 @@ export async function updateProject(
         custom_color_h: params.custom_color_h || null,
         custom_color_hex: params.custom_color_hex || null,
       })
-      .eq('id', params.projectId);
+      .eq('id', params.projectId)
+      .eq('is_deleted', false);
 
     if (projectError) {
       console.error('Error updating project:', projectError);
@@ -225,6 +227,7 @@ export async function updateProject(
       .from('projects')
       .select('*')
       .eq('id', params.projectId)
+      .eq('is_deleted', false)
       .maybeSingle();
 
     if (updatedFetchError) {
@@ -265,21 +268,18 @@ export async function deleteProject(
       return orgAccessResult;
     }
 
-    // First delete project_data (if exists)
-    await supabase
-      .from('project_data')
-      .delete()
-      .eq('project_id', params.projectId);
-
-    // Delete the main project with organization verification
+    // Soft delete: update is_deleted, deleted_at, and deleted_by
     const { error: projectError } = await supabase
       .from('projects')
-      .delete()
+      .update({
+        is_deleted: true,
+        deleted_at: new Date().toISOString()
+      })
       .eq('id', params.projectId)
       .eq('organization_id', params.organizationId);
 
     if (projectError) {
-      console.error('Error deleting project:', projectError);
+      console.error('Error soft deleting project:', projectError);
       return { success: false, error: 'Failed to delete project' };
     }
 

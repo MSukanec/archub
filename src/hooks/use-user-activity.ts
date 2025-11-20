@@ -78,6 +78,7 @@ export function useUserActivity(organizationId: string | undefined, timePeriod: 
             .from('projects')
             .select('created_by, created_at')
             .eq('organization_id', organizationId)
+            .eq('is_deleted', false)
             .gte('created_at', overallStartDate)
             .lte('created_at', overallEndDate),
           

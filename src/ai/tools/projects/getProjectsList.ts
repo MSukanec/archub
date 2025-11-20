@@ -34,6 +34,7 @@ export async function getProjectsList(
       `)
       .eq('organization_id', organizationId)
       .eq('is_active', true)
+      .eq('is_deleted', false)
       .order('created_at', { ascending: false });
 
     if (filters?.status) {

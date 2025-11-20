@@ -41,6 +41,7 @@ export async function getProjects(
         project_data!left(lat, lng, address, city, state, country, project_image_url)
       `)
       .eq('is_active', true)
+      .eq('is_deleted', false)
       .eq('organizations.is_active', true)
       .order('created_at', { ascending: false })
       .limit(500);

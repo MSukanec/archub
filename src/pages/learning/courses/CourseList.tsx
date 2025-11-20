@@ -2,7 +2,6 @@ import { Layout } from '@/layout/desktop/Layout'
 import { useState, useEffect } from 'react'
 import { useCourseListData, type CourseTabFilter } from '@/features/learning'
 import { BookOpen, Clock, ShoppingCart } from 'lucide-react'
-import { useLocation } from 'wouter'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { Tabs } from '@/components/ui-custom/Tabs'
@@ -14,8 +13,6 @@ import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
 export default function CourseList() {
   const [activeTab, setActiveTab] = useState<CourseTabFilter>('all')
   const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore()
-  
-  const [, navigate] = useLocation()
 
   useEffect(() => {
     setSidebarContext('learning')
@@ -28,8 +25,9 @@ export default function CourseList() {
     courseViewModels,
     enrolledCount,
     completedCount,
-    isLoading
-  } = useCourseListData(activeTab);
+    isLoading,
+    emptyState
+  } = useCourseListData(activeTab, () => setActiveTab('all'));
 
   const headerProps = {
     title: "Cursos",
@@ -62,25 +60,19 @@ export default function CourseList() {
           onValueChange={(v) => setActiveTab(v as CourseTabFilter)}
         />
 
-        {courseViewModels.length === 0 ? (
+        {emptyState.show ? (
           <EmptyState
             icon={<BookOpen className="w-12 h-12" />}
-            title="No hay cursos disponibles"
-            description={
-              activeTab === 'enrolled' 
-                ? "No estás inscripto en ningún curso actualmente" 
-                : activeTab === 'completed'
-                ? "Aún no has completado ningún curso"
-                : "Actualmente no hay cursos activos para mostrar"
-            }
+            title={emptyState.title}
+            description={emptyState.description}
             action={
-              activeTab !== 'all' ? (
+              emptyState.ctaText && emptyState.onCtaClick ? (
                 <Button
                   variant="default"
-                  onClick={() => setActiveTab('all')}
+                  onClick={emptyState.onCtaClick}
                   data-testid="button-view-all-courses"
                 >
-                  Ver todos los cursos
+                  {emptyState.ctaText}
                 </Button>
               ) : undefined
             }
@@ -149,7 +141,7 @@ export default function CourseList() {
                       className="w-full"
                       data-testid={`button-course-action-${courseVM.id}`}
                     >
-                      {courseVM.enrollmentStatus === 'not_enrolled' && (
+                      {courseVM.showCartIcon && (
                         <ShoppingCart className="h-4 w-4 mr-1" />
                       )}
                       {courseVM.ctaText}

@@ -38,6 +38,8 @@ export function OrganizationRecentProjects() {
         .from('projects')
         .select('*')
         .eq('organization_id', currentOrganization.id)
+        .eq('is_active', true)
+        .eq('is_deleted', false)
         .order('updated_at', { ascending: false })
         .limit(6)
       

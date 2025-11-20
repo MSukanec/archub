@@ -87,6 +87,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
         .from('projects')
         .select('*')
         .eq('id', activeProjectId)
+        .eq('is_deleted', false)
         .single();
         
       if (error) {

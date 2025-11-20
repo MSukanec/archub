@@ -25,6 +25,7 @@ export interface CourseViewModel {
   progressPercent: number;
   progressText: string;
   showProgress: boolean;
+  showCartIcon: boolean;
   ctaText: string;
   ctaDisabled: boolean;
   hasDuration: boolean;
@@ -92,9 +93,13 @@ function formatProgressText(completed: number, total: number): string {
  * - Lógica de navegación (onClick callbacks ya listos)
  * 
  * @param activeTab - Filtro activo ('enrolled' | 'completed' | 'all')
+ * @param onShowAllCourses - Callback para mostrar todos los cursos (cambiar a tab 'all')
  * @returns View-model completo con datos listos para renderizar
  */
-export function useCourseListData(activeTab: CourseTabFilter): UseCourseListDataResult {
+export function useCourseListData(
+  activeTab: CourseTabFilter,
+  onShowAllCourses?: () => void
+): UseCourseListDataResult {
   const { data: fullData, isLoading: fullDataLoading } = useLearningCourses();
   const [, navigate] = useLocation();
 
@@ -168,6 +173,7 @@ export function useCourseListData(activeTab: CourseTabFilter): UseCourseListData
       const progressText = formatProgressText(progress.completed, progress.total);
       const hasDuration = progress.totalDurationSec > 0;
       const showProgress = hasEnrollment;
+      const showCartIcon = enrollmentStatus === 'not_enrolled';
       const ctaText = hasEnrollment ? 'Ver curso' : 'Suscribirme';
       const ctaDisabled = false;
 
@@ -194,6 +200,7 @@ export function useCourseListData(activeTab: CourseTabFilter): UseCourseListData
         progressPercent: progress.percentage,
         progressText,
         showProgress,
+        showCartIcon,
         ctaText,
         ctaDisabled,
         hasDuration,
@@ -241,8 +248,8 @@ export function useCourseListData(activeTab: CourseTabFilter): UseCourseListData
         show: true,
         title: 'No tienes cursos inscritos',
         description: 'Explora nuestro catálogo y comienza a aprender hoy',
-        ctaText: 'Ver todos los cursos',
-        onCtaClick: () => navigate('/learning/courses')
+        ctaText: onShowAllCourses ? 'Ver todos los cursos' : undefined,
+        onCtaClick: onShowAllCourses
       };
     }
     
@@ -251,8 +258,8 @@ export function useCourseListData(activeTab: CourseTabFilter): UseCourseListData
         show: true,
         title: 'Aún no has completado ningún curso',
         description: 'Continúa con tus cursos en progreso para completarlos',
-        ctaText: 'Ver todos los cursos',
-        onCtaClick: () => navigate('/learning/courses')
+        ctaText: onShowAllCourses ? 'Ver todos los cursos' : undefined,
+        onCtaClick: onShowAllCourses
       };
     }
     
@@ -262,7 +269,7 @@ export function useCourseListData(activeTab: CourseTabFilter): UseCourseListData
       title: 'No hay cursos disponibles',
       description: 'Actualmente no hay cursos activos para mostrar'
     };
-  }, [courseViewModels.length, activeTab, navigate]);
+  }, [courseViewModels.length, activeTab, onShowAllCourses]);
 
   return {
     courseViewModels,

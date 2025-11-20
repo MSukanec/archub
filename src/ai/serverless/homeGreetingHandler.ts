@@ -212,6 +212,7 @@ export async function getHomeGreetingHandler(
       .select('id, name, status')
       .eq('organization_id', organizationId)
       .eq('status', 'active')
+      .eq('is_deleted', false)
       .order('created_at', { ascending: false })
       .limit(3) : { data: null };
 

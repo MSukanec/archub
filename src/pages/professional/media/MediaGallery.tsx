@@ -45,6 +45,7 @@ export function MediaGallery() {
         .select('id, name, organization_id')
         .eq('id', storedProjectId)
         .eq('organization_id', userData.organization.id)
+        .eq('is_deleted', false)
         .single();
       
       if (error) {

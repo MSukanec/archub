@@ -24,6 +24,7 @@ export async function getCurrentProject(
     .select('id, name, organization_id')
     .eq('id', projectId)
     .eq('organization_id', organizationId)
+    .eq('is_deleted', false)
     .single();
 
   if (error) {

@@ -60,7 +60,8 @@ export async function getOrganizationInfo(
       .from('projects')
       .select('id', { count: 'exact', head: true })
       .eq('organization_id', organizationId)
-      .eq('is_active', true);
+      .eq('is_active', true)
+      .eq('is_deleted', false);
 
     // Formatear respuesta
     let response = `📊 Información de "${organization.name}":\n\n`;

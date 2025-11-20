@@ -37,6 +37,7 @@ export function useProjectAccentColor() {
         .from('projects')
         .select('color, use_custom_color, custom_color_h, custom_color_hex')
         .eq('id', selectedProjectId)
+        .eq('is_deleted', false)
         .single();
 
       if (error) return null;

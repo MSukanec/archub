@@ -10,6 +10,8 @@ interface Project {
   organization_id: string
   is_active: boolean
   color?: string
+  is_deleted: boolean
+  deleted_at?: string | null
   project_data?: {
     project_type_id?: string
     modality_id?: string
@@ -60,6 +62,7 @@ export function useProjects(organizationId: string | undefined) {
         `)
         .eq('organization_id', organizationId)
         .eq('is_active', true)
+        .eq('is_deleted', false)
         .order('created_at', { ascending: false })
       
       console.log('Supabase query result:', { data, error });
@@ -125,6 +128,7 @@ export function useProject(projectId: string | undefined) {
         `)
         .eq('id', projectId)
         .eq('is_active', true)
+        .eq('is_deleted', false)
         .single()
       
       if (error) {
@@ -172,6 +176,7 @@ export function useProjectsMap(organizationId: string | undefined) {
         .select('id, name, color')
         .eq('organization_id', organizationId)
         .eq('is_active', true)
+        .eq('is_deleted', false)
       
       if (error) {
         throw error

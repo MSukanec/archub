@@ -40,7 +40,8 @@ async function searchProjects(
   const { data: projects, error } = await supabase
     .from('projects')
     .select('id, name')
-    .eq('organization_id', organizationId);
+    .eq('organization_id', organizationId)
+    .eq('is_deleted', false);
   
   if (error || !projects || projects.length === 0) {
     return [];

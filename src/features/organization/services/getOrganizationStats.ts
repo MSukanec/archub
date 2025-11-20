@@ -33,7 +33,8 @@ export async function getOrganizationStats(
       .from('projects')
       .select('*', { count: 'exact', head: true })
       .eq('organization_id', organizationId)
-      .eq('is_active', true);
+      .eq('is_active', true)
+      .eq('is_deleted', false);
 
     const { count: documentsCount } = await supabase
       .from('design_documents')

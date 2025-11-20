@@ -52,6 +52,7 @@ export async function getProjectDetails(
       `)
       .eq('organization_id', organizationId)
       .eq('is_active', true)
+      .eq('is_deleted', false)
       .ilike('name', `%${projectName}%`);
 
     if (error) {
@@ -65,6 +66,7 @@ export async function getProjectDetails(
         .select('name')
         .eq('organization_id', organizationId)
         .eq('is_active', true)
+        .eq('is_deleted', false)
         .limit(5);
       
       if (allProjects && allProjects.length > 0) {

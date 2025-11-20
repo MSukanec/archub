@@ -168,6 +168,7 @@ export async function getAllFinancialMovements(
           .from('projects')
           .select('id, name, code, color')
           .eq('id', payment.project_id)
+          .eq('is_deleted', false)
           .single();
 
         // Fetch creator data

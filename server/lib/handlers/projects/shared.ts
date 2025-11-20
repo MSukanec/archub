@@ -98,6 +98,7 @@ export async function getProjectById(
     .from('projects')
     .select('*')
     .eq('id', projectId)
+    .eq('is_deleted', false)
     .limit(1);
 
   if (error) {

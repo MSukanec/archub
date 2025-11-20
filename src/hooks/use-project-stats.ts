@@ -16,6 +16,7 @@ export function useProjectStats(projectId: string | null) {
         .from('projects')
         .select('*')
         .eq('id', projectId)
+        .eq('is_deleted', false)
         .single()
 
       // Get project data (including image) separately

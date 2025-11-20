@@ -84,6 +84,7 @@ export async function updateProjectImageUrl(
       .from('projects')
       .select('organization_id')
       .eq('id', projectId)
+      .eq('is_deleted', false)
       .single();
 
     if (projectError || !projectData) {
