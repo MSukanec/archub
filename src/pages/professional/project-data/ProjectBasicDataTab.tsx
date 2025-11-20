@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
-import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
+import { useUserOrganizationPreferences } from '@/features/organization'
 import { supabase } from '@/lib/supabase'
 import { useDebouncedAutoSave } from '@/components/save'
 import { Label } from '@/components/ui/label'

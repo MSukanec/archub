@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useOrganizationMembers } from '@/hooks/use-organization-members';
+import { useOrganizationMembers } from '@/features/organization';
 import { getActivityData } from '../services/getActivityData';
 import type { ActivityTimePeriod } from '../types';
 

@@ -25,7 +25,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useOrganizationMembers } from '@/hooks/use-organization-members'
+import { useOrganizationMembers } from '@/features/organization'
 import { useLocation } from 'wouter'
 
 const attendanceSchema = z.object({

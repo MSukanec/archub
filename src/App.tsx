@@ -52,7 +52,7 @@ import Calendar from "@/pages/professional/calendar/Calendar";
 // Media Pages (Lazy Loaded - incluye librerías pesadas de PDF)
 const Media = lazy(() => import("@/pages/media/Media"));
 
-import OrganizationDashboard from "@/pages/professional/organization/OrganizationDashboard";
+import OrganizationDashboard from "@/pages/organization/OrganizationDashboard";
 
 import Profile from "@/pages/profile/Profile";
 

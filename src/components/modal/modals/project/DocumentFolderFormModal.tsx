@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useToast } from '@/hooks/use-toast';
-import { useOrganizationMembers } from '@/hooks/use-organization-members';
+import { useOrganizationMembers } from '@/features/organization';
 import { useCreateDesignDocumentFolder, useUpdateDesignDocumentFolder } from '@/hooks/use-design-document-folders';
 import { FormModalLayout } from '../../form/FormModalLayout';
 import { FormModalHeader } from '../../form/FormModalHeader';

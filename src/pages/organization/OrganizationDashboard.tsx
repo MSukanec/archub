@@ -21,9 +21,9 @@ import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent }
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects } from '@/hooks/use-projects';
-import { useContacts } from '@/hooks/use-contacts';
+import { useContacts } from '@/features/contacts';
 import { useMovements } from '@/hooks/use-movements';
-import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences';
+import { useUserOrganizationPreferences } from '@/features/organization';
 import { useProjectContext } from '@/stores/projectContext';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useToast } from '@/hooks/use-toast';
@@ -42,10 +42,11 @@ export default function OrganizationDashboard() {
   const { data: userData, isLoading } = useCurrentUser();
   const { currentOrganizationId, setSelectedProject } = useProjectContext();
   const organizationId = currentOrganizationId || userData?.organization?.id;
+  const userId = userData?.user?.id;
   const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId || undefined);
-  const { data: contacts = [], isLoading: contactsLoading } = useContacts();
+  const { data: contacts = [], isLoading: contactsLoading } = useContacts(organizationId);
   const { data: movements = [], isLoading: movementsLoading } = useMovements(organizationId, null);
-  const { data: userOrgPrefs } = useUserOrganizationPreferences(organizationId);
+  const { data: userOrgPrefs } = useUserOrganizationPreferences(userId, organizationId);
   const activeProjectId = userOrgPrefs?.last_project_id;
   const { setSidebarLevel, sidebarLevel } = useNavigationStore();
   const { toast } = useToast();

@@ -31,7 +31,7 @@ import { queryClient } from "@/lib/queryClient";
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useMobile } from "@/hooks/use-mobile";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
-import { useOrganizationMembers } from "@/hooks/use-organization-members";
+import { useOrganizationMembers } from "@/features/organization";
 
 function getInitials(name: string): string {
   return name

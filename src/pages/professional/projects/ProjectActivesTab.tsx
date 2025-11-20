@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
-import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
+import { useUserOrganizationPreferences } from '@/features/organization'
 import { Folder, Plus, Bell, Search, Filter } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -53,7 +53,8 @@ export default function ProjectActives() {
   }, [mobileSearchValue, isMobile])
 
   // Get active project
-  const { data: userOrgPrefs } = useUserOrganizationPreferences(organizationId);
+  const userId = userData?.user?.id;
+  const { data: userOrgPrefs } = useUserOrganizationPreferences(userId, organizationId);
   const activeProjectId = userOrgPrefs?.last_project_id
 
   // Extract unique values for filters

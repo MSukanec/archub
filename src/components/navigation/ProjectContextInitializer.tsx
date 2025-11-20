@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
+import { useUserOrganizationPreferences } from '@/features/organization'
 import { useProjectContext } from '@/stores/projectContext'
 import { useHeartbeat } from '@/hooks/use-heartbeat'
 
@@ -17,7 +17,8 @@ export function ProjectContextInitializer() {
   useHeartbeat(currentOrganizationId)
   
   // Obtener las preferencias de la organización actual
-  const { data: orgPreferences } = useUserOrganizationPreferences(currentOrganizationId || undefined)
+  const userId = userData?.user?.id;
+  const { data: orgPreferences } = useUserOrganizationPreferences(userId, currentOrganizationId || undefined)
   
   // Track if we've already initialized for this organization to prevent auto-loading after explicit organization selection
   const initializedForOrg = useRef<string | null>(null)

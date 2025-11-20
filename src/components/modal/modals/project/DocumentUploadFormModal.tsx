@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useToast } from '@/hooks/use-toast';
-import { useOrganizationMembers } from '@/hooks/use-organization-members';
+import { useOrganizationMembers } from '@/features/organization';
 import { useDesignDocumentFolders } from '@/hooks/use-design-document-folders';
 
 import { useCreateDesignDocumentFolder } from '@/hooks/use-design-document-folders';

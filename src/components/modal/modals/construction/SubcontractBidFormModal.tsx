@@ -21,7 +21,7 @@ import { z } from 'zod';
 import { useContacts } from '@/hooks/use-contacts';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies } from '@/hooks/use-currencies';
-import { useOrganizationMembers } from '@/hooks/use-organization-members';
+import { useOrganizationMembers } from '@/features/organization';
 import { useSubcontractTasks } from '@/hooks/use-subcontract-tasks';
 import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton';
 import { Checkbox } from '@/components/ui/checkbox';

@@ -13,7 +13,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
-import { useOrganizationMembers } from '@/hooks/use-organization-members';
+import { useOrganizationMembers } from '@/features/organization';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useToggleKanbanCardCompleted } from '@/hooks/use-kanban';
 import type { KanbanList, KanbanCard } from '@/hooks/use-kanban';

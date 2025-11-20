@@ -11,7 +11,7 @@ import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies, useOrganizationCurrencies } from '@/hooks/use-currencies';
 import { useAllWallets } from '@/hooks/use-wallets';
-import { useOrganizationWallets } from '@/hooks/use-organization-wallets';
+import { useOrganizationWallets } from '@/features/organization';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';

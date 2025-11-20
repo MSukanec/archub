@@ -54,28 +54,28 @@ export function getActivityDisplayInfo(log: ActivityLog): ActivityDisplayInfo {
   switch (action) {
     case ACTIVITY_ACTIONS.CREATE_MOVEMENT:
     case ACTIVITY_ACTIONS.UPDATE_MOVEMENT:
-      description = `Movimiento de $${metadata.amount?.toLocaleString() || '0'}${metadata.description ? ` - ${metadata.description}` : ''}`;
+      description = `Movimiento de $${metadata?.amount?.toLocaleString() || '0'}${metadata?.description ? ` - ${metadata.description}` : ''}`;
       break;
       
     case ACTIVITY_ACTIONS.CREATE_SITE_LOG:
     case ACTIVITY_ACTIONS.UPDATE_SITE_LOG:
-      description = `${metadata.entry_type || 'Entrada de bitácora'}${metadata.comments ? ` - ${metadata.comments}` : ''}`;
+      description = `${metadata?.entry_type || 'Entrada de bitácora'}${metadata?.comments ? ` - ${metadata.comments}` : ''}`;
       break;
       
     case ACTIVITY_ACTIONS.UPLOAD_DESIGN_DOCUMENT:
     case ACTIVITY_ACTIONS.UPDATE_DESIGN_DOCUMENT:
-      description = `${metadata.name || 'Documento'}${metadata.folder_name ? ` en ${metadata.folder_name}` : ''}`;
+      description = `${metadata?.name || 'Documento'}${metadata?.folder_name ? ` en ${metadata.folder_name}` : ''}`;
       break;
       
     case ACTIVITY_ACTIONS.CREATE_TASK:
     case ACTIVITY_ACTIONS.UPDATE_TASK:
     case ACTIVITY_ACTIONS.COMPLETE_TASK:
-      description = `${metadata.title || metadata.name || 'Tarea'}${metadata.description ? ` - ${metadata.description}` : ''}`;
+      description = `${metadata?.title || metadata?.name || 'Tarea'}${metadata?.description ? ` - ${metadata.description}` : ''}`;
       break;
       
     case ACTIVITY_ACTIONS.ADD_CONTACT:
     case ACTIVITY_ACTIONS.UPDATE_CONTACT:
-      description = `${metadata.first_name || ''} ${metadata.last_name || ''}${metadata.company_name ? ` de ${metadata.company_name}` : ''}`.trim();
+      description = `${metadata?.first_name || ''} ${metadata?.last_name || ''}${metadata?.company_name ? ` de ${metadata.company_name}` : ''}`.trim();
       break;
       
     default:

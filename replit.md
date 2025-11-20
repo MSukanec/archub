@@ -9,66 +9,41 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### UI/UX Decisions
-- **Design System**: "new-york" style with a neutral color palette, dark mode, and reusable UI components, leveraging `shadcn/ui` and Tailwind CSS.
-- **Typography System**: Unified Inter Variable Font with Apple-style optical letter-spacing, antialiased rendering, and consistent font weights.
-- **Dynamic Color System**: Project-based color theming using `chroma-js` for intelligent color calculations, including dynamic accent colors, hover states, foreground colors, and organic radial gradients.
-- **Modals**: Responsive Dialog component (right-side panel on desktop, fullscreen on mobile) with standardized development patterns using `FormModalLayout`, React Hook Form with Zod validation, and `useMutation` from React Query. Delete confirmation uses Vercel-style "type to confirm".
-- **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub. Experimental two-level sidebar system for context navigation.
-- **Content Theming System**: Unified CSS theming layer with `--content-bg` for solid backgrounds and `--content-gradient-from/to` for gradient backgrounds, dynamically switched by `useContentBackground` hook.
+- **Design System**: "new-york" style with a neutral color palette, dark mode, reusable UI components using `shadcn/ui` and Tailwind CSS.
+- **Typography System**: Unified Inter Variable Font with Apple-style optical letter-spacing.
+- **Dynamic Color System**: Project-based color theming using `chroma-js` for intelligent color calculations, including dynamic accent colors and organic radial gradients.
+- **Modals**: Responsive Dialog component with standardized patterns using `FormModalLayout`, React Hook Form with Zod validation.
+- **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub, including an experimental two-level sidebar system.
+- **Content Theming System**: Unified CSS theming layer with dynamic background switching via `useContentBackground` hook.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui, Tailwind CSS, Zustand, Wouter, TanStack Query.
-- **Backend**: Node.js, Express.js, TypeScript (ES modules), 100% Express architecture with modular design (`server/lib/handlers/` for core logic, `server/routes.ts` for routing).
+- **Backend**: Node.js, Express.js, TypeScript (ES modules), 100% Express architecture with modular design.
 - **Database**: PostgreSQL with Drizzle ORM, utilizing optimized database views.
 - **Authentication**: Supabase Auth (Email/password, Google OAuth).
 - **Data Flow**: React Query for server state, Express.js for REST APIs, Drizzle ORM for database operations with cache invalidation.
-- **Performance Optimizations**: Code-splitting, lazy loading, database views, smart caching, optimized backend endpoints for sub-second page loads.
+- **Performance Optimizations**: Code-splitting, lazy loading, database views, smart caching, optimized backend endpoints.
 
-### Module Architecture (Feature-Sliced Design)
-- **CLIENTS Module**: Refactored with strict separation of concerns for services, hooks, types, mappers, pages, and modals. Services query Supabase tables directly with `organization_id` filtering for multi-tenancy.
-- **COURSE-LANDING Module**: Scalable course landing page system with public services for courses, modules, lessons, and FAQs (no auth required). Includes React Query hooks for caching, mappers for business logic, and modular components. Features SEO-optimized public pages (`/cursos`, `/cursos/:slug`) with meta tags, JSON-LD, and Open Graph. Implements a dual routing pattern for public landing and private dashboard. Admin interface includes auto-save for landing page fields.
-- **FINANCES Module** (November 2025): Unified financial movements audit system following Feature-Sliced Design architecture:
-  - **Services** (`src/features/finances/services/`): `getAllFinancialMovements` composes existing CLIENTS module service (getClientPayments) plus new partner movement services (getPartnerContributions, getPartnerWithdrawals). Supports optional projectId parameter for filtering by project or showing all organization data. Client payments service enhanced with creator (organization_members→users) and project relations.
-  - **Hooks** (`src/features/finances/hooks/`): `useFinancialMovements(organizationId, projectId)` with React Query caching. Query key includes projectId for proper cache invalidation. `useFinancialMetrics` calculates KPIs with multi-currency conversion using exchange_rate, balance by currency, and 14-day timeline from movements data. `usePartnerMovements(organizationId, projectId)` fetches and combines partner contributions and withdrawals.
-  - **Types** (`src/features/finances/types/`): Unified `FinancialMovement` interface normalizing all *_payments tables with movement_type discriminator. Enhanced `ClientPaymentWithRelations` with creator and project relations. `PartnerContributionWithRelations` and `PartnerWithdrawalWithRelations` types for partner movements.
-  - **Mappers** (`src/features/finances/mappers/`): Transform entity-specific payments into unified format. Supports client_payments with full creator/project hydration, partner_contributions (positive amounts, ingresos), and partner_withdrawals (negative amounts, egresos). Future expansion for material_payments, personnel_payments, etc.
-  - **Constants** (`src/features/finances/constants/`): FINANCIAL_QUERY_KEYS, MOVEMENT_TYPES (including partner_contribution and partner_withdrawal), PAYMENT_STATUS (only valid ShadCN variants: default, secondary, destructive, outline).
-  - **Components** (`src/features/finances/components/`): `FinancialStatsSection` displays 4-column KPI dashboard with total balance in primary currency (converted via exchange_rate), mini trend chart, movements summary, and balance by currency breakdown.
-  - **Pages** (`src/pages/finances/`): Finances main page with two tabs:
-    - **MovimientosTab**: General financial movements showing 3 types: client_payments, partner_contributions, partner_withdrawals. Header includes OrganizationMembers (ExpandableAvatarGroup) and ProjectSelectorButton for filtering. KPI dashboard shows total balance, trend chart, and currency breakdowns. Table columns: Fecha (with creator avatar+name in 2nd row for TEAMS plan), Contexto (org view only), Tipo (colored badge), Descripción (full width), Billetera, Monto (right-aligned with exchange rate), Estado.
-    - **PartnerMovementsTab**: Partner capital movements (contributions/withdrawals) using `usePartnerMovements` hook. Table columns: Fecha, Socio (with avatar), Tipo (badge for income/text for expense), Billetera, Monto (with exchange rate).
-  - **Smart Filtering**: When projectId selected → filters by project. When no project selected (organization view) → shows all organization data. Contexto column visible only in org view. Creator shown inline within Fecha column for TEAMS plan.
-  - **Navigation**: Accessible via "Finanzas" button in experimental project sidebar (coming_soon restriction).
-- **CONTACTS Module** (November 2025): Complete refactoring to feature-based architecture following Feature-Sliced Design:
-  - **Services** (`src/features/contacts/services/`): 14 pure async functions with JSDoc documentation - `getContacts`, `getContact`, `createContact`, `updateContact`, `softDeleteContact`, `getContactTypes`, `createContactType`, `updateContactType`, `softDeleteContactType`, `getContactAttachments`, `uploadContactAttachment`, `deleteContactAttachment`, `setContactAvatar`. All services filter by `organization_id` for multi-tenancy and respect soft delete (`is_deleted = false`).
-  - **Hooks** (`src/features/contacts/hooks/`): 16 React Query hooks following TanStack Query v5 patterns with standardized query keys from `CONTACT_QUERY_KEYS` and `CONTACT_ATTACHMENT_QUERY_KEYS`. Includes wrapper hooks (`useCreateContactAttachment`, `useDeleteContactAttachment`, `useSetContactAvatar`) with toast notifications.
-  - **Components** (`src/features/contacts/components/`): ContactAvatarUploader (drag & drop + click upload with preview), ContactAttachmentsPanel (tabbed view with gallery, file management), ContactRow (mobile-optimized row with avatar), ContactList (desktop table with filters).
-  - **Modals** (`src/features/contacts/modals/`): ContactFormModal (create/edit), ContactModalView (view with tabs: info, attachments), ContactAttachmentsForm (file upload with category selection).
-  - **Types & Schemas** (`src/features/contacts/types/`, `src/features/contacts/schemas/`): Full TypeScript types for contacts, contact types, attachments with Zod validation schemas using `drizzle-zod`.
-  - **Utils & Mappers** (`src/features/contacts/utils/`, `src/features/contacts/mappers/`): Helper functions including `formatContactName`, `groupContactsByLetter`, `getAttachmentPublicUrl`.
-  - **Soft Delete**: Implemented in `contacts` and `contact_types` tables with `is_deleted` and `deleted_at` columns. All read services filter deleted records; delete mutations use soft delete pattern.
-  - **Page** (`src/pages/contacts/Contacts.tsx`): Main contacts page with mobile/desktop responsive layouts, search, type filtering, grouped alphabetical display (mobile), tabular view (desktop).
-  - **Migration**: Completely migrated from `src/pages/professional/contacts/` to feature architecture. All obsolete components (`ContactRow`, `ContactAvatarUploader`) removed from old locations. Routing updated in `App.tsx` to use `/contacts`.
-
-### Feature Specifications
-- **Core Modules**: Home, Project Management, Financial Management, Document Management, Learning Module, Community Map, Notification System.
-- **Community Map**: Global interactive map showing organization projects with clustering.
-- **Learning Module ("Capacitaciones")**: Course management, video integration, progress tracking, payment integration.
-- **Admin Management**: Reorganized admin section with analytics dashboard, date range filtering, global announcements, and real-time active user status.
-- **Real-Time Support System**: Bidirectional support conversations with read tracking and notifications.
-- **Payment Architecture**: Unified `payments` table supporting multiple gateways, centralized checkout.
-- **Access Control**: `PlanRestricted` component system with admin bypass; comprehensive access control for organization membership.
-- **Cost System**: Three-tier cost system (Seencel Cost, Organization Cost, Independent Cost) for budget items.
+### System Design Choices
+- **Module Architecture**: Feature-Sliced Design adopted for modules like CLIENTS, COURSE-LANDING, FINANCES, CONTACTS, and ORGANIZATION, ensuring strict separation of concerns.
+- **Multi-tenancy**: Services consistently filter data by `organization_id`.
+- **Soft Delete**: Implemented for key entities like contacts and contact types.
+- **Financial Management**: Unified financial movements audit system with multi-currency conversion, KPI calculation, and detailed transaction views.
+- **Contacts Management**: Comprehensive CRUD operations for contacts and contact types, including attachment management and avatar uploads.
+- **Organization Dashboard**: Provides an overview of organization members, stats, activity logs, and wallets.
+- **Core Modules**: Encompass Home, Project Management, Financial Management, Document Management, Learning Module, Community Map, and Notification System.
+- **Learning Module**: Supports course management, video integration, progress tracking, and payment integration.
+- **Admin Management**: Reorganized section with analytics, announcements, and real-time user status.
+- **Real-Time Support**: Bidirectional support conversations with read tracking and notifications.
+- **Payment Architecture**: Unified `payments` table supporting multiple gateways and centralized checkout.
+- **Access Control**: `PlanRestricted` component system with comprehensive access control for organization membership and subscription plans (FREE, PRO, TEAMS, ENTERPRISE).
+- **Cost System**: Three-tier cost system (Seencel Cost, Organization Cost, Independent Cost).
 - **AI Integration**: GPT-4o-powered intelligent assistant with function-calling tools.
-- **User Presence & Analytics System**: Dual-layer tracking for real-time presence and historical usage.
-- **Project Data Management**: Organized project info into tabs (Basic Data, Location, Client) with map integration and auto-save.
-- **Mobile Action Bar**: Functional mobile action bars for Project Data and Project Management.
-- **Project Client Management**: Tab-based interface for managing project clients.
-- **Client Roles Management**: Custom client roles with full CRUD operations.
-- **Subscription System**: Complete organization subscription management (FREE, PRO, TEAMS, ENTERPRISE plans) with multi-currency.
-- **Media Uploads**: Standardized `UploadMediaField.tsx` for media uploads with progress bars and lightbox.
-- **Sitelog Statistics & Filters**: Complete filtering system for construction site logs with Zustand state, statistics dashboard with 4 metric cards, 14-day timeline visualization, and client-side filtering.
-- **Media Lightbox System**: Unified lightbox for viewing images and videos in sitelog entries, supporting both media types with gallery navigation.
+- **User Presence & Analytics**: Dual-layer tracking for real-time presence and historical usage.
+- **Project Data Management**: Organized project information with map integration and auto-save.
+- **Media Uploads**: Standardized component for media uploads with progress bars and lightbox.
+- **Sitelog Statistics & Filters**: Complete filtering system for construction site logs with statistics dashboard and timeline visualization.
+- **Media Lightbox System**: Unified lightbox for viewing images and videos in sitelog entries.
 
 ## External Dependencies
 - **Supabase**: Authentication.

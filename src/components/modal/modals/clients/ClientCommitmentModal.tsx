@@ -16,7 +16,7 @@ import { DollarSign } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
-import { useOrganizationMembers } from '@/hooks/use-organization-members'
+import { useOrganizationMembers } from '@/features/organization'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { formatContactName } from '@/utils/contacts'
 import { 
