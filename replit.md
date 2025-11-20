@@ -27,7 +27,7 @@ Preferred communication style: Simple, everyday language.
 ### System Design Choices
 - **Module Architecture**: Feature-Sliced Design adopted for modules like CLIENTS, COURSE-LANDING, FINANCES, CONTACTS, ORGANIZATION, and LEARNING, ensuring strict separation of concerns.
 - **Multi-tenancy**: Services consistently filter data by `organization_id`.
-- **Soft Delete**: Implemented for key entities like contacts, contact types, projects, and project types.
+- **Soft Delete**: Implemented for key entities like contacts, contact types, projects, project types, and project modalities.
 - **Financial Management**: Unified financial movements audit system with multi-currency conversion, KPI calculation, and detailed transaction views.
 - **Contacts Management**: Comprehensive CRUD operations for contacts and contact types, including attachment management and avatar uploads.
 - **Organization Dashboard**: Provides an overview of organization members, stats, activity logs, and wallets.
@@ -45,6 +45,7 @@ Preferred communication style: Simple, everyday language.
 - **Sitelog Statistics & Filters**: Complete filtering system for construction site logs with statistics dashboard and timeline visualization.
 - **Media Lightbox System**: Unified lightbox for viewing images and videos in sitelog entries.
 - **Project Types Management**: Complete Feature-Sliced Design implementation for managing project types. System includes global types (organization_id = null) and organization-specific custom types. ProjectSettingsTab (accessible from Projects page "Ajustes" tab and ProjectData page "Configuración" tab) allows creating, editing, and soft-deleting custom project types with color, icon, and category support. Services validate organizationId and prevent operations on system types. Modal follows ProjectTypeModal pattern with validation guards. "Agregar Tipo" button appears in page header actions when in settings tab.
+- **Project Modalities Management**: Complete Feature-Sliced Design implementation for managing project modalities (table PROJECT_MODALITIES). System includes global modalities (organization_id = null) and organization-specific custom modalities. ProjectSettingsTab has dedicated section for managing modalities alongside project types. Services (getProjectModalities, createProjectModality, updateProjectModality, deleteProjectModality) follow same pattern as project types with soft delete support. Modal follows ProjectModalityModal pattern with validation. "Agregar Modalidad" button appears in page header actions when in settings tab.
 
 ## External Dependencies
 - **Supabase**: Authentication.

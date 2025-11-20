@@ -57,7 +57,7 @@ export function useProjects(organizationId: string | undefined) {
             modality_id,
             project_image_url,
             project_type:project_types(id, name),
-            modality:modalities(id, name)
+            modality:project_modalities(id, name)
           )
         `)
         .eq('organization_id', organizationId)
@@ -123,7 +123,7 @@ export function useProject(projectId: string | undefined) {
             modality_id,
             project_image_url,
             project_type:project_types(id, name),
-            modality:modalities(id, name)
+            modality:project_modalities(id, name)
           )
         `)
         .eq('id', projectId)

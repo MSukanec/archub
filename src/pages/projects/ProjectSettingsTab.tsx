@@ -66,6 +66,17 @@ export default function ProjectSettingsTab() {
       });
       return;
     }
+
+    // Validar que no se intente editar una modalidad del sistema
+    if (modality.organization_id === null) {
+      toast({
+        title: 'Operación no permitida',
+        description: 'No se pueden modificar las modalidades del sistema',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     openModal('projectModality', { 
       projectModality: modality,
       isEditing: true 
@@ -98,6 +109,17 @@ export default function ProjectSettingsTab() {
 
   const handleDeleteModality = async () => {
     if (!modalityToDelete || !organizationId) return;
+
+    // Validar que no se intente eliminar una modalidad del sistema
+    if (modalityToDelete.organization_id === null) {
+      toast({
+        title: 'Operación no permitida',
+        description: 'No se pueden eliminar las modalidades del sistema',
+        variant: 'destructive'
+      });
+      setModalityToDelete(null);
+      return;
+    }
 
     try {
       await deleteModalityMutation.mutateAsync({

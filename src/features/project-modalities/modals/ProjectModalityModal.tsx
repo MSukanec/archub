@@ -86,7 +86,7 @@ export function ProjectModalityModal({ modalData, onClose }: ProjectModalityModa
     mutationFn: ({ modalityId, organizationId, data }: {
       modalityId: string;
       organizationId: string;
-      data: any;
+      data: ProjectModalityFormData;
     }) => updateProjectModality(modalityId, organizationId, data),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['project-modalities', variables.organizationId] });
@@ -116,7 +116,17 @@ export function ProjectModalityModal({ modalData, onClose }: ProjectModalityModa
       return;
     }
 
+    // Validar que no se intente editar una modalidad del sistema
     if (isEditing && projectModality) {
+      if (projectModality.organization_id === null) {
+        toast({
+          title: 'Operación no permitida',
+          description: 'No se pueden modificar las modalidades del sistema',
+          variant: 'destructive'
+        });
+        return;
+      }
+
       updateMutation.mutate({
         modalityId: projectModality.id,
         organizationId: userData.organization.id,
