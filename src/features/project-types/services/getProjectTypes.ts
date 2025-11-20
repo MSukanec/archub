@@ -3,9 +3,6 @@ import { supabase } from '@/lib/supabase';
 export interface ProjectType {
   id: string;
   name: string;
-  category: string | null;
-  icon: string | null;
-  color: string | null;
   is_default: boolean;
   created_at: string;
   organization_id: string | null;

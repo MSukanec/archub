@@ -18,14 +18,6 @@ import type { ProjectType } from '../services/getProjectTypes';
 // Schema de validación
 const projectTypeSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido').max(100, 'Máximo 100 caracteres'),
-  category: z.string().max(100, 'Máximo 100 caracteres').optional(),
-  icon: z.string().max(50, 'Máximo 50 caracteres').optional(),
-  color: z.string()
-    .refine(
-      (val) => !val || /^#[0-9A-Fa-f]{6}$/.test(val),
-      'Debe ser un color hexadecimal válido (#RRGGBB)'
-    )
-    .optional(),
 });
 
 type ProjectTypeFormData = z.infer<typeof projectTypeSchema>;
@@ -48,9 +40,6 @@ export function ProjectTypeModal({ modalData, onClose }: ProjectTypeModalProps) 
     resolver: zodResolver(projectTypeSchema),
     defaultValues: {
       name: '',
-      category: '',
-      icon: '',
-      color: undefined,
     }
   });
 
@@ -59,16 +48,10 @@ export function ProjectTypeModal({ modalData, onClose }: ProjectTypeModalProps) 
     if (projectType) {
       form.reset({
         name: projectType.name || '',
-        category: projectType.category || '',
-        icon: projectType.icon || '',
-        color: projectType.color || undefined,
       });
     } else {
       form.reset({
         name: '',
-        category: '',
-        icon: '',
-        color: undefined,
       });
     }
   }, [projectType, form]);
@@ -139,17 +122,11 @@ export function ProjectTypeModal({ modalData, onClose }: ProjectTypeModalProps) 
         organizationId: userData.organization.id,
         data: {
           name: data.name,
-          category: data.category || null,
-          icon: data.icon || null,
-          color: data.color || null,
         }
       });
     } else {
       createMutation.mutate({
         name: data.name,
-        category: data.category || null,
-        icon: data.icon || null,
-        color: data.color || null,
         organizationId: userData.organization.id,
       });
     }
@@ -177,94 +154,6 @@ export function ProjectTypeModal({ modalData, onClose }: ProjectTypeModalProps) 
             </FormItem>
           )}
         />
-
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Categoría (opcional)</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="Ej: Residencial" 
-                  {...field}
-                  data-testid="input-project-type-category"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="icon"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Icono (opcional)</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Ej: building" 
-                    {...field}
-                    data-testid="input-project-type-icon"
-                  />
-                </FormControl>
-                <p className="text-xs text-muted-foreground">
-                  Nombre del icono de Lucide React
-                </p>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="color"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Color (opcional)</FormLabel>
-                <div className="flex gap-2">
-                  {field.value && (
-                    <FormControl>
-                      <Input 
-                        type="color" 
-                        value={field.value}
-                        onChange={field.onChange}
-                        className="w-16 h-10 p-1 cursor-pointer"
-                        data-testid="input-project-type-color"
-                      />
-                    </FormControl>
-                  )}
-                  {!field.value && (
-                    <div 
-                      onClick={() => field.onChange('#84cc16')}
-                      className="w-16 h-10 border border-input rounded-md flex items-center justify-center cursor-pointer hover:bg-accent"
-                      data-testid="button-project-type-color-placeholder"
-                    >
-                      <div className="w-6 h-6 rounded border border-border bg-muted" />
-                    </div>
-                  )}
-                  <Input 
-                    placeholder="#84cc16" 
-                    value={field.value || ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === '') {
-                        field.onChange(undefined);
-                      } else if (/^#[0-9A-Fa-f]{0,6}$/.test(val)) {
-                        field.onChange(val);
-                      }
-                    }}
-                    className="flex-1"
-                    maxLength={7}
-                  />
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
       </form>
     </Form>
   );

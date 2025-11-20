@@ -187,12 +187,6 @@ export default function ProjectSettingsTab() {
                   data-testid={`card-project-type-${type.id}`}
                 >
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    {type.color && (
-                      <div 
-                        className="w-3 h-3 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: type.color }}
-                      />
-                    )}
                     <p className="text-sm font-medium truncate">{type.name}</p>
                   </div>
                   <div className="flex items-center gap-2 ml-4">
@@ -215,12 +209,6 @@ export default function ProjectSettingsTab() {
                   data-testid={`card-project-type-${type.id}`}
                 >
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    {type.color && (
-                      <div 
-                        className="w-3 h-3 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: type.color }}
-                      />
-                    )}
                     <p className="text-sm font-medium truncate">{type.name}</p>
                   </div>
                   <div className="flex items-center gap-1 ml-4">

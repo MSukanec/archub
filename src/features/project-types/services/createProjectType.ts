@@ -2,9 +2,6 @@ import { supabase } from '@/lib/supabase';
 
 export interface CreateProjectTypeData {
   name: string;
-  category?: string | null;
-  icon?: string | null;
-  color?: string | null;
   organizationId: string;
   createdBy?: string | null;
 }
@@ -28,9 +25,6 @@ export async function createProjectType(data: CreateProjectTypeData) {
     .from('project_types')
     .insert({
       name: data.name,
-      category: data.category || null,
-      icon: data.icon || null,
-      color: data.color || null,
       organization_id: data.organizationId,
       created_by: data.createdBy || null,
       is_default: false,

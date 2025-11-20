@@ -2,9 +2,6 @@ import { supabase } from '@/lib/supabase';
 
 export interface UpdateProjectTypeData {
   name?: string;
-  category?: string | null;
-  icon?: string | null;
-  color?: string | null;
 }
 
 /**

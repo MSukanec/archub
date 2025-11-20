@@ -56,9 +56,6 @@ execute FUNCTION set_timestamp ();
 create table public.project_types (
   id uuid not null default gen_random_uuid (),
   name text not null,
-  category text null,
-  icon text null,
-  color text null,
   created_at timestamp with time zone null default now(),
   is_default boolean not null default false,
   organization_id uuid null,
