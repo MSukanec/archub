@@ -34,10 +34,26 @@ export default function ProjectSettingsTab() {
   const customTypes = projectTypes.filter(type => type.organization_id !== null);
 
   const handleAddType = () => {
+    if (!organizationId) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo obtener la información de la organización',
+        variant: 'destructive'
+      });
+      return;
+    }
     openModal('projectType', { isEditing: false });
   };
 
   const handleEditType = (type: ProjectType) => {
+    if (!organizationId) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo obtener la información de la organización',
+        variant: 'destructive'
+      });
+      return;
+    }
     openModal('projectType', { 
       projectType: type,
       isEditing: true 
@@ -100,6 +116,7 @@ export default function ProjectSettingsTab() {
             onClick={handleAddType}
             className="w-full sm:w-auto"
             data-testid="button-add-project-type"
+            disabled={!organizationId}
           >
             <Plus className="h-4 w-4 mr-2" />
             Agregar Tipo
@@ -173,6 +190,7 @@ export default function ProjectSettingsTab() {
                       size="sm"
                       onClick={() => handleEditType(type)}
                       data-testid={`button-edit-type-${type.id}`}
+                      disabled={!organizationId}
                     >
                       <Edit2 className="h-4 w-4" />
                     </Button>
@@ -181,6 +199,7 @@ export default function ProjectSettingsTab() {
                       size="sm"
                       onClick={() => setTypeToDelete(type)}
                       data-testid={`button-delete-type-${type.id}`}
+                      disabled={!organizationId}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
