@@ -39,6 +39,16 @@ Preferred communication style: Simple, everyday language.
     - **PartnerMovementsTab**: Partner capital movements (contributions/withdrawals) using `usePartnerMovements` hook. Table columns: Fecha, Socio (with avatar), Tipo (badge for income/text for expense), Billetera, Monto (with exchange rate).
   - **Smart Filtering**: When projectId selected → filters by project. When no project selected (organization view) → shows all organization data. Contexto column visible only in org view. Creator shown inline within Fecha column for TEAMS plan.
   - **Navigation**: Accessible via "Finanzas" button in experimental project sidebar (coming_soon restriction).
+- **CONTACTS Module** (November 2025): Complete refactoring to feature-based architecture following Feature-Sliced Design:
+  - **Services** (`src/features/contacts/services/`): 14 pure async functions with JSDoc documentation - `getContacts`, `getContact`, `createContact`, `updateContact`, `softDeleteContact`, `getContactTypes`, `createContactType`, `updateContactType`, `softDeleteContactType`, `getContactAttachments`, `uploadContactAttachment`, `deleteContactAttachment`, `setContactAvatar`. All services filter by `organization_id` for multi-tenancy and respect soft delete (`is_deleted = false`).
+  - **Hooks** (`src/features/contacts/hooks/`): 16 React Query hooks following TanStack Query v5 patterns with standardized query keys from `CONTACT_QUERY_KEYS` and `CONTACT_ATTACHMENT_QUERY_KEYS`. Includes wrapper hooks (`useCreateContactAttachment`, `useDeleteContactAttachment`, `useSetContactAvatar`) with toast notifications.
+  - **Components** (`src/features/contacts/components/`): ContactAvatarUploader (drag & drop + click upload with preview), ContactAttachmentsPanel (tabbed view with gallery, file management), ContactRow (mobile-optimized row with avatar), ContactList (desktop table with filters).
+  - **Modals** (`src/features/contacts/modals/`): ContactFormModal (create/edit), ContactModalView (view with tabs: info, attachments), ContactAttachmentsForm (file upload with category selection).
+  - **Types & Schemas** (`src/features/contacts/types/`, `src/features/contacts/schemas/`): Full TypeScript types for contacts, contact types, attachments with Zod validation schemas using `drizzle-zod`.
+  - **Utils & Mappers** (`src/features/contacts/utils/`, `src/features/contacts/mappers/`): Helper functions including `formatContactName`, `groupContactsByLetter`, `getAttachmentPublicUrl`.
+  - **Soft Delete**: Implemented in `contacts` and `contact_types` tables with `is_deleted` and `deleted_at` columns. All read services filter deleted records; delete mutations use soft delete pattern.
+  - **Page** (`src/pages/contacts/Contacts.tsx`): Main contacts page with mobile/desktop responsive layouts, search, type filtering, grouped alphabetical display (mobile), tabular view (desktop).
+  - **Migration**: Completely migrated from `src/pages/professional/contacts/` to feature architecture. All obsolete components (`ContactRow`, `ContactAvatarUploader`) removed from old locations. Routing updated in `App.tsx` to use `/contacts`.
 
 ### Feature Specifications
 - **Core Modules**: Home, Project Management, Financial Management, Document Management, Learning Module, Community Map, Notification System.
