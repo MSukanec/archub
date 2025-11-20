@@ -361,14 +361,37 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   };
 
 
-  // Format currency for KPIs - single value in commitment currency
+  // Convert digits to unicode superscript
+  const toSuperscript = (digit: string): string => {
+    const superscriptMap: Record<string, string> = {
+      '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+      '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
+      ',': '⸴', '.': '·'
+    };
+    return digit.split('').map(char => superscriptMap[char] || char).join('');
+  };
+
+  // Format currency for KPIs with superscript decimals - single value in commitment currency
   const formatCurrencyKPI = (amount: number, currencySymbol: string | null) => {
     // If no commitment currency, show placeholder
     if (!currencySymbol) {
-      return '-';
+      return null;
     }
-    const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    return `${currencySymbol} ${formattedAmount}`;
+    
+    const [integerPart, decimalPart] = amount.toFixed(2).split('.');
+    const formattedInteger = parseInt(integerPart).toLocaleString('es-AR');
+    
+    if (decimalPart === '00') {
+      return <span>{currencySymbol} {formattedInteger}</span>;
+    }
+    
+    const superscriptDecimals = toSuperscript(`,${decimalPart}`);
+    
+    return (
+      <span>
+        {currencySymbol} {formattedInteger}{superscriptDecimals}
+      </span>
+    );
   };
 
   // Format currency breakdown by original currency
@@ -604,7 +627,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           <StatCardValue>
             {metricsData?.commitment_currency_symbol 
               ? formatCurrencyKPI(metricsData.total_confirmed, metricsData.commitment_currency_symbol)
-              : '-'
+              : <span>-</span>
             }
           </StatCardValue>
           <StatCardMeta>
@@ -624,7 +647,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           <StatCardValue>
             {metricsData?.commitment_currency_symbol 
               ? formatCurrencyKPI(metricsData.total_pending, metricsData.commitment_currency_symbol)
-              : '-'
+              : <span>-</span>
             }
           </StatCardValue>
           <StatCardMeta>

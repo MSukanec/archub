@@ -15,6 +15,7 @@ import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/componen
 import {
   useClientDashboard,
   useClientCommitments,
+  useClientPayments,
   useDeleteProjectClient,
   mapToClientSummaries,
   type ProjectClientSummary,
@@ -36,9 +37,10 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
 
-  // Use feature hooks to get dashboard data and commitments
+  // Use feature hooks to get dashboard data, commitments, and payments
   const { data: dashboardData, isLoading } = useClientDashboard(activeProjectId || undefined, organizationId);
   const { data: commitmentsData } = useClientCommitments(activeProjectId || undefined, organizationId);
+  const { data: paymentsData } = useClientPayments(activeProjectId || undefined, organizationId);
 
   // Transform dashboard data using mappers (no inline calculations)
   const projectClients = useMemo(() => {
@@ -176,11 +178,34 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     return `${currency.symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  // Format currency for KPIs
+  // Convert digits to unicode superscript
+  const toSuperscript = (digit: string): string => {
+    const superscriptMap: Record<string, string> = {
+      '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+      '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
+      ',': '⸴', '.': '·'
+    };
+    return digit.split('').map(char => superscriptMap[char] || char).join('');
+  };
+
+  // Format currency for KPIs with superscript decimals
   const formatCurrencyKPI = (amount: number) => {
-    if (!commitmentCurrency) return '-';
-    const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    return `${commitmentCurrency.symbol} ${formattedAmount}`;
+    if (!commitmentCurrency) return null;
+    
+    const [integerPart, decimalPart] = amount.toFixed(2).split('.');
+    const formattedInteger = parseInt(integerPart).toLocaleString('es-AR');
+    
+    if (decimalPart === '00') {
+      return <span>{commitmentCurrency.symbol} {formattedInteger}</span>;
+    }
+    
+    const superscriptDecimals = toSuperscript(`,${decimalPart}`);
+    
+    return (
+      <span>
+        {commitmentCurrency.symbol} {formattedInteger}{superscriptDecimals}
+      </span>
+    );
   };
 
   // Format currency breakdown by original currency
@@ -273,18 +298,21 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       key: 'total_committed_amount',
       label: 'Compromiso total',
       sortable: true,
+      align: 'right' as const,
       render: (client: ProjectClientSummary) => renderMultiCurrency(client, 'total_committed_amount'),
     },
     {
       key: 'total_paid_amount',
       label: 'Pagado',
       sortable: true,
+      align: 'right' as const,
       render: (client: ProjectClientSummary) => renderMultiCurrency(client, 'total_paid_amount'),
     },
     {
       key: 'balance_due',
       label: 'Saldo pendiente',
       sortable: true,
+      align: 'right' as const,
       render: (client: ProjectClientSummary) => renderMultiCurrency(client, 'balance_due'),
     },
     {
@@ -352,14 +380,11 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     };
 
     let totalCommitted = 0;
-    let totalPaid = 0;
-    let totalBalance = 0;
     let totalScheduleItems = 0;
     let totalSchedulePaid = 0;
 
     const committedByCurrency = new Map<string, number>();
     const paidByCurrency = new Map<string, number>();
-    const balanceByCurrency = new Map<string, number>();
 
     // Process commitments to get exchange rates
     const exchangeRateMap = new Map<string, number>();
@@ -369,7 +394,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       }
     });
 
-    // Sum up all financial data with conversion
+    // Calculate COMMITTED amount from financial data (using commitment exchange_rate)
     projectClients.forEach(client => {
       client.financialByCurrency.forEach(financial => {
         if (!financial.currency) return;
@@ -377,19 +402,47 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
         const exchangeRate = exchangeRateMap.get(financial.currency.id) || null;
         const currencySymbol = financial.currency.symbol;
 
-        // Track by original currency
+        // Track committed by original currency
         committedByCurrency.set(currencySymbol, (committedByCurrency.get(currencySymbol) || 0) + financial.total_committed_amount);
-        paidByCurrency.set(currencySymbol, (paidByCurrency.get(currencySymbol) || 0) + financial.total_paid_amount);
-        balanceByCurrency.set(currencySymbol, (balanceByCurrency.get(currencySymbol) || 0) + financial.balance_due);
 
-        // Convert and sum
+        // Convert and sum committed
         totalCommitted += convertToCommitmentCurrency(financial.total_committed_amount, financial.currency, exchangeRate);
-        totalPaid += convertToCommitmentCurrency(financial.total_paid_amount, financial.currency, exchangeRate);
-        totalBalance += convertToCommitmentCurrency(financial.balance_due, financial.currency, exchangeRate);
         
         totalScheduleItems += financial.total_schedule_items || 0;
         totalSchedulePaid += financial.schedule_paid || 0;
       });
+    });
+
+    // Calculate PAID amount from actual payments (using payment.exchange_rate) - SAME AS ClientPaymentsTab
+    let totalPaid = 0;
+    const allPayments = paymentsData || [];
+    
+    allPayments.forEach(payment => {
+      if (!payment.currency || payment.status !== 'confirmed') return;
+
+      const currencySymbol = payment.currency.symbol;
+      
+      // If payment is already in commitment currency, add as-is
+      if (payment.currency.id === commitmentCurrency.id) {
+        totalPaid += payment.amount;
+        paidByCurrency.set(currencySymbol, (paidByCurrency.get(currencySymbol) || 0) + payment.amount);
+      } else {
+        // Convert using payment's exchange_rate (not commitment's!)
+        if (payment.exchange_rate && payment.exchange_rate > 0) {
+          totalPaid += payment.amount / payment.exchange_rate;
+          paidByCurrency.set(currencySymbol, (paidByCurrency.get(currencySymbol) || 0) + payment.amount);
+        }
+      }
+    });
+
+    // Calculate SALDO (balance) = Committed - Paid
+    const totalBalance = totalCommitted - totalPaid;
+
+    // Balance by currency = Committed by currency - Paid by currency
+    const balanceByCurrency = new Map<string, number>();
+    committedByCurrency.forEach((committedAmount, symbol) => {
+      const paidAmount = paidByCurrency.get(symbol) || 0;
+      balanceByCurrency.set(symbol, committedAmount - paidAmount);
     });
 
     const paidPercentage = totalCommitted > 0 ? (totalPaid / totalCommitted) * 100 : 0;
@@ -409,7 +462,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       paidByOriginalCurrency: Array.from(paidByCurrency.entries()).map(([symbol, amount]) => ({ symbol, amount })),
       balanceByOriginalCurrency: Array.from(balanceByCurrency.entries()).map(([symbol, amount]) => ({ symbol, amount })),
     };
-  }, [projectClients, dashboardData, commitmentCurrency, commitmentsData]);
+  }, [projectClients, dashboardData, commitmentCurrency, commitmentsData, paymentsData]);
 
   return (
     <div className="space-y-6">
@@ -422,7 +475,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             Compromiso Total
           </StatCardTitle>
           <StatCardValue className="text-2xl md:text-3xl">
-            {commitmentCurrency ? formatCurrencyKPI(kpis.totalCommittedAmount) : '-'}
+            {commitmentCurrency ? formatCurrencyKPI(kpis.totalCommittedAmount) : <span>-</span>}
           </StatCardValue>
           <StatCardMeta>
             {commitmentCurrency ? formatCurrencyBreakdown(kpis.committedByOriginalCurrency) : 'Sin compromisos registrados'}
@@ -436,7 +489,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             Pagado
           </StatCardTitle>
           <StatCardValue className="text-2xl md:text-3xl">
-            {commitmentCurrency ? formatCurrencyKPI(kpis.totalPaidAmount) : '-'}
+            {commitmentCurrency ? formatCurrencyKPI(kpis.totalPaidAmount) : <span>-</span>}
           </StatCardValue>
           <StatCardMeta>
             {commitmentCurrency ? formatCurrencyBreakdown(kpis.paidByOriginalCurrency) : 'Sin compromisos registrados'}
@@ -450,7 +503,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             Saldo
           </StatCardTitle>
           <StatCardValue className="text-2xl md:text-3xl">
-            {commitmentCurrency ? formatCurrencyKPI(kpis.totalBalanceDue) : '-'}
+            {commitmentCurrency ? formatCurrencyKPI(kpis.totalBalanceDue) : <span>-</span>}
           </StatCardValue>
           <StatCardMeta>
             {commitmentCurrency ? formatCurrencyBreakdown(kpis.balanceByOriginalCurrency) : 'Sin compromisos registrados'}
