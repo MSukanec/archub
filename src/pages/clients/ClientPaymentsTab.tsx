@@ -425,7 +425,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'contact',
       label: 'Cliente',
       sortable: true,
-      width: '280px',
       render: (payment: ClientPaymentWithRelations) => {
         const initials = payment.client?.contact?.first_name?.[0] && payment.client?.contact?.last_name?.[0]
           ? `${payment.client.contact.first_name[0]}${payment.client.contact.last_name[0]}`
@@ -451,13 +450,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           </div>
         );
       },
-    },
-    {
-      key: 'reference',
-      label: 'Referencia',
-      sortable: true,
-      align: 'right' as const,
-      render: (payment: ClientPaymentWithRelations) => payment.reference || '-',
     },
     {
       key: 'commitment_id',
