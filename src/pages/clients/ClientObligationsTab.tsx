@@ -178,34 +178,13 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     return `${currency.symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  // Convert digits to unicode superscript
-  const toSuperscript = (digit: string): string => {
-    const superscriptMap: Record<string, string> = {
-      '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
-      '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
-      ',': '⸴', '.': '·'
-    };
-    return digit.split('').map(char => superscriptMap[char] || char).join('');
-  };
-
-  // Format currency for KPIs with superscript decimals
+  // Format currency for KPIs (integers only, no decimals)
   const formatCurrencyKPI = (amount: number) => {
     if (!commitmentCurrency) return null;
     
-    const [integerPart, decimalPart] = amount.toFixed(2).split('.');
-    const formattedInteger = parseInt(integerPart).toLocaleString('es-AR');
+    const formattedInteger = Math.round(amount).toLocaleString('es-AR');
     
-    if (decimalPart === '00') {
-      return <span>{commitmentCurrency.symbol} {formattedInteger}</span>;
-    }
-    
-    const superscriptDecimals = toSuperscript(`,${decimalPart}`);
-    
-    return (
-      <span>
-        {commitmentCurrency.symbol} {formattedInteger}{superscriptDecimals}
-      </span>
-    );
+    return <span>{commitmentCurrency.symbol} {formattedInteger}</span>;
   };
 
   // Format currency breakdown by original currency
@@ -218,11 +197,14 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     }).join(' + ');
   };
 
-  // Helper function to render multi-currency amounts with conversion
-  const renderMultiCurrency = (client: ProjectClientSummary, field: keyof Pick<CurrencyFinancial, 'total_committed_amount' | 'total_paid_amount' | 'balance_due'>) => {
-    if (client.financialByCurrency.length === 0 || !commitmentCurrency) return '-';
-    
-    // Build map of exchange rates from commitments
+  // Helper function to calculate client-specific totals with percentages
+  const renderClientFinancial = (client: ProjectClientSummary, type: 'committed' | 'paid' | 'balance') => {
+    if (!commitmentCurrency) return <span>-</span>;
+
+    let total = 0;
+    let percentage = 0;
+
+    // Build exchange rate map from commitments
     const exchangeRateMap = new Map<string, number>();
     commitmentsData?.forEach(commitment => {
       if (commitment.currency && commitment.exchange_rate) {
@@ -230,30 +212,97 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       }
     });
 
-    // Convert all currency amounts to commitment currency
-    let totalInCommitmentCurrency = 0;
-
-    client.financialByCurrency.forEach(financial => {
-      if (!financial.currency) return;
-      
-      const amount = financial[field];
-      
-      // If already in commitment currency, add as-is
-      if (financial.currency.id === commitmentCurrency.id) {
-        totalInCommitmentCurrency += amount;
-      } else {
-        // Convert using exchange_rate
-        const exchangeRate = exchangeRateMap.get(financial.currency.id);
-        if (exchangeRate && exchangeRate > 0) {
-          totalInCommitmentCurrency += amount / exchangeRate;
+    if (type === 'committed') {
+      // Calculate committed amount from financialByCurrency (using commitment exchange rates)
+      client.financialByCurrency.forEach(financial => {
+        if (!financial.currency) return;
+        
+        if (financial.currency.id === commitmentCurrency.id) {
+          total += financial.total_committed_amount;
+        } else {
+          const exchangeRate = exchangeRateMap.get(financial.currency.id);
+          if (exchangeRate && exchangeRate > 0) {
+            total += financial.total_committed_amount / exchangeRate;
+          }
         }
-      }
-    });
-    
+      });
+      percentage = 100; // Committed is always 100%
+    } 
+    else if (type === 'paid') {
+      // Calculate paid amount from actual payments (using payment.exchange_rate)
+      const clientPayments = (paymentsData || []).filter(p => 
+        p.client?.id === client.id && p.status === 'confirmed'
+      );
+
+      clientPayments.forEach(payment => {
+        if (!payment.currency) return;
+
+        if (payment.currency.id === commitmentCurrency.id) {
+          total += payment.amount;
+        } else if (payment.exchange_rate && payment.exchange_rate > 0) {
+          total += payment.amount / payment.exchange_rate;
+        }
+      });
+
+      // Calculate committed total for percentage
+      let committedTotal = 0;
+      client.financialByCurrency.forEach(financial => {
+        if (!financial.currency) return;
+        if (financial.currency.id === commitmentCurrency.id) {
+          committedTotal += financial.total_committed_amount;
+        } else {
+          const exchangeRate = exchangeRateMap.get(financial.currency.id);
+          if (exchangeRate && exchangeRate > 0) {
+            committedTotal += financial.total_committed_amount / exchangeRate;
+          }
+        }
+      });
+
+      percentage = committedTotal > 0 ? (total / committedTotal) * 100 : 0;
+    }
+    else if (type === 'balance') {
+      // Calculate committed
+      let committedTotal = 0;
+      client.financialByCurrency.forEach(financial => {
+        if (!financial.currency) return;
+        if (financial.currency.id === commitmentCurrency.id) {
+          committedTotal += financial.total_committed_amount;
+        } else {
+          const exchangeRate = exchangeRateMap.get(financial.currency.id);
+          if (exchangeRate && exchangeRate > 0) {
+            committedTotal += financial.total_committed_amount / exchangeRate;
+          }
+        }
+      });
+
+      // Calculate paid from actual payments
+      let paidTotal = 0;
+      const clientPayments = (paymentsData || []).filter(p => 
+        p.client?.id === client.id && p.status === 'confirmed'
+      );
+
+      clientPayments.forEach(payment => {
+        if (!payment.currency) return;
+        if (payment.currency.id === commitmentCurrency.id) {
+          paidTotal += payment.amount;
+        } else if (payment.exchange_rate && payment.exchange_rate > 0) {
+          paidTotal += payment.amount / payment.exchange_rate;
+        }
+      });
+
+      total = committedTotal - paidTotal;
+      percentage = committedTotal > 0 ? (total / committedTotal) * 100 : 0;
+    }
+
+    const formattedAmount = Math.round(total).toLocaleString('es-AR');
+
     return (
-      <div className="flex flex-col">
+      <div className="flex flex-col items-end">
         <span className="font-semibold" style={{ fontSize: '14px' }}>
-          {formatCurrency(totalInCommitmentCurrency, commitmentCurrency)}
+          {commitmentCurrency.symbol} {formattedAmount}
+        </span>
+        <span className="text-muted-foreground" style={{ fontSize: '12px', fontWeight: 'normal' }}>
+          {percentage.toFixed(1)}%
         </span>
       </div>
     );
@@ -286,6 +335,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       key: 'full_name',
       label: 'Cliente',
       sortable: true,
+      defaultSort: 'asc' as const,
       cellClassName: 'font-semibold',
       render: (client: ProjectClientSummary) => {
         const displayName = client.contacts?.company_name || 
@@ -299,21 +349,21 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       label: 'Compromiso total',
       sortable: true,
       align: 'right' as const,
-      render: (client: ProjectClientSummary) => renderMultiCurrency(client, 'total_committed_amount'),
+      render: (client: ProjectClientSummary) => renderClientFinancial(client, 'committed'),
     },
     {
       key: 'total_paid_amount',
       label: 'Pagado',
       sortable: true,
       align: 'right' as const,
-      render: (client: ProjectClientSummary) => renderMultiCurrency(client, 'total_paid_amount'),
+      render: (client: ProjectClientSummary) => renderClientFinancial(client, 'paid'),
     },
     {
       key: 'balance_due',
       label: 'Saldo pendiente',
       sortable: true,
       align: 'right' as const,
-      render: (client: ProjectClientSummary) => renderMultiCurrency(client, 'balance_due'),
+      render: (client: ProjectClientSummary) => renderClientFinancial(client, 'balance'),
     },
     {
       key: 'next_due',
@@ -597,37 +647,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
           },
         ]}
       />
-
-      {/* Porcentajes debajo de cada columna */}
-      {projectClients.length > 0 && commitmentCurrency && (
-        <div className="px-4 py-2 border-t border-border/40">
-          <div className="grid grid-cols-[60px_1fr_150px_150px_150px_150px] gap-4 items-center">
-            {/* Avatar column - empty */}
-            <div></div>
-            
-            {/* Cliente column - empty */}
-            <div></div>
-            
-            {/* Compromiso total - 100% */}
-            <div className="text-muted-foreground" style={{ fontSize: '12px', fontWeight: 'normal' }}>
-              100%
-            </div>
-            
-            {/* Pagado */}
-            <div className="text-muted-foreground" style={{ fontSize: '12px', fontWeight: 'normal' }}>
-              {kpis.paidPercentage.toFixed(1)}%
-            </div>
-            
-            {/* Saldo */}
-            <div className="text-muted-foreground" style={{ fontSize: '12px', fontWeight: 'normal' }}>
-              {kpis.balancePercentage.toFixed(1)}%
-            </div>
-            
-            {/* Próximo vencimiento - empty */}
-            <div></div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

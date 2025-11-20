@@ -361,37 +361,16 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   };
 
 
-  // Convert digits to unicode superscript
-  const toSuperscript = (digit: string): string => {
-    const superscriptMap: Record<string, string> = {
-      '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
-      '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
-      ',': '⸴', '.': '·'
-    };
-    return digit.split('').map(char => superscriptMap[char] || char).join('');
-  };
-
-  // Format currency for KPIs with superscript decimals - single value in commitment currency
+  // Format currency for KPIs (integers only, no decimals)
   const formatCurrencyKPI = (amount: number, currencySymbol: string | null) => {
     // If no commitment currency, show placeholder
     if (!currencySymbol) {
       return null;
     }
     
-    const [integerPart, decimalPart] = amount.toFixed(2).split('.');
-    const formattedInteger = parseInt(integerPart).toLocaleString('es-AR');
+    const formattedInteger = Math.round(amount).toLocaleString('es-AR');
     
-    if (decimalPart === '00') {
-      return <span>{currencySymbol} {formattedInteger}</span>;
-    }
-    
-    const superscriptDecimals = toSuperscript(`,${decimalPart}`);
-    
-    return (
-      <span>
-        {currencySymbol} {formattedInteger}{superscriptDecimals}
-      </span>
-    );
+    return <span>{currencySymbol} {formattedInteger}</span>;
   };
 
   // Format currency breakdown by original currency
