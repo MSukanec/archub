@@ -300,7 +300,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     const formattedAmount = Math.round(total).toLocaleString('es-AR');
 
     return (
-      <div className="flex flex-col items-end">
+      <div className="flex flex-col items-end text-right">
         <span className="font-semibold text-sm">
           {commitmentCurrency.symbol} {formattedAmount}
         </span>
