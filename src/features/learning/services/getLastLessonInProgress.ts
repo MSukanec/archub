@@ -54,7 +54,7 @@ export async function getLastLessonInProgress(
     .from('course_lessons')
     .select('id')
     .in('module_id', moduleIds)
-    .order('order_index', { ascending: true });
+    .order('sort_index', { ascending: true });
 
   if (lessonsError) {
     console.error('Error fetching course lessons:', lessonsError);

@@ -27,7 +27,7 @@ export async function getCourseStructure(
     .from('course_modules')
     .select('*')
     .eq('course_id', courseId)
-    .order('order_index', { ascending: true });
+    .order('sort_index', { ascending: true });
 
   if (modulesError) {
     throw modulesError;
@@ -44,7 +44,7 @@ export async function getCourseStructure(
     .from('course_lessons')
     .select('*')
     .in('module_id', moduleIds)
-    .order('order_index', { ascending: true });
+    .order('sort_index', { ascending: true });
 
   if (lessonsError) {
     console.error('Error fetching course lessons:', lessonsError);
