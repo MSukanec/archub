@@ -18,6 +18,40 @@ export default function Projects() {
   const organizationId = userData?.organization?.id
   const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId || undefined)
 
+  // Define actions based on active tab
+  const getActions = () => {
+    if (activeTab === 'settings') {
+      return [
+        <Button
+          key="add-project-type"
+          onClick={() => openModal('projectType', { isEditing: false })}
+          className="h-8 px-3 text-xs"
+          disabled={!organizationId}
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          Agregar Tipo
+        </Button>
+      ]
+    }
+    
+    return [
+      <PlanRestricted 
+        key="create-project"
+        feature="max_projects" 
+        current={projects.length}
+        functionName="Crear Proyecto"
+      >
+        <Button
+          onClick={() => openModal('project', {})}
+          className="h-8 px-3 text-xs"
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          Nuevo Proyecto
+        </Button>
+      </PlanRestricted>
+    ]
+  }
+
   const headerProps = {
     title: "Gestión de Proyectos",
     description: "Administra todos los proyectos de tu organización desde un solo lugar",
@@ -46,22 +80,7 @@ export default function Projects() {
       },
     ],
     onTabChange: (tabId: string) => setActiveTab(tabId),
-    actions: [
-      <PlanRestricted 
-        key="create-project"
-        feature="max_projects" 
-        current={projects.length}
-        functionName="Crear Proyecto"
-      >
-        <Button
-          onClick={() => openModal('project', {})}
-          className="h-8 px-3 text-xs"
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Nuevo Proyecto
-        </Button>
-      </PlanRestricted>
-    ]
+    actions: getActions()
   }
 
   if (isLoading || projectsLoading) {

@@ -111,17 +111,6 @@ export default function ProjectSettingsTab() {
 
         {/* Right Column - Contenido */}
         <div className="space-y-6">
-          {/* Botón para agregar nuevo tipo */}
-          <Button 
-            onClick={handleAddType}
-            className="w-full sm:w-auto"
-            data-testid="button-add-project-type"
-            disabled={!organizationId}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Agregar Tipo
-          </Button>
-
           {/* Tipos del Sistema */}
           {systemTypes.length > 0 && (
             <div className="space-y-3">
