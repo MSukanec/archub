@@ -544,6 +544,37 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
           },
         ]}
       />
+
+      {/* Porcentajes debajo de cada columna */}
+      {projectClients.length > 0 && commitmentCurrency && (
+        <div className="px-4 py-2 border-t border-border/40">
+          <div className="grid grid-cols-[60px_1fr_150px_150px_150px_150px] gap-4 items-center">
+            {/* Avatar column - empty */}
+            <div></div>
+            
+            {/* Cliente column - empty */}
+            <div></div>
+            
+            {/* Compromiso total - 100% */}
+            <div className="text-muted-foreground" style={{ fontSize: '12px', fontWeight: 'normal' }}>
+              100%
+            </div>
+            
+            {/* Pagado */}
+            <div className="text-muted-foreground" style={{ fontSize: '12px', fontWeight: 'normal' }}>
+              {kpis.paidPercentage.toFixed(1)}%
+            </div>
+            
+            {/* Saldo */}
+            <div className="text-muted-foreground" style={{ fontSize: '12px', fontWeight: 'normal' }}>
+              {kpis.balancePercentage.toFixed(1)}%
+            </div>
+            
+            {/* Próximo vencimiento - empty */}
+            <div></div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
