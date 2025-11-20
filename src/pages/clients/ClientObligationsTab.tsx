@@ -22,6 +22,9 @@ import {
   type CurrencyFinancial,
 } from '@/features/clients'
 
+// Extended type for table with computed clientName field
+type EnrichedClient = ProjectClientSummary & { clientName: string };
+
 interface ClientListTabProps {
   projectId?: string;
 }
@@ -315,7 +318,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       label: '',
       width: '60px',
       sortable: false,
-      render: (client: ProjectClientSummary) => {
+      render: (client: EnrichedClient) => {
         const avatarUrl = client.contacts?.linked_user?.avatar_url;
         const initials = client.contacts?.first_name?.[0] && client.contacts?.last_name?.[0]
           ? `${client.contacts.first_name[0]}${client.contacts.last_name[0]}`
@@ -332,44 +335,37 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       },
     },
     {
-      key: 'full_name',
+      key: 'clientName',
       label: 'Cliente',
       sortable: true,
-      defaultSort: 'asc' as const,
       cellClassName: 'font-semibold',
-      render: (client: ProjectClientSummary) => {
-        const displayName = client.contacts?.company_name || 
-                           client.contacts?.full_name || 
-                           `${client.contacts?.first_name || ''} ${client.contacts?.last_name || ''}`.trim();
-        return displayName || '-';
-      },
     },
     {
       key: 'total_committed_amount',
       label: 'Compromiso total',
       sortable: true,
       align: 'left' as const,
-      render: (client: ProjectClientSummary) => renderClientFinancial(client, 'committed'),
+      render: (client: EnrichedClient) => renderClientFinancial(client, 'committed'),
     },
     {
       key: 'total_paid_amount',
       label: 'Pagado',
       sortable: true,
       align: 'left' as const,
-      render: (client: ProjectClientSummary) => renderClientFinancial(client, 'paid'),
+      render: (client: EnrichedClient) => renderClientFinancial(client, 'paid'),
     },
     {
       key: 'balance_due',
       label: 'Saldo pendiente',
       sortable: true,
       align: 'left' as const,
-      render: (client: ProjectClientSummary) => renderClientFinancial(client, 'balance'),
+      render: (client: EnrichedClient) => renderClientFinancial(client, 'balance'),
     },
     {
       key: 'next_due',
       label: 'Próximo vencimiento',
       sortable: true,
-      render: (client: ProjectClientSummary) => {
+      render: (client: EnrichedClient) => {
         // Find the earliest next due date across all currencies
         const nextDues = client.financialByCurrency
           .filter(f => f.next_due_date)
@@ -514,6 +510,16 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     };
   }, [projectClients, dashboardData, commitmentCurrency, commitmentsData, paymentsData]);
 
+  // Enrich projectClients with computed clientName field for sorting
+  const enrichedClients = useMemo<EnrichedClient[]>(() => {
+    return projectClients.map(client => ({
+      ...client,
+      clientName: client.contacts?.company_name || 
+                  client.contacts?.full_name || 
+                  `${client.contacts?.first_name || ''} ${client.contacts?.last_name || ''}`.trim() || '-'
+    }));
+  }, [projectClients]);
+
   return (
     <div className="space-y-6">
       {/* KPIs Grid - 4 columnas, 2 por fila en mobile */}
@@ -575,8 +581,9 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
 
       <Table
         columns={columns}
-        data={projectClients}
+        data={enrichedClients}
         isLoading={isLoading}
+        defaultSort={{ key: 'clientName', direction: 'asc' }}
         showDoubleHeader={false}
         emptyStateConfig={{
           icon: <Users className="h-12 w-12 text-muted-foreground" />,
@@ -608,7 +615,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             </Button>
           ),
         }}
-        rowActions={(client: ProjectClientSummary) => [
+        rowActions={(client: EnrichedClient) => [
           {
             label: 'Ver / editar compromiso',
             icon: FileText,
