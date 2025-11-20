@@ -1,6 +1,6 @@
 import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useLessonFavorite } from '@/hooks/use-lesson-favorite';
+import { useToggleLessonFavorite } from '../hooks';
 import { cn } from '@/lib/utils';
 
 interface FavoriteButtonProps {
@@ -20,7 +20,7 @@ export function FavoriteButton({
   size = 'md',
   className 
 }: FavoriteButtonProps) {
-  const { toggleFavorite, isLoading, optimisticFavorite } = useLessonFavorite({ 
+  const { toggleFavorite, isLoading, optimisticFavorite } = useToggleLessonFavorite({ 
     lessonId, 
     courseId, 
     currentlyFavorite: isFavorite 

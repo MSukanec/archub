@@ -9,9 +9,7 @@ import { useCoursePlayerStore } from '@/stores/coursePlayerStore'
 import VimeoPlayer from '@/components/video/VimeoPlayer'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
-import { LessonSummaryNote } from '@/components/learning/LessonSummaryNote'
-import { LessonMarkers } from '@/components/learning/LessonMarkers'
-import { FavoriteButton } from '@/components/learning/FavoriteButton'
+import { LessonSummaryNote, LessonMarkers, FavoriteButton, useCourseStructure, useCourseProgress, useUpdateLessonProgress } from '@/features/learning'
 import Player from '@vimeo/player'
 
 interface CoursePlayerTabProps {
@@ -61,71 +59,28 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
     }
   }, [activeLessonId]);
   
-  // Get course modules and lessons
-  const { data: modules = [], isLoading: modulesLoading } = useQuery({
-    queryKey: ['course-modules', courseId],
-    queryFn: async () => {
-      if (!courseId || !supabase) return [];
-      
-      const { data, error } = await supabase
-        .from('course_modules')
-        .select('*')
-        .eq('course_id', courseId)
-        .order('sort_index', { ascending: true });
-        
-      if (error) {
-        throw error;
-      }
-      
-      return data || [];
-    },
-    enabled: !!courseId && !!supabase
-  });
+  // Get course structure (modules with lessons) using the learning feature hook
+  const { data: courseStructure = [], isLoading: structureLoading } = useCourseStructure(courseId);
+  
+  // Extract modules and lessons from the structure for compatibility with existing code
+  const modules = useMemo(() => {
+    return courseStructure.map(({ lessons, ...module }) => module);
+  }, [courseStructure]);
+  
+  const lessons = useMemo(() => {
+    return courseStructure.flatMap(module => 
+      (module.lessons || []).map(lesson => ({
+        ...lesson,
+        module_id: module.id
+      }))
+    );
+  }, [courseStructure]);
+  
+  const modulesLoading = structureLoading;
+  const lessonsLoading = structureLoading;
 
-  const { data: lessons = [], isLoading: lessonsLoading } = useQuery({
-    queryKey: ['course-lessons-full', courseId],
-    queryFn: async () => {
-      if (!courseId || !supabase || modules.length === 0) return [];
-      
-      const moduleIds = modules.map(m => m.id);
-      
-      const { data, error } = await supabase
-        .from('course_lessons')
-        .select('id, module_id, title, vimeo_video_id, duration_sec, free_preview, sort_index, is_active')
-        .in('module_id', moduleIds)
-        .order('sort_index', { ascending: true });
-        
-      if (error) {
-        throw error;
-      }
-      
-      return data || [];
-    },
-    enabled: !!courseId && !!supabase && modules.length > 0
-  });
-
-  // Fetch progress for all lessons in the course
-  const { data: progressData } = useQuery<any[]>({
-    queryKey: ['/api/courses', courseId, 'progress'],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return [];
-      
-      const res = await fetch(`/api/courses/${courseId}/progress`, {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        credentials: 'include'
-      });
-      
-      if (!res.ok) {
-        return [];
-      }
-      
-      return res.json();
-    },
-    enabled: !!courseId
-  });
+  // Get progress for all lessons using the learning feature hook
+  const { data: progressData = [] } = useCourseProgress(courseId);
 
   // Create a map of lesson progress for quick lookup
   const progressMap = useMemo(() => {
@@ -164,40 +119,26 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
     };
   }, [activeLessonId, orderedLessons]);
 
-  // Save progress mutation (for auto-save while watching)
-  const saveProgressMutation = useMutation({
-    mutationFn: async ({ lessonId, sec, pct }: { lessonId: string, sec: number, pct: number }) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-
-      const response = await fetch(`/api/lessons/${lessonId}/progress`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify({
-          progress_pct: pct,
-          last_position_sec: sec,
-          completed_at: null
-        }),
-        credentials: 'include'
+  // Use the learning feature hook for updating lesson progress
+  const updateProgressMutation = useUpdateLessonProgress(courseId);
+  
+  // Wrap the mutation to add custom success behavior (maintain playing flag)
+  const saveProgressMutation = useMemo(() => ({
+    mutate: (payload: { lessonId: string, sec: number, pct: number }) => {
+      updateProgressMutation.mutate({
+        lessonId: payload.lessonId,
+        progress_pct: payload.pct,
+        last_position_sec: payload.sec,
+        completed_at: null
+      }, {
+        onSuccess: () => {
+          // Set flag that video is playing to prevent rewind
+          isPlayingRef.current = true;
+        }
       });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to save progress (${response.status})`);
-      }
-      
-      return response.json();
     },
-    onSuccess: () => {
-      // Set flag that video is playing to prevent rewind
-      isPlayingRef.current = true;
-      // Still invalidate to keep cache fresh for lesson switching
-      queryClient.invalidateQueries({ queryKey: ['/api/courses', courseId, 'progress'] });
-    }
-  });
+    isPending: updateProgressMutation.isPending
+  }), [updateProgressMutation, courseId]);
 
   // Throttle progress saves to avoid too many requests
   const lastSaveTime = useRef(0);
@@ -213,64 +154,27 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
     }
   }, [activeLessonId, saveProgressMutation]);
 
-  // Mark lesson as complete mutation (toggle)
-  const markCompleteMutation = useMutation({
-    mutationFn: async ({ lessonId, isCompleted }: { lessonId: string; isCompleted: boolean }) => {
-      // Get the Supabase session token
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('No active session');
-      }
-
-      const response = await fetch(`/api/lessons/${lessonId}/progress`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify({
-          completed_at: isCompleted ? new Date().toISOString() : null,
-          progress_pct: isCompleted ? 100 : 0,
-          last_position_sec: 0,
-          is_completed: isCompleted
-        }),
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        const errorData = errorText ? JSON.parse(errorText) : {};
-        throw new Error(errorData.error || `Failed to update lesson completion status (${response.status})`);
-      }
-      
-      return response.json();
-    },
-    onSuccess: async (_, variables) => {
-      // Force refetch of progress data for course and dashboard
-      await Promise.all([
-        queryClient.refetchQueries({ 
-          queryKey: ['/api/courses', courseId, 'progress'],
-          exact: true 
-        }),
-        queryClient.refetchQueries({ 
-          queryKey: ['/api/user/all-progress'],
-          exact: true 
-        })
-      ]);
-      
-      toast({
-        title: variables.isCompleted ? 'Lección completada' : 'Lección desmarcada',
-        description: variables.isCompleted ? 'Has marcado esta lección como completa' : 'Has desmarcado esta lección'
+  // Mark lesson as complete mutation (toggle) using the same update progress mutation
+  const markCompleteMutation = useMemo(() => ({
+    mutate: (params: { lessonId: string; isCompleted: boolean }) => {
+      updateProgressMutation.mutate({
+        lessonId: params.lessonId,
+        completed_at: params.isCompleted ? new Date().toISOString() : null,
+        progress_pct: params.isCompleted ? 100 : 0,
+        last_position_sec: 0,
+        is_completed: params.isCompleted
+      }, {
+        onSuccess: () => {
+          // Show custom toast for manual completion toggle
+          toast({
+            title: params.isCompleted ? 'Lección completada' : 'Lección desmarcada',
+            description: params.isCompleted ? 'Has marcado esta lección como completa' : 'Has desmarcado esta lección'
+          });
+        }
       });
     },
-    onError: (error) => {
-      toast({
-        title: 'Error',
-        description: 'No se pudo actualizar el estado de la lección',
-        variant: 'destructive'
-      });
-    }
-  });
+    isPending: updateProgressMutation.isPending
+  }), [updateProgressMutation, toast]);
 
   // Crear strings estables de IDs para evitar re-renders innecesarios
   const moduleIdsString = useMemo(() => modules.map(m => m.id).join(','), [modules]);
@@ -462,7 +366,7 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
             <div className="bg-card border rounded-lg p-6">
               <h2 className="text-xl font-semibold mb-1">{currentLesson.title}</h2>
               {currentModule && (
-                <p className="text-sm text-muted-foreground mb-2">{currentModule.name}</p>
+                <p className="text-sm text-muted-foreground mb-2">{currentModule.title}</p>
               )}
               {currentLesson.duration_sec && (
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">

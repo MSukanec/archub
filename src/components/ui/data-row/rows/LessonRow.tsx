@@ -2,7 +2,7 @@ import { CheckCircle2, Circle, Clock, FileText, Bookmark } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import DataRowCard from '../DataRowCard';
-import { FavoriteButton } from '@/components/learning/FavoriteButton';
+import { FavoriteButton } from '@/features/learning';
 
 interface LessonRowProps {
   lesson: {

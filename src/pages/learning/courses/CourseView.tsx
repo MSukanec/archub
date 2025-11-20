@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { BookOpen, ChevronLeft, ChevronRight, CheckCircle, Lock } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { useCoursePlayerStore } from '@/stores/coursePlayerStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { useCourseOverview, useCourseEnrollment, useLastLessonInProgress } from '@/features/learning';
 
 import { Layout } from '@/layout/desktop/Layout';
 import CourseDashboardTab from './view/CourseDashboardTab';
@@ -75,123 +74,23 @@ export default function CourseView() {
     }
   };
   
-  // Get course data
-  const { data: course, isLoading: courseLoading } = useQuery({
-    queryKey: ['course', id],
-    queryFn: async () => {
-      if (!id || !supabase) return null;
-      
-      const { data, error } = await supabase
-        .from('courses')
-        .select('*')
-        .eq('slug', id)
-        .single();
-        
-      if (error) {
-        throw error;
-      }
-      
-      return data;
-    },
-    enabled: !!id && !!supabase
-  });
+  // 🚀 Usar hooks del feature learning
+  const { data: course, isLoading: courseLoading } = useCourseOverview(id);
 
   // Detect if coming from successful payment
   const enrolledParam = urlParams.get('enrolled');
   
-  // Check if user is enrolled in this course (SECURITY CHECK)
-  const { data: enrollment, isLoading: enrollmentLoading, refetch: refetchEnrollment } = useQuery({
-    queryKey: ['course-enrollment', course?.id, userData?.user?.id],
-    queryFn: async () => {
-      if (!course?.id || !userData?.user?.id || !supabase) return null;
-      
-      // userData.user.id is already the UUID from users table
-      const userId = userData.user.id;
-      
-      // Check enrollment
-      const { data, error } = await supabase
-        .from('course_enrollments')
-        .select('*')
-        .eq('course_id', course.id)
-        .eq('user_id', userId)
-        .maybeSingle();
-        
-      if (error) {
-        return null;
-      }
-      
-      return data;
-    },
-    enabled: !!course?.id && !!userData?.user?.id && !!supabase,
-    staleTime: 0, // Always refetch to ensure fresh enrollment data
-    gcTime: 0 // Don't cache enrollment checks
-  });
+  // 🚀 Check if user is enrolled in this course (SECURITY CHECK)
+  const { data: enrollment, isLoading: enrollmentLoading, refetch: refetchEnrollment } = useCourseEnrollment(
+    course?.id,
+    userData?.user?.id
+  );
 
-  // Get last lesson in progress (for smart "Continue Course" button)
-  const { data: lastLesson } = useQuery({
-    queryKey: ['last-lesson-progress-header', course?.id, userData?.user?.id],
-    queryFn: async () => {
-      if (!course?.id || !userData?.user?.id || !supabase) return null;
-      
-      // Get all modules for this course
-      const { data: courseModules } = await supabase
-        .from('course_modules')
-        .select('id')
-        .eq('course_id', course.id);
-
-      if (!courseModules || courseModules.length === 0) return null;
-
-      const moduleIds = courseModules.map(m => m.id);
-
-      // Get all lessons for these modules
-      const { data: courseLessons } = await supabase
-        .from('course_lessons')
-        .select('id')
-        .in('module_id', moduleIds)
-        .order('order_index', { ascending: true });
-
-      if (!courseLessons || courseLessons.length === 0) return null;
-
-      const lessonIds = courseLessons.map(l => l.id);
-      const firstLessonId = courseLessons[0].id;
-
-      // Get the most recent lesson in progress
-      const { data: progressData } = await supabase
-        .from('course_lesson_progress')
-        .select(`
-          lesson_id,
-          last_position_sec,
-          is_completed,
-          updated_at
-        `)
-        .eq('user_id', userData.user.id)
-        .in('lesson_id', lessonIds)
-        .order('updated_at', { ascending: false })
-        .limit(10);
-
-      if (!progressData || progressData.length === 0) {
-        // No progress yet, return first lesson
-        return {
-          lesson_id: firstLessonId,
-          last_position_sec: 0
-        };
-      }
-
-      // Find first lesson that's not completed
-      const inProgressLesson = progressData.find(p => !p.is_completed);
-      
-      // If no lesson in progress, return the most recently updated one
-      const selectedLesson = inProgressLesson || progressData[0];
-
-      return {
-        lesson_id: selectedLesson.lesson_id,
-        last_position_sec: selectedLesson.last_position_sec || 0
-      };
-    },
-    enabled: !!course?.id && !!userData?.user?.id && !!supabase,
-    staleTime: 10000, // 10 seconds
-    refetchInterval: 15000 // Auto refresh every 15s
-  });
+  // 🚀 Get last lesson in progress (for smart "Continue Course" button)
+  const { data: lastLesson } = useLastLessonInProgress(
+    course?.id,
+    userData?.user?.id
+  );
   
   // Force refetch if coming from payment
   useEffect(() => {

@@ -17,6 +17,12 @@ export const LEARNING_QUERY_KEYS = {
   courseProgress: (courseId: string) => ['learning', 'courses', courseId, 'progress'] as const,
   coursePricing: (courseSlug: string, currency?: string, provider?: string) => 
     ['learning', 'courses', courseSlug, 'pricing', currency, provider] as const,
+  courseEnrollment: (courseId: string, userId: string) => ['learning', 'courses', courseId, 'enrollment', userId] as const,
+  courseDuration: (courseId: string) => ['learning', 'courses', courseId, 'duration'] as const,
+  courseLessonsSummary: (courseIds: string[]) => ['learning', 'courses', 'lessons-summary', ...courseIds] as const,
+  lastLessonInProgress: (courseId: string, userId: string) => ['learning', 'courses', courseId, 'last-lesson', userId] as const,
+  studyTime: (userId: string, courseId?: string) => ['learning', 'study-time', userId, courseId] as const,
+  monthlyStudyTime: ['learning', 'monthly-study-time'] as const,
   
   // Lessons
   lesson: (lessonId: string) => ['learning', 'lessons', lessonId] as const,

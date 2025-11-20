@@ -2,7 +2,7 @@ import { Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import PayButton from '@/components/learning/PayButton';
+import { PayButton } from '@/features/learning';
 
 type CourseCardProps = {
   course: {

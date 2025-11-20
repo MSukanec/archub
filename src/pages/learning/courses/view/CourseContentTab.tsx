@@ -9,7 +9,7 @@ import { CheckCircle2, Circle, ArrowRight, Star } from 'lucide-react'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
 import { useCoursePlayerStore } from '@/stores/coursePlayerStore'
 import LessonRow from '@/components/ui/data-row/rows/LessonRow'
-import { FavoriteButton } from '@/components/learning/FavoriteButton'
+import { FavoriteButton, useCourseStructure, useCourseProgress } from '@/features/learning'
 
 interface CourseContentTabProps {
   courseId?: string;
@@ -35,72 +35,25 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
   const { setCurrentLesson } = useCourseSidebarStore()
   const goToLesson = useCoursePlayerStore(s => s.goToLesson)
 
-  // Get course modules
-  const { data: modules = [] } = useQuery({
-    queryKey: ['course-modules', courseId],
-    queryFn: async () => {
-      if (!courseId || !supabase) return [];
-      
-      const { data, error } = await supabase
-        .from('course_modules')
-        .select('*')
-        .eq('course_id', courseId)
-        .order('sort_index', { ascending: true });
-        
-      if (error) {
-        throw error;
-      }
-      
-      return data || [];
-    },
-    enabled: !!courseId && !!supabase
-  });
+  // Get course structure (modules with lessons) using the learning feature hook
+  const { data: courseStructure = [] } = useCourseStructure(courseId);
+  
+  // Extract modules and lessons from the structure
+  const modules = useMemo(() => {
+    return courseStructure.map(({ lessons, ...module }) => module);
+  }, [courseStructure]);
+  
+  const lessons = useMemo(() => {
+    return courseStructure.flatMap(module => 
+      (module.lessons || []).map(lesson => ({
+        ...lesson,
+        module_id: module.id
+      }))
+    );
+  }, [courseStructure]);
 
-  // Get lessons
-  const { data: lessons = [] } = useQuery({
-    queryKey: ['lessons', courseId],
-    queryFn: async () => {
-      if (!courseId || !supabase || modules.length === 0) return [];
-      
-      const moduleIds = modules.map(m => m.id);
-      
-      const { data, error } = await supabase
-        .from('course_lessons')
-        .select('*')
-        .in('module_id', moduleIds)
-        .order('sort_index', { ascending: true});
-        
-      if (error) {
-        throw error;
-      }
-      
-      return data || [];
-    },
-    enabled: !!courseId && !!supabase && modules.length > 0
-  });
-
-  // Get all progress for the current course
-  const { data: courseProgress = [] } = useQuery<any[]>({
-    queryKey: ['/api/courses', courseId, 'progress'],
-    queryFn: async () => {
-      if (!courseId || !supabase) return [];
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return [];
-
-      const response = await fetch(`/api/courses/${courseId}/progress`, {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      });
-
-      if (!response.ok) return [];
-      return response.json();
-    },
-    enabled: !!courseId && !!supabase,
-    staleTime: 0,
-    refetchOnMount: 'always'
-  });
+  // Get progress for all lessons using the learning feature hook
+  const { data: courseProgress = [] } = useCourseProgress(courseId);
 
   // Get notes for this course using optimized backend API
   const { data: notesResponse } = useQuery<any[]>({

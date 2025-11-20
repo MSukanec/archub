@@ -10,38 +10,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { useLocation } from 'wouter'
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
-
-interface DashboardData {
-  global: {
-    done_lessons_total: number
-    total_lessons_total: number
-    progress_pct: number
-  } | null
-  courses: Array<{
-    course_id: string
-    course_title: string
-    course_slug: string
-    progress_pct: number
-    done_lessons: number
-    total_lessons: number
-  }>
-  study: {
-    seconds_lifetime: number
-    seconds_this_month: number
-  }
-  currentStreak: number
-  activeDays: number
-  recentCompletions: Array<{
-    type: string
-    when: string
-    lesson_title: string
-    module_title: string
-    course_title: string
-    course_slug: string
-  }>
-}
+import { useLearningDashboardFast } from '@/features/learning'
 
 export default function LearningDashboard() {
   const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore()
@@ -55,35 +24,8 @@ export default function LearningDashboard() {
     }
   }, [setSidebarContext, setSidebarLevel, sidebarLevel])
 
-  // Use optimized endpoint for better performance
-  const useOptimizedEndpoint = true; // Toggle this to compare performance
-  const endpoint = useOptimizedEndpoint ? '/api/learning/dashboard-fast' : '/api/learning/dashboard';
-  
-  const { data: dashboardData, isLoading } = useQuery<DashboardData>({
-    queryKey: [endpoint],
-    queryFn: async () => {
-      if (!supabase) return null as any;
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return null as any;
-
-      const response = await fetch(endpoint, {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      });
-
-      if (!response.ok) {
-        return null as any;
-      }
-      
-      return response.json();
-    },
-    enabled: !!supabase && !!userData,
-    staleTime: 30000, // Cache for 30 seconds to reduce load
-    gcTime: 600000, // Keep in cache for 10 minutes for instant navigation
-    refetchOnMount: 'always' // Always refetch when component mounts
-  });
+  // Usar hook del feature para obtener dashboard optimizado
+  const { data: dashboardData, isLoading } = useLearningDashboardFast();
 
   const { global, courses = [], currentStreak = 0 } = dashboardData || {}
   

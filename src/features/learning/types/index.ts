@@ -127,17 +127,35 @@ export interface LearningDashboard {
 
 /**
  * Fast dashboard data (optimized version)
+ * Matches the backend DashboardFastData interface
  */
 export interface LearningDashboardFast {
-  enrollments: Array<{
-    course: Course;
-    progress: CourseProgressSummary;
+  global: {
+    done_lessons_total: number;
+    total_lessons_total: number;
+    progress_pct: number;
+  } | null;
+  courses: Array<{
+    course_id: string;
+    course_title: string;
+    course_slug: string;
+    progress_pct: number;
+    done_lessons: number;
+    total_lessons: number;
   }>;
-  recentActivity: Array<{
-    lessonId: string;
-    lessonTitle: string;
-    courseTitle: string;
-    completedAt: string;
+  study: {
+    seconds_lifetime: number;
+    seconds_this_month: number;
+  };
+  currentStreak: number;
+  activeDays: number;
+  recentCompletions: Array<{
+    type: string;
+    when: string;
+    lesson_title: string;
+    module_title: string;
+    course_title: string;
+    course_slug: string;
   }>;
 }
 
@@ -160,14 +178,14 @@ export interface CoursePricing {
 // ========== HELPER TYPES ==========
 
 /**
- * Lesson status derived from progress
- */
-export type LessonStatus = 'not_started' | 'in_progress' | 'completed';
-
-/**
  * Get lesson status from progress data
+ * 
+ * Returns 'not_started' | 'in_progress' | 'completed'
+ * based on the progress data.
+ * 
+ * Note: LessonStatus type is exported from constants/index.ts
  */
-export function getLessonStatus(progress?: CourseLessonProgress): LessonStatus {
+export function getLessonStatus(progress?: CourseLessonProgress): 'not_started' | 'in_progress' | 'completed' {
   if (!progress) return 'not_started';
   if (progress.is_completed || (progress.progress_pct && Number(progress.progress_pct) >= 95)) {
     return 'completed';

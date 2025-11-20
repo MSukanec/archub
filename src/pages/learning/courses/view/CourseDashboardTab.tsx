@@ -1,15 +1,24 @@
 import { useMemo, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
-import { getUserByAuthId } from '@/lib/supabase-helpers'
 import { queryClient } from '@/lib/queryClient'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui/stat-card'
 import { BookOpen, CheckCircle, Clock, FileText, Bookmark, Megaphone, Info, PlayCircle, Play } from 'lucide-react'
-import { DiscordWidget } from '@/components/learning/DiscordWidget'
+import { 
+  DiscordWidget, 
+  useCourseProgress, 
+  useCourseEnrollment, 
+  useLastLessonInProgress, 
+  useStudyTime, 
+  useCourseDuration,
+  useLessonDetails,
+  useMonthlyStudyTime,
+  useCourseRecentNotes,
+  useCourseRecentMarkers
+} from '@/features/learning'
 import { useLocation, useParams } from 'wouter'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useCoursePlayerStore } from '@/stores/coursePlayerStore'
+import { useCurrentUser } from '@/hooks/use-current-user'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Button } from '@/components/ui/button'
@@ -24,6 +33,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
   const { id: courseSlug } = useParams<{ id: string }>();
   const goToLesson = useCoursePlayerStore(s => s.goToLesson);
   const setActiveTab = useCoursePlayerStore(s => s.setActiveTab);
+  const { data: userData } = useCurrentUser();
 
   // Handler to navigate to a specific tab
   const navigateToTab = (tab: string) => {
@@ -35,286 +45,60 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     }
   };
 
-  // Invalidate queries when dashboard mounts to ensure fresh data
-  useEffect(() => {
-    if (courseId) {
-      queryClient.invalidateQueries({ queryKey: ['course-progress', courseId] });
-      queryClient.invalidateQueries({ queryKey: ['study-time', courseId] });
-      queryClient.invalidateQueries({ queryKey: [`/api/courses/${courseId}/recent-notes`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/courses/${courseId}/recent-markers`] });
-      queryClient.invalidateQueries({ queryKey: ['course-duration', courseId] });
-      queryClient.invalidateQueries({ queryKey: ['course-enrollment', courseId] });
-      queryClient.invalidateQueries({ queryKey: ['monthly-study-time'] });
+  // 🚀 Use learning feature hooks
+  const { data: lessonProgressArray = [] } = useCourseProgress(courseId);
+
+  // Calculate aggregated course progress from lesson progress array
+  const courseProgress = useMemo(() => {
+    if (!lessonProgressArray || lessonProgressArray.length === 0) {
+      return { progress_pct: 0, done_lessons: 0, total_lessons: 0 };
     }
-  }, [courseId]);
+    
+    const totalLessons = lessonProgressArray.length;
+    const doneLessons = lessonProgressArray.filter(p => p.is_completed).length;
+    const progressPct = totalLessons > 0 ? (doneLessons / totalLessons) * 100 : 0;
+    
+    return {
+      progress_pct: progressPct,
+      done_lessons: doneLessons,
+      total_lessons: totalLessons
+    };
+  }, [lessonProgressArray]);
 
-  // Get course progress using backend endpoint (avoids RLS issues with views)
-  const { data: courseProgress } = useQuery({
-    queryKey: ['course-progress', courseId],
-    queryFn: async () => {
-      if (!courseId || !supabase) return null;
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return null;
+  // 🚀 Get total study time usando el hook del feature
+  const { data: studyTime } = useStudyTime(userData?.user?.id, courseId);
 
-      const response = await fetch(`/api/user/course-progress?course_id=${courseId}`, {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      });
+  // 🚀 Get recent notes and markers usando los hooks del feature
+  const { data: recentNotes = [] } = useCourseRecentNotes(courseId);
+  const { data: recentMarkers = [] } = useCourseRecentMarkers(courseId);
 
-      if (!response.ok) {
-        return null;
-      }
+  // 🚀 Get total course duration usando el hook del feature
+  const { data: courseDuration } = useCourseDuration(courseId);
 
-      const data = await response.json();
-      // Backend returns array, we need single object
-      return data && data.length > 0 ? data[0] : null;
-    },
-    enabled: !!courseId && !!supabase
-  });
+  // 🚀 Get user's enrollment usando el hook del feature
+  const { data: enrollment } = useCourseEnrollment(courseId, userData?.user?.id);
 
-  // Get total study time
-  const { data: studyTime } = useQuery({
-    queryKey: ['study-time', courseId],
-    queryFn: async () => {
-      if (!courseId || !supabase) return { total_seconds: 0 };
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return { total_seconds: 0 };
+  // 🚀 Get last lesson in progress usando el hook del feature
+  const { data: lastLessonProgress } = useLastLessonInProgress(courseId, userData?.user?.id);
 
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!authUser?.email) return { total_seconds: 0 };
+  // 🚀 Fetch lesson details for the last lesson in progress usando el hook del feature
+  const { data: lastLessonDetails } = useLessonDetails(lastLessonProgress?.lesson_id);
 
-      const userRecord = await getUserByAuthId(authUser.id);
+  // Combine lastLessonProgress with lastLessonDetails
+  const lastLesson = useMemo(() => {
+    if (!lastLessonProgress) return null;
+    
+    return {
+      lesson_id: lastLessonProgress.lesson_id,
+      lesson_title: lastLessonDetails?.title || 'Sin título',
+      last_position_sec: lastLessonProgress.last_position_sec,
+      duration_sec: lastLessonDetails?.duration_sec || 0,
+      is_completed: false
+    };
+  }, [lastLessonProgress, lastLessonDetails]);
 
-      if (!userRecord) return { total_seconds: 0 };
-
-      // Get all modules for this course
-      const { data: courseModules } = await supabase
-        .from('course_modules')
-        .select('id')
-        .eq('course_id', courseId);
-
-      if (!courseModules || courseModules.length === 0) return { total_seconds: 0 };
-
-      const moduleIds = courseModules.map(m => m.id);
-
-      // Get all lessons for these modules
-      const { data: courseLessons } = await supabase
-        .from('course_lessons')
-        .select('id')
-        .in('module_id', moduleIds);
-
-      if (!courseLessons || courseLessons.length === 0) return { total_seconds: 0 };
-
-      const lessonIds = courseLessons.map(l => l.id);
-
-      // Get sum of last_position_sec for all lessons in this course
-      const { data: progressData, error } = await supabase
-        .from('course_lesson_progress')
-        .select('last_position_sec')
-        .eq('user_id', userRecord.id)
-        .in('lesson_id', lessonIds);
-
-      if (error) {
-        return { total_seconds: 0 };
-      }
-
-      const totalSeconds = progressData?.reduce((sum, p) => sum + (p.last_position_sec || 0), 0) || 0;
-      
-      return { total_seconds: totalSeconds };
-    },
-    enabled: !!courseId && !!supabase
-  });
-
-  // Get latest 3 notes (OPTIMIZED with backend endpoint)
-  const { data: recentNotes = [] } = useQuery<any[]>({
-    queryKey: [`/api/courses/${courseId}/recent-notes`],
-    enabled: !!courseId
-  });
-
-  // Get latest 3 markers (OPTIMIZED with backend endpoint)
-  const { data: recentMarkers = [] } = useQuery<any[]>({
-    queryKey: [`/api/courses/${courseId}/recent-markers`],
-    enabled: !!courseId
-  });
-
-  // Get total course duration (sum of all lesson durations)
-  const { data: courseDuration } = useQuery({
-    queryKey: ['course-duration', courseId],
-    queryFn: async () => {
-      if (!courseId || !supabase) return { total_seconds: 0 };
-      
-      // Get all modules for this course
-      const { data: courseModules } = await supabase
-        .from('course_modules')
-        .select('id')
-        .eq('course_id', courseId);
-
-      if (!courseModules || courseModules.length === 0) return { total_seconds: 0 };
-
-      const moduleIds = courseModules.map(m => m.id);
-
-      // Get all lessons for these modules with their durations
-      const { data: courseLessons, error } = await supabase
-        .from('course_lessons')
-        .select('duration_sec')
-        .in('module_id', moduleIds);
-
-      if (error) {
-        return { total_seconds: 0 };
-      }
-
-      if (!courseLessons || courseLessons.length === 0) return { total_seconds: 0 };
-
-      const totalSeconds = courseLessons.reduce((sum, lesson) => sum + (lesson.duration_sec || 0), 0);
-      
-      return { total_seconds: totalSeconds };
-    },
-    enabled: !!courseId && !!supabase
-  });
-
-  // Get user's enrollment for this course
-  const { data: enrollment } = useQuery({
-    queryKey: ['course-enrollment', courseId],
-    queryFn: async () => {
-      if (!courseId || !supabase) return null;
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return null;
-
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!authUser?.email) return null;
-
-      const userRecord = await getUserByAuthId(authUser.id);
-
-      if (!userRecord) return null;
-
-      const { data, error } = await supabase
-        .from('course_enrollments')
-        .select('started_at, expires_at, status')
-        .eq('course_id', courseId)
-        .eq('user_id', userRecord.id)
-        .maybeSingle();
-
-      if (error) {
-        return null;
-      }
-
-      return data;
-    },
-    enabled: !!courseId && !!supabase
-  });
-
-  // Get last lesson in progress (for "Continue watching" card)
-  const { data: lastLesson } = useQuery({
-    queryKey: ['last-lesson-progress', courseId],
-    queryFn: async () => {
-      if (!courseId || !supabase) return null;
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return null;
-
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!authUser?.email) return null;
-
-      const userRecord = await getUserByAuthId(authUser.id);
-
-      if (!userRecord) return null;
-
-      // Get all modules for this course
-      const { data: courseModules } = await supabase
-        .from('course_modules')
-        .select('id')
-        .eq('course_id', courseId);
-
-      if (!courseModules || courseModules.length === 0) return null;
-
-      const moduleIds = courseModules.map(m => m.id);
-
-      // Get all lessons for these modules
-      const { data: courseLessons } = await supabase
-        .from('course_lessons')
-        .select('id')
-        .in('module_id', moduleIds);
-
-      if (!courseLessons || courseLessons.length === 0) return null;
-
-      const lessonIds = courseLessons.map(l => l.id);
-
-      // Get the most recent lesson in progress (not completed) or the most recently updated
-      const { data: progressData, error } = await supabase
-        .from('course_lesson_progress')
-        .select(`
-          lesson_id,
-          last_position_sec,
-          is_completed,
-          updated_at,
-          course_lessons (
-            id,
-            title,
-            duration_sec
-          )
-        `)
-        .eq('user_id', userRecord.id)
-        .in('lesson_id', lessonIds)
-        .order('updated_at', { ascending: false })
-        .limit(10);
-
-      if (error) {
-        return null;
-      }
-
-      if (!progressData || progressData.length === 0) return null;
-
-      // Find first lesson that's not completed
-      const inProgressLesson = progressData.find(p => !p.is_completed);
-      
-      // If no lesson in progress, return the most recently updated one
-      const selectedLesson = inProgressLesson || progressData[0];
-
-      const lessonData = Array.isArray(selectedLesson.course_lessons) 
-        ? selectedLesson.course_lessons[0] 
-        : selectedLesson.course_lessons;
-
-      return {
-        lesson_id: selectedLesson.lesson_id,
-        lesson_title: lessonData?.title || 'Sin título',
-        last_position_sec: selectedLesson.last_position_sec || 0,
-        duration_sec: lessonData?.duration_sec || 0,
-        is_completed: selectedLesson.is_completed
-      };
-    },
-    enabled: !!courseId && !!supabase,
-    staleTime: 10000, // 10 seconds
-    refetchInterval: 15000 // Auto refresh every 15s
-  });
-
-  // Get user's study time using backend endpoint (avoids RLS issues with views)
-  const { data: monthlyStudyTime } = useQuery({
-    queryKey: ['monthly-study-time'],
-    queryFn: async () => {
-      if (!supabase) return { seconds_this_month: 0 };
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return { seconds_this_month: 0 };
-
-      const response = await fetch('/api/user/study-time', {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      });
-
-      if (!response.ok) {
-        return { seconds_this_month: 0 };
-      }
-
-      const data = await response.json();
-      return { seconds_this_month: data?.seconds_this_month || 0 };
-    },
-    enabled: !!supabase
-  });
+  // 🚀 Get user's monthly study time usando el hook del feature
+  const { data: monthlyStudyTime } = useMonthlyStudyTime();
 
   // Calculate stats
   const stats = useMemo(() => {
