@@ -46,7 +46,7 @@ import BudgetView from "@/pages/professional/budgets/BudgetView";
 import ConstructionSubcontracts from "@/pages/professional/project/construction/subcontracts/Subcontracts";
 import SubcontractView from "@/pages/professional/project/construction/subcontracts/SubcontractView";
 import ConstructionIndirects from "@/pages/professional/project/construction/indirects/Indirects";
-import Contacts from "@/pages/professional/contacts/Contacts";
+import Contacts from "@/pages/contacts/Contacts";
 import Calendar from "@/pages/professional/calendar/Calendar";
 
 // Media Pages (Lazy Loaded - incluye librerías pesadas de PDF)

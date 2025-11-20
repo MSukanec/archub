@@ -1,4 +1,5 @@
-import type { Contact, ContactWithRelations } from '../types';
+import type { Contact, ContactWithRelations, ContactAttachment } from '../types';
+import { getPublicUrl } from '@/lib/supabase/storage';
 
 /**
  * Formatea el nombre de un contacto con lógica de fallback.
@@ -42,6 +43,16 @@ export function formatContactName(contact: {
   }
   
   return 'Cliente';
+}
+
+/**
+ * Obtiene la URL pública de un adjunto de contacto.
+ * 
+ * @param attachment - Objeto de adjunto con bucket y path
+ * @returns URL pública del archivo
+ */
+export function getAttachmentPublicUrl(attachment: ContactAttachment): string {
+  return getPublicUrl(attachment.storage_bucket, attachment.storage_path);
 }
 
 /**
