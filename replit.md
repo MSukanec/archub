@@ -25,14 +25,14 @@ Preferred communication style: Simple, everyday language.
 - **Performance Optimizations**: Code-splitting, lazy loading, database views, smart caching, optimized backend endpoints.
 
 ### System Design Choices
-- **Module Architecture**: Feature-Sliced Design adopted for modules like CLIENTS, COURSE-LANDING, FINANCES, CONTACTS, and ORGANIZATION, ensuring strict separation of concerns.
+- **Module Architecture**: Feature-Sliced Design adopted for modules like CLIENTS, COURSE-LANDING, FINANCES, CONTACTS, ORGANIZATION, and LEARNING, ensuring strict separation of concerns.
 - **Multi-tenancy**: Services consistently filter data by `organization_id`.
 - **Soft Delete**: Implemented for key entities like contacts and contact types.
 - **Financial Management**: Unified financial movements audit system with multi-currency conversion, KPI calculation, and detailed transaction views.
 - **Contacts Management**: Comprehensive CRUD operations for contacts and contact types, including attachment management and avatar uploads.
 - **Organization Dashboard**: Provides an overview of organization members, stats, activity logs, and wallets.
 - **Core Modules**: Encompass Home, Project Management, Financial Management, Document Management, Learning Module, Community Map, and Notification System.
-- **Learning Module**: Supports course management, video integration, progress tracking, and payment integration.
+- **Learning Module (REFACTORED)**: Complete Feature-Sliced Design implementation with 26 services, 27 hooks, 7 components. Supports course management, video integration (Vimeo), progress tracking with favorites, notes/markers system, course enrollment, pricing, and payment integration. All pages are "dumb" orchestrators using only feature hooks, following strict ARCHITECTURE.MD patterns.
 - **Admin Management**: Reorganized section with analytics, announcements, and real-time user status.
 - **Real-Time Support**: Bidirectional support conversations with read tracking and notifications.
 - **Payment Architecture**: Unified `payments` table supporting multiple gateways and centralized checkout.

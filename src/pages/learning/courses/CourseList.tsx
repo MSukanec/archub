@@ -1,7 +1,7 @@
 import { Layout } from '@/layout/desktop/Layout'
-import { useState, useEffect, useMemo } from 'react'
-import { useLearningCourses, useCourseLessonsSummary, PayButton } from '@/features/learning'
-import { BookOpen, Clock } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { useCourseListData, type CourseTabFilter } from '@/features/learning'
+import { BookOpen, Clock, ShoppingCart } from 'lucide-react'
 import { useLocation } from 'wouter'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -10,8 +10,6 @@ import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
-
-type CourseTabFilter = 'enrolled' | 'completed' | 'all';
 
 export default function CourseList() {
   const [activeTab, setActiveTab] = useState<CourseTabFilter>('all')
@@ -26,94 +24,12 @@ export default function CourseList() {
     }
   }, [setSidebarContext, setSidebarLevel, sidebarLevel])
 
-  // 🚀 Usar hook del feature para obtener todos los cursos con enrollments y progreso
-  const { data: fullData, isLoading: fullDataLoading } = useLearningCourses();
-
-  // Extraer datos del resultado unificado
-  const courses = fullData?.courses || [];
-  const courseProgressData = fullData?.progress || [];
-  const enrollments = fullData?.enrollments || [];
-
-  // 🚀 Usar hook del feature para obtener resumen de lecciones de todos los cursos
-  const courseIds = useMemo(() => courses.map((c: any) => c.id), [courses]);
-  const { data: courseLessonsSummary } = useCourseLessonsSummary(courseIds);
-
-  // 🚀 ULTRA-RÁPIDO: Usar datos pre-calculados de la vista + resumen de lecciones
-  const courseProgress = useMemo(() => {
-    const progressMap = new Map<string, { completed: number; total: number; percentage: number; totalDurationSec: number }>();
-    
-    if (!courseLessonsSummary) return progressMap;
-    
-    courses.forEach((course: any) => {
-      // Buscar progreso pre-calculado de la vista
-      const viewProgress = courseProgressData.find((p: any) => p.course_id === course.id);
-      
-      // Obtener resumen de lecciones del hook
-      const lessonsSummary = courseLessonsSummary.get(course.id);
-      const totalLessons = lessonsSummary?.totalLessons || 0;
-      const totalDurationSec = lessonsSummary?.totalDurationSec || 0;
-      
-      if (viewProgress) {
-        // Usar datos de la vista (súper rápido)
-        progressMap.set(course.id, {
-          completed: viewProgress.done_lessons || 0,
-          total: viewProgress.total_lessons || totalLessons,
-          percentage: Math.round(viewProgress.progress_pct || 0),
-          totalDurationSec
-        });
-      } else {
-        // Si no hay progreso, el curso es nuevo para el usuario
-        progressMap.set(course.id, {
-          completed: 0,
-          total: totalLessons,
-          percentage: 0,
-          totalDurationSec
-        });
-      }
-    });
-    
-    return progressMap;
-  }, [courses, courseProgressData, courseLessonsSummary]);
-
-  const filteredCourses = useMemo(() => {
-    const activeCourses = courses.filter((c: any) => c.is_active && c.visibility !== 'draft');
-    
-    if (activeTab === 'enrolled') {
-      return activeCourses.filter((course: any) => {
-        const enrollment = enrollments.find((e: any) => e.course_id === course.id && e.status === 'active');
-        const progress = courseProgress.get(course.id);
-        return enrollment && progress && progress.percentage < 100;
-      });
-    } else if (activeTab === 'completed') {
-      return activeCourses.filter((course: any) => {
-        const enrollment = enrollments.find((e: any) => e.course_id === course.id && e.status === 'active');
-        const progress = courseProgress.get(course.id);
-        return enrollment && progress && progress.percentage === 100;
-      });
-    }
-    
-    return activeCourses;
-  }, [courses, activeTab, enrollments, courseProgress]);
-
-  const enrolledCount = useMemo(() => {
-    return courses.filter((course: any) => {
-      const enrollment = enrollments.find((e: any) => e.course_id === course.id && e.status === 'active');
-      const progress = courseProgress.get(course.id);
-      return enrollment && progress && progress.percentage < 100;
-    }).length;
-  }, [courses, enrollments, courseProgress]);
-
-  const completedCount = useMemo(() => {
-    return courses.filter((course: any) => {
-      const enrollment = enrollments.find((e: any) => e.course_id === course.id && e.status === 'active');
-      const progress = courseProgress.get(course.id);
-      return enrollment && progress && progress.percentage === 100;
-    }).length;
-  }, [courses, enrollments, courseProgress]);
-
-  const handleViewCourse = (courseSlug: string) => {
-    navigate(`/learning/courses/${courseSlug}`);
-  };
+  const {
+    courseViewModels,
+    enrolledCount,
+    completedCount,
+    isLoading
+  } = useCourseListData(activeTab);
 
   const headerProps = {
     title: "Cursos",
@@ -123,7 +39,7 @@ export default function CourseList() {
     actions: []
   };
 
-  if (fullDataLoading) {
+  if (isLoading) {
     return (
       <Layout headerProps={headerProps} wide>
         <div className="flex items-center justify-center h-64">
@@ -146,7 +62,7 @@ export default function CourseList() {
           onValueChange={(v) => setActiveTab(v as CourseTabFilter)}
         />
 
-        {filteredCourses.length === 0 ? (
+        {courseViewModels.length === 0 ? (
           <EmptyState
             icon={<BookOpen className="w-12 h-12" />}
             title="No hay cursos disponibles"
@@ -171,96 +87,77 @@ export default function CourseList() {
           />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredCourses.map((course: any) => {
-              const progress = courseProgress.get(course.id) || { completed: 0, total: 0, percentage: 0, totalDurationSec: 0 };
-              const enrollment = enrollments.find((e: any) => e.course_id === course.id && e.status === 'active');
-              const hasEnrollment = !!enrollment;
-              
-              const hours = Math.floor(progress.totalDurationSec / 3600);
-              const minutes = Math.floor((progress.totalDurationSec % 3600) / 60);
-              const durationText = hours > 0 
-                ? `${hours}h ${minutes}m` 
-                : `${minutes}m`;
-
-              return (
-                <Card 
-                  key={course.id} 
-                  className="overflow-hidden hover:shadow-lg transition-shadow duration-200 flex flex-col"
-                  data-testid={`course-card-${course.id}`}
+            {courseViewModels.map((courseVM) => (
+              <Card 
+                key={courseVM.id} 
+                className="overflow-hidden hover:shadow-lg transition-shadow duration-200 flex flex-col"
+                data-testid={`course-card-${courseVM.id}`}
+              >
+                <div 
+                  className="h-40 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center cursor-pointer relative overflow-hidden"
+                  onClick={courseVM.onClick}
                 >
-                  <div 
-                    className="h-40 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center cursor-pointer relative overflow-hidden"
-                    onClick={() => hasEnrollment && handleViewCourse(course.slug)}
+                  {courseVM.coverUrl ? (
+                    <img 
+                      src={courseVM.coverUrl} 
+                      alt={courseVM.displayTitle}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <BookOpen className="h-16 w-16 text-primary/20" />
+                  )}
+                </div>
+
+                <div className="p-4 flex-1 flex flex-col">
+                  <h3 
+                    className="font-semibold text-base mb-3 line-clamp-2 cursor-pointer hover:text-primary transition-colors"
+                    onClick={courseVM.onClick}
+                    data-testid={`course-title-${courseVM.id}`}
                   >
-                    {course.cover_url ? (
-                      <img 
-                        src={course.cover_url} 
-                        alt={course.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <BookOpen className="h-16 w-16 text-primary/20" />
-                    )}
-                  </div>
+                    {courseVM.displayTitle}
+                  </h3>
 
-                  <div className="p-4 flex-1 flex flex-col">
-                    <h3 
-                      className="font-semibold text-base mb-3 line-clamp-2 cursor-pointer hover:text-primary transition-colors"
-                      onClick={() => hasEnrollment && handleViewCourse(course.slug)}
-                      data-testid={`course-title-${course.id}`}
-                    >
-                      {course.title}
-                    </h3>
-
-                    <div className="space-y-1 mb-4 text-xs text-muted-foreground">
+                  <div className="space-y-1 mb-4 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="h-3.5 w-3.5" />
+                      <span>{courseVM.lessonsCountText}</span>
+                    </div>
+                    {courseVM.hasDuration && (
                       <div className="flex items-center gap-2">
-                        <BookOpen className="h-3.5 w-3.5" />
-                        <span>{progress.total} {progress.total === 1 ? 'lección' : 'lecciones'}</span>
-                      </div>
-                      {progress.totalDurationSec > 0 && (
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-3.5 w-3.5" />
-                          <span>{durationText} de contenido</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {hasEnrollment && (
-                      <div className="space-y-2 mb-4 mt-auto">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground">Progreso</span>
-                          <span className="font-semibold">{progress.percentage}%</span>
-                        </div>
-                        <Progress value={progress.percentage} className="h-2" />
+                        <Clock className="h-3.5 w-3.5" />
+                        <span>{courseVM.durationText} de contenido</span>
                       </div>
                     )}
-
-
-                    <div className={hasEnrollment ? '' : 'mt-auto'}>
-                      {hasEnrollment ? (
-                        <Button
-                          variant="default"
-                          size="sm"
-                          onClick={() => handleViewCourse(course.slug)}
-                          className="w-full"
-                          data-testid={`button-view-course-${course.id}`}
-                        >
-                          Ver curso
-                        </Button>
-                      ) : (
-                        <PayButton
-                          courseSlug={course.slug}
-                          currency="ARS"
-                          variant="default"
-                          size="sm"
-                          className="w-full"
-                        />
-                      )}
-                    </div>
                   </div>
-                </Card>
-              );
-            })}
+
+                  {courseVM.showProgress && (
+                    <div className="space-y-2 mb-4 mt-auto">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">Progreso</span>
+                        <span className="font-semibold">{courseVM.progressPercent}%</span>
+                      </div>
+                      <Progress value={courseVM.progressPercent} className="h-2" />
+                    </div>
+                  )}
+
+                  <div className={courseVM.showProgress ? '' : 'mt-auto'}>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={courseVM.onClick}
+                      disabled={courseVM.ctaDisabled}
+                      className="w-full"
+                      data-testid={`button-course-action-${courseVM.id}`}
+                    >
+                      {courseVM.enrollmentStatus === 'not_enrolled' && (
+                        <ShoppingCart className="h-4 w-4 mr-1" />
+                      )}
+                      {courseVM.ctaText}
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
           </div>
         )}
       </div>

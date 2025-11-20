@@ -24,6 +24,7 @@ export { useCourseDuration } from './use-course-duration';
 export { useCourseLessonsSummary } from './use-course-lessons-summary';
 export { useLessonDetails } from './use-lesson-details';
 export { useMonthlyStudyTime } from './use-monthly-study-time';
+export { useCourseListData, type CourseTabFilter, type CourseViewModel, type EnrollmentStatus } from './use-course-list-data';
 
 // ========== LESSON PROGRESS (QUERIES) ==========
 export { useLessonProgress } from './use-lesson-progress';
@@ -32,6 +33,7 @@ export { useLessonProgress } from './use-lesson-progress';
 export { useLessonNotes } from './use-lesson-notes';
 export { useCourseRecentNotes } from './use-course-recent-notes';
 export { useLessonMarkers } from './use-lesson-markers';
+export { useCourseMarkers, type MarkerWithLesson } from './use-course-markers';
 export { useCourseRecentMarkers } from './use-course-recent-markers';
 
 // ========== PRICING (QUERIES) ==========

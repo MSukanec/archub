@@ -1,10 +1,50 @@
 import { supabase } from '@/lib/supabase';
-import type { CourseWithDetails } from '../types';
 
+/**
+ * Course data from backend
+ */
+export interface CourseData {
+  id: string;
+  slug: string;
+  title: string;
+  short_description: string | null;
+  cover_url: string | null;
+  is_active: boolean;
+  visibility: string;
+}
+
+/**
+ * Enrollment data from backend
+ */
+export interface EnrollmentData {
+  id: string;
+  course_id: string;
+  user_id: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  course_slug?: string;
+}
+
+/**
+ * Course progress data from course_progress_view
+ */
+export interface CourseProgressViewData {
+  user_id: string;
+  course_id: string;
+  done_lessons: number;
+  total_lessons: number;
+  progress_pct: number;
+  last_activity_at?: string;
+}
+
+/**
+ * Response from /api/learning/courses-full endpoint
+ */
 export interface LearningCoursesResponse {
-  courses: any[];
-  enrollments: any[];
-  progress: any[];
+  courses: CourseData[];
+  enrollments: EnrollmentData[];
+  progress: CourseProgressViewData[];
 }
 
 /**

@@ -36,6 +36,7 @@ export { deleteLessonNote } from './deleteLessonNote';
 
 // ========== MARKERS ==========
 export { getLessonMarkers } from './getLessonMarkers';
+export { getCourseMarkersUrl, getCourseMarkers, type MarkerWithLesson } from './getCourseMarkers';
 export { getCourseRecentMarkers } from './getCourseRecentMarkers';
 export { upsertLessonMarker } from './upsertLessonMarker';
 export { deleteLessonMarker } from './deleteLessonMarker';

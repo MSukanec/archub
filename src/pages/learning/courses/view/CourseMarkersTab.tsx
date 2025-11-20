@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,30 +14,11 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { MarkerRow } from '@/components/ui/data-row/rows';
+import { useCourseMarkers, getCourseMarkersUrl, type MarkerWithLesson } from '@/features/learning';
 
 interface CourseMarkersTabProps {
   courseId: string;
   courseSlug?: string;
-}
-
-interface MarkerWithLesson {
-  id: string;
-  user_id: string;
-  lesson_id: string;
-  body: string;
-  time_sec: number | null;
-  is_pinned: boolean;
-  note_type: string;
-  created_at: string;
-  updated_at: string;
-  lesson?: {
-    title: string;
-    module_id: string;
-  };
-  module?: {
-    title: string;
-    sort_index: number;
-  };
 }
 
 export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkersTabProps) {
@@ -49,10 +30,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
   const { toast } = useToast();
 
   // Fetch all markers for the course with lesson and module information (OPTIMIZED)
-  const { data: markers = [], isLoading } = useQuery<MarkerWithLesson[]>({
-    queryKey: [`/api/courses/${courseId}/markers`],
-    enabled: !!courseId
-  });
+  const { data: markers = [], isLoading } = useCourseMarkers(courseId);
 
   // Get unique modules from markers
   const modules = useMemo(() => {
@@ -105,7 +83,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/courses/${courseId}/markers`] });
+      queryClient.invalidateQueries({ queryKey: [getCourseMarkersUrl(courseId)] });
       toast({
         title: "Marcador eliminado",
         description: "El marcador se eliminó correctamente",
