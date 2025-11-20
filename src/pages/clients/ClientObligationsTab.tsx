@@ -300,7 +300,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     const formattedAmount = Math.round(total).toLocaleString('es-AR');
 
     return (
-      <div className="flex flex-col items-start">
+      <div className="flex flex-col items-end">
         <span className="font-semibold text-sm">
           {commitmentCurrency.symbol} {formattedAmount}
         </span>
@@ -341,21 +341,21 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       key: 'total_committed_amount',
       label: 'Compromiso total',
       sortable: true,
-      align: 'left' as const,
+      align: 'right' as const,
       render: (client: EnrichedClient) => renderClientFinancial(client, 'committed'),
     },
     {
       key: 'total_paid_amount',
       label: 'Pagado',
       sortable: true,
-      align: 'left' as const,
+      align: 'right' as const,
       render: (client: EnrichedClient) => renderClientFinancial(client, 'paid'),
     },
     {
       key: 'balance_due',
       label: 'Saldo pendiente',
       sortable: true,
-      align: 'left' as const,
+      align: 'right' as const,
       render: (client: EnrichedClient) => renderClientFinancial(client, 'balance'),
     },
     {
