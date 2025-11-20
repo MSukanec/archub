@@ -44,7 +44,7 @@ Preferred communication style: Simple, everyday language.
 - **Media Uploads**: Unified `UploadImageAndShowField` component for project image uploads with dual-mode support (normal upload mode for existing projects, preview mode for new projects), 2MB size limit, drag-and-drop, and inline editing capabilities.
 - **Sitelog Statistics & Filters**: Complete filtering system for construction site logs with statistics dashboard and timeline visualization.
 - **Media Lightbox System**: Unified lightbox for viewing images and videos in sitelog entries.
-- **Project Types Management**: Complete Feature-Sliced Design implementation for managing project types. System includes global types (organization_id = null) and organization-specific custom types. ProjectSettingsTab allows creating, editing, and soft-deleting custom project types with color, icon, and category support. Services validate organizationId and prevent operations on system types. Modal follows ProjectTypeModal pattern with validation guards.
+- **Project Types Management**: Complete Feature-Sliced Design implementation for managing project types. System includes global types (organization_id = null) and organization-specific custom types. ProjectSettingsTab (accessible from Projects page "Ajustes" tab and ProjectData page "Configuración" tab) allows creating, editing, and soft-deleting custom project types with color, icon, and category support. Services validate organizationId and prevent operations on system types. Modal follows ProjectTypeModal pattern with validation guards. "Agregar Tipo" button appears in page header actions when in settings tab.
 
 ## External Dependencies
 - **Supabase**: Authentication.
