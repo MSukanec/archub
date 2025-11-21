@@ -14,7 +14,10 @@ export function useDeleteMediaFile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: deleteMediaFileV2,
+    mutationFn: (linkId: string) => {
+      console.log('[useDeleteMediaFile] Hook received linkId:', linkId);
+      return deleteMediaFileV2(linkId);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GALLERY_FILES] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DOCUMENT_FILES] });
