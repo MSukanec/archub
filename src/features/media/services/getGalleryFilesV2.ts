@@ -72,32 +72,48 @@ export async function getGalleryFilesV2(
 
     if (!data) return [];
 
+    // DEBUG: Ver datos antes del mapeo
+    console.log('[getGalleryFilesV2] Primeros 2 items raw:', data.slice(0, 2));
+    
     // Mapear a estructura MediaFileWithLink
-    const files: MediaFileWithLink[] = data.map((item: any) => ({
-      // Datos del archivo (media_files)
-      id: item.media_files.id,
-      file_url: item.media_files.file_url,
-      file_name: item.media_files.file_name,
-      file_type: item.media_files.file_type,
-      file_size: item.media_files.file_size,
-      file_path: item.media_files.file_path,
-      bucket: item.media_files.bucket,
-      is_deleted: item.media_files.is_deleted,
+    const files: MediaFileWithLink[] = data.map((item: any) => {
+      const mapped = {
+        // Datos del archivo (media_files)
+        id: item.media_files.id,
+        file_url: item.media_files.file_url,
+        file_name: item.media_files.file_name,
+        file_type: item.media_files.file_type,
+        file_size: item.media_files.file_size,
+        file_path: item.media_files.file_path,
+        bucket: item.media_files.bucket,
+        is_deleted: item.media_files.is_deleted,
+        
+        // Datos del link (media_links)
+        link_id: item.id, // Este debería ser el ID de media_links
+        project_id: item.project_id,
+        project_name: item.projects?.name || 'Sin proyecto',
+        site_log_id: item.site_log_id,
+        organization_id: item.organization_id,
+        visibility: item.visibility,
+        description: item.description,
+        category: item.category,
+        is_cover: item.is_cover,
+        position: item.position,
+        created_at: item.created_at,
+        created_by: item.created_by || 'Desconocido'
+      };
       
-      // Datos del link (media_links)
-      link_id: item.id,
-      project_id: item.project_id,
-      project_name: item.projects?.name || 'Sin proyecto',
-      site_log_id: item.site_log_id,
-      organization_id: item.organization_id,
-      visibility: item.visibility,
-      description: item.description,
-      category: item.category,
-      is_cover: item.is_cover,
-      position: item.position,
-      created_at: item.created_at,
-      created_by: item.created_by || 'Desconocido'
-    }));
+      // DEBUG: Ver un ejemplo de mapeo
+      if (data.indexOf(item) === 0) {
+        console.log('[getGalleryFilesV2] Primer archivo mapeado:', {
+          file_id: mapped.id,
+          link_id: mapped.link_id,
+          file_name: mapped.file_name
+        });
+      }
+      
+      return mapped;
+    });
 
     // Ordenar por fecha (más recientes primero)
     return files.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());

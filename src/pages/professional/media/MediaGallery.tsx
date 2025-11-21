@@ -41,21 +41,34 @@ export function MediaGallery() {
   );
 
   // Mapear a formato compatible con Gallery component
-  const galleryFiles: GalleryFile[] = galleryFilesRaw.map(file => ({
-    id: file.id,
-    link_id: file.link_id, // CRÍTICO: ID del link para poder eliminar
-    file_url: file.file_url,
-    file_name: file.file_name,
-    file_type: file.file_type,
-    file_size: file.file_size || undefined,
-    created_at: file.created_at,
-    project_id: file.project_id || '',
-    project_name: file.project_name,
-    description: file.description || undefined,
-    visibility: file.visibility || 'organization',
-    created_by: file.created_by || 'Desconocido',
-    site_log_id: file.site_log_id
-  }));
+  const galleryFiles: GalleryFile[] = galleryFilesRaw.map(file => {
+    const mapped = {
+      id: file.id,
+      link_id: file.link_id, // CRÍTICO: ID del link para poder eliminar
+      file_url: file.file_url,
+      file_name: file.file_name,
+      file_type: file.file_type,
+      file_size: file.file_size || undefined,
+      created_at: file.created_at,
+      project_id: file.project_id || '',
+      project_name: file.project_name,
+      description: file.description || undefined,
+      visibility: file.visibility || 'organization',
+      created_by: file.created_by || 'Desconocido',
+      site_log_id: file.site_log_id
+    };
+    
+    // DEBUG: Ver primer archivo
+    if (galleryFilesRaw.indexOf(file) === 0) {
+      console.log('[MediaGallery] Primer archivo:', {
+        file_id: mapped.id,
+        link_id: mapped.link_id,
+        file_name: mapped.file_name
+      });
+    }
+    
+    return mapped;
+  });
 
   // Delete file mutation usando nuevo servicio
   const deleteFileMutation = useDeleteMediaFile();
