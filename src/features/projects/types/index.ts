@@ -18,6 +18,7 @@ export interface Project {
   custom_color_hex?: string | null;
   is_deleted: boolean;
   deleted_at?: string | null;
+  last_active_at?: string | null;
   updated_at?: string;
   project_data?: ProjectData;
   creator?: ProjectCreator;

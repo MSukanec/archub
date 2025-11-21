@@ -106,11 +106,20 @@ export default function ProjectActives() {
     return searchMatch && matchesProjectType && matchesModality && matchesStatus;
   })
 
-  // Put active project first
-  const sortedProjects = activeProjectId ? [
-    ...filteredProjects.filter(project => project.id === activeProjectId),
-    ...filteredProjects.filter(project => project.id !== activeProjectId)
-  ] : filteredProjects
+  // Put active project first, then sort by last_active_at
+  const sortedProjects = useMemo(() => {
+    const activeProject = filteredProjects.find(p => p.id === activeProjectId);
+    const otherProjects = filteredProjects
+      .filter(p => p.id !== activeProjectId)
+      .sort((a, b) => {
+        // Ordenar por last_active_at descendente (más reciente primero)
+        const dateA = a.last_active_at ? new Date(a.last_active_at).getTime() : 0;
+        const dateB = b.last_active_at ? new Date(b.last_active_at).getTime() : 0;
+        return dateB - dateA;
+      });
+    
+    return activeProject ? [activeProject, ...otherProjects] : otherProjects;
+  }, [filteredProjects, activeProjectId])
 
   // Select project mutation - AHORA SIN NAVEGACIÓN
   const selectProjectMutation = useMutation({
@@ -131,6 +140,15 @@ export default function ProjectActives() {
         })
       
       if (error) throw error
+
+      // Update project's last_active_at
+      const { error: projectError } = await supabase
+        .from('projects')
+        .update({ last_active_at: new Date().toISOString() })
+        .eq('id', projectId)
+      
+      if (projectError) throw projectError
+      
       return projectId;
     },
     onSuccess: (projectId) => {
@@ -190,6 +208,14 @@ export default function ProjectActives() {
           });
         
         if (error) throw error;
+
+        // Update project's last_active_at
+        const { error: projectError } = await supabase
+          .from('projects')
+          .update({ last_active_at: new Date().toISOString() })
+          .eq('id', projectId);
+        
+        if (projectError) throw projectError;
       }
 
       // Actualizar contextos

@@ -212,6 +212,9 @@ export const projects = pgTable("projects", {
   custom_color_hex: text("custom_color_hex"),
   created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  is_deleted: boolean("is_deleted").notNull().default(false),
+  deleted_at: timestamp("deleted_at", { withTimezone: true }),
+  last_active_at: timestamp("last_active_at", { withTimezone: true }),
 });
 
 export type Project = typeof projects.$inferSelect;

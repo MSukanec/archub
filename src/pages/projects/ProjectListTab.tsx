@@ -220,6 +220,15 @@ export default function ProjectList() {
         })
       
       if (error) throw error
+
+      // Update project's last_active_at
+      const { error: projectError } = await supabase
+        .from('projects')
+        .update({ last_active_at: new Date().toISOString() })
+        .eq('id', projectId)
+      
+      if (projectError) throw projectError
+      
       return projectId;
     },
     onSuccess: (projectId) => {
@@ -360,6 +369,17 @@ export default function ProjectList() {
       render: (project: any) => (
         <div className="text-sm text-muted-foreground">
           {project.created_at ? format(new Date(project.created_at), 'dd/MM/yyyy', { locale: es }) : 'Sin fecha'}
+        </div>
+      )
+    },
+    {
+      key: 'last_active_at',
+      label: 'Última Actividad',
+      render: (project: any) => (
+        <div className="text-sm text-muted-foreground">
+          {project.last_active_at 
+            ? format(new Date(project.last_active_at), 'dd/MM/yyyy HH:mm', { locale: es }) 
+            : 'Nunca'}
         </div>
       )
     }

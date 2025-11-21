@@ -18,6 +18,7 @@ create table public.projects (
   code text null,
   is_deleted boolean not null default false,
   deleted_at timestamp with time zone null,
+  last_active_at timestamp with time zone null,
   constraint projects_pkey primary key (id),
   constraint projects_id_key unique (id),
   constraint projects_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
@@ -168,37 +169,45 @@ execute FUNCTION set_timestamp ();
 
 create view public.project_summary_view as
 select
-  p.id,
+  p.id as project_id,
   p.name,
-  p.code,
   p.status,
-  p.is_active,
   p.created_at,
   p.updated_at,
-  p.custom_color_hex,
-  p.use_custom_color,
+  p.last_active_at,
+  p.is_active,
+  p.is_deleted,
+  p.deleted_at,
   p.organization_id,
-  d.surface_total,
-  d.surface_covered,
-  d.surface_semi,
-  d.start_date,
-  d.estimated_end,
-  d.lat,
-  d.lng,
-  d.address,
-  d.city,
-  d.zip_code,
-  d.country,
-  d.project_image_url,
-  t.name as project_type_name,
-  m.name as project_modality_name
+  pt.id as project_type_id,
+  pt.name as project_type_name,
+  pm.id as project_modality_id,
+  pm.name as project_modality_name,
+  pd.surface_total,
+  pd.surface_covered,
+  pd.surface_semi,
+  pd.start_date,
+  pd.estimated_end,
+  pd.project_image_url,
+  pd.lat,
+  pd.lng,
+  pd.zip_code,
+  pd.city,
+  pd.address,
+  pd.country,
+  pd.state,
+  pd.client_name,
+  pd.contact_phone,
+  pd.email,
+  pd.address_full,
+  pd.location_type,
+  pd.place_id,
+  pd.timezone
 from
   projects p
-  left join project_data d on d.project_id = p.id
-  left join project_types t on t.id = d.project_type_id
-  left join project_modalities m on m.id = d.project_modality_id
-where
-  p.is_deleted = false;
+  left join project_data pd on pd.project_id = p.id
+  left join project_types pt on pt.id = pd.project_type_id
+  left join project_modalities pm on pm.id = pd.project_modality_id;
 
 ---------- VISTA PROJECT_ACTIVE_VIEW:
 
@@ -209,6 +218,8 @@ select
   p.status,
   p.organization_id,
   p.created_at,
+  p.updated_at,
+  p.last_active_at,
   pd.project_image_url,
   pt.name as project_type_name,
   pm.name as modality_name
@@ -225,18 +236,23 @@ where
 
 create view public.projects_list_view as
 select
-  p.id,
+  p.id as project_id,
   p.name,
   p.status,
-  p.organization_id,
   p.created_at,
-  pd.project_image_url,
+  p.updated_at,
+  p.last_active_at,
+  p.is_active,
+  p.organization_id,
   pt.name as project_type_name,
-  pm.name as modality_name
+  pm.name as project_modality_name,
+  pd.project_image_url,
+  pd.city,
+  pd.country,
+  pd.start_date,
+  pd.estimated_end
 from
   projects p
   left join project_data pd on pd.project_id = p.id
   left join project_types pt on pt.id = pd.project_type_id
-  left join project_modalities pm on pm.id = pd.project_modality_id
-where
-  p.is_deleted = false;
+  left join project_modalities pm on pm.id = pd.project_modality_id;
