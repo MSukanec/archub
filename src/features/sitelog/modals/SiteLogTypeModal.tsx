@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useOrganizationMembers } from '@/features/organization/hooks/use-organization-members';
 import { createSiteLogType } from '../services/createSiteLogType';
 import { updateSiteLogType } from '../services/updateSiteLogType';
 import type { SiteLogType } from '../services/getSiteLogTypes';
@@ -48,6 +49,7 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
+  const { data: members = [] } = useOrganizationMembers(userData?.organization?.id);
 
   const form = useForm<SiteLogTypeFormData>({
     resolver: zodResolver(siteLogTypeSchema),
@@ -154,6 +156,16 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
         }
       });
     } else {
+      const currentMember = members.find((m: any) => m.user_id === userData?.user?.id);
+      if (!currentMember) {
+        toast({
+          title: 'Error',
+          description: 'No se encontró el miembro de la organización',
+          variant: 'destructive'
+        });
+        return;
+      }
+      
       createMutation.mutate({
         name: data.name,
         code: data.code,
@@ -161,6 +173,7 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
         icon: data.icon || null,
         color: data.color || null,
         organizationId: userData.organization.id,
+        createdBy: currentMember.id,
       });
     }
   };

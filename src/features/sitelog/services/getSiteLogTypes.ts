@@ -11,6 +11,9 @@ export interface SiteLogType {
   created_at: string;
   organization_id: string | null;
   updated_at: string;
+  is_deleted: boolean;
+  deleted_at: string | null;
+  created_by: string | null;
 }
 
 /**
@@ -32,6 +35,7 @@ export async function getSiteLogTypes(organizationId: string): Promise<SiteLogTy
     .from('site_log_types')
     .select('*')
     .or(`organization_id.eq.${organizationId},organization_id.is.null`)
+    .eq('is_deleted', false)
     .order('is_default', { ascending: false })
     .order('name');
 

@@ -7,6 +7,7 @@ export interface CreateSiteLogTypeData {
   icon?: string | null;
   color?: string | null;
   organizationId: string;
+  createdBy: string;
 }
 
 /**
@@ -21,8 +22,8 @@ export async function createSiteLogType(data: CreateSiteLogTypeData) {
     throw new Error('Supabase client not available');
   }
 
-  if (!data.name || !data.code || !data.organizationId) {
-    throw new Error('Missing required parameters: name, code, and organizationId are required');
+  if (!data.name || !data.code || !data.organizationId || !data.createdBy) {
+    throw new Error('Missing required parameters: name, code, organizationId, and createdBy are required');
   }
 
   const { data: newType, error } = await supabase
@@ -35,6 +36,7 @@ export async function createSiteLogType(data: CreateSiteLogTypeData) {
       color: data.color || null,
       is_default: false, // Los tipos personalizados nunca son default
       organization_id: data.organizationId,
+      created_by: data.createdBy,
     })
     .select()
     .single();

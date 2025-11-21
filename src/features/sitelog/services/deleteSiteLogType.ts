@@ -17,10 +17,13 @@ export async function deleteSiteLogType(typeId: string, organizationId: string) 
     throw new Error('Missing required parameters: typeId and organizationId are required');
   }
 
-  // Eliminar solo si pertenece a la organización (no tipos del sistema)
+  // Soft delete solo si pertenece a la organización (no tipos del sistema)
   const { error } = await supabase
     .from('site_log_types')
-    .delete()
+    .update({ 
+      is_deleted: true, 
+      deleted_at: new Date().toISOString() 
+    })
     .eq('id', typeId)
     .eq('organization_id', organizationId);
 
