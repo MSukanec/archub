@@ -90,6 +90,13 @@ export function MediaGallery() {
   };
 
   const handleDelete = (file: GalleryFile) => {
+    // DEBUG: Ver qué datos tiene el file cuando hacemos delete
+    console.log('[MediaGallery] handleDelete called with:', {
+      file_id: file.id,
+      link_id: file.link_id,
+      file_name: file.file_name
+    });
+    
     // Usar link_id para eliminar (NO el media_file.id)
     if (!file.link_id) {
       toast({
@@ -99,6 +106,8 @@ export function MediaGallery() {
       });
       return;
     }
+    
+    console.log('[MediaGallery] About to delete link_id:', file.link_id);
     
     deleteFileMutation.mutate(file.link_id, {
       onSuccess: () => {
