@@ -21,6 +21,13 @@ import { useUnreadUserSupportMessages } from '@/hooks/use-unread-user-support-me
 import ButtonSidebar from "../desktop-layout-classic/ButtonSidebar";
 import { SidebarIconButton } from "../desktop/SidebarIconButton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { SupportModal } from "@/components/support/SupportModal";
 import { getUnreadCount, subscribeUserNotifications } from '@/lib/notifications';
@@ -107,7 +114,6 @@ export function LeftSidebar() {
   // Estado para popovers y modals
   const [notificationPopoverOpen, setNotificationPopoverOpen] = useState(false);
   const [helpPopoverOpen, setHelpPopoverOpen] = useState(false);
-  const [userPopoverOpen, setUserPopoverOpen] = useState(false);
   const [supportModalOpen, setSupportModalOpen] = useState(false);
   const [notificationUnreadCount, setNotificationUnreadCount] = useState(0);
   
@@ -728,11 +734,10 @@ export function LeftSidebar() {
                 </PopoverContent>
               </Popover>
 
-              {/* Avatar del usuario con Popover */}
-              <Popover open={userPopoverOpen} onOpenChange={setUserPopoverOpen}>
-                <PopoverTrigger asChild>
+              {/* Avatar del usuario con DropdownMenu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   <button
-                    onClick={() => setUserPopoverOpen(!userPopoverOpen)}
                     className="group relative cursor-pointer transition-all duration-200 hover:scale-105"
                     data-testid="button-user-menu"
                     title="Menú de usuario"
@@ -744,73 +749,61 @@ export function LeftSidebar() {
                       </AvatarFallback>
                     </Avatar>
                   </button>
-                </PopoverTrigger>
-                <PopoverContent 
+                </DropdownMenuTrigger>
+                <DropdownMenuContent 
                   side="right" 
                   align="end"
-                  className="w-[200px] p-2"
+                  className="w-[200px]"
                   sideOffset={8}
                   alignOffset={0}
                 >
-                  <div className="flex flex-col gap-1">
-                    {/* Mi Perfil */}
-                    <button
-                      onClick={() => {
-                        setSidebarLevel('settings');
-                        navigate('/settings/user-basic-data');
-                        setUserPopoverOpen(false);
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent/10 transition-colors text-left"
-                      data-testid="button-profile"
-                    >
-                      <User className="h-4 w-4" />
-                      <span>Mi Perfil</span>
-                    </button>
-                    
-                    {/* Página de Inicio */}
-                    <button
-                      onClick={() => {
-                        navigate('/');
-                        setUserPopoverOpen(false);
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent/10 transition-colors text-left"
-                      data-testid="button-home"
-                    >
-                      <Home className="h-4 w-4" />
-                      <span>Página de Inicio</span>
-                    </button>
-                    
-                    {/* Cambiar Modo */}
-                    <button
-                      onClick={() => {
-                        navigate('/select-mode');
-                        setUserPopoverOpen(false);
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent/10 transition-colors text-left"
-                      data-testid="button-change-mode"
-                    >
-                      <Settings className="h-4 w-4" />
-                      <span>Cambiar Modo</span>
-                    </button>
-                    
-                    {/* Separador */}
-                    <div className="h-px bg-border my-1" />
-                    
-                    {/* Cerrar Sesión */}
-                    <button
-                      onClick={() => {
-                        handleLogout();
-                        setUserPopoverOpen(false);
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-destructive/10 text-destructive transition-colors text-left"
-                      data-testid="button-logout"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      <span>Cerrar Sesión</span>
-                    </button>
-                  </div>
-                </PopoverContent>
-              </Popover>
+                  {/* Mi Perfil */}
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSidebarLevel('settings');
+                      navigate('/settings/user-basic-data');
+                    }}
+                    className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent hover:text-black dark:hover:text-white transition-colors"
+                    data-testid="button-profile"
+                  >
+                    <User className="h-4 w-4" />
+                    Mi Perfil
+                  </DropdownMenuItem>
+                  
+                  {/* Página de Inicio */}
+                  <DropdownMenuItem
+                    onClick={() => navigate('/')}
+                    className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent hover:text-black dark:hover:text-white transition-colors"
+                    data-testid="button-home"
+                  >
+                    <Home className="h-4 w-4" />
+                    Página de Inicio
+                  </DropdownMenuItem>
+                  
+                  {/* Cambiar Modo */}
+                  <DropdownMenuItem
+                    onClick={() => navigate('/select-mode')}
+                    className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent hover:text-black dark:hover:text-white transition-colors"
+                    data-testid="button-change-mode"
+                  >
+                    <Settings className="h-4 w-4" />
+                    Cambiar Modo
+                  </DropdownMenuItem>
+                  
+                  {/* Separador */}
+                  <DropdownMenuSeparator className="bg-border" />
+                  
+                  {/* Cerrar Sesión */}
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent text-foreground hover:text-red-600 dark:hover:text-red-500 transition-colors"
+                    data-testid="button-logout"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Cerrar Sesión
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
