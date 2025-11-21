@@ -43,7 +43,9 @@ export function MediaForm({
         throw dbError;
       }
 
-      queryClient.invalidateQueries({ queryKey: ['site-log-files'] });
+      // Invalidar todas las queries de archivos de sitelog (partial match)
+      queryClient.invalidateQueries({ queryKey: ['sitelog-files'] });
+      queryClient.invalidateQueries({ queryKey: ['site-logs'] });
       queryClient.invalidateQueries({ queryKey: ['galleryFiles'] });
       
       toast({
