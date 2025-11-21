@@ -64,8 +64,9 @@ export function SitelogGallery({ files, onDelete, onDownload, onEdit }: SitelogG
       const weekStart = startOfWeek(fileDate, { weekStartsOn: 1, locale: es }); // Lunes
       const weekEnd = endOfWeek(fileDate, { weekStartsOn: 1, locale: es }); // Domingo
       
-      // Crear label de semana: "Semana del 1-7 Nov"
-      const weekLabel = `Semana del ${format(weekStart, 'd', { locale: es })}-${format(weekEnd, 'd MMM', { locale: es })}`;
+      // Crear label de semana: "Semana del 1-7 nov" (primera letra en mayúscula, resto en minúsculas)
+      const weekLabelRaw = `semana del ${format(weekStart, 'd', { locale: es })}-${format(weekEnd, 'd MMM', { locale: es })}`;
+      const weekLabel = weekLabelRaw.charAt(0).toUpperCase() + weekLabelRaw.slice(1);
       const weekKey = weekStart.toISOString();
 
       if (!groups.has(weekKey)) {
@@ -94,12 +95,13 @@ export function SitelogGallery({ files, onDelete, onDownload, onEdit }: SitelogG
       {groupedByWeek.map((group, index) => (
         <div key={group.weekStart.toISOString()} className="space-y-4">
           {/* Separador visual por semana */}
-          <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-border" />
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              {group.weekLabel}
-            </h3>
-            <div className="h-px flex-1 bg-border" />
+          <div className="relative flex items-center my-6">
+            <div className="flex-shrink-0 pr-4">
+              <span className="text-xs font-medium text-border/60">
+                {group.weekLabel}
+              </span>
+            </div>
+            <div className="flex-grow border-t border-border/40"></div>
           </div>
 
           {/* Gallery component reutilizado para cada grupo */}
