@@ -29,6 +29,7 @@ export function useProjectsLite(organizationId?: string | undefined) {
         .eq('organization_id', effectiveOrganizationId)
         .eq('is_active', true)
         .eq('is_deleted', false)
+        .eq('status', 'active')
         .order('updated_at', { ascending: false })
       
       if (error) {
