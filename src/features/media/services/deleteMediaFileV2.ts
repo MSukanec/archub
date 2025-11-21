@@ -18,12 +18,16 @@ export async function deleteMediaFileV2(linkId: string): Promise<void> {
   }
 
   try {
+    console.log('[deleteMediaFileV2] Attempting to delete link:', linkId);
+    
     // 1. Obtener información del link antes de eliminarlo
     const { data: linkData, error: linkFetchError } = await supabase
       .from('media_links')
       .select('media_file_id')
       .eq('id', linkId)
       .single();
+
+    console.log('[deleteMediaFileV2] Query result:', { linkData, linkFetchError });
 
     if (linkFetchError) throw linkFetchError;
     if (!linkData) throw new Error('Link no encontrado');
