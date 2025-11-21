@@ -34,8 +34,17 @@ export function transformProjectData(rawProject: any): Project {
         project_modality: pd.modality
       };
     }
-  } else if (rawProject.project_type_id || rawProject.project_modality_id || rawProject.project_image_url) {
+  } else if (
+    rawProject.project_type_id || 
+    rawProject.project_modality_id || 
+    rawProject.project_image_url ||
+    rawProject.city ||
+    rawProject.country ||
+    rawProject.start_date ||
+    rawProject.estimated_end
+  ) {
     // Estructura plana: proyecto viene de la vista projects_view
+    // Crear project_data si CUALQUIERA de estos campos existe
     projectData = {
       project_type_id: rawProject.project_type_id,
       project_modality_id: rawProject.project_modality_id,
