@@ -58,7 +58,7 @@ import { queryClient } from "@/lib/queryClient";
 import { useActionBarMobile } from "@/layout/mobile/ActionBarMobileContext";
 import { useMobile } from "@/hooks/use-mobile";
 import { useProjectContext } from "@/stores/projectContext";
-import { FILTER_LABELS } from "@/constants/actionBarConstants";
+import { FILTER_LABELS } from "@/layout/constants/actionBarConstants";
 import { MovementKPICardsWithWallets } from "@/components/kpis/MovementKPICardsWithWallets";
 
 interface Movement {
