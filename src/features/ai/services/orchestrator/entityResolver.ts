@@ -10,7 +10,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Entity, AIContext } from './types';
-import { textIncludes, normalizeText } from '../utils/textNormalizer';
+import { textIncludes, normalizeText } from '../../utils/textNormalizer';
 import { generateEntityVariants, synonymRegistry } from './entitySynonyms';
 import { aiCache } from './cache';
 

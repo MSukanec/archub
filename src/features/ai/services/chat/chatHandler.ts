@@ -11,7 +11,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
-import { getChatSystemPrompt } from "../systemPrompt";
+import { getChatSystemPrompt } from "../../constants/systemPrompt";
 import { runAIPipeline, enrichSystemPrompt, cacheAIResult, getPipelineMetrics } from "../orchestrator/pipeline";
 import type { AIContext } from "../orchestrator/types";
 

@@ -10,7 +10,7 @@ import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { UserQuickAccess } from "@/components/ui-custom/layout/UserQuickAccess";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
-import { AIPanel } from "@/components/ai/AIPanel";
+import { AIPanel } from "@/features/ai";
 import { SupportPanel } from "@/components/support/SupportPanel";
 import { Bell, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";

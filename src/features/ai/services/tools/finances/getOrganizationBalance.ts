@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { formatCurrency } from '../../utils/responseFormatter';
-import { convertCurrency } from '../../utils/currencyConverter';
+import { formatCurrency } from '../../../utils/responseFormatter';
+import { convertCurrency } from '../../../utils/currencyConverter';
 import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder';
 
 /**

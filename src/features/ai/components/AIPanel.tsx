@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Sparkles, ArrowUp } from 'lucide-react';
-import { MessageContent } from '@/components/ai/MessageContent';
+import { MessageContent } from './MessageContent';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';

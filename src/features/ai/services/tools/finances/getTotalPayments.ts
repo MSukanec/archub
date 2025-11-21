@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder';
-import { textIncludes } from '../../utils/textNormalizer';
+import { textIncludes } from '../../../utils/textNormalizer';
 
 /**
  * Calcula el total de pagos realizados a un contacto (en cualquier rol)

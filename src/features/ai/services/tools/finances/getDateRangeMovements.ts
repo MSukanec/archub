@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { formatCurrency, formatDateRange, formatMovementCount } from '../../utils/responseFormatter';
+import { formatCurrency, formatDateRange, formatMovementCount } from '../../../utils/responseFormatter';
 import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder';
-import { textIncludes } from '../../utils/textNormalizer';
+import { textIncludes } from '../../../utils/textNormalizer';
 
 export interface MovementFilters {
   projectNames?: string[];

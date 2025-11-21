@@ -1,8 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { formatCurrency, formatDateRange, formatMovementCount } from '../../utils/responseFormatter';
-import { convertCurrency } from '../../utils/currencyConverter';
+import { formatCurrency, formatDateRange, formatMovementCount } from '../../../utils/responseFormatter';
+import { convertCurrency } from '../../../utils/currencyConverter';
 import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder';
-import { normalizeText, textIncludes } from '../../utils/textNormalizer';
+import { normalizeText, textIncludes } from '../../../utils/textNormalizer';
 
 /**
  * Obtiene TODOS los movimientos (ingresos y egresos) de un contacto específico.

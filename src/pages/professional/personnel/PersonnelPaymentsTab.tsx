@@ -6,7 +6,7 @@ import { DollarSign, Receipt } from 'lucide-react'
 import { Table } from "@/components/ui-custom/tables-and-trees/Table"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { convertCurrency } from '@/ai/utils/currencyConverter'
+import { convertCurrency } from '@/features/ai'
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
 
 interface PersonnelPaymentsTabProps {

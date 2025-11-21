@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { formatCurrency } from '../../utils/responseFormatter';
+import { formatCurrency } from '../../../utils/responseFormatter';
 import { buildMovementQuery, type MovementRow } from './helpers/movementQueryBuilder';
-import { textIncludes } from '../../utils/textNormalizer';
+import { textIncludes } from '../../../utils/textNormalizer';
 
 /**
  * Resumen financiero completo de un proyecto (balance, ingresos, egresos)

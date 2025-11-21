@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { AIPanel } from '@/components/ai/AIPanel';
+import { AIPanel } from '@/features/ai';
 import { Sparkles, X, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCurrentUser } from '@/hooks/use-current-user';

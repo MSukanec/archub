@@ -10,16 +10,34 @@ export { AIPanel } from './components/AIPanel';
 export { MessageContent } from './components/MessageContent';
 
 // Services - Chat Handlers
-export { chatHandler } from './services/chat/chatHandler';
-export { homeGreetingHandler } from './services/chat/homeGreetingHandler';
-export { historyHandler } from './services/chat/historyHandler';
+export { getChatHandler, checkAndIncrementUsageLimit } from './services/chat/chatHandler';
+export { getHomeGreetingHandler } from './services/chat/homeGreetingHandler';
+export { getHistoryHandler } from './services/chat/historyHandler';
 
 // Services - Orchestrator
-export { cache } from './services/orchestrator/cache';
-export { entityResolver } from './services/orchestrator/entityResolver';
-export { entitySynonyms } from './services/orchestrator/entitySynonyms';
-export { intentClassifier } from './services/orchestrator/intentClassifier';
-export { pipeline } from './services/orchestrator/pipeline';
+export { aiCache } from './services/orchestrator/cache';
+export { resolveEntities, invalidateEntityCache, type EntitySearchResult } from './services/orchestrator/entityResolver';
+export { 
+  expandWithSynonyms, 
+  extractKeyTerms, 
+  generateEntityVariants,
+  financialTermSynonyms,
+  abbreviationPatterns,
+  regionalVariants,
+  EntitySynonymRegistry,
+  synonymRegistry
+} from './services/orchestrator/entitySynonyms';
+export { 
+  classifyIntent, 
+  suggestToolForIntent, 
+  validateIntent 
+} from './services/orchestrator/intentClassifier';
+export { 
+  runAIPipeline,
+  enrichSystemPrompt, 
+  cacheAIResult, 
+  getPipelineMetrics 
+} from './services/orchestrator/pipeline';
 
 // Services - Tools (Finance)
 export { getCashflowTrend } from './services/tools/finances/getCashflowTrend';
@@ -29,7 +47,7 @@ export { getDateRangeMovements } from './services/tools/finances/getDateRangeMov
 export { getOrganizationBalance } from './services/tools/finances/getOrganizationBalance';
 export { getProjectFinancialSummary } from './services/tools/finances/getProjectFinancialSummary';
 export { getRoleSpending } from './services/tools/finances/getRoleSpending';
-export { getTotalPayments } from './services/tools/finances/getTotalPayments';
+export { getTotalPaymentsByContactAndProject } from './services/tools/finances/getTotalPayments';
 
 // Services - Tools (Organization)
 export { getOrganizationActivity } from './services/tools/organization/getOrganizationActivity';
@@ -41,13 +59,13 @@ export { getProjectDetails } from './services/tools/projects/getProjectDetails';
 export { getProjectsList } from './services/tools/projects/getProjectsList';
 
 // Utils
-export { currencyConverter } from './utils/currencyConverter';
-export { dateParser } from './utils/dateParser';
-export { responseFormatter } from './utils/responseFormatter';
-export { textNormalizer } from './utils/textNormalizer';
+export { convertCurrency } from './utils/currencyConverter';
+export { parseDateExpression, type DateRange } from './utils/dateParser';
+export { formatCurrency, formatDateRange, formatMovementCount } from './utils/responseFormatter';
+export { normalizeText, textMatches, textIncludes } from './utils/textNormalizer';
 
 // Constants
-export { SYSTEM_PROMPT } from './constants/systemPrompt';
+export { getGreetingSystemPrompt, getChatSystemPrompt, GENERAL_GUIDELINES, SYSTEM_PROMPT } from './constants/systemPrompt';
 
 // Types
 export type * from './services/orchestrator/types';

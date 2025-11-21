@@ -10,7 +10,7 @@
 
 import type { Intent, Entity, IntentPattern } from './types';
 import { extractKeyTerms, expandWithSynonyms } from './entitySynonyms';
-import { parseDateExpression } from '../utils/dateParser';
+import { parseDateExpression } from '../../utils/dateParser';
 
 /**
  * Patrones de intenciones con keywords asociadas y prioridad

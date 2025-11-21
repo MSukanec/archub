@@ -14,7 +14,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { AIContext, PipelineContext, Intent, QueryPlan, AIResponse } from './types';
-import { normalizeText } from '../utils/textNormalizer';
+import { normalizeText } from '../../utils/textNormalizer';
 import { expandWithSynonyms } from './entitySynonyms';
 import { aiCache } from './cache';
 import { resolveEntities } from './entityResolver';

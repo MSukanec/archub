@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
-import { getGreetingSystemPrompt } from "../systemPrompt";
+import { getGreetingSystemPrompt } from "../../constants/systemPrompt";
 
 interface Suggestion {
   label: string;

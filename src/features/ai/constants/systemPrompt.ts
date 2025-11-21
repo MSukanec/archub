@@ -270,8 +270,11 @@ export const GENERAL_GUIDELINES = {
   ]
 } as const;
 
-export default {
+/**
+ * Constante principal que exporta todos los prompts y configuraciones
+ */
+export const SYSTEM_PROMPT = {
   getGreetingSystemPrompt,
   getChatSystemPrompt,
   GENERAL_GUIDELINES
-};
+} as const;
