@@ -55,3 +55,10 @@ export { default as ProjectSelectorField } from './components/ProjectSelectorFie
 
 // ============ MODALS ============
 export * from './modals/ProjectModal';
+
+// ============ SUB-FEATURES ============
+// Project Types
+export * from './project-types';
+
+// Project Modalities
+export * from './project-modalities';

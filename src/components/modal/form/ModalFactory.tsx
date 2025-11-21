@@ -48,8 +48,8 @@ import { ChangelogFormModal } from '../modals/admin/ChangelogFormModal';
 import { SiteLogModal } from '@/features/sitelog/modals/SiteLogModal';
 import { SiteLogModalView } from '@/features/sitelog/modals/SiteLogModalView';
 import { SiteLogTypeModal } from '@/features/sitelog/modals/SiteLogTypeModal';
-import { ProjectTypeModal } from '@/features/project-types/modals/ProjectTypeModal';
-import { ProjectModalityModal } from '@/features/project-modalities/modals/ProjectModalityModal';
+import { ProjectTypeModal } from '@/features/projects/project-types/modals/ProjectTypeModal';
+import { ProjectModalityModal } from '@/features/projects/project-modalities/modals/ProjectModalityModal';
 import {
   PersonnelAttendanceModal,
   PersonnelAddModal,
