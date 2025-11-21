@@ -145,7 +145,7 @@ export default function Sitelog() {
         id: 'multimedia', 
         label: 'Multimedia', 
         isActive: activeTab === 'multimedia',
-        disabled: siteLogs.length === 0
+        isDisabled: siteLogs.length === 0
       },
       { id: 'ajustes', label: 'Ajustes', isActive: activeTab === 'ajustes' }
     ],

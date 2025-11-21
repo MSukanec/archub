@@ -115,7 +115,9 @@ export function SiteLogModalView({ modalData, onClose, onEdit, onDelete }: SiteL
       .slice(0, 2);
   };
 
-  const entryTypeConfig = entryTypes[siteLog.entry_type as keyof typeof entryTypes];
+  // Obtener configuración del tipo desde la relación site_log_type
+  const entryTypeName = siteLog.site_log_type?.name || 'Registro General';
+  const entryTypeConfig = { label: entryTypeName, icon: FileText, color: 'bg-teal-100 text-teal-800' };
   const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
   
   // Filtrar solo imágenes de los archivos

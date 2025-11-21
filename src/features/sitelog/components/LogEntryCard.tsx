@@ -1,4 +1,4 @@
-import { Star, Edit, Trash2, Image, Video, Play } from "lucide-react";
+import { Star, Edit, Trash2, Image, Video, Play, FileText } from "lucide-react";
 import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
 import { useMediaLightbox, type MediaItem } from "@/components/ui-custom/media/ImageLightbox";
-import { ENTRY_TYPES, WEATHER_TYPES } from '../constants';
+import { WEATHER_TYPES } from '../constants';
 
 interface LogEntryCardProps {
   siteLog: any;
@@ -30,7 +30,9 @@ export function LogEntryCard({
   mediaItems,
   lightbox
 }: LogEntryCardProps) {
-  const entryTypeConfig = ENTRY_TYPES[siteLog.entry_type as keyof typeof ENTRY_TYPES];
+  // Obtener configuración del tipo desde la relación site_log_type
+  const entryTypeName = siteLog.site_log_type?.name || 'Registro General';
+  const entryTypeConfig = { label: entryTypeName, icon: FileText, color: 'bg-teal-100 text-teal-800' };
   const weatherConfig = WEATHER_TYPES[siteLog.weather as keyof typeof WEATHER_TYPES];
   
   // Formatear hora del created_at
@@ -40,7 +42,7 @@ export function LogEntryCard({
   
   // Componentes de ícono dinámicos
   const WeatherIcon = weatherConfig?.icon;
-  const TypeIcon = entryTypeConfig?.icon;
+  const TypeIcon = entryTypeConfig.icon;
 
   return (
     <div 

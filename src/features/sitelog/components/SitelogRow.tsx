@@ -103,10 +103,10 @@ export default function SitelogRow({
   enableSwipe = true,
   className
 }: SitelogRowProps) {
-  // Obtener el code del tipo desde la relación site_log_type
-  // Fallback a 'registro_general' si no hay tipo definido
-  const entryType = (siteLog as any).site_log_type?.code || 'registro_general';
-  const entryTypeConfig = entryTypes[entryType as keyof typeof entryTypes] || entryTypes.registro_general;
+  // Obtener el nombre del tipo desde la relación site_log_type
+  const entryTypeName = (siteLog as any).site_log_type?.name || 'Registro General';
+  // Ya no usamos un mapeo hardcodeado porque los tipos son configurables
+  const entryTypeConfig = { label: entryTypeName, icon: FileText, color: 'bg-teal-100 text-teal-800' };
   const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
 
   // Obtener avatar y nombre del creador

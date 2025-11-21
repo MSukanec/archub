@@ -32,9 +32,8 @@ export async function getSiteLogs(projectId: string | undefined, organizationId:
       ),
       site_log_type:site_log_types(
         id,
-        code,
         name,
-        icon
+        description
       )
     `)
     .eq('organization_id', organizationId);
