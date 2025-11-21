@@ -732,11 +732,13 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
             </div>
           ),
         }}
-        leadingRowAction={(payment: ClientPaymentWithRelations) => payment.file_url ? {
-          label: 'Ver Adjunto',
-          icon: Paperclip,
-          onClick: () => window.open(payment.file_url!, '_blank'),
-        } : null}
+        leadingRowAction={(payment: ClientPaymentWithRelations) => 
+          payment.attachments && payment.attachments.length > 0 ? {
+            label: 'Ver Adjunto',
+            icon: Paperclip,
+            onClick: () => window.open(payment.attachments![0].file_url, '_blank'),
+          } : null
+        }
         primaryRowAction={(payment: ClientPaymentWithRelations) => ({
           label: 'Ver',
           onClick: () => handleViewPayment(payment),
