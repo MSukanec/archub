@@ -106,11 +106,6 @@ export function Clients() {
   // Crear tabs para el header
   const headerTabs = [
     {
-      id: "dashboard",
-      label: "Visión General",
-      isActive: activeTab === "dashboard"
-    },
-    {
       id: "list",
       label: "Lista de Clientes",
       isActive: activeTab === "list"
@@ -209,13 +204,6 @@ export function Clients() {
   return (
     <Layout headerProps={headerProps} wide={false}>
       <div className="space-y-4">
-        {activeTab === "dashboard" && (
-          <ClientDashboardTab 
-            projectId={projectId || undefined}
-            onTabChange={setActiveTab}
-          />
-        )}
-
         {activeTab === "list" && (
           <ClientListTab 
             projectId={projectId || undefined}
