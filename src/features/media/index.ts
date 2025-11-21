@@ -11,7 +11,15 @@ export type {
   DocumentFile, 
   MediaVisibility,
   MediaFileInput,
-  UploadMediaResult
+  UploadMediaResult,
+  // V2 Types (nueva arquitectura)
+  MediaFileRecord,
+  MediaLinkRecord,
+  MediaFileWithLink,
+  MediaFileType,
+  MediaCategory,
+  UploadMediaInputV2,
+  UploadMediaResultV2
 } from './types';
 
 // Constants
@@ -36,6 +44,10 @@ export { getCurrentProject } from './services/getCurrentProject';
 export { getGalleryFiles } from './services/getGalleryFiles';
 export { deleteMediaFile } from './services/deleteMediaFile';
 export { uploadMediaFile } from './services/uploadMediaFile';
+// V2 Services (nueva arquitectura media_files + media_links)
+export { uploadMediaFileV2 } from './services/uploadMediaFileV2';
+export { getGalleryFilesV2 } from './services/getGalleryFilesV2';
+export { deleteMediaFileV2, deleteMultipleMediaFilesV2 } from './services/deleteMediaFileV2';
 
 // Hooks
 export { useCurrentProject } from './hooks/use-current-project';

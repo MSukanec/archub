@@ -24,7 +24,7 @@ export async function getGalleryFilesV2(
   }
 
   try {
-    // Base query: JOIN entre media_links y media_files
+    // Base query: JOIN entre media_links, media_files y projects
     let query = supabase
       .from('media_links')
       .select(`
@@ -49,6 +49,9 @@ export async function getGalleryFilesV2(
           file_path,
           bucket,
           is_deleted
+        ),
+        projects (
+          name
         )
       `)
       .eq('organization_id', organizationId)
@@ -84,6 +87,7 @@ export async function getGalleryFilesV2(
       // Datos del link (media_links)
       link_id: item.id,
       project_id: item.project_id,
+      project_name: item.projects?.name || 'Sin proyecto',
       site_log_id: item.site_log_id,
       organization_id: item.organization_id,
       visibility: item.visibility,
@@ -92,7 +96,7 @@ export async function getGalleryFilesV2(
       is_cover: item.is_cover,
       position: item.position,
       created_at: item.created_at,
-      created_by: item.created_by
+      created_by: item.created_by || 'Desconocido'
     }));
 
     // Ordenar por fecha (más recientes primero)

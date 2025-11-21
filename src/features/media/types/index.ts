@@ -78,6 +78,7 @@ export interface MediaFileWithLink {
   // Datos del link (media_links)
   link_id: string;
   project_id: string | null;
+  project_name?: string;
   site_log_id: string | null;
   organization_id: string;
   visibility: MediaVisibility | null;

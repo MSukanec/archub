@@ -1,12 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { deleteMediaFile } from '../services/deleteMediaFile';
+import { deleteMediaFileV2 } from '../services/deleteMediaFileV2';
 import { QUERY_KEYS } from '../constants';
 
 /**
- * Hook para eliminar un archivo de media.
+ * Hook para eliminar un archivo de media usando nueva arquitectura (media_files + media_links).
  * 
- * Elimina el archivo de storage y base de datos, luego invalida
- * las queries de archivos para refrescar la UI.
+ * Elimina el link en media_links y, si no quedan más links, hace soft delete
+ * en media_files y elimina el archivo físico del storage.
  * 
  * @returns React Query mutation para eliminar archivos
  */
@@ -14,7 +14,7 @@ export function useDeleteMediaFile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: deleteMediaFile,
+    mutationFn: deleteMediaFileV2,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GALLERY_FILES] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DOCUMENT_FILES] });
