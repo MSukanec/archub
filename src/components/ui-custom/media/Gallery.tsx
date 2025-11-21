@@ -329,58 +329,56 @@ export function Gallery({
                   
                   {/* Botón de opciones arriba a la derecha */}
                   {(onEdit || onDownload || onDelete) && (
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                          <button
-                            className="h-8 w-8 rounded-md bg-white/90 backdrop-blur-sm shadow-lg border border-gray-300 flex items-center justify-center transition-colors hover:bg-white"
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <button
+                          className="absolute top-2 right-2 h-8 w-8 rounded-md bg-white/90 backdrop-blur-sm shadow-lg border border-gray-300 flex items-center justify-center transition-all hover:bg-white opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100 z-20"
+                        >
+                          <MoreVertical className="h-4 w-4 text-gray-700" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {onEdit && (
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEdit(file);
+                            }}
+                            className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent hover:text-black dark:hover:text-white transition-colors"
                           >
-                            <MoreVertical className="h-4 w-4 text-gray-700" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {onEdit && (
+                            <Edit className="h-4 w-4" />
+                            Editar
+                          </DropdownMenuItem>
+                        )}
+                        {onDownload && (
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDownload(file);
+                            }}
+                            className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent hover:text-black dark:hover:text-white transition-colors"
+                          >
+                            <Download className="h-4 w-4" />
+                            Descargar
+                          </DropdownMenuItem>
+                        )}
+                        {onDelete && (
+                          <>
+                            {(onEdit || onDownload) && <DropdownMenuSeparator className="bg-border" />}
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();
-                                onEdit(file);
+                                onDelete(file);
                               }}
-                              className="flex items-center gap-2 cursor-pointer"
+                              className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent text-foreground hover:text-red-600 dark:hover:text-red-500 transition-colors"
                             >
-                              <Edit className="h-4 w-4" />
-                              Editar
+                              <Trash2 className="h-4 w-4" />
+                              Eliminar
                             </DropdownMenuItem>
-                          )}
-                          {onDownload && (
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onDownload(file);
-                              }}
-                              className="flex items-center gap-2 cursor-pointer"
-                            >
-                              <Download className="h-4 w-4" />
-                              Descargar
-                            </DropdownMenuItem>
-                          )}
-                          {onDelete && (
-                            <>
-                              {(onEdit || onDownload) && <DropdownMenuSeparator />}
-                              <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onDelete(file);
-                                }}
-                                className="flex items-center gap-2 cursor-pointer text-red-600 dark:text-red-500"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                                Eliminar
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
                 </div>
               </div>
@@ -438,58 +436,56 @@ export function Gallery({
                     
                     {/* Botón de opciones arriba a la derecha */}
                     {(onEdit || onDownload || onDelete) && (
-                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <button
-                              className="h-8 w-8 rounded-md bg-white/90 backdrop-blur-sm shadow-lg border border-gray-300 flex items-center justify-center transition-colors hover:bg-white"
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                          <button
+                            className="absolute top-2 right-2 h-8 w-8 rounded-md bg-white/90 backdrop-blur-sm shadow-lg border border-gray-300 flex items-center justify-center transition-all hover:bg-white opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100 z-20"
+                          >
+                            <MoreVertical className="h-4 w-4 text-gray-700" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {onEdit && (
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onEdit(file);
+                              }}
+                              className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent hover:text-black dark:hover:text-white transition-colors"
                             >
-                              <MoreVertical className="h-4 w-4 text-gray-700" />
-                            </button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {onEdit && (
+                              <Edit className="h-4 w-4" />
+                              Editar
+                            </DropdownMenuItem>
+                          )}
+                          {onDownload && (
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDownload(file);
+                              }}
+                              className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent hover:text-black dark:hover:text-white transition-colors"
+                            >
+                              <Download className="h-4 w-4" />
+                              Descargar
+                            </DropdownMenuItem>
+                          )}
+                          {onDelete && (
+                            <>
+                              {(onEdit || onDownload) && <DropdownMenuSeparator className="bg-border" />}
                               <DropdownMenuItem
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  onEdit(file);
+                                  onDelete(file);
                                 }}
-                                className="flex items-center gap-2 cursor-pointer"
+                                className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent text-foreground hover:text-red-600 dark:hover:text-red-500 transition-colors"
                               >
-                                <Edit className="h-4 w-4" />
-                                Editar
+                                <Trash2 className="h-4 w-4" />
+                                Eliminar
                               </DropdownMenuItem>
-                            )}
-                            {onDownload && (
-                              <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onDownload(file);
-                                }}
-                                className="flex items-center gap-2 cursor-pointer"
-                              >
-                                <Download className="h-4 w-4" />
-                                Descargar
-                              </DropdownMenuItem>
-                            )}
-                            {onDelete && (
-                              <>
-                                {(onEdit || onDownload) && <DropdownMenuSeparator />}
-                                <DropdownMenuItem
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onDelete(file);
-                                  }}
-                                  className="flex items-center gap-2 cursor-pointer text-red-600 dark:text-red-500"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                  Eliminar
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     )}
                   </div>
                 </div>
