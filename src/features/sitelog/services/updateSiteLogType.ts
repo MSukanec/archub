@@ -2,10 +2,7 @@ import { supabase } from '@/lib/supabase';
 
 export interface UpdateSiteLogTypeData {
   name?: string;
-  code?: string;
   description?: string | null;
-  icon?: string | null;
-  color?: string | null;
 }
 
 /**

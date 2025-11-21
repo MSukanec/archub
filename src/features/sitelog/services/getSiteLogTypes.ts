@@ -3,10 +3,7 @@ import { supabase } from '@/lib/supabase';
 export interface SiteLogType {
   id: string;
   name: string;
-  code: string;
   description: string | null;
-  icon: string | null;
-  color: string | null;
   is_default: boolean;
   created_at: string;
   organization_id: string | null;

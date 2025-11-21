@@ -5,10 +5,7 @@
 create table public.site_log_types (
   id uuid not null default gen_random_uuid (),
   name text not null,
-  code text not null,
   description text null,
-  icon text null,
-  color text null,
   is_default boolean not null default false,
   created_at timestamp with time zone null default now(),
   organization_id uuid null,
@@ -30,8 +27,6 @@ create table public.site_log_types (
   )
 ) TABLESPACE pg_default;
 
-create unique INDEX IF not exists site_log_types_org_code_uniq on public.site_log_types using btree (organization_id, lower(code)) TABLESPACE pg_default;
-
 create unique INDEX IF not exists site_log_types_global_default_uniq on public.site_log_types using btree (is_default) TABLESPACE pg_default
 where
   (
@@ -43,11 +38,15 @@ create index IF not exists site_log_types_not_deleted_idx on public.site_log_typ
 where
   (is_deleted = false);
 
+create unique INDEX IF not exists site_log_types_org_name_uniq on public.site_log_types using btree (organization_id, lower(name)) TABLESPACE pg_default;
+
+create index IF not exists site_log_types_org_not_deleted_idx on public.site_log_types using btree (organization_id) TABLESPACE pg_default
+where
+  (is_deleted = false);
+
 create index IF not exists site_log_types_org_idx on public.site_log_types using btree (organization_id) TABLESPACE pg_default;
 
 create index IF not exists site_log_types_org_default_idx on public.site_log_types using btree (organization_id, is_default) TABLESPACE pg_default;
-
-create index IF not exists site_log_types_code_idx on public.site_log_types using btree (code) TABLESPACE pg_default;
 
 create trigger update_site_log_types_timestamp BEFORE
 update on site_log_types for EACH row

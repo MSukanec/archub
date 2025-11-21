@@ -20,18 +20,7 @@ import type { SiteLogType } from '../services/getSiteLogTypes';
 // Schema de validación
 const siteLogTypeSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido').max(100, 'Máximo 100 caracteres'),
-  code: z.string()
-    .min(1, 'El código es requerido')
-    .max(50, 'Máximo 50 caracteres')
-    .regex(/^[A-Z0-9_-]+$/, 'Solo mayúsculas, números, guiones y guiones bajos'),
   description: z.string().max(500, 'Máximo 500 caracteres').optional(),
-  icon: z.string().max(50, 'Máximo 50 caracteres').optional(),
-  color: z.string()
-    .refine(
-      (val) => !val || /^#[0-9A-Fa-f]{6}$/.test(val),
-      'Debe ser un color hexadecimal válido (#RRGGBB)'
-    )
-    .optional(),
 });
 
 type SiteLogTypeFormData = z.infer<typeof siteLogTypeSchema>;
@@ -55,10 +44,7 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
     resolver: zodResolver(siteLogTypeSchema),
     defaultValues: {
       name: '',
-      code: '',
       description: '',
-      icon: '',
-      color: undefined,
     }
   });
 
@@ -67,18 +53,12 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
     if (siteLogType) {
       form.reset({
         name: siteLogType.name || '',
-        code: siteLogType.code || '',
         description: siteLogType.description || '',
-        icon: siteLogType.icon || '',
-        color: siteLogType.color || undefined,
       });
     } else {
       form.reset({
         name: '',
-        code: '',
         description: '',
-        icon: '',
-        color: undefined,
       });
     }
   }, [siteLogType, form]);
@@ -149,10 +129,7 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
         organizationId: userData.organization.id,
         data: {
           name: data.name,
-          code: data.code,
           description: data.description || null,
-          icon: data.icon || null,
-          color: data.color || null,
         }
       });
     } else {
@@ -168,10 +145,7 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
       
       createMutation.mutate({
         name: data.name,
-        code: data.code,
         description: data.description || null,
-        icon: data.icon || null,
-        color: data.color || null,
         organizationId: userData.organization.id,
         createdBy: currentMember.id,
       });
@@ -203,36 +177,6 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
 
         <FormField
           control={form.control}
-          name="code"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Código <span className="text-red-500">*</span>
-              </FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="Ej: EVENTOS_ESPECIALES" 
-                  {...field}
-                  onChange={(e) => {
-                    const formatted = e.target.value
-                      .toUpperCase()
-                      .replace(/[^A-Z0-9\-_]/g, '');
-                    field.onChange(formatted);
-                  }}
-                  data-testid="input-sitelog-type-code"
-                  maxLength={50}
-                />
-              </FormControl>
-              <p className="text-xs text-muted-foreground">
-                Solo mayúsculas, números, guiones y guiones bajos
-              </p>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name="description"
           render={({ field }) => (
             <FormItem>
@@ -249,76 +193,6 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
             </FormItem>
           )}
         />
-
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="icon"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Icono (opcional)</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Ej: star" 
-                    {...field}
-                    data-testid="input-sitelog-type-icon"
-                  />
-                </FormControl>
-                <p className="text-xs text-muted-foreground">
-                  Nombre del icono de Lucide React
-                </p>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="color"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Color (opcional)</FormLabel>
-                <div className="flex gap-2">
-                  {field.value && (
-                    <FormControl>
-                      <Input 
-                        type="color" 
-                        value={field.value}
-                        onChange={field.onChange}
-                        className="w-16 h-10 p-1 cursor-pointer"
-                        data-testid="input-sitelog-type-color"
-                      />
-                    </FormControl>
-                  )}
-                  {!field.value && (
-                    <div 
-                      onClick={() => field.onChange('#84cc16')}
-                      className="w-16 h-10 border border-input rounded-md flex items-center justify-center cursor-pointer hover:bg-accent"
-                      data-testid="button-sitelog-type-color-placeholder"
-                    >
-                      <div className="w-6 h-6 rounded border border-border bg-muted" />
-                    </div>
-                  )}
-                  <Input 
-                    placeholder="#84cc16" 
-                    value={field.value || ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === '') {
-                        field.onChange(undefined);
-                      } else if (/^#[0-9A-Fa-f]{0,6}$/.test(val)) {
-                        field.onChange(val);
-                      }
-                    }}
-                    className="flex-1"
-                    maxLength={7}
-                  />
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
       </form>
     </Form>
   );

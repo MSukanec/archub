@@ -82,9 +82,20 @@ export default function SitelogSettings() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column - Descripción */}
         <div>
-          <div className="flex items-center gap-2 mb-6">
-            <Tag className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="text-lg font-semibold">Tipos de Bitácora</h2>
+          <div className="flex items-center justify-between gap-2 mb-6">
+            <div className="flex items-center gap-2">
+              <Tag className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Tipos de Bitácora</h2>
+            </div>
+            <Button
+              onClick={handleAddType}
+              size="sm"
+              disabled={!organizationId}
+              data-testid="button-add-sitelog-type"
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Agregar Tipo
+            </Button>
           </div>
           <p className="text-sm text-muted-foreground">
             Gestiona los tipos de bitácora disponibles para clasificar tus entradas. 
@@ -94,110 +105,83 @@ export default function SitelogSettings() {
         </div>
 
         {/* Right Column - Contenido */}
-        <div className="space-y-6">
-          {/* Botón para agregar nuevo tipo */}
-          <Button 
-            onClick={handleAddType}
-            className="w-full sm:w-auto"
-            data-testid="button-add-sitelog-type"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Agregar Tipo
-          </Button>
+        <div className="space-y-3">
 
           {/* Tipos del Sistema */}
           {systemTypes.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-muted-foreground">Tipos del Sistema</h3>
+            <>
               {systemTypes.map((type) => (
                 <div 
                   key={type.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-border bg-card"
+                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
                   data-testid={`card-sitelog-type-${type.id}`}
                 >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    {type.color && (
-                      <div 
-                        className="w-4 h-4 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: type.color }}
-                      />
-                    )}
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{type.name}</p>
+                      <p className="text-sm font-medium truncate">{type.name}</p>
                       {type.description && (
-                        <p className="text-sm text-muted-foreground truncate">
+                        <p className="text-xs text-muted-foreground truncate">
                           {type.description}
                         </p>
                       )}
-                      <p className="text-xs text-muted-foreground font-mono">
-                        {type.code}
-                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 ml-4">
-                    <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
                       Sistema
                     </span>
                   </div>
                 </div>
               ))}
-            </div>
+            </>
           )}
 
           {/* Tipos Personalizados */}
           {customTypes.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-muted-foreground">Tipos Personalizados</h3>
+            <>
               {customTypes.map((type) => (
                 <div 
                   key={type.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-border bg-card"
+                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
                   data-testid={`card-sitelog-type-${type.id}`}
                 >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    {type.color && (
-                      <div 
-                        className="w-4 h-4 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: type.color }}
-                      />
-                    )}
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{type.name}</p>
+                      <p className="text-sm font-medium truncate">{type.name}</p>
                       {type.description && (
-                        <p className="text-sm text-muted-foreground truncate">
+                        <p className="text-xs text-muted-foreground truncate">
                           {type.description}
                         </p>
                       )}
-                      <p className="text-xs text-muted-foreground font-mono">
-                        {type.code}
-                      </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="flex items-center gap-1 ml-4">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleEditType(type)}
                       data-testid={`button-edit-type-${type.id}`}
+                      disabled={!organizationId}
                     >
-                      <Edit2 className="h-4 w-4" />
+                      <Edit2 className="h-3.5 w-3.5" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setTypeToDelete(type)}
                       data-testid={`button-delete-type-${type.id}`}
+                      disabled={!organizationId}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </div>
               ))}
-            </div>
+            </>
           )}
 
           {/* Estado vacío para tipos personalizados */}
-          {customTypes.length === 0 && (
+          {customTypes.length === 0 && systemTypes.length === 0 && (
             <div className="p-8 text-center rounded-lg border border-dashed border-border">
               <Tag className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-sm text-muted-foreground mb-4">
