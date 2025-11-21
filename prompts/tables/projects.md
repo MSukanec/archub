@@ -165,12 +165,14 @@ create trigger project_data_set_updated_at BEFORE
 update on project_data for EACH row
 execute FUNCTION set_timestamp ();
 
----------- VISTA PROJECT_SUMMARY_VIEW:
+---------- VISTA PROJECTS_VIEW (Optimizada para GESTIÓN DE PROYECTOS):
 
-create view public.project_summary_view as
-select
-  p.id as project_id,
+create or replace view public.projects_view as
+select 
+  -- Campos principales del proyecto
+  p.id,
   p.name,
+  p.code,
   p.status,
   p.created_at,
   p.updated_at,
@@ -179,80 +181,30 @@ select
   p.is_deleted,
   p.deleted_at,
   p.organization_id,
-  pt.id as project_type_id,
-  pt.name as project_type_name,
-  pm.id as project_modality_id,
-  pm.name as project_modality_name,
-  pd.surface_total,
-  pd.surface_covered,
-  pd.surface_semi,
+  p.created_by,
+  p.color,
+  p.use_custom_color,
+  p.custom_color_h,
+  p.custom_color_hex,
+  -- Campos de project_data
+  pd.project_type_id,
+  pd.project_modality_id,
+  pd.project_image_url,
+  pd.city,
+  pd.country,
   pd.start_date,
   pd.estimated_end,
-  pd.project_image_url,
-  pd.lat,
-  pd.lng,
-  pd.zip_code,
-  pd.city,
-  pd.address,
-  pd.country,
-  pd.state,
-  pd.client_name,
-  pd.contact_phone,
-  pd.email,
-  pd.address_full,
-  pd.location_type,
-  pd.place_id,
-  pd.timezone
-from
-  projects p
-  left join project_data pd on pd.project_id = p.id
-  left join project_types pt on pt.id = pd.project_type_id
-  left join project_modalities pm on pm.id = pd.project_modality_id;
-
----------- VISTA PROJECT_ACTIVE_VIEW:
-
-create view public.projects_active_view as
-select
-  p.id,
-  p.name,
-  p.status,
-  p.organization_id,
-  p.created_at,
-  p.updated_at,
-  p.last_active_at,
-  pd.project_image_url,
+  -- Nombres de las relaciones (pre-computados)
   pt.name as project_type_name,
-  pm.name as modality_name
-from
+  pm.name as project_modality_name
+from 
   projects p
   left join project_data pd on pd.project_id = p.id
-  left join project_types pt on pt.id = pd.project_type_id
-  left join project_modalities pm on pm.id = pd.project_modality_id
-where
-  p.is_deleted = false
-  and p.is_active = true;
+  left join project_types pt on pt.id = pd.project_type_id and pt.is_deleted = false
+  left join project_modalities pm on pm.id = pd.project_modality_id and pm.is_deleted = false
+where 
+  p.is_deleted = false;
 
----------- VISTA PROJECT_LIST_VIEW:
-
-create view public.projects_list_view as
-select
-  p.id as project_id,
-  p.name,
-  p.status,
-  p.created_at,
-  p.updated_at,
-  p.last_active_at,
-  p.is_active,
-  p.organization_id,
-  pt.name as project_type_name,
-  pm.name as project_modality_name,
-  pd.project_image_url,
-  pd.city,
-  pd.country,
-  pd.start_date,
-  pd.estimated_end
-from
-  projects p
-  left join project_data pd on pd.project_id = p.id
-  left join project_types pt on pt.id = pd.project_type_id
-  left join project_modalities pm on pm.id = pd.project_modality_id;
+-- Índice compuesto para optimizar queries comunes
+create index if not exists idx_projects_org_status_active 
+  on projects (organization_id, status, is_active, is_deleted);
