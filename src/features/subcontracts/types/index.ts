@@ -2,7 +2,7 @@
 import type {
   Subcontract,
   SubcontractBid,
-} from '@shared/schema';
+} from '../../../../shared/schema';
 
 // Re-export types from shared schema
 export type {
@@ -14,7 +14,7 @@ export type {
   InsertSubcontractBid,
   MovementSubcontract,
   InsertMovementSubcontract,
-} from '@shared/schema';
+} from '../../../../shared/schema';
 
 // Additional feature-specific types
 export interface SubcontractWithContact extends Subcontract {

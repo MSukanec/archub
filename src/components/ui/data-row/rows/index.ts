@@ -16,9 +16,6 @@ export type { ClientPayment } from './ClientPaymentRow';
 export { default as GeneralCostPaymentRow } from './GeneralCostPaymentRow';
 export type { GeneralCostPayment } from './GeneralCostPaymentRow';
 
-export { default as SubcontractRow } from './SubcontractRow';
-export type { Subcontract } from './SubcontractRow';
-
 export { default as AdminOrganizationRow } from './AdminOrganizationRow';
 export type { Organization } from './AdminOrganizationRow';
 

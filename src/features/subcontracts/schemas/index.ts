@@ -4,4 +4,4 @@ export {
   insertSubcontractTaskSchema,
   insertSubcontractBidSchema,
   insertMovementSubcontractSchema,
-} from '@shared/schema';
+} from '../../../../shared/schema';

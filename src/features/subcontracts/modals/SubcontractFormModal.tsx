@@ -75,7 +75,8 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       if (modalData.isEditing && modalData.subcontractId) {
         await updateSubcontract.mutateAsync({
           subcontractId: modalData.subcontractId,
-          subcontract: {
+          data: {
+            organization_id: modalData.organizationId,
             date: data.date,
             title: data.title,
             code: data.code || null,
@@ -84,26 +85,20 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
             currency_id: existingSubcontract?.currency_id || null,
             amount_total: existingSubcontract?.amount_total || null,
             exchange_rate: existingSubcontract?.exchange_rate || null,
-            winner_bid_id: existingSubcontract?.winner_bid_id || null
-          },
-          taskIds: []
+          }
         });
       } else {
         await createSubcontract.mutateAsync({
-          subcontract: {
-            project_id: modalData.projectId,
-            organization_id: modalData.organizationId,
-            date: data.date,
-            title: data.title,
-            code: data.code || null,
-            notes: data.notes || null,
-            status: 'draft',
-            currency_id: null,
-            amount_total: null,
-            exchange_rate: null,
-            winner_bid_id: null
-          },
-          taskIds: []
+          project_id: modalData.projectId,
+          organization_id: modalData.organizationId,
+          date: data.date,
+          title: data.title,
+          code: data.code || null,
+          notes: data.notes || null,
+          status: 'draft',
+          currency_id: null,
+          amount_total: null,
+          exchange_rate: null,
         });
       }
       

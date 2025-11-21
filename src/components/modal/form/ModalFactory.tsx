@@ -56,10 +56,12 @@ import { PersonnelDataModal } from '../modals/personnel/PersonnelDataModal';
 import { PersonnelRatesModal } from '../modals/personnel/PersonnelRatesModal';
 import { ParameterVisibilityConfigModal } from '../modals/admin/ParameterVisibilityConfigModal';
 import { AddParameterToCanvasModal } from '../modals/admin/AddParameterToCanvasModal';
-import { SubcontractFormModal } from '../modals/construction/SubcontractFormModal';
-import { SubcontractBidFormModal } from '../modals/construction/SubcontractBidFormModal';
-import { SubcontractAwardModal } from '../modals/construction/SubcontractAwardModal';
-import { SubcontractTaskFormModal } from '../modals/construction/SubcontractTaskFormModal';
+import {
+  SubcontractFormModal,
+  SubcontractBidFormModal,
+  SubcontractAwardModal,
+  SubcontractTaskFormModal,
+} from '@/features/subcontracts';
 import { InsuranceFormModal } from '../modals/construction/InsuranceFormModal';
 import { RenewInsuranceFormModal } from '../modals/construction/RenewInsuranceFormModal';
 import { PartnerModal } from '../modals/organizations/members/PartnerModal';
