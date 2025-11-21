@@ -550,20 +550,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     <div className="space-y-6">
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {/* Card 1: Total Pagos (count) */}
-        <StatCard data-testid="stat-card-total-pagos">
-          <StatCardTitle showArrow={false}>
-            <DollarSign className="w-4 h-4 inline mr-1" />
-            Total Pagos
-          </StatCardTitle>
-          <StatCardValue>
-            {metricsData?.total_count ?? 0}
-          </StatCardValue>
-          <StatCardMeta>Cantidad de pagos registrados</StatCardMeta>
-        </StatCard>
-
-        {/* Card 2: Total Confirmado (in commitment currency) */}
-        <StatCard data-testid="stat-card-total-confirmado">
+        {/* Card 1: Total Confirmado (2 cols en desktop, full row en mobile) */}
+        <StatCard className="col-span-2" data-testid="stat-card-total-confirmado">
           <StatCardTitle showArrow={false}>
             <CheckCircle2 className="w-4 h-4 inline mr-1" />
             Total Confirmado
@@ -582,27 +570,19 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           </StatCardMeta>
         </StatCard>
 
-        {/* Card 3: Total Pendiente (in commitment currency) */}
-        <StatCard data-testid="stat-card-total-pendiente">
+        {/* Card 2: Total Pagos (1 col) */}
+        <StatCard data-testid="stat-card-total-pagos">
           <StatCardTitle showArrow={false}>
-            <AlertCircle className="w-4 h-4 inline mr-1" />
-            Total Pendiente
+            <DollarSign className="w-4 h-4 inline mr-1" />
+            Total Pagos
           </StatCardTitle>
           <StatCardValue>
-            {metricsData?.commitment_currency_symbol 
-              ? formatCurrencyKPI(metricsData.total_pending, metricsData.commitment_currency_symbol)
-              : <span>-</span>
-            }
+            {metricsData?.total_count ?? 0}
           </StatCardValue>
-          <StatCardMeta>
-            {metricsData?.commitment_currency_symbol 
-              ? formatCurrencyBreakdown(metricsData.pending_by_currency)
-              : 'Sin compromisos registrados'
-            }
-          </StatCardMeta>
+          <StatCardMeta>Cantidad de pagos registrados</StatCardMeta>
         </StatCard>
 
-        {/* Card 4: Último Pago (latest payment date) */}
+        {/* Card 3: Último Pago (1 col) */}
         <StatCard data-testid="stat-card-ultimo-pago">
           <StatCardTitle showArrow={false}>
             <Calendar className="w-4 h-4 inline mr-1" />
