@@ -1,8 +1,8 @@
 import React from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
 import { UploadMediaField } from "@/components/ui-custom/fields/UploadMediaField";
+import { deleteMediaFileV2 } from "@/features/media/services/deleteMediaFileV2";
 import type { SiteLogFileInput } from '../../types';
 
 interface MediaFormProps {
@@ -22,31 +22,33 @@ export function MediaForm({
   const handleExistingFileDelete = async (fileId: string) => {
     try {
       const fileToDelete = siteLogFiles.find(f => f.id === fileId);
-      if (!fileToDelete) return;
-
-      // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from('media')
-        .remove([fileToDelete.file_path]);
-
-      if (storageError) {
-        console.error('Error deleting from storage:', storageError);
+      if (!fileToDelete) {
+        toast({
+          title: "Error",
+          description: "No se encontró el archivo a eliminar.",
+          variant: "destructive"
+        });
+        return;
       }
 
-      // Delete from database
-      const { error: dbError } = await supabase
-        .from('project_media')
-        .delete()
-        .eq('id', fileId);
-
-      if (dbError) {
-        throw dbError;
+      // Necesitamos el link_id para eliminar (no el file_id)
+      const linkId = fileToDelete.link_id;
+      if (!linkId) {
+        toast({
+          title: "Error",
+          description: "No se puede eliminar este archivo (link_id faltante).",
+          variant: "destructive"
+        });
+        return;
       }
 
-      // Invalidar todas las queries de archivos de sitelog (partial match)
+      // Usar el servicio V2 que maneja la eliminación completa
+      await deleteMediaFileV2(linkId);
+
+      // Invalidar queries relevantes
       queryClient.invalidateQueries({ queryKey: ['sitelog-files'] });
       queryClient.invalidateQueries({ queryKey: ['site-logs'] });
-      queryClient.invalidateQueries({ queryKey: ['galleryFiles'] });
+      queryClient.invalidateQueries({ queryKey: ['gallery-files'] });
       
       toast({
         title: "Archivo eliminado",
