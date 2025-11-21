@@ -260,6 +260,7 @@ export default function ProjectList() {
     const getStatusText = (status: string) => {
       const statusConfig = {
         'active': 'En proceso',
+        'inactive': 'Inactivo',
         'completed': 'Completado',
         'paused': 'Pausado',
         'cancelled': 'Cancelado',
@@ -291,6 +292,7 @@ export default function ProjectList() {
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       'active': { color: 'var(--accent)', text: 'En proceso' },
+      'inactive': { color: '#6b7280', text: 'Inactivo' },
       'completed': { color: 'var(--main-sidebar-bg)', text: 'Completado' },
       'paused': { color: '#f59e0b', text: 'Pausado' },
       'cancelled': { color: '#ef4444', text: 'Cancelado' },

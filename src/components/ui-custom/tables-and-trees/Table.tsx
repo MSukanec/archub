@@ -13,7 +13,8 @@ import {
   FileText,
   Upload,
   MoreHorizontal,
-  Eye
+  Eye,
+  ArrowRight
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -1156,7 +1157,7 @@ export function Table<T = any>({
                               }}
                               title={action.label}
                             >
-                              <Eye className="h-4 w-4" />
+                              <ArrowRight className="h-4 w-4" />
                             </Button>
                           ) : null;
                         })()}
@@ -1310,7 +1311,7 @@ export function Table<T = any>({
                           }}
                           title={action.label}
                         >
-                          <Eye className="h-4 w-4" />
+                          <ArrowRight className="h-4 w-4" />
                         </Button>
                       ) : null;
                     })()}
