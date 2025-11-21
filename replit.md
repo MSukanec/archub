@@ -42,7 +42,7 @@ Preferred communication style: Simple, everyday language.
 - **Payment Architecture**: Unified `payments` table supporting multiple gateways and centralized checkout.
 - **Access Control**: `PlanRestricted` component system with comprehensive access control for organization membership and subscription plans (FREE, PRO, TEAMS, ENTERPRISE).
 - **Cost System**: Three-tier cost system (Seencel Cost, Organization Cost, Independent Cost).
-- **AI Integration**: GPT-4o-powered intelligent assistant with function-calling tools.
+- **AI Assistant (REFACTORED)**: Complete Feature-Sliced Design implementation with intelligent orchestrator, chat handlers, and function-calling tools. Includes services for chat handling (chatHandler, homeGreetingHandler, historyHandler), orchestrator logic (intent classification, entity resolution, caching, pipeline), and specialized tools for finance queries (cashflow trends, balances, project summaries), organization data (members, activity, info), and project details. Provides AIPanel and MessageContent UI components with FloatingAIChat integration. All services are pure functions with utils for currency conversion, date parsing, text normalization, and response formatting. Powered by GPT-4o with context-aware system prompts. All consuming files use barrel exports from @/features/ai.
 - **User Presence & Analytics**: Dual-layer tracking for real-time presence and historical usage.
 - **Project Data Management**: Organized project information with map integration and auto-save.
 - **Media Uploads**: Unified `UploadImageAndShowField` component for project image uploads with dual-mode support (normal upload mode for existing projects, preview mode for new projects), 2MB size limit, drag-and-drop, and inline editing capabilities.
