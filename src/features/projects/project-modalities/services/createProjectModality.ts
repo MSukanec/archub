@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 export interface CreateProjectModalityData {
   name: string;
   organizationId: string;
-  createdBy?: string | null;
+  createdBy: string;
 }
 
 /**
@@ -17,8 +17,8 @@ export async function createProjectModality(data: CreateProjectModalityData) {
     throw new Error('Supabase client not available');
   }
 
-  if (!data.name || !data.organizationId) {
-    throw new Error('Missing required parameters: name and organizationId are required');
+  if (!data.name || !data.organizationId || !data.createdBy) {
+    throw new Error('Missing required parameters: name, organizationId, and createdBy are required');
   }
 
   const { error } = await supabase
@@ -26,7 +26,7 @@ export async function createProjectModality(data: CreateProjectModalityData) {
     .insert({
       name: data.name,
       organization_id: data.organizationId,
-      created_by: data.createdBy || null,
+      created_by: data.createdBy,
       is_default: false,
     });
 

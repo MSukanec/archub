@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useOrganizationMembers } from '@/features/organization/hooks/use-organization-members';
 import { createProjectModality } from '../services/createProjectModality';
 import { updateProjectModality } from '../services/updateProjectModality';
 import type { ProjectModality } from '../services/getProjectModalities';
@@ -35,6 +36,8 @@ export function ProjectModalityModal({ modalData, onClose }: ProjectModalityModa
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
+  const organizationId = userData?.organization?.id;
+  const { data: members = [] } = useOrganizationMembers(organizationId);
 
   const form = useForm<ProjectModalityFormData>({
     resolver: zodResolver(projectModalitySchema),
@@ -135,9 +138,21 @@ export function ProjectModalityModal({ modalData, onClose }: ProjectModalityModa
         }
       });
     } else {
+      // Obtener el organization_member.id del usuario actual
+      const currentMember = members.find((m: any) => m.user_id === userData?.user?.id);
+      if (!currentMember) {
+        toast({
+          title: 'Error',
+          description: 'No se encontró el miembro de la organización para el usuario actual',
+          variant: 'destructive'
+        });
+        return;
+      }
+
       createMutation.mutate({
         name: data.name,
         organizationId: userData.organization.id,
+        createdBy: currentMember.id,
       });
     }
   };
