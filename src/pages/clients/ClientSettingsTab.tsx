@@ -73,107 +73,118 @@ export default function ClientSettingsTab() {
 
   return (
     <div className="p-6 space-y-8">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Users className="h-5 w-5 text-[var(--accent)]" />
-          <h2 className="text-lg font-semibold">Roles de Cliente</h2>
+      {/* Sección: Roles de Cliente */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column - Descripción */}
+        <div>
+          <div className="flex items-center justify-between gap-2 mb-6">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Roles de Cliente</h2>
+            </div>
+            <Button
+              onClick={handleAddRole}
+              size="sm"
+              disabled={!organizationId}
+              data-testid="button-add-client-role"
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Agregar Rol
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Gestiona los roles disponibles para clasificar a tus clientes. 
+            Los roles del sistema son predefinidos y no se pueden modificar. 
+            Puedes crear roles personalizados para adaptar la gestión de clientes a las necesidades de tu organización.
+          </p>
         </div>
-        <Button 
-          onClick={handleAddRole}
-          data-testid="button-add-client-role"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Agregar Rol
-        </Button>
-      </div>
 
-      <p className="text-sm text-muted-foreground max-w-3xl">
-        Gestiona los roles disponibles para clasificar a tus clientes. 
-        Los roles del sistema son predefinidos y no se pueden modificar. 
-        Puedes crear roles personalizados para adaptar la gestión de clientes a las necesidades de tu organización.
-      </p>
+        {/* Right Column - Contenido */}
+        <div className="space-y-3">
 
-      <div className="space-y-6">
-
+          {/* Roles del Sistema */}
           {systemRoles.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-muted-foreground">Roles del Sistema</h3>
+            <>
               {systemRoles.map((role) => (
                 <div 
                   key={role.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-border bg-card"
+                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
                   data-testid={`card-client-role-${role.id}`}
                 >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{role.name}</p>
+                      <p className="text-sm font-medium truncate">{role.name}</p>
                       {role.description && (
-                        <p className="text-sm text-muted-foreground truncate">
+                        <p className="text-xs text-muted-foreground truncate">
                           {role.description}
                         </p>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 ml-4">
-                    <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
                       Sistema
                     </span>
                   </div>
                 </div>
               ))}
-            </div>
+            </>
           )}
 
+          {/* Roles Personalizados */}
           {customRoles.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-muted-foreground">Roles Personalizados</h3>
+            <>
               {customRoles.map((role) => (
                 <div 
                   key={role.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-border bg-card"
+                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
                   data-testid={`card-client-role-${role.id}`}
                 >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{role.name}</p>
+                      <p className="text-sm font-medium truncate">{role.name}</p>
                       {role.description && (
-                        <p className="text-sm text-muted-foreground truncate">
+                        <p className="text-xs text-muted-foreground truncate">
                           {role.description}
                         </p>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="flex items-center gap-1 ml-4">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleEditRole(role)}
                       data-testid={`button-edit-role-${role.id}`}
+                      disabled={!organizationId}
                     >
-                      <Edit2 className="h-4 w-4" />
+                      <Edit2 className="h-3.5 w-3.5" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDeleteRole(role)}
                       data-testid={`button-delete-role-${role.id}`}
+                      disabled={!organizationId}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </div>
               ))}
-            </div>
+            </>
           )}
 
-        {customRoles.length === 0 && (
-          <div className="p-8 text-center rounded-lg border border-dashed border-border">
-            <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground mb-4">
-              No hay roles personalizados. Crea uno para adaptar la gestión de clientes a tus necesidades.
-            </p>
-          </div>
-        )}
+          {/* Estado vacío para roles personalizados */}
+          {customRoles.length === 0 && systemRoles.length === 0 && (
+            <div className="p-8 text-center rounded-lg border border-dashed border-border">
+              <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground mb-4">
+                No hay roles personalizados. Crea uno para adaptar la gestión de clientes a tus necesidades.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
