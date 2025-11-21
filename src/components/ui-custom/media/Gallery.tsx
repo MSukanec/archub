@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 
 interface GalleryFile {
   id: string;
+  link_id?: string; // ID del media_link (requerido para eliminación en nueva arquitectura)
   file_url: string;
   file_name: string;
   file_type: string;
