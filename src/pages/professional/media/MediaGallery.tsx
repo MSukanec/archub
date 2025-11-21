@@ -4,14 +4,15 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/lib/supabase';
 import { Images, Plus } from 'lucide-react';
+import { useGalleryFiles, useDeleteMediaFile } from '@/features/media';
 
 // Gallery file interface - compatible with Gallery component
 interface GalleryFile {
   id: string;
+  link_id?: string; // ID del link en media_links (para eliminar)
   file_url: string;
   file_name: string;
   file_type: string;
@@ -30,164 +31,34 @@ export function MediaGallery() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
-  const storedProjectId = userData?.preferences?.last_project_id;
+  const organizationId = userData?.organization?.id;
+  const projectId = userData?.preferences?.last_project_id;
 
-  // Query to check if stored project belongs to current organization
-  const { data: currentProject } = useQuery({
-    queryKey: ['currentProject', storedProjectId, userData?.organization?.id],
-    queryFn: async () => {
-      if (!storedProjectId || !userData?.organization?.id || !supabase) {
-        return null;
-      }
-      
-      const { data, error } = await supabase
-        .from('projects')
-        .select('id, name, organization_id')
-        .eq('id', storedProjectId)
-        .eq('organization_id', userData.organization.id)
-        .eq('is_deleted', false)
-        .single();
-      
-      if (error) {
-        console.log('Project not found in current organization:', error);
-        return null;
-      }
-      
-      return data;
-    },
-    enabled: !!storedProjectId && !!userData?.organization?.id && !!supabase
-  });
+  // Usar hooks del feature de media (nueva arquitectura)
+  const { data: galleryFilesRaw = [], isLoading: galleryLoading, error: galleryError } = useGalleryFiles(
+    organizationId,
+    projectId
+  );
 
-  // Gallery: Fetch files for organization and project
-  const { data: galleryFiles = [], isLoading: galleryLoading, error: galleryError } = useQuery({
-    queryKey: ['galleryFiles', userData?.organization?.id, currentProject?.id],
-    queryFn: async () => {
-      if (!userData?.organization?.id || !supabase) {
-        console.log('Fetching gallery files - missing data:', { orgId: userData?.organization?.id, supabase: !!supabase });
-        return [];
-      }
+  // Mapear a formato compatible con Gallery component
+  const galleryFiles: GalleryFile[] = galleryFilesRaw.map(file => ({
+    id: file.id,
+    link_id: file.link_id, // CRÍTICO: ID del link para poder eliminar
+    file_url: file.file_url,
+    file_name: file.file_name,
+    file_type: file.file_type,
+    file_size: file.file_size || undefined,
+    created_at: file.created_at,
+    project_id: file.project_id || '',
+    project_name: file.project_name,
+    description: file.description || undefined,
+    visibility: file.visibility || 'organization',
+    created_by: file.created_by || 'Desconocido',
+    site_log_id: file.site_log_id
+  }));
 
-      console.log('Fetching gallery files for project:', currentProject?.id);
-      console.log('Organization ID:', userData.organization.id);
-
-      // Get organization files (visibility = 'organization')
-      const orgQuery = supabase
-        .from('project_media')
-        .select(`
-          id,
-          file_url,
-          file_type,
-          file_name,
-          file_size,
-          created_at,
-          description,
-          project_id,
-          visibility,
-          created_by,
-          site_log_id,
-          projects!inner(name)
-        `)
-        .eq('organization_id', userData.organization.id)
-        .eq('visibility', 'organization');
-
-      // Get project files if there's a current project (visibility = 'project')
-      let projectQuery = null;
-      if (currentProject?.id) {
-        projectQuery = supabase
-          .from('project_media')
-          .select(`
-            id,
-            file_url,
-            file_type,
-            file_name,
-            file_size,
-            created_at,
-            description,
-            project_id,
-            visibility,
-            created_by,
-            site_log_id,
-            projects!inner(name)
-          `)
-          .eq('project_id', currentProject.id)
-          .eq('visibility', 'project');
-      }
-
-      try {
-        const [orgResult, projectResult] = await Promise.all([
-          orgQuery,
-          projectQuery
-        ]);
-
-        if (orgResult.error) throw orgResult.error;
-        if (projectResult?.error) throw projectResult.error;
-
-        const orgFiles = orgResult.data || [];
-        const projectFiles = projectResult?.data || [];
-
-        // Combine and format files
-        const allFiles = [...orgFiles, ...projectFiles].map(file => ({
-          ...file,
-          project_name: file.projects?.[0]?.name || 'Sin proyecto',
-          created_by: file.created_by || 'Desconocido',
-          site_log_id: file.site_log_id || null
-        }));
-
-        // Sort by creation date (newest first)
-        return allFiles.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      } catch (error) {
-        console.error('Error fetching gallery files:', error);
-        throw error;
-      }
-    },
-    enabled: !!userData?.organization?.id && !!supabase
-  });
-
-  // Delete file mutation
-  const deleteFileMutation = useMutation({
-    mutationFn: async (fileId: string) => {
-      if (!supabase) throw new Error('Supabase not initialized');
-
-      // Get file data first
-      const { data: fileData, error: fetchError } = await supabase
-        .from('project_media')
-        .select('file_path')
-        .eq('id', fileId)
-        .single();
-
-      if (fetchError) throw fetchError;
-
-      // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from('media')
-        .remove([fileData.file_path]);
-
-      if (storageError) throw storageError;
-
-      // Delete from database
-      const { error: dbError } = await supabase
-        .from('project_media')
-        .delete()
-        .eq('id', fileId);
-
-      if (dbError) throw dbError;
-    },
-    onSuccess: () => {
-      toast({
-        title: 'Éxito',
-        description: 'Archivo eliminado correctamente',
-      });
-      queryClient.invalidateQueries({ queryKey: ['galleryFiles'] });
-    },
-    onError: (error) => {
-      toast({
-        title: 'Error',
-        description: 'No se pudo eliminar el archivo',
-        variant: 'destructive',
-      });
-      console.error('Delete error:', error);
-    },
-  });
+  // Delete file mutation usando nuevo servicio
+  const deleteFileMutation = useDeleteMediaFile();
 
   // Gallery handlers
   const handleEdit = (file: GalleryFile) => {
@@ -206,7 +77,32 @@ export function MediaGallery() {
   };
 
   const handleDelete = (file: GalleryFile) => {
-    deleteFileMutation.mutate(file.id);
+    // Usar link_id para eliminar (NO el media_file.id)
+    if (!file.link_id) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo eliminar el archivo: ID de link no encontrado',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    deleteFileMutation.mutate(file.link_id, {
+      onSuccess: () => {
+        toast({
+          title: 'Éxito',
+          description: 'Archivo eliminado correctamente',
+        });
+      },
+      onError: (error) => {
+        toast({
+          title: 'Error',
+          description: 'No se pudo eliminar el archivo',
+          variant: 'destructive',
+        });
+        console.error('Delete error:', error);
+      }
+    });
   };
 
   if (galleryLoading) {
