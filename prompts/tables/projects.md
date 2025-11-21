@@ -163,3 +163,80 @@ create index IF not exists project_data_org_project_idx on public.project_data u
 create trigger project_data_set_updated_at BEFORE
 update on project_data for EACH row
 execute FUNCTION set_timestamp ();
+
+---------- VISTA PROJECT_SUMMARY_VIEW:
+
+create view public.project_summary_view as
+select
+  p.id,
+  p.name,
+  p.code,
+  p.status,
+  p.is_active,
+  p.created_at,
+  p.updated_at,
+  p.custom_color_hex,
+  p.use_custom_color,
+  p.organization_id,
+  d.surface_total,
+  d.surface_covered,
+  d.surface_semi,
+  d.start_date,
+  d.estimated_end,
+  d.lat,
+  d.lng,
+  d.address,
+  d.city,
+  d.zip_code,
+  d.country,
+  d.project_image_url,
+  t.name as project_type_name,
+  m.name as project_modality_name
+from
+  projects p
+  left join project_data d on d.project_id = p.id
+  left join project_types t on t.id = d.project_type_id
+  left join project_modalities m on m.id = d.project_modality_id
+where
+  p.is_deleted = false;
+
+---------- VISTA PROJECT_ACTIVE_VIEW:
+
+create view public.projects_active_view as
+select
+  p.id,
+  p.name,
+  p.status,
+  p.organization_id,
+  p.created_at,
+  pd.project_image_url,
+  pt.name as project_type_name,
+  pm.name as modality_name
+from
+  projects p
+  left join project_data pd on pd.project_id = p.id
+  left join project_types pt on pt.id = pd.project_type_id
+  left join project_modalities pm on pm.id = pd.project_modality_id
+where
+  p.is_deleted = false
+  and p.is_active = true;
+
+---------- VISTA PROJECT_LIST_VIEW:
+
+create view public.projects_list_view as
+select
+  p.id,
+  p.name,
+  p.status,
+  p.organization_id,
+  p.created_at,
+  pd.project_image_url,
+  pt.name as project_type_name,
+  pm.name as modality_name
+from
+  projects p
+  left join project_data pd on pd.project_id = p.id
+  left join project_types pt on pt.id = pd.project_type_id
+  left join project_modalities pm on pm.id = pd.project_modality_id
+where
+  p.is_deleted = false;
