@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Users, Search, UserPlus } from 'lucide-react';
-import { useQuery, useMutation } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
@@ -19,9 +18,8 @@ import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useContacts } from '@/hooks/use-contacts';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/lib/supabase';
-import { queryClient } from '@/lib/queryClient';
 import { getAttachmentPublicUrl } from '@/services/contactAttachments';
+import { useProjectPersonnel, useCreatePersonnel, useContactAttachmentsForPersonnel } from '@/features/personnel/hooks';
 
 const personnelFormSchema = z.object({
   contact_ids: z.array(z.string()).min(1, "Selecciona al menos un contacto")
@@ -43,6 +41,7 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
   
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Helper para obtener nombre display
   const getDisplayName = (contact: any): string => {
@@ -69,23 +68,19 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
     return '?';
   };
 
-  // Query para obtener personal ya asignado al proyecto
-  const { data: assignedPersonnel = [], isLoading: isLoadingAssigned } = useQuery({
-    queryKey: ['project-personnel', projectId],
-    queryFn: async () => {
-      if (!projectId || !supabase) return [];
-      
-      const { data, error } = await supabase
-        .from('project_personnel')
-        .select('contact_id')
-        .eq('project_id', projectId);
-      
-      if (error) throw error;
-      return data?.map(p => p.contact_id) || [];
-    },
-    enabled: !!projectId && !!supabase,
-    staleTime: 0 // Siempre refrescar para obtener datos actualizados
-  });
+  const organizationId = currentUser?.organization?.id;
+
+  // Use feature hook to get assigned personnel
+  const { data: projectPersonnel = [], isLoading: isLoadingAssigned } = useProjectPersonnel(
+    projectId,
+    organizationId
+  );
+
+  // Extract contact IDs from project personnel
+  const assignedPersonnel = useMemo(
+    () => projectPersonnel.map((p: any) => p.contact_id),
+    [projectPersonnel]
+  );
 
   // Filtrar contactos disponibles (no asignados) y ordenar alfabéticamente
   const availableContacts = useMemo(() => {
@@ -100,28 +95,14 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
     });
   }, [contacts, assignedPersonnel]);
 
-  // Query para obtener solo los attachments de contactos disponibles (optimización)
-  const { data: contactAttachments = [] } = useQuery({
-    queryKey: ['contact-attachments-personnel', availableContacts.map((c: any) => c.id).join(',')],
-    queryFn: async () => {
-      if (!supabase || availableContacts.length === 0) return [];
-      
-      // Solo cargar attachments de contactos que tienen avatar_attachment_id
-      const contactsWithAvatars = availableContacts.filter((c: any) => c.avatar_attachment_id);
-      if (contactsWithAvatars.length === 0) return [];
-      
-      const avatarIds = contactsWithAvatars.map((c: any) => c.avatar_attachment_id);
-      
-      const { data, error } = await supabase
-        .from('contact_attachments')
-        .select('*')
-        .in('id', avatarIds);
-      
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!supabase && availableContacts.length > 0
-  });
+  // Obtener IDs de attachments de avatares
+  const avatarAttachmentIds = useMemo(() => {
+    const contactsWithAvatars = availableContacts.filter((c: any) => c.avatar_attachment_id);
+    return contactsWithAvatars.map((c: any) => c.avatar_attachment_id);
+  }, [availableContacts]);
+
+  // Use feature hook to get contact attachments
+  const { data: contactAttachments = [] } = useContactAttachmentsForPersonnel(avatarAttachmentIds);
 
   // Filtrar por búsqueda y ordenar alfabéticamente
   const filteredContacts = useMemo(() => {
@@ -151,50 +132,37 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
     }
   });
 
-  const addPersonnelMutation = useMutation({
-    mutationFn: async (formData: PersonnelFormData) => {
+  const createPersonnel = useCreatePersonnel();
+
+  const handleSubmit = async (data: PersonnelFormData) => {
+    setIsSubmitting(true);
+
+    try {
       const projectId = currentUser?.preferences?.last_project_id;
       const organizationId = currentUser?.organization?.id;
-      if (!projectId || !supabase) throw new Error('No hay proyecto seleccionado');
+      if (!projectId || !organizationId) throw new Error('No hay proyecto seleccionado');
 
-      // Insertar cada contacto seleccionado en project_personnel
-      const personnelToInsert = formData.contact_ids.map(contact_id => ({
-        project_id: projectId,
-        contact_id,
-        organization_id: organizationId,
-        status: 'active', // Por defecto, nuevo personal está activo
-        notes: ''
-      }));
+      // Create personnel records sequentially using the feature hook
+      for (const contact_id of data.contact_ids) {
+        await createPersonnel.mutateAsync({
+          project_id: projectId,
+          organization_id: organizationId,
+          contact_id,
+          notes: '',
+        });
+      }
 
-      const { error } = await supabase
-        .from('project_personnel')
-        .insert(personnelToInsert);
-
-      if (error) throw error;
-      
-      // Retornar projectId para usar en onSuccess
-      return { projectId };
-    },
-    onSuccess: async (data) => {
-      // Forzar refetch inmediato para actualizar la lista con el projectId correcto
-      await queryClient.refetchQueries({ queryKey: ['project-personnel', data.projectId] });
-      toast({
-        title: 'Personal agregado',
-        description: 'El personal ha sido asignado al proyecto correctamente'
-      });
       closeModal();
-    },
-    onError: (error: any) => {
+    } catch (error: any) {
+      console.error('Error adding personnel:', error);
       toast({
         title: 'Error',
         description: error.message || 'No se pudo agregar el personal',
         variant: 'destructive'
       });
+    } finally {
+      setIsSubmitting(false);
     }
-  });
-
-  const handleSubmit = (data: PersonnelFormData) => {
-    addPersonnelMutation.mutate(data);
   };
 
   const handleContactToggle = (contactId: string, checked: boolean) => {
@@ -334,8 +302,8 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
       onLeftClick={closeModal}
       rightLabel="Asignar Personal"
       onRightClick={form.handleSubmit(handleSubmit)}
-      submitDisabled={selectedContacts.length === 0}
-      showLoadingSpinner={addPersonnelMutation.isPending}
+      submitDisabled={selectedContacts.length === 0 || isSubmitting}
+      showLoadingSpinner={isSubmitting}
     />
   );
 

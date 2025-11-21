@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { useQueryClient } from '@tanstack/react-query'
 import { DollarSign, Clock, Calendar } from 'lucide-react'
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
@@ -22,7 +21,8 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { apiRequest, queryClient as globalQueryClient } from '@/lib/queryClient'
+import { queryClient as globalQueryClient } from '@/lib/queryClient'
+import { usePersonnelRates, useCurrencies, useCreatePersonnelRate } from '@/features/personnel/hooks'
 
 const rateSchema = z.object({
   pay_type: z.enum(['hour', 'day', 'month']),
@@ -60,60 +60,10 @@ export function PersonnelRatesModal({ modalData, onClose }: PersonnelRatesModalP
   const organizationId = currentUser?.preferences?.last_organization_id
   const projectId = currentUser?.preferences?.last_project_id
 
-  // Obtener session de Supabase para autenticación
-  const [session, setSession] = useState<any>(null)
-  
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-    })
-  }, [])
-
-  // Query para obtener currencies
-  const { data: currencies = [] } = useQuery({
-    queryKey: ['currencies'],
-    queryFn: async () => {
-      if (!supabase) return []
-      
-      const { data, error } = await supabase
-        .from('currencies')
-        .select('id, code, name, symbol')
-        .order('code', { ascending: true })
-
-      if (error) throw error
-      return data || []
-    },
-    enabled: !!supabase
-  })
-
-  // Query para obtener historial de tarifas
-  const { data: ratesHistory = [], isLoading: ratesLoading } = useQuery({
-    queryKey: ['personnel-rates', personnelId],
-    queryFn: async () => {
-      if (!personnelId || !organizationId) return []
-
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
-      }
-
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`
-      }
-
-      const response = await fetch(
-        `/api/personnel/${personnelId}/rates?organization_id=${organizationId}`,
-        {
-          headers,
-          credentials: 'include'
-        }
-      )
-      
-      if (!response.ok) throw new Error('Error al cargar tarifas')
-      
-      return response.json()
-    },
-    enabled: !!personnelId && !!organizationId && !!session
-  })
+  // Use feature hooks instead of direct queries
+  const { data: currencies = [] } = useCurrencies()
+  const { data: ratesHistory = [], isLoading: ratesLoading } = usePersonnelRates(personnelId, organizationId)
+  const createRate = useCreatePersonnelRate()
 
   const form = useForm<RateForm>({
     resolver: zodResolver(rateSchema),
@@ -130,36 +80,36 @@ export function PersonnelRatesModal({ modalData, onClose }: PersonnelRatesModalP
 
   const watchPayType = form.watch('pay_type')
 
-  const createRateMutation = useMutation({
-    mutationFn: async (data: RateForm) => {
-      if (!personnelId || !organizationId) {
-        throw new Error('Información de personal u organización no disponible')
-      }
-
-      const payload = {
-        organization_id: organizationId,
-        personnel_id: personnelId,
-        pay_type: data.pay_type,
-        rate_hour: data.pay_type === 'hour' ? data.rate_hour : null,
-        rate_day: data.pay_type === 'day' ? data.rate_day : null,
-        rate_month: data.pay_type === 'month' ? data.rate_month : null,
-        currency_id: data.currency_id,
-        valid_from: data.valid_from.toISOString().split('T')[0],
-        valid_to: data.valid_to ? data.valid_to.toISOString().split('T')[0] : null,
-        is_active: true
-      }
-
-      return apiRequest('POST', `/api/personnel/${personnelId}/rates`, payload)
-    },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ['personnel-rates', personnelId] })
-      await globalQueryClient.refetchQueries({ queryKey: ['project-personnel', projectId] })
-      
+  const handleSubmit = async (data: RateForm) => {
+    if (!personnelId || !organizationId) {
       toast({
-        title: 'Tarifa creada exitosamente',
-        description: 'La tarifa ha sido registrada correctamente'
+        title: 'Error',
+        description: 'Información de personal u organización no disponible',
+        variant: 'destructive'
       })
-      
+      return
+    }
+
+    try {
+      await createRate.mutateAsync({
+        personnelId,
+        data: {
+          organization_id: organizationId,
+          personnel_id: personnelId,
+          pay_type: data.pay_type,
+          rate_hour: data.pay_type === 'hour' ? data.rate_hour : null,
+          rate_day: data.pay_type === 'day' ? data.rate_day : null,
+          rate_month: data.pay_type === 'month' ? data.rate_month : null,
+          currency_id: data.currency_id,
+          valid_from: data.valid_from.toISOString().split('T')[0],
+          valid_to: data.valid_to ? data.valid_to.toISOString().split('T')[0] : null,
+          is_active: true
+        }
+      })
+
+      await queryClient.refetchQueries({ queryKey: ['personnel-rates', personnelId] })
+      await globalQueryClient.refetchQueries({ queryKey: ['personnel', projectId] })
+
       form.reset({
         pay_type: 'hour',
         rate_hour: null,
@@ -169,22 +119,12 @@ export function PersonnelRatesModal({ modalData, onClose }: PersonnelRatesModalP
         valid_from: new Date(),
         valid_to: null
       })
-    },
-    onError: (error: any) => {
+    } catch (error) {
       console.error('Error creating rate:', error)
-      toast({
-        title: 'Error al crear tarifa',
-        description: error.message || 'No se pudo crear la tarifa',
-        variant: 'destructive'
-      })
     }
-  })
-
-  const handleSubmit = (data: RateForm) => {
-    createRateMutation.mutate(data)
   }
 
-  const isLoading = createRateMutation.isPending
+  const isLoading = createRate.isPending
 
   // Get contact display name
   const contactDisplayName = personnelRecord?.contact?.first_name || personnelRecord?.contact?.last_name

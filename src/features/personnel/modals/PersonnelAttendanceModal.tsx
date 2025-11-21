@@ -2,8 +2,7 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { useQueryClient } from '@tanstack/react-query'
 import { addDays } from 'date-fns'
 import { Calendar, Users, Trash2 } from 'lucide-react'
 
@@ -27,6 +26,11 @@ import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/features/organization'
 import { useLocation } from 'wouter'
+import { 
+  useProjectPersonnel, 
+  useCreatePersonnelAttendance, 
+  useUpdatePersonnelAttendance 
+} from '@/features/personnel/hooks'
 
 const attendanceSchema = z.object({
   attendance_date: z.date({
@@ -63,30 +67,11 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
   const queryClient = useQueryClient()
   const [, navigate] = useLocation()
 
-  // Get project personnel only
-  const { data: projectPersonnel = [], isLoading: personnelLoading } = useQuery({
-    queryKey: ['project-personnel', projectId],
-    queryFn: async () => {
-      if (!projectId || !supabase) return [];
-      
-      const { data, error } = await supabase
-        .from('project_personnel')
-        .select(`
-          id,
-          contact_id,
-          contact:contacts (
-            id,
-            first_name,
-            last_name
-          )
-        `)
-        .eq('project_id', projectId);
-
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!projectId
-  })
+  // Use feature hook to get project personnel
+  const { data: projectPersonnel = [], isLoading: personnelLoading } = useProjectPersonnel(
+    projectId,
+    organizationId
+  )
 
   // Get organization members (siguiendo patrón de SiteLogModal)
   const { data: members = [] } = useOrganizationMembers(organizationId)
@@ -141,159 +126,66 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
     }
   }, [attendance, isEditing, form, modalData, projectPersonnel])
 
-  const createAttendanceMutation = useMutation({
-    mutationFn: async (data: AttendanceForm) => {
-      if (!supabase) throw new Error('Supabase not initialized')
-      if (!currentUser?.organization?.id || !currentUser?.preferences?.last_project_id) {
-        throw new Error('No hay proyecto u organización seleccionada')
-      }
-      
-      // Obtener el organization_member.id del usuario actual (siguiendo patrón de SiteLogModal)
-      // Usar membersRef.current para obtener el valor más reciente
-      const currentMember = membersRef.current.find((m: any) => m.user_id === currentUser.user.id)
-      if (!currentMember) {
-        throw new Error('No se encontró el miembro de la organización para el usuario actual')
-      }
-      
-      const { error } = await supabase
-        .from('personnel_attendees')
-        .insert({
-          site_log_id: null, // Como especificaste, esto es null
-          personnel_id: data.personnel_id, // Ahora usa el ID de project_personnel
-          attendance_type: data.attendance_type,
-          hours_worked: data.hours_worked,
-          description: data.description,
-          created_by: currentMember.id, // Usar el ID del organization member
-          project_id: projectId,
-          organization_id: currentUser.organization.id, // Nueva columna requerida
-          created_at: data.attendance_date.toISOString(),
-          updated_at: new Date().toISOString()
-        })
+  const createAttendance = useCreatePersonnelAttendance()
+  const updateAttendance = useUpdatePersonnelAttendance()
+  
+  // TODO: Create deletePersonnelAttendance service/hook when backend endpoint is available
+  // For now, keeping minimal delete placeholder since it's referenced in the footer
+  const deleteAttendanceMutation = { isPending: false }
 
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['construction-attendance'] })
-      toast({
-        title: 'Asistencia registrada',
-        description: 'La asistencia se ha registrado correctamente'
-      })
-      onClose()
-    },
-    onError: (error) => {
-      console.error('Error creating attendance:', error)
+  const handleSubmit = async (data: AttendanceForm) => {
+    if (!currentUser?.organization?.id || !projectId) {
       toast({
         title: 'Error',
-        description: 'No se pudo registrar la asistencia',
+        description: 'No hay proyecto u organización seleccionada',
         variant: 'destructive'
       })
+      return
     }
-  })
 
-  const updateAttendanceMutation = useMutation({
-    mutationFn: async (data: AttendanceForm) => {
-      if (!supabase) throw new Error('Supabase not initialized')
-      
-      // Ensure personnel_id is valid
-      if (!data.personnel_id || data.personnel_id === 'undefined') {
-        throw new Error('ID de personal requerido')
-      }
-      
-      // Use the correct record identification - for gradebook we need to find by date and personnel
-      const workerContactId = modalData?.editingData?.personnelId || attendance.workerId
-      const attendanceDate = attendance.day || attendance.created_at?.split('T')[0]
-      
-      if (!workerContactId || !attendanceDate) {
-        throw new Error('No se puede identificar la asistencia a actualizar')
-      }
-      
-      const { error } = await supabase
-        .from('personnel_attendees')
-        .update({
+    try {
+      if (isEditing) {
+        const workerContactId = modalData?.editingData?.personnelId || attendance.workerId
+        const attendanceDate = attendance.day || attendance.created_at?.split('T')[0]
+        
+        if (!workerContactId || !attendanceDate) {
+          throw new Error('No se puede identificar la asistencia a actualizar')
+        }
+
+        await updateAttendance.mutateAsync({
+          workerContactId,
+          attendanceDate,
+          data: {
+            personnel_id: data.personnel_id,
+            attendance_type: data.attendance_type,
+            hours_worked: data.hours_worked,
+            description: data.description,
+          },
+        })
+      } else {
+        const currentMember = membersRef.current.find((m: any) => m.user_id === currentUser.user.id)
+        if (!currentMember) {
+          throw new Error('No se encontró el miembro de la organización para el usuario actual')
+        }
+
+        await createAttendance.mutateAsync({
           personnel_id: data.personnel_id,
           attendance_type: data.attendance_type,
           hours_worked: data.hours_worked,
           description: data.description,
-          updated_at: new Date().toISOString()
+          created_by: currentMember.id,
+          project_id: projectId,
+          organization_id: currentUser.organization.id,
+          created_at: data.attendance_date.toISOString(),
         })
-        .eq('personnel_id', workerContactId)
-        .gte('created_at', attendanceDate)
-        .lt('created_at', new Date(new Date(attendanceDate).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0])
-
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['construction-attendance'] })
-      toast({
-        title: 'Asistencia actualizada',
-        description: 'La asistencia se ha actualizada correctamente'
-      })
+      }
       onClose()
-    },
-    onError: (error) => {
-      console.error('Error updating attendance:', error)
-      toast({
-        title: 'Error',
-        description: 'No se pudo actualizar la asistencia',
-        variant: 'destructive'
-      })
-    }
-  })
-
-  // Delete attendance mutation
-  const deleteAttendanceMutation = useMutation({
-    mutationFn: async () => {
-      if (!supabase) throw new Error('Supabase no inicializado')
-      
-      // For the gradebook structure, we need to find and delete the actual attendance record
-      const personnelId = modalData?.editingData?.personnelId || attendance?.workerId
-      const attendanceDate = modalData?.editingData?.attendanceDate || attendance?.day
-      
-      if (!personnelId || !attendanceDate) throw new Error('No se puede identificar la asistencia a eliminar')
-      
-      const { error } = await supabase
-        .from('personnel_attendees')
-        .delete()
-        .eq('personnel_id', personnelId)
-        .eq('created_at', new Date(attendanceDate).toISOString().split('T')[0])
-      
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['attendances'] })
-      queryClient.invalidateQueries({ queryKey: ['project-attendances'] })
-      queryClient.invalidateQueries({ queryKey: ['project-personnel-attendances'] })
-      toast({
-        title: 'Asistencia eliminada',
-        description: 'La asistencia se ha eliminado correctamente'
-      })
-      onClose()
-    },
-    onError: (error) => {
-      console.error('Error deleting attendance:', error)
-      toast({
-        title: 'Error',
-        description: 'No se pudo eliminar la asistencia',
-        variant: 'destructive'
-      })
-    }
-  })
-
-  const handleDelete = () => {
-    if (confirm('¿Estás seguro de que quieres eliminar esta asistencia? Esta acción no se puede deshacer.')) {
-      deleteAttendanceMutation.mutate()
+    } catch (error) {
+      console.error('Error handling attendance:', error)
     }
   }
 
-  const handleSubmit = (data: AttendanceForm) => {
-    if (isEditing) {
-      updateAttendanceMutation.mutate(data)
-    } else {
-      createAttendanceMutation.mutate(data)
-    }
-  }
-
-  const isLoading = createAttendanceMutation.isPending || updateAttendanceMutation.isPending
+  const isLoading = createAttendance.isPending || updateAttendance.isPending
 
   const attendanceTypes = [
     { value: 'full', label: 'Jornada Completa' },

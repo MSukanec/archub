@@ -2,8 +2,7 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { useQueryClient } from '@tanstack/react-query'
 import { UserCog, Trash2 } from 'lucide-react'
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
@@ -20,6 +19,7 @@ import { Calendar } from "@/components/ui/calendar"
 
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { usePersonnelDetail, useLaborTypes, useUpdatePersonnel } from '@/features/personnel/hooks'
 
 const personnelDataSchema = z.object({
   start_date: z.date().nullable(),
@@ -53,55 +53,12 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
   const queryClient = useQueryClient()
   const personnelRecordId = modalData?.personnelRecord?.id
   const projectId = currentUser?.preferences?.last_project_id
+  const organizationId = currentUser?.organization?.id
 
-  // Query para obtener los datos FRESCOS del personnel desde la base de datos
-  const { data: personnelRecord, isLoading: personnelLoading } = useQuery({
-    queryKey: ['personnel-detail', personnelRecordId],
-    queryFn: async () => {
-      if (!supabase || !personnelRecordId) return null
-      
-      const { data, error } = await supabase
-        .from('project_personnel')
-        .select(`
-          id,
-          notes,
-          start_date,
-          end_date,
-          status,
-          labor_type_id,
-          project_id,
-          contact:contacts(
-            id,
-            first_name,
-            last_name,
-            full_name
-          )
-        `)
-        .eq('id', personnelRecordId)
-        .single()
-
-      if (error) throw error
-      return data
-    },
-    enabled: !!supabase && !!personnelRecordId
-  })
-
-  // Query para obtener labor types
-  const { data: laborTypes = [] } = useQuery({
-    queryKey: ['labor-types'],
-    queryFn: async () => {
-      if (!supabase) return []
-      
-      const { data, error } = await supabase
-        .from('labor_types')
-        .select('id, name')
-        .order('name', { ascending: true })
-
-      if (error) throw error
-      return data || []
-    },
-    enabled: !!supabase
-  })
+  // Use feature hooks instead of direct Supabase queries
+  const { data: personnelRecord, isLoading: personnelLoading } = usePersonnelDetail(personnelRecordId)
+  const { data: laborTypes = [] } = useLaborTypes()
+  const updatePersonnel = useUpdatePersonnel()
 
   const form = useForm<PersonnelDataForm>({
     resolver: zodResolver(personnelDataSchema),
@@ -127,56 +84,32 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
     }
   }, [personnelRecord, form])
 
-  const updatePersonnelMutation = useMutation({
-    mutationFn: async (data: PersonnelDataForm) => {
-      if (!supabase) throw new Error('Supabase no inicializado')
-      if (!personnelRecord?.id) throw new Error('No se encontró el registro de personal')
+  const handleSubmit = async (data: PersonnelDataForm) => {
+    if (!personnelRecord?.id || !organizationId) return
 
-      const updateData: any = {
-        start_date: data.start_date ? data.start_date.toISOString().split('T')[0] : null,
-        end_date: data.end_date ? data.end_date.toISOString().split('T')[0] : null,
-        status: data.status,
-        labor_type_id: data.labor_type_id,
-        notes: data.notes || null,
-        updated_at: new Date().toISOString()
-      }
-
-      const { error } = await supabase
-        .from('project_personnel')
-        .update(updateData)
-        .eq('id', personnelRecord.id)
-
-      if (error) throw error
-    },
-    onSuccess: async () => {
-      // Refetch con el mismo patrón de queryKey que usa PersonnelListTab
-      // Usar el project_id del personnelRecord para asegurar que coincida
+    try {
+      await updatePersonnel.mutateAsync({
+        personnelId: personnelRecord.id,
+        data: {
+          organization_id: organizationId,
+          start_date: data.start_date ? data.start_date.toISOString().split('T')[0] : null,
+          end_date: data.end_date ? data.end_date.toISOString().split('T')[0] : null,
+          status: data.status,
+          labor_type_id: data.labor_type_id,
+          notes: data.notes || '',
+        },
+      })
+      
       const invalidateProjectId = personnelRecord?.project_id || projectId
+      await queryClient.refetchQueries({ queryKey: ['personnel', invalidateProjectId] })
       
-      // ESPERAR a que los datos frescos se carguen antes de cerrar el modal
-      await queryClient.refetchQueries({ queryKey: ['project-personnel', invalidateProjectId] })
-      
-      toast({
-        title: 'Datos actualizados',
-        description: 'La información del personal se ha actualizado correctamente'
-      })
       onClose()
-    },
-    onError: (error) => {
+    } catch (error) {
       console.error('Error updating personnel:', error)
-      toast({
-        title: 'Error',
-        description: 'No se pudo actualizar la información del personal',
-        variant: 'destructive'
-      })
     }
-  })
-
-  const handleSubmit = (data: PersonnelDataForm) => {
-    updatePersonnelMutation.mutate(data)
   }
 
-  const isLoading = updatePersonnelMutation.isPending || personnelLoading
+  const isLoading = updatePersonnel.isPending || personnelLoading
 
   // Get contact display name
   const contactDisplayName = personnelRecord?.contact?.first_name || personnelRecord?.contact?.last_name

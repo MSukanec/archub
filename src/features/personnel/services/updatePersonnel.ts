@@ -5,6 +5,8 @@ export interface UpdatePersonnelData {
   notes?: string;
   start_date?: string | null;
   end_date?: string | null;
+  status?: 'active' | 'absent' | 'inactive' | null;
+  labor_type_id?: string | null;
 }
 
 export async function updatePersonnel(
@@ -16,6 +18,8 @@ export async function updatePersonnel(
     notes: data.notes,
     start_date: data.start_date,
     end_date: data.end_date,
+    status: data.status,
+    labor_type_id: data.labor_type_id,
   });
 
   if (response.ok) {
