@@ -50,10 +50,12 @@ import { SiteLogModalView } from '@/features/sitelog/modals/SiteLogModalView';
 import { SiteLogTypeModal } from '@/features/sitelog/modals/SiteLogTypeModal';
 import { ProjectTypeModal } from '@/features/project-types/modals/ProjectTypeModal';
 import { ProjectModalityModal } from '@/features/project-modalities/modals/ProjectModalityModal';
-import { PersonnelAttendanceModal } from '../modals/personnel/PersonnelAttendanceModal';
-import { PersonnelAddModal } from '../modals/personnel/PersonnelAddModal';
-import { PersonnelDataModal } from '../modals/personnel/PersonnelDataModal';
-import { PersonnelRatesModal } from '../modals/personnel/PersonnelRatesModal';
+import {
+  PersonnelAttendanceModal,
+  PersonnelAddModal,
+  PersonnelDataModal,
+  PersonnelRatesModal,
+} from '@/features/personnel';
 import { ParameterVisibilityConfigModal } from '../modals/admin/ParameterVisibilityConfigModal';
 import { AddParameterToCanvasModal } from '../modals/admin/AddParameterToCanvasModal';
 import {

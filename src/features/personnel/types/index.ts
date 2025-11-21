@@ -1,9 +1,3 @@
-// Import types from shared schema to use in extensions
-import type { Contact } from '../../../../shared/schema';
-
-// Re-export types from shared schema if needed
-export type { Contact } from '../../../../shared/schema';
-
 // Additional feature-specific types
 export interface ProjectPersonnel {
   id: string;
@@ -12,11 +6,23 @@ export interface ProjectPersonnel {
   notes?: string;
   start_date?: string | null;
   end_date?: string | null;
-  contact?: Contact;
+  contact?: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    full_name?: string;
+    organization_id: string;
+  };
 }
 
 export interface PersonnelWithContact extends ProjectPersonnel {
-  contact: Contact;
+  contact: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    full_name?: string;
+    organization_id: string;
+  };
 }
 
 export interface PersonnelAttendance {
