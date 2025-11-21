@@ -20,7 +20,10 @@ export function useCreateProjectModality() {
   return useMutation({
     mutationFn: (data: CreateProjectModalityData) => createProjectModality(data),
     onSuccess: (_, variables) => {
+      // Invalidar query con organizationId (feature hook)
       queryClient.invalidateQueries({ queryKey: ['project-modalities', variables.organizationId] });
+      // Invalidar query legacy (sin organizationId) usada en modales
+      queryClient.invalidateQueries({ queryKey: ['project-modalities'] });
     },
   });
 }
@@ -35,7 +38,10 @@ export function useUpdateProjectModality() {
       data: UpdateProjectModalityData 
     }) => updateProjectModality(modalityId, organizationId, data),
     onSuccess: (_, variables) => {
+      // Invalidar query con organizationId (feature hook)
       queryClient.invalidateQueries({ queryKey: ['project-modalities', variables.organizationId] });
+      // Invalidar query legacy (sin organizationId) usada en modales
+      queryClient.invalidateQueries({ queryKey: ['project-modalities'] });
     },
   });
 }
@@ -47,7 +53,10 @@ export function useDeleteProjectModality() {
     mutationFn: ({ modalityId, organizationId }: { modalityId: string; organizationId: string }) => 
       deleteProjectModality(modalityId, organizationId),
     onSuccess: (_, variables) => {
+      // Invalidar query con organizationId (feature hook)
       queryClient.invalidateQueries({ queryKey: ['project-modalities', variables.organizationId] });
+      // Invalidar query legacy (sin organizationId) usada en modales
+      queryClient.invalidateQueries({ queryKey: ['project-modalities'] });
     },
   });
 }

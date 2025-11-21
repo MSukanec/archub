@@ -232,27 +232,41 @@ where
   p.is_deleted = false
   and p.is_active = true;
 
----------- VISTA PROJECT_LIST_VIEW:
+---------- VISTA PROJECTS_VIEW:
 
-create view public.projects_list_view as
+create view public.projects_view as
 select
-  p.id as project_id,
+  p.id,
   p.name,
+  p.code,
   p.status,
   p.created_at,
   p.updated_at,
   p.last_active_at,
   p.is_active,
+  p.is_deleted,
+  p.deleted_at,
   p.organization_id,
-  pt.name as project_type_name,
-  pm.name as project_modality_name,
+  p.created_by,
+  p.color,
+  p.use_custom_color,
+  p.custom_color_h,
+  p.custom_color_hex,
+  pd.project_type_id,
+  pd.project_modality_id,
   pd.project_image_url,
   pd.city,
   pd.country,
   pd.start_date,
-  pd.estimated_end
+  pd.estimated_end,
+  pt.name as project_type_name,
+  pm.name as project_modality_name
 from
   projects p
   left join project_data pd on pd.project_id = p.id
   left join project_types pt on pt.id = pd.project_type_id
-  left join project_modalities pm on pm.id = pd.project_modality_id;
+  and pt.is_deleted = false
+  left join project_modalities pm on pm.id = pd.project_modality_id
+  and pm.is_deleted = false
+where
+  p.is_deleted = false;
