@@ -5,17 +5,6 @@ import { useSiteLogTypes, useDeleteSiteLogType } from '@/features/sitelog/hooks/
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { useState } from 'react';
 import type { SiteLogType } from '@/features/sitelog/services/getSiteLogTypes';
 
 export default function SitelogSettings() {
@@ -26,8 +15,6 @@ export default function SitelogSettings() {
   
   const { data: siteLogTypes = [], isLoading } = useSiteLogTypes(organizationId);
   const deleteMutation = useDeleteSiteLogType();
-
-  const [typeToDelete, setTypeToDelete] = useState<SiteLogType | null>(null);
 
   // Separar tipos del sistema y de la organización
   const systemTypes = siteLogTypes.filter(type => type.organization_id === null);
@@ -44,28 +31,34 @@ export default function SitelogSettings() {
     });
   };
 
-  const handleDeleteType = async () => {
-    if (!typeToDelete || !organizationId) return;
+  const handleDeleteType = (type: SiteLogType) => {
+    if (!organizationId) return;
 
-    try {
-      await deleteMutation.mutateAsync({
-        typeId: typeToDelete.id,
-        organizationId
-      });
+    openModal('delete-confirmation', {
+      mode: 'simple',
+      title: '¿Eliminar tipo de bitácora?',
+      description: `Se eliminará el tipo "${type.name}". Las bitácoras existentes con este tipo no se verán afectadas.`,
+      onConfirm: async () => {
+        try {
+          await deleteMutation.mutateAsync({
+            typeId: type.id,
+            organizationId
+          });
 
-      toast({
-        title: 'Tipo eliminado',
-        description: 'El tipo de bitácora se eliminó correctamente'
-      });
-      setTypeToDelete(null);
-    } catch (error) {
-      console.error('Error deleting site log type:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo eliminar el tipo de bitácora',
-        variant: 'destructive'
-      });
-    }
+          toast({
+            title: 'Tipo eliminado',
+            description: 'El tipo de bitácora se eliminó correctamente'
+          });
+        } catch (error) {
+          console.error('Error deleting site log type:', error);
+          toast({
+            title: 'Error',
+            description: 'No se pudo eliminar el tipo de bitácora',
+            variant: 'destructive'
+          });
+        }
+      }
+    });
   };
 
   if (isLoading) {
@@ -168,7 +161,7 @@ export default function SitelogSettings() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setTypeToDelete(type)}
+                      onClick={() => handleDeleteType(type)}
                       data-testid={`button-delete-type-${type.id}`}
                       disabled={!organizationId}
                     >
@@ -191,28 +184,6 @@ export default function SitelogSettings() {
           )}
         </div>
       </div>
-
-      {/* Alert Dialog para confirmar eliminación */}
-      <AlertDialog open={!!typeToDelete} onOpenChange={() => setTypeToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar tipo de bitácora?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción eliminará permanentemente el tipo "{typeToDelete?.name}".
-              Las bitácoras existentes con este tipo no se verán afectadas.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteType}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
