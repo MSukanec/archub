@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { uploadMediaFileV2 } from '@/features/media/services/uploadMediaFileV2';
 
 export interface GalleryFileInput {
   file: File;
@@ -6,6 +6,18 @@ export interface GalleryFileInput {
   description?: string;
 }
 
+/**
+ * Sube múltiples archivos de galería usando la nueva arquitectura (media_files + media_links).
+ * 
+ * Wrapper para mantener compatibilidad con código existente mientras se usa
+ * internamente uploadMediaFileV2.
+ * 
+ * @param files - Array de archivos a subir
+ * @param projectId - ID del proyecto (puede ser null)
+ * @param organizationId - ID de la organización
+ * @param createdBy - ID del organization_member (NO user_id)
+ * @param visibility - Nivel de visibilidad del archivo
+ */
 export async function uploadGalleryFiles(
   files: GalleryFileInput[],
   projectId: string | null,
@@ -17,96 +29,33 @@ export async function uploadGalleryFiles(
     throw new Error('No hay archivos para subir');
   }
 
-  for (const { file, title, description } of files) {
+  // Subir archivos en paralelo para mejor performance
+  const uploadPromises = files.map(async ({ file, title, description }) => {
     try {
       // Validate file first
       if (!file || file.size === 0) {
-        console.error('Archivo vacío o inválido');
-        continue;
+        console.warn('Archivo vacío o inválido, saltando:', title);
+        return;
       }
 
-      // Generate unique filename
-      const extension = file.name.split('.').pop();
-      const filePath = `${crypto.randomUUID()}.${extension}`;
-
-
-
-      // First upload to storage
-      const { error: uploadError } = await supabase.storage
-        .from('media')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: true
-        });
-
-      if (uploadError) {
-        console.error('Error uploading file:', uploadError);
-        throw uploadError;
-      }
-
-      // Get the public URL after successful upload
-      const { data: urlData } = supabase.storage
-        .from('media')
-        .getPublicUrl(filePath);
-
-      const fileType: 'image' | 'video' = file.type.startsWith('image/') ? 'image' : 'video';
-
-      const insertData = {
-        file_name: title,
-        file_type: fileType,
-        file_url: urlData.publicUrl,
-        file_path: filePath,
-        file_size: file.size,
-        description: description || null,
-        created_by: createdBy,
+      // Usar el servicio V2 que maneja media_files + media_links
+      await uploadMediaFileV2({
+        file,
         organization_id: organizationId,
-        project_id: projectId,
-        visibility: visibility
-      };
-
-      console.log('Insertando en DB después de subir archivo:', insertData);
-      console.log('File details:', {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        customTitle: title
+        created_by: createdBy,
+        bucket: 'media',
+        project_id: projectId || undefined,
+        visibility,
+        description: description || title, // Usar title como descripción si no hay descripción
       });
 
-      // Test current user auth first
-      const { data: authUser } = await supabase.auth.getUser();
-      console.log('Current auth user:', authUser?.user?.id);
-      
-      // Test if we can select from table first
-      const { data: testSelect, error: selectError } = await supabase
-        .from('project_media')
-        .select('id')
-        .limit(1);
-      console.log('Test select result:', { testSelect, selectError });
-
-      // Now create the database record
-      const { error: dbError } = await supabase
-        .from('project_media')
-        .insert(insertData);
-
-      if (dbError) {
-        console.error('Error creating file record:', dbError);
-        console.error('Detailed error:', {
-          message: dbError.message,
-          details: dbError.details,
-          hint: dbError.hint,
-          code: dbError.code
-        });
-        // Clean up uploaded file if DB insertion failed
-        await supabase.storage
-          .from('media')
-          .remove([filePath]);
-        throw dbError;
-      }
-
-      console.log('Archivo subido exitosamente:', filePath);
+      console.log('Archivo subido exitosamente:', title);
     } catch (error) {
       console.error('Error processing file:', file.name, error);
       throw error;
     }
-  }
+  });
+
+  // Esperar a que todos los archivos se suban
+  await Promise.all(uploadPromises);
 }
