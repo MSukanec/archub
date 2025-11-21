@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { FileText, Plus } from "lucide-react";
+import { BookOpen, Plus } from "lucide-react";
 
 import { Layout } from '@/layout/desktop/Layout';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
@@ -133,7 +133,7 @@ export default function Sitelog() {
   };
 
   const headerProps = {
-    icon: FileText,
+    icon: BookOpen,
     title: "Bitácora de Obra",
     description: "Registra el progreso diario del proyecto con entradas detalladas de obra, condiciones climáticas, personal y eventos importantes",
     organizationId: currentOrganizationId,
