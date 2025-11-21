@@ -62,7 +62,7 @@ export default function ProjectActives() {
   ), [projects]);
 
   const availableModalities = useMemo(() => Array.from(
-    new Set(projects.map(p => p.project_data?.modality?.name).filter(Boolean))
+    new Set(projects.map(p => p.project_data?.project_modality?.name).filter(Boolean))
   ), [projects]);
 
   const availableStatuses = useMemo(() => {
@@ -98,7 +98,7 @@ export default function ProjectActives() {
     
     const matchesModality = filterByModality === 'all' || 
       project.project_data?.project_modality_id === filterByModality ||
-      project.project_data?.modality?.name?.toLowerCase().includes(filterByModality.toLowerCase());
+      project.project_data?.project_modality?.name?.toLowerCase().includes(filterByModality.toLowerCase());
     
     const matchesStatus = filterByStatus === 'all' || 
       project.status?.toLowerCase() === filterByStatus.toLowerCase();

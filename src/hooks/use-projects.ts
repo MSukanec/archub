@@ -20,7 +20,7 @@ interface Project {
       id: string
       name: string
     }
-    modality?: {
+    project_modality?: {
       id: string
       name: string
     }
@@ -84,7 +84,7 @@ export function useProjects(organizationId: string | undefined) {
               project_modality_id: pd.project_modality_id,
               project_image_url: pd.project_image_url,
               project_type: pd.project_type,
-              modality: pd.modality
+              project_modality: pd.modality
             }
           }
         }
@@ -145,7 +145,7 @@ export function useProject(projectId: string | undefined) {
             project_modality_id: pd.project_modality_id,
             project_image_url: pd.project_image_url,
             project_type: pd.project_type,
-            modality: pd.modality
+            project_modality: pd.modality
           }
         }
       }

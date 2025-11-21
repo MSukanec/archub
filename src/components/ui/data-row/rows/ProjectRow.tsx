@@ -30,7 +30,7 @@ interface Project {
       id: string;
       name: string;
     };
-    modality?: {
+    project_modality?: {
       id: string;
       name: string;
     };
@@ -95,8 +95,8 @@ export default function ProjectRow({
     metadata.push(project.project_data.project_type.name);
   }
   
-  if (project.project_data?.modality?.name) {
-    metadata.push(project.project_data.modality.name);
+  if (project.project_data?.project_modality?.name) {
+    metadata.push(project.project_data.project_modality.name);
   }
   
   metadata.push(getStatusText(project.status));

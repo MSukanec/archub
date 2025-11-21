@@ -32,7 +32,7 @@ interface Project {
       id: string;
       name: string;
     };
-    modality?: {
+    project_modality?: {
       id: string;
       name: string;
     };
@@ -176,11 +176,11 @@ export default function ProjectItem({
                 {project.project_data.project_type.name}
               </Badge>
             )}
-            {project.project_data?.modality?.name && (
+            {project.project_data?.project_modality?.name && (
               <Badge 
                 className="bg-[var(--accent)] text-white border-0 text-xs"
               >
-                {project.project_data.modality.name}
+                {project.project_data.project_modality.name}
               </Badge>
             )}
           </div>

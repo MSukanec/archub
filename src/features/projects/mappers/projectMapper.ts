@@ -29,7 +29,7 @@ export function transformProjectData(rawProject: any): Project {
         project_modality_id: pd.project_modality_id,
         project_image_url: pd.project_image_url,
         project_type: pd.project_type,
-        modality: pd.modality
+        project_modality: pd.modality
       };
     }
   }

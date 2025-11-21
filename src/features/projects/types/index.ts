@@ -31,7 +31,7 @@ export interface ProjectData {
     id: string;
     name: string;
   };
-  modality?: {
+  project_modality?: {
     id: string;
     name: string;
   };

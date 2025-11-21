@@ -180,7 +180,7 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
                 <span className="font-medium">Tipología:</span> {project.project_data?.project_type?.name || 'Sin especificar'}
               </p>
               <p className="text-sm text-muted-foreground">
-                <span className="font-medium">Modalidad:</span> {project.project_data?.modality?.name || 'Sin especificar'}
+                <span className="font-medium">Modalidad:</span> {project.project_data?.project_modality?.name || 'Sin especificar'}
               </p>
               <p className="text-sm text-muted-foreground">
                 <span className="font-medium">Estado:</span> {statusConfig.label}

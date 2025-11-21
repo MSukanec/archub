@@ -67,7 +67,7 @@ export default function ProjectList() {
   ), [projects]);
 
   const availableModalities = useMemo(() => Array.from(
-    new Set(projects.map(p => p.project_data?.modality?.name).filter(Boolean))
+    new Set(projects.map(p => p.project_data?.project_modality?.name).filter(Boolean))
   ), [projects]);
 
   const availableStatuses = useMemo(() => {
@@ -103,7 +103,7 @@ export default function ProjectList() {
     
     const matchesModality = filterByModality === 'all' || 
       project.project_data?.project_modality_id === filterByModality ||
-      project.project_data?.modality?.name?.toLowerCase().includes(filterByModality.toLowerCase());
+      project.project_data?.project_modality?.name?.toLowerCase().includes(filterByModality.toLowerCase());
     
     const matchesStatus = filterByStatus === 'all' || 
       project.status?.toLowerCase() === filterByStatus.toLowerCase();
@@ -270,7 +270,7 @@ export default function ProjectList() {
     
     // Construir detalles del proyecto
     const projectType = project.project_data?.project_type?.name || 'Sin tipo';
-    const modality = project.project_data?.modality?.name || 'Sin modalidad';
+    const modality = project.project_data?.project_modality?.name || 'Sin modalidad';
     const statusText = getStatusText(project.status);
     const itemDetails = `${projectType} · ${modality} · ${statusText}`;
     
@@ -343,7 +343,7 @@ export default function ProjectList() {
       label: 'Modalidad',
       render: (project: any) => (
         <div className="text-sm">
-          {project.project_data?.modality?.name || 'Sin especificar'}
+          {project.project_data?.project_modality?.name || 'Sin especificar'}
         </div>
       )
     },
