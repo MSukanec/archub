@@ -6,10 +6,10 @@ import { Users, Search, UserPlus } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 
-import { FormModalLayout } from '../../form/FormModalLayout';
-import { FormModalHeader } from '../../form/FormModalHeader';
-import { FormModalFooter } from '../../form/FormModalFooter';
-import { useGlobalModalStore } from '../../form/useGlobalModalStore';
+import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
+import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
+import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
