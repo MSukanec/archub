@@ -55,10 +55,10 @@ export async function getSitelogGalleryFiles(
         ),
         site_logs!inner (
           id,
-          date,
-          description,
-          site_log_type_id,
-          site_log_types (
+          log_date,
+          comments,
+          entry_type_id,
+          site_log_types:entry_type_id (
             id,
             name
           )
@@ -125,8 +125,8 @@ export async function getSitelogGalleryFiles(
           // Datos de la bitácora asociada (para mostrar contexto)
           site_log: {
             id: siteLog.id,
-            date: siteLog.date,
-            description: siteLog.description || null,
+            date: siteLog.log_date,
+            description: siteLog.comments || null,
             type_name: siteLog.site_log_types?.name || 'Sin tipo'
           }
         };
