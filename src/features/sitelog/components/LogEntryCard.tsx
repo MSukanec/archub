@@ -46,7 +46,7 @@ export function LogEntryCard({
 
   return (
     <div 
-      className="group pl-12 py-3 hover:border hover:border-border rounded-md transition-all cursor-pointer"
+      className="group pl-12 py-3 border border-transparent hover:border-gray-300 rounded-md transition-colors cursor-pointer"
       onClick={() => handleViewSiteLog(siteLog)}
     >
       <div className="flex gap-3">
