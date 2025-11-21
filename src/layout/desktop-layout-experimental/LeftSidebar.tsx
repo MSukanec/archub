@@ -215,7 +215,7 @@ export function LeftSidebar() {
         { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects' },
         { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts' },
         { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs' },
-        { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis' },
+        { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', restricted: 'coming_soon' },
         { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements', restricted: 'coming_soon' },
         { id: 'capital', label: 'Capital', icon: TrendingUp, href: '/finances/capital', restricted: 'coming_soon' },
         { id: 'finances-org', label: 'Finanzas', icon: DollarSign, href: '/finances', restricted: 'coming_soon' },
@@ -224,8 +224,8 @@ export function LeftSidebar() {
       return [
         { id: 'dashboard', label: 'Visión General', icon: Home, href: '/project/dashboard' },
         { id: 'basic-data', label: 'Datos Básicos', icon: FileText, href: '/project' },
-        { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets' },
         { id: 'logs', label: 'Bitácora de Obra', icon: BookOpen, href: '/construction/logs' },
+        { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets', restricted: 'coming_soon' },
         { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel', restricted: 'coming_soon' },
         { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials', restricted: 'coming_soon' },
         { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'coming_soon' },
