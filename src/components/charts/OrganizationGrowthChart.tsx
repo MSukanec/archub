@@ -56,6 +56,7 @@ function useOrganizationGrowthData(period: PeriodType) {
 
       const { data, error } = await supabase
         .from('organizations')
+        .eq('is_deleted', false)
         .select('created_at')
         .gte('created_at', startDate.toISOString())
         .order('created_at', { ascending: true });

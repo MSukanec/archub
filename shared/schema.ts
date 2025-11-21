@@ -136,12 +136,16 @@ export const organizations = pgTable("organizations", {
   plan_id: uuid("plan_id"),
   is_system: boolean("is_system").default(false),
   logo_url: text("logo_url"),
+  is_deleted: boolean("is_deleted").notNull().default(false),
+  deleted_at: timestamp("deleted_at", { withTimezone: true }),
 });
 
 export const insertOrganizationSchema = createInsertSchema(organizations).omit({
   id: true,
   created_at: true,
   updated_at: true,
+  is_deleted: true,
+  deleted_at: true,
 });
 
 export type Organization = typeof organizations.$inferSelect;

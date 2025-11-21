@@ -34,6 +34,7 @@ export async function getOrganizationClientsSummary(
     // Get organization's subscription plan to determine multi-currency capability
     const { data: orgData, error: orgError } = await supabase
       .from('organizations')
+      .eq('is_deleted', false)
       .select(`
         id,
         name,

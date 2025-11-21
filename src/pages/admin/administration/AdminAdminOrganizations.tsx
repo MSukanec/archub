@@ -110,6 +110,7 @@ function useAllOrganizations() {
 
       const { data, error } = await supabase
         .from('organizations')
+        .eq('is_deleted', false)
         .select(`
           id,
           name,

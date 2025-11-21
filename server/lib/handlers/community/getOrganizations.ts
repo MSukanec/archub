@@ -23,6 +23,7 @@ export async function getOrganizations(
 
     const { data, error } = await supabase
       .from('organizations')
+      .eq('is_deleted', false)
       .select('id, name, logo_url, created_at')
       .eq('is_active', true)
       .order('created_at', { ascending: false })
