@@ -16,7 +16,6 @@ export async function getOrganizationInfo(
     // Obtener información de la organización con el plan
     const { data: organization, error } = await supabase
       .from('organizations')
-      .eq('is_deleted', false)
       .select(`
         id,
         name,
@@ -39,6 +38,7 @@ export async function getOrganizationInfo(
           monthly_amount
         )
       `)
+      .eq('is_deleted', false)
       .eq('id', organizationId)
       .single();
 

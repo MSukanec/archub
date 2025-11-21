@@ -110,7 +110,6 @@ function useAllOrganizations() {
 
       const { data, error } = await supabase
         .from('organizations')
-        .eq('is_deleted', false)
         .select(`
           id,
           name,
@@ -120,6 +119,7 @@ function useAllOrganizations() {
           plan_id,
           created_by
         `)
+        .eq('is_deleted', false)
         .order('created_at', { ascending: false });
 
       if (error) {

@@ -56,8 +56,8 @@ export async function getPendingInvitations(
       // Get organization data
       const { data: org } = await supabase
         .from('organizations')
-        .eq('is_deleted', false)
         .select('name, logo_url')
+        .eq('is_deleted', false)
         .eq('id', inv.organization_id)
         .single();
 

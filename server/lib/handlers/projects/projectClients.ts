@@ -176,8 +176,8 @@ export async function getClientsSummary(
     // Fetch organization to get plan_id (avoid maybeSingle - use limit(1))
     const { data: orgDataArray, error: orgError } = await supabase
       .from('organizations')
-      .eq('is_deleted', false)
       .select('id, plan_id')
+      .eq('is_deleted', false)
       .eq('id', params.organizationId)
       .limit(1);
 

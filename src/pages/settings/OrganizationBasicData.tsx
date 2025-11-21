@@ -57,8 +57,8 @@ export default function OrganizationBasicData() {
       
       const { data, error } = await supabase
         .from('organizations')
-        .eq('is_deleted', false)
         .select('*')
+        .eq('is_deleted', false)
         .eq('id', organizationId)
         .single();
         

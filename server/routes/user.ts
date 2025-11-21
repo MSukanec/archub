@@ -168,8 +168,8 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
         // Fetch logo_url for all organizations in one query
         const { data: orgLogos, error: logoError } = await authenticatedSupabase
           .from('organizations')
-          .eq('is_deleted', false)
           .select('id, logo_url')
+          .eq('is_deleted', false)
           .in('id', orgIds);
           
         if (!logoError && orgLogos) {

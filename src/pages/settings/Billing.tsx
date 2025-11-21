@@ -198,8 +198,8 @@ const Billing = () => {
 
       const { data, error } = await supabase
         .from('organizations')
-        .eq('is_deleted', false)
         .select('name, logo_url, plan_id, plans(name, slug)')
+        .eq('is_deleted', false)
         .eq('id', currentOrganizationId)
         .single();
 

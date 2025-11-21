@@ -21,7 +21,7 @@ export async function getStats(
     const { supabase } = ctx;
 
     const [orgResult, projectsResult, membersResult] = await Promise.all([
-      supabase.from('organizations').eq('is_deleted', false).select('id', { count: 'exact', head: true }),
+      supabase.from('organizations').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
       supabase.from('projects').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
       supabase.from('organization_members').select('user_id', { count: 'exact', head: true })
     ]);

@@ -89,28 +89,28 @@ export default function AdminAdminDashboard() {
         // Total organizaciones
         supabase
           .from('organizations')
-          .eq('is_deleted', false)
-          .select('*', { count: 'exact', head: true }),
+          .select('*', { count: 'exact', head: true })
+          .eq('is_deleted', false),
         
         // Organizaciones activas
         supabase
           .from('organizations')
-          .eq('is_deleted', false)
           .select('*', { count: 'exact', head: true })
+          .eq('is_deleted', false)
           .eq('is_active', true),
         
         // Nuevas organizaciones este mes
         supabase
           .from('organizations')
-          .eq('is_deleted', false)
           .select('*', { count: 'exact', head: true })
+          .eq('is_deleted', false)
           .gte('created_at', thisMonthStart.toISOString()),
         
         // Nuevas organizaciones mes anterior
         supabase
           .from('organizations')
-          .eq('is_deleted', false)
           .select('*', { count: 'exact', head: true })
+          .eq('is_deleted', false)
           .gte('created_at', lastMonthStart.toISOString())
           .lte('created_at', lastMonthEnd.toISOString()),
         
@@ -212,8 +212,8 @@ export default function AdminAdminDashboard() {
       // Obtener las últimas organizaciones registradas ordenadas por created_at
       const { data } = await supabase
         .from('organizations')
-        .eq('is_deleted', false)
         .select('id, name, created_at')
+        .eq('is_deleted', false)
         .order('created_at', { ascending: false })
         .limit(10)
 
