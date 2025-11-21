@@ -40,6 +40,11 @@ export function transformProjectData(rawProject: any): Project {
       project_type_id: rawProject.project_type_id,
       project_modality_id: rawProject.project_modality_id,
       project_image_url: rawProject.project_image_url,
+      // Incluir campos adicionales que necesita el UI
+      city: rawProject.city,
+      country: rawProject.country,
+      start_date: rawProject.start_date,
+      estimated_end: rawProject.estimated_end,
       project_type: rawProject.project_type_name ? {
         id: rawProject.project_type_id,
         name: rawProject.project_type_name

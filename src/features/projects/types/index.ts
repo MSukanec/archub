@@ -28,6 +28,10 @@ export interface ProjectData {
   project_type_id?: string;
   project_modality_id?: string;
   project_image_url?: string;
+  city?: string;
+  country?: string;
+  start_date?: string;
+  estimated_end?: string;
   project_type?: {
     id: string;
     name: string;
