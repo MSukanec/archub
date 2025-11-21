@@ -7,6 +7,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { Link, useLocation } from 'wouter'
@@ -281,7 +282,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     {
       key: 'notes',
       label: 'Notas',
-      width: '400px',
+      width: '320px',
       sortable: false,
       render: (client: ProjectClientSummary) => {
         if (!client.notes) return '-';
@@ -292,31 +293,44 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       },
     },
     {
-      key: 'is_primary',
-      label: 'Primario',
+      key: 'status',
+      label: 'Estado',
+      width: '140px',
       sortable: true,
       align: 'center' as const,
       render: (client: ProjectClientSummary) => {
-        return client.is_primary ? (
-          <span className="text-green-600 dark:text-green-400 font-medium">Sí</span>
-        ) : (
-          <span className="text-muted-foreground">No</span>
-        );
-      },
-    },
-    {
-      key: 'status',
-      label: 'Estado',
-      sortable: true,
-      render: (client: ProjectClientSummary) => {
-        const statusMap: Record<string, { label: string; color: string }> = {
-          active: { label: 'Activo', color: 'text-green-600 dark:text-green-400' },
-          inactive: { label: 'Inactivo', color: 'text-muted-foreground' },
-          pending: { label: 'Pendiente', color: 'text-orange-600 dark:text-orange-400' },
+        const statusConfig: Record<string, { label: string; borderColor: string; textColor: string }> = {
+          active: { 
+            label: 'Activo', 
+            borderColor: 'border-green-600 dark:border-green-400', 
+            textColor: 'text-green-600 dark:text-green-400' 
+          },
+          inactive: { 
+            label: 'Inactivo', 
+            borderColor: 'border-muted-foreground', 
+            textColor: 'text-muted-foreground' 
+          },
+          pending: { 
+            label: 'Pendiente', 
+            borderColor: 'border-orange-600 dark:border-orange-400', 
+            textColor: 'text-orange-600 dark:text-orange-400' 
+          },
         };
         
-        const status = statusMap[client.status] || { label: client.status, color: 'text-muted-foreground' };
-        return <span className={`font-medium ${status.color}`}>{status.label}</span>;
+        const config = statusConfig[client.status] || { 
+          label: client.status, 
+          borderColor: 'border-muted-foreground', 
+          textColor: 'text-muted-foreground' 
+        };
+        
+        return (
+          <Badge 
+            variant="outline"
+            className={`${config.borderColor} ${config.textColor} border-2`}
+          >
+            {config.label}
+          </Badge>
+        );
       },
     },
   ];
