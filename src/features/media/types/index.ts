@@ -51,6 +51,7 @@ export interface MediaLinkRecord {
   contact_id: string | null;
   course_lesson_id: string | null;
   general_cost_id: string | null;
+  client_payment_id: string | null;
   created_by: string | null;
   created_at: string;
   visibility: string | null;
@@ -166,6 +167,7 @@ export interface UploadMediaInputV2 {
   contact_id?: string;
   course_lesson_id?: string;
   general_cost_id?: string;
+  client_payment_id?: string;
   
   // Metadata del link
   visibility?: MediaVisibility;

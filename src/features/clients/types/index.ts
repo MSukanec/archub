@@ -141,7 +141,7 @@ export interface ClientPayment {
   reference: string | null;
   wallet_id: string | null;
   status: 'confirmed' | 'pending' | 'rejected' | 'void';
-  file_url: string | null;
+  file_url?: string | null; // Optional: migrating to media_files + media_links system
   created_by: string | null;
   created_at: string;
   updated_at: string;

@@ -32,6 +32,7 @@ export async function uploadMediaFileV2(input: UploadMediaInputV2): Promise<Uplo
     contact_id,
     course_lesson_id,
     general_cost_id,
+    client_payment_id,
     visibility = 'organization',
     description,
     category,
@@ -41,7 +42,7 @@ export async function uploadMediaFileV2(input: UploadMediaInputV2): Promise<Uplo
   } = input;
 
   // Validar que al menos una entidad esté presente
-  if (!project_id && !site_log_id && !movement_id && !contact_id && !course_lesson_id && !general_cost_id) {
+  if (!project_id && !site_log_id && !movement_id && !contact_id && !course_lesson_id && !general_cost_id && !client_payment_id) {
     throw new Error('Se requiere al menos una entidad relacionada (project_id, site_log_id, etc.)');
   }
 
@@ -111,6 +112,7 @@ export async function uploadMediaFileV2(input: UploadMediaInputV2): Promise<Uplo
         contact_id: contact_id || null,
         course_lesson_id: course_lesson_id || null,
         general_cost_id: general_cost_id || null,
+        client_payment_id: client_payment_id || null,
         created_by,
         visibility,
         description: description || null,

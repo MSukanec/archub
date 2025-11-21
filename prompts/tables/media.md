@@ -46,6 +46,7 @@ create table public.media_links (
   contact_id uuid null,
   course_lesson_id uuid null,
   general_cost_id uuid null,
+  client_payment_id uuid null,
   created_by uuid null,
   created_at timestamp with time zone not null default now(),
   visibility text null,
@@ -63,6 +64,7 @@ create table public.media_links (
   constraint media_links_org_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
   constraint media_links_project_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
   constraint media_links_sitelog_fkey foreign KEY (site_log_id) references site_logs (id) on delete CASCADE,
+  constraint media_links_client_payment_fkey foreign KEY (client_payment_id) references client_payments (id) on delete CASCADE,
   constraint media_links_category_check check (
     (
       (category is null)
@@ -110,6 +112,13 @@ create index IF not exists idx_media_links_movement on public.media_links using 
 where
   (
     (movement_id is not null)
+    and (organization_id is not null)
+  );
+
+create index IF not exists idx_media_links_client_payment on public.media_links using btree (client_payment_id) TABLESPACE pg_default
+where
+  (
+    (client_payment_id is not null)
     and (organization_id is not null)
   );
 

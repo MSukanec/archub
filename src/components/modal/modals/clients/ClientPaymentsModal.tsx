@@ -24,6 +24,8 @@ import { useOrganizationWallets, useOrganizationMembers } from '@/features/organ
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { supabase } from '@/lib/supabase'
 import { formatContactName } from '@/utils/contacts'
+import { uploadMediaFileV2 } from '@/features/media/services/uploadMediaFileV2'
+import { deleteMediaFileV2 } from '@/features/media/services/deleteMediaFileV2'
 import { UploadSingleFileField } from '@/components/ui-custom/fields/UploadSingleFileField'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { 
@@ -47,7 +49,6 @@ const clientPaymentSchema = z.object({
   status: z.enum(['confirmed', 'pending', 'rejected', 'void']),
   reference: z.string().optional(),
   notes: z.string().optional(),
-  file_url: z.string().optional(),
 })
 
 type ClientPaymentForm = z.infer<typeof clientPaymentSchema>
@@ -68,6 +69,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
   const { toast } = useToast()
   const { setPanel } = useModalPanelStore()
   const [filesToUpload, setFilesToUpload] = useState<any[]>([])
+  const [attachments, setAttachments] = useState<any[]>([])
 
   // Fetch existing payment data for edit/view mode
   const { data: existingPayment, isLoading: loadingPayment } = useClientPayment(
@@ -121,7 +123,6 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
       status: 'confirmed',
       reference: '',
       notes: '',
-      file_url: '',
     }
   })
 
@@ -154,25 +155,57 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
         status: existingPayment.status || 'confirmed',
         reference: existingPayment.reference || '',
         notes: existingPayment.notes || '',
-        file_url: existingPayment.file_url || '',
       })
     }
   }, [existingPayment, mode, form, currentMember?.id])
-  
-  // Build existing files array from file_url
-  const existingFiles = React.useMemo(() => {
-    const fileUrl = form.watch('file_url')
-    if (!fileUrl) return []
+
+  // Fetch attachments from media_links when in edit/view mode
+  React.useEffect(() => {
+    const fetchAttachments = async () => {
+      if (!paymentId || !organizationId) return
+      
+      const { data, error } = await supabase
+        .from('media_links')
+        .select(`
+          id,
+          description,
+          category,
+          created_at,
+          media_file:media_files (
+            id,
+            file_url,
+            file_name,
+            file_type,
+            file_size
+          )
+        `)
+        .eq('client_payment_id', paymentId)
+        .eq('organization_id', organizationId)
+        .order('created_at', { ascending: true })
+      
+      if (!error && data) {
+        setAttachments(data)
+      }
+    }
     
-    return [{
-      id: 'existing',
-      file_name: fileUrl.split('/').pop() || 'Archivo adjunto',
-      file_type: 'document',
-      file_size: 0,
-      file_url: fileUrl,
+    if (mode === 'edit' || mode === 'view') {
+      fetchAttachments()
+    }
+  }, [paymentId, organizationId, mode])
+  
+  // Build existing files array from media_links attachments
+  const existingFiles = React.useMemo(() => {
+    if (!attachments || attachments.length === 0) return []
+    
+    return attachments.map((attachment: any) => ({
+      id: attachment.id,
+      file_name: attachment.media_file?.file_name || 'Archivo adjunto',
+      file_type: attachment.media_file?.file_type || 'document',
+      file_size: attachment.media_file?.file_size || 0,
+      file_url: attachment.media_file?.file_url || '',
       isExisting: true,
-    }]
-  }, [form.watch('file_url')])
+    }))
+  }, [attachments])
 
   // Initialize default values for create mode (including created_by)
   React.useEffect(() => {
@@ -210,51 +243,18 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
     }
   }, [selectedCurrency, mode, currencies, form])
 
-  // File upload handler
-  const handleFileUpload = async (file: File): Promise<string> => {
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${organizationId}/${projectId}/${Date.now()}.${fileExt}`
-    
-    const { error: uploadError } = await supabase.storage
-      .from('client-payments-attachments')
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: false
-      })
-    
-    if (uploadError) {
-      throw new Error(`Error al subir archivo: ${uploadError.message}`)
-    }
-    
-    const { data: { publicUrl } } = supabase.storage
-      .from('client-payments-attachments')
-      .getPublicUrl(fileName)
-    
-    return publicUrl
-  }
-
   // Mutations for create/update
   const createPaymentMutation = useCreateClientPayment()
   const updatePaymentMutation = useUpdateClientPayment()
 
   const onSubmit = async (data: ClientPaymentForm) => {
     try {
-      let fileUrl = data.file_url || null
-
-      // Upload file if there's a new one
-      if (filesToUpload.length > 0 && filesToUpload[0].file) {
-        try {
-          fileUrl = await handleFileUpload(filesToUpload[0].file)
-        } catch (error: any) {
-          throw new Error(error.message || 'Error al subir el archivo')
-        }
-      } else if (!data.file_url) {
-        // Si no hay archivo existente ni nuevo, eliminar la URL
-        fileUrl = null
-      }
-
+      // 1. Create/update payment FIRST
+      let paymentResult;
+      
       if (mode === 'edit' && paymentId) {
-        await updatePaymentMutation.mutateAsync({
+        // Update existing payment
+        paymentResult = await updatePaymentMutation.mutateAsync({
           paymentId,
           updates: {
             client_id: data.client_id,
@@ -266,12 +266,12 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
             status: data.status,
             reference: data.reference || null,
             notes: data.notes || null,
-            file_url: fileUrl || null,
           },
           organizationId,
         })
       } else {
-        await createPaymentMutation.mutateAsync({
+        // Create new payment
+        paymentResult = await createPaymentMutation.mutateAsync({
           payment: {
             client_id: data.client_id,
             wallet_id: data.wallet_id,
@@ -282,7 +282,6 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
             status: data.status,
             reference: data.reference || null,
             notes: data.notes || null,
-            file_url: fileUrl || null,
             commitment_id: null,
             schedule_id: null,
           },
@@ -291,7 +290,46 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
           createdBy: data.created_by,
         })
       }
+
+      // 2. Upload file IF it exists
+      if (filesToUpload.length > 0 && filesToUpload[0].file) {
+        const createdPaymentId = paymentResult?.id || paymentId
+        
+        if (!createdPaymentId) {
+          toast({
+            variant: 'destructive',
+            title: 'Error al subir archivo',
+            description: 'No se pudo obtener el ID del pago para subir el archivo.',
+            duration: 8000,
+          })
+          return; // DON'T close modal
+        }
+        
+        try {
+          await uploadMediaFileV2({
+            file: filesToUpload[0].file,
+            organization_id: organizationId,
+            created_by: data.created_by,
+            bucket: 'media',
+            client_payment_id: createdPaymentId,
+            project_id: projectId,
+            visibility: 'organization',
+            category: 'document',
+          })
+        } catch (uploadError: any) {
+          console.error('Error uploading file:', uploadError)
+          // DON'T close modal - show clearer error message
+          toast({
+            variant: 'destructive',
+            title: 'Error al subir archivo',
+            description: `El pago se ${mode === 'edit' ? 'actualizó' : 'registró'} correctamente, pero el archivo no pudo subirse: ${uploadError.message || 'Error desconocido'}. Puedes editarlo más tarde para agregar el archivo.`,
+            duration: 8000, // Longer duration to read the message
+          })
+          return; // DON'T close modal - user can retry or close manually
+        }
+      }
       
+      // 3. Complete success - show success message and close modal
       toast({
         title: mode === 'edit' || mode === 'view' ? 'Pago actualizado' : 'Pago registrado',
         description: mode === 'edit' || mode === 'view'
@@ -300,6 +338,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
       })
       onClose()
     } catch (error: any) {
+      // Payment creation/update failed - show error
       toast({
         variant: 'destructive',
         title: 'Error',
@@ -403,19 +442,27 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
         </div>
       )}
 
-      {/* Archivo Adjunto */}
-      {existingPayment.file_url && (
+      {/* Archivos Adjuntos */}
+      {attachments.length > 0 && (
         <div>
-          <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Archivo Adjunto</h4>
-          <a
-            href={existingPayment.file_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
-          >
-            <FileText className="h-4 w-4" />
-            Ver archivo adjunto
-          </a>
+          <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Archivos Adjuntos</h4>
+          <div className="space-y-2">
+            {attachments.map((attachment: any) => (
+              <a
+                key={attachment.id}
+                href={attachment.media_file?.file_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                <FileText className="h-4 w-4" />
+                {attachment.media_file?.file_name || 'Archivo adjunto'}
+                {attachment.description && (
+                  <span className="text-xs text-muted-foreground">({attachment.description})</span>
+                )}
+              </a>
+            ))}
+          </div>
         </div>
       )}
 
@@ -699,7 +746,22 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
               }}
               onExistingFileDelete={async (fileId) => {
-                form.setValue('file_url', '')
+                // Delete file from media_links using deleteMediaFileV2
+                try {
+                  await deleteMediaFileV2(fileId)
+                  // Update local state to remove the deleted attachment
+                  setAttachments(prev => prev.filter(a => a.id !== fileId))
+                  toast({
+                    title: 'Archivo eliminado',
+                    description: 'El archivo se ha eliminado correctamente',
+                  })
+                } catch (error: any) {
+                  toast({
+                    variant: 'destructive',
+                    title: 'Error',
+                    description: `Error al eliminar archivo: ${error.message || 'Error desconocido'}`,
+                  })
+                }
               }}
               emptyStateTitle="Sin archivo adjunto"
               emptyStateDescription="Arrastra un archivo o haz clic para seleccionar"

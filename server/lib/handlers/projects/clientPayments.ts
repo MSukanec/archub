@@ -60,6 +60,12 @@ export interface ClientPayment {
     due_date: string;
     amount: number;
   } | null;
+  attachments?: Array<{
+    id: string;
+    file_url: string;
+    file_name: string;
+    file_type: string;
+  }>;
 }
 
 export type ListClientPaymentsResult =
@@ -250,12 +256,51 @@ export async function listClientPayments(
       return { success: false, error: 'Failed to fetch client payments' };
     }
 
+    // Fetch attachments for all payments in a single query
+    const paymentIds = (payments || []).map(p => p.id);
+    let attachmentsMap: Record<string, any[]> = {};
+    
+    if (paymentIds.length > 0) {
+      const { data: attachments, error: attachmentsError } = await supabase
+        .from('media_links')
+        .select(`
+          id,
+          client_payment_id,
+          media_file:media_files (
+            id,
+            file_url,
+            file_name,
+            file_type
+          )
+        `)
+        .in('client_payment_id', paymentIds)
+        .eq('organization_id', params.organizationId);
+
+      if (!attachmentsError && attachments) {
+        // Group attachments by payment ID
+        attachments.forEach((att: any) => {
+          if (!attachmentsMap[att.client_payment_id]) {
+            attachmentsMap[att.client_payment_id] = [];
+          }
+          if (att.media_file) {
+            attachmentsMap[att.client_payment_id].push({
+              id: att.id,
+              file_url: att.media_file.file_url,
+              file_name: att.media_file.file_name,
+              file_type: att.media_file.file_type,
+            });
+          }
+        });
+      }
+    }
+
     // Map response to match frontend expectations
     const mappedPayments = (payments || []).map((payment: any) => ({
       ...payment,
       contact: payment.contacts || null,
       project_client: payment.project_clients || null,
       currency: payment.currencies || null,
+      attachments: attachmentsMap[payment.id] || [],
       // Remove plural keys to avoid confusion
       contacts: undefined,
       project_clients: undefined,
@@ -357,13 +402,14 @@ export async function createClientPayment(
       return { success: false, error: 'Failed to create client payment' };
     }
 
-    // Normalize wallet structure
+    // Normalize wallet structure and add empty attachments (will be uploaded separately)
     const normalizedPayment = {
       ...newPayment,
       wallet: newPayment.wallet ? {
         id: newPayment.wallet.id,
         name: newPayment.wallet.wallets?.name || null
-      } : null
+      } : null,
+      attachments: []
     };
 
     return { success: true, data: normalizedPayment };
@@ -473,13 +519,40 @@ export async function updateClientPayment(
       return { success: false, error: 'Failed to update client payment' };
     }
 
-    // Normalize wallet structure
+    // Fetch attachments for the updated payment
+    const { data: attachments, error: attachmentsError } = await supabase
+      .from('media_links')
+      .select(`
+        id,
+        media_file:media_files (
+          id,
+          file_url,
+          file_name,
+          file_type
+        )
+      `)
+      .eq('client_payment_id', params.paymentId)
+      .eq('organization_id', params.organizationId);
+
+    const mappedAttachments = (!attachmentsError && attachments)
+      ? attachments
+          .filter((att: any) => att.media_file)
+          .map((att: any) => ({
+            id: att.id,
+            file_url: att.media_file.file_url,
+            file_name: att.media_file.file_name,
+            file_type: att.media_file.file_type,
+          }))
+      : [];
+
+    // Normalize wallet structure and add attachments
     const normalizedPayment = {
       ...updatedPayment,
       wallet: updatedPayment.wallet ? {
         id: updatedPayment.wallet.id,
         name: updatedPayment.wallet.wallets?.name || null
-      } : null
+      } : null,
+      attachments: mappedAttachments
     };
 
     return { success: true, data: normalizedPayment };
