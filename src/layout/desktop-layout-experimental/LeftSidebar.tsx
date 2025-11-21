@@ -218,20 +218,20 @@ export function LeftSidebar() {
         { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis' },
         { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements', restricted: 'coming_soon' },
         { id: 'capital', label: 'Capital', icon: TrendingUp, href: '/finances/capital', restricted: 'coming_soon' },
+        { id: 'finances-org', label: 'Finanzas', icon: DollarSign, href: '/finances', restricted: 'coming_soon' },
       ];
     } else if (sidebarLevel === 'project' && selectedProjectId) {
       return [
         { id: 'dashboard', label: 'Visión General', icon: Home, href: '/project/dashboard' },
         { id: 'basic-data', label: 'Datos Básicos', icon: FileText, href: '/project' },
         { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets' },
+        { id: 'logs', label: 'Bitácora de Obra', icon: FileText, href: '/construction/logs' },
         { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel', restricted: 'coming_soon' },
         { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials', restricted: 'coming_soon' },
         { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'coming_soon' },
         { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts', restricted: 'coming_soon' },
-        { id: 'logs', label: 'Bitácora de Obra', icon: FileText, href: '/construction/logs' },
         { id: 'media', label: 'Archivos y Media', icon: FolderOpen, href: '/media', restricted: 'coming_soon' },
         { id: 'clients', label: 'Clientes', icon: Users, href: '/clients', restricted: 'coming_soon' },
-        { id: 'finances', label: 'Finanzas', icon: DollarSign, href: '/finances', restricted: 'coming_soon' },
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
       return [
