@@ -10,7 +10,7 @@ import { SubcontractBidsView } from './tabs/SubcontractBidsView';
 import { SubcontractAwardedView } from './tabs/SubcontractAwardedView';
 import { SubcontractPaymentsView } from './tabs/SubcontractPaymentsView';
 import { SubcontractHistoryView } from './tabs/SubcontractHistoryView';
-import { useSubcontract } from "@/hooks/use-subcontracts";
+import { useSubcontract } from "@/features/subcontracts";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 

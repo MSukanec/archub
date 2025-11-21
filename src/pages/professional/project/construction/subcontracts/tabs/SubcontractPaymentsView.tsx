@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
-import { SubcontractPaymentsChart } from '@/components/charts/SubcontractPaymentsChart';
+import { SubcontractPaymentsChart } from '@/features/subcontracts';
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency as globalFormatCurrency } from "@/lib/currency-formatter";

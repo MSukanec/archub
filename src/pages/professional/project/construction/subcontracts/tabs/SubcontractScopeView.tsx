@@ -7,7 +7,7 @@ import { TableTopBar } from '@/components/ui-custom/tables-and-trees/TableTopBar
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useSubcontractTasks } from '@/hooks/use-subcontract-tasks';
+import { useSubcontractTasks } from '@/features/subcontracts';
 
 interface SubcontractScopeViewProps {
   subcontract: any;
