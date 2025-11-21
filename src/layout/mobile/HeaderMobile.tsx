@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { MobileMenu } from "./MobileMenu";
 import { useMobileMenuStore } from "./useMobileMenuStore";
-import { SwipeContainer } from "./SwipeContainer";
 
 interface Tab {
   id: string;
@@ -60,23 +59,6 @@ export function HeaderMobile({
   };
 
   const isProjectBasedSection = location.startsWith("/design") || location.startsWith("/construction") || location.startsWith("/finances");
-
-  // Función para manejar swipes entre tabs
-  const handleSwipeLeft = () => {
-    if (!tabs || !onTabChange) return;
-    const activeIndex = tabs.findIndex(tab => tab.isActive);
-    if (activeIndex < tabs.length - 1) {
-      onTabChange(tabs[activeIndex + 1].id);
-    }
-  };
-
-  const handleSwipeRight = () => {
-    if (!tabs || !onTabChange) return;
-    const activeIndex = tabs.findIndex(tab => tab.isActive);
-    if (activeIndex > 0) {
-      onTabChange(tabs[activeIndex - 1].id);
-    }
-  };
 
   return (
     <>
@@ -143,19 +125,8 @@ export function HeaderMobile({
         <MobileMenu isOpen={isMobileMenuOpen} onClose={closeMenu} />
       )}
 
-      {/* Swipe Container for Tab Navigation */}
-      {children && tabs && tabs.length > 1 && (
-        <SwipeContainer
-          onSwipeLeft={handleSwipeLeft}
-          onSwipeRight={handleSwipeRight}
-          className="md:hidden"
-        >
-          {children}
-        </SwipeContainer>
-      )}
-      
-      {/* Fallback for non-swipe content */}
-      {children && (!tabs || tabs.length <= 1) && (
+      {/* Content */}
+      {children && (
         <div className="md:hidden">
           {children}
         </div>
