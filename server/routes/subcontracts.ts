@@ -1,13 +1,29 @@
 import type { Express } from "express";
 import type { RouteDeps } from './_base';
 import { extractToken, createAuthenticatedClient } from './_base';
+import {
+  handleCreateSubcontract,
+  handleUpdateSubcontract,
+  handleDeleteSubcontract,
+} from '../controllers/subcontracts/subcontracts.controller.js';
 
 /**
  * Register subcontract-related endpoints
- * Includes: bulk movements, movement-subcontracts, subcontract-bids, subcontract-tasks, and subcontracts
+ * Includes: CRUD subcontracts, bulk movements, movement-subcontracts, subcontract-bids, subcontract-tasks
  */
 export function registerSubcontractRoutes(app: Express, deps: RouteDeps): void {
   const { supabase, createAuthenticatedClient: createAuthClient, extractToken: getToken } = deps;
+
+  // ========== SUBCONTRACTS CRUD ENDPOINTS ==========
+
+  // POST /api/subcontracts - Create new subcontract
+  app.post("/api/subcontracts", handleCreateSubcontract);
+
+  // PATCH /api/subcontracts/:id - Update subcontract
+  app.patch("/api/subcontracts/:id", handleUpdateSubcontract);
+
+  // DELETE /api/subcontracts/:id - Delete subcontract
+  app.delete("/api/subcontracts/:id", handleDeleteSubcontract);
 
   // ========== BULK MOVEMENTS IMPORT ENDPOINT ==========
 
