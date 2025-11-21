@@ -55,10 +55,11 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
   const userInitial = userFullName?.charAt(0)?.toUpperCase() || 'U';
 
   useEffect(() => {
-    if (historyData?.messages) {
+    // Solo setear messages desde historial si están vacíos (primera carga)
+    if (historyData?.messages && messages.length === 0) {
       setMessages(historyData.messages);
     }
-  }, [historyData]);
+  }, [historyData, messages.length]);
 
   useEffect(() => {
     const textarea = textareaRef.current;
