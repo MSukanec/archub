@@ -1,25 +1,23 @@
 /**
  * 🤖 AIPanel - Panel de chat IA integrado en RightSidebar
  * 
- * Componente que muestra un chat conversacional con IA:
+ * Componente presentacional que muestra un chat conversacional con IA:
  * - Vista inicial: Saludo personalizado + ideas pre-establecidas
  * - Vista con conversación: Burbujas de chat + input
+ * 
+ * Refactorizado para usar Services → Hooks → Component pattern (FSD)
  */
 
 import { useEffect, useState, useRef, type KeyboardEvent } from 'react';
-import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Sparkles, ArrowUp } from 'lucide-react';
 import { MessageContent } from './MessageContent';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/lib/supabase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
-interface ChatMessage {
-  role: 'user' | 'assistant';
-  content: string;
-}
+import { useAIHistory } from '../hooks/use-ai-history';
+import { useAIChat } from '../hooks/use-ai-chat';
+import type { ChatMessage } from '../types';
 
 interface AIPanelProps {
   userId: string;
@@ -37,18 +35,12 @@ const SUGGESTED_IDEAS = [
 export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
-  const [isSending, setIsSending] = useState(false);
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const scrollEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
-  // Usar sessionStorage para persistir entre aperturas/cierres del panel
-  // pero resetear cuando el usuario recarga la página (F5)
   const getSessionKey = () => `ai_has_interacted_${userId}`;
   
   const [hasInteracted, setHasInteracted] = useState(() => {
-    // Inicializar desde sessionStorage
     try {
       const stored = sessionStorage.getItem(getSessionKey());
       return stored === 'true';
@@ -57,25 +49,28 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
     }
   });
   
-  // Obtener primera letra del nombre para el avatar
+  const { data: historyData, isLoading: isLoadingHistory } = useAIHistory(hasInteracted);
+  const chatMutation = useAIChat();
+  
   const userInitial = userFullName?.charAt(0)?.toUpperCase() || 'U';
 
-  // Auto-resize del textarea
+  useEffect(() => {
+    if (historyData?.messages) {
+      setMessages(historyData.messages);
+    }
+  }, [historyData]);
+
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
     textarea.style.height = 'auto';
-    const newHeight = Math.min(textarea.scrollHeight, 120); // max 120px
+    const newHeight = Math.min(textarea.scrollHeight, 120);
     textarea.style.height = `${newHeight}px`;
   }, [inputValue]);
 
-  // NO cargar historial automáticamente al montar
-  // Solo cargar cuando el usuario interactúa
-
   const hasMessages = messages.length > 0;
 
-  // Auto-scroll hacia arriba (donde están los nuevos) cuando cambian los mensajes
   useEffect(() => {
     if (scrollAreaRef.current && hasMessages) {
       const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
@@ -85,63 +80,20 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
     }
   }, [messages, hasMessages]);
 
-  const loadHistory = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session?.access_token) {
-        setIsLoadingHistory(false);
-        return;
-      }
-
-      const response = await fetch('/api/ai/history', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data?.messages) {
-          const formattedMessages = data.messages.map((msg: any) => ({
-            role: msg.role,
-            content: msg.content
-          }));
-          setMessages(formattedMessages);
-        }
-      }
-    } catch (error) {
-      console.error('Error loading AI history:', error);
-    } finally {
-      setIsLoadingHistory(false);
-    }
-  };
-
   const handleSendMessage = async (messageText?: string) => {
     const textToSend = messageText || inputValue.trim();
     
-    if (!textToSend || isSending) return;
+    if (!textToSend || chatMutation.isPending) return;
 
-    // Si es la primera interacción, cargar historial primero
     if (!hasInteracted) {
-      setIsLoadingHistory(true);
-      await loadHistory();
       setHasInteracted(true);
-      // Guardar en sessionStorage para persistir entre aperturas/cierres del panel
-      // pero resetear cuando se recarga la página
       try {
         sessionStorage.setItem(getSessionKey(), 'true');
       } catch (error) {
         console.error('Error saving to sessionStorage:', error);
       }
-      setIsLoadingHistory(false);
     }
-
-    setIsSending(true);
     
-    // Agregar mensaje del usuario
     const userMessage: ChatMessage = {
       role: 'user',
       content: textToSend
@@ -150,49 +102,22 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
     setMessages(prev => [...prev, userMessage]);
     setInputValue("");
 
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session?.access_token) {
-        throw new Error("No session");
+    chatMutation.mutate(textToSend, {
+      onSuccess: (data) => {
+        const assistantMessage: ChatMessage = {
+          role: 'assistant',
+          content: data.response
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+      },
+      onError: (error) => {
+        const errorMessage: ChatMessage = {
+          role: 'assistant',
+          content: `❌ Error: ${error.message || 'No se pudo enviar el mensaje'}`
+        };
+        setMessages(prev => [...prev, errorMessage]);
       }
-
-      const response = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ message: textToSend })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al enviar mensaje');
-      }
-
-      const data = await response.json();
-      
-      // Agregar respuesta de la IA
-      const assistantMessage: ChatMessage = {
-        role: 'assistant',
-        content: data.response
-      };
-      
-      setMessages(prev => [...prev, assistantMessage]);
-    } catch (error: any) {
-      console.error('Error sending message:', error);
-      
-      // Mostrar error como mensaje de la IA
-      const errorMessage: ChatMessage = {
-        role: 'assistant',
-        content: `❌ Error: ${error.message || 'No se pudo enviar el mensaje'}`
-      };
-      
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsSending(false);
-    }
+    });
   };
 
   const handleIdeaClick = (idea: string) => {
@@ -202,7 +127,7 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      if (inputValue.trim() && !isSending) {
+      if (inputValue.trim() && !chatMutation.isPending) {
         handleSendMessage();
       }
     }
@@ -220,7 +145,7 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
         <ScrollArea className="flex-1 px-4" ref={scrollAreaRef}>
           <div className="py-4 space-y-4">
             {/* Indicador de carga - aparece arriba de todo (mensaje más nuevo) */}
-            {isSending && (
+            {chatMutation.isPending && (
               <div className="flex gap-3">
                 <div className="h-8 w-8 rounded-full bg-[var(--accent)] flex items-center justify-center">
                   <Sparkles className="h-4 w-4 text-white" />
@@ -304,7 +229,7 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
                 <button
                   key={index}
                   onClick={() => handleIdeaClick(idea)}
-                  disabled={isSending}
+                  disabled={chatMutation.isPending}
                   className="w-full text-left px-4 py-2 rounded-full border border-[var(--main-sidebar-fg)] text-[var(--main-sidebar-fg)] text-xs leading-relaxed hover:bg-[var(--main-sidebar-button-hover-bg)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   data-testid={`button-ai-idea-${index}`}
                 >
@@ -326,7 +251,7 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Escribe tu mensaje..."
-            disabled={isSending}
+            disabled={chatMutation.isPending}
             rows={1}
             className={cn(
               "flex-1 resize-none bg-transparent",
@@ -346,7 +271,7 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
           <button
             type="button"
             onClick={() => handleSendMessage()}
-            disabled={!inputValue.trim() || isSending}
+            disabled={!inputValue.trim() || chatMutation.isPending}
             className={cn(
               "flex-shrink-0 p-1.5 rounded-full",
               "bg-[var(--accent)] hover:opacity-90 transition-opacity",

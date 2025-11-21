@@ -9,6 +9,14 @@
 export { AIPanel } from './components/AIPanel';
 export { MessageContent } from './components/MessageContent';
 
+// Hooks
+export { useAIHistory } from './hooks/use-ai-history';
+export { useAIChat } from './hooks/use-ai-chat';
+
+// Services - API
+export { getAIHistory } from './services/getAIHistory';
+export { sendAIChatMessage } from './services/sendAIChatMessage';
+
 // Services - Chat Handlers
 export { getChatHandler, checkAndIncrementUsageLimit } from './services/chat/chatHandler';
 export { getHomeGreetingHandler } from './services/chat/homeGreetingHandler';
@@ -66,6 +74,8 @@ export { normalizeText, textMatches, textIncludes } from './utils/textNormalizer
 
 // Constants
 export { getGreetingSystemPrompt, getChatSystemPrompt, GENERAL_GUIDELINES, SYSTEM_PROMPT } from './constants/systemPrompt';
+export { AI_QUERY_KEYS } from './constants';
 
 // Types
+export type { ChatMessage, AIHistoryResponse, AIChatRequest, AIChatResponse } from './types';
 export type * from './services/orchestrator/types';
