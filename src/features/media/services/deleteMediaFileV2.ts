@@ -20,27 +20,20 @@ export async function deleteMediaFileV2(linkId: string): Promise<void> {
   try {
     console.log('[deleteMediaFileV2] Attempting to delete link:', linkId);
     
-    // 1. Obtener información del link antes de eliminarlo
-    const { data: linkData, error: linkFetchError } = await supabase
-      .from('media_links')
-      .select('media_file_id')
-      .eq('id', linkId)
-      .single();
-
-    console.log('[deleteMediaFileV2] Query result:', { linkData, linkFetchError });
-
-    if (linkFetchError) throw linkFetchError;
-    if (!linkData) throw new Error('Link no encontrado');
-
-    const mediaFileId = linkData.media_file_id;
-
-    // 2. Eliminar el link
-    const { error: deleteLinkError } = await supabase
+    // 1 y 2. Eliminar el link y obtener media_file_id en una sola operación (evita problemas con RLS)
+    const { data: deletedLink, error: deleteLinkError } = await supabase
       .from('media_links')
       .delete()
-      .eq('id', linkId);
+      .eq('id', linkId)
+      .select('media_file_id')
+      .single();
+
+    console.log('[deleteMediaFileV2] Delete result:', { deletedLink, deleteLinkError });
 
     if (deleteLinkError) throw deleteLinkError;
+    if (!deletedLink) throw new Error('Link no encontrado o ya eliminado');
+
+    const mediaFileId = deletedLink.media_file_id;
 
     // 3. Verificar si quedan otros links al mismo archivo
     const { data: remainingLinks, error: checkLinksError } = await supabase
