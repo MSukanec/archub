@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import type { MediaFileWithLink } from '@/features/media/types';
+import type { SitelogGalleryFile } from '../types';
 
 /**
  * Obtiene archivos multimedia (fotos y videos) de bitácoras.
@@ -11,6 +11,7 @@ import type { MediaFileWithLink } from '@/features/media/types';
  * - Datos del archivo (file_url, file_name, file_type, file_size)
  * - Datos del link (link_id para eliminación)
  * - Datos de la bitácora asociada (fecha, tipo, descripción)
+ * - Datos del proyecto (nombre)
  * 
  * @param organizationId - ID de la organización
  * @param projectId - ID del proyecto (opcional)
@@ -20,13 +21,13 @@ import type { MediaFileWithLink } from '@/features/media/types';
 export async function getSitelogGalleryFiles(
   organizationId: string | undefined,
   projectId: string | undefined
-): Promise<MediaFileWithLink[]> {
+): Promise<SitelogGalleryFile[]> {
   if (!organizationId || !supabase) {
     return [];
   }
 
   try {
-    // Base query: JOIN entre media_links, media_files y site_logs
+    // Base query: JOIN entre media_links, media_files, site_logs y projects
     let query = supabase
       .from('media_links')
       .select(`
@@ -35,6 +36,7 @@ export async function getSitelogGalleryFiles(
         organization_id,
         project_id,
         site_log_id,
+        visibility,
         description,
         category,
         position,
@@ -60,6 +62,10 @@ export async function getSitelogGalleryFiles(
             id,
             name
           )
+        ),
+        projects (
+          id,
+          name
         )
       `)
       .eq('organization_id', organizationId)
@@ -78,39 +84,53 @@ export async function getSitelogGalleryFiles(
 
     if (!data) return [];
 
-    // Mapear a estructura MediaFileWithLink extendida con info de bitácora
-    const files: MediaFileWithLink[] = data.map((item: any) => ({
-      // Datos del archivo (media_files)
-      id: item.media_files.id,
-      file_url: item.media_files.file_url,
-      file_name: item.media_files.file_name,
-      file_type: item.media_files.file_type,
-      file_size: item.media_files.file_size,
-      file_path: item.media_files.file_path,
-      bucket: item.media_files.bucket,
-      is_deleted: item.media_files.is_deleted,
-      
-      // Datos del link (media_links)
-      link_id: item.id,
-      project_id: item.project_id,
-      site_log_id: item.site_log_id,
-      organization_id: item.organization_id,
-      visibility: null,
-      description: item.description,
-      category: item.category,
-      is_cover: false,
-      position: item.position,
-      created_at: item.created_at,
-      created_by: item.created_by || 'Desconocido',
-      
-      // Datos de la bitácora asociada (para mostrar contexto)
-      site_log: {
-        id: item.site_logs.id,
-        date: item.site_logs.date,
-        description: item.site_logs.description,
-        type_name: item.site_logs.site_log_types?.name || 'Sin tipo'
-      }
-    }));
+    // Mapear a estructura SitelogGalleryFile con null checks robustos
+    const files: SitelogGalleryFile[] = data
+      .filter((item: any) => {
+        // Validar que existan los datos críticos
+        const mediaFile = Array.isArray(item.media_files) ? item.media_files[0] : item.media_files;
+        const siteLog = Array.isArray(item.site_logs) ? item.site_logs[0] : item.site_logs;
+        return mediaFile && siteLog;
+      })
+      .map((item: any) => {
+        const mediaFile = Array.isArray(item.media_files) ? item.media_files[0] : item.media_files;
+        const siteLog = Array.isArray(item.site_logs) ? item.site_logs[0] : item.site_logs;
+        const project = Array.isArray(item.projects) ? item.projects[0] : item.projects;
+        
+        return {
+          // Datos del archivo (media_files)
+          id: mediaFile.id,
+          file_url: mediaFile.file_url,
+          file_name: mediaFile.file_name,
+          file_type: mediaFile.file_type,
+          file_size: mediaFile.file_size,
+          file_path: mediaFile.file_path,
+          bucket: mediaFile.bucket,
+          is_deleted: mediaFile.is_deleted,
+          
+          // Datos del link (media_links)
+          link_id: item.id,
+          project_id: item.project_id || '',
+          project_name: project?.name || 'Sin proyecto',
+          site_log_id: item.site_log_id || '',
+          organization_id: item.organization_id,
+          visibility: item.visibility || 'organization',
+          description: item.description || null,
+          category: item.category || null,
+          is_cover: false,
+          position: item.position || null,
+          created_at: item.created_at,
+          created_by: item.created_by || 'Desconocido',
+          
+          // Datos de la bitácora asociada (para mostrar contexto)
+          site_log: {
+            id: siteLog.id,
+            date: siteLog.date,
+            description: siteLog.description || null,
+            type_name: siteLog.site_log_types?.name || 'Sin tipo'
+          }
+        };
+      });
 
     return files;
 

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getSitelogGalleryFiles } from '../services/getSitelogGalleryFiles';
+import type { SitelogGalleryFile } from '../types';
 
 /**
  * Hook para obtener archivos multimedia de bitácoras.
@@ -15,7 +16,7 @@ export function useSitelogGallery(
   organizationId: string | undefined,
   projectId: string | undefined
 ) {
-  return useQuery({
+  return useQuery<SitelogGalleryFile[]>({
     queryKey: ['sitelog-gallery', organizationId, projectId],
     queryFn: () => getSitelogGalleryFiles(organizationId, projectId),
     enabled: !!organizationId

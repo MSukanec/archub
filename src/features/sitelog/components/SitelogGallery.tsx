@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { startOfWeek, endOfWeek, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Gallery } from '@/components/ui-custom/media/Gallery';
-import type { MediaFileWithLink } from '@/features/media/types';
+import type { SitelogGalleryFile } from '../types';
 
 // GalleryFile type compatible with Gallery component
 interface GalleryFile {
@@ -22,10 +22,10 @@ interface GalleryFile {
 }
 
 interface SitelogGalleryProps {
-  files: MediaFileWithLink[];
-  onDelete?: (file: MediaFileWithLink) => void;
-  onDownload?: (file: MediaFileWithLink) => void;
-  onEdit?: (file: MediaFileWithLink) => void;
+  files: SitelogGalleryFile[];
+  onDelete?: (file: SitelogGalleryFile) => void;
+  onDownload?: (file: SitelogGalleryFile) => void;
+  onEdit?: (file: SitelogGalleryFile) => void;
 }
 
 interface GroupedFiles {

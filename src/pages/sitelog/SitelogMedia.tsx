@@ -8,7 +8,7 @@ import { SitelogGallery } from '@/features/sitelog/components/SitelogGallery';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Images } from 'lucide-react';
-import type { MediaFileWithLink } from '@/features/media/types';
+import type { SitelogGalleryFile } from '@/features/sitelog/types';
 
 export default function SitelogMedia() {
   const { toast } = useToast();
@@ -30,7 +30,7 @@ export default function SitelogMedia() {
   const deleteFileMutation = useDeleteMediaFile();
 
   // Handlers
-  const handleDownload = (file: MediaFileWithLink) => {
+  const handleDownload = (file: SitelogGalleryFile) => {
     if (file.file_url) {
       const link = document.createElement('a');
       link.href = file.file_url;
@@ -41,7 +41,7 @@ export default function SitelogMedia() {
     }
   };
 
-  const handleDelete = (file: MediaFileWithLink) => {
+  const handleDelete = (file: SitelogGalleryFile) => {
     if (!file.link_id) {
       toast({
         title: 'Error',

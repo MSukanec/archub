@@ -14,6 +14,43 @@ export interface SiteLogFileInput {
   description?: string;
 }
 
+/**
+ * Archivo de galería de bitácora con toda la información necesaria para mostrar en UI
+ */
+export interface SitelogGalleryFile {
+  // Media file info
+  id: string;
+  file_url: string;
+  file_name: string;
+  file_type: string;
+  file_size: number | null;
+  file_path: string;
+  bucket: string;
+  is_deleted: boolean;
+  
+  // Link info
+  link_id: string;
+  project_id: string;
+  project_name: string;
+  site_log_id: string;
+  organization_id: string;
+  visibility: string;
+  description: string | null;
+  category: string | null;
+  is_cover: boolean;
+  position: number | null;
+  created_at: string;
+  created_by: string;
+  
+  // Site log context
+  site_log: {
+    id: string;
+    date: string;
+    description: string | null;
+    type_name: string;
+  };
+}
+
 export interface SiteLogAttendee {
   id: string;
   contact_id: string;

@@ -2,10 +2,10 @@ import { Image, Video, HardDrive, Clock } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import type { MediaFileWithLink } from '@/features/media/types';
+import type { SitelogGalleryFile } from '../types';
 
 interface SitelogGalleryCardProps {
-  files: MediaFileWithLink[];
+  files: SitelogGalleryFile[];
 }
 
 export function SitelogGalleryCard({ files }: SitelogGalleryCardProps) {
