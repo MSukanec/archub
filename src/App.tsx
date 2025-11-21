@@ -124,8 +124,8 @@ import UserOrganizations from "@/pages/settings/UserOrganizations";
 
 import NotFound from "@/pages/public/NotFound";
 import { ModalFactory } from "@/components/modal/form/ModalFactory";
-import { ProjectContextInitializer } from "@/components/navigation/ProjectContextInitializer";
-import { PresenceInitializer } from "@/components/navigation/PresenceInitializer";
+import { ProjectContextInitializer } from "@/layout/ProjectContextInitializer";
+import { PresenceInitializer } from "@/layout/PresenceInitializer";
 import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
 
 function LazyLoadFallback() {
