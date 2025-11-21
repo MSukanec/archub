@@ -10,7 +10,7 @@ import { Check, X, Crown, CreditCard, Folder, HardDrive, Users, Briefcase, Bot }
 import { cn } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { DowngradeModal } from "@/components/modals/DowngradeModal";
+import { DowngradeModal } from "@/components/modal/modals/DowngradeModal";
 import { useQuery } from "@tanstack/react-query";
 
 interface Plan {
