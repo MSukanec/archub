@@ -25,6 +25,7 @@ import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { supabase } from '@/lib/supabase'
 import { formatContactName } from '@/utils/contacts'
 import { UploadSingleFileField } from '@/components/ui-custom/fields/UploadSingleFileField'
+import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { 
   useProjectClients, 
   useClientPayment, 
@@ -84,6 +85,22 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
   const currentMember = React.useMemo(() => {
     return members.find(m => m.user_id === userData?.user?.id) || null
   }, [members, userData?.user?.id])
+
+  // Transform and sort clients alphabetically for ComboBox
+  const clientOptions = React.useMemo(() => {
+    if (!projectClients) return []
+    
+    return projectClients
+      .map(client => {
+        const name = formatContactName(client.contact)
+        const label = client.unit ? `${name} - ${client.unit}` : name
+        return {
+          value: client.id,
+          label: label
+        }
+      })
+      .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
+  }, [projectClients])
 
   // Get default exchange rate for selected currency
   const getCurrencyExchangeRate = (currencyId: string) => {
@@ -479,19 +496,14 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
                 <FormItem>
                   <FormLabel>Cliente *</FormLabel>
                   <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar cliente" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {projectClients?.map((client) => (
-                          <SelectItem key={client.id} value={client.id}>
-                            {formatContactName(client.contact)}
-                            {client.unit && ` - ${client.unit}`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <ComboBox
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      options={clientOptions}
+                      placeholder="Seleccionar cliente"
+                      searchPlaceholder="Buscar cliente..."
+                      emptyMessage="No se encontraron clientes"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
