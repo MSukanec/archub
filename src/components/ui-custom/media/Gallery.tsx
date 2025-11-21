@@ -332,13 +332,11 @@ export function Gallery({
                     <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                          <Button
-                            variant="secondary"
-                            size="icon"
-                            className="h-8 w-8 bg-white/90 hover:bg-white shadow-lg"
+                          <button
+                            className="h-8 w-8 rounded-md bg-white/90 backdrop-blur-sm shadow-lg border border-gray-300 flex items-center justify-center transition-colors hover:bg-white"
                           >
                             <MoreVertical className="h-4 w-4 text-gray-700" />
-                          </Button>
+                          </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           {onEdit && (
@@ -443,13 +441,11 @@ export function Gallery({
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button
-                              variant="secondary"
-                              size="icon"
-                              className="h-8 w-8 bg-white/90 hover:bg-white shadow-lg"
+                            <button
+                              className="h-8 w-8 rounded-md bg-white/90 backdrop-blur-sm shadow-lg border border-gray-300 flex items-center justify-center transition-colors hover:bg-white"
                             >
                               <MoreVertical className="h-4 w-4 text-gray-700" />
-                            </Button>
+                            </button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             {onEdit && (
