@@ -2,9 +2,16 @@ import { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
-import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/media/ImageLightbox';
+import { MediaLightbox, useMediaLightbox, type MediaItem } from '@/components/ui-custom/media/ImageLightbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { 
   Search, 
   Filter, 
@@ -16,7 +23,8 @@ import {
   PlayCircle, 
   FolderOpen,
   Grid3X3,
-  LayoutGrid
+  LayoutGrid,
+  MoreVertical
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -94,11 +102,17 @@ export function Gallery({
     return filtered;
   }, [files, searchTerm, fileTypeFilter, sourceFilter]);
 
-  // Lightbox setup - usar TODAS las imágenes de files, no solo las filtradas
-  const imageUrls = useMemo(() => 
+  // Lightbox setup - usar TODOS los archivos multimedia (imágenes y videos)
+  const mediaItems = useMemo<MediaItem[]>(() => 
     files
-      .filter(file => file.file_type === 'image' || file.file_type?.startsWith('image/'))
-      .map(file => file.file_url), 
+      .filter(file => 
+        file.file_type === 'image' || file.file_type?.startsWith('image/') ||
+        file.file_type === 'video' || file.file_type?.startsWith('video/')
+      )
+      .map(file => ({
+        type: (file.file_type === 'video' || file.file_type?.startsWith('video/')) ? 'video' as const : 'image' as const,
+        src: file.file_url
+      })), 
     [files]
   );
   
@@ -107,13 +121,19 @@ export function Gallery({
     currentIndex, 
     openLightbox, 
     closeLightbox
-  } = useImageLightbox(imageUrls);
+  } = useMediaLightbox(mediaItems);
 
-  const handleImageClick = (file: GalleryFile) => {
-    if (file.file_type === 'image' || file.file_type?.startsWith('image/')) {
-      const imageIndex = imageUrls.indexOf(file.file_url);
-      if (imageIndex !== -1) {
-        openLightbox(imageIndex);
+  const handleMediaClick = (file: GalleryFile) => {
+    if (file.file_type === 'image' || file.file_type?.startsWith('image/') ||
+        file.file_type === 'video' || file.file_type?.startsWith('video/')) {
+      const mediaIndex = files
+        .filter(f => 
+          f.file_type === 'image' || f.file_type?.startsWith('image/') ||
+          f.file_type === 'video' || f.file_type?.startsWith('video/')
+        )
+        .findIndex(f => f.id === file.id);
+      if (mediaIndex !== -1) {
+        openLightbox(mediaIndex);
       }
     }
   };
@@ -283,7 +303,7 @@ export function Gallery({
                 {/* Image/Video Preview */}
                 <div 
                   className="w-full h-full cursor-pointer relative overflow-hidden bg-gray-100"
-                  onClick={() => handleImageClick(file)}
+                  onClick={() => handleMediaClick(file)}
                 >
                   {file.file_type === 'image' || file.file_type?.startsWith('image/') ? (
                     <img
@@ -307,48 +327,63 @@ export function Gallery({
                     </div>
                   )}
                   
-                  {/* Overlay with actions */}
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    {onEdit && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onEdit(file);
-                        }}
-                        className=" bg-white/90 hover:bg-white"
-                      >
-                        <Edit className="w-3 h-3 text-gray-700" />
-                      </Button>
-                    )}
-                    {onDownload && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDownload(file);
-                        }}
-                        className=" bg-white/90 hover:bg-white"
-                      >
-                        <Download className="w-3 h-3 text-gray-700" />
-                      </Button>
-                    )}
-                    {onDelete && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDelete(file);
-                        }}
-                        className=" bg-white/90 hover:bg-white"
-                      >
-                        <Trash2 className="w-3 h-3 text-red-500" />
-                      </Button>
-                    )}
-                  </div>
+                  {/* Botón de opciones arriba a la derecha */}
+                  {(onEdit || onDownload || onDelete) && (
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="secondary"
+                            size="icon"
+                            className="h-8 w-8 bg-white/90 hover:bg-white shadow-lg"
+                          >
+                            <MoreVertical className="h-4 w-4 text-gray-700" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {onEdit && (
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onEdit(file);
+                              }}
+                              className="flex items-center gap-2 cursor-pointer"
+                            >
+                              <Edit className="h-4 w-4" />
+                              Editar
+                            </DropdownMenuItem>
+                          )}
+                          {onDownload && (
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDownload(file);
+                              }}
+                              className="flex items-center gap-2 cursor-pointer"
+                            >
+                              <Download className="h-4 w-4" />
+                              Descargar
+                            </DropdownMenuItem>
+                          )}
+                          {onDelete && (
+                            <>
+                              {(onEdit || onDownload) && <DropdownMenuSeparator />}
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onDelete(file);
+                                }}
+                                className="flex items-center gap-2 cursor-pointer text-red-600 dark:text-red-500"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                Eliminar
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -379,7 +414,7 @@ export function Gallery({
                   {/* Image/Video Preview */}
                   <div 
                     className="w-full h-full cursor-pointer relative overflow-hidden"
-                    onClick={() => handleImageClick(file)}
+                    onClick={() => handleMediaClick(file)}
                   >
                     {file.file_type === 'image' || file.file_type?.startsWith('image/') ? (
                       <img
@@ -403,48 +438,63 @@ export function Gallery({
                       </div>
                     )}
                     
-                    {/* Overlay with actions */}
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                      {onEdit && (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onEdit(file);
-                          }}
-                          className=" bg-white/90 hover:bg-white"
-                        >
-                          <Edit className="w-3 h-3 text-gray-700" />
-                        </Button>
-                      )}
-                      {onDownload && (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDownload(file);
-                          }}
-                          className=" bg-white/90 hover:bg-white"
-                        >
-                          <Download className="w-3 h-3 text-gray-700" />
-                        </Button>
-                      )}
-                      {onDelete && (
-                        <Button
-                          variant="secondary"
-          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete(file);
-                          }}
-                          className=" bg-white/90 hover:bg-white"
-                        >
-                          <Trash2 className="w-3 h-3 text-red-500" />
-                        </Button>
-                      )}
-                    </div>
+                    {/* Botón de opciones arriba a la derecha */}
+                    {(onEdit || onDownload || onDelete) && (
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                            <Button
+                              variant="secondary"
+                              size="icon"
+                              className="h-8 w-8 bg-white/90 hover:bg-white shadow-lg"
+                            >
+                              <MoreVertical className="h-4 w-4 text-gray-700" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {onEdit && (
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onEdit(file);
+                                }}
+                                className="flex items-center gap-2 cursor-pointer"
+                              >
+                                <Edit className="h-4 w-4" />
+                                Editar
+                              </DropdownMenuItem>
+                            )}
+                            {onDownload && (
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onDownload(file);
+                                }}
+                                className="flex items-center gap-2 cursor-pointer"
+                              >
+                                <Download className="h-4 w-4" />
+                                Descargar
+                              </DropdownMenuItem>
+                            )}
+                            {onDelete && (
+                              <>
+                                {(onEdit || onDownload) && <DropdownMenuSeparator />}
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(file);
+                                  }}
+                                  className="flex items-center gap-2 cursor-pointer text-red-600 dark:text-red-500"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                  Eliminar
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -465,9 +515,9 @@ export function Gallery({
         />
       )}
 
-      {/* Image Lightbox */}
-      <ImageLightbox
-        images={imageUrls}
+      {/* Media Lightbox (imágenes y videos) */}
+      <MediaLightbox
+        media={mediaItems}
         isOpen={isLightboxOpen}
         currentIndex={currentIndex}
         onClose={closeLightbox}
