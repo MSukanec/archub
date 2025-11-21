@@ -1,0 +1,25 @@
+# robots.txt para Seencel
+# Este archivo indica a los motores de búsqueda qué páginas pueden rastrear e indexar
+
+# Permitir a todos los bots rastrear todas las páginas públicas
+User-agent: *
+Allow: /
+
+# Bloquear indexación de rutas privadas/admin
+Disallow: /admin/
+Disallow: /settings/
+Disallow: /profile/
+Disallow: /organization/
+Disallow: /construction/
+Disallow: /design/
+Disallow: /finances/
+Disallow: /analysis/
+Disallow: /recursos/
+Disallow: /media/
+
+# Permitir explícitamente páginas públicas de cursos
+Allow: /cursos
+Allow: /cursos/*
+
+# Sitemap location
+Sitemap: https://seencel.com/sitemap.xml
