@@ -59,8 +59,9 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
   const queryClient = useQueryClient()
   const { setPanel } = useModalPanelStore()
   const { data: userData } = useCurrentUser()
+  const organizationId = userData?.organization?.id
   const { currentOrganizationId } = useProjectContext()
-  const { data: materials = [] } = useMaterials()
+  const { data: materials = [] } = useMaterials(organizationId)
 
   // Hook para obtener tipos de mano de obra con unit_name desde labor_view (global, sin filtro de organización)
   const { data: laborTypes = [] } = useQuery({

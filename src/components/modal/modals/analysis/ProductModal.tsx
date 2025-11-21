@@ -60,9 +60,10 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
   const createBrandMutation = useCreateBrand()
   const { setPanel } = useModalPanelStore()
   const { data: userData } = useCurrentUser()
+  const organizationId = userData?.organization?.id
   
   // Data hooks
-  const { data: materials = [] } = useMaterials()
+  const { data: materials = [] } = useMaterials(organizationId)
   const { data: brands = [] } = useBrands()
   const { data: units = [] } = useUnits()
   const { data: unitPresentations = [] } = useUnitPresentations()

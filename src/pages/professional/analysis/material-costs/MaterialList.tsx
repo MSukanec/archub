@@ -16,10 +16,11 @@ export default function MaterialList() {
   const [filterByCategory, setFilterByCategory] = useState("all")
   const [filterByMaterialType, setFilterByMaterialType] = useState("all")
   
-  const { data: materials = [], isLoading: materialsLoading } = useMaterials()
+  const { data: userData } = useCurrentUser()
+  const organizationId = userData?.organization?.id
+  const { data: materials = [], isLoading: materialsLoading } = useMaterials(organizationId)
   const deleteMaterialMutation = useDeleteMaterial()
   const { openModal } = useGlobalModalStore()
-  const { data: userData } = useCurrentUser()
   const [, navigate] = useLocation()
 
   // Filter materials and add groupKey for grouping

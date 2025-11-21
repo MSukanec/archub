@@ -6,7 +6,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted"
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
-import { useConstructionMaterials } from '@/hooks/use-construction-materials'
+import { useConstructionMaterials } from '@/features/materials'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useEffect } from 'react'
 import { Package, ShoppingCart } from 'lucide-react'
@@ -26,6 +26,7 @@ export default function Materials() {
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
   const { data: materialsResult, isLoading: materialsLoading } = useConstructionMaterials(
     selectedProjectId || '',
+    currentOrganizationId || '',
     selectedPhase
   )
   

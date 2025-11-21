@@ -17,6 +17,7 @@ import { useCreateProduct, useUpdateProduct, Product, NewProductData } from '@/h
 import { useMaterials } from '@/features/materials'
 import { useBrands } from '@/hooks/use-brands'
 import { useUnitPresentations } from '@/hooks/use-unit-presentations'
+import { useCurrentUser } from '@/hooks/use-current-user'
 
 import { Package } from 'lucide-react'
 
@@ -48,9 +49,11 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
   const createMutation = useCreateProduct()
   const updateMutation = useUpdateProduct()
   const { setPanel } = useModalPanelStore()
+  const { data: userData } = useCurrentUser()
+  const organizationId = userData?.organization?.id
   
   // Data hooks
-  const { data: materials = [] } = useMaterials()
+  const { data: materials = [] } = useMaterials(organizationId)
   const { data: brands = [] } = useBrands()
   const { data: unitPresentations = [] } = useUnitPresentations()
 

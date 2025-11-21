@@ -11,6 +11,7 @@ import type { ConstructionMaterialsParams } from '../types';
 
 export function useConstructionMaterials(
   projectId: string,
+  organizationId: string,
   selectedPhase?: string,
   filterTaskIds?: string[]
 ) {
@@ -18,11 +19,12 @@ export function useConstructionMaterials(
     projectId,
     selectedPhase,
     filterTaskIds,
+    organizationId,
   };
 
   return useQuery({
-    queryKey: MATERIALS_QUERY_KEYS.construction(projectId, selectedPhase, filterTaskIds),
+    queryKey: MATERIALS_QUERY_KEYS.construction(projectId, organizationId, selectedPhase, filterTaskIds),
     queryFn: () => getConstructionMaterials(params),
-    enabled: !!projectId,
+    enabled: !!projectId && !!organizationId,
   });
 }

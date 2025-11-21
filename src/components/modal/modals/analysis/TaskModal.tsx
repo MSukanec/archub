@@ -246,12 +246,13 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
   
   // Current user data with success tracking
   const { data: userData, isSuccess: userLoaded } = useCurrentUser()
+  const organizationId = userData?.organization?.id
   
   // Query client for cache invalidation
   const queryClient = useQueryClient()
   
   // Materials data with success tracking
-  const { data: materials = [], isSuccess: materialsLoaded } = useMaterials()
+  const { data: materials = [], isSuccess: materialsLoaded } = useMaterials(organizationId)
   const { data: existingTaskMaterials = [] } = useTaskMaterials(savedTaskId || actualTask?.id)
   
   // Get original task materials and labor for duplication with success tracking

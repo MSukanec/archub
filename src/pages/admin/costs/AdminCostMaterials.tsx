@@ -4,6 +4,7 @@ import { es } from 'date-fns/locale'
 import { toast } from '@/hooks/use-toast'
 import { useMaterials, Material, useDeleteMaterial, useMaterialCategories } from '@/features/materials'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useCurrentUser } from '@/hooks/use-current-user'
 import AdminMaterialRow from '@/components/ui/data-row/rows/AdminMaterialRow'
 
 import { Button } from '@/components/ui/button'
@@ -24,10 +25,12 @@ const AdminCostMaterials = () => {
   const [groupingType, setGroupingType] = useState<'none' | 'categories'>('categories')
   
   const { openModal } = useGlobalModalStore()
+  const { data: userData } = useCurrentUser()
+  const organizationId = userData?.organization?.id
 
   // Fetch materials and categories using the hooks
-  const { data: materials = [], isLoading } = useMaterials()
-  const { data: categories = [] } = useMaterialCategories()
+  const { data: materials = [], isLoading } = useMaterials(organizationId)
+  const { data: categories = [] } = useMaterialCategories(organizationId)
   const deleteMaterialMutation = useDeleteMaterial()
 
   // Function to build category hierarchy path

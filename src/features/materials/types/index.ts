@@ -78,6 +78,7 @@ export interface ConstructionMaterialsResult {
 
 export interface ConstructionMaterialsParams {
   projectId: string;
+  organizationId: string;
   selectedPhase?: string;
   filterTaskIds?: string[];
 }
@@ -95,6 +96,7 @@ export interface MaterialCategory {
 export interface NewMaterialCategoryData {
   name: string;
   parent_id?: string | null;
+  organization_id?: string;
 }
 
 export interface UpdateMaterialCategoryData extends Partial<NewMaterialCategoryData> {}

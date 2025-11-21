@@ -8,6 +8,7 @@ import { HierarchicalTree } from '@/components/ui-custom/tables-and-trees/Hierar
 
 import { useMaterialCategories, useDeleteMaterialCategory, MaterialCategory } from '@/features/materials';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 const AdminCostCategories = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,8 +16,10 @@ const AdminCostCategories = () => {
   
   // New modal system
   const { openModal } = useGlobalModalStore();
+  const { data: userData } = useCurrentUser();
+  const organizationId = userData?.organization?.id;
 
-  const { data: categories = [], isLoading, error, isError } = useMaterialCategories();
+  const { data: categories = [], isLoading, error, isError } = useMaterialCategories(organizationId);
 
   // Debug query state (only log errors)
   if (isError) {

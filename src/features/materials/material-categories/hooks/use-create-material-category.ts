@@ -6,6 +6,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createMaterialCategory } from '../services/createMaterialCategory';
+import { MATERIALS_QUERY_KEYS } from '../../constants';
 import { toast } from '@/hooks/use-toast';
 import type { NewMaterialCategoryData } from '../../types';
 
@@ -14,8 +15,20 @@ export function useCreateMaterialCategory() {
 
   return useMutation({
     mutationFn: (data: NewMaterialCategoryData) => createMaterialCategory(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['material-categories'] });
+    onSuccess: (_, variables) => {
+      // Invalidate legacy key for backward compatibility
+      queryClient.invalidateQueries({ queryKey: ['material-categories'], exact: false });
+      
+      // Invalidate materials queries that depend on categories
+      queryClient.invalidateQueries({ queryKey: MATERIALS_QUERY_KEYS.all });
+      queryClient.invalidateQueries({ queryKey: MATERIALS_QUERY_KEYS.lists(), exact: false });
+      
+      // Invalidate org-scoped key using organization_id from mutation payload
+      if (variables.organization_id) {
+        queryClient.invalidateQueries({ 
+          queryKey: MATERIALS_QUERY_KEYS.categories(variables.organization_id) 
+        });
+      }
       
       toast({
         title: "Categoría creada",

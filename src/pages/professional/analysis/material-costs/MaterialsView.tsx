@@ -6,13 +6,16 @@ import { Layout } from '@/layout/desktop/Layout';
 import { MaterialCostsTab } from './MaterialCostsTab';
 import { MaterialBasicDataTab } from './MaterialBasicDataTab';
 import { useMaterial } from "@/features/materials";
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 export default function MaterialsView() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState('Datos Básicos');
+  const { data: userData } = useCurrentUser();
+  const organizationId = userData?.organization?.id;
   
-  const { data: material, isLoading } = useMaterial(id || '');
+  const { data: material, isLoading } = useMaterial(id || '', organizationId);
 
   const headerTabs = [
     {

@@ -11,9 +11,14 @@ export const MATERIALS_QUERY_KEYS = {
   lists: () => [...MATERIALS_QUERY_KEYS.all, 'list'] as const,
   list: (organizationId: string) => [...MATERIALS_QUERY_KEYS.lists(), organizationId] as const,
   details: () => [...MATERIALS_QUERY_KEYS.all, 'detail'] as const,
-  detail: (id: string) => [...MATERIALS_QUERY_KEYS.details(), id] as const,
-  construction: (projectId: string, phase?: string, taskIds?: string[]) => 
-    ['construction-materials', projectId, phase, taskIds] as const,
+  detail: (id: string, organizationId?: string) => 
+    organizationId 
+      ? [...MATERIALS_QUERY_KEYS.details(), id, organizationId] as const
+      : [...MATERIALS_QUERY_KEYS.details(), id] as const,
+  construction: (projectId: string, organizationId: string, phase?: string, taskIds?: string[]) => 
+    ['construction-materials', organizationId, projectId, phase, taskIds] as const,
+  categories: (organizationId: string) => ['material-categories', organizationId] as const,
+  prices: (organizationId: string) => ['material-prices', organizationId] as const,
   taskMaterials: () => ['task-materials'] as const,
   materialView: () => ['material-view'] as const,
 };

@@ -3,6 +3,9 @@
  * 
  * Modal presentacional 100% para crear/editar materiales.
  * Refactorizado desde MaterialFormModal para seguir Feature-Sliced Design.
+ * 
+ * IMPORTANT: This modal is 100% presentational and receives all data via props.
+ * It does NOT use global hooks like useUnits, useCurrentUser, or useProjectContext.
  */
 
 import { useState, useEffect, useMemo } from 'react';
@@ -23,13 +26,15 @@ import { CascadingSelect } from '@/components/ui-custom/fields/CascadingSelectFi
 import { useCreateMaterial } from '../hooks/use-create-material';
 import { useUpdateMaterial } from '../hooks/use-update-material';
 import { useMaterialCategories } from '../material-categories';
-import { useUnits } from '@/hooks/use-units';
-import { useCurrentUser } from '@/hooks/use-current-user';
-import { useProjectContext } from '@/stores/projectContext';
 
 import { materialSchema, type MaterialFormData } from '../schemas';
 import type { Material, NewMaterialData } from '../types';
 import { convertToCascadingOptions, findCategoryPath, findCategoryIdByName } from '../mappers/materialMapper';
+
+interface Unit {
+  id: string;
+  name: string;
+}
 
 interface MaterialModalProps {
   modalData: {
@@ -37,22 +42,21 @@ interface MaterialModalProps {
     isDuplicating?: boolean;
   };
   onClose: () => void;
+  organizationId: string;
+  units: Unit[];
 }
 
-export function MaterialModal({ modalData, onClose }: MaterialModalProps) {
+export function MaterialModal({ modalData, onClose, organizationId, units }: MaterialModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCategoryPath, setSelectedCategoryPath] = useState<string[]>([]);
 
   const { editingMaterial, isDuplicating = false } = modalData;
   const isEditing = !!editingMaterial && !isDuplicating;
 
-  // Hooks
+  // Feature hooks only (100% presentational)
   const createMutation = useCreateMaterial();
   const updateMutation = useUpdateMaterial();
-  const { data: userData } = useCurrentUser();
-  const { currentOrganizationId } = useProjectContext();
-  const { data: categories = [] } = useMaterialCategories();
-  const { data: units = [] } = useUnits();
+  const { data: categories = [] } = useMaterialCategories(organizationId);
   const { setPanel } = useModalPanelStore();
 
   // Convert categories to cascading format - memoize to prevent recreation
@@ -124,6 +128,7 @@ export function MaterialModal({ modalData, onClose }: MaterialModalProps) {
             unit_id: values.unit_id,
             category_id: values.category_id,
             is_completed: values.is_completed,
+            organization_id: organizationId,
           },
         });
       } else {
@@ -134,7 +139,7 @@ export function MaterialModal({ modalData, onClose }: MaterialModalProps) {
           category_id: values.category_id,
           unit_id: values.unit_id,
           is_completed: values.is_completed,
-          organization_id: currentOrganizationId || userData?.organization?.id,
+          organization_id: organizationId,
           is_system: false,
         };
 

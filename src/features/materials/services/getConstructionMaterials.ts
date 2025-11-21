@@ -11,10 +11,14 @@ import type { ConstructionMaterial, ConstructionMaterialsResult, ConstructionMat
 export async function getConstructionMaterials(
   params: ConstructionMaterialsParams
 ): Promise<ConstructionMaterialsResult> {
-  const { projectId, selectedPhase, filterTaskIds } = params;
+  const { projectId, organizationId, selectedPhase, filterTaskIds } = params;
 
   if (!supabase) {
     throw new Error('Supabase client not initialized');
+  }
+
+  if (!organizationId) {
+    throw new Error('organizationId is required for getConstructionMaterials');
   }
 
   // Get all construction tasks for this project using the view with phase information
@@ -27,7 +31,8 @@ export async function getConstructionMaterials(
       project_id,
       phase_name
     `)
-    .eq('project_id', projectId);
+    .eq('project_id', projectId)
+    .eq('organization_id', organizationId);
 
   if (constructionTasksError) {
     console.error('Error fetching construction tasks:', constructionTasksError);
@@ -59,6 +64,11 @@ export async function getConstructionMaterials(
   // Extract task IDs from filtered construction tasks
   const taskIds = filteredConstructionTasks.map(ct => ct.task_id);
 
+  // Guard against empty arrays to prevent .in('task_id', []) errors
+  if (taskIds.length === 0) {
+    return { materials: [], phases: uniquePhases };
+  }
+
   // Get task_materials for these tasks
   const { data, error } = await supabase
     .from('task_materials')
@@ -87,7 +97,8 @@ export async function getConstructionMaterials(
         )
       )
     `)
-    .in('task_id', taskIds);
+    .in('task_id', taskIds)
+    .eq('organization_id', organizationId);
 
   if (error) {
     console.error('Error fetching task materials:', error);

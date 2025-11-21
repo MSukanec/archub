@@ -96,7 +96,8 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
   const createMutation = useCreateMaterial()
   const updateMutation = useUpdateMaterial()
   const { data: userData } = useCurrentUser()
-  const { data: categories = [] } = useMaterialCategories()
+  const organizationId = userData?.organization?.id
+  const { data: categories = [] } = useMaterialCategories(organizationId)
   const { data: units = [] } = useUnits()
   const { setPanel } = useModalPanelStore()
   

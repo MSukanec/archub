@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import { useCreateMaterialCategory, useUpdateMaterialCategory, useMaterialCategories, MaterialCategory, NewMaterialCategoryData } from '@/features/materials'
+import { useCurrentUser } from '@/hooks/use-current-user'
 
 import { Tag } from 'lucide-react'
 
@@ -35,9 +36,11 @@ export function MaterialCategoryFormModal({ modalData, onClose }: MaterialCatego
   const isEditing = !!editingMaterialCategory
 
   // Hooks
+  const { data: userData } = useCurrentUser()
+  const organizationId = userData?.organization?.id
   const createMutation = useCreateMaterialCategory()
   const updateMutation = useUpdateMaterialCategory()
-  const { data: allCategories = [] } = useMaterialCategories()
+  const { data: allCategories = [] } = useMaterialCategories(organizationId)
   const { setPanel } = useModalPanelStore()
 
   // Force edit mode when modal opens

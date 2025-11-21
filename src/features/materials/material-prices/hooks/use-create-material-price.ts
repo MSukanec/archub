@@ -15,11 +15,29 @@ export function useCreateMaterialPrice() {
 
   return useMutation({
     mutationFn: (data: InsertOrganizationMaterialPrice) => createMaterialPrice(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['material-prices'] });
+    onSuccess: (_, variables) => {
+      // Invalidate legacy key for backward compatibility
+      queryClient.invalidateQueries({ queryKey: ['material-prices'], exact: false });
       queryClient.invalidateQueries({ queryKey: MATERIALS_QUERY_KEYS.all });
+      queryClient.invalidateQueries({ queryKey: MATERIALS_QUERY_KEYS.lists(), exact: false });
       queryClient.invalidateQueries({ queryKey: MATERIALS_QUERY_KEYS.taskMaterials() });
       queryClient.invalidateQueries({ queryKey: MATERIALS_QUERY_KEYS.materialView() });
+      
+      // Invalidate org-scoped keys using organization_id from mutation payload
+      if (variables.organization_id) {
+        queryClient.invalidateQueries({ 
+          queryKey: MATERIALS_QUERY_KEYS.list(variables.organization_id) 
+        });
+        queryClient.invalidateQueries({ 
+          queryKey: MATERIALS_QUERY_KEYS.prices(variables.organization_id) 
+        });
+      }
+      
+      toast({
+        title: 'Precio creado',
+        description: 'El precio del material se ha guardado exitosamente.',
+        variant: 'default',
+      });
     },
     onError: (error) => {
       console.error('Error creating material price:', error);

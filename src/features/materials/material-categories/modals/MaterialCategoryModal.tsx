@@ -3,6 +3,8 @@
  * 
  * Modal presentacional 100% para crear/editar categorías de materiales.
  * Recibe datos y callbacks via props, sin lógica de negocio interna.
+ * 
+ * IMPORTANT: This modal is 100% presentational and receives organizationId via props.
  */
 
 import { useState, useEffect } from 'react';
@@ -35,17 +37,19 @@ interface MaterialCategoryModalProps {
     parentCategory?: { id: string; name: string } | null;
   };
   onClose: () => void;
+  organizationId: string;
 }
 
-export function MaterialCategoryModal({ modalData, onClose }: MaterialCategoryModalProps) {
+export function MaterialCategoryModal({ modalData, onClose, organizationId }: MaterialCategoryModalProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const { editingMaterialCategory, parentCategory } = modalData;
   const isEditing = !!editingMaterialCategory;
 
+  // Feature hooks only (100% presentational)
   const createMutation = useCreateMaterialCategory();
   const updateMutation = useUpdateMaterialCategory();
-  const { data: allCategories = [] } = useMaterialCategories();
+  const { data: allCategories = [] } = useMaterialCategories(organizationId);
   const { setPanel } = useModalPanelStore();
 
   // Force edit mode when modal opens
@@ -110,10 +114,16 @@ export function MaterialCategoryModal({ modalData, onClose }: MaterialCategoryMo
       if (isEditing && editingMaterialCategory) {
         await updateMutation.mutateAsync({
           id: editingMaterialCategory.id,
-          data,
+          data: {
+            ...data,
+            organization_id: organizationId,
+          },
         });
       } else {
-        await createMutation.mutateAsync(data);
+        await createMutation.mutateAsync({
+          ...data,
+          organization_id: organizationId,
+        });
       }
 
       onClose();

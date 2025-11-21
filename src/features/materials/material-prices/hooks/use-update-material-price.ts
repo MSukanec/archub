@@ -16,11 +16,23 @@ export function useUpdateMaterialPrice() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<InsertOrganizationMaterialPrice> }) =>
       updateMaterialPrice(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['material-prices'] });
+    onSuccess: (_, variables) => {
+      // Invalidate legacy key for backward compatibility
+      queryClient.invalidateQueries({ queryKey: ['material-prices'], exact: false });
       queryClient.invalidateQueries({ queryKey: MATERIALS_QUERY_KEYS.all });
+      queryClient.invalidateQueries({ queryKey: MATERIALS_QUERY_KEYS.lists(), exact: false });
       queryClient.invalidateQueries({ queryKey: MATERIALS_QUERY_KEYS.taskMaterials() });
       queryClient.invalidateQueries({ queryKey: MATERIALS_QUERY_KEYS.materialView() });
+      
+      // Invalidate org-scoped keys using organization_id from mutation payload
+      if (variables.data.organization_id) {
+        queryClient.invalidateQueries({ 
+          queryKey: MATERIALS_QUERY_KEYS.list(variables.data.organization_id) 
+        });
+        queryClient.invalidateQueries({ 
+          queryKey: MATERIALS_QUERY_KEYS.prices(variables.data.organization_id) 
+        });
+      }
       
       toast({
         title: 'Precio actualizado',
