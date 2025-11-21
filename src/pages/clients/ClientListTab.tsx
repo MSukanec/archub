@@ -14,6 +14,8 @@ import { Link, useLocation } from 'wouter'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMobile } from '@/hooks/use-mobile'
+import ClientRow from '@/components/ui/data-row/rows/Client'
 import {
   useClientDashboard,
   useDeleteProjectClient,
@@ -34,6 +36,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   const { setSidebarLevel } = useNavigationStore();
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
+  const isMobile = useMobile();
   
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
@@ -384,65 +387,81 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
         </div>
       )}
 
-      <Table
-        columns={columns}
-        data={projectClients}
-        isLoading={isLoading}
-        showDoubleHeader={false}
-        emptyStateConfig={{
-          icon: <Users className="h-12 w-12 text-muted-foreground" />,
-          title: 'No hay clientes en este proyecto',
-          description: (
-            <>
-              Agrega clientes para gestionar la información del proyecto. Recuerda que un cliente, antes debe ser un{' '}
-              <button
-                onClick={() => {
-                  setSidebarLevel('organization');
-                  navigate('/contacts');
-                }}
-                className="hover:underline font-bold cursor-pointer"
-                style={{ color: 'var(--accent)' }}
+      {isMobile ? (
+        <div className="space-y-3 pb-20">
+          {projectClients.map(client => (
+            <ClientRow
+              key={client.id}
+              client={client}
+              onClick={handleView}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              data-testid={`client-row-${client.id}`}
+            />
+          ))}
+        </div>
+      ) : (
+        <Table
+          columns={columns}
+          data={projectClients}
+          isLoading={isLoading}
+          showDoubleHeader={false}
+          emptyStateConfig={{
+            icon: <Users className="h-12 w-12 text-muted-foreground" />,
+            title: 'No hay clientes en este proyecto',
+            description: (
+              <>
+                Agrega clientes para gestionar la información del proyecto. Recuerda que un cliente, antes debe ser un{' '}
+                <button
+                  onClick={() => {
+                    setSidebarLevel('organization');
+                    navigate('/contacts');
+                  }}
+                  className="hover:underline font-bold cursor-pointer"
+                  style={{ color: 'var(--accent)' }}
+                >
+                  contacto
+                </button>
+                .
+              </>
+            ),
+            action: (
+              <Button
+                onClick={handleAddClient}
+                size="sm"
+                data-testid="button-add-client-empty"
               >
-                contacto
-              </button>
-              .
-            </>
-          ),
-          action: (
-            <Button
-              onClick={handleAddClient}
-              size="sm"
-              data-testid="button-add-client-empty"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Agregar Cliente
-            </Button>
-          ),
-        }}
-        primaryRowAction={(client: ProjectClientSummary) => ({
-          icon: Eye,
-          onClick: () => handleView(client),
-          label: 'Ver cliente',
-        })}
-        rowActions={(client: ProjectClientSummary) => [
-          {
-            label: 'Editar Cliente',
-            icon: Edit,
-            onClick: () => handleEdit(client),
-          },
-          {
-            label: 'Editar Contacto',
-            icon: User,
-            onClick: () => handleEditContact(client),
-          },
-          {
-            label: 'Eliminar',
-            icon: Trash2,
-            onClick: () => handleDelete(client),
-            variant: 'destructive',
-          },
-        ]}
-      />
+                <Plus className="h-4 w-4 mr-2" />
+                Agregar Cliente
+              </Button>
+            ),
+          }}
+          primaryRowAction={(client: ProjectClientSummary) => ({
+            icon: Eye,
+            onClick: () => handleView(client),
+            label: 'Ver cliente',
+          })}
+          rowActions={(client: ProjectClientSummary) => [
+            {
+              label: 'Editar Cliente',
+              icon: Edit,
+              onClick: () => handleEdit(client),
+            },
+            {
+              label: 'Editar Contacto',
+              icon: User,
+              onClick: () => handleEditContact(client),
+            },
+            {
+              label: 'Eliminar',
+              icon: Trash2,
+              onClick: () => handleDelete(client),
+              variant: 'destructive',
+            },
+          ]}
+        />
+      )}
     </div>
   )
 }

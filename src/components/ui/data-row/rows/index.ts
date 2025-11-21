@@ -7,6 +7,9 @@ export type { ConversionGroup } from './ConversionRow';
 export { default as TransferRow } from './TransferRow';
 export type { TransferGroup } from './TransferRow';
 
+export { default as ClientRow } from './Client';
+export type { Client } from './Client';
+
 export { default as ClientObligationRow } from './ClientObligationRow';
 export type { ClientObligation } from './ClientObligationRow';
 
