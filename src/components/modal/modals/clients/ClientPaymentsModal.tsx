@@ -605,7 +605,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
                       type="number"
                       step="0.0001"
                       min="0.0001"
-                      placeholder="Dejar vacío si no aplica"
+                      placeholder="1.00"
                       value={field.value || ''}
                       onChange={(e) => {
                         const value = e.target.value;
