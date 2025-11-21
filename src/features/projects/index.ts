@@ -47,3 +47,11 @@ export * from './mappers/projectMapper';
 
 // ============ UTILS ============
 export * from './utils/colorUtils';
+
+// ============ COMPONENTS ============
+export { default as ProjectItemCard } from './components/ProjectItemCard';
+export { default as ProjectColorAdvanced } from './components/ProjectColorAdvanced';
+export { default as ProjectSelectorField } from './components/ProjectSelectorField';
+
+// ============ MODALS ============
+export * from './modals/ProjectModal';

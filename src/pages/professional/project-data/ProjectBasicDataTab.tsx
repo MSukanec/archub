@@ -14,7 +14,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useProjectTypes } from '@/hooks/use-project-types'
 import { useProjectModalities } from '@/hooks/use-project-modalities'
-import ProjectColorAdvanced from '@/components/projects/ProjectColorAdvanced'
+import { ProjectColorAdvanced } from '@/features/projects'
 import ProjectColorPalette from '@/components/projects/ProjectColorPalette'
 
 interface ProjectDataTabProps {

@@ -14,13 +14,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Layout } from '@/layout/desktop/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import ProjectItemCard from '@/components/cards/ProjectItemCard';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui-custom/KPICard';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useProjects } from '@/features/projects';
+import { useProjects, ProjectItemCard } from '@/features/projects';
 import { useContacts } from '@/features/contacts';
 import { useMovements } from '@/hooks/use-movements';
 import { useUserOrganizationPreferences } from '@/features/organization';

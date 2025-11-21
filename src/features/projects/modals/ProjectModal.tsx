@@ -1,34 +1,34 @@
 import React, { useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { FolderPlus, Check, Upload, X } from "lucide-react";
+import { FolderPlus, Check } from "lucide-react";
 import chroma from "chroma-js";
 
-import { FormModalLayout } from "../../form/FormModalLayout";
-import { FormModalHeader } from "../../form/FormModalHeader";
-import { FormModalFooter } from "../../form/FormModalFooter";
-import { useModalPanelStore } from "../../form/modalPanelStore";
+import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
+import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
+import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
+import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import ProjectColorAdvanced from "@/components/projects/ProjectColorAdvanced";
+import UploadImageAndShowField from "@/components/ui-custom/fields/UploadImageAndShowField";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/features/organization";
 import { useProjectTypes } from "@/hooks/use-project-types";
 import { useProjectModalities } from "@/hooks/use-project-modalities";
 import { useProjectContext } from "@/stores/projectContext";
-import { useNavigationStore } from "@/stores/navigationStore";
 import { supabase } from "@/lib/supabase";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useLocation } from 'wouter';
 import { uploadProjectImage, updateProjectImageUrl } from "@/lib/storage/uploadProjectImage";
-import UploadImageAndShowField from "@/components/ui-custom/fields/UploadImageAndShowField";
+
+// Import feature hooks
+import { useCreateProject } from '../hooks/use-create-project';
+import { useUpdateProject } from '../hooks/use-update-project';
+import ProjectColorAdvanced from '../components/ProjectColorAdvanced';
 
 // Paleta de colores predefinidos
 const PRESET_COLORS = [
@@ -100,15 +100,17 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
   const { editingProject, isEditing = false } = modalData || {};
   const { currentPanel, setPanel } = useModalPanelStore();
   const { data: userData } = useCurrentUser();
-  const { currentOrganizationId, setSelectedProject } = useProjectContext();
+  const { currentOrganizationId } = useProjectContext();
   const organizationId = currentOrganizationId || undefined;
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
   const { data: projectTypes = [] } = useProjectTypes();
   const { data: projectModalities = [] } = useProjectModalities();
-  const { setSidebarLevel } = useNavigationStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [, setLocation] = useLocation();
+
+  // Use feature hooks for mutations
+  const createProjectMutation = useCreateProject();
+  const updateProjectMutation = useUpdateProject();
 
   // Image upload states
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
@@ -181,126 +183,56 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
     reader.readAsDataURL(file);
   };
 
-  const createProjectMutation = useMutation({
-    mutationFn: async (data: CreateProjectForm) => {
-      if (!organizationId) {
-        throw new Error('No hay una organización activa seleccionada');
-      }
+  // Handle image upload after project creation
+  const handleImageUpload = async (projectId: string) => {
+    if (!selectedImageFile || !organizationId) return;
 
-      if (!currentUserMember) {
-        throw new Error('Usuario no es miembro de la organización');
-      }
+    setIsUploadingImage(true);
+    try {
+      toast({
+        title: "Subiendo imagen...",
+        description: "Tu imagen se está procesando",
+      });
 
-      if (isEditing && editingProject) {
-        // Update existing project via API endpoint
-        const response = await apiRequest('PATCH', `/api/projects/${editingProject.id}`, {
-          name: data.name,
-          status: data.status,
-          color: data.color || "#84cc16",
-          use_custom_color: data.use_custom_color || false,
-          custom_color_h: data.custom_color_h || null,
-          custom_color_hex: data.custom_color_hex || null,
-          project_type_id: data.project_type_id || null,
-          modality_id: data.modality_id || null,
-          organization_id: organizationId,
-        });
-
-        const updatedProject = await response.json();
-        return updatedProject;
-      } else {
-        // Create new project via API endpoint
-        const response = await apiRequest('POST', '/api/projects', {
-          organization_id: organizationId,
-          name: data.name,
-          status: data.status,
-          created_by: currentUserMember.id,
-          color: data.color || "#84cc16",
-          use_custom_color: data.use_custom_color || false,
-          custom_color_h: data.custom_color_h || null,
-          custom_color_hex: data.custom_color_hex || null,
-          project_type_id: data.project_type_id || null,
-          modality_id: data.modality_id || null,
-        });
-
-        const newProject = await response.json();
-        return newProject;
-      }
-    },
-    onSuccess: async (newProject) => {
-      // Si estamos creando un nuevo proyecto (no editando), solo marcamos el checklist
-      if (!isEditing && newProject && userData?.user?.id && organizationId) {
-        try {
-          // Marcar checklist de "crear primer proyecto" como completado
-          const { error: checklistError } = await supabase.rpc('tick_home_checklist', {
-            p_key: 'create_project',
-            p_value: true
-          });
-          
-          if (checklistError) {
-            console.error('Error updating home checklist:', checklistError);
-          }
-        } catch (error) {
-          console.error('Error updating checklist:', error);
-        }
-
-        // Upload image if one was selected (only for new projects)
-        if (selectedImageFile && newProject.id && organizationId) {
-          setIsUploadingImage(true);
-          try {
-            toast({
-              title: "Subiendo imagen...",
-              description: "Tu imagen se está procesando",
-            });
-
-            // Upload image to storage
-            const uploadResult = await uploadProjectImage(selectedImageFile, newProject.id, organizationId);
-            
-            // Update project_data table with new image URL
-            await updateProjectImageUrl(newProject.id, uploadResult.file_url);
-            
-            toast({
-              title: "Imagen subida",
-              description: "La imagen principal se ha guardado correctamente"
-            });
-          } catch (error: any) {
-            console.error('Error uploading project image:', error);
-            toast({
-              title: "Error al subir imagen",
-              description: error.message || "No se pudo subir la imagen. Puedes intentarlo más tarde desde los datos del proyecto.",
-              variant: "destructive"
-            });
-          } finally {
-            setIsUploadingImage(false);
-          }
-        }
-      }
-
-      // Only invalidate necessary queries to prevent unnecessary requests
-      queryClient.invalidateQueries({ queryKey: ['projects'], exact: false });
-      queryClient.invalidateQueries({ queryKey: ['projects-lite'], exact: false });
-      queryClient.invalidateQueries({ queryKey: ['projects-map'], exact: false });
-      queryClient.invalidateQueries({ queryKey: ['user-data'], exact: false });
-      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'], exact: false });
-      queryClient.invalidateQueries({ queryKey: ['current-user'], exact: false });
-      queryClient.invalidateQueries({ queryKey: ['project-data', newProject.id], exact: false });
+      // Upload image to storage
+      const uploadResult = await uploadProjectImage(selectedImageFile, projectId, organizationId);
+      
+      // Update project_data table with new image URL
+      await updateProjectImageUrl(projectId, uploadResult.file_url);
       
       toast({
-        title: isEditing ? "Proyecto actualizado" : "Proyecto creado",
-        description: isEditing 
-          ? "El proyecto ha sido actualizado exitosamente" 
-          : "El nuevo proyecto ha sido creado exitosamente",
+        title: "Imagen subida",
+        description: "La imagen principal se ha guardado correctamente"
       });
-      
-      handleClose();
-    },
-    onError: (error: any) => {
+    } catch (error: any) {
+      console.error('Error uploading project image:', error);
       toast({
-        title: "Error",
-        description: error.message || error.details || "Hubo un error al procesar el proyecto",
-        variant: "destructive",
+        title: "Error al subir imagen",
+        description: error.message || "No se pudo subir la imagen. Puedes intentarlo más tarde desde los datos del proyecto.",
+        variant: "destructive"
       });
+    } finally {
+      setIsUploadingImage(false);
     }
-  });
+  };
+
+  // Handle checklist update for new projects
+  const handleChecklistUpdate = async () => {
+    if (!userData?.user?.id) return;
+
+    try {
+      const { error: checklistError } = await supabase.rpc('tick_home_checklist', {
+        p_key: 'create_project',
+        p_value: true
+      });
+      
+      if (checklistError) {
+        console.error('Error updating home checklist:', checklistError);
+      }
+    } catch (error) {
+      console.error('Error updating checklist:', error);
+    }
+  };
 
   const handleClose = () => {
     // Prevent closing while uploading image
@@ -321,16 +253,82 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
     onClose();
   };
 
-  const onSubmit = (data: CreateProjectForm) => {
+  const onSubmit = async (data: CreateProjectForm) => {
+    if (!organizationId) {
+      toast({
+        title: "Error",
+        description: "No hay una organización activa seleccionada",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!currentUserMember && !isEditing) {
+      toast({
+        title: "Error",
+        description: "Usuario no es miembro de la organización",
+        variant: "destructive"
+      });
+      return;
+    }
+
     // Clean the data before submission
     const cleanedData = {
-      ...data,
-      project_type_id: data.project_type_id || undefined,
-      modality_id: data.modality_id || undefined,
-      color: data.color || "#84cc16"
+      name: data.name,
+      status: data.status,
+      color: data.color || "#84cc16",
+      use_custom_color: data.use_custom_color || false,
+      custom_color_h: data.custom_color_h || null,
+      custom_color_hex: data.custom_color_hex || null,
+      project_type_id: data.project_type_id || null,
+      modality_id: data.modality_id || null,
     };
-    
-    createProjectMutation.mutate(cleanedData);
+
+    try {
+      if (isEditing && editingProject) {
+        // Update existing project
+        await updateProjectMutation.mutateAsync({
+          projectId: editingProject.id,
+          data: {
+            ...cleanedData,
+            organization_id: organizationId,
+          }
+        });
+
+        toast({
+          title: "Proyecto actualizado",
+          description: "El proyecto ha sido actualizado exitosamente"
+        });
+      } else {
+        // Create new project
+        const newProject = await createProjectMutation.mutateAsync({
+          organization_id: organizationId,
+          created_by: currentUserMember!.id,
+          ...cleanedData,
+        });
+
+        // Handle checklist update
+        await handleChecklistUpdate();
+
+        // Upload image if one was selected
+        if (selectedImageFile && newProject.id) {
+          await handleImageUpload(newProject.id);
+        }
+
+        toast({
+          title: "Proyecto creado",
+          description: "El nuevo proyecto ha sido creado exitosamente"
+        });
+      }
+
+      handleClose();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || error.details || "Hubo un error al procesar el proyecto",
+        variant: "destructive",
+      });
+    }
   };
 
   const viewPanel = (
@@ -594,8 +592,8 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       onLeftClick={handleClose}
       rightLabel={isEditing ? "Actualizar Proyecto" : "Crear Proyecto"}
       onRightClick={() => form.handleSubmit(onSubmit)()}
-      submitDisabled={createProjectMutation.isPending || isUploadingImage}
-      showLoadingSpinner={createProjectMutation.isPending || isUploadingImage}
+      submitDisabled={createProjectMutation.isPending || updateProjectMutation.isPending || isUploadingImage}
+      showLoadingSpinner={createProjectMutation.isPending || updateProjectMutation.isPending || isUploadingImage}
     />
   );
 

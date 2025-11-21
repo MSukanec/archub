@@ -20,7 +20,7 @@ import { es } from 'date-fns/locale'
 import { CalendarIcon } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import ProjectSelectorField from '@/components/ui-custom/fields/ProjectSelectorField'
+import { ProjectSelectorField } from '@/features/projects'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useWallets } from '@/hooks/use-wallets'

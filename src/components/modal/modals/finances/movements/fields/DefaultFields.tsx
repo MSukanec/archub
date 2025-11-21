@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton'
 import { CurrencyAmountField } from '@/components/ui-custom/fields/CurrencyAmountField'
 import { Package, Users, Folder } from 'lucide-react'
-import ProjectSelectorField from '@/components/ui-custom/fields/ProjectSelectorField'
+import { ProjectSelectorField } from '@/features/projects'
 import { UseFormReturn } from 'react-hook-form'
 import { PersonnelFields } from './PersonnelFields'
 import { SubcontractsFields } from './SubcontractsFields'
