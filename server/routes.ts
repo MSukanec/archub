@@ -23,6 +23,100 @@ import { registerOrganizationRoutes } from './routes/organization';
 import { registerCommunityRoutes } from './routes/community';
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // ==========================================
+  // SEO: robots.txt - serve static file before any other route
+  // ==========================================
+  app.get("/robots.txt", (req, res) => {
+    res.type('text/plain');
+    res.send(`# robots.txt para Seencel
+# Este archivo indica a los motores de búsqueda qué páginas pueden rastrear e indexar
+
+# Permitir a todos los bots rastrear todas las páginas públicas
+User-agent: *
+Allow: /
+
+# Bloquear indexación de rutas privadas/admin
+Disallow: /admin/
+Disallow: /settings/
+Disallow: /profile/
+Disallow: /organization/
+Disallow: /construction/
+Disallow: /design/
+Disallow: /finances/
+Disallow: /analysis/
+Disallow: /recursos/
+Disallow: /media/
+
+# Permitir explícitamente páginas públicas de cursos
+Allow: /cursos
+Allow: /cursos/*
+
+# Sitemap location
+Sitemap: https://seencel.com/sitemap.xml`);
+  });
+
+  // ==========================================
+  // SEO: Sitemap.xml endpoint for Google indexing
+  // ==========================================
+  app.get("/sitemap.xml", async (req, res) => {
+    try {
+      // Get all published courses from database
+      const { data: courses, error } = await getAdminClient()
+        .from('courses')
+        .select('slug, updated_at')
+        .eq('is_active', true)
+        .eq('visibility', 'public')
+        .order('updated_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching courses for sitemap:', error);
+        return res.status(500).send('Error generating sitemap');
+      }
+
+      // Base URL - use VITE_SITE_URL if available, otherwise default
+      const baseUrl = process.env.VITE_SITE_URL || 'https://seencel.com';
+      
+      // Generate XML sitemap
+      const now = new Date().toISOString();
+      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+      xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+      
+      // Static pages
+      const staticPages = [
+        { loc: '/', priority: '1.0', changefreq: 'weekly' },
+        { loc: '/cursos', priority: '0.9', changefreq: 'daily' },
+      ];
+      
+      staticPages.forEach(page => {
+        xml += '  <url>\n';
+        xml += `    <loc>${baseUrl}${page.loc}</loc>\n`;
+        xml += `    <lastmod>${now}</lastmod>\n`;
+        xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
+        xml += `    <priority>${page.priority}</priority>\n`;
+        xml += '  </url>\n';
+      });
+      
+      // Dynamic course pages
+      courses?.forEach(course => {
+        xml += '  <url>\n';
+        xml += `    <loc>${baseUrl}/cursos/${course.slug}</loc>\n`;
+        xml += `    <lastmod>${course.updated_at || now}</lastmod>\n`;
+        xml += `    <changefreq>weekly</changefreq>\n`;
+        xml += `    <priority>0.8</priority>\n`;
+        xml += '  </url>\n';
+      });
+      
+      xml += '</urlset>';
+      
+      // Set content type to XML
+      res.header('Content-Type', 'application/xml');
+      res.send(xml);
+    } catch (error: any) {
+      console.error('Error generating sitemap:', error);
+      res.status(500).send('Error generating sitemap');
+    }
+  });
+
   // Get shared dependencies
   const deps = getRouteDeps();
   
@@ -188,68 +282,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('Debug endpoint error:', error);
       return res.status(500).json({ error: error.message });
-    }
-  });
-
-  // ==========================================
-  // SEO: Sitemap.xml endpoint for Google indexing
-  // ==========================================
-  app.get("/sitemap.xml", async (req, res) => {
-    try {
-      // Get all published courses from database
-      const { data: courses, error } = await getAdminClient()
-        .from('courses')
-        .select('slug, updated_at')
-        .eq('is_active', true)
-        .eq('visibility', 'public')
-        .order('updated_at', { ascending: false });
-      
-      if (error) {
-        console.error('Error fetching courses for sitemap:', error);
-        return res.status(500).send('Error generating sitemap');
-      }
-
-      // Base URL - use VITE_SITE_URL if available, otherwise default
-      const baseUrl = process.env.VITE_SITE_URL || 'https://seencel.com';
-      
-      // Generate XML sitemap
-      const now = new Date().toISOString();
-      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-      xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-      
-      // Static pages
-      const staticPages = [
-        { loc: '/', priority: '1.0', changefreq: 'weekly' },
-        { loc: '/cursos', priority: '0.9', changefreq: 'daily' },
-      ];
-      
-      staticPages.forEach(page => {
-        xml += '  <url>\n';
-        xml += `    <loc>${baseUrl}${page.loc}</loc>\n`;
-        xml += `    <lastmod>${now}</lastmod>\n`;
-        xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
-        xml += `    <priority>${page.priority}</priority>\n`;
-        xml += '  </url>\n';
-      });
-      
-      // Dynamic course pages
-      courses?.forEach(course => {
-        xml += '  <url>\n';
-        xml += `    <loc>${baseUrl}/cursos/${course.slug}</loc>\n`;
-        xml += `    <lastmod>${course.updated_at || now}</lastmod>\n`;
-        xml += `    <changefreq>weekly</changefreq>\n`;
-        xml += `    <priority>0.8</priority>\n`;
-        xml += '  </url>\n';
-      });
-      
-      xml += '</urlset>';
-      
-      // Set content type to XML
-      res.header('Content-Type', 'application/xml');
-      res.send(xml);
-    } catch (error: any) {
-      console.error('Error generating sitemap:', error);
-      res.status(500).send('Error generating sitemap');
     }
   });
 
