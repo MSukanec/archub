@@ -21,21 +21,12 @@ export async function getProjects(organizationId: string): Promise<Project[]> {
     return [];
   }
 
+  // Usar la vista optimizada projects_view que pre-computa los JOINs
   const { data, error } = await supabase
-    .from('projects')
-    .select(`
-      *,
-      project_data (
-        project_type_id,
-        project_modality_id,
-        project_image_url,
-        project_type:project_types(id, name),
-        modality:project_modalities(id, name)
-      )
-    `)
+    .from('projects_view')
+    .select('*')
     .eq('organization_id', organizationId)
     .eq('is_active', true)
-    .eq('is_deleted', false)
     .order('created_at', { ascending: false });
   
   if (error) {

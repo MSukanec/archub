@@ -18,7 +18,9 @@ import type { Project, ProjectData } from '../types';
 export function transformProjectData(rawProject: any): Project {
   let projectData: ProjectData | null = null;
   
+  // Manejar estructura anidada (legacy) o plana (vista optimizada)
   if (rawProject.project_data) {
+    // Estructura anidada: proyecto viene con project_data como objeto/array
     const pd = Array.isArray(rawProject.project_data) 
       ? rawProject.project_data[0] 
       : rawProject.project_data;
@@ -32,10 +34,39 @@ export function transformProjectData(rawProject: any): Project {
         project_modality: pd.modality
       };
     }
+  } else if (rawProject.project_type_id || rawProject.project_modality_id || rawProject.project_image_url) {
+    // Estructura plana: proyecto viene de la vista projects_view
+    projectData = {
+      project_type_id: rawProject.project_type_id,
+      project_modality_id: rawProject.project_modality_id,
+      project_image_url: rawProject.project_image_url,
+      project_type: rawProject.project_type_name ? {
+        id: rawProject.project_type_id,
+        name: rawProject.project_type_name
+      } : undefined,
+      project_modality: rawProject.project_modality_name ? {
+        id: rawProject.project_modality_id,
+        name: rawProject.project_modality_name
+      } : undefined
+    };
   }
   
+  // Limpiar campos planos de la vista para evitar duplicación
+  const { 
+    project_type_id, 
+    project_modality_id, 
+    project_image_url,
+    project_type_name,
+    project_modality_name,
+    city,
+    country,
+    start_date,
+    estimated_end,
+    ...cleanProject 
+  } = rawProject;
+  
   return {
-    ...rawProject,
+    ...cleanProject,
     project_data: projectData
   };
 }
