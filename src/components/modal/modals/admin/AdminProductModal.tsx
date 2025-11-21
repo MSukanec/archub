@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 
 import { useCreateProduct, useUpdateProduct, Product, NewProductData } from '@/hooks/use-products'
-import { useMaterials } from '@/hooks/use-materials'
+import { useMaterials } from '@/features/materials'
 import { useBrands } from '@/hooks/use-brands'
 import { useUnitPresentations } from '@/hooks/use-unit-presentations'
 

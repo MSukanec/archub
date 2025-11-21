@@ -5,7 +5,7 @@ import { Package } from 'lucide-react';
 import { Layout } from '@/layout/desktop/Layout';
 import { MaterialCostsTab } from './MaterialCostsTab';
 import { MaterialBasicDataTab } from './MaterialBasicDataTab';
-import { useMaterial } from "@/hooks/use-materials";
+import { useMaterial } from "@/features/materials";
 
 export default function MaterialsView() {
   const { id } = useParams<{ id: string }>();

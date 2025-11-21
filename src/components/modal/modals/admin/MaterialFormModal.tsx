@@ -13,8 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { CascadingSelect } from '@/components/ui-custom/fields/CascadingSelectField'
 
-import { useCreateMaterial, useUpdateMaterial, Material, NewMaterialData } from '@/hooks/use-materials'
-import { useMaterialCategories, MaterialCategory } from '@/hooks/use-material-categories'
+import { useCreateMaterial, useUpdateMaterial, Material, NewMaterialData, useMaterialCategories, MaterialCategory } from '@/features/materials'
 import { useUnits } from '@/hooks/use-units'
 import { useCurrentUser } from '@/hooks/use-current-user'
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { toast } from '@/hooks/use-toast'
 import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial, useGeneratedTasks, useCreateTaskLabor } from '@/hooks/use-generated-tasks'
-import { useMaterials } from '@/hooks/use-materials'
+import { useMaterials } from '@/features/materials'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useTaskCategories } from '@/hooks/use-task-categories'
 import { useUnits } from '@/hooks/use-units'

@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 
 import { HierarchicalTree } from '@/components/ui-custom/tables-and-trees/HierarchicalTree';
 
-import { useMaterialCategories, useDeleteMaterialCategory, MaterialCategory } from '@/hooks/use-material-categories';
+import { useMaterialCategories, useDeleteMaterialCategory, MaterialCategory } from '@/features/materials';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 const AdminCostCategories = () => {

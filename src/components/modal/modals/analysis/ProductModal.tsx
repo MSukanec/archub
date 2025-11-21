@@ -17,7 +17,7 @@ import { CurrencyAmountField } from '@/components/ui-custom/fields/CurrencyAmoun
 
 import { useCreateProduct, useUpdateProduct, NewProductData } from '@/hooks/use-products'
 import { useBrands, useCreateBrand } from '@/hooks/use-brands'
-import { useMaterials } from '@/hooks/use-materials'
+import { useMaterials } from '@/features/materials'
 import { useUnits } from '@/hooks/use-units'
 import { useUnitPresentations } from '@/hooks/use-unit-presentations'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'

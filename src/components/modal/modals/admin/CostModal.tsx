@@ -14,7 +14,7 @@ import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { useMaterials } from '@/hooks/use-materials'
+import { useMaterials } from '@/features/materials'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { toast } from '@/hooks/use-toast'

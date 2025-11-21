@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import { useCreateMaterialCategory, useUpdateMaterialCategory, useMaterialCategories, MaterialCategory, NewMaterialCategoryData } from '@/hooks/use-material-categories'
+import { useCreateMaterialCategory, useUpdateMaterialCategory, useMaterialCategories, MaterialCategory, NewMaterialCategoryData } from '@/features/materials'
 
 import { Tag } from 'lucide-react'
 

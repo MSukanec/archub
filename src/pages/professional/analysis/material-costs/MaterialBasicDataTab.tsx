@@ -7,7 +7,7 @@ import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButt
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useLocation } from 'wouter';
-import { useDeleteMaterial } from '@/hooks/use-materials';
+import { useDeleteMaterial } from '@/features/materials';
 import { Badge } from '@/components/ui/badge';
 
 interface MaterialBasicDataTabProps {
