@@ -21,13 +21,13 @@ import { useOrganizationMembers } from "@/features/organization";
 import { useProjectTypes } from "@/hooks/use-project-types";
 import { useProjectModalities } from "@/hooks/use-project-modalities";
 import { useProjectContext } from "@/stores/projectContext";
-import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-import { uploadProjectImage, updateProjectImageUrl } from "@/lib/storage/uploadProjectImage";
+import { useUpdateChecklist } from "@/hooks/use-update-checklist";
 
-// Import feature hooks
+// Import feature hooks and services
 import { useCreateProject } from '../hooks/use-create-project';
 import { useUpdateProject } from '../hooks/use-update-project';
+import { uploadProjectImage, updateProjectImageUrl } from '@/features/projects';
 import ProjectColorAdvanced from '../components/ProjectColorAdvanced';
 
 // Paleta de colores predefinidos
@@ -111,6 +111,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
   // Use feature hooks for mutations
   const createProjectMutation = useCreateProject();
   const updateProjectMutation = useUpdateProject();
+  const updateChecklist = useUpdateChecklist();
 
   // Image upload states
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
@@ -216,23 +217,6 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
     }
   };
 
-  // Handle checklist update for new projects
-  const handleChecklistUpdate = async () => {
-    if (!userData?.user?.id) return;
-
-    try {
-      const { error: checklistError } = await supabase.rpc('tick_home_checklist', {
-        p_key: 'create_project',
-        p_value: true
-      });
-      
-      if (checklistError) {
-        console.error('Error updating home checklist:', checklistError);
-      }
-    } catch (error) {
-      console.error('Error updating checklist:', error);
-    }
-  };
 
   const handleClose = () => {
     // Prevent closing while uploading image
@@ -307,8 +291,13 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
           ...cleanedData,
         });
 
-        // Handle checklist update
-        await handleChecklistUpdate();
+        // Update checklist for new project
+        if (userData?.user?.id) {
+          await updateChecklist.mutateAsync({ 
+            key: 'create_project', 
+            value: true 
+          });
+        }
 
         // Upload image if one was selected
         if (selectedImageFile && newProject.id) {

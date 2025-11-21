@@ -25,9 +25,10 @@ Preferred communication style: Simple, everyday language.
 - **Performance Optimizations**: Code-splitting, lazy loading, database views, smart caching, optimized backend endpoints.
 
 ### System Design Choices
-- **Module Architecture**: Feature-Sliced Design adopted for modules like CLIENTS, COURSE-LANDING, FINANCES, CONTACTS, ORGANIZATION, and LEARNING, ensuring strict separation of concerns.
+- **Module Architecture**: Feature-Sliced Design adopted for modules like PROJECTS, CLIENTS, COURSE-LANDING, FINANCES, CONTACTS, ORGANIZATION, LEARNING, MEDIA, SITELOG, PROJECT-TYPES, and PROJECT-MODALITIES, ensuring strict separation of concerns.
 - **Multi-tenancy**: Services consistently filter data by `organization_id`.
 - **Soft Delete**: Implemented for key entities like contacts, contact types, projects, project types, and project modalities.
+- **Projects Management (REFACTORED)**: Complete Feature-Sliced Design implementation with 9 services, 9 hooks, 3 components, and ProjectModal. Services use Express API for mutations (CREATE/UPDATE/DELETE) with authentication and validation, and Supabase direct for read operations. Supports project creation, updating, soft deletion, statistics, activity tracking, and image uploads. All consuming files use barrel exports from @/features/projects.
 - **Financial Management**: Unified financial movements audit system with multi-currency conversion, KPI calculation, and detailed transaction views.
 - **Contacts Management**: Comprehensive CRUD operations for contacts and contact types, including attachment management and avatar uploads.
 - **Organization Dashboard**: Provides an overview of organization members, stats, activity logs, and wallets.

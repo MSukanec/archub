@@ -1,34 +1,43 @@
 import { apiRequest } from '@/lib/queryClient';
-import type { CreateProjectData } from '../types';
+import type { Project, CreateProjectData } from '../types';
 
 /**
- * Crea un nuevo proyecto con sus datos relacionados.
+ * Crea un nuevo proyecto mediante el endpoint Express API.
  * 
- * Usa el endpoint de la API para crear el proyecto y automáticamente
- * crea el registro en project_data si se proporcionan tipo o modalidad.
+ * Usa el endpoint POST /api/projects que incluye:
+ * - Autenticación (ensureAuth)
+ * - Validación de acceso (ensureOrganizationAccess)
+ * - Rollback en caso de error
+ * - Audit logging
  * 
- * @param data - Datos del proyecto a crear
+ * @param data - Datos del proyecto a crear (incluye organization_id)
  * @returns Proyecto creado con su ID
  * @throws {Error} Si falla la creación o faltan parámetros requeridos
  */
-export async function createProject(data: CreateProjectData) {
-  if (!data.organization_id || !data.name || !data.created_by) {
-    throw new Error('Missing required parameters: organization_id, name, and created_by are required');
+export async function createProject(data: CreateProjectData): Promise<Project> {
+  if (!data.organization_id) {
+    throw new Error('Organization ID required');
   }
 
   const response = await apiRequest('POST', '/api/projects', {
     organization_id: data.organization_id,
     name: data.name,
-    status: data.status,
-    created_by: data.created_by,
-    color: data.color || "#84cc16",
-    use_custom_color: data.use_custom_color || false,
-    custom_color_h: data.custom_color_h || null,
-    custom_color_hex: data.custom_color_hex || null,
-    project_type_id: data.project_type_id || null,
-    modality_id: data.modality_id || null,
+    status: data.status || 'active',
+    color: data.color,
+    use_custom_color: data.use_custom_color,
+    custom_color_h: data.custom_color_h,
+    custom_color_hex: data.custom_color_hex,
+    project_type_id: data.project_type_id,
+    modality_id: data.modality_id,
   });
 
-  const newProject = await response.json();
-  return newProject;
+  // Si HTTP 200, el JSON ES el proyecto directamente
+  if (response.ok) {
+    const project = await response.json();
+    return project;
+  }
+  
+  // Si HTTP 4xx/5xx, parsear el error
+  const errorData = await response.json();
+  throw new Error(errorData.error || 'Failed to create project');
 }
