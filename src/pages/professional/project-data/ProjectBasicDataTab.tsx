@@ -37,7 +37,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
   const [projectName, setProjectName] = useState('')
   const [projectCode, setProjectCode] = useState('')
   const [projectTypeId, setProjectTypeId] = useState('')
-  const [modalityId, setModalityId] = useState('')
+  const [projectModalityId, setProjectModalityId] = useState('')
   const [status, setStatus] = useState('')
   
   // Form states - Details
@@ -199,7 +199,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       name: projectName,
       code: projectCode,
       project_type_id: projectTypeId,
-      modality_id: modalityId,
+      project_modality_id: projectModalityId,
       status: status,
       description: description,
       internal_notes: internalNotes
@@ -230,7 +230,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
     // Load project data (may be null for new projects)
     if (projectData) {
       setProjectTypeId(projectData.project_type_id || '');
-      setModalityId(projectData.modality_id || '');
+      setProjectModalityId(projectData.project_modality_id || '');
       setDescription(projectData.description || '');
       setInternalNotes(projectData.internal_notes || '');
       setProjectImageUrl(projectData.project_image_url || null);
@@ -385,7 +385,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
 
             <div className="space-y-2">
               <Label htmlFor="modality">Modalidad</Label>
-              <Select value={modalityId} onValueChange={setModalityId}>
+              <Select value={projectModalityId} onValueChange={setProjectModalityId}>
                 <SelectTrigger id="modality">
                   <SelectValue placeholder="Selecciona una modalidad" />
                 </SelectTrigger>

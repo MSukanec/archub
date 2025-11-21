@@ -55,7 +55,7 @@ function getTextColor(backgroundColor: string): string {
 const createProjectSchema = z.object({
   name: z.string().min(1, "El nombre del proyecto es requerido"),
   project_type_id: z.string().optional(),
-  modality_id: z.string().optional(),
+  project_modality_id: z.string().optional(),
   status: z.enum(["active", "inactive", "completed", "paused"]).default("active"),
   color: z.string().optional(),
   use_custom_color: z.boolean().default(false),
@@ -78,7 +78,7 @@ interface Project {
   custom_color_hex?: string | null;
   project_data?: {
     project_type_id?: string;
-    modality_id?: string;
+    project_modality_id?: string;
   };
   creator?: {
     id: string;
@@ -128,7 +128,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
     defaultValues: {
       name: editingProject?.name || "",
       project_type_id: editingProject?.project_data?.project_type_id || "",
-      modality_id: editingProject?.project_data?.modality_id || "",
+      project_modality_id: editingProject?.project_data?.project_modality_id || "",
       status: (editingProject?.status as "active" | "inactive" | "completed" | "paused") || "active",
       color: editingProject?.color || "#84cc16",
       use_custom_color: editingProject?.use_custom_color || false,
@@ -143,7 +143,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       form.reset({
         name: editingProject.name,
         project_type_id: editingProject.project_data?.project_type_id || "",
-        modality_id: editingProject.project_data?.modality_id || "",
+        project_modality_id: editingProject.project_data?.project_modality_id || "",
         status: editingProject.status as "active" | "inactive" | "completed" | "paused",
         color: editingProject.color || "#84cc16",
         use_custom_color: editingProject.use_custom_color || false,
@@ -154,7 +154,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       form.reset({
         name: "",
         project_type_id: "",
-        modality_id: "",
+        project_modality_id: "",
         status: "active",
         color: "#84cc16",
         use_custom_color: false,
@@ -265,7 +265,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       custom_color_h: data.custom_color_h || null,
       custom_color_hex: data.custom_color_hex || null,
       project_type_id: data.project_type_id || null,
-      modality_id: data.modality_id || null,
+      project_modality_id: data.project_modality_id || null,
     };
 
     try {
@@ -341,8 +341,8 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       <div>
         <h4 className="font-medium">Modalidad</h4>
         <p className="text-muted-foreground mt-1">
-          {editingProject?.project_data?.modality_id ? 
-           projectModalities.find(m => m.id === editingProject.project_data?.modality_id)?.name || 'Sin especificar'
+          {editingProject?.project_data?.project_modality_id ? 
+           projectModalities.find(m => m.id === editingProject.project_data?.project_modality_id)?.name || 'Sin especificar'
            : 'Sin especificar'}
         </p>
       </div>
@@ -446,7 +446,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
 
             <FormField
               control={form.control}
-              name="modality_id"
+              name="project_modality_id"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Modalidad</FormLabel>

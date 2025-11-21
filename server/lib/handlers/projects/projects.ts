@@ -11,7 +11,7 @@ export interface CreateProjectParams {
   custom_color_h?: number | null;
   custom_color_hex?: string | null;
   project_type_id?: string | null;
-  modality_id?: string | null;
+  project_modality_id?: string | null;
 }
 
 export interface UpdateProjectParams {
@@ -23,7 +23,7 @@ export interface UpdateProjectParams {
   custom_color_h?: number | null;
   custom_color_hex?: string | null;
   project_type_id?: string | null;
-  modality_id?: string | null;
+  project_modality_id?: string | null;
   organization_id?: string;
 }
 
@@ -101,7 +101,7 @@ export async function createProject(
         project_id: newProject.id,
         organization_id: params.organization_id,
         project_type_id: params.project_type_id || null,
-        modality_id: params.modality_id || null,
+        project_modality_id: params.project_modality_id || null,
       });
 
     if (dataError) {
@@ -195,7 +195,7 @@ export async function updateProject(
         .from('project_data')
         .update({
           project_type_id: params.project_type_id || null,
-          modality_id: params.modality_id || null,
+          project_modality_id: params.project_modality_id || null,
         })
         .eq('project_id', params.projectId);
 
@@ -203,7 +203,7 @@ export async function updateProject(
         console.error('Error updating project_data:', dataError);
         return { success: false, error: 'Failed to update project data' };
       }
-    } else if (params.project_type_id || params.modality_id) {
+    } else if (params.project_type_id || params.project_modality_id) {
       // Create project_data if doesn't exist and we have data to insert
       const { error: dataError } = await supabase
         .from('project_data')
@@ -211,7 +211,7 @@ export async function updateProject(
           project_id: params.projectId,
           organization_id: params.organization_id!,
           project_type_id: params.project_type_id || null,
-          modality_id: params.modality_id || null,
+          project_modality_id: params.project_modality_id || null,
         }, {
           onConflict: 'project_id'
         });

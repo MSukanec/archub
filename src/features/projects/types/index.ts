@@ -25,7 +25,7 @@ export interface Project {
 
 export interface ProjectData {
   project_type_id?: string;
-  modality_id?: string;
+  project_modality_id?: string;
   project_image_url?: string;
   project_type?: {
     id: string;
@@ -64,7 +64,7 @@ export interface CreateProjectData {
   custom_color_h?: number | null;
   custom_color_hex?: string | null;
   project_type_id?: string | null;
-  modality_id?: string | null;
+  project_modality_id?: string | null;
 }
 
 export interface UpdateProjectData {
@@ -75,7 +75,7 @@ export interface UpdateProjectData {
   custom_color_h?: number | null;
   custom_color_hex?: string | null;
   project_type_id?: string | null;
-  modality_id?: string | null;
+  project_modality_id?: string | null;
   organization_id: string;
 }
 

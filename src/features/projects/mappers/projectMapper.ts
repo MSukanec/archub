@@ -26,7 +26,7 @@ export function transformProjectData(rawProject: any): Project {
     if (pd) {
       projectData = {
         project_type_id: pd.project_type_id,
-        modality_id: pd.modality_id,
+        project_modality_id: pd.project_modality_id,
         project_image_url: pd.project_image_url,
         project_type: pd.project_type,
         modality: pd.modality

@@ -14,7 +14,7 @@ interface Project {
   deleted_at?: string | null
   project_data?: {
     project_type_id?: string
-    modality_id?: string
+    project_modality_id?: string
     project_image_url?: string
     project_type?: {
       id: string
@@ -54,7 +54,7 @@ export function useProjects(organizationId: string | undefined) {
           *,
           project_data (
             project_type_id,
-            modality_id,
+            project_modality_id,
             project_image_url,
             project_type:project_types(id, name),
             modality:project_modalities(id, name)
@@ -81,7 +81,7 @@ export function useProjects(organizationId: string | undefined) {
           if (pd) {
             projectData = {
               project_type_id: pd.project_type_id,
-              modality_id: pd.modality_id,
+              project_modality_id: pd.project_modality_id,
               project_image_url: pd.project_image_url,
               project_type: pd.project_type,
               modality: pd.modality
@@ -120,7 +120,7 @@ export function useProject(projectId: string | undefined) {
           *,
           project_data (
             project_type_id,
-            modality_id,
+            project_modality_id,
             project_image_url,
             project_type:project_types(id, name),
             modality:project_modalities(id, name)
@@ -142,7 +142,7 @@ export function useProject(projectId: string | undefined) {
         if (pd) {
           projectData = {
             project_type_id: pd.project_type_id,
-            modality_id: pd.modality_id,
+            project_modality_id: pd.project_modality_id,
             project_image_url: pd.project_image_url,
             project_type: pd.project_type,
             modality: pd.modality

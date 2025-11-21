@@ -233,7 +233,7 @@ export const project_data = pgTable("project_data", {
   
   // Project Classification
   project_type_id: uuid("project_type_id"),
-  modality_id: uuid("modality_id"),
+  project_modality_id: uuid("project_modality_id"),
   
   // Image
   project_image_url: text("project_image_url"),

@@ -9,7 +9,7 @@ import { z } from 'zod';
 export const createProjectSchema = z.object({
   name: z.string().min(1, "El nombre del proyecto es requerido"),
   project_type_id: z.string().optional(),
-  modality_id: z.string().optional(),
+  project_modality_id: z.string().optional(),
   status: z.enum(["active", "inactive", "completed", "paused"]).default("active"),
   color: z.string().optional(),
   use_custom_color: z.boolean().default(false),
@@ -20,7 +20,7 @@ export const createProjectSchema = z.object({
 export const updateProjectSchema = z.object({
   name: z.string().min(1, "El nombre del proyecto es requerido").optional(),
   project_type_id: z.string().optional(),
-  modality_id: z.string().optional(),
+  project_modality_id: z.string().optional(),
   status: z.enum(["active", "inactive", "completed", "paused"]).optional(),
   color: z.string().optional(),
   use_custom_color: z.boolean().optional(),

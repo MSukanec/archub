@@ -29,7 +29,7 @@ export async function updateProject(projectId: string, data: UpdateProjectData):
     custom_color_h: data.custom_color_h,
     custom_color_hex: data.custom_color_hex,
     project_type_id: data.project_type_id,
-    modality_id: data.modality_id,
+    project_modality_id: data.project_modality_id,
   });
 
   // Si HTTP 200, el JSON ES el proyecto directamente

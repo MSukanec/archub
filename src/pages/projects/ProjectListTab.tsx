@@ -102,7 +102,7 @@ export default function ProjectList() {
       project.project_data?.project_type?.name?.toLowerCase().includes(filterByProjectType.toLowerCase());
     
     const matchesModality = filterByModality === 'all' || 
-      project.project_data?.modality_id === filterByModality ||
+      project.project_data?.project_modality_id === filterByModality ||
       project.project_data?.modality?.name?.toLowerCase().includes(filterByModality.toLowerCase());
     
     const matchesStatus = filterByStatus === 'all' || 

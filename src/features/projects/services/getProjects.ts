@@ -27,7 +27,7 @@ export async function getProjects(organizationId: string): Promise<Project[]> {
       *,
       project_data (
         project_type_id,
-        modality_id,
+        project_modality_id,
         project_image_url,
         project_type:project_types(id, name),
         modality:project_modalities(id, name)
