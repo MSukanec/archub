@@ -1190,6 +1190,8 @@ export const courses = pgTable("courses", {
   // 🔍 SEO fields for landing pages
   seo_keywords: text("seo_keywords").array(),
   og_image_url: text("og_image_url"),
+  // 📄 Landing page section customization
+  landing_sections: jsonb("landing_sections"),
 });
 
 export const course_modules = pgTable("course_modules", {
@@ -1291,7 +1293,23 @@ export const insertCourseFaqSchema = createInsertSchema(course_faqs).omit({
   updated_at: true,
 });
 
+// Landing Sections Schema
+export const landingSectionSchema = z.object({
+  title: z.string().optional(),
+  subtitle: z.string().optional(),
+  description: z.string().optional(),
+});
+
+export const landingSectionsSchema = z.object({
+  instructor: landingSectionSchema.optional(),
+  modules: landingSectionSchema.optional(),
+  features: landingSectionSchema.optional(),
+  faq: landingSectionSchema.optional(),
+}).optional();
+
 // Types for courses
+export type LandingSection = z.infer<typeof landingSectionSchema>;
+export type LandingSections = z.infer<typeof landingSectionsSchema>;
 export type Course = typeof courses.$inferSelect;
 export type InsertCourse = z.infer<typeof insertCourseSchema>;
 export type CourseModule = typeof course_modules.$inferSelect;
