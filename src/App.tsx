@@ -90,6 +90,7 @@ import CommunityMap from "@/pages/community/CommunityMap";
 const LearningDashboard = lazy(() => import("@/pages/learning/dashboard/LearningDashboard"));
 const CourseList = lazy(() => import("@/pages/learning/courses/CourseList"));
 const CourseView = lazy(() => import("@/pages/learning/courses/CourseView"));
+const CourseLandingPrivate = lazy(() => import("@/pages/professional/learning/CourseLanding"));
 const PaymentReturn = lazy(() => import("@/pages/learning/PaymentReturn"));
 const CheckoutPage = lazy(() => import("@/pages/checkout/CheckoutPage"));
 const SubscriptionCheckout = lazy(() => import("@/pages/checkout/SubscriptionCheckout"));
@@ -249,6 +250,11 @@ function Router() {
         <Route path="/learning/courses/:id">
           <Suspense fallback={<LazyLoadFallback />}>
             <CourseView />
+          </Suspense>
+        </Route>
+        <Route path="/learning/landing/:slug">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <CourseLandingPrivate />
           </Suspense>
         </Route>
         <Route path="/learning/retorno">

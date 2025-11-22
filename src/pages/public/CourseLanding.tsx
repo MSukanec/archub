@@ -1,5 +1,5 @@
 import { useParams } from 'wouter';
-import { PublicLayout } from '@/layout/public/PublicLayout';
+import { CourseLandingLayout } from '@/layout/course-landing';
 import { useCourseLanding } from '@/features/course-landing';
 import {
   HeroSection,
@@ -22,20 +22,20 @@ export default function CourseLanding() {
 
   if (isLoading) {
     return (
-      <PublicLayout headerNavigation={navigationLinks}>
+      <CourseLandingLayout variant="public" headerNavigation={navigationLinks}>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center space-y-4">
             <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
             <p className="text-muted-foreground">Cargando curso...</p>
           </div>
         </div>
-      </PublicLayout>
+      </CourseLandingLayout>
     );
   }
 
   if (error || !data) {
     return (
-      <PublicLayout headerNavigation={navigationLinks}>
+      <CourseLandingLayout variant="public" headerNavigation={navigationLinks}>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center space-y-4">
             <h1 className="text-2xl font-bold">Curso no encontrado</h1>
@@ -44,30 +44,25 @@ export default function CourseLanding() {
             </p>
           </div>
         </div>
-      </PublicLayout>
+      </CourseLandingLayout>
     );
   }
 
   const { course, modules, faqs, stats } = data;
 
   // SEO metadata
-  const seoTitle = `${course.title} - Curso Online | Seencel`;
-  const seoDescription = course.short_description || course.long_description || '';
-  const seoKeywords = (course.seo_keywords || []).join(', ');
-  const ogImage = course.og_image_url || course.cover_url || '';
+  const seoProps = {
+    title: `${course.title} - Curso Online | Seencel`,
+    description: course.short_description || course.long_description || '',
+    keywords: (course.seo_keywords || []).join(', '),
+    ogImage: course.og_image_url || course.cover_url || '',
+  };
 
   return (
-    <PublicLayout
+    <CourseLandingLayout 
+      variant="public" 
       headerNavigation={navigationLinks}
-      seo={{
-        title: seoTitle,
-        description: seoDescription,
-        ogTitle: seoTitle,
-        ogDescription: seoDescription,
-        keywords: seoKeywords || undefined,
-        ogImage: ogImage || undefined,
-        twitterImage: ogImage || undefined,
-      }}
+      seo={seoProps}
     >
       {/* Structured Data (JSON-LD) for SEO */}
       <script
@@ -114,6 +109,6 @@ export default function CourseLanding() {
         <FAQSection faqs={faqs} />
         <CTAFooter course={course} />
       </div>
-    </PublicLayout>
+    </CourseLandingLayout>
   );
 }
