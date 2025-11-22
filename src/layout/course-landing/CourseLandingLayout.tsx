@@ -218,7 +218,13 @@ function TransparentHeaderLayout({
       
       {/* Floating Sticky Card - Desktop only, positioned absolutely */}
       {stickyContent && (
-        <div className="hidden lg:block fixed top-24 right-8 w-[380px] z-40">
+        <div 
+          className="hidden lg:block fixed top-24 z-40"
+          style={{
+            width: '368px', // 1/4 of 1472px content width
+            right: 'max(32px, calc((100vw - 1472px) / 2))' // Align with content right edge
+          }}
+        >
           <div className="sticky top-24">
             {stickyContent}
           </div>
