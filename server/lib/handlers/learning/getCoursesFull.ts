@@ -72,12 +72,14 @@ export async function getCoursesFull(
         .eq('user_id', dbUser.id),
 
       // Get course cover images
+      // Deterministic cover selection: flagged first, newest first, exclude soft-deleted
       supabase
         .from('media_links')
-        .select('course_id, media_files!inner(file_url)')
-        .eq('category', 'course_cover')
-        .eq('is_cover', true)
-        .neq('course_id', null)
+        .select('course_id, media_files!inner(file_url), is_cover, created_at')
+        .not('course_id', 'is', null)
+        .eq('media_files.is_deleted', false)
+        .order('is_cover', { ascending: false })
+        .order('created_at', { ascending: false })
     ]);
 
     console.log('[getCoursesFull] Courses result:', coursesResult.error ? coursesResult.error : `${coursesResult.data?.length} courses`);
@@ -105,14 +107,14 @@ export async function getCoursesFull(
       console.warn('Warning fetching course images:', courseImagesResult.error);
     }
 
-    // Build image map for quick lookup
+    // Build image map - first match per course wins (already sorted)
     const imageMap = new Map<string, string>();
     if (courseImagesResult.data) {
-      courseImagesResult.data.forEach((link: any) => {
-        if (link.course_id && link.media_files?.file_url) {
-          imageMap.set(link.course_id, link.media_files.file_url);
+      for (const img of courseImagesResult.data) {
+        if (!imageMap.has(img.course_id)) {
+          imageMap.set(img.course_id, img.media_files.file_url);
         }
-      });
+      }
     }
 
     // Combine courses with their cover images

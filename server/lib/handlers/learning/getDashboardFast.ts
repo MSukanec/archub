@@ -124,11 +124,12 @@ function accumulateProgress(
   return { totalCompleted, totalLessons, completedLessons, totalStudyTime, activeDaysSet };
 }
 
-function formatCourses(courseProgressMap: Map<string, CourseProgressEntry>) {
+function formatCourses(courseProgressMap: Map<string, CourseProgressEntry>, courseImageMap: Map<string, string>) {
   return Array.from(courseProgressMap.values()).map(course => ({
     course_id: course.course_id,
     course_title: course.title,
     course_slug: course.slug,
+    cover_url: courseImageMap.get(course.course_id) || null,
     progress_pct: course.total > 0 ? Math.round((course.completed / course.total) * 100) : 0,
     done_lessons: course.completed,
     total_lessons: course.total
@@ -183,6 +184,7 @@ export interface DashboardFastData {
     course_id: string;
     course_title: string;
     course_slug: string;
+    cover_url: string | null;
     progress_pct: number;
     done_lessons: number;
     total_lessons: number;
@@ -248,7 +250,28 @@ export async function getDashboardFast(
 
     const courseIds = enrollments.map(e => e.course_id);
 
-    // BULK QUERY 2: Get ALL modules for these courses (NO JOINS)
+    // BULK QUERY 2: Get course cover images
+    // Deterministic cover selection: flagged first, newest first, exclude soft-deleted
+    const { data: courseImages } = await supabase
+      .from('media_links')
+      .select('course_id, media_files!inner(file_url), is_cover, created_at')
+      .not('course_id', 'is', null)
+      .in('course_id', courseIds)
+      .eq('media_files.is_deleted', false)
+      .order('is_cover', { ascending: false })
+      .order('created_at', { ascending: false });
+
+    // Build image map - first match per course wins (already sorted)
+    const courseImageMap = new Map<string, string>();
+    if (courseImages) {
+      for (const img of courseImages) {
+        if (!courseImageMap.has(img.course_id)) {
+          courseImageMap.set(img.course_id, img.media_files.file_url);
+        }
+      }
+    }
+
+    // BULK QUERY 3: Get ALL modules for these courses (NO JOINS)
     const { data: modules, error: modulesError } = await supabase
       .from('course_modules')
       .select('id, course_id, title')
@@ -275,7 +298,7 @@ export async function getDashboardFast(
 
     const moduleIds = modules.map(m => m.id);
 
-    // BULK QUERY 3: Get ALL lessons for these modules (NO JOINS)
+    // BULK QUERY 4: Get ALL lessons for these modules (NO JOINS)
     const { data: lessons, error: lessonsError } = await supabase
       .from('course_lessons')
       .select('id, module_id, title, duration_sec, is_active')
@@ -303,7 +326,7 @@ export async function getDashboardFast(
 
     const lessonIds = lessons.map(l => l.id);
 
-    // BULK QUERY 4: Get progress for ALL lessons (NO JOINS)
+    // BULK QUERY 5: Get progress for ALL lessons (NO JOINS)
     const { data: progressData, error: progressError } = await supabase
       .from('course_lesson_progress')
       .select('lesson_id, is_completed, completed_at, last_position_sec')
@@ -326,7 +349,7 @@ export async function getDashboardFast(
       accumulateProgress(lessons, moduleMap, progressMap, courseProgressMap);
 
     // Format output
-    const courses = formatCourses(courseProgressMap);
+    const courses = formatCourses(courseProgressMap, courseImageMap);
     const globalProgress = computeGlobalProgress(totalCompleted, totalLessons);
     const recentCompletions = computeRecentCompletions(completedLessons);
     const currentStreak = computeStreak(activeDaysSet);

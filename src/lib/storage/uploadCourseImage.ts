@@ -105,50 +105,100 @@ export async function uploadCourseImage(
       mediaFileId = newFile.id;
     }
 
-    // Clean up ALL existing media_links for this course's cover images
-    // This handles legacy rows and different file extensions
-    const { data: allCourseLinks } = await supabase
+    // Fetch ALL candidate cover links using strict predicate
+    // Handles: flagged covers, legacy records, and hero file patterns
+    const { data: candidateLinks } = await supabase
       .from('media_links')
-      .select('media_file_id, media_files!inner(file_path)')
+      .select('id, media_file_id, category, is_cover, created_at, media_files!inner(file_path)')
       .eq('course_id', courseId);
 
-    // Filter to only cover image links (file_path contains 'hero')
-    const coverImageLinks = (allCourseLinks || []).filter((link: any) => 
-      link.media_files?.file_path?.includes('/hero.')
+    // Filter to only cover-related links based on strict criteria
+    const coverCandidates = (candidateLinks || []).filter((link: any) => {
+      // Match by category flag
+      if (link.category === 'course_cover') return true;
+      // Match by is_cover flag
+      if (link.is_cover === true) return true;
+      // Match legacy by file_path pattern
+      if (link.media_files?.file_path?.includes('/hero.')) return true;
+      return false;
+    });
+
+    // Deduplicate by ID (in case of overlapping matches)
+    const uniqueCandidates = Array.from(
+      new Map(coverCandidates.map(link => [link.id, link])).values()
     );
 
-    if (coverImageLinks.length > 0) {
-      // Soft-delete old media_files and delete their links
-      for (const link of coverImageLinks) {
-        // Soft-delete media_file
+    // Sort: prefer flagged rows first, then by created_at DESC
+    const sortedCandidates = uniqueCandidates.sort((a, b) => {
+      // Prefer rows with category='course_cover' or is_cover=true
+      const aFlagged = a.category === 'course_cover' || a.is_cover === true;
+      const bFlagged = b.category === 'course_cover' || b.is_cover === true;
+      if (aFlagged !== bFlagged) return bFlagged ? 1 : -1;
+      // Then sort by created_at DESC
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+
+    if (sortedCandidates.length > 0) {
+      // Pick the canonical link (flagged + newest)
+      const linkToKeep = sortedCandidates[0];
+      
+      // Soft-delete outdated cover media_files (not the new one)
+      const oldCoverFileIds = sortedCandidates
+        .map(link => link.media_file_id)
+        .filter(id => id !== mediaFileId);
+      
+      if (oldCoverFileIds.length > 0) {
         await supabase
           .from('media_files')
           .update({ is_deleted: true })
-          .eq('id', link.media_file_id);
+          .in('id', oldCoverFileIds);
+      }
 
-        // Delete media_link
+      // Hard-delete extra cover links (keep only canonical one)
+      if (sortedCandidates.length > 1) {
+        const linksToDelete = sortedCandidates.slice(1).map(link => link.id);
         await supabase
           .from('media_links')
           .delete()
-          .eq('course_id', courseId)
-          .eq('media_file_id', link.media_file_id);
+          .in('id', linksToDelete);
       }
-    }
 
-    // Create new media_links record with visibility='public'
-    const { error: mediaLinkError } = await supabase
-      .from('media_links')
-      .insert({
-        media_file_id: mediaFileId,
-        course_id: courseId,
-        visibility: 'public',
-        created_by: userId,
-        description: 'Course cover image'
-      });
+      // Update the canonical link with new metadata
+      const { error: updateError } = await supabase
+        .from('media_links')
+        .update({
+          media_file_id: mediaFileId,
+          visibility: 'public',
+          is_public: true,
+          category: 'course_cover',
+          is_cover: true,
+          description: 'Course cover image'
+        })
+        .eq('id', linkToKeep.id);
 
-    if (mediaLinkError) {
-      console.error('Error creating media_links record:', mediaLinkError);
-      throw new Error(`Error al crear link de imagen: ${mediaLinkError.message}`);
+      if (updateError) {
+        console.error('Error updating media_links record:', updateError);
+        throw new Error(`Error al actualizar link de imagen: ${updateError.message}`);
+      }
+    } else {
+      // No existing cover links - insert new one
+      const { error: insertError } = await supabase
+        .from('media_links')
+        .insert({
+          media_file_id: mediaFileId,
+          course_id: courseId,
+          visibility: 'public',
+          is_public: true,
+          category: 'course_cover',
+          is_cover: true,
+          created_by: userId,
+          description: 'Course cover image'
+        });
+
+      if (insertError) {
+        console.error('Error creating media_links record:', insertError);
+        throw new Error(`Error al crear link de imagen: ${insertError.message}`);
+      }
     }
 
     return {

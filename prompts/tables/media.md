@@ -4,7 +4,7 @@
 
 create table public.media_files (
   id uuid not null default gen_random_uuid (),
-  organization_id uuid not null,
+  organization_id uuid null,
   created_by uuid null,
   bucket text not null,
   file_path text not null,
@@ -17,7 +17,6 @@ create table public.media_files (
   deleted_at timestamp with time zone null,
   created_at timestamp with time zone not null default now(),
   constraint media_files_pkey primary key (id),
-  constraint media_files_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
   constraint media_files_org_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
   constraint media_files_file_type_chk check (
     (
@@ -34,21 +33,30 @@ create table public.media_files (
   )
 ) TABLESPACE pg_default;
 
+create trigger trigger_cleanup_media_file_hard_delete
+after DELETE on media_files for EACH row
+execute FUNCTION cleanup_media_file_storage ();
+
+create trigger trigger_cleanup_media_file_soft_delete
+after
+update OF is_deleted on media_files for EACH row when (
+  new.is_deleted = true
+  and old.is_deleted = false
+)
+execute FUNCTION cleanup_media_file_storage ();
+
 ---------- TABLA MEDIA_LINKS:
 
 create table public.media_links (
   id uuid not null default gen_random_uuid (),
   media_file_id uuid not null,
-  organization_id uuid not null,
+  organization_id uuid null,
   project_id uuid null,
   site_log_id uuid null,
   movement_id uuid null,
   contact_id uuid null,
   course_lesson_id uuid null,
   general_cost_id uuid null,
-  client_payment_id uuid null,
-  course_id uuid null,
-  course_module_id uuid null,
   created_by uuid null,
   created_at timestamp with time zone not null default now(),
   visibility text null,
@@ -57,18 +65,22 @@ create table public.media_links (
   is_cover boolean null default false,
   position integer null,
   metadata jsonb null default '{}'::jsonb,
+  client_payment_id uuid null,
+  course_id uuid null,
+  course_module_id uuid null,
+  is_public boolean null default false,
   constraint media_links_pkey primary key (id),
+  constraint media_links_client_payment_fkey foreign KEY (client_payment_id) references client_payments (id) on delete CASCADE,
   constraint media_links_contact_fkey foreign KEY (contact_id) references contacts (id) on delete CASCADE,
   constraint media_links_cost_fkey foreign KEY (general_cost_id) references general_costs (id) on delete set null,
+  constraint media_links_course_fkey foreign KEY (course_id) references courses (id) on delete CASCADE,
   constraint media_links_course_lesson_fkey foreign KEY (course_lesson_id) references course_lessons (id) on delete set null,
+  constraint media_links_course_module_fkey foreign KEY (course_module_id) references course_modules (id) on delete CASCADE,
   constraint media_links_media_fkey foreign KEY (media_file_id) references media_files (id) on delete CASCADE,
   constraint media_links_movement_fkey foreign KEY (movement_id) references movements (id) on delete CASCADE,
   constraint media_links_org_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
   constraint media_links_project_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
   constraint media_links_sitelog_fkey foreign KEY (site_log_id) references site_logs (id) on delete CASCADE,
-  constraint media_links_client_payment_fkey foreign KEY (client_payment_id) references client_payments (id) on delete CASCADE,
-  constraint media_links_course_fkey foreign KEY (course_id) references courses (id) on delete CASCADE,
-  constraint media_links_course_module_fkey foreign KEY (course_module_id) references course_modules (id) on delete CASCADE,
   constraint media_links_category_check check (
     (
       (category is null)
@@ -126,6 +138,8 @@ where
     and (organization_id is not null)
   );
 
+create index IF not exists idx_media_links_media_file on public.media_links using btree (media_file_id, organization_id) TABLESPACE pg_default;
+
 create index IF not exists idx_media_links_client_payment on public.media_links using btree (client_payment_id) TABLESPACE pg_default
 where
   (
@@ -135,16 +149,12 @@ where
 
 create index IF not exists idx_media_links_course on public.media_links using btree (course_id) TABLESPACE pg_default
 where
-  (
-    (course_id is not null)
-    and (organization_id is not null)
-  );
+  (course_id is not null);
 
 create index IF not exists idx_media_links_course_module on public.media_links using btree (course_module_id) TABLESPACE pg_default
 where
-  (
-    (course_module_id is not null)
-    and (organization_id is not null)
-  );
+  (course_module_id is not null);
 
-create index IF not exists idx_media_links_media_file on public.media_links using btree (media_file_id, organization_id) TABLESPACE pg_default;
+create index IF not exists idx_media_links_is_public on public.media_links using btree (is_public) TABLESPACE pg_default
+where
+  (is_public = true);

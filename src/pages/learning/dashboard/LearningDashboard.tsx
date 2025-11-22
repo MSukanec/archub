@@ -70,63 +70,70 @@ export default function LearningDashboard() {
           </p>
         </div>
 
-        {/* Hero Section - Always visible */}
-        <div 
-          className="relative h-[300px] md:h-[400px] rounded-xl overflow-hidden group cursor-pointer"
-          onClick={() => navigate('/learning/courses')}
-          data-testid="hero-archicad-course"
-        >
+        {/* Hero Section - Show first available course */}
+        {courses && courses.length > 0 && (
           <div 
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-            style={{
-              backgroundImage: `url(/ArchiCADCourse.jpg)`
-            }}
-          />
-          
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
-          
-          <div className="relative h-full flex flex-col justify-end p-6 md:p-10">
-            <div className="mb-4">
-              <Badge 
-                style={{ 
-                  backgroundColor: 'var(--accent)', 
-                  color: 'white',
-                  borderColor: 'var(--accent)'
-                }}
-                className="text-[10px] md:text-xs font-medium uppercase"
-                data-testid="badge-recommended"
+            className="relative h-[300px] md:h-[400px] rounded-xl overflow-hidden group cursor-pointer"
+            onClick={() => navigate(`/learning/courses/${courses[0].course_slug}`)}
+            data-testid="hero-featured-course"
+          >
+            {courses[0].cover_url ? (
+              <>
+                <div 
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                  style={{
+                    backgroundImage: `url(${courses[0].cover_url})`
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
+              </>
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/10" />
+            )}
+            
+            <div className="relative h-full flex flex-col justify-end p-6 md:p-10">
+              <div className="mb-4">
+                <Badge 
+                  style={{ 
+                    backgroundColor: 'var(--accent)', 
+                    color: 'white',
+                    borderColor: 'var(--accent)'
+                  }}
+                  className="text-[10px] md:text-xs font-medium uppercase"
+                  data-testid="badge-featured"
+                >
+                  Destacado
+                </Badge>
+              </div>
+              
+              <h1 
+                className="text-4xl md:text-6xl font-bold mb-3 md:mb-4 tracking-tight !text-white" 
+                data-testid="text-hero-title"
               >
-                Recomendado
-              </Badge>
-            </div>
-            
-            <h1 
-              className="text-4xl md:text-6xl font-bold mb-3 md:mb-4 tracking-tight !text-white" 
-              data-testid="text-hero-title"
-            >
-              Master ArchiCAD Online
-            </h1>
-            
-            <p className="text-sm md:text-base max-w-2xl mb-6" style={{ color: '#9ca3af' }}>
-              Domina las herramientas más avanzadas de diseño arquitectónico y modelado BIM
-            </p>
-            
-            <div>
-              <Button
-                size="lg"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate('/learning/courses');
-                }}
-                className="group/btn"
-                data-testid="button-go-to-archicad"
-              >
-                <span>Ver Curso</span>
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
-              </Button>
+                {courses[0].course_title}
+              </h1>
+              
+              <p className="text-sm md:text-base max-w-2xl mb-6" style={{ color: '#9ca3af' }}>
+                {courses[0].done_lessons} de {courses[0].total_lessons} lecciones completadas • {courses[0].progress_pct}% completado
+              </p>
+              
+              <div>
+                <Button
+                  size="lg"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/learning/courses/${courses[0].course_slug}`);
+                  }}
+                  className="group/btn"
+                  data-testid="button-continue-course"
+                >
+                  <span>Continuar Curso</span>
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Continue Where You Left Off Section */}
         <StatCard>
@@ -150,11 +157,17 @@ export default function LearningDashboard() {
                   >
                     {/* Imagen - arriba en mobile, izquierda en desktop */}
                     <div className="w-full md:w-24 h-40 md:h-24 rounded-lg overflow-hidden md:flex-shrink-0 bg-muted">
-                      <img 
-                        src="/ArchiCADCourse.jpg" 
-                        alt={course.course_title}
-                        className="w-full h-full object-cover"
-                      />
+                      {course.cover_url ? (
+                        <img 
+                          src={course.cover_url} 
+                          alt={course.course_title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                          <BookOpen className="h-12 w-12 text-primary/20" />
+                        </div>
+                      )}
                     </div>
                     
                     {/* Contenido - stack vertical en mobile y desktop */}

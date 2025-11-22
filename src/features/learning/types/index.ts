@@ -139,6 +139,7 @@ export interface LearningDashboardFast {
     course_id: string;
     course_title: string;
     course_slug: string;
+    cover_url: string | null;
     progress_pct: number;
     done_lessons: number;
     total_lessons: number;
