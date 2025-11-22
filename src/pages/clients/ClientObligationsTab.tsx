@@ -17,6 +17,7 @@ import {
   useClientCommitments,
   useClientPayments,
   useDeleteProjectClient,
+  useDeleteClientCommitment,
   mapToClientSummaries,
   type ProjectClientSummary,
   type CurrencyFinancial,
@@ -94,8 +95,9 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     return mostCommon.currency;
   }, [commitmentsData]);
 
-  // Delete mutation using feature hook
+  // Delete mutations using feature hooks
   const deleteClientMutation = useDeleteProjectClient();
+  const deleteCommitmentMutation = useDeleteClientCommitment();
 
   const handleDelete = async (client: ProjectClientSummary) => {
     if (!activeProjectId || !organizationId) {
@@ -166,6 +168,45 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
         email: client.contacts.email,
         phone: client.contacts.phone,
         created_at: new Date().toISOString(),
+      },
+    });
+  };
+
+  const handleDeleteCommitment = async (commitmentId: string, clientName: string) => {
+    if (!activeProjectId || !organizationId) {
+      toast({
+        title: 'No disponible',
+        description: 'Para eliminar un compromiso, selecciona un proyecto específico',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    openModal('delete-confirmation', {
+      mode: 'dangerous',
+      title: 'Eliminar Compromiso',
+      description: 'Se eliminará este compromiso de pago. Esta acción no se puede deshacer.',
+      itemName: clientName,
+      itemType: 'compromiso de pago',
+      onConfirm: async () => {
+        try {
+          await deleteCommitmentMutation.mutateAsync({
+            commitmentId,
+            organizationId,
+            projectId: activeProjectId!,
+          });
+
+          toast({
+            title: 'Compromiso eliminado',
+            description: 'El compromiso ha sido eliminado correctamente',
+          });
+        } catch (error: any) {
+          toast({
+            title: 'Error',
+            description: error.message || 'No se pudo eliminar el compromiso',
+            variant: 'destructive',
+          });
+        }
       },
     });
   };
@@ -627,7 +668,19 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             {
               label: 'Eliminar',
               icon: Trash2,
-              onClick: () => handleDelete(client),
+              onClick: () => {
+                if (clientCommitment) {
+                  // Eliminar el compromiso, no el cliente
+                  handleDeleteCommitment(clientCommitment.id, client.clientName);
+                } else {
+                  // Si no hay compromiso, no hay nada que eliminar
+                  toast({
+                    title: 'No hay compromiso',
+                    description: 'Este cliente no tiene un compromiso de pago asignado',
+                    variant: 'destructive',
+                  });
+                }
+              },
               variant: 'destructive',
             },
           ];
