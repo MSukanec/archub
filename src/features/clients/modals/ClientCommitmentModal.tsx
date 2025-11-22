@@ -275,7 +275,7 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
           />
 
           {/* Row 2: Moneda / Monto Comprometido / Tipo de Cambio (3 columnas en desktop) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <FormField
               control={form.control}
               name="currency_id"

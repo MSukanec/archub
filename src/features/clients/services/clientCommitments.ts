@@ -59,7 +59,9 @@ export async function getClientCommitments(
           linked_at,
           sync_status,
           created_at,
-          updated_at
+          updated_at,
+          is_deleted,
+          deleted_at
         ),
         role:client_roles(
           id,
@@ -68,7 +70,9 @@ export async function getClientCommitments(
           description,
           is_default,
           created_at,
-          updated_at
+          updated_at,
+          is_deleted,
+          deleted_at
         )
       ),
       currency:currencies(
@@ -95,8 +99,12 @@ export async function getClientCommitments(
     ...commitment,
     project_client: commitment.project_client ? {
       ...commitment.project_client,
-      contact: commitment.project_client.contact || null,
-      role: commitment.project_client.role || null,
+      contact: commitment.project_client.contact && !commitment.project_client.contact.is_deleted 
+        ? commitment.project_client.contact 
+        : null,
+      role: commitment.project_client.role && !commitment.project_client.role.is_deleted 
+        ? commitment.project_client.role 
+        : null,
     } : null,
     currency: commitment.currency || null,
   }));
@@ -162,7 +170,9 @@ export async function getClientCommitmentById(
           linked_at,
           sync_status,
           created_at,
-          updated_at
+          updated_at,
+          is_deleted,
+          deleted_at
         ),
         role:client_roles(
           id,
@@ -171,7 +181,9 @@ export async function getClientCommitmentById(
           description,
           is_default,
           created_at,
-          updated_at
+          updated_at,
+          is_deleted,
+          deleted_at
         )
       ),
       currency:currencies(
@@ -198,8 +210,12 @@ export async function getClientCommitmentById(
     ...data,
     project_client: data.project_client ? {
       ...data.project_client,
-      contact: data.project_client.contact || null,
-      role: data.project_client.role || null,
+      contact: data.project_client.contact && !data.project_client.contact.is_deleted 
+        ? data.project_client.contact 
+        : null,
+      role: data.project_client.role && !data.project_client.role.is_deleted 
+        ? data.project_client.role 
+        : null,
     } : null,
     currency: data.currency || null,
   };
@@ -264,7 +280,9 @@ export async function createClientCommitment(
           linked_at,
           sync_status,
           created_at,
-          updated_at
+          updated_at,
+          is_deleted,
+          deleted_at
         ),
         role:client_roles(
           id,
@@ -273,7 +291,9 @@ export async function createClientCommitment(
           description,
           is_default,
           created_at,
-          updated_at
+          updated_at,
+          is_deleted,
+          deleted_at
         )
       ),
       currency:currencies(
@@ -293,8 +313,12 @@ export async function createClientCommitment(
     ...data,
     project_client: data.project_client ? {
       ...data.project_client,
-      contact: data.project_client.contact || null,
-      role: data.project_client.role || null,
+      contact: data.project_client.contact && !data.project_client.contact.is_deleted 
+        ? data.project_client.contact 
+        : null,
+      role: data.project_client.role && !data.project_client.role.is_deleted 
+        ? data.project_client.role 
+        : null,
     } : null,
     currency: data.currency || null,
   };
@@ -357,7 +381,9 @@ export async function updateClientCommitment(
           linked_at,
           sync_status,
           created_at,
-          updated_at
+          updated_at,
+          is_deleted,
+          deleted_at
         ),
         role:client_roles(
           id,
@@ -366,7 +392,9 @@ export async function updateClientCommitment(
           description,
           is_default,
           created_at,
-          updated_at
+          updated_at,
+          is_deleted,
+          deleted_at
         )
       ),
       currency:currencies(
@@ -386,8 +414,12 @@ export async function updateClientCommitment(
     ...data,
     project_client: data.project_client ? {
       ...data.project_client,
-      contact: data.project_client.contact || null,
-      role: data.project_client.role || null,
+      contact: data.project_client.contact && !data.project_client.contact.is_deleted 
+        ? data.project_client.contact 
+        : null,
+      role: data.project_client.role && !data.project_client.role.is_deleted 
+        ? data.project_client.role 
+        : null,
     } : null,
     currency: data.currency || null,
   };

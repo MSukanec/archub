@@ -45,7 +45,9 @@ export async function getProjectClients(
         linked_at,
         sync_status,
         created_at,
-        updated_at
+        updated_at,
+        is_deleted,
+        deleted_at
       ),
       role:client_roles(
         id,
@@ -54,7 +56,9 @@ export async function getProjectClients(
         description,
         is_default,
         created_at,
-        updated_at
+        updated_at,
+        is_deleted,
+        deleted_at
       )
     `)
     .eq('organization_id', organizationId)
@@ -72,8 +76,8 @@ export async function getProjectClients(
 
   const data = clientsData.map(client => ({
     ...client,
-    contact: client.contact || null,
-    role: client.role || null,
+    contact: client.contact && !client.contact.is_deleted ? client.contact : null,
+    role: client.role && !client.role.is_deleted ? client.role : null,
   }));
 
   return data;
@@ -123,7 +127,9 @@ export async function getProjectClientById(
         linked_at,
         sync_status,
         created_at,
-        updated_at
+        updated_at,
+        is_deleted,
+        deleted_at
       ),
       role:client_roles(
         id,
@@ -132,7 +138,9 @@ export async function getProjectClientById(
         description,
         is_default,
         created_at,
-        updated_at
+        updated_at,
+        is_deleted,
+        deleted_at
       )
     `)
     .eq('id', clientId)
@@ -150,8 +158,8 @@ export async function getProjectClientById(
 
   return {
     ...data,
-    contact: data.contact || null,
-    role: data.role || null,
+    contact: data.contact && !data.contact.is_deleted ? data.contact : null,
+    role: data.role && !data.role.is_deleted ? data.role : null,
   };
 }
 
@@ -202,7 +210,9 @@ export async function createProjectClient(
         linked_at,
         sync_status,
         created_at,
-        updated_at
+        updated_at,
+        is_deleted,
+        deleted_at
       ),
       role:client_roles(
         id,
@@ -211,7 +221,9 @@ export async function createProjectClient(
         description,
         is_default,
         created_at,
-        updated_at
+        updated_at,
+        is_deleted,
+        deleted_at
       )
     `)
     .single();
@@ -222,8 +234,8 @@ export async function createProjectClient(
 
   return {
     ...data,
-    contact: data.contact || null,
-    role: data.role || null,
+    contact: data.contact && !data.contact.is_deleted ? data.contact : null,
+    role: data.role && !data.role.is_deleted ? data.role : null,
   };
 }
 
@@ -271,7 +283,9 @@ export async function updateProjectClient(
         linked_at,
         sync_status,
         created_at,
-        updated_at
+        updated_at,
+        is_deleted,
+        deleted_at
       ),
       role:client_roles(
         id,
@@ -280,7 +294,9 @@ export async function updateProjectClient(
         description,
         is_default,
         created_at,
-        updated_at
+        updated_at,
+        is_deleted,
+        deleted_at
       )
     `)
     .single();
@@ -291,8 +307,8 @@ export async function updateProjectClient(
 
   return {
     ...data,
-    contact: data.contact || null,
-    role: data.role || null,
+    contact: data.contact && !data.contact.is_deleted ? data.contact : null,
+    role: data.role && !data.role.is_deleted ? data.role : null,
   };
 }
 

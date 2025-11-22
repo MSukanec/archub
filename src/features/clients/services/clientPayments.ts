@@ -61,7 +61,9 @@ export async function getClientPayments(
           linked_at,
           sync_status,
           created_at,
-          updated_at
+          updated_at,
+          is_deleted,
+          deleted_at
         ),
         role:client_roles(
           id,
@@ -70,7 +72,9 @@ export async function getClientPayments(
           description,
           is_default,
           created_at,
-          updated_at
+          updated_at,
+          is_deleted,
+          deleted_at
         )
       ),
       commitment:client_commitments(
@@ -167,8 +171,12 @@ export async function getClientPayments(
     ...payment,
     client: payment.client ? {
       ...payment.client,
-      contact: payment.client.contact || null,
-      role: payment.client.role || null,
+      contact: payment.client.contact && !payment.client.contact.is_deleted 
+        ? payment.client.contact 
+        : null,
+      role: payment.client.role && !payment.client.role.is_deleted 
+        ? payment.client.role 
+        : null,
     } : null,
     commitment: payment.commitment || null,
     schedule: payment.schedule || null,
@@ -258,7 +266,9 @@ export async function getClientPaymentById(
           linked_at,
           sync_status,
           created_at,
-          updated_at
+          updated_at,
+          is_deleted,
+          deleted_at
         ),
         role:client_roles(
           id,
@@ -267,7 +277,9 @@ export async function getClientPaymentById(
           description,
           is_default,
           created_at,
-          updated_at
+          updated_at,
+          is_deleted,
+          deleted_at
         )
       ),
       commitment:client_commitments(
@@ -349,8 +361,12 @@ export async function getClientPaymentById(
     ...data,
     client: data.client ? {
       ...data.client,
-      contact: data.client.contact || null,
-      role: data.client.role || null,
+      contact: data.client.contact && !data.client.contact.is_deleted 
+        ? data.client.contact 
+        : null,
+      role: data.client.role && !data.client.role.is_deleted 
+        ? data.client.role 
+        : null,
     } : null,
     commitment: data.commitment || null,
     schedule: data.schedule || null,
@@ -430,7 +446,9 @@ export async function createClientPayment(
           linked_at,
           sync_status,
           created_at,
-          updated_at
+          updated_at,
+          is_deleted,
+          deleted_at
         ),
         role:client_roles(
           id,
@@ -439,7 +457,9 @@ export async function createClientPayment(
           description,
           is_default,
           created_at,
-          updated_at
+          updated_at,
+          is_deleted,
+          deleted_at
         )
       ),
       commitment:client_commitments(
@@ -499,8 +519,12 @@ export async function createClientPayment(
     ...data,
     client: data.client ? {
       ...data.client,
-      contact: data.client.contact || null,
-      role: data.client.role || null,
+      contact: data.client.contact && !data.client.contact.is_deleted 
+        ? data.client.contact 
+        : null,
+      role: data.client.role && !data.client.role.is_deleted 
+        ? data.client.role 
+        : null,
     } : null,
     commitment: data.commitment || null,
     schedule: data.schedule || null,
@@ -566,7 +590,9 @@ export async function updateClientPayment(
           linked_at,
           sync_status,
           created_at,
-          updated_at
+          updated_at,
+          is_deleted,
+          deleted_at
         ),
         role:client_roles(
           id,
@@ -575,7 +601,9 @@ export async function updateClientPayment(
           description,
           is_default,
           created_at,
-          updated_at
+          updated_at,
+          is_deleted,
+          deleted_at
         )
       ),
       commitment:client_commitments(
@@ -635,8 +663,12 @@ export async function updateClientPayment(
     ...data,
     client: data.client ? {
       ...data.client,
-      contact: data.client.contact || null,
-      role: data.client.role || null,
+      contact: data.client.contact && !data.client.contact.is_deleted 
+        ? data.client.contact 
+        : null,
+      role: data.client.role && !data.client.role.is_deleted 
+        ? data.client.role 
+        : null,
     } : null,
     commitment: data.commitment || null,
     schedule: data.schedule || null,
