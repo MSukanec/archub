@@ -76,22 +76,15 @@ export function InstallmentsPlanSection({ form }: InstallmentsPlanSectionProps) 
               <FormControl>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <div
-                      className={cn(
-                        'flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background cursor-pointer',
-                        'hover:bg-accent/5 transition-colors',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                      data-testid="button-installments-start-date"
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
-                      <span className="flex-1">
-                        {field.value ? (
-                          format(new Date(field.value), 'PPP', { locale: es })
-                        ) : (
-                          'Seleccionar fecha'
-                        )}
-                      </span>
+                    <div className="relative">
+                      <Input
+                        placeholder="Seleccionar fecha"
+                        value={field.value ? format(new Date(field.value), 'dd/MM/yyyy', { locale: es }) : ''}
+                        className="pr-10 cursor-pointer"
+                        readOnly
+                        data-testid="input-installments-start-date"
+                      />
+                      <CalendarIcon className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
