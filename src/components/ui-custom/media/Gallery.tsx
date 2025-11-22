@@ -24,7 +24,14 @@ import {
   FolderOpen,
   Grid3X3,
   LayoutGrid,
-  MoreVertical
+  MoreVertical,
+  Image as ImageIcon,
+  Video,
+  FileText,
+  BookOpen,
+  Users,
+  DollarSign,
+  GraduationCap
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -44,6 +51,44 @@ interface GalleryFile {
   visibility: string;
   created_by: string;
   site_log_id?: string | null;
+  movement_id?: string | null;
+  contact_id?: string | null;
+  course_lesson_id?: string | null;
+  general_cost_id?: string | null;
+  client_payment_id?: string | null;
+}
+
+// Helper para obtener el icono según el tipo de archivo
+function getFileTypeIcon(fileType: string) {
+  if (fileType === 'image' || fileType?.startsWith('image/')) {
+    return ImageIcon;
+  } else if (fileType === 'video' || fileType?.startsWith('video/')) {
+    return Video;
+  }
+  return FileText;
+}
+
+// Helper para obtener el icono y label según el origen del archivo
+function getSourceInfo(file: GalleryFile): { icon: any; label: string; color: string } | null {
+  if (file.site_log_id) {
+    return { icon: BookOpen, label: 'Bitácora', color: 'bg-blue-500' };
+  }
+  if (file.client_payment_id) {
+    return { icon: Users, label: 'Clientes', color: 'bg-purple-500' };
+  }
+  if (file.movement_id) {
+    return { icon: DollarSign, label: 'Movimientos', color: 'bg-green-500' };
+  }
+  if (file.contact_id) {
+    return { icon: Users, label: 'Contactos', color: 'bg-orange-500' };
+  }
+  if (file.course_lesson_id) {
+    return { icon: GraduationCap, label: 'Cursos', color: 'bg-indigo-500' };
+  }
+  if (file.general_cost_id) {
+    return { icon: DollarSign, label: 'Costos', color: 'bg-yellow-500' };
+  }
+  return null;
 }
 
 interface GalleryProps {
@@ -327,6 +372,40 @@ export function Gallery({
                     </div>
                   )}
                   
+                  {/* Badges en la esquina superior izquierda */}
+                  <div className="absolute top-2 left-2 flex gap-1 z-10">
+                    {/* Badge 1: Tipo de archivo */}
+                    {(() => {
+                      const FileIcon = getFileTypeIcon(file.file_type);
+                      return (
+                        <div
+                          className="h-6 w-6 rounded-full bg-white/90 backdrop-blur-sm shadow-md border border-gray-300 flex items-center justify-center"
+                          title={file.file_type === 'image' || file.file_type?.startsWith('image/') ? 'Imagen' : file.file_type === 'video' || file.file_type?.startsWith('video/') ? 'Video' : 'Documento'}
+                        >
+                          <FileIcon className="h-3.5 w-3.5 text-gray-700" />
+                        </div>
+                      );
+                    })()}
+                    
+                    {/* Badge 2: Origen del archivo */}
+                    {(() => {
+                      const sourceInfo = getSourceInfo(file);
+                      if (!sourceInfo) return null;
+                      const SourceIcon = sourceInfo.icon;
+                      return (
+                        <div
+                          className={cn(
+                            "h-6 w-6 rounded-full shadow-md border border-white/50 flex items-center justify-center",
+                            sourceInfo.color
+                          )}
+                          title={sourceInfo.label}
+                        >
+                          <SourceIcon className="h-3.5 w-3.5 text-white" />
+                        </div>
+                      );
+                    })()}
+                  </div>
+                  
                   {/* Botón de opciones arriba a la derecha */}
                   {(onEdit || onDownload || onDelete) && (
                     <DropdownMenu>
@@ -433,6 +512,40 @@ export function Gallery({
                         <FolderOpen className="w-8 h-8 text-gray-400" />
                       </div>
                     )}
+                    
+                    {/* Badges en la esquina superior izquierda */}
+                    <div className="absolute top-2 left-2 flex gap-1 z-10">
+                      {/* Badge 1: Tipo de archivo */}
+                      {(() => {
+                        const FileIcon = getFileTypeIcon(file.file_type);
+                        return (
+                          <div
+                            className="h-6 w-6 rounded-full bg-white/90 backdrop-blur-sm shadow-md border border-gray-300 flex items-center justify-center"
+                            title={file.file_type === 'image' || file.file_type?.startsWith('image/') ? 'Imagen' : file.file_type === 'video' || file.file_type?.startsWith('video/') ? 'Video' : 'Documento'}
+                          >
+                            <FileIcon className="h-3.5 w-3.5 text-gray-700" />
+                          </div>
+                        );
+                      })()}
+                      
+                      {/* Badge 2: Origen del archivo */}
+                      {(() => {
+                        const sourceInfo = getSourceInfo(file);
+                        if (!sourceInfo) return null;
+                        const SourceIcon = sourceInfo.icon;
+                        return (
+                          <div
+                            className={cn(
+                              "h-6 w-6 rounded-full shadow-md border border-white/50 flex items-center justify-center",
+                              sourceInfo.color
+                            )}
+                            title={sourceInfo.label}
+                          >
+                            <SourceIcon className="h-3.5 w-3.5 text-white" />
+                          </div>
+                        );
+                      })()}
+                    </div>
                     
                     {/* Botón de opciones arriba a la derecha */}
                     {(onEdit || onDownload || onDelete) && (

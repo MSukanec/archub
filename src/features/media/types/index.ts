@@ -81,6 +81,11 @@ export interface MediaFileWithLink {
   project_id: string | null;
   project_name?: string;
   site_log_id: string | null;
+  movement_id?: string | null;
+  contact_id?: string | null;
+  course_lesson_id?: string | null;
+  general_cost_id?: string | null;
+  client_payment_id?: string | null;
   organization_id: string;
   visibility: MediaVisibility | null;
   description: string | null;

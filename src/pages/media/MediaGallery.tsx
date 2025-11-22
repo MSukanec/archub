@@ -145,14 +145,20 @@ export function MediaGallery() {
     <div className="space-y-6">
       {galleryFiles.length > 0 && (
         <MediaStatsSection 
-          galleryFiles={galleryFiles}
+          galleryFiles={galleryFiles.map(file => ({
+            ...file,
+            file_size: file.file_size ?? undefined
+          })) as any}
           galleryStyle={galleryStyle}
           onGalleryStyleChange={() => setGalleryStyle(galleryStyle === 'uniform' ? 'masonry' : 'uniform')}
         />
       )}
       
       <GalleryComponent
-        files={galleryFiles as any}
+        files={galleryFiles.map(file => ({
+          ...file,
+          file_size: file.file_size ?? undefined
+        })) as any}
         onEdit={handleEdit as any}
         onDownload={handleDownload as any}
         onDelete={handleDelete as any}
