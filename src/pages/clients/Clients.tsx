@@ -17,7 +17,7 @@ import { useProjectContext } from '@/stores/projectContext'
 export function Clients() {
   const searchParams = useSearch();
   const urlParams = new URLSearchParams(searchParams);
-  const tabFromUrl = urlParams.get('tab') || 'dashboard';
+  const tabFromUrl = urlParams.get('tab') || 'list';
   const [activeTab, setActiveTab] = useState(tabFromUrl)
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
