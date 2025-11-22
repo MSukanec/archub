@@ -1,5 +1,27 @@
 # Detalle de las tablas de Supabase de Cursos:
 
+---------- Tabla COURSE_DETAILS:
+
+create table public.course_details (
+  id uuid not null default gen_random_uuid (),
+  course_id uuid not null,
+  instructor_name text null,
+  instructor_title text null,
+  instructor_bio text null,
+  instructor_photo_url text null,
+  badge_text text null,
+  highlights text[] null,
+  preview_video_id text null,
+  seo_keywords text[] null,
+  og_image_url text null,
+  landing_sections jsonb null,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  constraint course_details_pkey primary key (id),
+  constraint course_details_course_id_uniq unique (course_id),
+  constraint course_details_course_id_fkey foreign KEY (course_id) references courses (id) on delete CASCADE
+) TABLESPACE pg_default;
+
 ---------- Tabla COURSE_ENROLLMENTS:
 
 create table public.course_enrollments (
@@ -224,3 +246,4 @@ from
         constraint courses_slug_key unique (slug),
         constraint courses_created_by_fkey foreign KEY (created_by) references users (id) on delete set null
       ) TABLESPACE pg_default;
+      

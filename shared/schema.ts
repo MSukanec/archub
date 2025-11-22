@@ -1178,20 +1178,41 @@ export const courses = pgTable("courses", {
   created_at: timestamp("created_at").notNull().defaultNow(),
   updated_at: timestamp("updated_at").notNull().defaultNow(),
   price: numeric("price", { precision: 10, scale: 2 }), // Price in USD (like plans table)
-  // 🎓 Instructor fields for landing pages
+  // 🎓 Instructor fields for landing pages (LEGACY - moved to course_details)
   instructor_name: text("instructor_name"),
   instructor_title: text("instructor_title"),
   instructor_bio: text("instructor_bio"),
   instructor_photo_url: text("instructor_photo_url"),
+  // 🎨 Marketing fields for landing pages (LEGACY - moved to course_details)
+  badge_text: text("badge_text"),
+  highlights: text("highlights").array(),
+  preview_video_id: text("preview_video_id"),
+  // 🔍 SEO fields for landing pages (LEGACY - moved to course_details)
+  seo_keywords: text("seo_keywords").array(),
+  og_image_url: text("og_image_url"),
+  // 📄 Landing page section customization (LEGACY - moved to course_details)
+  landing_sections: jsonb("landing_sections"),
+});
+
+export const course_details = pgTable("course_details", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  course_id: uuid("course_id").notNull().unique(),
+  // 🎓 Instructor fields for landing pages
+  instructor_name: text("instructor_name"),
+  instructor_title: text("instructor_title"),
+  instructor_bio: text("instructor_bio"),
+  instructor_photo_url: text("instructor_photo_url"), // LEGACY - will be removed after media migration
   // 🎨 Marketing fields for landing pages
   badge_text: text("badge_text"),
   highlights: text("highlights").array(),
   preview_video_id: text("preview_video_id"),
   // 🔍 SEO fields for landing pages
   seo_keywords: text("seo_keywords").array(),
-  og_image_url: text("og_image_url"),
+  og_image_url: text("og_image_url"), // LEGACY - will be removed after media migration
   // 📄 Landing page section customization
   landing_sections: jsonb("landing_sections"),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const course_modules = pgTable("course_modules", {
@@ -1262,6 +1283,12 @@ export const insertCourseSchema = createInsertSchema(courses).omit({
   updated_at: true,
 });
 
+export const insertCourseDetailsSchema = createInsertSchema(course_details).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
 export const insertCourseModuleSchema = createInsertSchema(course_modules).omit({
   id: true,
   created_at: true,
@@ -1312,6 +1339,8 @@ export type LandingSection = z.infer<typeof landingSectionSchema>;
 export type LandingSections = z.infer<typeof landingSectionsSchema>;
 export type Course = typeof courses.$inferSelect;
 export type InsertCourse = z.infer<typeof insertCourseSchema>;
+export type CourseDetails = typeof course_details.$inferSelect;
+export type InsertCourseDetails = z.infer<typeof insertCourseDetailsSchema>;
 export type CourseModule = typeof course_modules.$inferSelect;
 export type InsertCourseModule = z.infer<typeof insertCourseModuleSchema>;
 export type Lesson = typeof course_lessons.$inferSelect;

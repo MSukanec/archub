@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import type { Course, CourseModule, Lesson, CourseFaq } from '@shared/schema';
+import type { Course, CourseDetails, CourseModule, Lesson, CourseFaq } from '@shared/schema';
 
 /**
  * Fetch public course data by slug (NO AUTH required)
@@ -10,10 +10,13 @@ export async function fetchCourseLandingBySlug(slug: string) {
     throw new Error('Supabase client not initialized');
   }
 
-  // 1. Fetch course
+  // 1. Fetch course with details
   const { data: course, error: courseError } = await supabase
     .from('courses')
-    .select('*')
+    .select(`
+      *,
+      course_details (*)
+    `)
     .eq('slug', slug)
     .eq('is_active', true)
     .eq('visibility', 'public')
@@ -21,6 +24,21 @@ export async function fetchCourseLandingBySlug(slug: string) {
 
   if (courseError) throw new Error(`Course not found: ${courseError.message}`);
   if (!course) throw new Error('Course not found');
+
+  // Merge course_details into course object
+  const courseDetails = (course as any).course_details?.[0] || (course as any).course_details;
+  if (courseDetails) {
+    Object.assign(course, {
+      instructor_name: courseDetails.instructor_name,
+      instructor_title: courseDetails.instructor_title,
+      instructor_bio: courseDetails.instructor_bio,
+      badge_text: courseDetails.badge_text,
+      highlights: courseDetails.highlights,
+      preview_video_id: courseDetails.preview_video_id,
+      seo_keywords: courseDetails.seo_keywords,
+      landing_sections: courseDetails.landing_sections,
+    });
+  }
 
   // 1.5. Fetch course media (cover, instructor photo, og_image)
   const { data: mediaLinks } = await supabase
@@ -97,7 +115,18 @@ export async function getAllPublicCourses() {
 
   const { data: courses, error } = await supabase
     .from('courses')
-    .select('id, slug, title, short_description, price, badge_text, instructor_name, instructor_title')
+    .select(`
+      id,
+      slug,
+      title,
+      short_description,
+      price,
+      course_details (
+        badge_text,
+        instructor_name,
+        instructor_title
+      )
+    `)
     .eq('is_active', true)
     .eq('visibility', 'public')
     .order('created_at', { ascending: false });
@@ -123,13 +152,18 @@ export async function getAllPublicCourses() {
     .eq('category', 'course_cover')
     .eq('media_files.is_deleted', false);
 
-  // Attach cover_url to each course
+  // Attach cover_url and merge course_details
   const coursesWithCovers = courses.map(course => {
     const coverLink = (mediaLinks || []).find((link: any) => link.course_id === course.id);
     const mediaFile = Array.isArray(coverLink?.media_files) ? coverLink.media_files[0] : coverLink?.media_files;
+    const courseDetails = (course as any).course_details?.[0] || (course as any).course_details;
+    
     return {
       ...course,
-      cover_url: mediaFile?.file_url || null
+      cover_url: mediaFile?.file_url || null,
+      badge_text: courseDetails?.badge_text || null,
+      instructor_name: courseDetails?.instructor_name || null,
+      instructor_title: courseDetails?.instructor_title || null,
     };
   });
 
