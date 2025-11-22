@@ -4,8 +4,8 @@
 
 create table public.client_commitments (
   id uuid not null default gen_random_uuid (),
-  project_id uuid not null,
-  client_id uuid not null,
+  project_id uuid null,
+  client_id uuid null,
   organization_id uuid not null,
   amount numeric(12, 2) not null,
   currency_id uuid not null,
@@ -16,11 +16,11 @@ create table public.client_commitments (
   is_deleted boolean not null default false,
   deleted_at timestamp with time zone null,
   constraint project_client_commitments_pkey primary key (id),
+  constraint client_commitments_client_id_fkey foreign KEY (client_id) references project_clients (id) on delete set null,
   constraint client_commitments_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
-  constraint fk_commit_client foreign KEY (client_id) references project_clients (id) on delete CASCADE,
+  constraint client_commitments_project_id_fkey foreign KEY (project_id) references projects (id) on delete set null,
   constraint fk_commit_currency foreign KEY (currency_id) references currencies (id) on delete RESTRICT,
   constraint fk_commit_org foreign KEY (organization_id) references organizations (id) on delete CASCADE,
-  constraint fk_commit_project foreign KEY (project_id) references projects (id) on delete CASCADE,
   constraint client_commitments_amount_positive check ((amount > (0)::numeric)),
   constraint client_commitments_exchange_rate_positive check ((exchange_rate > (0)::numeric))
 ) TABLESPACE pg_default;
