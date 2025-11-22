@@ -8,7 +8,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useDebouncedAutoSave } from '@/components/save/useDebouncedAutoSave';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { InstructorSection, ModulesSection } from '@/features/course-landing/components';
 import type { LandingSections, LandingSection, Course } from '@shared/schema';
 import type { ModuleWithLessons } from '@/features/course-landing/types';
@@ -243,10 +242,10 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
   });
 
   return (
-    <div className="w-full" data-testid="admin-course-marketing-tab">
+    <div className="w-full space-y-8" data-testid="admin-course-marketing-tab">
       {/* Auto-save indicator */}
       {isSaving && (
-        <Alert className="mb-6 bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+        <Alert className="bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
           <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           <AlertDescription className="text-blue-800 dark:text-blue-200">
             Guardando cambios automáticamente...
@@ -254,11 +253,10 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
         </Alert>
       )}
 
-      {/* Two-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column - Edit Cards (60-65% width) */}
-        <div className="lg:col-span-7 space-y-6">
-          {/* Instructor Data Section */}
+      {/* SECCIÓN INSTRUCTOR */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          {/* Instructor Data Card */}
           <div className="bg-card border rounded-lg p-6 space-y-4">
             <div>
               <h3 className="text-lg font-semibold mb-1">🎓 Información del Instructor</h3>
@@ -315,7 +313,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
             </div>
           </div>
 
-          {/* Instructor Section Header */}
+          {/* Instructor Section Header Card */}
           <div className="bg-card border rounded-lg p-6 space-y-4">
             <div>
               <h3 className="text-lg font-semibold mb-1">📝 Encabezado de Sección - Instructor</h3>
@@ -360,8 +358,38 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Modules Section Header */}
+        {/* Instructor Preview */}
+        <div>
+          <div className="sticky top-24 bg-muted/20 border rounded-lg p-4">
+            <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
+              Vista Previa - Instructor
+            </h4>
+            <div className="bg-background rounded-lg border overflow-hidden">
+              {courseData && (
+                <InstructorSection
+                  course={{
+                    ...courseData,
+                    instructor_name: instructorName,
+                    instructor_title: instructorTitle,
+                    instructor_bio: instructorBio,
+                    instructor_photo_url: instructorPhotoUrl
+                  } as Course}
+                  title={landingSections?.instructor?.title}
+                  subtitle={landingSections?.instructor?.subtitle}
+                  description={landingSections?.instructor?.description}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* SECCIÓN MÓDULOS */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+          {/* Modules Section Header Card */}
           <div className="bg-card border rounded-lg p-6 space-y-4">
             <div>
               <h3 className="text-lg font-semibold mb-1">📚 Encabezado de Sección - Módulos</h3>
@@ -406,163 +434,131 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
               </div>
             </div>
           </div>
-
-          {/* Marketing Section */}
-          <div className="bg-card border rounded-lg p-6 space-y-4">
-            <div>
-              <h3 className="text-lg font-semibold mb-1">🎨 Marketing y Presentación</h3>
-              <p className="text-sm text-muted-foreground">
-                Elementos visuales y de marketing para la página de landing
-              </p>
-            </div>
-
-            <div className="grid gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="badge-text">Texto del Badge</Label>
-                <Input
-                  id="badge-text"
-                  value={badgeText}
-                  onChange={(e) => setBadgeText(e.target.value)}
-                  placeholder="Ej: BESTSELLER, NUEVO, DESTACADO"
-                  data-testid="input-badge-text"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Badge que aparece en la esquina superior de la portada del curso
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="highlights">Puntos Destacados (Highlights)</Label>
-                <Textarea
-                  id="highlights"
-                  value={highlights}
-                  onChange={(e) => setHighlights(e.target.value)}
-                  placeholder="Aprende desde cero, Certificación incluida, Acceso de por vida"
-                  rows={3}
-                  data-testid="textarea-highlights"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Separa cada punto con una coma (,). Estos se mostrarán como viñetas en la landing.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="preview-video">ID de Video Preview (Vimeo)</Label>
-                <Input
-                  id="preview-video"
-                  value={previewVideoId}
-                  onChange={(e) => setPreviewVideoId(e.target.value)}
-                  placeholder="123456789"
-                  data-testid="input-preview-video"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Solo el ID numérico del video de Vimeo (ejemplo: de https://vimeo.com/123456789 usar 123456789)
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* SEO Section */}
-          <div className="bg-card border rounded-lg p-6 space-y-4">
-            <div>
-              <h3 className="text-lg font-semibold mb-1">🔍 SEO y Redes Sociales</h3>
-              <p className="text-sm text-muted-foreground">
-                Optimización para motores de búsqueda y vista previa en redes sociales
-              </p>
-            </div>
-
-            <div className="grid gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="seo-keywords">Palabras Clave SEO (Keywords)</Label>
-                <Textarea
-                  id="seo-keywords"
-                  value={seoKeywords}
-                  onChange={(e) => setSeoKeywords(e.target.value)}
-                  placeholder="archicad, curso archicad, bim, modelado 3d, arquitectura"
-                  rows={2}
-                  data-testid="textarea-seo-keywords"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Separa cada palabra clave con una coma (,). Estas keywords ayudan al posicionamiento en Google.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="og-image">Imagen Open Graph (OG Image)</Label>
-                <Input
-                  id="og-image"
-                  value={ogImageUrl}
-                  onChange={(e) => setOgImageUrl(e.target.value)}
-                  placeholder="https://ejemplo.com/og-image-curso.jpg"
-                  data-testid="input-og-image"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Imagen que se muestra al compartir el curso en Facebook, Twitter, LinkedIn, etc. (Recomendado: 1200x630px)
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Help Text */}
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription>
-              Los cambios se guardan automáticamente. Estos datos se utilizan para generar la página de landing pública del curso en <code className="text-xs bg-muted px-1 py-0.5 rounded">/cursos/{'{'}slug{'}'}</code>
-            </AlertDescription>
-          </Alert>
         </div>
 
-        {/* Right Column - Preview Panel (35-40% width) */}
-        <div className="hidden lg:block lg:col-span-5">
-          <div className="sticky top-24">
-            <div className="bg-muted/20 border rounded-lg p-4">
-              <h3 className="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wide">
-                Vista Previa en Vivo
-              </h3>
-              
-              <Tabs defaultValue="instructor" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-4">
-                  <TabsTrigger value="instructor" data-testid="tab-preview-instructor">
-                    Instructor
-                  </TabsTrigger>
-                  <TabsTrigger value="modules" data-testid="tab-preview-modules">
-                    Módulos
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="instructor" className="mt-0">
-                  <div className="bg-background rounded-lg border overflow-hidden">
-                    {courseData && (
-                      <InstructorSection
-                        course={{
-                          ...courseData,
-                          instructor_name: instructorName,
-                          instructor_title: instructorTitle,
-                          instructor_bio: instructorBio,
-                          instructor_photo_url: instructorPhotoUrl
-                        } as Course}
-                        title={landingSections?.instructor?.title}
-                        subtitle={landingSections?.instructor?.subtitle}
-                        description={landingSections?.instructor?.description}
-                      />
-                    )}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="modules" className="mt-0">
-                  <div className="bg-background rounded-lg border overflow-hidden">
-                    <ModulesSection
-                      modules={modulesWithLessons}
-                      title={landingSections?.modules?.title}
-                      subtitle={landingSections?.modules?.subtitle}
-                      description={landingSections?.modules?.description}
-                    />
-                  </div>
-                </TabsContent>
-              </Tabs>
+        {/* Modules Preview */}
+        <div>
+          <div className="sticky top-24 bg-muted/20 border rounded-lg p-4">
+            <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
+              Vista Previa - Módulos
+            </h4>
+            <div className="bg-background rounded-lg border overflow-hidden">
+              <ModulesSection
+                modules={modulesWithLessons}
+                title={landingSections?.modules?.title}
+                subtitle={landingSections?.modules?.subtitle}
+                description={landingSections?.modules?.description}
+              />
             </div>
           </div>
         </div>
+      </div>
+
+      {/* MARKETING Y SEO (no preview needed) */}
+      <div className="space-y-6">
+        {/* Marketing Section */}
+        <div className="bg-card border rounded-lg p-6 space-y-4">
+          <div>
+            <h3 className="text-lg font-semibold mb-1">🎨 Marketing y Presentación</h3>
+            <p className="text-sm text-muted-foreground">
+              Elementos visuales y de marketing para la página de landing
+            </p>
+          </div>
+
+          <div className="grid gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="badge-text">Texto del Badge</Label>
+              <Input
+                id="badge-text"
+                value={badgeText}
+                onChange={(e) => setBadgeText(e.target.value)}
+                placeholder="Ej: BESTSELLER, NUEVO, DESTACADO"
+                data-testid="input-badge-text"
+              />
+              <p className="text-xs text-muted-foreground">
+                Badge que aparece en la esquina superior de la portada del curso
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="highlights">Puntos Destacados (Highlights)</Label>
+              <Textarea
+                id="highlights"
+                value={highlights}
+                onChange={(e) => setHighlights(e.target.value)}
+                placeholder="Aprende desde cero, Certificación incluida, Acceso de por vida"
+                rows={3}
+                data-testid="textarea-highlights"
+              />
+              <p className="text-xs text-muted-foreground">
+                Separa cada punto con una coma (,). Estos se mostrarán como viñetas en la landing.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="preview-video">ID de Video Preview (Vimeo)</Label>
+              <Input
+                id="preview-video"
+                value={previewVideoId}
+                onChange={(e) => setPreviewVideoId(e.target.value)}
+                placeholder="123456789"
+                data-testid="input-preview-video"
+              />
+              <p className="text-xs text-muted-foreground">
+                Solo el ID numérico del video de Vimeo (ejemplo: de https://vimeo.com/123456789 usar 123456789)
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* SEO Section */}
+        <div className="bg-card border rounded-lg p-6 space-y-4">
+          <div>
+            <h3 className="text-lg font-semibold mb-1">🔍 SEO y Redes Sociales</h3>
+            <p className="text-sm text-muted-foreground">
+              Optimización para motores de búsqueda y vista previa en redes sociales
+            </p>
+          </div>
+
+          <div className="grid gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="seo-keywords">Palabras Clave SEO (Keywords)</Label>
+              <Textarea
+                id="seo-keywords"
+                value={seoKeywords}
+                onChange={(e) => setSeoKeywords(e.target.value)}
+                placeholder="archicad, curso archicad, bim, modelado 3d, arquitectura"
+                rows={2}
+                data-testid="textarea-seo-keywords"
+              />
+              <p className="text-xs text-muted-foreground">
+                Separa cada palabra clave con una coma (,). Estas keywords ayudan al posicionamiento en Google.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="og-image">Imagen Open Graph (OG Image)</Label>
+              <Input
+                id="og-image"
+                value={ogImageUrl}
+                onChange={(e) => setOgImageUrl(e.target.value)}
+                placeholder="https://ejemplo.com/og-image-curso.jpg"
+                data-testid="input-og-image"
+              />
+              <p className="text-xs text-muted-foreground">
+                Imagen que se muestra al compartir el curso en Facebook, Twitter, LinkedIn, etc. (Recomendado: 1200x630px)
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Help Text */}
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            Los cambios se guardan automáticamente. Estos datos se utilizan para generar la página de landing pública del curso en <code className="text-xs bg-muted px-1 py-0.5 rounded">/cursos/{'{'}slug{'}'}</code>
+          </AlertDescription>
+        </Alert>
       </div>
     </div>
   );
