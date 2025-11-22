@@ -30,6 +30,10 @@ Preferred communication style: Simple, everyday language.
 - **Soft Delete**: Implemented for key entities (organizations, contacts, projects, etc.) with all SELECT queries filtering `is_deleted = false`.
 - **Core Feature Management**: Comprehensive CRUD operations and related functionalities are implemented using Feature-Sliced Design for Projects, Subcontracts, Personnel, Materials, Financial, Contacts, Sitelog, Project Types, and Project Modalities. This includes mutation services via Express API and read operations via Supabase/API, ensuring authentication, validation, and consistent design patterns.
 - **Learning Module**: Supports course management, video integration, progress tracking, notes, enrollment, pricing, and payment integration following a strict architectural pattern.
+  - **Course Data Architecture**: Split between `COURSES` table (core data: title, price, visibility) and `COURSE_DETAILS` table (marketing data: instructor info, SEO, badges). Backend's `splitCourseData()` handles automatic data distribution.
+  - **Course Soft Delete**: Implemented with `is_deleted` and `deleted_at` columns. All queries filter `is_deleted=false`, DELETE operations use UPDATE to set `is_deleted=true`.
+  - **Course Media Management**: Course images (cover, instructor photo, OG image) managed exclusively via `MEDIA_LINKS` table. Legacy URL columns removed from schema.
+  - **Course Mutations**: Admin course create/update operations route through `/api/admin/courses` REST endpoint (not direct Supabase) to ensure proper data splitting between tables.
 - **AI Assistant**: Implemented with a clean frontend/backend separation. The frontend uses API services and React Query hooks for chat interaction, while the backend orchestrates context-aware GPT-4o powered responses using specialized tools for finance, organization, and project data.
 - **Payment Architecture**: Unified `payments` table supporting multiple gateways and centralized checkout.
 - **Access Control**: `PlanRestricted` component system provides comprehensive access control for organization membership and subscription plans (FREE, PRO, TEAMS, ENTERPRISE).
