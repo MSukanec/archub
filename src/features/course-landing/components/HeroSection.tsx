@@ -12,7 +12,7 @@ interface HeroSectionProps {
 
 export function HeroSection({ course, stats }: HeroSectionProps) {
   return (
-    <section className="relative min-h-[70vh] py-24 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 flex items-center overflow-hidden">
+    <section className="relative h-screen flex items-center overflow-hidden">
       {/* Background Image with Overlay */}
       {course.cover_url ? (
         <>
@@ -26,11 +26,9 @@ export function HeroSection({ course, stats }: HeroSectionProps) {
         <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20" />
       )}
 
-      {/* Content Grid - Only use 8 columns out of 12 */}
-      <div className="w-full relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-8">
-            <div className="max-w-3xl">
+      {/* Content */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-3xl">
           {course.badge_text && (
             <Badge variant="secondary" className="px-4 py-2 text-sm font-medium mb-6 bg-primary/90 text-primary-foreground border-0">
               <Award className="w-4 h-4 mr-2 inline" />
@@ -77,8 +75,6 @@ export function HeroSection({ course, stats }: HeroSectionProps) {
                 <span className="text-sm text-gray-200">/ año</span>
               </div>
             )}
-          </div>
-            </div>
           </div>
         </div>
       </div>

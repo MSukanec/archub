@@ -216,36 +216,19 @@ function TransparentHeaderLayout({
         </div>
       </header>
       
-      <main>
-        {stickyContent ? (
-          // Layout with sticky sidebar for desktop
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              {/* Main Content - 8 columns on desktop */}
-              <div className="lg:col-span-8 space-y-16">
-                {heroSlot}
-                {children}
-              </div>
-              
-              {/* Sticky Sidebar - 4 columns on desktop, hidden on mobile */}
-              <div className="hidden lg:block lg:col-span-4">
-                <div className="lg:sticky lg:top-24">
-                  {stickyContent}
-                </div>
-              </div>
-            </div>
+      {/* Floating Sticky Card - Desktop only, positioned absolutely */}
+      {stickyContent && (
+        <div className="hidden lg:block fixed top-24 right-8 w-[380px] z-40">
+          <div className="sticky top-24">
+            {stickyContent}
           </div>
-        ) : (
-          // Full-width layout without sticky sidebar
-          <>
-            {heroSlot && (
-              <div className="w-full">
-                {heroSlot}
-              </div>
-            )}
-            {children}
-          </>
-        )}
+        </div>
+      )}
+      
+      <main>
+        {/* Full-width sections */}
+        {heroSlot}
+        {children}
       </main>
       <PublicFooter />
     </div>

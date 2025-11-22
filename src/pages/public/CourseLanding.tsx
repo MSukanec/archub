@@ -110,7 +110,7 @@ export default function CourseLanding() {
       />
 
       {/* Landing Sections */}
-      <div className="space-y-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
         <InstructorSection course={course} />
         <ModulesSection modules={modules} />
         <FeaturesSection course={course} />
