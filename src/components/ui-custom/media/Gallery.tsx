@@ -169,8 +169,11 @@ export function Gallery({
   } = useMediaLightbox(mediaItems);
 
   const handleMediaClick = (file: GalleryFile) => {
-    if (file.file_type === 'image' || file.file_type?.startsWith('image/') ||
-        file.file_type === 'video' || file.file_type?.startsWith('video/')) {
+    const isMediaFile = file.file_type === 'image' || file.file_type?.startsWith('image/') ||
+                        file.file_type === 'video' || file.file_type?.startsWith('video/');
+    
+    if (isMediaFile) {
+      // Para imágenes y videos, abrir en lightbox
       const mediaIndex = files
         .filter(f => 
           f.file_type === 'image' || f.file_type?.startsWith('image/') ||
@@ -180,6 +183,9 @@ export function Gallery({
       if (mediaIndex !== -1) {
         openLightbox(mediaIndex);
       }
+    } else {
+      // Para documentos y otros archivos, abrir en nueva pestaña
+      window.open(file.file_url, '_blank');
     }
   };
 
