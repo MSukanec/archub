@@ -118,6 +118,7 @@ interface TableProps<T = any> {
     sortType?: "string" | "number" | "date";
     width?: string; // Nuevo: ancho personalizado (ej: "10%", "100px", etc.)
     cellClassName?: string; // Nuevo: clases CSS personalizadas para las celdas de esta columna
+    align?: 'left' | 'center' | 'right'; // Nuevo: alineación de header y contenido
   }[];
   data: T[];
   emptyState?: React.ReactNode; // DEPRECATED: Usar emptyStateConfig en su lugar
@@ -997,12 +998,18 @@ export function Table<T = any>({
           )}
           {columns.map((column) => {
             const isNumericColumn = column.sortType === "number";
+            const alignment = column.align || (isNumericColumn ? 'right' : 'left');
+            const justifyClass = alignment === 'right' ? 'justify-end' : alignment === 'center' ? 'justify-center' : 'justify-start';
+            
             return (
               <button
                 key={String(column.key)}
                 className={cn(
-                  "flex items-center text-left transition-colors hover:text-accent",
-                  isNumericColumn ? "justify-end" : "justify-start",
+                  "flex items-center transition-colors hover:text-accent",
+                  justifyClass,
+                  alignment === 'left' && "text-left",
+                  alignment === 'center' && "text-center",
+                  alignment === 'right' && "text-right",
                   column.sortable !== false && "cursor-pointer",
                 )}
                 onClick={() =>
@@ -1108,12 +1115,15 @@ export function Table<T = any>({
                     )}
                     {columns.map((column) => {
                       const isNumericColumn = column.sortType === "number";
+                      const alignment = column.align || (isNumericColumn ? 'right' : 'left');
+                      const justifyClass = alignment === 'right' ? 'justify-end' : alignment === 'center' ? 'justify-center' : 'justify-start';
+                      
                       return (
                         <div
                           key={String(column.key)}
                           className={cn(
                             "text-sm flex items-center",
-                            isNumericColumn ? "justify-end" : "justify-start",
+                            justifyClass,
                             mode === "budget" && "text-[var(--table-row-fg)]",
                             mode === "construction" && "text-[var(--table-row-fg)]",
                             column.cellClassName
@@ -1264,12 +1274,15 @@ export function Table<T = any>({
                 )}
                 {columns.map((column) => {
                   const isNumericColumn = column.sortType === "number";
+                  const alignment = column.align || (isNumericColumn ? 'right' : 'left');
+                  const justifyClass = alignment === 'right' ? 'justify-end' : alignment === 'center' ? 'justify-center' : 'justify-start';
+                  
                   return (
                     <div
                       key={String(column.key)}
                       className={cn(
                         "text-sm flex items-center",
-                        isNumericColumn ? "justify-end" : "justify-start",
+                        justifyClass,
                         column.cellClassName
                       )}
                     >
