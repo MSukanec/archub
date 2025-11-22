@@ -76,6 +76,7 @@ export function RightSidebar() {
       
       const { data, error } = await supabase
         .from('courses')
+        .eq('is_deleted', false)
         .select('*')
         .eq('slug', courseSlug)
         .single();

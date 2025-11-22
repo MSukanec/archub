@@ -199,6 +199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get all published courses from database
       const { data: courses, error } = await getAdminClient()
         .from('courses')
+        .eq('is_deleted', false)
         .select('slug, updated_at')
         .eq('is_active', true)
         .eq('visibility', 'public')

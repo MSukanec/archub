@@ -51,6 +51,7 @@ export async function getCoursesFull(
       // Get all active courses
       supabase
         .from('courses')
+        .eq('is_deleted', false)
         .select('id, slug, title, short_description, cover_url, is_active, visibility')
         .eq('is_active', true)
         .neq('visibility', 'draft'),

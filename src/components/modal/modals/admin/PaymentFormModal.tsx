@@ -72,6 +72,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
 
       const { data, error } = await supabase
         .from('courses')
+        .eq('is_deleted', false)
         .select('id, title')
         .eq('is_active', true)
         .order('title');

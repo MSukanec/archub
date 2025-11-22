@@ -104,6 +104,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
       
       const { data, error } = await supabase
         .from('courses')
+        .eq('is_deleted', false)
         .select('id, title, slug')
         .eq('is_active', true)
         .order('title', { ascending: true });

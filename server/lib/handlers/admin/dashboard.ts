@@ -35,10 +35,10 @@ export async function getDashboardStats(
       allProgressResult
     ] = await Promise.all([
       // Total courses
-      ctx.supabase.from('courses').select('id', { count: 'exact', head: true }),
+      ctx.supabase.from('courses').eq('is_deleted', false).select('id', { count: 'exact', head: true }),
       
       // Active courses
-      ctx.supabase.from('courses').select('id', { count: 'exact', head: true }).eq('is_active', true),
+      ctx.supabase.from('courses').eq('is_deleted', false).select('id', { count: 'exact', head: true }).eq('is_active', true),
       
       // Total enrollments
       ctx.supabase.from('course_enrollments').select('id', { count: 'exact', head: true }),

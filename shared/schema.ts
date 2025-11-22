@@ -1203,14 +1203,12 @@ export const course_details = pgTable("course_details", {
   instructor_name: text("instructor_name"),
   instructor_title: text("instructor_title"),
   instructor_bio: text("instructor_bio"),
-  instructor_photo_url: text("instructor_photo_url"), // LEGACY - will be removed after media migration
   // 🎨 Marketing fields for landing pages
   badge_text: text("badge_text"),
   highlights: text("highlights").array(),
   preview_video_id: text("preview_video_id"),
   // 🔍 SEO fields for landing pages
   seo_keywords: text("seo_keywords").array(),
-  og_image_url: text("og_image_url"), // LEGACY - will be removed after media migration
   // 📄 Landing page section customization
   landing_sections: jsonb("landing_sections"),
   created_at: timestamp("created_at").notNull().defaultNow(),

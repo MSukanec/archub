@@ -56,6 +56,7 @@ export async function create(req: Request, res: Response) {
 
     const { data: course, error: courseError } = await adminClient
       .from('courses')
+      .eq('is_deleted', false)
       .select('id')
       .eq('slug', course_slug)
       .maybeSingle();

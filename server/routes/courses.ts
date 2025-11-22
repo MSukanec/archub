@@ -1388,6 +1388,7 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         // Get all active courses
         authenticatedSupabase
           .from('courses')
+          .eq('is_deleted', false)
           .select('id, slug, title, short_description, cover_url, is_active, visibility')
           .eq('is_active', true)
           .neq('visibility', 'draft'),

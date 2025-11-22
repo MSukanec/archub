@@ -92,6 +92,7 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
       
       const { data, error } = await supabase
         .from('courses')
+        .eq('is_deleted', false)
         .select('id, slug, title')
         .order('title', { ascending: true });
       

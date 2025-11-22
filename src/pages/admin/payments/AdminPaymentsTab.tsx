@@ -91,6 +91,7 @@ const AdminPaymentsTab = () => {
       // Fetch courses
       const { data: coursesData, error: coursesError } = await supabase
         .from('courses')
+        .eq('is_deleted', false)
         .select('id, title, slug')
         .in('id', courseIds);
 

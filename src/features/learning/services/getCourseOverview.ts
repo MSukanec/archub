@@ -25,6 +25,7 @@ export async function getCourseOverview(
   
   let query = supabase
     .from('courses')
+    .eq('is_deleted', false)
     .select('*');
 
   if (isUuid) {

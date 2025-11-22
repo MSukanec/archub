@@ -11,12 +11,10 @@ const COURSE_DETAILS_FIELDS = [
   'instructor_name',
   'instructor_title',
   'instructor_bio',
-  'instructor_photo_url',
   'badge_text',
   'highlights',
   'preview_video_id',
   'seo_keywords',
-  'og_image_url',
   'landing_sections'
 ];
 
@@ -70,12 +68,10 @@ export async function listCourses(
           instructor_name,
           instructor_title,
           instructor_bio,
-          instructor_photo_url,
           badge_text,
           highlights,
           preview_video_id,
           seo_keywords,
-          og_image_url,
           landing_sections
         )
       `)
@@ -120,12 +116,10 @@ export async function getCourse(
           instructor_name,
           instructor_title,
           instructor_bio,
-          instructor_photo_url,
           badge_text,
           highlights,
           preview_video_id,
           seo_keywords,
-          og_image_url,
           landing_sections
         )
       `)
@@ -273,12 +267,10 @@ export async function updateCourse(
           instructor_name,
           instructor_title,
           instructor_bio,
-          instructor_photo_url,
           badge_text,
           highlights,
           preview_video_id,
           seo_keywords,
-          og_image_url,
           landing_sections
         )
       `)
