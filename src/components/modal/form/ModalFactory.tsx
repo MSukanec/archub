@@ -77,7 +77,7 @@ import { GeneralCostsModal } from '@/features/general-costs/modals/GeneralCostsM
 import { GeneralCostsPaymentModal } from '@/features/general-costs/modals/GeneralCostsPaymentModal';
 import { AdminLaborModal } from '../modals/admin/AdminLaborModal';
 import { CostModal } from '../modals/admin/CostModal';
-import { CourseFormModal } from '../modals/admin/CourseFormModal';
+import { CourseModal } from '@/features/learning/modals';
 import { CourseModuleFormModal } from '../modals/admin/CourseModuleFormModal';
 import { LessonFormModal } from '../modals/admin/LessonFormModal';
 import { CourseEnrollmentModal } from '../modals/admin/CourseEnrollmentModal';
@@ -265,7 +265,7 @@ export function ModalFactory() {
     case 'cost-modal':
       return <CostModal modalData={data || {}} onClose={closeModal} />;
     case 'course':
-      return <CourseFormModal modalData={data || undefined} onClose={closeModal} />;
+      return <CourseModal modalData={data || undefined} onClose={closeModal} />;
     case 'course-module':
       return <CourseModuleFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'lesson':
