@@ -53,16 +53,16 @@ export function PlanUpgradeModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="max-w-3xl p-0 gap-0 border-0 overflow-hidden md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-auto md:h-auto md:min-w-0 md:max-w-3xl"
+        className="p-0 gap-0 overflow-hidden md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-auto md:h-auto md:min-w-0 md:max-w-3xl md:rounded-lg md:border-none md:shadow-2xl"
         style={{ backgroundColor: 'hsl(0, 0%, 10%)' }}
       >
         <DialogTitle className="sr-only">{featureTitle}</DialogTitle>
         <DialogDescription className="sr-only">{featureDescription}</DialogDescription>
         
         {/* Header */}
-        <div className="px-6 pt-6 pb-4">
+        <div className="pt-6 pb-4">
           <Badge 
-            className="text-xs px-2.5 py-1 mb-3 border-0 font-medium"
+            className="text-xs px-2.5 py-1 mb-3 border-0 font-medium ml-6"
             style={{ 
               backgroundColor: planColor,
               color: 'white'
@@ -70,19 +70,19 @@ export function PlanUpgradeModal({
           >
             Plan {planName}
           </Badge>
-          <h2 className="text-xl font-semibold !text-white" aria-hidden="true">
+          <h2 className="text-xl font-semibold !text-white ml-6" aria-hidden="true">
             {featureTitle}
           </h2>
         </div>
 
         {/* Content - Two Columns */}
         <div className="grid grid-cols-2 gap-0">
-          {/* Left Column - Image (sin padding) */}
-          <div className="flex items-center justify-center bg-black/20 overflow-hidden">
+          {/* Left Column - Image (sin padding, con rounded) */}
+          <div className="flex items-center justify-center bg-black/20 overflow-hidden md:rounded-l-lg">
             <img 
               src={featureImage} 
               alt={featureTitle}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover md:rounded-l-lg"
             />
           </div>
 
@@ -113,14 +113,14 @@ export function PlanUpgradeModal({
 
         {/* Footer */}
         <div 
-          className="flex gap-3 px-6 py-4 border-t"
+          className="flex justify-end gap-3 px-6 py-4 border-t"
           style={{ borderColor: 'hsl(0, 0%, 20%)' }}
         >
           <Button
             type="button"
             variant="ghost"
             onClick={() => onOpenChange(false)}
-            className="w-1/4 border"
+            className="border"
             style={{ 
               borderColor: 'hsl(0, 0%, 30%)',
               color: 'hsl(0, 0%, 70%)'
@@ -132,7 +132,7 @@ export function PlanUpgradeModal({
           <Button
             type="button"
             onClick={handleViewPlans}
-            className="flex-1 font-medium"
+            className="font-medium"
             style={{ 
               backgroundColor: 'var(--accent)',
               color: 'white'
