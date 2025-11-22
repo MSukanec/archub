@@ -107,6 +107,9 @@ export async function uploadMediaFileV2(input: UploadMediaInputV2): Promise<Uplo
     }
 
     // 4. Create media_links record
+    // Determine if this is public (course-related media is always public)
+    const isPublic = !!(course_id || course_module_id || course_lesson_id);
+    
     const { data: mediaLink, error: mediaLinkError } = await supabase
       .from('media_links')
       .insert({
@@ -127,7 +130,8 @@ export async function uploadMediaFileV2(input: UploadMediaInputV2): Promise<Uplo
         category: category || null,
         is_cover,
         position: position || null,
-        metadata
+        metadata,
+        is_public: isPublic
       })
       .select('id')
       .single();

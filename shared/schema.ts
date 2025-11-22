@@ -1622,3 +1622,64 @@ export const user_view_history = pgTable("user_view_history", {
 });
 
 export type UserViewHistory = typeof user_view_history.$inferSelect;
+
+// Media Files Table (Centralized file storage)
+export const media_files = pgTable("media_files", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organization_id: uuid("organization_id"),
+  created_by: uuid("created_by"),
+  bucket: text("bucket").notNull().default("media"),
+  file_path: text("file_path").notNull(),
+  file_name: text("file_name").notNull(),
+  file_url: text("file_url").notNull(),
+  file_type: text("file_type", { enum: ["image", "video", "pdf", "doc", "other"] }).notNull(),
+  file_size: integer("file_size"),
+  is_public: boolean("is_public").default(false).notNull(),
+  is_deleted: boolean("is_deleted").default(false).notNull(),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const insertMediaFileSchema = createInsertSchema(media_files).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export type MediaFile = typeof media_files.$inferSelect;
+export type InsertMediaFile = z.infer<typeof insertMediaFileSchema>;
+
+// Media Links Table (Relationships between files and entities)
+export const media_links = pgTable("media_links", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  media_file_id: uuid("media_file_id").notNull(),
+  organization_id: uuid("organization_id"),
+  project_id: uuid("project_id"),
+  site_log_id: uuid("site_log_id"),
+  movement_id: uuid("movement_id"),
+  contact_id: uuid("contact_id"),
+  course_lesson_id: uuid("course_lesson_id"),
+  general_cost_id: uuid("general_cost_id"),
+  client_payment_id: uuid("client_payment_id"),
+  course_id: uuid("course_id"),
+  course_module_id: uuid("course_module_id"),
+  created_by: uuid("created_by"),
+  visibility: text("visibility", { enum: ["public", "organization", "private"] }).default("organization").notNull(),
+  description: text("description"),
+  category: text("category"),
+  is_cover: boolean("is_cover").default(false),
+  position: integer("position"),
+  metadata: jsonb("metadata"),
+  is_public: boolean("is_public").default(false).notNull(),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const insertMediaLinkSchema = createInsertSchema(media_links).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export type MediaLink = typeof media_links.$inferSelect;
+export type InsertMediaLink = z.infer<typeof insertMediaLinkSchema>;
