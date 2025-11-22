@@ -53,7 +53,7 @@ export function PlanUpgradeModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="max-w-3xl p-0 gap-0 border-0 overflow-hidden"
+        className="max-w-3xl p-0 gap-0 border-0 overflow-hidden md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-auto md:h-auto md:min-w-0 md:max-w-3xl"
         style={{ backgroundColor: 'hsl(0, 0%, 10%)' }}
       >
         <DialogTitle className="sr-only">{featureTitle}</DialogTitle>
