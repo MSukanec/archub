@@ -732,38 +732,30 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
             </div>
           ),
         }}
+        leadingRowAction={(payment: ClientPaymentWithRelations) => 
+          payment.attachments && payment.attachments.length > 0 ? {
+            label: 'Ver Adjunto',
+            icon: Paperclip,
+            onClick: () => window.open(payment.attachments![0].file_url, '_blank'),
+          } : null
+        }
         primaryRowAction={(payment: ClientPaymentWithRelations) => ({
           label: 'Ver',
           onClick: () => handleViewPayment(payment),
         })}
-        rowActions={(payment: ClientPaymentWithRelations) => {
-          const actions = [];
-          
-          // Add attachment button if attachments exist
-          if (payment.attachments && payment.attachments.length > 0) {
-            actions.push({
-              label: 'Ver Adjunto',
-              icon: Paperclip,
-              onClick: () => window.open(payment.attachments![0].file_url, '_blank'),
-            });
-          }
-          
-          actions.push(
-            {
-              label: 'Editar Pago',
-              icon: Edit,
-              onClick: () => handleEdit(payment),
-            },
-            {
-              label: 'Eliminar Pago',
-              icon: Trash2,
-              onClick: () => handleDeletePayment(payment),
-              variant: 'destructive' as const,
-            }
-          );
-          
-          return actions;
-        }}
+        rowActions={(payment: ClientPaymentWithRelations) => [
+          {
+            label: 'Editar Pago',
+            icon: Edit,
+            onClick: () => handleEdit(payment),
+          },
+          {
+            label: 'Eliminar Pago',
+            icon: Trash2,
+            onClick: () => handleDeletePayment(payment),
+            variant: 'destructive' as const,
+          },
+        ]}
         renderCard={(payment: ClientPaymentWithRelations) => (
           <ClientPaymentRow
             payment={payment}
