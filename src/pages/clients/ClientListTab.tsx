@@ -396,10 +396,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
               </Button>
             ),
           }}
-          primaryRowAction={(client: ProjectClientSummary) => ({
-            onClick: () => handleView(client),
-            label: 'Ver cliente',
-          })}
           rowActions={(client: ProjectClientSummary) => [
             {
               label: 'Editar Cliente',

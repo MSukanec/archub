@@ -726,6 +726,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
             </div>
           ),
         }}
+        onRowClick={handleViewPayment}
         leadingRowAction={(payment: ClientPaymentWithRelations) => 
           payment.attachments && payment.attachments.length > 0 ? {
             label: 'Ver Adjunto',
@@ -733,10 +734,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
             onClick: () => window.open(payment.attachments![0].file_url, '_blank'),
           } : null
         }
-        primaryRowAction={(payment: ClientPaymentWithRelations) => ({
-          label: 'Ver',
-          onClick: () => handleViewPayment(payment),
-        })}
         rowActions={(payment: ClientPaymentWithRelations) => [
           {
             label: 'Editar Pago',
