@@ -532,14 +532,25 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   }, [projectClients, dashboardData, commitmentCurrency, commitmentsData, paymentsData]);
 
   // Enrich projectClients with computed clientName field for sorting
+  // FILTER: Only show clients that have commitments assigned
   const enrichedClients = useMemo<EnrichedClient[]>(() => {
-    return projectClients.map(client => ({
-      ...client,
-      clientName: client.contacts?.company_name || 
-                  client.contacts?.full_name || 
-                  `${client.contacts?.first_name || ''} ${client.contacts?.last_name || ''}`.trim() || '-'
-    }));
-  }, [projectClients]);
+    if (!commitmentsData) return [];
+    
+    // Get client IDs that have commitments
+    const clientIdsWithCommitments = new Set(
+      commitmentsData.map(commitment => commitment.client_id)
+    );
+    
+    // Filter and enrich only clients with commitments
+    return projectClients
+      .filter(client => clientIdsWithCommitments.has(client.id))
+      .map(client => ({
+        ...client,
+        clientName: client.contacts?.company_name || 
+                    client.contacts?.full_name || 
+                    `${client.contacts?.first_name || ''} ${client.contacts?.last_name || ''}`.trim() || '-'
+      }));
+  }, [projectClients, commitmentsData]);
 
   return (
     <div className="space-y-6">
