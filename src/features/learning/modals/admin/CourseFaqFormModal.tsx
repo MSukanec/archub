@@ -1,14 +1,27 @@
-import { useState, useEffect } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import { useToast } from '@/hooks/use-toast';
-import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { HelpCircle } from 'lucide-react';
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
+import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createCourseFaq, updateCourseFaq } from '../../services';
 import type { CourseFaq } from '@shared/schema';
+
+// Schema de validación Zod
+const courseFaqSchema = z.object({
+  question: z.string().min(1, 'La pregunta es requerida'),
+  answer: z.string().min(1, 'La respuesta es requerida'),
+  sort_index: z.number().int().min(0, 'El orden debe ser 0 o mayor').default(0),
+});
+
+type CourseFaqFormData = z.infer<typeof courseFaqSchema>;
 
 interface CourseFaqFormModalProps {
   isOpen: boolean;
@@ -17,56 +30,52 @@ interface CourseFaqFormModalProps {
   faq?: CourseFaq | null;
 }
 
-interface FaqFormData {
-  course_id: string;
-  question: string;
-  answer: string;
-  sort_index: number;
-}
-
 export function CourseFaqFormModal({ isOpen, onClose, courseId, faq }: CourseFaqFormModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = React.useState(false);
 
-  const [question, setQuestion] = useState('');
-  const [answer, setAnswer] = useState('');
-  const [sortIndex, setSortIndex] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (faq) {
-      setQuestion(faq.question || '');
-      setAnswer(faq.answer || '');
-      setSortIndex(faq.sort_index || 0);
-    } else {
-      setQuestion('');
-      setAnswer('');
-      setSortIndex(0);
+  // Configurar form con React Hook Form
+  const form = useForm<CourseFaqFormData>({
+    resolver: zodResolver(courseFaqSchema),
+    defaultValues: {
+      question: '',
+      answer: '',
+      sort_index: 0,
     }
-  }, [faq]);
+  });
 
+  // Cargar datos cuando se edita una FAQ
+  React.useEffect(() => {
+    if (faq) {
+      form.reset({
+        question: faq.question || '',
+        answer: faq.answer || '',
+        sort_index: faq.sort_index || 0,
+      });
+    } else {
+      form.reset({
+        question: '',
+        answer: '',
+        sort_index: 0,
+      });
+    }
+  }, [faq, form]);
+
+  // Función de cierre
   const handleClose = () => {
-    setQuestion('');
-    setAnswer('');
-    setSortIndex(0);
+    form.reset();
     onClose();
   };
 
-  const createFaqMutation = useMutation({
-    mutationFn: async (data: FaqFormData) => {
-      if (!supabase) throw new Error('Supabase not initialized');
-
-      const { error } = await supabase
-        .from('course_faqs')
-        .insert({
-          course_id: data.course_id,
-          question: data.question,
-          answer: data.answer,
-          sort_index: data.sort_index
-        });
-
-      if (error) throw error;
-    },
+  // Mutation para crear FAQ
+  const createMutation = useMutation({
+    mutationFn: (data: CourseFaqFormData) => createCourseFaq({
+      courseId,
+      question: data.question,
+      answer: data.answer,
+      sortIndex: data.sort_index,
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['course-faqs', courseId] });
       queryClient.invalidateQueries({ queryKey: ['course-landing'] });
@@ -86,22 +95,13 @@ export function CourseFaqFormModal({ isOpen, onClose, courseId, faq }: CourseFaq
     }
   });
 
-  const updateFaqMutation = useMutation({
-    mutationFn: async (data: FaqFormData) => {
-      if (!supabase) throw new Error('Supabase not initialized');
-
-      const { error } = await supabase
-        .from('course_faqs')
-        .update({
-          question: data.question,
-          answer: data.answer,
-          sort_index: data.sort_index,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', faq!.id);
-
-      if (error) throw error;
-    },
+  // Mutation para actualizar FAQ
+  const updateMutation = useMutation({
+    mutationFn: (data: CourseFaqFormData) => updateCourseFaq(faq!.id, {
+      question: data.question,
+      answer: data.answer,
+      sortIndex: data.sort_index,
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['course-faqs', courseId] });
       queryClient.invalidateQueries({ queryKey: ['course-landing'] });
@@ -121,97 +121,116 @@ export function CourseFaqFormModal({ isOpen, onClose, courseId, faq }: CourseFaq
     }
   });
 
-  const onSubmit = async () => {
-    if (!question.trim() || !answer.trim()) {
-      toast({
-        title: 'Error',
-        description: 'Por favor completa todos los campos obligatorios.',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    const data: FaqFormData = {
-      course_id: courseId,
-      question: question.trim(),
-      answer: answer.trim(),
-      sort_index: sortIndex
-    };
-
+  // Handler de submit
+  const onSubmit = async (data: CourseFaqFormData) => {
     setIsLoading(true);
     try {
       if (faq) {
-        await updateFaqMutation.mutateAsync(data);
+        await updateMutation.mutateAsync(data);
       } else {
-        await createFaqMutation.mutateAsync(data);
+        await createMutation.mutateAsync(data);
       }
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Panel de edición (Formulario)
+  const editPanel = (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 space-y-4">
+        <FormField
+          control={form.control}
+          name="question"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Pregunta *</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="¿Cuál es la pregunta?" 
+                  data-testid="input-faq-question"
+                  {...field} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="answer"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Respuesta *</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Respuesta detallada..."
+                  data-testid="textarea-faq-answer"
+                  rows={5}
+                  {...field} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="sort_index"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Orden</FormLabel>
+              <FormControl>
+                <Input 
+                  type="number"
+                  placeholder="0"
+                  data-testid="input-faq-sort-index"
+                  {...field}
+                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
+  );
+
+  // Header con título, descripción e ícono
   const headerContent = (
     <FormModalHeader 
       title={faq ? 'Editar FAQ' : 'Nueva FAQ'}
-      description="Configura una pregunta frecuente para la landing page del curso."
+      description={faq ? 'Actualiza la pregunta frecuente del curso' : 'Crea una nueva pregunta frecuente para la landing page del curso'}
+      icon={HelpCircle}
     />
   );
 
+  // Footer con botones
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
       rightLabel={faq ? 'Actualizar' : 'Crear'}
-      onRightClick={onSubmit}
+      onRightClick={form.handleSubmit(onSubmit)}
       isSubmitting={isLoading}
     />
   );
 
-  const editPanelContent = (
-    <div className="p-6 space-y-4">
-      <div>
-        <Label htmlFor="question">Pregunta *</Label>
-        <Input
-          id="question"
-          data-testid="input-faq-question"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          placeholder="¿Cuál es la pregunta?"
-        />
-      </div>
+  // Guard: Solo renderizar si el modal está abierto
+  if (!isOpen) return null;
 
-      <div>
-        <Label htmlFor="answer">Respuesta *</Label>
-        <Textarea
-          id="answer"
-          data-testid="textarea-faq-answer"
-          value={answer}
-          onChange={(e) => setAnswer(e.target.value)}
-          placeholder="Respuesta detallada..."
-          rows={5}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="sort_index">Orden</Label>
-        <Input
-          id="sort_index"
-          data-testid="input-faq-sort-index"
-          type="number"
-          value={sortIndex}
-          onChange={(e) => setSortIndex(parseInt(e.target.value) || 0)}
-          placeholder="0"
-        />
-      </div>
-    </div>
-  );
-
+  // Layout final
   return (
     <FormModalLayout
-      onClose={handleClose}
+      columns={1}
+      viewPanel={<div></div>}
+      editPanel={editPanel}
       headerContent={headerContent}
-      editPanel={editPanelContent}
       footerContent={footerContent}
+      onClose={handleClose}
       isEditing={true}
     />
   );

@@ -21,6 +21,9 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Hydration state - CRITICAL for preventing auto-save on page load
+  const [isHydrated, setIsHydrated] = useState(false);
+
   // Instructor fields
   const [instructorName, setInstructorName] = useState('');
   const [instructorTitle, setInstructorTitle] = useState('');
@@ -225,6 +228,9 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
           faq: { title: 'PREGUNTAS FRECUENTES', subtitle: 'DUDAS COMUNES', description: 'Resolvemos tus dudas sobre el curso' }
         });
       }
+      
+      // Mark as hydrated after data is loaded
+      setIsHydrated(true);
     }
   }, [courseData]);
 
@@ -274,14 +280,8 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
   // Delete FAQ mutation
   const deleteFaqMutation = useMutation({
     mutationFn: async (faqId: string) => {
-      if (!supabase) throw new Error('Supabase not initialized');
-
-      const { error } = await supabase
-        .from('course_faqs')
-        .delete()
-        .eq('id', faqId);
-
-      if (error) throw error;
+      const { deleteCourseFaq } = await import('@/features/learning');
+      return deleteCourseFaq(faqId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['course-faqs', courseId] });
@@ -384,21 +384,11 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
       });
     },
     delay: 1000,
-    enabled: !!courseData
+    enabled: !!courseData && isHydrated
   });
 
   return (
     <div className="w-full space-y-8" data-testid="admin-course-marketing-tab">
-      {/* Auto-save indicator */}
-      {isSaving && (
-        <Alert className="bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
-          <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-          <AlertDescription className="text-blue-800 dark:text-blue-200">
-            Guardando cambios automáticamente...
-          </AlertDescription>
-        </Alert>
-      )}
-
       {/* SECCIÓN HERO - PRINCIPAL */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
         {/* Left Column - Read-only fields */}
@@ -407,6 +397,12 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
             <Info className="w-5 h-5 text-accent flex-shrink-0" />
             <h3 className="text-lg font-semibold">Hero - Sección Principal</h3>
           </div>
+          {isSaving && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Info className="h-4 w-4 animate-pulse" />
+              <span>Guardando cambios...</span>
+            </div>
+          )}
           <div>
             <p className="text-sm text-muted-foreground">
               Estos campos se editan desde la pestaña "Datos del Curso"
@@ -846,14 +842,17 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
 
           {/* FAQ List Card */}
           <div className="bg-card border rounded-lg p-6 space-y-4 mt-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">FAQs del Curso</h3>
+            <div className="flex items-center justify-between gap-2 mb-6">
+              <div className="flex items-center gap-2">
+                <HelpCircle className="h-5 w-5 text-[var(--accent)]" />
+                <h3 className="text-lg font-semibold">FAQs del Curso</h3>
+              </div>
               <Button
                 onClick={() => handleOpenFaqModal()}
                 size="sm"
                 data-testid="button-add-faq"
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4 mr-1" />
                 Agregar FAQ
               </Button>
             </div>

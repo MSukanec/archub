@@ -45,3 +45,8 @@ export { deleteLessonMarker } from './student/deleteLessonMarker';
 
 // ========== STUDENT SERVICES - PRICING ==========
 export { getCoursePricing } from './student/getCoursePricing';
+
+// ========== ADMIN SERVICES - FAQS ==========
+export { createCourseFaq } from './admin/createCourseFaq';
+export { updateCourseFaq } from './admin/updateCourseFaq';
+export { deleteCourseFaq } from './admin/deleteCourseFaq';
