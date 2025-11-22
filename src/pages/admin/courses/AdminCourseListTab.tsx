@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Plus, BookOpen, Edit, Trash2 } from 'lucide-react'
-import { useAdminCourses } from '@/hooks/use-admin-courses'
+import { useAdminCourses } from '@/features/learning/hooks'
 import { useToast } from '@/hooks/use-toast'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Badge } from '@/components/ui/badge'
