@@ -595,44 +595,43 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             </Button>
           ),
         }}
-        rowActions={(client: EnrichedClient) => [
-          {
-            label: 'Ver / editar compromiso',
-            icon: FileText,
-            onClick: () => {
-              toast({
-                title: 'Función en desarrollo',
-                description: 'La gestión de compromisos estará disponible próximamente',
-              });
+        rowActions={(client: EnrichedClient) => {
+          // Buscar el compromiso del cliente
+          const clientCommitment = commitmentsData?.find(
+            (commitment) => commitment.client_id === client.id
+          );
+          
+          return [
+            {
+              label: 'Editar',
+              icon: Edit,
+              onClick: () => {
+                if (clientCommitment) {
+                  // Si existe compromiso, abrir modal en modo edición
+                  openModal('client-commitment', {
+                    projectId: activeProjectId,
+                    organizationId,
+                    commitmentId: clientCommitment.id,
+                    mode: 'edit',
+                  });
+                } else {
+                  // Si no existe compromiso, crear uno nuevo
+                  openModal('client-commitment', {
+                    projectId: activeProjectId,
+                    organizationId,
+                    mode: 'create',
+                  });
+                }
+              },
             },
-          },
-          {
-            label: 'Ver plan de pagos',
-            icon: Calendar,
-            onClick: () => {
-              toast({
-                title: 'Función en desarrollo',
-                description: 'El plan de pagos estará disponible próximamente',
-              });
+            {
+              label: 'Eliminar',
+              icon: Trash2,
+              onClick: () => handleDelete(client),
+              variant: 'destructive',
             },
-          },
-          {
-            label: 'Editar Cliente',
-            icon: Edit,
-            onClick: () => handleEdit(client),
-          },
-          {
-            label: 'Editar Contacto',
-            icon: User,
-            onClick: () => handleEditContact(client),
-          },
-          {
-            label: 'Eliminar',
-            icon: Trash2,
-            onClick: () => handleDelete(client),
-            variant: 'destructive',
-          },
-        ]}
+          ];
+        }}
       />
     </div>
   )
