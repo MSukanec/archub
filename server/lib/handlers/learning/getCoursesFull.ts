@@ -72,10 +72,10 @@ export async function getCoursesFull(
       // Get course cover images
       supabase
         .from('media_links')
-        .select('entity_id, media_files!inner(url)')
-        .eq('link_type', 'course_cover')
-        .eq('is_deleted', false)
-        .eq('media_files.is_deleted', false)
+        .select('course_id, media_files!inner(file_url)')
+        .eq('category', 'course_cover')
+        .eq('is_cover', true)
+        .neq('course_id', null)
     ]);
 
     console.log('[getCoursesFull] Courses result:', coursesResult.error ? coursesResult.error : `${coursesResult.data?.length} courses`);
@@ -107,8 +107,8 @@ export async function getCoursesFull(
     const imageMap = new Map<string, string>();
     if (courseImagesResult.data) {
       courseImagesResult.data.forEach((link: any) => {
-        if (link.entity_id && link.media_files?.url) {
-          imageMap.set(link.entity_id, link.media_files.url);
+        if (link.course_id && link.media_files?.file_url) {
+          imageMap.set(link.course_id, link.media_files.file_url);
         }
       });
     }
