@@ -29,14 +29,20 @@ interface CourseLandingLayoutProps {
   children: React.ReactNode;
   headerNavigation?: Array<{ label: string; href: string }>;
   seo?: SEOProps;
+  stickyContent?: React.ReactNode;
+  heroSlot?: React.ReactNode;
 }
 
 function TransparentHeaderLayout({ 
   navigation, 
-  children 
+  children,
+  stickyContent,
+  heroSlot
 }: { 
   navigation?: Array<{ label: string; href: string }>; 
   children: React.ReactNode;
+  stickyContent?: React.ReactNode;
+  heroSlot?: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const { user, loading, initialized, initialize, logout } = useAuthStore();
@@ -211,7 +217,35 @@ function TransparentHeaderLayout({
       </header>
       
       <main>
-        {children}
+        {/* Full-width Hero Slot */}
+        {heroSlot && (
+          <div className="w-full">
+            {heroSlot}
+          </div>
+        )}
+
+        {/* Main Content Area */}
+        {stickyContent ? (
+          // Layout with sticky sidebar for desktop
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              {/* Main Content - 8 columns on desktop */}
+              <div className="lg:col-span-8">
+                {children}
+              </div>
+              
+              {/* Sticky Sidebar - 4 columns on desktop, hidden on mobile */}
+              <div className="hidden lg:block lg:col-span-4">
+                <div className="lg:sticky lg:top-24">
+                  {stickyContent}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          // Full-width layout without sticky sidebar
+          children
+        )}
       </main>
       <PublicFooter />
     </div>
@@ -222,7 +256,9 @@ export function CourseLandingLayout({
   variant, 
   children,
   headerNavigation,
-  seo
+  seo,
+  stickyContent,
+  heroSlot
 }: CourseLandingLayoutProps) {
   
   // Handle SEO meta tags with proper cleanup
@@ -323,7 +359,15 @@ export function CourseLandingLayout({
   }, [seo]);
   
   if (variant === 'public') {
-    return <TransparentHeaderLayout navigation={headerNavigation}>{children}</TransparentHeaderLayout>;
+    return (
+      <TransparentHeaderLayout 
+        navigation={headerNavigation}
+        stickyContent={stickyContent}
+        heroSlot={heroSlot}
+      >
+        {children}
+      </TransparentHeaderLayout>
+    );
   }
   
   // variant === 'dashboard' - Uses professional layout with sidebar

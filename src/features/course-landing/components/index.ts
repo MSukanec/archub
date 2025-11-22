@@ -6,3 +6,4 @@ export { FAQSection } from './FAQSection';
 export { CTAFooter } from './CTAFooter';
 export { CourseCard } from './CourseCard';
 export { CourseGrid } from './CourseGrid';
+export { CourseStickyCard } from './CourseStickyCard';

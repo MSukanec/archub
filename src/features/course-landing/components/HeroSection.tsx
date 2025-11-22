@@ -12,7 +12,7 @@ interface HeroSectionProps {
 
 export function HeroSection({ course, stats }: HeroSectionProps) {
   return (
-    <section className="relative h-screen -mx-6 px-6 flex items-center overflow-hidden">
+    <section className="relative min-h-[70vh] py-24 flex items-center overflow-hidden">
       {/* Background Image with Overlay */}
       {course.cover_url ? (
         <>

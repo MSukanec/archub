@@ -8,6 +8,7 @@ import {
   FeaturesSection,
   FAQSection,
   CTAFooter,
+  CourseStickyCard,
 } from '@/features/course-landing/components';
 
 export default function CourseLanding() {
@@ -58,11 +59,19 @@ export default function CourseLanding() {
     ogImage: course.og_image_url || course.cover_url || '',
   };
 
+  // Sticky sidebar content (shown in desktop only)
+  const stickyContent = <CourseStickyCard course={course} stats={stats} />;
+  
+  // Full-width hero section
+  const heroSection = <HeroSection course={course} stats={stats} />;
+
   return (
     <CourseLandingLayout 
       variant="public" 
       headerNavigation={navigationLinks}
       seo={seoProps}
+      stickyContent={stickyContent}
+      heroSlot={heroSection}
     >
       {/* Structured Data (JSON-LD) for SEO */}
       <script
@@ -101,8 +110,7 @@ export default function CourseLanding() {
       />
 
       {/* Landing Sections */}
-      <div className="space-y-0">
-        <HeroSection course={course} stats={stats} />
+      <div className="space-y-16">
         <InstructorSection course={course} />
         <ModulesSection modules={modules} />
         <FeaturesSection course={course} />
