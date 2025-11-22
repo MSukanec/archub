@@ -46,12 +46,43 @@ export async function getClientDashboardData(
     };
   }
 
-  const [clients, commitments, payments, schedule] = await Promise.all([
-    getProjectClients(projectId, organizationId),
-    getClientCommitments(projectId, organizationId),
-    getClientPayments(projectId, organizationId),
-    getClientPaymentSchedule(projectId, organizationId),
-  ]);
+  let clients, commitments, payments, schedule;
+  
+  try {
+    console.log('[getClientDashboardData] Fetching project clients...');
+    clients = await getProjectClients(projectId, organizationId);
+    console.log('[getClientDashboardData] Project clients fetched:', clients.length);
+  } catch (error) {
+    console.error('[getClientDashboardData] Error fetching project clients:', error);
+    throw error;
+  }
+
+  try {
+    console.log('[getClientDashboardData] Fetching commitments...');
+    commitments = await getClientCommitments(projectId, organizationId);
+    console.log('[getClientDashboardData] Commitments fetched:', commitments.length);
+  } catch (error) {
+    console.error('[getClientDashboardData] Error fetching commitments:', error);
+    throw error;
+  }
+
+  try {
+    console.log('[getClientDashboardData] Fetching payments...');
+    payments = await getClientPayments(projectId, organizationId);
+    console.log('[getClientDashboardData] Payments fetched:', payments.length);
+  } catch (error) {
+    console.error('[getClientDashboardData] Error fetching payments:', error);
+    throw error;
+  }
+
+  try {
+    console.log('[getClientDashboardData] Fetching schedule...');
+    schedule = await getClientPaymentSchedule(projectId, organizationId);
+    console.log('[getClientDashboardData] Schedule fetched:', schedule.length);
+  } catch (error) {
+    console.error('[getClientDashboardData] Error fetching schedule:', error);
+    throw error;
+  }
 
   console.log('[getClientDashboardData] Fetched data:', {
     clientsCount: clients.length,

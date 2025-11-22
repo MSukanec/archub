@@ -107,28 +107,6 @@ export async function getClientPaymentSchedule(
             created_at,
             updated_at
           )
-        ),
-        contact:contacts(
-          id,
-          organization_id,
-          first_name,
-          last_name,
-          full_name,
-          email,
-          phone,
-          company_name,
-          location,
-          notes,
-          national_id,
-          linked_user_id,
-          avatar_attachment_id,
-          avatar_updated_at,
-          is_local,
-          display_name_override,
-          linked_at,
-          sync_status,
-          created_at,
-          updated_at
         )
       ),
       currency:currencies(
@@ -159,7 +137,6 @@ export async function getClientPaymentSchedule(
         contact: schedule.commitment[0].client[0].contact?.[0] || null,
         role: schedule.commitment[0].client[0].role?.[0] || null,
       } : null,
-      contact: schedule.commitment[0].contact?.[0] || null,
     } : null,
     currency: schedule.currency?.[0] || null,
   }));
@@ -257,28 +234,6 @@ export async function getClientPaymentScheduleById(
             created_at,
             updated_at
           )
-        ),
-        contact:contacts(
-          id,
-          organization_id,
-          first_name,
-          last_name,
-          full_name,
-          email,
-          phone,
-          company_name,
-          location,
-          notes,
-          national_id,
-          linked_user_id,
-          avatar_attachment_id,
-          avatar_updated_at,
-          is_local,
-          display_name_override,
-          linked_at,
-          sync_status,
-          created_at,
-          updated_at
         )
       ),
       currency:currencies(
@@ -311,7 +266,6 @@ export async function getClientPaymentScheduleById(
         contact: typedData.commitment[0].client[0].contact?.[0] || null,
         role: typedData.commitment[0].client[0].role?.[0] || null,
       } : null,
-      contact: typedData.commitment[0].contact?.[0] || null,
     } : null,
     currency: typedData.currency?.[0] || null,
   };
@@ -403,28 +357,6 @@ export async function createClientPaymentSchedule(
             created_at,
             updated_at
           )
-        ),
-        contact:contacts(
-          id,
-          organization_id,
-          first_name,
-          last_name,
-          full_name,
-          email,
-          phone,
-          company_name,
-          location,
-          notes,
-          national_id,
-          linked_user_id,
-          avatar_attachment_id,
-          avatar_updated_at,
-          is_local,
-          display_name_override,
-          linked_at,
-          sync_status,
-          created_at,
-          updated_at
         )
       ),
       currency:currencies(
@@ -451,7 +383,6 @@ export async function createClientPaymentSchedule(
         contact: typedData.commitment[0].client[0].contact?.[0] || null,
         role: typedData.commitment[0].client[0].role?.[0] || null,
       } : null,
-      contact: typedData.commitment[0].contact?.[0] || null,
     } : null,
     currency: typedData.currency?.[0] || null,
   };
@@ -547,28 +478,6 @@ export async function updateClientPaymentSchedule(
             created_at,
             updated_at
           )
-        ),
-        contact:contacts(
-          id,
-          organization_id,
-          first_name,
-          last_name,
-          full_name,
-          email,
-          phone,
-          company_name,
-          location,
-          notes,
-          national_id,
-          linked_user_id,
-          avatar_attachment_id,
-          avatar_updated_at,
-          is_local,
-          display_name_override,
-          linked_at,
-          sync_status,
-          created_at,
-          updated_at
         )
       ),
       currency:currencies(
@@ -595,7 +504,6 @@ export async function updateClientPaymentSchedule(
         contact: typedData.commitment[0].client[0].contact?.[0] || null,
         role: typedData.commitment[0].client[0].role?.[0] || null,
       } : null,
-      contact: typedData.commitment[0].contact?.[0] || null,
     } : null,
     currency: typedData.currency?.[0] || null,
   };
