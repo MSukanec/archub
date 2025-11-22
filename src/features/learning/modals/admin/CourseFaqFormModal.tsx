@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
-import { FormModalLayout, FormModalHeader, FormModalFooter } from '@/components/modals';
+import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
+import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
+import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -66,7 +68,7 @@ export function CourseFaqFormModal({ isOpen, onClose, courseId, faq }: CourseFaq
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['course-faqs'] });
+      queryClient.invalidateQueries({ queryKey: ['course-faqs', courseId] });
       queryClient.invalidateQueries({ queryKey: ['course-landing'] });
       toast({
         title: 'FAQ creada',
@@ -101,7 +103,7 @@ export function CourseFaqFormModal({ isOpen, onClose, courseId, faq }: CourseFaq
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['course-faqs'] });
+      queryClient.invalidateQueries({ queryKey: ['course-faqs', courseId] });
       queryClient.invalidateQueries({ queryKey: ['course-landing'] });
       toast({
         title: 'FAQ actualizada',
@@ -157,56 +159,60 @@ export function CourseFaqFormModal({ isOpen, onClose, courseId, faq }: CourseFaq
 
   const footerContent = (
     <FormModalFooter
-      onCancel={handleClose}
-      onSubmit={onSubmit}
-      submitLabel={faq ? 'Actualizar' : 'Crear'}
-      isLoading={isLoading}
+      leftLabel="Cancelar"
+      onLeftClick={handleClose}
+      rightLabel={faq ? 'Actualizar' : 'Crear'}
+      onRightClick={onSubmit}
+      isSubmitting={isLoading}
     />
+  );
+
+  const editPanelContent = (
+    <div className="p-6 space-y-4">
+      <div>
+        <Label htmlFor="question">Pregunta *</Label>
+        <Input
+          id="question"
+          data-testid="input-faq-question"
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          placeholder="¿Cuál es la pregunta?"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="answer">Respuesta *</Label>
+        <Textarea
+          id="answer"
+          data-testid="textarea-faq-answer"
+          value={answer}
+          onChange={(e) => setAnswer(e.target.value)}
+          placeholder="Respuesta detallada..."
+          rows={5}
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="sort_index">Orden</Label>
+        <Input
+          id="sort_index"
+          data-testid="input-faq-sort-index"
+          type="number"
+          value={sortIndex}
+          onChange={(e) => setSortIndex(parseInt(e.target.value) || 0)}
+          placeholder="0"
+        />
+      </div>
+    </div>
   );
 
   return (
     <FormModalLayout
-      isOpen={isOpen}
       onClose={handleClose}
-      header={headerContent}
-      footer={footerContent}
-    >
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="question">Pregunta *</Label>
-          <Input
-            id="question"
-            data-testid="input-faq-question"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            placeholder="¿Cuál es la pregunta?"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="answer">Respuesta *</Label>
-          <Textarea
-            id="answer"
-            data-testid="textarea-faq-answer"
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            placeholder="Respuesta detallada..."
-            rows={5}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="sort_index">Orden</Label>
-          <Input
-            id="sort_index"
-            data-testid="input-faq-sort-index"
-            type="number"
-            value={sortIndex}
-            onChange={(e) => setSortIndex(parseInt(e.target.value) || 0)}
-            placeholder="0"
-          />
-        </div>
-      </div>
-    </FormModalLayout>
+      headerContent={headerContent}
+      editPanel={editPanelContent}
+      footerContent={footerContent}
+      isEditing={true}
+    />
   );
 }

@@ -4,12 +4,13 @@ import { supabase } from '@/lib/supabase';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useDebouncedAutoSave } from '@/components/save/useDebouncedAutoSave';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Info, GraduationCap, FileText, BookOpen, Palette, Search } from 'lucide-react';
-import { HeroSection, InstructorSection, ModulesSection, LessonsSection } from '@/features/learning';
-import type { LandingSections, LandingSection, Course } from '@shared/schema';
+import { Info, GraduationCap, FileText, BookOpen, Palette, Search, HelpCircle, Plus, Pencil, Trash2 } from 'lucide-react';
+import { HeroSection, InstructorSection, ModulesSection, LessonsSection, FAQSection, CourseFaqFormModal } from '@/features/learning';
+import type { LandingSections, LandingSection, Course, CourseFaq } from '@shared/schema';
 import type { ModuleWithLessons } from '@/features/learning';
 
 interface AdminCourseMarketingTabProps {
@@ -42,6 +43,10 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
     features: undefined,
     faq: undefined,
   });
+
+  // FAQ modal state
+  const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
+  const [selectedFaq, setSelectedFaq] = useState<CourseFaq | null>(null);
 
   // Get course data
   const { data: courseData } = useQuery({
@@ -143,6 +148,28 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
     enabled: !!courseId && !!supabase && modules.length > 0
   });
 
+  // Get FAQs data for preview
+  const { data: faqs = [] } = useQuery<CourseFaq[]>({
+    queryKey: ['course-faqs', courseId],
+    queryFn: async () => {
+      if (!courseId || !supabase) return [];
+
+      const { data, error } = await supabase
+        .from('course_faqs')
+        .select('*')
+        .eq('course_id', courseId)
+        .order('sort_index', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching FAQs:', error);
+        return [];
+      }
+
+      return data || [];
+    },
+    enabled: !!courseId && !!supabase
+  });
+
   // Combine modules with lessons and images for preview
   const modulesWithLessons: ModuleWithLessons[] = useMemo(() => {
     return modules.map((module: any) => {
@@ -180,9 +207,23 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
       setSeoKeywords(Array.isArray(courseData.seo_keywords) ? courseData.seo_keywords.join(', ') : '');
       setOgImageUrl(courseData.og_image_url || '');
       
-      // Load landing sections
+      // Load landing sections with defaults
       if (courseData.landing_sections) {
-        setLandingSections(courseData.landing_sections as LandingSections);
+        const sections = courseData.landing_sections as LandingSections | undefined;
+        setLandingSections({
+          instructor: sections?.instructor || { title: 'SOBRE EL DOCENTE', subtitle: 'NUESTRO CURSO', description: '' },
+          modules: sections?.modules || { title: 'MÓDULOS Y LECCIONES', subtitle: 'CONTENIDO DEL CURSO', description: 'Contenido estructurado paso a paso para tu aprendizaje profesional' },
+          features: sections?.features,
+          faq: sections?.faq || { title: 'PREGUNTAS FRECUENTES', subtitle: 'DUDAS COMUNES', description: 'Resolvemos tus dudas sobre el curso' }
+        });
+      } else {
+        // Initialize with defaults if no landing_sections
+        setLandingSections({
+          instructor: { title: 'SOBRE EL DOCENTE', subtitle: 'NUESTRO CURSO', description: '' },
+          modules: { title: 'MÓDULOS Y LECCIONES', subtitle: 'CONTENIDO DEL CURSO', description: 'Contenido estructurado paso a paso para tu aprendizaje profesional' },
+          features: undefined,
+          faq: { title: 'PREGUNTAS FRECUENTES', subtitle: 'DUDAS COMUNES', description: 'Resolvemos tus dudas sobre el curso' }
+        });
       }
     }
   }, [courseData]);
@@ -230,6 +271,36 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
     }
   });
 
+  // Delete FAQ mutation
+  const deleteFaqMutation = useMutation({
+    mutationFn: async (faqId: string) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+
+      const { error } = await supabase
+        .from('course_faqs')
+        .delete()
+        .eq('id', faqId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['course-faqs', courseId] });
+      queryClient.invalidateQueries({ queryKey: ['course-landing'] });
+      toast({
+        title: "FAQ eliminada",
+        description: "La pregunta frecuente se eliminó correctamente"
+      });
+    },
+    onError: (error: any) => {
+      console.error('Error deleting FAQ:', error);
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo eliminar la FAQ",
+        variant: "destructive"
+      });
+    }
+  });
+
   // Helper functions to update landingSections
   const updateInstructorSection = (field: keyof LandingSection, value: string) => {
     setLandingSections(prev => ({
@@ -243,6 +314,30 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
       ...prev,
       modules: { ...prev?.modules, [field]: value }
     }));
+  };
+
+  const updateFaqSection = (field: keyof LandingSection, value: string) => {
+    setLandingSections(prev => ({
+      ...prev,
+      faq: { ...prev?.faq, [field]: value }
+    }));
+  };
+
+  // FAQ modal handlers
+  const handleOpenFaqModal = (faq?: CourseFaq) => {
+    setSelectedFaq(faq || null);
+    setIsFaqModalOpen(true);
+  };
+
+  const handleCloseFaqModal = () => {
+    setSelectedFaq(null);
+    setIsFaqModalOpen(false);
+  };
+
+  const handleDeleteFaq = async (faqId: string) => {
+    if (confirm('¿Estás seguro de que deseas eliminar esta FAQ?')) {
+      await deleteFaqMutation.mutateAsync(faqId);
+    }
   };
 
   // Helper function to format total duration
@@ -695,7 +790,132 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
             </div>
           </div>
         </div>
+      </div>
 
+      {/* SECCIÓN DE FAQs */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          {/* FAQ Section Header Card */}
+          <div className="bg-card border rounded-lg p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <HelpCircle className="w-5 h-5 text-accent flex-shrink-0" />
+              <h3 className="text-lg font-semibold">Sección de Preguntas Frecuentes</h3>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">
+                Personaliza el título y descripción de la sección de FAQs
+              </p>
+            </div>
+
+            <div className="grid gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="faq-section-title">Título de Sección</Label>
+                <Input
+                  id="faq-section-title"
+                  value={landingSections?.faq?.title || ''}
+                  onChange={(e) => updateFaqSection('title', e.target.value)}
+                  placeholder="Ej: PREGUNTAS FRECUENTES"
+                  data-testid="input-faq-section-title"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="faq-section-subtitle">Subtítulo de Sección</Label>
+                <Input
+                  id="faq-section-subtitle"
+                  value={landingSections?.faq?.subtitle || ''}
+                  onChange={(e) => updateFaqSection('subtitle', e.target.value)}
+                  placeholder="Ej: DUDAS COMUNES"
+                  data-testid="input-faq-section-subtitle"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="faq-section-description">Descripción de Sección</Label>
+                <Textarea
+                  id="faq-section-description"
+                  value={landingSections?.faq?.description || ''}
+                  onChange={(e) => updateFaqSection('description', e.target.value)}
+                  placeholder="Ej: Resolvemos tus dudas sobre el curso"
+                  rows={2}
+                  data-testid="textarea-faq-section-description"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* FAQ List Card */}
+          <div className="bg-card border rounded-lg p-6 space-y-4 mt-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">FAQs del Curso</h3>
+              <Button
+                onClick={() => handleOpenFaqModal()}
+                size="sm"
+                data-testid="button-add-faq"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Agregar FAQ
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              {faqs.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  No hay FAQs creadas. Haz clic en "Agregar FAQ" para crear una.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {faqs.map((faq) => (
+                    <div
+                      key={faq.id}
+                      className="flex items-start justify-between gap-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                      data-testid={`faq-item-${faq.id}`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{faq.question}</p>
+                        <p className="text-xs text-muted-foreground truncate mt-1">
+                          {faq.answer}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleOpenFaqModal(faq)}
+                          data-testid={`button-edit-faq-${faq.id}`}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteFaq(faq.id)}
+                          data-testid={`button-delete-faq-${faq.id}`}
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* FAQ Preview */}
+        <div className="sticky top-24 bg-muted/20 border rounded-lg overflow-hidden lg:col-span-2">
+          <FAQSection
+            faqs={faqs}
+            title={landingSections?.faq?.title}
+            subtitle={landingSections?.faq?.subtitle}
+            description={landingSections?.faq?.description}
+          />
+        </div>
+      </div>
+
+      {/* MARKETING Y SEO (no preview needed) */}
+      <div className="space-y-6">
         {/* Help Text */}
         <Alert>
           <Info className="h-4 w-4" />
@@ -704,6 +924,14 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
           </AlertDescription>
         </Alert>
       </div>
+
+      {/* FAQ Modal */}
+      <CourseFaqFormModal
+        isOpen={isFaqModalOpen}
+        onClose={handleCloseFaqModal}
+        courseId={courseId}
+        faq={selectedFaq}
+      />
     </div>
   );
 }
