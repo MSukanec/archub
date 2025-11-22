@@ -223,6 +223,10 @@ export function ActionBarMobile() {
               feature="max_projects" 
               current={projects.length}
               functionName="Crear Proyecto"
+              useUpgradeModal={true}
+              modalImage="/features/ft-projects-512.webp"
+              modalTitle="Alcanzaste el límite de proyectos"
+              modalDescription="Has llegado al máximo de proyectos permitidos en tu plan actual. Actualiza a un plan superior para crear proyectos ilimitados y gestionar tu negocio sin restricciones."
             >
               <button
                 onClick={actions.create.onClick}

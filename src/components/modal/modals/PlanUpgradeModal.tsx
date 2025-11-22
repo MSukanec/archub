@@ -53,7 +53,7 @@ export function PlanUpgradeModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="p-0 gap-0 overflow-hidden md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-auto md:h-auto md:min-w-0 md:max-w-5xl md:rounded-lg md:border-none md:shadow-2xl"
+        className="p-0 gap-0 overflow-hidden md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-auto md:h-auto md:min-w-0 md:max-w-6xl md:rounded-lg md:border-none md:shadow-2xl"
         style={{ backgroundColor: 'hsl(0, 0%, 10%)' }}
       >
         <DialogTitle className="sr-only">{featureTitle}</DialogTitle>
@@ -114,10 +114,7 @@ export function PlanUpgradeModal({
         </div>
 
         {/* Footer - Siguiendo patrón de FormModalFooter */}
-        <div 
-          className="p-2 border-t mt-auto"
-          style={{ borderColor: 'var(--card-border)' }}
-        >
+        <div className="p-2 mt-auto">
           <div className="flex gap-2 w-full">
             <Button
               type="button"
