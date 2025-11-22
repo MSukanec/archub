@@ -181,6 +181,7 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
           <div>
             <Label>Imagen de Portada</Label>
             <CourseHeroImageUpload
+              key={coverUrl || 'no-image'}
               courseId={courseId}
               currentImageUrl={coverUrl}
               onImageUpdate={(url) => setCoverUrl(url || '')}
