@@ -164,7 +164,7 @@ export function PlanRestricted({
     return (
       <>
         <div 
-          className="relative inline-flex cursor-pointer"
+          className="relative inline-flex cursor-pointer overflow-visible"
           onClick={() => setOpen(true)}
           data-testid="button-restricted-feature"
         >
@@ -175,6 +175,17 @@ export function PlanRestricted({
               className: `${(children as React.ReactElement).props.className || ''} cursor-pointer`,
             })}
           </div>
+          
+          {/* Badge pequeño CENTRADO */}
+          <Badge 
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] px-1.5 py-0.5 h-5 cursor-pointer border-0 shadow-lg"
+            style={{ 
+              backgroundColor: planBgColor,
+              color: 'white'
+            }}
+          >
+            <Lock className="w-3 h-3" />
+          </Badge>
         </div>
         
         <PlanUpgradeModal

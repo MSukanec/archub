@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLocation } from "wouter";
@@ -56,6 +56,9 @@ export function PlanUpgradeModal({
         className="max-w-3xl p-0 gap-0 border-0 overflow-hidden"
         style={{ backgroundColor: 'hsl(0, 0%, 10%)' }}
       >
+        <DialogTitle className="sr-only">{featureTitle}</DialogTitle>
+        <DialogDescription className="sr-only">{featureDescription}</DialogDescription>
+        
         {/* Header */}
         <div className="px-6 pt-6 pb-4">
           <Badge 
@@ -67,24 +70,24 @@ export function PlanUpgradeModal({
           >
             Plan {planName}
           </Badge>
-          <h2 className="text-xl font-semibold text-white">
+          <h2 className="text-xl font-semibold !text-white" aria-hidden="true">
             {featureTitle}
           </h2>
         </div>
 
         {/* Content - Two Columns */}
-        <div className="grid grid-cols-2 gap-6 px-6 pb-6">
-          {/* Left Column - Image */}
-          <div className="flex items-center justify-center bg-black/20 rounded-lg overflow-hidden">
+        <div className="grid grid-cols-2 gap-0">
+          {/* Left Column - Image (sin padding) */}
+          <div className="flex items-center justify-center bg-black/20 overflow-hidden">
             <img 
               src={featureImage} 
               alt={featureTitle}
-              className="w-full h-full object-contain p-8"
+              className="w-full h-full object-cover"
             />
           </div>
 
           {/* Right Column - Description */}
-          <div className="flex flex-col justify-center gap-4">
+          <div className="flex flex-col justify-center gap-4 px-6 py-6">
             <p className="text-sm leading-relaxed" style={{ color: 'hsl(0, 0%, 44%)' }}>
               {featureDescription}
             </p>
@@ -100,7 +103,7 @@ export function PlanUpgradeModal({
                 <div className="text-xs mb-1" style={{ color: 'hsl(0, 0%, 44%)' }}>
                   Límite actual
                 </div>
-                <div className="text-lg font-semibold text-white">
+                <div className="text-lg font-semibold !text-white">
                   {currentValue} / {currentLimit === Infinity ? '∞' : currentLimit}
                 </div>
               </div>
