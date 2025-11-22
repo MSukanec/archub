@@ -12,15 +12,15 @@ create table public.client_commitments (
   exchange_rate numeric not null,
   created_at timestamp with time zone null default now(),
   updated_at timestamp with time zone null default now(),
-  contact_id uuid null,
   created_by uuid null,
+  is_deleted boolean not null default false,
+  deleted_at timestamp with time zone null,
   constraint project_client_commitments_pkey primary key (id),
-  constraint client_commitments_created_by_fkey foreign KEY (created_by) references organization_members (id),
-  constraint fk_commit_client foreign KEY (client_id) references project_clients (id) on delete set null,
-  constraint fk_commit_contact foreign KEY (contact_id) references contacts (id) on delete set null,
+  constraint client_commitments_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
+  constraint fk_commit_client foreign KEY (client_id) references project_clients (id) on delete CASCADE,
+  constraint fk_commit_currency foreign KEY (currency_id) references currencies (id) on delete RESTRICT,
   constraint fk_commit_org foreign KEY (organization_id) references organizations (id) on delete CASCADE,
   constraint fk_commit_project foreign KEY (project_id) references projects (id) on delete CASCADE,
-  constraint fk_commit_currency foreign KEY (currency_id) references currencies (id) on delete set null,
   constraint client_commitments_amount_positive check ((amount > (0)::numeric)),
   constraint client_commitments_exchange_rate_positive check ((exchange_rate > (0)::numeric))
 ) TABLESPACE pg_default;
@@ -34,6 +34,16 @@ create index IF not exists idx_client_commitments_client on public.client_commit
 create index IF not exists idx_client_commitments_currency on public.client_commitments using btree (currency_id) TABLESPACE pg_default;
 
 create index IF not exists idx_client_commitments_created_at on public.client_commitments using btree (created_at) TABLESPACE pg_default;
+
+create index IF not exists idx_commitments_org_project_client on public.client_commitments using btree (organization_id, project_id, client_id) TABLESPACE pg_default;
+
+create index IF not exists client_commitments_not_deleted_idx on public.client_commitments using btree (is_deleted) TABLESPACE pg_default
+where
+  (is_deleted = false);
+
+create trigger client_commitments_set_updated_at BEFORE
+update on client_commitments for EACH row
+execute FUNCTION update_timestamp ();
 
 ---------- TABLA CLIENT_PAYMENT_SCHEDULE:
 

@@ -74,7 +74,6 @@ export interface ClientCommitment {
   id: string;
   project_id: string;
   client_id: string;
-  contact_id: string | null;
   organization_id: string;
   amount: number;
   currency_id: string;
@@ -82,12 +81,13 @@ export interface ClientCommitment {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  is_deleted: boolean;
+  deleted_at: string | null;
 }
 
 // Client Commitment with relations
 export interface ClientCommitmentWithRelations extends ClientCommitment {
   client: ProjectClientWithRelations | null;
-  contact: Contact | null;
   currency: {
     id: string;
     code: string;
