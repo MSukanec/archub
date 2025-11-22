@@ -237,7 +237,15 @@ export default function Members() {
     organizationId,
     showMembers: true,
     actions: [
-      <PlanRestricted key="invite-member" feature="max_members" current={organizationMembers.length}>
+      <PlanRestricted 
+        key="invite-member" 
+        feature="max_members" 
+        current={organizationMembers.length}
+        useUpgradeModal={true}
+        modalImage="/features/ft-members-512.webp"
+        modalTitle="Alcanzaste el límite de miembros"
+        modalDescription="Has llegado al máximo de miembros permitidos en tu plan actual. Actualiza a un plan superior para invitar más miembros a tu equipo y gestionar colaboraciones sin restricciones."
+      >
         <Button 
           onClick={() => openModal('member')}
           className="flex items-center gap-2"
