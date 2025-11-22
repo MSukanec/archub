@@ -1873,7 +1873,7 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         }));
       
       // Calculate current streak
-      const sortedDays = Array.from(activeDaysSet).sort((a, b) => (b || '').localeCompare(a || ''));
+      const sortedDays = Array.from(activeDaysSet).sort((a: any, b: any) => String(b || '').localeCompare(String(a || '')));
       let currentStreak = 0;
       
       for (let i = 0; i < sortedDays.length; i++) {
