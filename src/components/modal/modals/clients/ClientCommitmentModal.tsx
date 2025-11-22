@@ -28,8 +28,7 @@ import {
 
 const clientCommitmentSchema = z.object({
   created_by: z.string().min(1, 'Creador es requerido'),
-  contact_id: z.string().min(1, 'Cliente es requerido'),
-  client_id: z.string().min(1, 'Cliente del proyecto es requerido'),
+  client_id: z.string().min(1, 'Cliente es requerido'),
   amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
   currency_id: z.string().min(1, 'Moneda es requerida'),
   exchange_rate: z.number().min(0.0001, 'Tipo de cambio debe ser mayor a 0'),
@@ -78,7 +77,6 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
     resolver: zodResolver(clientCommitmentSchema),
     defaultValues: {
       created_by: '',
-      contact_id: '',
       client_id: '',
       amount: 0,
       currency_id: '',
@@ -104,7 +102,6 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
     if (existingCommitment && (mode === 'edit' || mode === 'view')) {
       form.reset({
         created_by: existingCommitment.created_by || currentMember?.id || '',
-        contact_id: existingCommitment.contact_id || '',
         client_id: existingCommitment.client_id || '',
         amount: existingCommitment.amount || 0,
         currency_id: existingCommitment.currency_id || '',
@@ -139,17 +136,6 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
     }
   }, [selectedCurrency, mode, currencies, form])
 
-  // Find client_id from contact_id
-  const selectedContactId = form.watch('contact_id')
-  React.useEffect(() => {
-    if (selectedContactId && projectClients) {
-      const projectClient = projectClients.find(pc => pc.contact?.id === selectedContactId)
-      if (projectClient) {
-        form.setValue('client_id', projectClient.id)
-      }
-    }
-  }, [selectedContactId, projectClients, form])
-
   // Mutations for create/update
   const createCommitmentMutation = useCreateClientCommitment()
   const updateCommitmentMutation = useUpdateClientCommitment()
@@ -160,7 +146,6 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
         await updateCommitmentMutation.mutateAsync({
           commitmentId,
           updates: {
-            contact_id: data.contact_id,
             client_id: data.client_id,
             amount: data.amount,
             currency_id: data.currency_id,
@@ -171,7 +156,6 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
       } else {
         await createCommitmentMutation.mutateAsync({
           commitment: {
-            contact_id: data.contact_id,
             client_id: data.client_id,
             amount: data.amount,
             currency_id: data.currency_id,
@@ -213,7 +197,7 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Cliente</h4>
           <div className="flex flex-col">
             <span className="text-base font-semibold">
-              {formatContactName(existingCommitment.contact) || '-'}
+              {formatContactName(existingCommitment.project_client?.contact) || '-'}
             </span>
             {existingCommitment.project_client?.unit && (
               <span className="text-sm text-muted-foreground">Unidad: {existingCommitment.project_client.unit}</span>
@@ -266,7 +250,7 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
           {/* Row 1: Cliente */}
           <FormField
             control={form.control}
-            name="contact_id"
+            name="client_id"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Cliente *</FormLabel>
@@ -277,7 +261,7 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
                     </SelectTrigger>
                     <SelectContent>
                       {projectClients?.map((client) => (
-                        <SelectItem key={client.contact.id} value={client.contact.id}>
+                        <SelectItem key={client.id} value={client.id}>
                           {formatContactName(client.contact)}
                           {client.unit && ` - ${client.unit}`}
                         </SelectItem>
@@ -382,8 +366,8 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
       onLeftClick={handleClose}
       rightLabel={mode === 'create' ? 'Crear Compromiso' : 'Guardar Cambios'}
       onRightClick={form.handleSubmit(onSubmit)}
-      isRightDisabled={!form.formState.isValid || createCommitmentMutation.isPending || updateCommitmentMutation.isPending || !currentMember?.id}
-      isRightLoading={createCommitmentMutation.isPending || updateCommitmentMutation.isPending}
+      submitDisabled={!form.formState.isValid || createCommitmentMutation.isPending || updateCommitmentMutation.isPending || !currentMember?.id}
+      isSubmitting={createCommitmentMutation.isPending || updateCommitmentMutation.isPending}
     />
   )
 

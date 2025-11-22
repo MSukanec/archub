@@ -41,7 +41,7 @@ export function useCreateClientCommitment() {
       organizationId,
       createdBy,
     }: {
-      commitment: Omit<ClientCommitment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>;
+      commitment: Omit<ClientCommitment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by' | 'is_deleted' | 'deleted_at'>;
       projectId: string;
       organizationId: string;
       createdBy: string;
@@ -67,7 +67,7 @@ export function useUpdateClientCommitment() {
       organizationId,
     }: {
       commitmentId: string;
-      updates: Partial<Omit<ClientCommitment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>>;
+      updates: Partial<Omit<ClientCommitment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by' | 'is_deleted' | 'deleted_at'>>;
       organizationId: string;
     }) => updateClientCommitment(commitmentId, updates, organizationId),
     onSuccess: (data) => {

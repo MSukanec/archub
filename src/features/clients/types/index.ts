@@ -87,7 +87,7 @@ export interface ClientCommitment {
 
 // Client Commitment with relations
 export interface ClientCommitmentWithRelations extends ClientCommitment {
-  client: ProjectClientWithRelations | null;
+  project_client: ProjectClientWithRelations | null;
   currency: {
     id: string;
     code: string;

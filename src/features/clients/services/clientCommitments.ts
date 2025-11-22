@@ -216,7 +216,7 @@ export async function getClientCommitmentById(
  * @throws {Error} Si falla la creación
  */
 export async function createClientCommitment(
-  commitment: Omit<ClientCommitment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>,
+  commitment: Omit<ClientCommitment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by' | 'is_deleted' | 'deleted_at'>,
   projectId: string,
   organizationId: string,
   createdBy: string
@@ -311,7 +311,7 @@ export async function createClientCommitment(
  */
 export async function updateClientCommitment(
   commitmentId: string,
-  updates: Partial<Omit<ClientCommitment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>>,
+  updates: Partial<Omit<ClientCommitment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by' | 'is_deleted' | 'deleted_at'>>,
   organizationId: string
 ): Promise<ClientCommitmentWithRelations> {
   const { data, error } = await supabase
