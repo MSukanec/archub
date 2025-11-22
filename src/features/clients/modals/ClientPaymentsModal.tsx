@@ -652,12 +652,9 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
                       type="number"
                       step="0.0001"
                       min="0.0001"
-                      placeholder="1.00"
+                      placeholder="1.0000"
                       value={field.value || ''}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        field.onChange(value === '' ? undefined : parseFloat(value) || undefined);
-                      }}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -700,7 +697,7 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
                   <FormLabel>Referencia (opcional)</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Ej: Transferencia #12345"
+                      placeholder="Ej: TRX-12345"
                       {...field}
                     />
                   </FormControl>
@@ -719,9 +716,9 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
                 <FormLabel>Notas (opcional)</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Notas adicionales sobre el pago..."
+                    placeholder="Agregar notas adicionales sobre el pago..."
+                    rows={2}
                     {...field}
-                    rows={3}
                   />
                 </FormControl>
                 <FormMessage />
@@ -729,40 +726,14 @@ export function ClientPaymentsModal({ modalData, onClose }: ClientPaymentsModalP
             )}
           />
 
-          {/* Row 6: Adjuntar Archivo */}
-          <div className="space-y-2">
-            <FormLabel>Adjuntar Archivo (opcional)</FormLabel>
+          {/* Row 6: Archivo Adjunto */}
+          <div>
             <UploadSingleFileField
+              files={filesToUpload}
               existingFiles={existingFiles}
-              filesToUpload={filesToUpload}
               onFilesChange={setFilesToUpload}
-              maxSize={10 * 1024 * 1024}
-              acceptedTypes={{
-                'application/pdf': ['.pdf'],
-                'image/*': ['.png', '.jpg', '.jpeg'],
-                'application/msword': ['.doc'],
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-                'application/vnd.ms-excel': ['.xls'],
-                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
-              }}
-              onExistingFileDelete={async (fileId) => {
-                // Delete file from media_links using deleteMediaFileV2
-                try {
-                  await deleteMediaFileV2(fileId)
-                  // Update local state to remove the deleted attachment
-                  setAttachments(prev => prev.filter(a => a.id !== fileId))
-                  toast({
-                    title: 'Archivo eliminado',
-                    description: 'El archivo se ha eliminado correctamente',
-                  })
-                } catch (error: any) {
-                  toast({
-                    variant: 'destructive',
-                    title: 'Error',
-                    description: `Error al eliminar archivo: ${error.message || 'Error desconocido'}`,
-                  })
-                }
-              }}
+              maxFileSize={10 * 1024 * 1024}
+              acceptedFileTypes={['image/*', 'application/pdf', '.doc', '.docx', '.xls', '.xlsx']}
               emptyStateTitle="Sin archivo adjunto"
               emptyStateDescription="Arrastra un archivo o haz clic para seleccionar"
               newFileBadgeText="Nuevo"

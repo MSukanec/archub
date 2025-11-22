@@ -25,9 +25,9 @@ import { BudgetItemModal } from '../modals/construction/tasks/BudgetItemModal';
 import { ConstructionTaskScheduleModal } from '../modals/construction/ConstructionTaskScheduleModal';
 import { ConstructionPhaseFormModal } from '../modals/construction/ConstructionPhaseFormModal';
 
-import ClientPaymentsModal from '../modals/clients/ClientPaymentsModal';
-import { ClientCommitmentModal } from '../modals/clients/ClientCommitmentModal';
-import { ClientRoleModal } from '../modals/clients/ClientRoleModal';
+import ClientPaymentsModal from '@/features/clients/modals/ClientPaymentsModal';
+import { ClientCommitmentModal } from '@/features/clients/modals/ClientCommitmentModal';
+import { ClientRoleModal } from '@/features/clients/modals/ClientRoleModal';
 import { MaterialFormModal } from '../modals/admin/MaterialFormModal'
 import { MaterialCategoryFormModal } from '../modals/admin/MaterialCategoryFormModal';
 import { BrandFormModal } from '../modals/admin/BrandFormModal';
@@ -67,7 +67,7 @@ import {
 import { InsuranceFormModal } from '../modals/construction/InsuranceFormModal';
 import { RenewInsuranceFormModal } from '../modals/construction/RenewInsuranceFormModal';
 import { PartnerModal } from '../modals/organizations/members/PartnerModal';
-import { ProjectClientModal } from '../modals/clients/ClientDataModal';
+import { ProjectClientModal } from '@/features/clients/modals/ClientDataModal';
 import { PDFExporterModal } from '../modals/PDFExporterModal';
 import { ProviderProductModal } from '../modals/providers/ProviderProductModal';
 import { ProductModal } from '../modals/analysis/ProductModal';
