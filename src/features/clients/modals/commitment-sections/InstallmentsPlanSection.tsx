@@ -76,21 +76,23 @@ export function InstallmentsPlanSection({ form }: InstallmentsPlanSectionProps) 
               <FormControl>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
+                    <div
                       className={cn(
-                        'w-full justify-start text-left font-normal',
+                        'flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background cursor-pointer',
+                        'hover:bg-accent/5 transition-colors',
                         !field.value && 'text-muted-foreground'
                       )}
                       data-testid="button-installments-start-date"
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value ? (
-                        format(new Date(field.value), 'PPP', { locale: es })
-                      ) : (
-                        <span>Seleccionar fecha</span>
-                      )}
-                    </Button>
+                      <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+                      <span className="flex-1">
+                        {field.value ? (
+                          format(new Date(field.value), 'PPP', { locale: es })
+                        ) : (
+                          'Seleccionar fecha'
+                        )}
+                      </span>
+                    </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar

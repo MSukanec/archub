@@ -508,6 +508,12 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
   const headerContent = (
     <FormModalHeader 
       title={mode === 'create' ? 'Nuevo Compromiso de Pago' : mode === 'edit' ? 'Editar Compromiso de Pago' : 'Compromiso de Pago'}
+      description={mode === 'create' 
+        ? 'Define el compromiso financiero del cliente con el proyecto' 
+        : mode === 'edit' 
+        ? 'Modifica los detalles del compromiso de pago existente'
+        : 'Visualiza la información del compromiso de pago'
+      }
       icon={DollarSign}
     />
   )
