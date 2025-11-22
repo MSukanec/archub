@@ -367,32 +367,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       align: 'right' as const,
       render: (client: EnrichedClient) => renderClientFinancial(client, 'balance'),
     },
-    {
-      key: 'next_due',
-      label: 'Próximo vencimiento',
-      sortable: true,
-      render: (client: EnrichedClient) => {
-        // Find the earliest next due date across all currencies
-        const nextDues = client.financialByCurrency
-          .filter(f => f.next_due_date)
-          .sort((a, b) => new Date(a.next_due_date!).getTime() - new Date(b.next_due_date!).getTime());
-        
-        if (nextDues.length === 0) {
-          return <span className="text-muted-foreground">Sin vencimientos</span>;
-        }
-        
-        const earliest = nextDues[0];
-        const formattedDate = format(new Date(earliest.next_due_date!), 'dd/MM/yyyy', { locale: es });
-        const formattedAmount = earliest.next_due_amount ? formatCurrency(earliest.next_due_amount, earliest.currency) : '';
-        
-        return (
-          <div className="flex flex-col">
-            <span className="font-medium">{formattedDate}</span>
-            {formattedAmount && <span className="text-muted-foreground">{formattedAmount}</span>}
-          </div>
-        );
-      },
-    },
   ];
 
   // Calculate KPIs with currency conversion
