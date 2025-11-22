@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useDebouncedAutoSave } from '@/components/save/useDebouncedAutoSave';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Info } from 'lucide-react';
+import { Info, GraduationCap, FileText, BookOpen, Palette, Search } from 'lucide-react';
 import { HeroSection, InstructorSection, ModulesSection, LessonsSection } from '@/features/learning';
 import type { LandingSections, LandingSection, Course } from '@shared/schema';
 import type { ModuleWithLessons } from '@/features/learning';
@@ -271,11 +271,14 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
       )}
 
       {/* SECCIÓN HERO - PRINCIPAL */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
         {/* Left Column - Read-only fields */}
-        <div className="bg-card border rounded-lg p-6 space-y-4">
+        <div className="bg-card border rounded-lg p-6 space-y-4 lg:col-span-1">
+          <div className="flex items-center gap-2">
+            <Info className="w-5 h-5 text-accent flex-shrink-0" />
+            <h3 className="text-lg font-semibold">Hero - Sección Principal</h3>
+          </div>
           <div>
-            <h3 className="text-lg font-semibold mb-1">🚀 Hero - Sección Principal</h3>
             <p className="text-sm text-muted-foreground">
               Estos campos se editan desde la pestaña "Datos del Curso"
             </p>
@@ -341,7 +344,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
         </div>
 
         {/* Right Column - HeroSection preview */}
-        <div className="sticky top-24 bg-muted/20 border rounded-lg overflow-hidden">
+        <div className="sticky top-24 bg-muted/20 border rounded-lg overflow-hidden lg:col-span-2">
           {courseData && (
             <HeroSection 
               course={{
@@ -360,12 +363,15 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
       </div>
 
       {/* SECCIÓN INSTRUCTOR */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="space-y-6 lg:col-span-1">
           {/* Instructor Data Card */}
           <div className="bg-card border rounded-lg p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <GraduationCap className="w-5 h-5 text-accent flex-shrink-0" />
+              <h3 className="text-lg font-semibold">Información del Instructor</h3>
+            </div>
             <div>
-              <h3 className="text-lg font-semibold mb-1">🎓 Información del Instructor</h3>
               <p className="text-sm text-muted-foreground">
                 Datos del instructor que se mostrarán en la página de landing del curso
               </p>
@@ -421,8 +427,11 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
 
           {/* Instructor Section Header Card */}
           <div className="bg-card border rounded-lg p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-accent flex-shrink-0" />
+              <h3 className="text-lg font-semibold">Encabezado de Sección - Instructor</h3>
+            </div>
             <div>
-              <h3 className="text-lg font-semibold mb-1">📝 Encabezado de Sección - Instructor</h3>
               <p className="text-sm text-muted-foreground">
                 Personaliza el título y descripción de la sección del instructor
               </p>
@@ -467,7 +476,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
         </div>
 
         {/* Instructor Preview */}
-        <div className="sticky top-24 bg-muted/20 border rounded-lg overflow-hidden">
+        <div className="sticky top-24 bg-muted/20 border rounded-lg overflow-hidden lg:col-span-2">
           {courseData && (
             <InstructorSection
               course={{
@@ -486,12 +495,15 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
       </div>
 
       {/* SECCIÓN MÓDULOS */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
           {/* Modules Section Header Card */}
           <div className="bg-card border rounded-lg p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-accent flex-shrink-0" />
+              <h3 className="text-lg font-semibold">Encabezado de Sección - Módulos</h3>
+            </div>
             <div>
-              <h3 className="text-lg font-semibold mb-1">📚 Encabezado de Sección - Módulos</h3>
               <p className="text-sm text-muted-foreground">
                 Personaliza el título y descripción de la sección de módulos
               </p>
@@ -536,7 +548,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
         </div>
 
         {/* Modules Preview */}
-        <div className="sticky top-24 bg-muted/20 border rounded-lg overflow-hidden">
+        <div className="sticky top-24 bg-muted/20 border rounded-lg overflow-hidden lg:col-span-2">
           <ModulesSection
             modules={modulesWithLessons}
             title={landingSections?.modules?.title}
@@ -550,8 +562,11 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
       <div className="space-y-6">
         {/* Marketing Section */}
         <div className="bg-card border rounded-lg p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <Palette className="w-5 h-5 text-accent flex-shrink-0" />
+            <h3 className="text-lg font-semibold">Marketing y Presentación</h3>
+          </div>
           <div>
-            <h3 className="text-lg font-semibold mb-1">🎨 Marketing y Presentación</h3>
             <p className="text-sm text-muted-foreground">
               Elementos visuales y de marketing para la página de landing
             </p>
@@ -605,8 +620,11 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
 
         {/* SEO Section */}
         <div className="bg-card border rounded-lg p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <Search className="w-5 h-5 text-accent flex-shrink-0" />
+            <h3 className="text-lg font-semibold">SEO y Redes Sociales</h3>
+          </div>
           <div>
-            <h3 className="text-lg font-semibold mb-1">🔍 SEO y Redes Sociales</h3>
             <p className="text-sm text-muted-foreground">
               Optimización para motores de búsqueda y vista previa en redes sociales
             </p>
