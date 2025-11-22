@@ -167,5 +167,5 @@ export async function getAllPublicCourses() {
     };
   });
 
-  return coursesWithCovers as Course[];
+  return coursesWithCovers as any;
 }
