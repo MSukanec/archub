@@ -69,12 +69,12 @@ export function ModulesSection({
                       className="w-full px-6 py-4 h-auto flex items-center justify-between hover:bg-muted/50"
                     >
                       <div className="flex items-center gap-4 text-left flex-1">
-                        <span className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">
+                        <span className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-base">
                           {String(idx + 1).padStart(2, '0')}
                         </span>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 flex-wrap">
-                            <h3 className="text-lg font-semibold">{module.title}</h3>
+                            <h3 className="text-base font-semibold">{module.title}</h3>
                             <div className="flex items-center gap-3 text-sm text-muted-foreground">
                               <span className="flex items-center gap-1">
                                 <PlayCircle className="w-4 h-4" />
