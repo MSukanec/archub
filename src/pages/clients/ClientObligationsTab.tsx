@@ -40,8 +40,17 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
 
+  // Debug: log values
+  console.log('[ClientObligationsTab] organizationId:', organizationId);
+  console.log('[ClientObligationsTab] activeProjectId:', activeProjectId);
+  console.log('[ClientObligationsTab] enabled:', !!activeProjectId && !!organizationId);
+
   // Use feature hooks to get dashboard data, commitments, and payments
   const { data: dashboardData, isLoading } = useClientDashboard(activeProjectId || undefined, organizationId);
+
+  // Debug: log dashboard data
+  console.log('[ClientObligationsTab] dashboardData:', dashboardData);
+  console.log('[ClientObligationsTab] isLoading:', isLoading);
   const { data: commitmentsData } = useClientCommitments(activeProjectId || undefined, organizationId);
   const { data: paymentsData } = useClientPayments(activeProjectId || undefined, organizationId);
 

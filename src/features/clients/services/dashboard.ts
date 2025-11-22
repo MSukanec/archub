@@ -33,7 +33,10 @@ export async function getClientDashboardData(
   projectId: string,
   organizationId: string
 ): Promise<ClientDashboardData> {
+  console.log('[getClientDashboardData] Called with:', { projectId, organizationId, hasSupabase: !!supabase });
+  
   if (!supabase || !organizationId || !projectId) {
+    console.log('[getClientDashboardData] Early return - missing params');
     return {
       clients: [],
       commitments: [],
@@ -50,6 +53,13 @@ export async function getClientDashboardData(
     getClientPaymentSchedule(projectId, organizationId),
   ]);
 
+  console.log('[getClientDashboardData] Fetched data:', {
+    clientsCount: clients.length,
+    commitmentsCount: commitments.length,
+    paymentsCount: payments.length,
+    scheduleCount: schedule.length,
+  });
+
   const financialSummaries = calculateFinancialSummaries(
     clients.map(c => c.id),
     commitments,
@@ -57,13 +67,19 @@ export async function getClientDashboardData(
     schedule
   );
 
-  return {
+  console.log('[getClientDashboardData] Financial summaries count:', financialSummaries.length);
+
+  const result = {
     clients,
     commitments,
     payments,
     schedule,
     financialSummaries,
   };
+
+  console.log('[getClientDashboardData] Returning result:', result);
+
+  return result;
 }
 
 /**
