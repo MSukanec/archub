@@ -364,6 +364,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
           data={projectClients}
           isLoading={isLoading}
           showDoubleHeader={false}
+          defaultSort={{ key: 'full_name', direction: 'asc' }}
           emptyStateConfig={{
             icon: <Users className="h-12 w-12 text-muted-foreground" />,
             title: 'No hay clientes en este proyecto',
