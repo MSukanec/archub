@@ -398,7 +398,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'payment_date',
       label: 'Fecha de Pago',
       sortable: true,
-      align: 'right' as const,
       render: (payment: ClientPaymentWithRelations) => formatDate(payment.payment_date, 'dd/MM/yyyy'),
     },
     // Project column - only shown when viewing organization-wide data
@@ -455,7 +454,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'commitment_id',
       label: 'Compromiso',
       sortable: true,
-      align: 'right' as const,
       render: (payment: ClientPaymentWithRelations) => {
         if (!payment.commitment) return '-';
         return (
@@ -469,7 +467,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       key: 'schedule_id',
       label: 'Cuota',
       sortable: true,
-      align: 'right' as const,
       render: (payment: ClientPaymentWithRelations) => {
         if (!payment.schedule) return '-';
         return (
@@ -480,14 +477,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       },
     },
     {
-      key: 'wallet',
-      label: 'Billetera',
-      sortable: true,
-      align: 'right' as const,
-      cellClassName: 'font-bold',
-      render: (payment: ClientPaymentWithRelations) => payment.wallet?.wallets?.name || '-',
-    },
-    {
       key: 'amount',
       label: 'Monto',
       sortable: true,
@@ -495,6 +484,11 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       render: (payment: ClientPaymentWithRelations) => (
         <div className="flex flex-col items-end">
           <span className="font-bold">{formatAmount(payment.amount, payment.currency?.symbol)}</span>
+          {payment.wallet?.wallets?.name && (
+            <span className="text-xs text-muted-foreground">
+              {payment.wallet.wallets.name}
+            </span>
+          )}
           {payment.exchange_rate && (
             <span className="text-xs text-muted-foreground">
               Cot. {payment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
