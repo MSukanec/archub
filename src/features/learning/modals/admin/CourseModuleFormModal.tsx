@@ -271,15 +271,20 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       }
 
       // Create or update media_link
-      const { data: existingLink } = await supabase
+      const { data: existingLink, error: linkCheckError } = await supabase
         .from('media_links')
         .select('id')
         .eq('module_id', moduleId)
         .eq('category', 'module_image')
         .maybeSingle();
 
+      if (linkCheckError) {
+        console.error('Error checking existing link:', linkCheckError);
+        throw new Error(`Error verificando link existente: ${linkCheckError.message}`);
+      }
+
       if (existingLink) {
-        await supabase
+        const { error: updateLinkError } = await supabase
           .from('media_links')
           .update({
             media_file_id: mediaFileId,
@@ -288,8 +293,13 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
             updated_at: new Date().toISOString()
           })
           .eq('id', existingLink.id);
+
+        if (updateLinkError) {
+          console.error('Error updating media_link:', updateLinkError);
+          throw new Error(`Error al actualizar link: ${updateLinkError.message}`);
+        }
       } else {
-        await supabase
+        const { error: insertLinkError } = await supabase
           .from('media_links')
           .insert({
             media_file_id: mediaFileId,
@@ -299,10 +309,19 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
             is_public: true,
             created_by: userId
           });
+
+        if (insertLinkError) {
+          console.error('Error inserting media_link:', insertLinkError);
+          throw new Error(`Error al crear link: ${insertLinkError.message}`);
+        }
       }
 
       const urlWithCacheBust = `${publicUrl}?t=${Date.now()}`;
       setModuleImageUrl(urlWithCacheBust);
+
+      // Invalidate queries to refetch module data
+      queryClient.invalidateQueries({ queryKey: ['all-course-modules'] });
+      queryClient.invalidateQueries({ queryKey: ['course-modules'] });
 
       toast({
         title: 'Éxito',
