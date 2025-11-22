@@ -11,14 +11,14 @@ interface HeroSectionProps {
 export function HeroSection({ course, stats }: HeroSectionProps) {
   return (
     <section className="relative h-screen flex items-center overflow-hidden">
-      {/* Background Image with Overlay */}
+      {/* Background Image with Parallax (desktop only) */}
       {course.cover_url ? (
         <>
           <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            className="absolute inset-0 bg-cover bg-center md:bg-fixed bg-no-repeat motion-reduce:bg-scroll"
             style={{ backgroundImage: `url(${course.cover_url})` }}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/70 to-black/50 dark:from-black/90 dark:via-black/80 dark:to-black/60" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/60 to-black/100 dark:from-black/30 dark:via-black/70 dark:to-black/100" />
         </>
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20" />
@@ -38,7 +38,7 @@ export function HeroSection({ course, stats }: HeroSectionProps) {
             {course.title}
           </h1>
 
-          <p className="text-[18px] leading-relaxed mb-8 text-foreground/80">
+          <p className="text-[18px] leading-relaxed mb-8 text-[rgb(220,220,220)]">
             {course.short_description}
           </p>
 
@@ -46,15 +46,15 @@ export function HeroSection({ course, stats }: HeroSectionProps) {
           <div className="flex flex-wrap gap-6">
             <div className="flex items-center gap-2 text-sm sm:text-base">
               <BookOpen className="w-5 h-5 text-accent" />
-              <span className="font-semibold text-foreground/80">{stats.total_modules} Módulos</span>
+              <span className="font-semibold text-[rgb(220,220,220)]">{stats.total_modules} Módulos</span>
             </div>
             <div className="flex items-center gap-2 text-sm sm:text-base">
               <CheckCircle className="w-5 h-5 text-accent" />
-              <span className="font-semibold text-foreground/80">{stats.total_lessons} Lecciones</span>
+              <span className="font-semibold text-[rgb(220,220,220)]">{stats.total_lessons} Lecciones</span>
             </div>
             <div className="flex items-center gap-2 text-sm sm:text-base">
               <Clock className="w-5 h-5 text-accent" />
-              <span className="font-semibold text-foreground/80">{stats.total_duration_formatted} de Contenido</span>
+              <span className="font-semibold text-[rgb(220,220,220)]">{stats.total_duration_formatted} de Contenido</span>
             </div>
           </div>
         </div>
