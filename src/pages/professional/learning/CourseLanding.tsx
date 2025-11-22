@@ -1,15 +1,15 @@
 import { useParams } from 'wouter';
 import { useEffect } from 'react';
 import { CourseLandingLayout } from '@/layout/course-landing';
-import { useCourseLanding } from '@/features/course-landing';
-import {
+import { 
+  useCourseLanding,
   HeroSection,
   InstructorSection,
   ModulesSection,
   FeaturesSection,
   FAQSection,
   CTAFooter,
-} from '@/features/course-landing/components';
+} from '@/features/learning';
 
 export default function CourseLanding() {
   const { slug } = useParams<{ slug: string }>();

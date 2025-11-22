@@ -1,6 +1,5 @@
 import { PublicLayout } from '@/layout/public/PublicLayout';
-import { useAllCourses } from '@/features/course-landing/hooks';
-import { CourseGrid } from '@/features/course-landing/components';
+import { useAllCourses, CourseGrid } from '@/features/learning';
 import { BookOpen, GraduationCap } from 'lucide-react';
 
 export default function CourseCatalog() {

@@ -1,1 +1,0 @@
-export { fetchCourseLandingBySlug } from './courseLanding';

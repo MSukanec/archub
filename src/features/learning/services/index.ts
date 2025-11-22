@@ -2,44 +2,46 @@
  * Learning Services - Barrel Export
  * 
  * Servicios del módulo learning organizados por categoría:
- * - Dashboard y cursos
- * - Progreso de lecciones
- * - Notas y marcadores
- * - Pricing
+ * - Public (landing pages, course catalog)
+ * - Student (dashboard, progress, notes, markers)
+ * - Admin (course management) - to be added
  */
 
-// ========== DASHBOARD & COURSES ==========
-export { getLearningDashboard } from './getLearningDashboard';
-export { getLearningDashboardFast } from './getLearningDashboardFast';
-export { getLearningCourses } from './getLearningCourses';
-export { getCourseOverview } from './getCourseOverview';
-export { getCourseStructure } from './getCourseStructure';
-export { getCourseProgress } from './getCourseProgress';
-export { getCourseEnrollment } from './getCourseEnrollment';
-export { getLastLessonInProgress } from './getLastLessonInProgress';
-export { getStudyTime } from './getStudyTime';
-export { getCourseDuration } from './getCourseDuration';
-export { getCourseLessonsSummary } from './getCourseLessonsSummary';
-export { getLessonDetails } from './getLessonDetails';
-export { getMonthlyStudyTime } from './getMonthlyStudyTime';
+// ========== PUBLIC SERVICES ==========
+export { fetchCourseLandingBySlug, getAllPublicCourses } from './public/courseLanding';
 
-// ========== LESSON PROGRESS ==========
-export { getLessonProgress } from './getLessonProgress';
-export { updateLessonProgress } from './updateLessonProgress';
-export { toggleLessonFavorite } from './toggleLessonFavorite';
+// ========== STUDENT SERVICES - DASHBOARD & COURSES ==========
+export { getLearningDashboard } from './student/getLearningDashboard';
+export { getLearningDashboardFast } from './student/getLearningDashboardFast';
+export { getLearningCourses } from './student/getLearningCourses';
+export { getCourseOverview } from './student/getCourseOverview';
+export { getCourseStructure } from './student/getCourseStructure';
+export { getCourseProgress } from './student/getCourseProgress';
+export { getCourseEnrollment } from './student/getCourseEnrollment';
+export { getLastLessonInProgress } from './student/getLastLessonInProgress';
+export { getStudyTime } from './student/getStudyTime';
+export { getCourseDuration } from './student/getCourseDuration';
+export { getCourseLessonsSummary } from './student/getCourseLessonsSummary';
+export { getLessonDetails } from './student/getLessonDetails';
+export { getMonthlyStudyTime } from './student/getMonthlyStudyTime';
 
-// ========== NOTES ==========
-export { getLessonNotes } from './getLessonNotes';
-export { getCourseRecentNotes } from './getCourseRecentNotes';
-export { upsertLessonNote } from './upsertLessonNote';
-export { deleteLessonNote } from './deleteLessonNote';
+// ========== STUDENT SERVICES - LESSON PROGRESS ==========
+export { getLessonProgress } from './student/getLessonProgress';
+export { updateLessonProgress } from './student/updateLessonProgress';
+export { toggleLessonFavorite } from './student/toggleLessonFavorite';
 
-// ========== MARKERS ==========
-export { getLessonMarkers } from './getLessonMarkers';
-export { getCourseMarkersUrl, getCourseMarkers, type MarkerWithLesson } from './getCourseMarkers';
-export { getCourseRecentMarkers } from './getCourseRecentMarkers';
-export { upsertLessonMarker } from './upsertLessonMarker';
-export { deleteLessonMarker } from './deleteLessonMarker';
+// ========== STUDENT SERVICES - NOTES ==========
+export { getLessonNotes } from './student/getLessonNotes';
+export { getCourseRecentNotes } from './student/getCourseRecentNotes';
+export { upsertLessonNote } from './student/upsertLessonNote';
+export { deleteLessonNote } from './student/deleteLessonNote';
 
-// ========== PRICING ==========
-export { getCoursePricing } from './getCoursePricing';
+// ========== STUDENT SERVICES - MARKERS ==========
+export { getLessonMarkers } from './student/getLessonMarkers';
+export { getCourseMarkersUrl, getCourseMarkers, type MarkerWithLesson } from './student/getCourseMarkers';
+export { getCourseRecentMarkers } from './student/getCourseRecentMarkers';
+export { upsertLessonMarker } from './student/upsertLessonMarker';
+export { deleteLessonMarker } from './student/deleteLessonMarker';
+
+// ========== STUDENT SERVICES - PRICING ==========
+export { getCoursePricing } from './student/getCoursePricing';

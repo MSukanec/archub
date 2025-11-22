@@ -2,14 +2,17 @@
  * Learning Hooks - Barrel Export
  * 
  * React Query hooks del módulo learning organizados por categoría:
- * - Dashboard y cursos (Queries)
- * - Progreso de lecciones (Queries)
- * - Notas y marcadores (Queries)
- * - Pricing (Queries)
- * - Mutations para progreso, notas y marcadores
+ * - Public (landing pages, catalog)
+ * - Student (dashboard, progress, notes, markers)
+ * - Admin (course management)
+ * - Mutations (progress, notes, markers)
  */
 
-// ========== DASHBOARD & COURSES (QUERIES) ==========
+// ========== PUBLIC HOOKS (LANDING PAGES) ==========
+export { useCourseLanding } from './use-course-landing';
+export { useAllCourses } from './use-all-courses';
+
+// ========== STUDENT HOOKS - DASHBOARD & COURSES (QUERIES) ==========
 export { useLearningDashboard } from './use-learning-dashboard';
 export { useLearningDashboardFast } from './use-learning-dashboard-fast';
 export { useLearningCourses } from './use-learning-courses';

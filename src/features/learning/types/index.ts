@@ -196,3 +196,35 @@ export function getLessonStatus(progress?: CourseLessonProgress): 'not_started' 
   }
   return 'not_started';
 }
+
+// ========== PUBLIC LANDING TYPES (from course-landing) ==========
+
+import type { CourseFaq } from '@shared/schema';
+
+/**
+ * Course landing page data (public-facing)
+ */
+export interface CourseLandingData {
+  course: Course;
+  modules: ModuleWithLessons[];
+  faqs: CourseFaq[];
+  stats: CourseStats;
+}
+
+/**
+ * Module with lessons and duration (for landing pages)
+ */
+export interface ModuleWithLessons extends CourseModule {
+  lessons: Lesson[];
+  total_duration_min: number;
+}
+
+/**
+ * Course statistics for landing pages
+ */
+export interface CourseStats {
+  total_modules: number;
+  total_lessons: number;
+  total_duration_hours: number;
+  total_duration_formatted: string;
+}

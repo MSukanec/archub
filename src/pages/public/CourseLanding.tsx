@@ -1,7 +1,8 @@
 import { useParams } from 'wouter';
 import { CourseLandingLayout } from '@/layout/course-landing';
-import { useCourseLanding, useCourseEnrollment } from '@/features/course-landing';
-import {
+import { 
+  useCourseLanding, 
+  useCourseEnrollment,
   HeroSection,
   InstructorSection,
   ModulesSection,
@@ -9,7 +10,7 @@ import {
   FAQSection,
   CTAFooter,
   CourseStickyCard,
-} from '@/features/course-landing/components';
+} from '@/features/learning';
 
 export default function CourseLanding() {
   const { slug } = useParams<{ slug: string }>();

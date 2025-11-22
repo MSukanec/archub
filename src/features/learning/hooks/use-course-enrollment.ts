@@ -1,28 +1,36 @@
 import { useQuery } from '@tanstack/react-query';
-import { getCourseEnrollment } from '../services';
-import { LEARNING_QUERY_KEYS } from '../constants';
+import { supabase } from '@/lib/supabase';
+import { useAuthStore } from '@/stores/authStore';
 
 /**
- * Hook para obtener el enrollment del usuario en un curso.
- * 
- * Consulta la tabla course_enrollments para verificar si el usuario
- * tiene acceso al curso y obtener metadatos del enrollment.
- * 
- * Útil para:
- * - Verificar acceso al curso
- * - Mostrar fechas de inicio/expiración
- * - Validar permisos antes de reproducir contenido
- * 
- * @param courseId - ID del curso (UUID)
- * @param userId - ID del usuario (UUID) o auth_id
+ * Check if the current user is enrolled in a specific course
  */
-export function useCourseEnrollment(
-  courseId: string | undefined,
-  userId: string | undefined
-) {
+export function useCourseEnrollment(courseId: string) {
+  const user = useAuthStore((state) => state.user);
+
   return useQuery({
-    queryKey: LEARNING_QUERY_KEYS.courseEnrollment(courseId!, userId!),
-    queryFn: () => getCourseEnrollment(courseId, userId),
-    enabled: !!courseId && !!userId,
+    queryKey: ['course-enrollment', courseId, user?.id],
+    queryFn: async () => {
+      if (!user || !courseId) {
+        return { isEnrolled: false };
+      }
+
+      const { data, error } = await supabase
+        .from('course_enrollments')
+        .select('id, status')
+        .eq('course_id', courseId)
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error checking enrollment:', error);
+        return { isEnrolled: false };
+      }
+
+      return { isEnrolled: !!data };
+    },
+    enabled: !!user && !!courseId,
+    staleTime: 30000, // Cache for 30 seconds
   });
 }

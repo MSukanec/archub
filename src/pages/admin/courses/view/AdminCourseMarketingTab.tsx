@@ -8,9 +8,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useDebouncedAutoSave } from '@/components/save/useDebouncedAutoSave';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
-import { HeroSection, InstructorSection, ModulesSection } from '@/features/course-landing/components';
+import { HeroSection, InstructorSection, ModulesSection } from '@/features/learning';
 import type { LandingSections, LandingSection, Course } from '@shared/schema';
-import type { ModuleWithLessons } from '@/features/course-landing/types';
+import type { ModuleWithLessons } from '@/features/learning';
 
 interface AdminCourseMarketingTabProps {
   courseId: string;
