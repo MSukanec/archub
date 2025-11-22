@@ -47,6 +47,8 @@ create table public.media_links (
   course_lesson_id uuid null,
   general_cost_id uuid null,
   client_payment_id uuid null,
+  course_id uuid null,
+  course_module_id uuid null,
   created_by uuid null,
   created_at timestamp with time zone not null default now(),
   visibility text null,
@@ -65,6 +67,8 @@ create table public.media_links (
   constraint media_links_project_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
   constraint media_links_sitelog_fkey foreign KEY (site_log_id) references site_logs (id) on delete CASCADE,
   constraint media_links_client_payment_fkey foreign KEY (client_payment_id) references client_payments (id) on delete CASCADE,
+  constraint media_links_course_fkey foreign KEY (course_id) references courses (id) on delete CASCADE,
+  constraint media_links_course_module_fkey foreign KEY (course_module_id) references course_modules (id) on delete CASCADE,
   constraint media_links_category_check check (
     (
       (category is null)
@@ -79,7 +83,14 @@ create table public.media_links (
             'general'::text,
             'technical'::text,
             'financial'::text,
-            'legal'::text
+            'legal'::text,
+            'course_cover'::text,
+            'instructor_photo'::text,
+            'module_image'::text,
+            'section_background'::text,
+            'testimonial_logo'::text,
+            'project_photo'::text,
+            'og_image'::text
           ]
         )
       )
@@ -119,6 +130,20 @@ create index IF not exists idx_media_links_client_payment on public.media_links 
 where
   (
     (client_payment_id is not null)
+    and (organization_id is not null)
+  );
+
+create index IF not exists idx_media_links_course on public.media_links using btree (course_id) TABLESPACE pg_default
+where
+  (
+    (course_id is not null)
+    and (organization_id is not null)
+  );
+
+create index IF not exists idx_media_links_course_module on public.media_links using btree (course_module_id) TABLESPACE pg_default
+where
+  (
+    (course_module_id is not null)
     and (organization_id is not null)
   );
 

@@ -201,6 +201,17 @@ Ver: `src/features/contacts/` (implementación con contact_id)
 ### Caso: Proyectos (Imágenes de proyecto)
 Ver: `src/features/projects/` (implementación con project_id)
 
+### Caso: Cursos (Cover, instructor, módulos, secciones)
+Ver: `src/features/courses/` (implementación con course_id y course_module_id)
+Categorías:
+- `course_cover`: Imagen principal del curso (hero)
+- `instructor_photo`: Foto del instructor
+- `module_image`: Imagen/GIF del módulo
+- `section_background`: Imagen de fondo de sección
+- `testimonial_logo`: Logo de cliente/testimonio
+- `project_photo`: Foto de proyecto terminado
+- `og_image`: Imagen para SEO/redes sociales
+
 ## ❌ Errores Comunes a Evitar
 
 ### 1. NO guardar URLs directamente en tablas
