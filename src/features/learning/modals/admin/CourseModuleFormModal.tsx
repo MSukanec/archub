@@ -63,17 +63,30 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
 
   const loadModuleImage = async (moduleId: string) => {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('media_links')
-        .select('media_files!inner(file_url)')
+        .select(`
+          media_files!inner (
+            file_url,
+            is_deleted
+          )
+        `)
         .eq('module_id', moduleId)
         .eq('category', 'module_image')
-        .eq('media_files.is_deleted', false)
         .maybeSingle();
+
+      if (error) {
+        console.error('Error loading module image:', error);
+        return;
+      }
 
       if (data && data.media_files) {
         const mediaFile: any = data.media_files;
-        setModuleImageUrl(mediaFile.file_url);
+        // Only show if not deleted
+        if (!mediaFile.is_deleted) {
+          const urlWithCacheBust = `${mediaFile.file_url}?t=${Date.now()}`;
+          setModuleImageUrl(urlWithCacheBust);
+        }
       }
     } catch (error) {
       console.error('Error loading module image:', error);
