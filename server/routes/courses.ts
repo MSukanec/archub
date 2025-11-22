@@ -1388,8 +1388,8 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         // Get all active courses
         authenticatedSupabase
           .from('courses')
-          .eq('is_deleted', false)
           .select('id, slug, title, short_description, is_active, visibility')
+          .eq('is_deleted', false)
           .eq('is_active', true)
           .neq('visibility', 'draft'),
         
@@ -1864,7 +1864,7 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       
       // Sort and limit recent completions
       const recentCompletions = completedLessons
-        .sort((a: any, b: any) => b.completed_at.localeCompare(a.completed_at))
+        .sort((a: any, b: any) => (b.completed_at || '').localeCompare(a.completed_at || ''))
         .slice(0, 10)
         .map((c: any) => ({
           type: 'completed',
@@ -1873,7 +1873,7 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         }));
       
       // Calculate current streak
-      const sortedDays = Array.from(activeDaysSet).sort((a: string, b: string) => b.localeCompare(a));
+      const sortedDays = Array.from(activeDaysSet).sort((a, b) => (b || '').localeCompare(a || ''));
       let currentStreak = 0;
       
       for (let i = 0; i < sortedDays.length; i++) {
