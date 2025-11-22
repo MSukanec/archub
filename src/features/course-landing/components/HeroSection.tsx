@@ -12,23 +12,25 @@ interface HeroSectionProps {
 
 export function HeroSection({ course, stats }: HeroSectionProps) {
   return (
-    <section className="relative min-h-[500px] py-16 flex items-center overflow-hidden rounded-xl">
+    <section className="relative min-h-[70vh] py-24 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 flex items-center overflow-hidden">
       {/* Background Image with Overlay */}
       {course.cover_url ? (
         <>
           <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat rounded-xl"
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{ backgroundImage: `url(${course.cover_url})` }}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/70 to-black/50 dark:from-black/90 dark:via-black/80 dark:to-black/60 rounded-xl" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/70 to-black/50 dark:from-black/90 dark:via-black/80 dark:to-black/60" />
         </>
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20 rounded-xl" />
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20" />
       )}
 
-      {/* Content */}
-      <div className="w-full px-6 sm:px-8 lg:px-12 relative z-10">
-        <div className="max-w-2xl">
+      {/* Content Grid - Only use 8 columns out of 12 */}
+      <div className="w-full relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-8">
+            <div className="max-w-3xl">
           {course.badge_text && (
             <Badge variant="secondary" className="px-4 py-2 text-sm font-medium mb-6 bg-primary/90 text-primary-foreground border-0">
               <Award className="w-4 h-4 mr-2 inline" />
@@ -75,6 +77,8 @@ export function HeroSection({ course, stats }: HeroSectionProps) {
                 <span className="text-sm text-gray-200">/ año</span>
               </div>
             )}
+          </div>
+            </div>
           </div>
         </div>
       </div>
