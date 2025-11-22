@@ -58,8 +58,9 @@ export async function getCoursesFull(
       // Get user's enrollments
       supabase
         .from('course_enrollments')
-        .select('id, course_id, user_id, status, created_at, updated_at, courses(slug)')
-        .eq('user_id', dbUser.id),
+        .select('id, course_id, user_id, status, created_at, updated_at, courses!inner(slug, is_deleted)')
+        .eq('user_id', dbUser.id)
+        .eq('courses.is_deleted', false),
 
       // Get user's progress from optimized view
       supabase
@@ -67,6 +68,10 @@ export async function getCoursesFull(
         .select('*')
         .eq('user_id', dbUser.id)
     ]);
+
+    console.log('[getCoursesFull] Courses result:', coursesResult.error ? coursesResult.error : `${coursesResult.data?.length} courses`);
+    console.log('[getCoursesFull] Enrollments result:', enrollmentsResult.error ? enrollmentsResult.error : `${enrollmentsResult.data?.length} enrollments`);
+    console.log('[getCoursesFull] Progress result:', progressResult.error ? progressResult.error : `${progressResult.data?.length} progress records`);
 
     if (coursesResult.error) {
       console.error('Error fetching courses:', coursesResult.error);
