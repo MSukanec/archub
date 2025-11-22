@@ -118,9 +118,14 @@ export function PlanUpgradeModal({
           <div className="flex gap-2 w-full px-2">
             <Button
               type="button"
-              variant="secondary"
+              variant="outline"
               onClick={() => onOpenChange(false)}
               className="w-1/4"
+              style={{
+                borderColor: planColor,
+                color: planColor,
+                backgroundColor: 'transparent'
+              }}
               data-testid="button-close-plan-modal"
             >
               Cerrar
@@ -131,7 +136,7 @@ export function PlanUpgradeModal({
               onClick={handleViewPlans}
               className="w-3/4"
               style={{ 
-                backgroundColor: 'var(--accent)',
+                backgroundColor: planColor,
                 color: 'white'
               }}
               data-testid="button-view-plans"
