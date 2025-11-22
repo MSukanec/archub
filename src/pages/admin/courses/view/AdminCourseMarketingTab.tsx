@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useDebouncedAutoSave } from '@/components/save/useDebouncedAutoSave';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
-import { InstructorSection, ModulesSection } from '@/features/course-landing/components';
+import { HeroSection, InstructorSection, ModulesSection } from '@/features/course-landing/components';
 import type { LandingSections, LandingSection, Course } from '@shared/schema';
 import type { ModuleWithLessons } from '@/features/course-landing/types';
 
@@ -211,6 +211,23 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
     }));
   };
 
+  // Helper function to format total duration
+  const formatTotalDuration = (lessons: any[]) => {
+    const totalMinutes = lessons.reduce((sum, lesson) => sum + (lesson.duration_sec || 0) / 60, 0);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = Math.floor(totalMinutes % 60);
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
+  };
+
+  // Helper function to calculate total hours
+  const calculateTotalHours = (lessons: any[]) => {
+    const totalMinutes = lessons.reduce((sum, lesson) => sum + (lesson.duration_sec || 0) / 60, 0);
+    return Math.floor(totalMinutes / 60);
+  };
+
   // Auto-save hook
   const { isSaving } = useDebouncedAutoSave({
     data: {
@@ -252,6 +269,95 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
           </AlertDescription>
         </Alert>
       )}
+
+      {/* SECCIÓN HERO - PRINCIPAL */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+        {/* Left Column - Read-only fields */}
+        <div className="bg-card border rounded-lg p-6 space-y-4">
+          <div>
+            <h3 className="text-lg font-semibold mb-1">🚀 Hero - Sección Principal</h3>
+            <p className="text-sm text-muted-foreground">
+              Estos campos se editan desde la pestaña "Datos del Curso"
+            </p>
+          </div>
+          
+          <div className="grid gap-4">
+            {/* Title field - disabled */}
+            <div className="space-y-2">
+              <Label htmlFor="hero-title">Título del Curso</Label>
+              <Input
+                id="hero-title"
+                value={courseData?.title || ''}
+                disabled
+                className="opacity-60 cursor-not-allowed"
+              />
+            </div>
+            
+            {/* Short description field - disabled */}
+            <div className="space-y-2">
+              <Label htmlFor="hero-description">Descripción Corta</Label>
+              <Textarea
+                id="hero-description"
+                value={courseData?.short_description || ''}
+                disabled
+                rows={3}
+                className="opacity-60 cursor-not-allowed"
+              />
+            </div>
+            
+            {/* Cover URL field - disabled */}
+            <div className="space-y-2">
+              <Label htmlFor="hero-cover">Imagen de Portada (Cover)</Label>
+              <Input
+                id="hero-cover"
+                value={courseData?.cover_url || ''}
+                disabled
+                className="opacity-60 cursor-not-allowed"
+              />
+            </div>
+            
+            {/* Badge text field - disabled (from marketing section) */}
+            <div className="space-y-2">
+              <Label htmlFor="hero-badge">Texto del Badge</Label>
+              <Input
+                id="hero-badge"
+                value={badgeText || ''}
+                disabled
+                className="opacity-60 cursor-not-allowed"
+              />
+            </div>
+            
+            {/* Price field - disabled */}
+            <div className="space-y-2">
+              <Label htmlFor="hero-price">Precio</Label>
+              <Input
+                id="hero-price"
+                value={courseData?.price ? `$${courseData.price}` : ''}
+                disabled
+                className="opacity-60 cursor-not-allowed"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column - HeroSection preview */}
+        <div className="sticky top-24 bg-muted/20 border rounded-lg overflow-hidden">
+          {courseData && (
+            <HeroSection 
+              course={{
+                ...courseData,
+                badge_text: badgeText || courseData.badge_text
+              }}
+              stats={{
+                total_modules: modules?.length || 0,
+                total_lessons: lessons?.length || 0,
+                total_duration_hours: calculateTotalHours(lessons || []),
+                total_duration_formatted: formatTotalDuration(lessons || [])
+              }}
+            />
+          )}
+        </div>
+      </div>
 
       {/* SECCIÓN INSTRUCTOR */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
