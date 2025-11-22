@@ -78,6 +78,7 @@ export interface ClientCommitment {
   amount: number;
   currency_id: string;
   exchange_rate: number;
+  commitment_method: 'fixed' | 'installments' | 'work_progress';
   created_by: string | null;
   created_at: string;
   updated_at: string;

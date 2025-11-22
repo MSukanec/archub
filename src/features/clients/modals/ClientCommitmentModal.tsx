@@ -31,7 +31,8 @@ const clientCommitmentSchema = z.object({
   client_id: z.string().min(1, 'Cliente es requerido'),
   amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
   currency_id: z.string().min(1, 'Moneda es requerida'),
-  exchange_rate: z.number().min(0.0001, 'Tipo de cambio debe ser mayor a 0'),
+  exchange_rate: z.number().optional(),
+  commitment_method: z.enum(['fixed', 'installments', 'work_progress']),
 })
 
 type ClientCommitmentForm = z.infer<typeof clientCommitmentSchema>
@@ -80,7 +81,8 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
       client_id: '',
       amount: 0,
       currency_id: '',
-      exchange_rate: 1,
+      exchange_rate: undefined,
+      commitment_method: 'fixed',
     }
   })
 
@@ -105,7 +107,8 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
         client_id: existingCommitment.client_id || '',
         amount: existingCommitment.amount || 0,
         currency_id: existingCommitment.currency_id || '',
-        exchange_rate: existingCommitment.exchange_rate || 1,
+        exchange_rate: existingCommitment.exchange_rate || undefined,
+        commitment_method: existingCommitment.commitment_method || 'fixed',
       })
     }
   }, [existingCommitment, mode, form, currentMember?.id])
@@ -121,20 +124,10 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
         const currencyId = defaultCurrency?.currency?.id || currencies[0].currency?.id
         if (currencyId) {
           form.setValue('currency_id', currencyId)
-          form.setValue('exchange_rate', getCurrencyExchangeRate(currencyId))
         }
       }
     }
   }, [currencies, mode, commitmentId, currentMember?.id, form])
-
-  // Update exchange rate when currency changes
-  const selectedCurrency = form.watch('currency_id')
-  React.useEffect(() => {
-    if (selectedCurrency && mode === 'create') {
-      const exchangeRate = getCurrencyExchangeRate(selectedCurrency)
-      form.setValue('exchange_rate', exchangeRate)
-    }
-  }, [selectedCurrency, mode, currencies, form])
 
   // Mutations for create/update
   const createCommitmentMutation = useCreateClientCommitment()
@@ -150,6 +143,7 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
             amount: data.amount,
             currency_id: data.currency_id,
             exchange_rate: data.exchange_rate || 1,
+            commitment_method: data.commitment_method,
           },
           organizationId,
         })
@@ -160,6 +154,7 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
             amount: data.amount,
             currency_id: data.currency_id,
             exchange_rate: data.exchange_rate || 1,
+            commitment_method: data.commitment_method,
           },
           projectId,
           organizationId,
@@ -188,6 +183,20 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
     onClose()
   }
 
+  // Helper function to translate commitment method
+  const getCommitmentMethodLabel = (method: string) => {
+    switch (method) {
+      case 'fixed':
+        return 'Monto fijo'
+      case 'installments':
+        return 'Cuotas'
+      case 'work_progress':
+        return 'Avance de obra'
+      default:
+        return method
+    }
+  }
+
   // View panel (read-only)
   const viewPanel = (mode === 'edit' || mode === 'view') && existingCommitment ? (
     <div className="space-y-6">
@@ -213,6 +222,14 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
             {existingCommitment.currency?.code} - Tipo de cambio: {existingCommitment.exchange_rate?.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
           </div>
         </div>
+      </div>
+
+      {/* Método de Compromiso */}
+      <div>
+        <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Método de Compromiso</h4>
+        <span className="text-base font-medium">
+          {getCommitmentMethodLabel(existingCommitment.commitment_method || 'fixed')}
+        </span>
       </div>
 
       {/* Metadatos */}
@@ -337,9 +354,9 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
                       type="number"
                       step="0.0001"
                       min="0.0001"
-                      placeholder="1.0000"
+                      placeholder="1.00"
                       value={field.value || ''}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 1)}
+                      onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -347,6 +364,30 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
               )}
             />
           </div>
+
+          {/* Row 3: Método de Compromiso */}
+          <FormField
+            control={form.control}
+            name="commitment_method"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Método de Compromiso *</FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar método" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fixed">Monto fijo</SelectItem>
+                      <SelectItem value="installments">Cuotas</SelectItem>
+                      <SelectItem value="work_progress">Avance de obra</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </form>
       </Form>
     )
