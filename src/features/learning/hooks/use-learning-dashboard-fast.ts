@@ -12,8 +12,15 @@ import { LEARNING_QUERY_KEYS } from '../constants';
  * Útil para cargas iniciales rápidas y actualizaciones frecuentes.
  */
 export function useLearningDashboardFast() {
-  return useQuery({
+  const result = useQuery({
     queryKey: LEARNING_QUERY_KEYS.dashboardFast,
     queryFn: () => getLearningDashboardFast(),
   });
+  
+  // DEBUG: Log dashboard data
+  if (result.data?.courses?.[0]) {
+    console.log('[useLearningDashboardFast] First course:', result.data.courses[0]);
+  }
+  
+  return result;
 }

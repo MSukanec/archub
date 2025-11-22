@@ -109,6 +109,7 @@ export function useCourseListData(
 
   // DEBUG: Log course data to see if cover_url is present
   console.log('[useCourseListData] Courses:', courses.map(c => ({ id: c.id, title: c.title, cover_url: c.cover_url })));
+  console.log('[useCourseListData] First course full data:', courses[0]);
 
   const courseIds = useMemo(() => courses.map((c: CourseData) => c.id), [courses]);
   const { data: courseLessonsSummary } = useCourseLessonsSummary(courseIds);
