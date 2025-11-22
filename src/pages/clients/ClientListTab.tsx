@@ -28,6 +28,8 @@ interface ClientListTabProps {
   projectId?: string;
 }
 
+type EnrichedClient = ProjectClientSummary & { clientName: string };
+
 export default function ClientListTab({ projectId }: ClientListTabProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -62,6 +64,16 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     if (!dashboardData) return [];
     return mapToClientSummaries(dashboardData.clients, dashboardData.financialSummaries);
   }, [dashboardData]);
+
+  // Enrich projectClients with computed clientName field for sorting
+  const enrichedClients = useMemo<EnrichedClient[]>(() => {
+    return projectClients.map(client => ({
+      ...client,
+      clientName: client.contacts?.company_name || 
+                  client.contacts?.full_name || 
+                  `${client.contacts?.first_name || ''} ${client.contacts?.last_name || ''}`.trim() || '-'
+    }));
+  }, [projectClients]);
 
   // Calculate metrics
   const metrics = useMemo(() => {
@@ -232,10 +244,10 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   // Table columns
   const columns = [
     {
-      key: 'full_name',
+      key: 'clientName',
       label: 'Cliente',
       sortable: true,
-      render: (client: ProjectClientSummary) => {
+      render: (client: EnrichedClient) => {
         const avatarUrl = client.contacts?.linked_user?.avatar_url;
         const initials = client.contacts?.first_name?.[0] && client.contacts?.last_name?.[0]
           ? `${client.contacts.first_name[0]}${client.contacts.last_name[0]}`
@@ -269,7 +281,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       key: 'email',
       label: 'Mail',
       sortable: true,
-      render: (client: ProjectClientSummary) => {
+      render: (client: EnrichedClient) => {
         return client.contacts?.email || '-';
       },
     },
@@ -277,7 +289,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       key: 'phone',
       label: 'Teléfono',
       sortable: true,
-      render: (client: ProjectClientSummary) => {
+      render: (client: EnrichedClient) => {
         return client.contacts?.phone || '-';
       },
     },
@@ -285,7 +297,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       key: 'notes',
       label: 'Notas',
       sortable: false,
-      render: (client: ProjectClientSummary) => {
+      render: (client: EnrichedClient) => {
         if (!client.notes) return '-';
         const truncated = client.notes.length > 100 
           ? client.notes.substring(0, 100) + '...' 
@@ -346,7 +358,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
 
       {isMobile ? (
         <div className="space-y-3 pb-20">
-          {projectClients.map(client => (
+          {enrichedClients.map(client => (
             <ClientRow
               key={client.id}
               client={client}
@@ -361,10 +373,10 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       ) : (
         <Table
           columns={columns}
-          data={projectClients}
+          data={enrichedClients}
           isLoading={isLoading}
           showDoubleHeader={false}
-          defaultSort={{ key: 'full_name', direction: 'asc' }}
+          defaultSort={{ key: 'clientName', direction: 'asc' }}
           onRowClick={handleView}
           emptyStateConfig={{
             icon: <Users className="h-12 w-12 text-muted-foreground" />,
@@ -396,7 +408,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
               </Button>
             ),
           }}
-          rowActions={(client: ProjectClientSummary) => [
+          rowActions={(client: EnrichedClient) => [
             {
               label: 'Editar Cliente',
               icon: Edit,
