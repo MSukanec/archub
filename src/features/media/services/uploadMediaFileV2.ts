@@ -23,8 +23,8 @@ export async function uploadMediaFileV2(input: UploadMediaInputV2): Promise<Uplo
 
   const {
     file,
-    organization_id,
-    created_by,
+    organization_id = null,
+    created_by = null,
     bucket = 'media',
     project_id,
     site_log_id,
@@ -33,6 +33,8 @@ export async function uploadMediaFileV2(input: UploadMediaInputV2): Promise<Uplo
     course_lesson_id,
     general_cost_id,
     client_payment_id,
+    course_id,
+    course_module_id,
     visibility = 'organization',
     description,
     category,
@@ -42,16 +44,20 @@ export async function uploadMediaFileV2(input: UploadMediaInputV2): Promise<Uplo
   } = input;
 
   // Validar que al menos una entidad esté presente
-  if (!project_id && !site_log_id && !movement_id && !contact_id && !course_lesson_id && !general_cost_id && !client_payment_id) {
-    throw new Error('Se requiere al menos una entidad relacionada (project_id, site_log_id, etc.)');
+  if (!project_id && !site_log_id && !movement_id && !contact_id && !course_lesson_id && !general_cost_id && !client_payment_id && !course_id && !course_module_id) {
+    throw new Error('Se requiere al menos una entidad relacionada (project_id, site_log_id, course_id, etc.)');
   }
 
   // Generate unique file path
   const fileExt = file.name.split('.').pop();
   const fileName = `${nanoid()}.${fileExt}`;
-  const filePath = project_id 
+  const filePath = organization_id && project_id 
     ? `${organization_id}/${project_id}/${fileName}`
-    : `${organization_id}/${fileName}`;
+    : organization_id
+    ? `${organization_id}/${fileName}`
+    : course_id
+    ? `courses/${course_id}/${fileName}`
+    : `global/${fileName}`;
 
   // Determinar tipo de archivo
   const fileType: MediaFileType = file.type.startsWith('image/') ? 'image' 
@@ -88,7 +94,7 @@ export async function uploadMediaFileV2(input: UploadMediaInputV2): Promise<Uplo
         file_url: publicUrl,
         file_type: fileType,
         file_size: file.size,
-        is_public: visibility === 'organization',
+        is_public: visibility === 'public', // Only public for course media
         is_deleted: false
       })
       .select('id')
@@ -113,6 +119,8 @@ export async function uploadMediaFileV2(input: UploadMediaInputV2): Promise<Uplo
         course_lesson_id: course_lesson_id || null,
         general_cost_id: general_cost_id || null,
         client_payment_id: client_payment_id || null,
+        course_id: course_id || null,
+        course_module_id: course_module_id || null,
         created_by,
         visibility,
         description: description || null,

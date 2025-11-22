@@ -22,6 +22,33 @@ export async function fetchCourseLandingBySlug(slug: string) {
   if (courseError) throw new Error(`Course not found: ${courseError.message}`);
   if (!course) throw new Error('Course not found');
 
+  // 1.5. Fetch course media (cover, instructor photo, og_image)
+  const { data: mediaLinks } = await supabase
+    .from('media_links')
+    .select(`
+      category,
+      media_files!inner (
+        file_url,
+        is_deleted
+      )
+    `)
+    .eq('course_id', course.id)
+    .eq('media_files.is_deleted', false)
+    .in('category', ['course_cover', 'instructor_photo', 'og_image']);
+
+  // Attach media URLs to course object
+  if (mediaLinks && mediaLinks.length > 0) {
+    mediaLinks.forEach((link: any) => {
+      if (link.category === 'course_cover' && link.media_files?.file_url) {
+        (course as any).cover_url = link.media_files.file_url;
+      } else if (link.category === 'instructor_photo' && link.media_files?.file_url) {
+        (course as any).instructor_photo_url = link.media_files.file_url;
+      } else if (link.category === 'og_image' && link.media_files?.file_url) {
+        (course as any).og_image_url = link.media_files.file_url;
+      }
+    });
+  }
+
   // 2. Fetch modules
   const { data: modules, error: modulesError } = await supabase
     .from('course_modules')
@@ -70,12 +97,41 @@ export async function getAllPublicCourses() {
 
   const { data: courses, error } = await supabase
     .from('courses')
-    .select('id, slug, title, short_description, cover_url, price, badge_text, instructor_name, instructor_title')
+    .select('id, slug, title, short_description, price, badge_text, instructor_name, instructor_title')
     .eq('is_active', true)
     .eq('visibility', 'public')
     .order('created_at', { ascending: false });
 
   if (error) throw new Error(`Failed to fetch courses: ${error.message}`);
 
-  return (courses || []) as Course[];
+  if (!courses || courses.length === 0) {
+    return [];
+  }
+
+  // Fetch cover images for all courses
+  const courseIds = courses.map(c => c.id);
+  const { data: mediaLinks } = await supabase
+    .from('media_links')
+    .select(`
+      course_id,
+      media_files!inner (
+        file_url,
+        is_deleted
+      )
+    `)
+    .in('course_id', courseIds)
+    .eq('category', 'course_cover')
+    .eq('media_files.is_deleted', false);
+
+  // Attach cover_url to each course
+  const coursesWithCovers = courses.map(course => {
+    const coverLink = (mediaLinks || []).find((link: any) => link.course_id === course.id);
+    const mediaFile = Array.isArray(coverLink?.media_files) ? coverLink.media_files[0] : coverLink?.media_files;
+    return {
+      ...course,
+      cover_url: mediaFile?.file_url || null
+    };
+  });
+
+  return coursesWithCovers as Course[];
 }

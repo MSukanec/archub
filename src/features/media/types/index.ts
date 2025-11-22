@@ -17,14 +17,21 @@ export type MediaCategory =
   | 'general'
   | 'technical'
   | 'financial'
-  | 'legal';
+  | 'legal'
+  | 'course_cover'
+  | 'instructor_photo'
+  | 'module_image'
+  | 'section_background'
+  | 'testimonial_logo'
+  | 'project_photo'
+  | 'og_image';
 
 /**
  * Registro en tabla media_files (archivo físico centralizado)
  */
 export interface MediaFileRecord {
   id: string;
-  organization_id: string;
+  organization_id: string | null;
   created_by: string | null;
   bucket: string;
   file_path: string;
@@ -44,7 +51,7 @@ export interface MediaFileRecord {
 export interface MediaLinkRecord {
   id: string;
   media_file_id: string;
-  organization_id: string;
+  organization_id: string | null;
   project_id: string | null;
   site_log_id: string | null;
   movement_id: string | null;
@@ -52,6 +59,8 @@ export interface MediaLinkRecord {
   course_lesson_id: string | null;
   general_cost_id: string | null;
   client_payment_id: string | null;
+  course_id: string | null;
+  course_module_id: string | null;
   created_by: string | null;
   created_at: string;
   visibility: string | null;
@@ -86,8 +95,10 @@ export interface MediaFileWithLink {
   course_lesson_id?: string | null;
   general_cost_id?: string | null;
   client_payment_id?: string | null;
-  organization_id: string;
-  visibility: MediaVisibility | null;
+  course_id?: string | null;
+  course_module_id?: string | null;
+  organization_id: string | null;
+  visibility: MediaVisibility | 'public' | null;
   description: string | null;
   category: MediaCategory | null;
   is_cover: boolean;
@@ -159,8 +170,8 @@ export interface UploadMediaResult {
  */
 export interface UploadMediaInputV2 {
   file: File;
-  organization_id: string;
-  created_by: string;
+  organization_id?: string | null;
+  created_by?: string | null;
   
   // Bucket de destino (por defecto 'media')
   bucket?: string;
@@ -173,9 +184,11 @@ export interface UploadMediaInputV2 {
   course_lesson_id?: string;
   general_cost_id?: string;
   client_payment_id?: string;
+  course_id?: string;
+  course_module_id?: string;
   
   // Metadata del link
-  visibility?: MediaVisibility;
+  visibility?: MediaVisibility | 'public';
   description?: string;
   category?: MediaCategory;
   is_cover?: boolean;
