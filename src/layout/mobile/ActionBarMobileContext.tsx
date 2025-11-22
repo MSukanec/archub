@@ -7,6 +7,14 @@ interface ActionBarAction {
   label: string
   onClick: () => void
   variant?: 'primary' | 'secondary'
+  // Plan restriction props (optional)
+  planRestriction?: {
+    feature: string
+    current: number
+    modalImage?: string
+    modalTitle?: string
+    modalDescription?: string
+  }
 }
 
 interface ActionBarActions {

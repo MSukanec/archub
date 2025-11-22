@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useProjects } from '@/features/projects'
+import { useProjects, useProjectsCount } from '@/features/projects'
 import { useUserOrganizationPreferences } from '@/features/organization'
 import { Folder, Edit, Trash2, Plus, CheckCircle2, Search, Filter, Bell } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -26,6 +26,7 @@ export default function ProjectList() {
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
   const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId || undefined)
+  const { data: projectsCount = 0 } = useProjectsCount(organizationId || undefined)
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setSelectedProject } = useProjectContext()
@@ -140,7 +141,14 @@ export default function ProjectList() {
         icon: Plus,
         label: 'Nuevo Proyecto',
         onClick: () => openModal('project', {}),
-        variant: 'primary'
+        variant: 'primary',
+        planRestriction: {
+          feature: 'max_projects',
+          current: projectsCount,
+          modalImage: '/features/ft-projects-512.webp',
+          modalTitle: 'Alcanzaste el límite de proyectos',
+          modalDescription: 'Has llegado al máximo de proyectos permitidos en tu plan actual. Actualiza a un plan superior para crear proyectos ilimitados y gestionar tu negocio sin restricciones.',
+        },
       },
       filter: {
         id: 'filter',
@@ -164,8 +172,7 @@ export default function ProjectList() {
       setMobileSearchValue('');
       setSearchValue('');
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMobile]);
+  }, [isMobile, projectsCount, openModal, setActions, setShowActionBar, clearActions, setMobileSearchValue]);
 
   // Configure filters for Mobile Action Bar
   useEffect(() => {

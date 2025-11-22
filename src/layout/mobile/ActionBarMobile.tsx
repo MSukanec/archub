@@ -16,9 +16,6 @@ import { useMobile } from '@/hooks/use-mobile'
 import { Search, Filter, Home, Bell, Lock } from 'lucide-react'
 import { useLocation } from 'wouter'
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
-import { useCurrentUser } from '@/hooks/use-current-user'
-import { useProjectsCount } from '@/features/projects'
-
 export function ActionBarMobile() {
   const [, navigate] = useLocation()
   const { 
@@ -36,11 +33,6 @@ export function ActionBarMobile() {
   } = useActionBarMobile()
   const isMobile = useMobile()
   const searchInputRef = useRef<HTMLInputElement>(null)
-  
-  // Get projects count for plan restrictions (counts ALL projects, not just active)
-  const { data: userData } = useCurrentUser()
-  const organizationId = userData?.organization?.id
-  const { data: projectsCount = 0 } = useProjectsCount(organizationId || undefined)
   
   // Focus search input when popover opens - always run this hook
   useEffect(() => {
@@ -219,24 +211,35 @@ export function ActionBarMobile() {
 
           {/* Slot 3: Create (Central, only if exists) */}
           {actions.create && (
-            <PlanRestricted 
-              feature="max_projects" 
-              current={projectsCount}
-              functionName="Crear Proyecto"
-              useUpgradeModal={true}
-              modalImage="/features/ft-projects-512.webp"
-              modalTitle="Alcanzaste el límite de proyectos"
-              modalDescription="Has llegado al máximo de proyectos permitidos en tu plan actual. Actualiza a un plan superior para crear proyectos ilimitados y gestionar tu negocio sin restricciones."
-            >
+            actions.create.planRestriction ? (
+              <PlanRestricted 
+                feature={actions.create.planRestriction.feature} 
+                current={actions.create.planRestriction.current}
+                functionName={actions.create.label}
+                useUpgradeModal={true}
+                modalImage={actions.create.planRestriction.modalImage}
+                modalTitle={actions.create.planRestriction.modalTitle}
+                modalDescription={actions.create.planRestriction.modalDescription}
+              >
+                <button
+                  onClick={actions.create.onClick}
+                  className="flex items-center justify-center w-14 h-14 rounded-full shadow-lg text-white transition-colors"
+                  style={{ backgroundColor: 'var(--accent)' }}
+                  data-testid="button-create-mobile"
+                >
+                  {React.createElement(actions.create.icon, { className: "h-6 w-6" })}
+                </button>
+              </PlanRestricted>
+            ) : (
               <button
                 onClick={actions.create.onClick}
                 className="flex items-center justify-center w-14 h-14 rounded-full shadow-lg text-white transition-colors"
                 style={{ backgroundColor: 'var(--accent)' }}
-                data-testid="button-create-project-mobile"
+                data-testid="button-create-mobile"
               >
                 {React.createElement(actions.create.icon, { className: "h-6 w-6" })}
               </button>
-            </PlanRestricted>
+            )
           )}
 
           {/* Slot 4: Filter */}

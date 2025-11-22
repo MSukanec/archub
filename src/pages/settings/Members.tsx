@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -7,7 +7,10 @@ import {
   UserCheck, 
   Clock, 
   MoreHorizontal,
-  UserPlus
+  UserPlus,
+  Search,
+  Filter,
+  Bell
 } from "lucide-react";
 
 import { Layout } from "@/layout/desktop/Layout";
@@ -32,6 +35,7 @@ import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore
 import { useMobile } from "@/hooks/use-mobile";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 import { useOrganizationMembers } from "@/features/organization";
+import { useActionBarMobile } from "@/layout/mobile/ActionBarMobileContext";
 
 function getInitials(name: string): string {
   return name
@@ -62,6 +66,7 @@ export default function Members() {
   const { openModal } = useGlobalModalStore();
 
   const isMobile = useMobile();
+  const { setActions, setShowActionBar, clearActions } = useActionBarMobile();
 
   const organizationId = userData?.organization?.id;
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
@@ -149,6 +154,53 @@ export default function Members() {
 
   // Mock guests data (empty for now)
   const guests: any[] = [];
+
+  // Configure mobile action bar
+  useEffect(() => {
+    if (isMobile) {
+      setActions({
+        search: {
+          id: 'search',
+          icon: Search,
+          label: 'Buscar',
+          onClick: () => {},
+        },
+        create: {
+          id: 'create',
+          icon: UserPlus,
+          label: 'Invitar Miembro',
+          onClick: () => openModal('member'),
+          variant: 'primary',
+          planRestriction: {
+            feature: 'max_members',
+            current: organizationMembers.length,
+            modalImage: '/features/ft-members-512.webp',
+            modalTitle: 'Alcanzaste el límite de miembros',
+            modalDescription: 'Has llegado al máximo de miembros permitidos en tu plan actual. Actualiza a un plan superior para invitar más miembros a tu equipo y gestionar colaboraciones sin restricciones.',
+          },
+        },
+        filter: {
+          id: 'filter',
+          icon: Filter,
+          label: 'Filtros',
+          onClick: () => {},
+        },
+        notifications: {
+          id: 'notifications',
+          icon: Bell,
+          label: 'Notificaciones',
+          onClick: () => {},
+        },
+      });
+      setShowActionBar(true);
+    }
+
+    return () => {
+      if (isMobile) {
+        clearActions();
+      }
+    };
+  }, [isMobile, openModal, organizationMembers.length, setActions, setShowActionBar, clearActions]);
 
   // Revoke invitation mutation
   const revokeInviteMutation = useMutation({
