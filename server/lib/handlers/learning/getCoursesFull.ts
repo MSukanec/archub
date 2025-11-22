@@ -9,6 +9,7 @@ export interface Course {
   short_description: string | null;
   is_active: boolean;
   visibility: string;
+  cover_url: string | null;
 }
 
 export interface Enrollment {
@@ -46,7 +47,7 @@ export async function getCoursesFull(
     }
 
     // Execute ALL queries in parallel for maximum speed
-    const [coursesResult, enrollmentsResult, progressResult] = await Promise.all([
+    const [coursesResult, enrollmentsResult, progressResult, courseImagesResult] = await Promise.all([
       // Get all active courses
       supabase
         .from('courses')
@@ -66,12 +67,21 @@ export async function getCoursesFull(
       supabase
         .from('course_progress_view')
         .select('*')
-        .eq('user_id', dbUser.id)
+        .eq('user_id', dbUser.id),
+
+      // Get course cover images
+      supabase
+        .from('media_links')
+        .select('entity_id, media_files!inner(url)')
+        .eq('link_type', 'course_cover')
+        .eq('is_deleted', false)
+        .eq('media_files.is_deleted', false)
     ]);
 
     console.log('[getCoursesFull] Courses result:', coursesResult.error ? coursesResult.error : `${coursesResult.data?.length} courses`);
     console.log('[getCoursesFull] Enrollments result:', enrollmentsResult.error ? enrollmentsResult.error : `${enrollmentsResult.data?.length} enrollments`);
     console.log('[getCoursesFull] Progress result:', progressResult.error ? progressResult.error : `${progressResult.data?.length} progress records`);
+    console.log('[getCoursesFull] Course images result:', courseImagesResult.error ? courseImagesResult.error : `${courseImagesResult.data?.length} images`);
 
     if (coursesResult.error) {
       console.error('Error fetching courses:', coursesResult.error);
@@ -88,6 +98,27 @@ export async function getCoursesFull(
       return { success: false, error: 'Failed to fetch progress' };
     }
 
+    // Course images are optional, log error but continue
+    if (courseImagesResult.error) {
+      console.warn('Warning fetching course images:', courseImagesResult.error);
+    }
+
+    // Build image map for quick lookup
+    const imageMap = new Map<string, string>();
+    if (courseImagesResult.data) {
+      courseImagesResult.data.forEach((link: any) => {
+        if (link.entity_id && link.media_files?.url) {
+          imageMap.set(link.entity_id, link.media_files.url);
+        }
+      });
+    }
+
+    // Combine courses with their cover images
+    const coursesWithImages = (coursesResult.data || []).map((course: any) => ({
+      ...course,
+      cover_url: imageMap.get(course.id) || null
+    }));
+
     // Flatten enrollment data
     const enrollments = (enrollmentsResult.data || []).map((e: any) => ({
       ...e,
@@ -97,7 +128,7 @@ export async function getCoursesFull(
     return {
       success: true,
       data: {
-        courses: coursesResult.data || [],
+        courses: coursesWithImages,
         enrollments: enrollments,
         progress: progressResult.data || []
       }
