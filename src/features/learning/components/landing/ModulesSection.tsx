@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, PlayCircle, Lock, Clock } from 'lucide-react';
+import { ChevronDown, ChevronUp, PlayCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Collapsible,
@@ -24,7 +24,7 @@ export function ModulesSection({
   subtitle = "CONTENIDO DEL CURSO",
   description = "Contenido estructurado paso a paso para tu aprendizaje profesional"
 }: ModulesSectionProps) {
-  const [openModules, setOpenModules] = useState<Set<string>>(new Set([modules[0]?.id]));
+  const [openModules, setOpenModules] = useState<Set<string>>(new Set());
 
   const toggleModule = (moduleId: string) => {
     setOpenModules((prev) => {
@@ -66,23 +66,25 @@ export function ModulesSection({
                   <CollapsibleTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="w-full px-6 py-6 h-auto flex items-center justify-between hover:bg-muted/50"
+                      className="w-full px-6 py-4 h-auto flex items-center justify-between hover:bg-muted/50"
                     >
-                      <div className="flex items-start gap-4 text-left flex-1">
+                      <div className="flex items-center gap-4 text-left flex-1">
                         <span className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">
-                          {idx + 1}
+                          {String(idx + 1).padStart(2, '0')}
                         </span>
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-lg font-semibold mb-1">{module.title}</h3>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <PlayCircle className="w-4 h-4" />
-                              {module.lessons.length} lecciones
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-4 h-4" />
-                              {formatMinutesToTime(module.total_duration_min)}
-                            </span>
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <h3 className="text-lg font-semibold">{module.title}</h3>
+                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <PlayCircle className="w-4 h-4" />
+                                {module.lessons.length} lecciones
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-4 h-4" />
+                                {formatMinutesToTime(module.total_duration_min)}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -102,11 +104,7 @@ export function ModulesSection({
                           className="flex items-center gap-4 px-6 py-4 hover:bg-muted/30 border-b last:border-b-0"
                         >
                           <div className="flex-shrink-0">
-                            {lesson.free_preview ? (
-                              <PlayCircle className="w-5 h-5 text-primary" />
-                            ) : (
-                              <Lock className="w-5 h-5 text-muted-foreground" />
-                            )}
+                            <PlayCircle className="w-5 h-5 text-primary" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-sm">{lesson.title}</p>
