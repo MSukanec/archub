@@ -624,6 +624,240 @@ export const movement_clients = pgTable("movement_clients", {
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
+// ============================================
+// CLIENT MANAGEMENT TABLES
+// ============================================
+
+// Currencies Table (Reference table for multi-currency support)
+export const currencies = pgTable("currencies", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  code: text("code").notNull().unique(),
+  name: text("name").notNull(),
+  symbol: text("symbol").notNull(),
+  decimal_places: integer("decimal_places").notNull().default(2),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+// Organization Wallets Table (For client payments)
+export const organization_wallets = pgTable("organization_wallets", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organization_id: uuid("organization_id").notNull(),
+  name: text("name").notNull(),
+  currency_id: uuid("currency_id").notNull(),
+  type: text("type").notNull(),
+  balance: numeric("balance", { precision: 12, scale: 2 }).notNull().default("0"),
+  is_active: boolean("is_active").notNull().default(true),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+// Contacts Table (Clients, Suppliers, etc.)
+export const contacts = pgTable("contacts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organization_id: uuid("organization_id").notNull(),
+  first_name: text("first_name"),
+  last_name: text("last_name"),
+  full_name: text("full_name"),
+  email: text("email"),
+  phone: text("phone"),
+  company_name: text("company_name"),
+  location: text("location"),
+  notes: text("notes"),
+  national_id: text("national_id"),
+  linked_user_id: uuid("linked_user_id"),
+  avatar_attachment_id: uuid("avatar_attachment_id"),
+  avatar_updated_at: timestamp("avatar_updated_at", { withTimezone: true }),
+  is_local: boolean("is_local").default(true),
+  display_name_override: text("display_name_override"),
+  linked_at: timestamp("linked_at", { withTimezone: true }),
+  sync_status: text("sync_status").default("local"),
+  is_deleted: boolean("is_deleted").notNull().default(false),
+  deleted_at: timestamp("deleted_at", { withTimezone: true }),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+// Client Roles Table
+export const client_roles = pgTable("client_roles", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organization_id: uuid("organization_id"),
+  name: text("name").notNull(),
+  description: text("description"),
+  is_default: boolean("is_default").default(true),
+  is_deleted: boolean("is_deleted").notNull().default(false),
+  deleted_at: timestamp("deleted_at", { withTimezone: true }),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+// Project Clients Table (Links contacts to projects as clients)
+export const project_clients = pgTable("project_clients", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  project_id: uuid("project_id").notNull(),
+  contact_id: uuid("contact_id"),
+  organization_id: uuid("organization_id").notNull(),
+  unit: text("unit"),
+  is_primary: boolean("is_primary").notNull().default(true),
+  notes: text("notes"),
+  status: text("status").notNull().default("active"),
+  client_role_id: uuid("client_role_id"),
+  created_by: uuid("created_by"),
+  is_deleted: boolean("is_deleted").notNull().default(false),
+  deleted_at: timestamp("deleted_at", { withTimezone: true }),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+// Client Commitments Table (Financial commitments from clients)
+export const client_commitments = pgTable("client_commitments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  project_id: uuid("project_id").notNull(),
+  client_id: uuid("client_id").notNull(),
+  organization_id: uuid("organization_id").notNull(),
+  amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+  currency_id: uuid("currency_id").notNull(),
+  exchange_rate: numeric("exchange_rate").notNull(),
+  commitment_method: text("commitment_method", { 
+    enum: ["fixed", "installments", "work_progress", "milestone", "custom"] 
+  }).notNull().default("fixed"),
+  created_by: uuid("created_by"),
+  is_deleted: boolean("is_deleted").notNull().default(false),
+  deleted_at: timestamp("deleted_at", { withTimezone: true }),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+// Client Payment Schedule Table (Installments and due dates)
+export const client_payment_schedule = pgTable("client_payment_schedule", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  commitment_id: uuid("commitment_id").notNull(),
+  due_date: timestamp("due_date", { mode: 'date' }).notNull(),
+  amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+  currency_id: uuid("currency_id").notNull(),
+  status: text("status").notNull().default("pending"),
+  paid_at: timestamp("paid_at", { withTimezone: true }),
+  payment_method: text("payment_method"),
+  notes: text("notes"),
+  organization_id: uuid("organization_id").notNull(),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+// Client Payments Table (Actual payments received from clients)
+export const client_payments = pgTable("client_payments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  project_id: uuid("project_id").notNull(),
+  commitment_id: uuid("commitment_id"),
+  schedule_id: uuid("schedule_id"),
+  organization_id: uuid("organization_id").notNull(),
+  amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+  currency_id: uuid("currency_id").notNull(),
+  exchange_rate: numeric("exchange_rate"),
+  payment_date: timestamp("payment_date", { mode: 'date' }).notNull().defaultNow(),
+  notes: text("notes"),
+  reference: text("reference"),
+  wallet_id: uuid("wallet_id").notNull(),
+  client_id: uuid("client_id"),
+  status: text("status").notNull().default("confirmed"),
+  created_by: uuid("created_by"),
+  file_url: text("file_url"),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+// ============================================
+// CLIENT MANAGEMENT SCHEMAS AND TYPES
+// ============================================
+
+// Currency Schemas
+export const insertCurrencySchema = createInsertSchema(currencies).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export type Currency = typeof currencies.$inferSelect;
+export type InsertCurrency = z.infer<typeof insertCurrencySchema>;
+
+// Organization Wallet Schemas
+export const insertOrganizationWalletSchema = createInsertSchema(organization_wallets).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export type OrganizationWallet = typeof organization_wallets.$inferSelect;
+export type InsertOrganizationWallet = z.infer<typeof insertOrganizationWalletSchema>;
+
+// Contact Schemas
+export const insertContactSchema = createInsertSchema(contacts).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+  is_deleted: true,
+  deleted_at: true,
+});
+
+export type Contact = typeof contacts.$inferSelect;
+export type InsertContact = z.infer<typeof insertContactSchema>;
+
+// Client Role Schemas
+export const insertClientRoleSchema = createInsertSchema(client_roles).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+  is_deleted: true,
+  deleted_at: true,
+});
+
+export type ClientRole = typeof client_roles.$inferSelect;
+export type InsertClientRole = z.infer<typeof insertClientRoleSchema>;
+
+// Project Client Schemas
+export const insertProjectClientSchema = createInsertSchema(project_clients).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+  is_deleted: true,
+  deleted_at: true,
+});
+
+export type ProjectClient = typeof project_clients.$inferSelect;
+export type InsertProjectClient = z.infer<typeof insertProjectClientSchema>;
+
+// Client Commitment Schemas
+export const insertClientCommitmentSchema = createInsertSchema(client_commitments).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+  is_deleted: true,
+  deleted_at: true,
+});
+
+export type ClientCommitment = typeof client_commitments.$inferSelect;
+export type InsertClientCommitment = z.infer<typeof insertClientCommitmentSchema>;
+
+// Client Payment Schedule Schemas
+export const insertClientPaymentScheduleSchema = createInsertSchema(client_payment_schedule).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export type ClientPaymentSchedule = typeof client_payment_schedule.$inferSelect;
+export type InsertClientPaymentSchedule = z.infer<typeof insertClientPaymentScheduleSchema>;
+
+// Client Payment Schemas
+export const insertClientPaymentSchema = createInsertSchema(client_payments).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export type ClientPayment = typeof client_payments.$inferSelect;
+export type InsertClientPayment = z.infer<typeof insertClientPaymentSchema>;
+
 // Budgets Table
 export const budgets = pgTable("budgets", {
   id: uuid("id").primaryKey().defaultRandom(),
