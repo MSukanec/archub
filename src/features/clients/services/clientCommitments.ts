@@ -71,28 +71,6 @@ export async function getClientCommitments(
           updated_at
         )
       ),
-      contact:contacts(
-        id,
-        organization_id,
-        first_name,
-        last_name,
-        full_name,
-        email,
-        phone,
-        company_name,
-        location,
-        notes,
-        national_id,
-        avatar_attachment_id,
-        avatar_updated_at,
-        is_local,
-        display_name_override,
-        linked_user_id,
-        linked_at,
-        sync_status,
-        created_at,
-        updated_at
-      ),
       currency:currencies(
         id,
         code,
@@ -102,6 +80,7 @@ export async function getClientCommitments(
     `)
     .eq('organization_id', organizationId)
     .eq('project_id', projectId)
+    .eq('is_deleted', false)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -119,7 +98,6 @@ export async function getClientCommitments(
       contact: commitment.client.contact || null,
       role: commitment.client.role || null,
     } : null,
-    contact: commitment.contact || null,
     currency: commitment.currency || null,
   }));
 
@@ -196,28 +174,6 @@ export async function getClientCommitmentById(
           updated_at
         )
       ),
-      contact:contacts(
-        id,
-        organization_id,
-        first_name,
-        last_name,
-        full_name,
-        email,
-        phone,
-        company_name,
-        location,
-        notes,
-        national_id,
-        avatar_attachment_id,
-        avatar_updated_at,
-        is_local,
-        display_name_override,
-        linked_user_id,
-        linked_at,
-        sync_status,
-        created_at,
-        updated_at
-      ),
       currency:currencies(
         id,
         code,
@@ -227,6 +183,7 @@ export async function getClientCommitmentById(
     `)
     .eq('id', commitmentId)
     .eq('organization_id', organizationId)
+    .eq('is_deleted', false)
     .single();
 
   if (error) {
@@ -244,7 +201,6 @@ export async function getClientCommitmentById(
       contact: data.client.contact || null,
       role: data.client.role || null,
     } : null,
-    contact: data.contact || null,
     currency: data.currency || null,
   };
 }
@@ -320,28 +276,6 @@ export async function createClientCommitment(
           updated_at
         )
       ),
-      contact:contacts(
-        id,
-        organization_id,
-        first_name,
-        last_name,
-        full_name,
-        email,
-        phone,
-        company_name,
-        location,
-        notes,
-        national_id,
-        avatar_attachment_id,
-        avatar_updated_at,
-        is_local,
-        display_name_override,
-        linked_user_id,
-        linked_at,
-        sync_status,
-        created_at,
-        updated_at
-      ),
       currency:currencies(
         id,
         code,
@@ -362,7 +296,6 @@ export async function createClientCommitment(
       contact: data.client.contact || null,
       role: data.client.role || null,
     } : null,
-    contact: data.contact || null,
     currency: data.currency || null,
   };
 }
@@ -436,28 +369,6 @@ export async function updateClientCommitment(
           updated_at
         )
       ),
-      contact:contacts(
-        id,
-        organization_id,
-        first_name,
-        last_name,
-        full_name,
-        email,
-        phone,
-        company_name,
-        location,
-        notes,
-        national_id,
-        avatar_attachment_id,
-        avatar_updated_at,
-        is_local,
-        display_name_override,
-        linked_user_id,
-        linked_at,
-        sync_status,
-        created_at,
-        updated_at
-      ),
       currency:currencies(
         id,
         code,
@@ -478,16 +389,16 @@ export async function updateClientCommitment(
       contact: data.client.contact || null,
       role: data.client.role || null,
     } : null,
-    contact: data.contact || null,
     currency: data.currency || null,
   };
 }
 
 /**
- * Elimina un compromiso de cliente.
+ * Elimina un compromiso de cliente (soft delete).
  * 
- * Nota: Esta operación eliminará en cascada los cronogramas de pago relacionados
- * según la configuración de la base de datos.
+ * Marca el compromiso como eliminado en lugar de eliminarlo físicamente.
+ * Los cronogramas de pago relacionados también serán afectados según
+ * la configuración de la base de datos.
  * 
  * @param commitmentId - ID del compromiso a eliminar
  * @param organizationId - ID de la organización
@@ -500,9 +411,13 @@ export async function deleteClientCommitment(
 ): Promise<boolean> {
   const { error } = await supabase
     .from('client_commitments')
-    .delete()
+    .update({
+      is_deleted: true,
+      deleted_at: new Date().toISOString(),
+    })
     .eq('id', commitmentId)
-    .eq('organization_id', organizationId);
+    .eq('organization_id', organizationId)
+    .eq('is_deleted', false);
 
   if (error) {
     throw error;
