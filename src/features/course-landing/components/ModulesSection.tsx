@@ -9,12 +9,21 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { formatMinutesToTime } from '../mappers';
 import type { ModuleWithLessons } from '../types';
+import { SectionHeader } from './SectionHeader';
 
 interface ModulesSectionProps {
   modules: ModuleWithLessons[];
+  title?: string;
+  subtitle?: string;
+  description?: string;
 }
 
-export function ModulesSection({ modules }: ModulesSectionProps) {
+export function ModulesSection({ 
+  modules, 
+  title = "MÓDULOS Y LECCIONES",
+  subtitle = "CONTENIDO DEL CURSO",
+  description = "Contenido estructurado paso a paso para tu aprendizaje profesional"
+}: ModulesSectionProps) {
   const [openModules, setOpenModules] = useState<Set<string>>(new Set([modules[0]?.id]));
 
   const toggleModule = (moduleId: string) => {
@@ -34,16 +43,17 @@ export function ModulesSection({ modules }: ModulesSectionProps) {
   return (
     <section className="py-16 sm:py-20 bg-muted/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-            Módulos y Lecciones
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Contenido estructurado paso a paso para tu aprendizaje
-          </p>
-        </div>
+        {/* Grid: 3/4 for content, 1/4 empty space for sticky */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-0">
+          {/* Content Area - 3/4 of width */}
+          <div className="lg:col-span-3 space-y-12">
+            <SectionHeader
+              title={title}
+              subtitle={subtitle}
+              description={description}
+            />
 
-        <div className="max-w-4xl mx-auto space-y-4">
+            <div className="space-y-4">
           {modules.map((module, idx) => {
             const isOpen = openModules.has(module.id);
             return (
@@ -121,6 +131,11 @@ export function ModulesSection({ modules }: ModulesSectionProps) {
               </Collapsible>
             );
           })}
+            </div>
+          </div>
+
+          {/* Empty Space - 1/4 of width for sticky to pass over */}
+          <div className="hidden lg:block" />
         </div>
       </div>
     </section>

@@ -7,3 +7,4 @@ export { CTAFooter } from './CTAFooter';
 export { CourseCard } from './CourseCard';
 export { CourseGrid } from './CourseGrid';
 export { CourseStickyCard } from './CourseStickyCard';
+export { SectionHeader } from './SectionHeader';

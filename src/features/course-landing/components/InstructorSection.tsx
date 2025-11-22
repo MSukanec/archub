@@ -1,11 +1,20 @@
 import { User } from 'lucide-react';
 import type { Course } from '@shared/schema';
+import { SectionHeader } from './SectionHeader';
 
 interface InstructorSectionProps {
   course: Course;
+  title?: string;
+  subtitle?: string;
+  description?: string;
 }
 
-export function InstructorSection({ course }: InstructorSectionProps) {
+export function InstructorSection({ 
+  course, 
+  title = "SOBRE EL DOCENTE",
+  subtitle = "NUESTRO CURSO",
+  description 
+}: InstructorSectionProps) {
   if (!course.instructor_name) return null;
 
   return (
@@ -14,7 +23,13 @@ export function InstructorSection({ course }: InstructorSectionProps) {
         {/* Grid: 3/4 for content, 1/4 empty space for sticky */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-0">
           {/* Content Area - 3/4 of width */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 space-y-12">
+            <SectionHeader
+              title={title}
+              subtitle={subtitle}
+              description={description}
+            />
+            
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
               {/* Instructor Photo */}
               <div className="flex justify-center lg:justify-start">
@@ -34,10 +49,9 @@ export function InstructorSection({ course }: InstructorSectionProps) {
               {/* Instructor Info */}
               <div className="lg:col-span-2 space-y-4">
                 <div>
-                  <p className="text-sm font-semibold text-primary mb-2">Sobre el Docente</p>
-                  <h2 className="text-3xl font-bold tracking-tight">
+                  <h3 className="text-3xl font-bold tracking-tight">
                     {course.instructor_name}
-                  </h2>
+                  </h3>
                   {course.instructor_title && (
                     <p className="text-lg text-muted-foreground mt-2">
                       {course.instructor_title}
