@@ -26,7 +26,7 @@ export async function getClientCommitments(
     .from('client_commitments')
     .select(`
       *,
-      client:project_clients(
+      project_client:project_clients(
         id,
         project_id,
         contact_id,
@@ -93,10 +93,10 @@ export async function getClientCommitments(
 
   const data = commitmentsData.map(commitment => ({
     ...commitment,
-    client: commitment.client ? {
-      ...commitment.client,
-      contact: commitment.client.contact || null,
-      role: commitment.client.role || null,
+    project_client: commitment.project_client ? {
+      ...commitment.project_client,
+      contact: commitment.project_client.contact || null,
+      role: commitment.project_client.role || null,
     } : null,
     currency: commitment.currency || null,
   }));
@@ -129,7 +129,7 @@ export async function getClientCommitmentById(
     .from('client_commitments')
     .select(`
       *,
-      client:project_clients(
+      project_client:project_clients(
         id,
         project_id,
         contact_id,
@@ -196,10 +196,10 @@ export async function getClientCommitmentById(
 
   return {
     ...data,
-    client: data.client ? {
-      ...data.client,
-      contact: data.client.contact || null,
-      role: data.client.role || null,
+    project_client: data.project_client ? {
+      ...data.project_client,
+      contact: data.project_client.contact || null,
+      role: data.project_client.role || null,
     } : null,
     currency: data.currency || null,
   };
@@ -231,7 +231,7 @@ export async function createClientCommitment(
     })
     .select(`
       *,
-      client:project_clients(
+      project_client:project_clients(
         id,
         project_id,
         contact_id,
@@ -291,10 +291,10 @@ export async function createClientCommitment(
 
   return {
     ...data,
-    client: data.client ? {
-      ...data.client,
-      contact: data.client.contact || null,
-      role: data.client.role || null,
+    project_client: data.project_client ? {
+      ...data.project_client,
+      contact: data.project_client.contact || null,
+      role: data.project_client.role || null,
     } : null,
     currency: data.currency || null,
   };
@@ -324,7 +324,7 @@ export async function updateClientCommitment(
     .eq('organization_id', organizationId)
     .select(`
       *,
-      client:project_clients(
+      project_client:project_clients(
         id,
         project_id,
         contact_id,
@@ -384,10 +384,10 @@ export async function updateClientCommitment(
 
   return {
     ...data,
-    client: data.client ? {
-      ...data.client,
-      contact: data.client.contact || null,
-      role: data.client.role || null,
+    project_client: data.project_client ? {
+      ...data.project_client,
+      contact: data.project_client.contact || null,
+      role: data.project_client.role || null,
     } : null,
     currency: data.currency || null,
   };
