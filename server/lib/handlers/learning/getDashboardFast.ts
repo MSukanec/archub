@@ -251,14 +251,14 @@ export async function getDashboardFast(
     const courseIds = enrollments.map(e => e.course_id);
 
     // BULK QUERY 2: Get course cover images
-    // Deterministic cover selection: flagged first, newest first, exclude soft-deleted
+    // Filter by category='course_cover' to get only cover images (not instructor photos, OG images, etc.)
     const { data: courseImages, error: imagesError } = await supabase
       .from('media_links')
-      .select('course_id, media_files!inner(file_url), is_cover, created_at')
+      .select('course_id, media_files!inner(file_url), category')
       .not('course_id', 'is', null)
       .in('course_id', courseIds)
+      .eq('category', 'course_cover')
       .eq('media_files.is_deleted', false)
-      .order('is_cover', { ascending: false })
       .order('created_at', { ascending: false });
     
     console.log('[getDashboardFast] Course images query result:', {
@@ -273,7 +273,11 @@ export async function getDashboardFast(
     if (courseImages) {
       for (const img of courseImages) {
         if (!courseImageMap.has(img.course_id)) {
-          courseImageMap.set(img.course_id, img.media_files.file_url);
+          // Normalize: media_files can be array or object depending on Supabase response
+          const mediaFile = Array.isArray(img.media_files) ? img.media_files[0] : img.media_files;
+          if (mediaFile?.file_url) {
+            courseImageMap.set(img.course_id, mediaFile.file_url);
+          }
         }
       }
     }

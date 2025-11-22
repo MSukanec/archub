@@ -72,13 +72,13 @@ export async function getCoursesFull(
         .eq('user_id', dbUser.id),
 
       // Get course cover images
-      // Deterministic cover selection: flagged first, newest first, exclude soft-deleted
+      // Filter by category='course_cover' to get only cover images (not instructor photos, OG images, etc.)
       supabase
         .from('media_links')
-        .select('course_id, media_files!inner(file_url), is_cover, created_at')
+        .select('course_id, media_files!inner(file_url), category')
         .not('course_id', 'is', null)
+        .eq('category', 'course_cover')
         .eq('media_files.is_deleted', false)
-        .order('is_cover', { ascending: false })
         .order('created_at', { ascending: false })
     ]);
 
@@ -113,7 +113,11 @@ export async function getCoursesFull(
     if (courseImagesResult.data) {
       for (const img of courseImagesResult.data) {
         if (!imageMap.has(img.course_id)) {
-          imageMap.set(img.course_id, img.media_files.file_url);
+          // Normalize: media_files can be array or object depending on Supabase response
+          const mediaFile = Array.isArray(img.media_files) ? img.media_files[0] : img.media_files;
+          if (mediaFile?.file_url) {
+            imageMap.set(img.course_id, mediaFile.file_url);
+          }
         }
       }
     }
