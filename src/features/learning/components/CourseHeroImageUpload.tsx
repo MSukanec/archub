@@ -58,9 +58,9 @@ export default function CourseHeroImageUpload({
         const urlParts = cleanUrl.split('/');
         const fileName = urlParts[urlParts.length - 1];
         const extension = fileName.split('.').pop();
-        const filePath = `${courseId}/hero.${extension}`;
+        const filePath = `courses/${courseId}/hero.${extension}`;
         
-        await deleteCourseImage(filePath);
+        await deleteCourseImage(filePath, courseId);
         await updateCourseImageUrl(courseId, null);
       }
     },

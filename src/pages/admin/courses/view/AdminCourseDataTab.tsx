@@ -6,8 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useDebouncedAutoSave } from '@/components/save/useDebouncedAutoSave';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Info, Save } from 'lucide-react';
+import { FileText, DollarSign, Save } from 'lucide-react';
+import CourseHeroImageUpload from '@/features/learning/components/CourseHeroImageUpload';
 
 interface AdminCourseDataTabProps {
   courseId: string;
@@ -106,7 +106,6 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
       title,
       slug,
       short_description: shortDescription,
-      cover_url: coverUrl,
       price: parseFloat(price) || 0
     },
     saveFn: async (dataToSave) => {
@@ -122,83 +121,102 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
   });
 
   return (
-    <div className="space-y-6 max-w-3xl" data-testid="admin-course-data-tab">
+    <div className="p-6 space-y-8" data-testid="admin-course-data-tab">
       {isSaving && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
           <Save className="h-4 w-4 animate-pulse" />
           <span>Guardando cambios...</span>
         </div>
       )}
 
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Nota:</strong> El sistema de precios ahora usa USD como moneda base. 
-          Los precios en ARS se convierten automáticamente usando la tabla exchange_rates.
-        </AlertDescription>
-      </Alert>
-
-      <div className="space-y-4">
+      {/* Sección: Información Básica */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column - Descripción */}
         <div>
-          <Label htmlFor="title">Título del Curso</Label>
-          <Input
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Nombre del curso"
-            data-testid="input-course-title"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="slug">Slug (URL amigable)</Label>
-          <Input
-            id="slug"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            placeholder="curso-ejemplo"
-            data-testid="input-course-slug"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="short_description">Descripción Corta</Label>
-          <Textarea
-            id="short_description"
-            value={shortDescription}
-            onChange={(e) => setShortDescription(e.target.value)}
-            placeholder="Descripción breve del curso"
-            rows={3}
-            data-testid="textarea-course-description"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="cover_url">URL de la Imagen de Portada</Label>
-          <Input
-            id="cover_url"
-            value={coverUrl}
-            onChange={(e) => setCoverUrl(e.target.value)}
-            placeholder="https://..."
-            data-testid="input-course-cover"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="price">Precio (USD)</Label>
-          <Input
-            id="price"
-            type="number"
-            step="0.01"
-            min="0"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            placeholder="99.99"
-            data-testid="input-course-price"
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            Este precio será convertido automáticamente a ARS usando el tipo de cambio configurado.
+          <div className="flex items-center gap-2 mb-4">
+            <FileText className="h-5 w-5 text-[var(--accent)]" />
+            <h2 className="text-lg font-semibold">Información Básica</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Configura los datos fundamentales del curso como título, URL amigable, descripción y la imagen de portada que se mostrará en las listas y landing pages.
           </p>
+        </div>
+
+        {/* Right Column - Contenido */}
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="title">Título del Curso</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Nombre del curso"
+              data-testid="input-course-title"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="slug">Slug (URL amigable)</Label>
+            <Input
+              id="slug"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              placeholder="curso-ejemplo"
+              data-testid="input-course-slug"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="short_description">Descripción Corta</Label>
+            <Textarea
+              id="short_description"
+              value={shortDescription}
+              onChange={(e) => setShortDescription(e.target.value)}
+              placeholder="Descripción breve del curso"
+              rows={3}
+              data-testid="textarea-course-description"
+            />
+          </div>
+
+          <div>
+            <Label>Imagen de Portada</Label>
+            <CourseHeroImageUpload
+              courseId={courseId}
+              currentImageUrl={coverUrl}
+              onImageUpdate={(url) => setCoverUrl(url || '')}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Sección: Precio */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column - Descripción */}
+        <div>
+          <div className="flex items-center gap-2 mb-4">
+            <DollarSign className="h-5 w-5 text-[var(--accent)]" />
+            <h2 className="text-lg font-semibold">Precio</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Define el precio del curso en USD. El sistema lo convertirá automáticamente a otras monedas según los tipos de cambio configurados.
+          </p>
+        </div>
+
+        {/* Right Column - Contenido */}
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="price">Precio (USD)</Label>
+            <Input
+              id="price"
+              type="number"
+              step="0.01"
+              min="0"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="99.99"
+              data-testid="input-course-price"
+            />
+          </div>
         </div>
       </div>
     </div>
