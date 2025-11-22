@@ -11,45 +11,26 @@ export default function Media() {
   const { setSidebarContext } = useNavigationStore();
   const { openModal } = useGlobalModalStore();
   const { currentOrganizationId } = useProjectContext();
-  const [activeTab, setActiveTab] = useState('documentation');
+  const [activeTab, setActiveTab] = useState('gallery');
 
   useEffect(() => {
     setSidebarContext('project');
   }, [setSidebarContext]);
 
   const tabs = [
-    { id: 'documentation', label: 'Documentos', isActive: activeTab === 'documentation' },
-    { id: 'gallery', label: 'Fotos y Videos', isActive: activeTab === 'gallery' }
+    { id: 'gallery', label: 'Archivos', isActive: activeTab === 'gallery' }
   ];
 
   const getActionButton = () => {
-    switch (activeTab) {
-      case 'documentation':
-        return {
-          label: "Subir Documentos",
-          icon: Plus,
-          onClick: () => openModal('document-upload', {})
-        };
-      case 'gallery':
-        return {
-          label: 'Subir Fotos y Videos',
-          icon: Plus,
-          onClick: () => openModal('gallery', {})
-        };
-      default:
-        return undefined;
-    }
+    return {
+      label: 'Subir Archivos',
+      icon: Plus,
+      onClick: () => openModal('gallery', {})
+    };
   };
 
   const renderTabContent = () => {
-    switch (activeTab) {
-      case 'documentation':
-        return <MediaDocumentation />;
-      case 'gallery':
-        return <MediaGallery />;
-      default:
-        return <MediaDocumentation />;
-    }
+    return <MediaGallery />;
   };
 
   const headerProps = {
