@@ -252,7 +252,7 @@ export async function getDashboardFast(
 
     // BULK QUERY 2: Get course cover images
     // Deterministic cover selection: flagged first, newest first, exclude soft-deleted
-    const { data: courseImages } = await supabase
+    const { data: courseImages, error: imagesError } = await supabase
       .from('media_links')
       .select('course_id, media_files!inner(file_url), is_cover, created_at')
       .not('course_id', 'is', null)
@@ -260,6 +260,13 @@ export async function getDashboardFast(
       .eq('media_files.is_deleted', false)
       .order('is_cover', { ascending: false })
       .order('created_at', { ascending: false });
+    
+    console.log('[getDashboardFast] Course images query result:', {
+      count: courseImages?.length || 0,
+      courseIds,
+      error: imagesError,
+      sampleData: courseImages?.slice(0, 2)
+    });
 
     // Build image map - first match per course wins (already sorted)
     const courseImageMap = new Map<string, string>();

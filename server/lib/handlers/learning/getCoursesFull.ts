@@ -86,6 +86,7 @@ export async function getCoursesFull(
     console.log('[getCoursesFull] Enrollments result:', enrollmentsResult.error ? enrollmentsResult.error : `${enrollmentsResult.data?.length} enrollments`);
     console.log('[getCoursesFull] Progress result:', progressResult.error ? progressResult.error : `${progressResult.data?.length} progress records`);
     console.log('[getCoursesFull] Course images result:', courseImagesResult.error ? courseImagesResult.error : `${courseImagesResult.data?.length} images`);
+    console.log('[getCoursesFull] Course images sample data:', courseImagesResult.data?.slice(0, 2));
 
     if (coursesResult.error) {
       console.error('Error fetching courses:', coursesResult.error);
