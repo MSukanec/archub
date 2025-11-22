@@ -58,27 +58,11 @@ export function PlanUpgradeModal({
       >
         <DialogTitle className="sr-only">{featureTitle}</DialogTitle>
         <DialogDescription className="sr-only">{featureDescription}</DialogDescription>
-        
-        {/* Header */}
-        <div className="pt-6 pb-4">
-          <Badge 
-            className="text-xs px-2.5 py-1 mb-3 border-0 font-medium ml-6"
-            style={{ 
-              backgroundColor: planColor,
-              color: 'white'
-            }}
-          >
-            Plan {planName}
-          </Badge>
-          <h2 className="text-xl font-semibold !text-white ml-6" aria-hidden="true">
-            {featureTitle}
-          </h2>
-        </div>
 
         {/* Content - Two Columns */}
-        <div className="grid grid-cols-2 gap-0">
-          {/* Left Column - Image (sin padding, con rounded) */}
-          <div className="flex items-center justify-center bg-black/20 overflow-hidden md:rounded-l-lg">
+        <div className="grid grid-cols-1 md:grid-cols-[minmax(280px,1fr)_minmax(320px,1.25fr)] gap-0 min-h-[320px] md:min-h-[420px]">
+          {/* Left Column - Image (tamaño completo) */}
+          <div className="flex items-center justify-center bg-black/20 overflow-hidden md:rounded-l-lg h-full">
             <img 
               src={featureImage} 
               alt={featureTitle}
@@ -86,12 +70,30 @@ export function PlanUpgradeModal({
             />
           </div>
 
-          {/* Right Column - Description */}
+          {/* Right Column - Badge + Título + Descripción */}
           <div className="flex flex-col justify-center gap-4 px-6 py-6">
+            {/* Badge + Título */}
+            <div className="flex flex-col gap-3 items-start">
+              <Badge 
+                className="text-xs px-2.5 py-1 border-0 font-medium"
+                style={{ 
+                  backgroundColor: planColor,
+                  color: 'white'
+                }}
+              >
+                Plan {planName}
+              </Badge>
+              <h2 className="text-xl font-semibold !text-white" aria-hidden="true">
+                {featureTitle}
+              </h2>
+            </div>
+
+            {/* Descripción */}
             <p className="text-sm leading-relaxed" style={{ color: 'hsl(0, 0%, 44%)' }}>
               {featureDescription}
             </p>
             
+            {/* Límite actual */}
             {currentLimit !== undefined && currentValue !== undefined && (
               <div 
                 className="p-3 rounded-lg border"
