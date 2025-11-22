@@ -173,9 +173,10 @@ export function Clients() {
       actionButton: {
         label: "Nuevo Compromiso",
         icon: Plus,
-        onClick: () => openModal('project-client', {
+        onClick: () => openModal('client-commitment', {
           projectId,
-          organizationId
+          organizationId,
+          mode: 'create'
         })
       }
     }),
