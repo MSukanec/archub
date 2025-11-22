@@ -254,7 +254,13 @@ export async function getDashboardFast(
     // Filter by category='course_cover' to get only cover images (not instructor photos, OG images, etc.)
     const { data: courseImages, error: imagesError } = await supabase
       .from('media_links')
-      .select('course_id, media_files!inner(file_url), category')
+      .select(`
+        course_id,
+        media_files!inner (
+          file_url,
+          is_deleted
+        )
+      `)
       .not('course_id', 'is', null)
       .in('course_id', courseIds)
       .eq('category', 'course_cover')

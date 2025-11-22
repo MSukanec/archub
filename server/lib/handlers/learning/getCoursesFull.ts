@@ -75,7 +75,13 @@ export async function getCoursesFull(
       // Filter by category='course_cover' to get only cover images (not instructor photos, OG images, etc.)
       supabase
         .from('media_links')
-        .select('course_id, media_files!inner(file_url), category')
+        .select(`
+          course_id,
+          media_files!inner (
+            file_url,
+            is_deleted
+          )
+        `)
         .not('course_id', 'is', null)
         .eq('category', 'course_cover')
         .eq('media_files.is_deleted', false)
