@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import type { Course } from '@shared/schema'
+import type { CourseWithEnrolledCount } from '@shared/schema'
 
 export function useAdminCourses() {
-  return useQuery<Course[]>({
+  return useQuery<CourseWithEnrolledCount[]>({
     queryKey: ['/api/admin/courses'],
     queryFn: async () => {
       if (!supabase) return []

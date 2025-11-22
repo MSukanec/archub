@@ -70,7 +70,7 @@ function mergeCourseData(course: any, details: any): any {
 }
 
 /**
- * List all courses (with course_details joined)
+ * List all courses (with course_details joined and enrollments count)
  */
 export async function listCourses(
   ctx: AdminContext
@@ -89,6 +89,10 @@ export async function listCourses(
           preview_video_id,
           seo_keywords,
           landing_sections
+        ),
+        enrollments (
+          id,
+          is_active
         )
       `)
       .eq('is_deleted', false)
@@ -99,13 +103,19 @@ export async function listCourses(
       return error("Failed to fetch courses");
     }
 
-    // Merge course_details into each course
+    // Merge course_details into each course and add enrollments count
     const mergedCourses = (courses || []).map(course => {
       const details = Array.isArray(course.course_details) 
         ? course.course_details[0] 
         : course.course_details;
       const merged = mergeCourseData(course, details);
       delete merged.course_details;
+      
+      // Count only active enrollments
+      const enrollments = Array.isArray(course.enrollments) ? course.enrollments : [];
+      merged.enrolled_count = enrollments.filter((e: any) => e.is_active === true).length;
+      delete merged.enrollments;
+      
       return merged;
     });
 

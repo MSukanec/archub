@@ -1343,6 +1343,8 @@ export type Course = typeof courses.$inferSelect;
 export type InsertCourse = z.infer<typeof insertCourseSchema>;
 export type CourseDetails = typeof course_details.$inferSelect;
 export type InsertCourseDetails = z.infer<typeof insertCourseDetailsSchema>;
+// Extended type for admin API responses with computed fields
+export type CourseWithEnrolledCount = Course & { enrolled_count: number };
 export type CourseModule = typeof course_modules.$inferSelect;
 export type InsertCourseModule = z.infer<typeof insertCourseModuleSchema>;
 export type Lesson = typeof course_lessons.$inferSelect;

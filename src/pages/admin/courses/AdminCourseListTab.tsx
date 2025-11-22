@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { Plus, BookOpen, Eye, Edit, Trash2 } from 'lucide-react'
+import { Plus, BookOpen, Edit, Trash2 } from 'lucide-react'
 import { useAdminCourses } from '@/hooks/use-admin-courses'
 import { useToast } from '@/hooks/use-toast'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useLocation } from 'wouter'
 import { supabase } from '@/lib/supabase'
+import { queryClient } from '@/lib/queryClient'
 
 export default function AdminCourseListTab() {
   const { toast } = useToast()
@@ -52,7 +53,7 @@ export default function AdminCourseListTab() {
           });
 
           // Invalidate cache to refresh the list
-          window.location.reload();
+          queryClient.invalidateQueries({ queryKey: ['/api/admin/courses'] });
         } catch (error) {
           toast({
             title: 'Error al eliminar',
@@ -110,6 +111,15 @@ export default function AdminCourseListTab() {
       )
     },
     {
+      key: 'enrolled_count',
+      label: 'Inscritos',
+      render: (course: any) => (
+        <div className="text-sm font-medium">
+          {course.enrolled_count || 0}
+        </div>
+      )
+    },
+    {
       key: 'created_at',
       label: 'Creado',
       render: (course: any) => (
@@ -127,12 +137,8 @@ export default function AdminCourseListTab() {
           data={courses}
           columns={courseColumns}
           isLoading={coursesLoading}
+          onRowClick={(course) => handleViewCourse(course.id)}
           rowActions={(course) => [
-            {
-              icon: Eye,
-              label: 'Ver',
-              onClick: () => handleViewCourse(course.id)
-            },
             {
               icon: Edit,
               label: 'Editar',
