@@ -42,6 +42,7 @@ export const DEFAULT_ACCENT = {
 export const QUERY_KEYS = {
   PROJECTS: 'projects',
   PROJECTS_LITE: 'projects-lite',
+  PROJECTS_COUNT: 'projects-count',
   PROJECTS_MAP: 'projects-map',
   PROJECT: 'project',
   PROJECT_STATS: 'project-stats',

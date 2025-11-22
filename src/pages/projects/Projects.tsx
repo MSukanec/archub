@@ -2,7 +2,7 @@ import { Layout } from '@/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useProjects } from '@/features/projects'
+import { useProjects, useProjectsCount } from '@/features/projects'
 import { Folder, Plus } from 'lucide-react'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
@@ -17,6 +17,9 @@ export default function Projects() {
   const { data: userData, isLoading } = useCurrentUser()
   const organizationId = userData?.organization?.id
   const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId || undefined)
+  
+  // Get total projects count for plan restrictions (counts ALL projects, not just active)
+  const { data: projectsCount = 0 } = useProjectsCount(organizationId || undefined)
 
   // Define actions based on active tab
   const getActions = () => {
@@ -29,7 +32,7 @@ export default function Projects() {
       <PlanRestricted 
         key="create-project"
         feature="max_projects" 
-        current={projects.length}
+        current={projectsCount}
         functionName="Crear Proyecto"
         useUpgradeModal={true}
         modalImage="/features/ft-projects-512.webp"

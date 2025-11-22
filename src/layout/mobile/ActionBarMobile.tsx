@@ -17,7 +17,7 @@ import { Search, Filter, Home, Bell, Lock } from 'lucide-react'
 import { useLocation } from 'wouter'
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useProjectsLite } from '@/features/projects'
+import { useProjectsCount } from '@/features/projects'
 
 export function ActionBarMobile() {
   const [, navigate] = useLocation()
@@ -37,10 +37,10 @@ export function ActionBarMobile() {
   const isMobile = useMobile()
   const searchInputRef = useRef<HTMLInputElement>(null)
   
-  // Get projects data for plan restrictions
+  // Get projects count for plan restrictions (counts ALL projects, not just active)
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
-  const { data: projects = [] } = useProjectsLite(organizationId || undefined)
+  const { data: projectsCount = 0 } = useProjectsCount(organizationId || undefined)
   
   // Focus search input when popover opens - always run this hook
   useEffect(() => {
@@ -221,7 +221,7 @@ export function ActionBarMobile() {
           {actions.create && (
             <PlanRestricted 
               feature="max_projects" 
-              current={projects.length}
+              current={projectsCount}
               functionName="Crear Proyecto"
               useUpgradeModal={true}
               modalImage="/features/ft-projects-512.webp"
@@ -232,6 +232,7 @@ export function ActionBarMobile() {
                 onClick={actions.create.onClick}
                 className="flex items-center justify-center w-14 h-14 rounded-full shadow-lg text-white transition-colors"
                 style={{ backgroundColor: 'var(--accent)' }}
+                data-testid="button-create-project-mobile"
               >
                 {React.createElement(actions.create.icon, { className: "h-6 w-6" })}
               </button>

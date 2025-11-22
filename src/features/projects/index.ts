@@ -15,6 +15,7 @@
 export * from './services/getProjects';
 export * from './services/getProjectById';
 export * from './services/getProjectsLite';
+export * from './services/getProjectsCount';
 export * from './services/createProject';
 export * from './services/updateProject';
 export * from './services/softDeleteProject';
@@ -26,6 +27,7 @@ export * from './services/uploadProjectImage';
 export * from './hooks/use-projects';
 export * from './hooks/use-project';
 export * from './hooks/use-projects-lite';
+export * from './hooks/use-projects-count';
 export * from './hooks/use-create-project';
 export * from './hooks/use-update-project';
 export * from './hooks/use-delete-project';
