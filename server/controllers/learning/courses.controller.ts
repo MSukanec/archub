@@ -58,6 +58,10 @@ export async function handleGetCoursesFull(req: Request, res: Response) {
     console.log('[handleGetCoursesFull] Result:', result.success ? 'SUCCESS' : `FAILED: ${result.error}`);
 
     if (result.success) {
+      // Add cache control headers to prevent stale data
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
       return res.status(200).json(result.data);
     } else {
       return res.status(400).json({ error: result.error });

@@ -38,6 +38,8 @@ export async function getCoursesFull(
   try {
     const { supabase } = ctx;
 
+    console.log('[getCoursesFull] ===== FETCHING COURSES WITH IMAGES =====');
+
     const dbUser = await getAuthenticatedUser(ctx);
     if (!dbUser) {
       return {
