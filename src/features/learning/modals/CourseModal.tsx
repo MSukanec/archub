@@ -173,34 +173,78 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="slug"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Slug (URL)</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="curso-ejemplo" data-testid="input-slug" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Título y Slug - Dos columnas en desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Título</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Nombre del curso" data-testid="input-title" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Título</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Nombre del curso" data-testid="input-title" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="slug"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Slug (URL)</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="curso-ejemplo" data-testid="input-slug" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
+        {/* Precio y Visibilidad - Dos columnas en desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Precio (USD)</FormLabel>
+                <FormControl>
+                  <Input {...field} type="number" step="0.01" min="0" placeholder="99.99" data-testid="input-price" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="visibility"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Visibilidad</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger data-testid="select-visibility">
+                      <SelectValue placeholder="Seleccionar visibilidad" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="public">Público</SelectItem>
+                    <SelectItem value="private">Privado</SelectItem>
+                    <SelectItem value="draft">Borrador</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Descripción Corta - Una columna */}
         <FormField
           control={form.control}
           name="short_description"
@@ -215,43 +259,7 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="price"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Precio (USD)</FormLabel>
-              <FormControl>
-                <Input {...field} type="number" step="0.01" min="0" placeholder="99.99" data-testid="input-price" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="visibility"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Visibilidad</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger data-testid="select-visibility">
-                    <SelectValue placeholder="Seleccionar visibilidad" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="public">Público</SelectItem>
-                  <SelectItem value="private">Privado</SelectItem>
-                  <SelectItem value="draft">Borrador</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
+        {/* Curso Activo - Una columna */}
         <FormField
           control={form.control}
           name="is_active"
