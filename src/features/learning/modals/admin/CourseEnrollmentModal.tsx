@@ -96,21 +96,39 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
     enabled: !!supabase
   });
 
-  // Fetch courses
+  // Fetch courses from backend API (bypasses RLS)
   const { data: courses = [] } = useQuery({
-    queryKey: ['courses'],
+    queryKey: ['admin-courses'],
     queryFn: async () => {
       if (!supabase) return [];
       
-      const { data, error } = await supabase
-        .from('courses')
-        .eq('is_deleted', false)
-        .select('id, title, slug')
-        .eq('is_active', true)
-        .order('title', { ascending: true });
-        
-      if (error) throw error;
-      return data || [];
+      // Get current session token
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No active session');
+      
+      // Call backend API endpoint with admin authentication
+      const response = await fetch('/api/admin/courses', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch courses');
+      }
+      
+      const allCourses = await response.json();
+      
+      // Extract only the fields we need for the combobox
+      return allCourses
+        .filter((course: any) => course.is_active && !course.is_deleted)
+        .map((course: any) => ({
+          id: course.id,
+          title: course.title,
+          slug: course.slug
+        }));
     },
     enabled: !!supabase
   });
@@ -380,7 +398,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
                       <Calendar
                         mode="single"
                         selected={dateValue}
-                        onSelect={(date) => {
+                        onSelect={(date: Date | undefined) => {
                           if (date) {
                             field.onChange(date.toISOString().split('T')[0]);
                           } else {
@@ -405,6 +423,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
   const headerContent = (
     <FormModalHeader 
       title={isEditing ? "Editar Inscripción" : "Nueva Inscripción"}
+      description={isEditing ? "Modifica el estado y la fecha de expiración de la inscripción." : "Inscribe un usuario a un curso seleccionando el alumno y el curso."}
       icon={Users}
     />
   );
