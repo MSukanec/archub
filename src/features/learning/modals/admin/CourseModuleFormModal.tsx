@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Layers } from 'lucide-react';
+import { Layers, Upload, X } from 'lucide-react';
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
@@ -10,6 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
@@ -49,7 +50,35 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
+  const [moduleImageUrl, setModuleImageUrl] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const { data: courses = [] } = useAdminCourses();
+
+  // Load module image on mount
+  useEffect(() => {
+    if (module?.id) {
+      loadModuleImage(module.id);
+    }
+  }, [module?.id]);
+
+  const loadModuleImage = async (moduleId: string) => {
+    try {
+      const { data } = await supabase
+        .from('media_links')
+        .select('media_files!inner(file_url)')
+        .eq('module_id', moduleId)
+        .eq('category', 'module_image')
+        .eq('media_files.is_deleted', false)
+        .maybeSingle();
+
+      if (data && data.media_files) {
+        const mediaFile: any = data.media_files;
+        setModuleImageUrl(mediaFile.file_url);
+      }
+    } catch (error) {
+      console.error('Error loading module image:', error);
+    }
+  };
 
   const form = useForm<CourseModuleFormData>({
     resolver: zodResolver(courseModuleSchema),
@@ -155,6 +184,171 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
     }
   });
 
+  const handleImageUpload = async (file: File, moduleId: string) => {
+    setIsUploadingImage(true);
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+
+      const extension = file.name.split('.').pop() || 'jpg';
+      const fileName = `module-image.${extension}`;
+      const filePath = `course_modules/${moduleId}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('course-content')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) throw new Error(`Error al subir imagen: ${uploadError.message}`);
+
+      const { data: urlData } = supabase.storage
+        .from('course-content')
+        .getPublicUrl(filePath);
+
+      const publicUrl = urlData.publicUrl;
+
+      // Create or update media_files record
+      const { data: existingMediaFile } = await supabase
+        .from('media_files')
+        .select('id')
+        .eq('file_path', filePath)
+        .maybeSingle();
+
+      let mediaFileId: string;
+
+      if (existingMediaFile) {
+        const { data: updatedFile, error: updateError } = await supabase
+          .from('media_files')
+          .update({
+            file_url: publicUrl,
+            file_type: 'image',
+            file_size: file.size,
+            is_public: true,
+            is_deleted: false,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingMediaFile.id)
+          .select()
+          .single();
+
+        if (updateError) throw new Error(`Error al actualizar archivo: ${updateError.message}`);
+        mediaFileId = updatedFile.id;
+      } else {
+        const { data: newFile, error: insertError } = await supabase
+          .from('media_files')
+          .insert({
+            bucket: 'course-content',
+            file_path: filePath,
+            file_name: fileName,
+            file_url: publicUrl,
+            file_type: 'image',
+            file_size: file.size,
+            is_public: true,
+            is_deleted: false,
+            created_by: userId
+          })
+          .select()
+          .single();
+
+        if (insertError) throw new Error(`Error al registrar archivo: ${insertError.message}`);
+        mediaFileId = newFile.id;
+      }
+
+      // Create or update media_link
+      const { data: existingLink } = await supabase
+        .from('media_links')
+        .select('id')
+        .eq('module_id', moduleId)
+        .eq('category', 'module_image')
+        .maybeSingle();
+
+      if (existingLink) {
+        await supabase
+          .from('media_links')
+          .update({
+            media_file_id: mediaFileId,
+            visibility: 'public',
+            is_public: true,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingLink.id);
+      } else {
+        await supabase
+          .from('media_links')
+          .insert({
+            media_file_id: mediaFileId,
+            module_id: moduleId,
+            category: 'module_image',
+            visibility: 'public',
+            is_public: true,
+            created_by: userId
+          });
+      }
+
+      const urlWithCacheBust = `${publicUrl}?t=${Date.now()}`;
+      setModuleImageUrl(urlWithCacheBust);
+
+      toast({
+        title: 'Éxito',
+        description: 'Imagen del módulo subida correctamente'
+      });
+    } catch (error: any) {
+      console.error('Error uploading module image:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo subir la imagen',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const handleImageRemove = async (moduleId: string) => {
+    setIsUploadingImage(true);
+    
+    try {
+      const { data: link } = await supabase
+        .from('media_links')
+        .select('media_file_id')
+        .eq('module_id', moduleId)
+        .eq('category', 'module_image')
+        .maybeSingle();
+
+      if (link) {
+        await supabase
+          .from('media_files')
+          .update({ is_deleted: true })
+          .eq('id', link.media_file_id);
+
+        await supabase
+          .from('media_links')
+          .delete()
+          .eq('module_id', moduleId)
+          .eq('category', 'module_image');
+      }
+
+      setModuleImageUrl(null);
+
+      toast({
+        title: 'Éxito',
+        description: 'Imagen del módulo eliminada correctamente'
+      });
+    } catch (error: any) {
+      console.error('Error removing module image:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo eliminar la imagen',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
   const onSubmit = async (data: CourseModuleFormData) => {
     setIsLoading(true);
     try {
@@ -171,6 +365,7 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
   const headerContent = (
     <FormModalHeader 
       title={module ? 'Editar Módulo' : 'Nuevo Módulo'}
+      description="Configura los datos del módulo del curso. Puedes incluir una imagen o GIF que se mostrará en la landing page."
       icon={Layers}
     />
   );
@@ -185,48 +380,171 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
     />
   );
 
+  const renderImageUploadField = () => {
+    if (!module?.id) {
+      return (
+        <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            Guarda el módulo primero para poder subir una imagen
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-2">
+        <div
+          className="relative w-full h-40 rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-accent/50 transition-colors cursor-pointer overflow-hidden bg-muted/30"
+          onClick={() => !isUploadingImage && document.getElementById('module-image-input')?.click()}
+        >
+          {moduleImageUrl ? (
+            <div className="w-full h-full relative group">
+              <img
+                src={moduleImageUrl}
+                alt="Imagen del módulo"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="default"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    document.getElementById('module-image-input')?.click();
+                  }}
+                  disabled={isUploadingImage}
+                >
+                  <Upload className="h-4 w-4 mr-1" />
+                  Cambiar
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="default"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleImageRemove(module.id);
+                  }}
+                  disabled={isUploadingImage}
+                  className="bg-red-500 hover:bg-red-600 text-white"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Eliminar
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center p-4">
+              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-2">
+                <Upload className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-muted-foreground text-center">
+                Haz clic para seleccionar imagen o GIF
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Tamaño máximo: 10MB
+              </p>
+            </div>
+          )}
+
+          {isUploadingImage && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+              <div className="bg-white dark:bg-gray-900 rounded-lg p-4 flex items-center gap-3">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                <span className="text-sm font-medium">Subiendo...</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <input
+          id="module-image-input"
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file && module?.id) {
+              handleImageUpload(file, module.id);
+            }
+          }}
+          className="hidden"
+        />
+      </div>
+    );
+  };
+
   const editContent = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="course_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Curso *</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+        {/* Primera fila: Curso / Título / Orden */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FormField
+            control={form.control}
+            name="course_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Curso *</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                  disabled={!!courseId || !!module}
+                >
+                  <FormControl>
+                    <SelectTrigger data-testid="select-module-course">
+                      <SelectValue placeholder="Selecciona un curso" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {courses.map((course: any) => (
+                      <SelectItem key={course.id} value={course.id}>
+                        {course.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Título del Módulo *</FormLabel>
                 <FormControl>
-                  <SelectTrigger data-testid="select-module-course">
-                    <SelectValue placeholder="Selecciona un curso" />
-                  </SelectTrigger>
+                  <Input {...field} placeholder="Nombre del módulo" data-testid="input-module-title" />
                 </FormControl>
-                <SelectContent>
-                  {courses.map((course: any) => (
-                    <SelectItem key={course.id} value={course.id}>
-                      {course.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Título del Módulo *</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Nombre del módulo" data-testid="input-module-title" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="sort_index"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Orden *</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    {...field} 
+                    value={field.value ?? ''}
+                    onChange={(e) => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value))}
+                    placeholder="Ej: 0, 1, 2..." 
+                    data-testid="input-module-sort" 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
+        {/* Segunda fila: Descripción */}
         <FormField
           control={form.control}
           name="description"
@@ -241,26 +559,11 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="sort_index"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Orden *</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number" 
-                  {...field} 
-                  value={field.value ?? ''}
-                  onChange={(e) => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value))}
-                  placeholder="Ej: 0, 1, 2..." 
-                  data-testid="input-module-sort" 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Tercera fila: Imagen */}
+        <div>
+          <FormLabel>Imagen del Módulo</FormLabel>
+          {renderImageUploadField()}
+        </div>
       </form>
     </Form>
   );
