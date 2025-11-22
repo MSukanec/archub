@@ -467,28 +467,21 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
         </div>
 
         {/* Instructor Preview */}
-        <div>
-          <div className="sticky top-24 bg-muted/20 border rounded-lg p-4">
-            <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
-              Vista Previa - Instructor
-            </h4>
-            <div className="bg-background rounded-lg border overflow-hidden">
-              {courseData && (
-                <InstructorSection
-                  course={{
-                    ...courseData,
-                    instructor_name: instructorName,
-                    instructor_title: instructorTitle,
-                    instructor_bio: instructorBio,
-                    instructor_photo_url: instructorPhotoUrl
-                  } as Course}
-                  title={landingSections?.instructor?.title}
-                  subtitle={landingSections?.instructor?.subtitle}
-                  description={landingSections?.instructor?.description}
-                />
-              )}
-            </div>
-          </div>
+        <div className="sticky top-24 bg-muted/20 border rounded-lg overflow-hidden">
+          {courseData && (
+            <InstructorSection
+              course={{
+                ...courseData,
+                instructor_name: instructorName,
+                instructor_title: instructorTitle,
+                instructor_bio: instructorBio,
+                instructor_photo_url: instructorPhotoUrl
+              } as Course}
+              title={landingSections?.instructor?.title}
+              subtitle={landingSections?.instructor?.subtitle}
+              description={landingSections?.instructor?.description}
+            />
+          )}
         </div>
       </div>
 
@@ -543,20 +536,13 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
         </div>
 
         {/* Modules Preview */}
-        <div>
-          <div className="sticky top-24 bg-muted/20 border rounded-lg p-4">
-            <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
-              Vista Previa - Módulos
-            </h4>
-            <div className="bg-background rounded-lg border overflow-hidden">
-              <ModulesSection
-                modules={modulesWithLessons}
-                title={landingSections?.modules?.title}
-                subtitle={landingSections?.modules?.subtitle}
-                description={landingSections?.modules?.description}
-              />
-            </div>
-          </div>
+        <div className="sticky top-24 bg-muted/20 border rounded-lg overflow-hidden">
+          <ModulesSection
+            modules={modulesWithLessons}
+            title={landingSections?.modules?.title}
+            subtitle={landingSections?.modules?.subtitle}
+            description={landingSections?.modules?.description}
+          />
         </div>
       </div>
 
