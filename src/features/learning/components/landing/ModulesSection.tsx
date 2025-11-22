@@ -1,12 +1,4 @@
-import { useState } from 'react';
-import { ChevronDown, ChevronUp, PlayCircle, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import { Badge } from '@/components/ui/badge';
+import { Clock, BookOpen } from 'lucide-react';
 import { formatMinutesToTime } from '../../mappers';
 import type { ModuleWithLessons } from '../../types';
 import { SectionHeader } from './SectionHeader';
@@ -20,20 +12,14 @@ interface ModulesSectionProps {
 
 export function ModulesSection({ 
   modules, 
-  title = "MÓDULOS Y LECCIONES",
-  subtitle = "CONTENIDO DEL CURSO",
-  description = "Contenido estructurado paso a paso para tu aprendizaje profesional"
+  title = "MÓDULOS DEL CURSO",
+  subtitle = "CONTENIDO ESTRUCTURADO",
+  description = "Cada módulo está diseñado para llevarte paso a paso hacia la maestría"
 }: ModulesSectionProps) {
-  const [openModuleId, setOpenModuleId] = useState<string | null>(null);
-
-  const toggleModule = (moduleId: string) => {
-    setOpenModuleId((prev) => (prev === moduleId ? null : moduleId));
-  };
-
   if (modules.length === 0) return null;
 
   return (
-    <section className="py-16 sm:py-20 bg-muted/30">
+    <section className="py-16 sm:py-20 bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Grid: 3/4 for content, 1/4 empty space for sticky */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-0">
@@ -45,82 +31,62 @@ export function ModulesSection({
               description={description}
             />
 
-            <div className="space-y-4">
-          {modules.map((module, idx) => {
-            const isOpen = openModuleId === module.id;
-            return (
-              <Collapsible
-                key={module.id}
-                open={isOpen}
-                onOpenChange={() => toggleModule(module.id)}
-              >
-                <div className="bg-background rounded-lg border shadow-sm">
-                  <CollapsibleTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="w-full px-6 py-3 h-auto flex items-center justify-between hover:bg-muted/50"
-                    >
-                      <div className="flex items-center gap-4 text-left flex-1">
-                        <span className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-base">
-                          {String(idx + 1).padStart(2, '0')}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-3 flex-wrap">
-                            <h3 className="text-base font-semibold">{module.title}</h3>
-                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                              <span className="flex items-center gap-1">
-                                <PlayCircle className="w-4 h-4" />
-                                {module.lessons.length} lecciones
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                {formatMinutesToTime(module.total_duration_min)}
-                              </span>
-                            </div>
-                          </div>
+            {/* Modules Grid - 2 columns */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {modules.map((module, idx) => (
+                <div
+                  key={module.id}
+                  className="group bg-background rounded-lg border shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+                >
+                  {/* Module Image/GIF - Placeholder for media_links integration */}
+                  <div className="relative aspect-video bg-muted overflow-hidden">
+                    {/* TODO: Integrate with media_links table for module images/gifs */}
+                    {/* For now, show a placeholder with module number */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                      <div className="text-center">
+                        <div className="w-20 h-20 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                          <span className="text-3xl font-bold text-primary">
+                            {String(idx + 1).padStart(2, '0')}
+                          </span>
                         </div>
+                        <p className="text-xs text-muted-foreground">Imagen del módulo</p>
                       </div>
-                      {isOpen ? (
-                        <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0 ml-2" />
-                      ) : (
-                        <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0 ml-2" />
-                      )}
-                    </Button>
-                  </CollapsibleTrigger>
-
-                  <CollapsibleContent>
-                    <div className="border-t">
-                      {module.lessons.map((lesson) => (
-                        <div
-                          key={lesson.id}
-                          className="flex items-center gap-4 px-6 py-3 hover:bg-muted/30 border-b last:border-b-0"
-                        >
-                          <div className="flex-shrink-0">
-                            <PlayCircle className="w-5 h-5 text-primary" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm">{lesson.title}</p>
-                          </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            {lesson.free_preview && (
-                              <Badge variant="outline" className="text-xs">
-                                Vista Previa
-                              </Badge>
-                            )}
-                            {lesson.duration_sec && (
-                              <span className="text-sm text-muted-foreground">
-                                {formatMinutesToTime(lesson.duration_sec / 60)}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
                     </div>
-                  </CollapsibleContent>
+                  </div>
+
+                  {/* Module Content */}
+                  <div className="p-6">
+                    {/* Module Header */}
+                    <div className="flex items-start gap-3 mb-3">
+                      <span className="flex-shrink-0 px-2 py-1 bg-primary/10 text-primary text-xs font-bold rounded">
+                        MÓDULO {String(idx + 1).padStart(2, '0')}
+                      </span>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <BookOpen className="w-3.5 h-3.5" />
+                          {module.lessons?.length || 0} lecciones
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" />
+                          {formatMinutesToTime(module.total_duration_min || 0)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Module Title */}
+                    <h3 className="text-lg font-semibold mb-3 group-hover:text-primary transition-colors">
+                      {module.title}
+                    </h3>
+
+                    {/* Module Description */}
+                    {module.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-3">
+                        {module.description}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </Collapsible>
-            );
-          })}
+              ))}
             </div>
           </div>
 

@@ -6,6 +6,7 @@ import {
   HeroSection,
   InstructorSection,
   ModulesSection,
+  LessonsSection,
   FeaturesSection,
   FAQSection,
   CTAFooter,
@@ -61,6 +62,7 @@ export default function CourseLanding() {
         <HeroSection course={course} stats={stats} />
         <InstructorSection course={course} />
         <ModulesSection modules={modules} />
+        <LessonsSection modules={modules} />
         <FeaturesSection course={course} />
         <FAQSection faqs={faqs} />
         <CTAFooter course={course} />

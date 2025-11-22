@@ -10,6 +10,7 @@
 export { HeroSection } from './landing/HeroSection';
 export { InstructorSection } from './landing/InstructorSection';
 export { ModulesSection } from './landing/ModulesSection';
+export { LessonsSection } from './landing/LessonsSection';
 export { FeaturesSection } from './landing/FeaturesSection';
 export { FAQSection } from './landing/FAQSection';
 export { CTAFooter } from './landing/CTAFooter';

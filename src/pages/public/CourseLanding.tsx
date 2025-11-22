@@ -6,6 +6,7 @@ import {
   HeroSection,
   InstructorSection,
   ModulesSection,
+  LessonsSection,
   FeaturesSection,
   FAQSection,
   CTAFooter,
@@ -118,6 +119,7 @@ export default function CourseLanding() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
         <InstructorSection course={course} />
         <ModulesSection modules={modules} />
+        <LessonsSection modules={modules} />
         <FeaturesSection course={course} />
         <FAQSection faqs={faqs} />
         <CTAFooter course={course} />
