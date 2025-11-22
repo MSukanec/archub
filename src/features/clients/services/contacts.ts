@@ -22,6 +22,7 @@ export async function getContacts(
     .from('contacts')
     .select('*')
     .eq('organization_id', organizationId)
+    .eq('is_deleted', false)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -55,6 +56,7 @@ export async function getContactById(
     .select('*')
     .eq('id', contactId)
     .eq('organization_id', organizationId)
+    .eq('is_deleted', false)
     .single();
 
   if (error) {
