@@ -31,10 +31,15 @@ export default function Projects() {
         feature="max_projects" 
         current={projects.length}
         functionName="Crear Proyecto"
+        useUpgradeModal={true}
+        modalImage="/features/ft-projects-512.webp"
+        modalTitle="Alcanzaste el límite de proyectos"
+        modalDescription="Has llegado al máximo de proyectos permitidos en tu plan actual. Actualiza a un plan superior para crear proyectos ilimitados y gestionar tu negocio sin restricciones."
       >
         <Button
           onClick={() => openModal('project', {})}
           className="h-8 px-3 text-xs"
+          data-testid="button-new-project"
         >
           <Plus className="w-4 h-4 mr-1" />
           Nuevo Proyecto

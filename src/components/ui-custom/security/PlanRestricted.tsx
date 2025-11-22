@@ -21,6 +21,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from "@/stores/projectContext";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useMobile } from '@/hooks/use-mobile';
+import { PlanUpgradeModal } from "@/components/modal/modals/PlanUpgradeModal";
 
 interface PlanRestrictedProps {
   feature?: string;
@@ -29,6 +30,10 @@ interface PlanRestrictedProps {
   functionName?: string;
   size?: "small" | "large";
   adminBypass?: boolean;
+  useUpgradeModal?: boolean;
+  modalImage?: string;
+  modalTitle?: string;
+  modalDescription?: string;
   children: React.ReactNode;
 }
 
@@ -39,6 +44,10 @@ export function PlanRestricted({
   functionName,
   size = "small",
   adminBypass = false,
+  useUpgradeModal = false,
+  modalImage,
+  modalTitle,
+  modalDescription,
   children,
 }: PlanRestrictedProps) {
   const { can, limit } = usePlanFeatures();
@@ -149,6 +158,38 @@ export function PlanRestricted({
 
   const planBgColor = planColors[requiredPlan];
   const planName = requiredPlan === 'pro' ? 'Pro' : 'Teams';
+
+  // NUEVO MODAL DE UPGRADE - Si useUpgradeModal es true
+  if (useUpgradeModal) {
+    return (
+      <>
+        <div 
+          className="relative inline-flex cursor-pointer"
+          onClick={() => setOpen(true)}
+          data-testid="button-restricted-feature"
+        >
+          {/* Contenido deshabilitado */}
+          <div className="opacity-60 pointer-events-none">
+            {React.cloneElement(children as React.ReactElement, {
+              disabled: true,
+              className: `${(children as React.ReactElement).props.className || ''} cursor-pointer`,
+            })}
+          </div>
+        </div>
+        
+        <PlanUpgradeModal
+          open={open}
+          onOpenChange={setOpen}
+          requiredPlan={requiredPlan}
+          featureTitle={modalTitle || `Función de Plan ${planName}`}
+          featureDescription={modalDescription || `Esta función requiere el plan ${planName}. Actualiza tu plan para desbloquear esta característica.`}
+          featureImage={modalImage || '/features/ft-projects-512.webp'}
+          currentLimit={feature ? limit(feature) : undefined}
+          currentValue={current}
+        />
+      </>
+    );
+  }
 
   // VERSIÓN SMALL: Badge pequeño con solo candado
   if (size === 'small') {
