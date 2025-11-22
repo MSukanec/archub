@@ -59,8 +59,8 @@ export function PlanUpgradeModal({
         <DialogTitle className="sr-only">{featureTitle}</DialogTitle>
         <DialogDescription className="sr-only">{featureDescription}</DialogDescription>
 
-        {/* Content - Three Columns on Desktop */}
-        <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-0 min-h-[320px] md:min-h-[460px]">
+        {/* Content - Two Equal Columns on Desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 min-h-[320px] md:min-h-[460px]">
           {/* Left Column - Image (tamaño completo) */}
           <div className="flex items-center justify-center bg-black/20 overflow-hidden md:rounded-l-lg h-full">
             <img 
@@ -71,9 +71,9 @@ export function PlanUpgradeModal({
           </div>
 
           {/* Right Column - Badge + Título + Descripción */}
-          <div className="flex flex-col justify-center gap-2 px-3 py-3">
+          <div className="flex flex-col justify-center gap-4 px-6 py-6">
             {/* Badge + Título */}
-            <div className="flex flex-col gap-2 items-start">
+            <div className="flex flex-col gap-3 items-start">
               <Badge 
                 className="text-xs px-2.5 py-1 border-0 font-medium"
                 style={{ 
@@ -118,13 +118,11 @@ export function PlanUpgradeModal({
           <div className="flex gap-2 w-full px-2">
             <Button
               type="button"
-              variant="outline"
               onClick={() => onOpenChange(false)}
-              className="w-1/4"
+              className="w-1/4 rounded-lg border-2 bg-transparent hover:bg-white/5"
               style={{
                 borderColor: planColor,
-                color: planColor,
-                backgroundColor: 'transparent'
+                color: planColor
               }}
               data-testid="button-close-plan-modal"
             >
@@ -132,9 +130,8 @@ export function PlanUpgradeModal({
             </Button>
             <Button
               type="button"
-              variant="default"
               onClick={handleViewPlans}
-              className="w-3/4"
+              className="w-3/4 rounded-lg"
               style={{ 
                 backgroundColor: planColor,
                 color: 'white'
