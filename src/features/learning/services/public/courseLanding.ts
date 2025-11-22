@@ -77,8 +77,41 @@ export async function fetchCourseLandingBySlug(slug: string) {
 
   if (modulesError) throw new Error(`Modules fetch error: ${modulesError.message}`);
 
+  // 2.5. Fetch module images and prepare lessons query
+  let moduleIds: string[] = [];
+  if (modules && modules.length > 0) {
+    moduleIds = modules.map((m) => m.id);
+    
+    const { data: moduleMediaLinks } = await supabase
+      .from('media_links')
+      .select(`
+        module_id,
+        media_files!inner (
+          file_url,
+          is_deleted
+        )
+      `)
+      .in('module_id', moduleIds)
+      .eq('category', 'module_image')
+      .eq('media_files.is_deleted', false);
+
+    // Attach module_image_url to each module
+    if (moduleMediaLinks && moduleMediaLinks.length > 0) {
+      modules.forEach((module: any) => {
+        const mediaLink = moduleMediaLinks.find((link: any) => link.module_id === module.id);
+        if (mediaLink?.media_files) {
+          const mediaFile = Array.isArray(mediaLink.media_files) 
+            ? mediaLink.media_files[0] 
+            : mediaLink.media_files;
+          if (mediaFile?.file_url) {
+            module.module_image_url = mediaFile.file_url;
+          }
+        }
+      });
+    }
+  }
+
   // 3. Fetch lessons (active only)
-  const moduleIds = (modules || []).map((m) => m.id);
   const { data: lessons, error: lessonsError } = await supabase
     .from('course_lessons')
     .select('*')

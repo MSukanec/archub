@@ -19,7 +19,7 @@ export function ModulesSection({
   if (modules.length === 0) return null;
 
   return (
-    <section className="py-16 sm:py-20 bg-background">
+    <section className="py-16 sm:py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Grid: 3/4 for content, 1/4 empty space for sticky */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-0">
@@ -38,20 +38,26 @@ export function ModulesSection({
                   key={module.id}
                   className="group bg-background rounded-lg border shadow-sm overflow-hidden hover:shadow-md transition-shadow"
                 >
-                  {/* Module Image/GIF - Placeholder for media_links integration */}
+                  {/* Module Image/GIF */}
                   <div className="relative aspect-video bg-muted overflow-hidden">
-                    {/* TODO: Integrate with media_links table for module images/gifs */}
-                    {/* For now, show a placeholder with module number */}
-                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-                      <div className="text-center">
-                        <div className="w-20 h-20 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                          <span className="text-3xl font-bold text-primary">
-                            {String(idx + 1).padStart(2, '0')}
-                          </span>
+                    {(module as any).module_image_url ? (
+                      <img
+                        src={(module as any).module_image_url}
+                        alt={module.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                        <div className="text-center">
+                          <div className="w-20 h-20 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                            <span className="text-3xl font-bold text-primary">
+                              {String(idx + 1).padStart(2, '0')}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Imagen del módulo</p>
                         </div>
-                        <p className="text-xs text-muted-foreground">Imagen del módulo</p>
                       </div>
-                    </div>
+                    )}
                   </div>
 
                   {/* Module Content */}

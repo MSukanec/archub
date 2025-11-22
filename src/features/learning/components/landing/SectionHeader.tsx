@@ -10,7 +10,7 @@ export function SectionHeader({ title, subtitle, description }: SectionHeaderPro
   return (
     <div className="mb-12 space-y-4">
       {subtitle && (
-        <p className="text-base uppercase tracking-wide font-semibold text-[hsl(var(--accent))]">
+        <p className="text-base uppercase tracking-wide font-semibold text-[var(--accent)]">
           {subtitle}
         </p>
       )}
