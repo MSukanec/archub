@@ -19,13 +19,29 @@ const COURSE_DETAILS_FIELDS = [
 ];
 
 /**
+ * Deleted image fields that should be completely ignored
+ * These are now handled via media_links table
+ */
+const DELETED_IMAGE_FIELDS = [
+  'cover_url',
+  'instructor_photo_url',
+  'og_image_url'
+];
+
+/**
  * Split incoming data into courses and course_details objects
+ * Filters out deleted image fields that are now handled via media_links
  */
 function splitCourseData(data: any): { coursesData: any; detailsData: any } {
   const coursesData: any = {};
   const detailsData: any = {};
 
   for (const [key, value] of Object.entries(data)) {
+    // Skip deleted image fields completely
+    if (DELETED_IMAGE_FIELDS.includes(key)) {
+      continue;
+    }
+    
     if (COURSE_DETAILS_FIELDS.includes(key)) {
       detailsData[key] = value;
     } else {

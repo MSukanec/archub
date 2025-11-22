@@ -22,7 +22,6 @@ const courseSchema = z.object({
   slug: z.string().min(1, 'El slug es requerido').regex(/^[a-z0-9-]+$/, 'Solo minúsculas, números y guiones'),
   title: z.string().min(1, 'El título es requerido'),
   short_description: z.string().optional(),
-  cover_url: z.string().optional(),
   price: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
     message: 'Debe ser un número válido mayor o igual a 0'
   }),
@@ -34,14 +33,12 @@ const courseSchema = z.object({
   instructor_name: z.string().optional(),
   instructor_title: z.string().optional(),
   instructor_bio: z.string().optional(),
-  instructor_photo_url: z.string().optional(),
   // 🎨 Marketing fields
   badge_text: z.string().optional(),
   highlights: z.string().optional(), // Comma-separated, will be converted to array
   preview_video_id: z.string().optional(),
   // 🔍 SEO fields
   seo_keywords: z.string().optional(), // Comma-separated, will be converted to array
-  og_image_url: z.string().optional(),
 });
 
 type CourseFormData = z.infer<typeof courseSchema>;
@@ -51,7 +48,6 @@ interface Course {
   slug: string;
   title: string;
   short_description?: string;
-  cover_url?: string;
   price?: number;
   visibility: string;
   is_active: boolean;
@@ -61,14 +57,12 @@ interface Course {
   instructor_name?: string;
   instructor_title?: string;
   instructor_bio?: string;
-  instructor_photo_url?: string;
   // 🎨 Marketing fields
   badge_text?: string;
   highlights?: string[];
   preview_video_id?: string;
   // 🔍 SEO fields
   seo_keywords?: string[];
-  og_image_url?: string;
 }
 
 interface CourseFormModalProps {
@@ -93,19 +87,16 @@ export function CourseFormModal({ modalData, onClose }: CourseFormModalProps) {
       slug: '',
       title: '',
       short_description: '',
-      cover_url: '',
       price: '0',
       visibility: 'draft',
       is_active: true,
       instructor_name: '',
       instructor_title: '',
       instructor_bio: '',
-      instructor_photo_url: '',
       badge_text: '',
       highlights: '',
       preview_video_id: '',
       seo_keywords: '',
-      og_image_url: '',
     }
   });
 
@@ -121,38 +112,32 @@ export function CourseFormModal({ modalData, onClose }: CourseFormModalProps) {
         slug: course.slug || '',
         title: course.title || '',
         short_description: course.short_description || '',
-        cover_url: course.cover_url || '',
         price: course.price?.toString() || '0',
         visibility: (course.visibility as any) || 'draft',
         is_active: course.is_active ?? true,
         instructor_name: course.instructor_name || '',
         instructor_title: course.instructor_title || '',
         instructor_bio: course.instructor_bio || '',
-        instructor_photo_url: course.instructor_photo_url || '',
         badge_text: course.badge_text || '',
         highlights: course.highlights?.join(', ') || '',
         preview_video_id: course.preview_video_id || '',
         seo_keywords: course.seo_keywords?.join(', ') || '',
-        og_image_url: course.og_image_url || '',
       });
     } else {
       form.reset({
         slug: '',
         title: '',
         short_description: '',
-        cover_url: '',
         price: '0',
         visibility: 'draft',
         is_active: true,
         instructor_name: '',
         instructor_title: '',
         instructor_bio: '',
-        instructor_photo_url: '',
         badge_text: '',
         highlights: '',
         preview_video_id: '',
         seo_keywords: '',
-        og_image_url: '',
       });
     }
   }, [course, form]);
@@ -162,18 +147,19 @@ export function CourseFormModal({ modalData, onClose }: CourseFormModalProps) {
       if (!supabase) throw new Error('Supabase not initialized');
       if (!userData) throw new Error('No user data');
 
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session');
+
       const courseData: any = {
         slug: data.slug,
         title: data.title,
         short_description: data.short_description || null,
-        cover_url: data.cover_url || null,
         price: parseFloat(data.price),
         visibility: data.visibility,
         is_active: data.is_active,
         instructor_name: data.instructor_name || null,
         instructor_title: data.instructor_title || null,
         instructor_bio: data.instructor_bio || null,
-        instructor_photo_url: data.instructor_photo_url || null,
         badge_text: data.badge_text || null,
         highlights: data.highlights 
           ? data.highlights.split(',').map(h => h.trim()).filter(Boolean)
@@ -182,23 +168,35 @@ export function CourseFormModal({ modalData, onClose }: CourseFormModalProps) {
         seo_keywords: data.seo_keywords
           ? data.seo_keywords.split(',').map(k => k.trim()).filter(Boolean)
           : null,
-        og_image_url: data.og_image_url || null,
       };
 
       if (isEditing && course) {
-        const { error } = await supabase
-          .from('courses')
-          .update(courseData)
-          .eq('id', course.id);
-
-        if (error) throw error;
+        const res = await fetch(`/api/admin/courses/${course.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify(courseData)
+        });
+        
+        if (!res.ok) throw new Error('Failed to update course');
+        return res.json();
       } else {
         courseData.created_by = userData.user?.id;
-        const { error } = await supabase
-          .from('courses')
-          .insert(courseData);
-
-        if (error) throw error;
+        const res = await fetch('/api/admin/courses', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify(courseData)
+        });
+        
+        if (!res.ok) throw new Error('Failed to create course');
+        return res.json();
       }
     },
     onSuccess: () => {
@@ -283,35 +281,19 @@ export function CourseFormModal({ modalData, onClose }: CourseFormModalProps) {
                 )}
               />
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="cover_url"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>URL de la Portada</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="https://..." />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Precio (USD)</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="number" step="0.01" min="0" placeholder="99.99" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Precio (USD)</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="number" step="0.01" min="0" placeholder="99.99" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <div className="grid grid-cols-2 gap-4">
                 <FormField
@@ -403,20 +385,6 @@ export function CourseFormModal({ modalData, onClose }: CourseFormModalProps) {
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={form.control}
-                name="instructor_photo_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL de Foto del Instructor</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="https://..." />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
             <Separator />
@@ -498,23 +466,6 @@ export function CourseFormModal({ modalData, onClose }: CourseFormModalProps) {
                     </FormControl>
                     <p className="text-xs text-muted-foreground">
                       Separar múltiples palabras clave con comas
-                    </p>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="og_image_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL de Imagen Open Graph</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="https://..." />
-                    </FormControl>
-                    <p className="text-xs text-muted-foreground">
-                      Imagen para compartir en redes sociales (1200x630px recomendado)
                     </p>
                     <FormMessage />
                   </FormItem>
