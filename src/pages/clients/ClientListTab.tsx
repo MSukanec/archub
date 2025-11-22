@@ -234,7 +234,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     {
       key: 'full_name',
       label: 'Cliente',
-      width: '220px',
       sortable: true,
       render: (client: ProjectClientSummary) => {
         const avatarUrl = client.contacts?.linked_user?.avatar_url;
@@ -285,7 +284,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     {
       key: 'notes',
       label: 'Notas',
-      width: '320px',
       sortable: false,
       render: (client: ProjectClientSummary) => {
         if (!client.notes) return '-';
@@ -293,47 +291,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
           ? client.notes.substring(0, 100) + '...' 
           : client.notes;
         return <span className="text-muted-foreground">{truncated}</span>;
-      },
-    },
-    {
-      key: 'status',
-      label: 'Estado',
-      width: '140px',
-      sortable: true,
-      align: 'center' as const,
-      render: (client: ProjectClientSummary) => {
-        const statusConfig: Record<string, { label: string; borderColor: string; textColor: string }> = {
-          active: { 
-            label: 'Activo', 
-            borderColor: 'border-green-600 dark:border-green-400', 
-            textColor: 'text-green-600 dark:text-green-400' 
-          },
-          inactive: { 
-            label: 'Inactivo', 
-            borderColor: 'border-muted-foreground', 
-            textColor: 'text-muted-foreground' 
-          },
-          pending: { 
-            label: 'Pendiente', 
-            borderColor: 'border-orange-600 dark:border-orange-400', 
-            textColor: 'text-orange-600 dark:text-orange-400' 
-          },
-        };
-        
-        const config = statusConfig[client.status] || { 
-          label: client.status, 
-          borderColor: 'border-muted-foreground', 
-          textColor: 'text-muted-foreground' 
-        };
-        
-        return (
-          <Badge 
-            variant="outline"
-            className={`${config.borderColor} ${config.textColor} border-2`}
-          >
-            {config.label}
-          </Badge>
-        );
       },
     },
   ];
