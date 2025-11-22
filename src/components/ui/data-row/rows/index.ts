@@ -31,14 +31,10 @@ export { default as TaskRow } from './TaskRow';
 
 export { default as ProjectRow } from './ProjectRow';
 
-export { default as AdminCourseStudentRow } from './AdminCourseStudentRow';
-export type { Enrollment, EnrollmentProgress } from './AdminCourseStudentRow';
-
 export { default as AdminCourseCouponRow } from './AdminCourseCouponRow';
 export type { Coupon } from './AdminCourseCouponRow';
 
 export { default as AdminPaymentTransferRow } from './AdminPaymentTransferRow';
 
-export { default as LessonRow } from './LessonRow';
 export { default as NoteRow } from './NoteRow';
 export { default as MarkerRow } from './MarkerRow';

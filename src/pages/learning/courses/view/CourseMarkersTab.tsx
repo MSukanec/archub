@@ -8,13 +8,12 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useLocation } from 'wouter';
 import { useCourseSidebarStore } from '@/stores/sidebarStore';
-import { useCoursePlayerStore } from '@/stores/coursePlayerStore';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { MarkerRow } from '@/components/ui/data-row/rows';
-import { useCourseMarkers, getCourseMarkersUrl, type MarkerWithLesson } from '@/features/learning';
+import { useCourseMarkers, getCourseMarkersUrl, type MarkerWithLesson, useCoursePlayerStore } from '@/features/learning';
 
 interface CourseMarkersTabProps {
   courseId: string;

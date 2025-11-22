@@ -24,3 +24,6 @@ export * from './modals';
 export * from './types';
 export * from './constants';
 export * from './schemas';
+
+// Store exports
+export { useCoursePlayerStore } from './stores/coursePlayerStore';

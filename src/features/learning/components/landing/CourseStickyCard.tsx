@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { BookOpen, Clock, CheckCircle, MessageCircle, Shield } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import type { Course } from '@shared/schema';
-import type { CourseStats } from '../types';
+import type { CourseStats } from '../../types';
 
 interface CourseStickyCardProps {
   course: Course;

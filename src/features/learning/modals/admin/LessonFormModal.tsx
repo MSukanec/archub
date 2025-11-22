@@ -2,10 +2,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Video } from 'lucide-react';
-import { FormModalHeader } from '../../form/FormModalHeader';
-import { FormModalFooter } from '../../form/FormModalFooter';
-import { FormModalLayout } from '../../form/FormModalLayout';
-import { useModalPanelStore } from '../../form/modalPanelStore';
+import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
+import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
+import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
+import { useModalPanelStore } from '@/components/modal/form/modalPanelStore';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
-import { useAdminCourses } from '@/hooks/use-admin-courses';
+import { useAdminCourses } from '../../hooks/use-admin-courses';
 
 const lessonSchema = z.object({
   module_id: z.string().min(1, 'El módulo es requerido'),

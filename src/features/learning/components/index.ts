@@ -26,3 +26,8 @@ export { LessonNotes } from './dashboard/LessonNotes';
 export { LessonSummaryNote } from './dashboard/LessonSummaryNote';
 export { default as PayButton } from './dashboard/PayButton';
 export { DiscordWidget } from './dashboard/DiscordWidget';
+
+// ========== LAYOUT/SHARED COMPONENTS ==========
+export { FloatingCourseLessons } from './FloatingCourseLessons';
+export { default as LessonRow } from './LessonRow';
+export { default as AdminCourseStudentRow } from './admin/AdminCourseStudentRow';

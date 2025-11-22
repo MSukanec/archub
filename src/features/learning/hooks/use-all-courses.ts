@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAllPublicCourses } from '../services/courseLanding';
+import { getAllPublicCourses } from '../services/public/courseLanding';
 import type { Course } from '@shared/schema';
 
 /**

@@ -77,10 +77,7 @@ import { GeneralCostsModal } from '@/features/general-costs/modals/GeneralCostsM
 import { GeneralCostsPaymentModal } from '@/features/general-costs/modals/GeneralCostsPaymentModal';
 import { AdminLaborModal } from '../modals/admin/AdminLaborModal';
 import { CostModal } from '../modals/admin/CostModal';
-import { CourseModal } from '@/features/learning/modals';
-import { CourseModuleFormModal } from '../modals/admin/CourseModuleFormModal';
-import { LessonFormModal } from '../modals/admin/LessonFormModal';
-import { CourseEnrollmentModal } from '../modals/admin/CourseEnrollmentModal';
+import { CourseModal, CourseModuleFormModal, LessonFormModal, CourseEnrollmentModal } from '@/features/learning';
 import { CouponFormModal } from '../modals/admin/CouponFormModal';
 import PaymentMethodModal from '../modals/PaymentMethodModal';
 import { NotificationFormModal } from '../modals/admin/NotificationFormModal';

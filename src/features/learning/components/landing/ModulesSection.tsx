@@ -7,8 +7,8 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { Badge } from '@/components/ui/badge';
-import { formatMinutesToTime } from '../mappers';
-import type { ModuleWithLessons } from '../types';
+import { formatMinutesToTime } from '../../mappers';
+import type { ModuleWithLessons } from '../../types';
 import { SectionHeader } from './SectionHeader';
 
 interface ModulesSectionProps {

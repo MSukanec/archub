@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getCoursePricing } from '../services/getCoursePricing';
+import { getCoursePricing } from '../services/student/getCoursePricing';
 import type { CoursePricing } from '../types';
 
 /**

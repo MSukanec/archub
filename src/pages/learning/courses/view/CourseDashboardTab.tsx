@@ -12,12 +12,12 @@ import {
   useLessonDetails,
   useMonthlyStudyTime,
   useCourseRecentNotes,
-  useCourseRecentMarkers
+  useCourseRecentMarkers,
+  useCoursePlayerStore
 } from '@/features/learning'
 import { useLocation, useParams } from 'wouter'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { useCoursePlayerStore } from '@/stores/coursePlayerStore'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'

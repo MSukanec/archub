@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { BookOpen, X, Play, CheckCircle2, Circle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { useCoursePlayerStore } from '@/stores/coursePlayerStore';
+import { useCoursePlayerStore } from '../stores/coursePlayerStore';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 

@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Clock, BookOpen, Award } from 'lucide-react';
 import type { Course } from '@shared/schema';
-import type { CourseStats } from '../types';
+import type { CourseStats } from '../../types';
 
 interface HeroSectionProps {
   course: Course;

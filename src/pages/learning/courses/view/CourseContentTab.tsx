@@ -7,9 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { CheckCircle2, Circle, ArrowRight, Star } from 'lucide-react'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
-import { useCoursePlayerStore } from '@/stores/coursePlayerStore'
-import LessonRow from '@/components/ui/data-row/rows/LessonRow'
-import { FavoriteButton, useCourseStructure, useCourseProgress } from '@/features/learning'
+import { FavoriteButton, useCourseStructure, useCourseProgress, useCoursePlayerStore, LessonRow } from '@/features/learning'
 
 interface CourseContentTabProps {
   courseId?: string;

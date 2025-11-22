@@ -23,7 +23,7 @@ import { CourseSidebar } from "@/layout/CourseSidebar";
 import { useProjectAccentColor } from "@/hooks/use-project-accent-color";
 import { useContentBackground } from "@/hooks/use-content-background";
 import { FloatingAIChat } from "@/components/ui-custom/layout/FloatingAIChat";
-import { FloatingCourseLessons } from "@/components/ui-custom/layout/FloatingCourseLessons";
+import { FloatingCourseLessons } from "@/features/learning";
 import { InvitationModal } from "@/components/invitations/InvitationModal";
 import { OrganizationRemovedModal } from "@/components/invitations/OrganizationRemovedModal";
 import { usePendingInvitations } from "@/hooks/use-pending-invitations";

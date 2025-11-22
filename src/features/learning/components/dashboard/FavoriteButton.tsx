@@ -1,6 +1,6 @@
 import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useToggleLessonFavorite } from '../hooks';
+import { useToggleLessonFavorite } from '../../hooks';
 import { cn } from '@/lib/utils';
 
 interface FavoriteButtonProps {

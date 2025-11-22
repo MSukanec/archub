@@ -9,7 +9,7 @@ import {
   CheckCircle2
 } from "lucide-react";
 import { useCourseSidebarStore } from "@/stores/sidebarStore";
-import { useCoursePlayerStore } from "@/stores/coursePlayerStore";
+import { useCoursePlayerStore } from "@/features/learning";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 

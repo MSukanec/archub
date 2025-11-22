@@ -2,10 +2,9 @@ import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { BookOpen, ChevronLeft, ChevronRight, CheckCircle, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCoursePlayerStore } from '@/stores/coursePlayerStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
-import { useCourseOverview, useCourseEnrollment, useLastLessonInProgress } from '@/features/learning';
+import { useCourseOverview, useCourseEnrollment, useLastLessonInProgress, useCoursePlayerStore } from '@/features/learning';
 
 import { Layout } from '@/layout/desktop/Layout';
 import CourseDashboardTab from './view/CourseDashboardTab';

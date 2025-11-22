@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useLearningCourses } from './use-learning-courses';
 import { useCourseLessonsSummary } from './use-course-lessons-summary';
-import type { CourseData, EnrollmentData, CourseProgressViewData } from '../services/getLearningCourses';
+import type { CourseData, EnrollmentData, CourseProgressViewData } from '../services/student/getLearningCourses';
 import { useLocation } from 'wouter';
 
 export type CourseTabFilter = 'enrolled' | 'completed' | 'all';

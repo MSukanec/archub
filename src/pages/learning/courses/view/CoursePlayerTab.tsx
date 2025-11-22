@@ -5,11 +5,10 @@ import { Play, BookOpen, CheckCircle, ChevronLeft, ChevronRight, FileText, Bookm
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
-import { useCoursePlayerStore } from '@/stores/coursePlayerStore'
 import VimeoPlayer from '@/components/video/VimeoPlayer'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
-import { LessonSummaryNote, LessonMarkers, FavoriteButton, useCourseStructure, useCourseProgress, useUpdateLessonProgress } from '@/features/learning'
+import { LessonSummaryNote, LessonMarkers, FavoriteButton, useCourseStructure, useCourseProgress, useUpdateLessonProgress, useCoursePlayerStore } from '@/features/learning'
 import Player from '@vimeo/player'
 
 interface CoursePlayerTabProps {
