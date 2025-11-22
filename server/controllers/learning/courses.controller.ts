@@ -41,15 +41,21 @@ function extractToken(authHeader: string | undefined): string | null {
 
 export async function handleGetCoursesFull(req: Request, res: Response) {
   try {
+    console.log('[handleGetCoursesFull] Starting request');
     const token = extractToken(req.headers.authorization);
     if (!token) {
+      console.log('[handleGetCoursesFull] No token provided');
       return res.status(401).json({ error: 'No authorization token provided' });
     }
 
+    console.log('[handleGetCoursesFull] Creating authenticated client');
     const supabase = createAuthenticatedClient(token);
     const ctx: LearningHandlerContext = { supabase };
 
+    console.log('[handleGetCoursesFull] Calling getCoursesFull handler');
     const result = await getCoursesFull(ctx);
+
+    console.log('[handleGetCoursesFull] Result:', result.success ? 'SUCCESS' : `FAILED: ${result.error}`);
 
     if (result.success) {
       return res.status(200).json(result.data);
@@ -58,6 +64,7 @@ export async function handleGetCoursesFull(req: Request, res: Response) {
     }
   } catch (error: any) {
     console.error('Error in handleGetCoursesFull controller:', error);
+    console.error('Error stack:', error.stack);
     return res.status(500).json({ error: error.message || 'Failed to fetch courses' });
   }
 }
