@@ -134,6 +134,22 @@ export async function getClientPayments(
         name,
         code,
         color
+      ),
+      media_links!client_payment_id(
+        id,
+        media_file_id,
+        visibility,
+        description,
+        category,
+        position,
+        created_at,
+        media_file:media_files(
+          id,
+          file_url,
+          file_name,
+          file_type,
+          file_size
+        )
       )
     `)
     .eq('organization_id', organizationId)
@@ -166,6 +182,18 @@ export async function getClientPayments(
       avatar_url: payment.creator.user.avatar_url,
     } : null,
     project: payment.project || null,
+    attachments: payment.media_links?.map((link: any) => ({
+      id: link.id,
+      media_file_id: link.media_file_id,
+      visibility: link.visibility,
+      description: link.description,
+      category: link.category,
+      position: link.position,
+      created_at: link.created_at,
+      media_file: link.media_file,
+      file_url: link.media_file?.file_url || '',
+      file_name: link.media_file?.file_name || '',
+    })) || [],
   }));
 
   return data;
@@ -289,6 +317,22 @@ export async function getClientPaymentById(
           created_at,
           updated_at
         )
+      ),
+      media_links!client_payment_id(
+        id,
+        media_file_id,
+        visibility,
+        description,
+        category,
+        position,
+        created_at,
+        media_file:media_files(
+          id,
+          file_url,
+          file_name,
+          file_type,
+          file_size
+        )
       )
     `)
     .eq('id', paymentId)
@@ -314,6 +358,18 @@ export async function getClientPaymentById(
     schedule: data.schedule || null,
     currency: data.currency || null,
     wallet: data.wallet || null,
+    attachments: data.media_links?.map((link: any) => ({
+      id: link.id,
+      media_file_id: link.media_file_id,
+      visibility: link.visibility,
+      description: link.description,
+      category: link.category,
+      position: link.position,
+      created_at: link.created_at,
+      media_file: link.media_file,
+      file_url: link.media_file?.file_url || '',
+      file_name: link.media_file?.file_name || '',
+    })) || [],
   };
 }
 
