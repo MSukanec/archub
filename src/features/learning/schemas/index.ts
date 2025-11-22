@@ -3,10 +3,6 @@
  */
 
 import { z } from 'zod';
-import {
-  insertCourseLessonProgressSchema,
-  insertCourseLessonNoteSchema,
-} from '@shared/schema';
 
 // ========== LESSON PROGRESS SCHEMAS ==========
 
@@ -68,9 +64,3 @@ export const toggleFavoriteSchema = z.object({
 });
 
 export type ToggleFavoriteFormData = z.infer<typeof toggleFavoriteSchema>;
-
-// ========== RE-EXPORT SHARED SCHEMAS ==========
-export {
-  insertCourseLessonProgressSchema,
-  insertCourseLessonNoteSchema,
-};
