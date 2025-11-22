@@ -11,7 +11,6 @@ export interface ClientCommitment {
   id: string;
   project_id: string;
   client_id: string;
-  contact_id: string;
   organization_id: string;
   amount: number;
   currency_id: string;
@@ -19,22 +18,24 @@ export interface ClientCommitment {
   created_at: string;
   updated_at: string;
   created_by: string | null;
-  contact: {
-    id: string;
-    first_name: string;
-    last_name: string;
-    full_name: string;
-    email: string;
-    phone?: string;
-    company_name?: string;
-    linked_user?: {
-      id: string;
-      avatar_url?: string;
-    } | null;
-  } | null;
+  is_deleted: boolean;
+  deleted_at: string | null;
   project_client: {
     id: string;
     unit: string | null;
+    contact: {
+      id: string;
+      first_name: string;
+      last_name: string;
+      full_name: string;
+      email: string;
+      phone?: string;
+      company_name?: string;
+      linked_user?: {
+        id: string;
+        avatar_url?: string;
+      } | null;
+    } | null;
   } | null;
   currency: {
     id: string;
@@ -62,7 +63,6 @@ export interface CreateClientCommitmentParams {
   projectId: string;
   organizationId: string;
   commitmentData: {
-    contact_id: string;
     client_id: string;
     amount: number;
     currency_id: string;
@@ -80,7 +80,6 @@ export interface UpdateClientCommitmentParams {
   commitmentId: string;
   organizationId: string;
   commitmentData: {
-    contact_id?: string;
     client_id?: string;
     amount?: number;
     currency_id?: string;
@@ -136,7 +135,6 @@ export async function listClientCommitments(
         id,
         project_id,
         client_id,
-        contact_id,
         organization_id,
         amount,
         currency_id,
@@ -144,22 +142,24 @@ export async function listClientCommitments(
         created_at,
         updated_at,
         created_by,
-        contact:contacts!contact_id (
-          id,
-          first_name,
-          last_name,
-          full_name,
-          email,
-          phone,
-          company_name,
-          linked_user:users!linked_user_id (
-            id,
-            avatar_url
-          )
-        ),
+        is_deleted,
+        deleted_at,
         project_client:project_clients!client_id (
           id,
-          unit
+          unit,
+          contact:contacts!contact_id (
+            id,
+            first_name,
+            last_name,
+            full_name,
+            email,
+            phone,
+            company_name,
+            linked_user:users!linked_user_id (
+              id,
+              avatar_url
+            )
+          )
         ),
         currency:currencies!currency_id (
           id,
@@ -170,6 +170,7 @@ export async function listClientCommitments(
       `)
       .eq('project_id', projectId)
       .eq('organization_id', organizationId)
+      .eq('is_deleted', false)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -177,7 +178,28 @@ export async function listClientCommitments(
       return { success: false, error: error.message };
     }
 
-    return { success: true, data: commitments as ClientCommitment[] };
+    // Transform the data to match the interface (Supabase returns arrays for joins)
+    const transformedCommitments = commitments.map((commitment: any) => ({
+      ...commitment,
+      project_client: Array.isArray(commitment.project_client) && commitment.project_client.length > 0
+        ? {
+            ...commitment.project_client[0],
+            contact: Array.isArray(commitment.project_client[0].contact) && commitment.project_client[0].contact.length > 0
+              ? {
+                  ...commitment.project_client[0].contact[0],
+                  linked_user: Array.isArray(commitment.project_client[0].contact[0].linked_user) && commitment.project_client[0].contact[0].linked_user.length > 0
+                    ? commitment.project_client[0].contact[0].linked_user[0]
+                    : null,
+                }
+              : null,
+          }
+        : null,
+      currency: Array.isArray(commitment.currency) && commitment.currency.length > 0
+        ? commitment.currency[0]
+        : null,
+    }));
+
+    return { success: true, data: transformedCommitments as ClientCommitment[] };
   } catch (err: any) {
     console.error('Unexpected error in listClientCommitments:', err);
     return { success: false, error: err.message || 'Internal server error' };
@@ -247,7 +269,6 @@ export async function createClientCommitment(
         id,
         project_id,
         client_id,
-        contact_id,
         organization_id,
         amount,
         currency_id,
@@ -255,22 +276,24 @@ export async function createClientCommitment(
         created_at,
         updated_at,
         created_by,
-        contact:contacts!contact_id (
-          id,
-          first_name,
-          last_name,
-          full_name,
-          email,
-          phone,
-          company_name,
-          linked_user:users!linked_user_id (
-            id,
-            avatar_url
-          )
-        ),
+        is_deleted,
+        deleted_at,
         project_client:project_clients!client_id (
           id,
-          unit
+          unit,
+          contact:contacts!contact_id (
+            id,
+            first_name,
+            last_name,
+            full_name,
+            email,
+            phone,
+            company_name,
+            linked_user:users!linked_user_id (
+              id,
+              avatar_url
+            )
+          )
         ),
         currency:currencies!currency_id (
           id,
@@ -286,7 +309,28 @@ export async function createClientCommitment(
       return { success: false, error: insertError.message };
     }
 
-    return { success: true, data: newCommitment as ClientCommitment };
+    // Transform the data to match the interface (Supabase returns arrays for joins)
+    const transformed = {
+      ...newCommitment,
+      project_client: Array.isArray(newCommitment.project_client) && newCommitment.project_client.length > 0
+        ? {
+            ...newCommitment.project_client[0],
+            contact: Array.isArray(newCommitment.project_client[0].contact) && newCommitment.project_client[0].contact.length > 0
+              ? {
+                  ...newCommitment.project_client[0].contact[0],
+                  linked_user: Array.isArray(newCommitment.project_client[0].contact[0].linked_user) && newCommitment.project_client[0].contact[0].linked_user.length > 0
+                    ? newCommitment.project_client[0].contact[0].linked_user[0]
+                    : null,
+                }
+              : null,
+          }
+        : null,
+      currency: Array.isArray(newCommitment.currency) && newCommitment.currency.length > 0
+        ? newCommitment.currency[0]
+        : null,
+    };
+
+    return { success: true, data: transformed as ClientCommitment };
   } catch (err: any) {
     console.error('Unexpected error in createClientCommitment:', err);
     return { success: false, error: err.message || 'Internal server error' };
@@ -330,13 +374,14 @@ export async function updateClientCommitment(
       return { success: false, error: 'Forbidden: Project does not belong to organization' };
     }
 
-    // 4. Verify the commitment exists and belongs to this project
+    // 4. Verify the commitment exists and belongs to this project (and is not already deleted)
     const { data: existingCommitment, error: fetchError } = await supabase
       .from('client_commitments')
       .select('id, project_id, organization_id')
       .eq('id', commitmentId)
       .eq('project_id', projectId)
       .eq('organization_id', organizationId)
+      .eq('is_deleted', false)
       .single();
 
     if (fetchError || !existingCommitment) {
@@ -367,11 +412,11 @@ export async function updateClientCommitment(
       .eq('id', commitmentId)
       .eq('project_id', projectId)
       .eq('organization_id', organizationId)
+      .eq('is_deleted', false)
       .select(`
         id,
         project_id,
         client_id,
-        contact_id,
         organization_id,
         amount,
         currency_id,
@@ -379,22 +424,24 @@ export async function updateClientCommitment(
         created_at,
         updated_at,
         created_by,
-        contact:contacts!contact_id (
-          id,
-          first_name,
-          last_name,
-          full_name,
-          email,
-          phone,
-          company_name,
-          linked_user:users!linked_user_id (
-            id,
-            avatar_url
-          )
-        ),
+        is_deleted,
+        deleted_at,
         project_client:project_clients!client_id (
           id,
-          unit
+          unit,
+          contact:contacts!contact_id (
+            id,
+            first_name,
+            last_name,
+            full_name,
+            email,
+            phone,
+            company_name,
+            linked_user:users!linked_user_id (
+              id,
+              avatar_url
+            )
+          )
         ),
         currency:currencies!currency_id (
           id,
@@ -410,7 +457,28 @@ export async function updateClientCommitment(
       return { success: false, error: updateError.message };
     }
 
-    return { success: true, data: updatedCommitment as ClientCommitment };
+    // Transform the data to match the interface (Supabase returns arrays for joins)
+    const transformed = {
+      ...updatedCommitment,
+      project_client: Array.isArray(updatedCommitment.project_client) && updatedCommitment.project_client.length > 0
+        ? {
+            ...updatedCommitment.project_client[0],
+            contact: Array.isArray(updatedCommitment.project_client[0].contact) && updatedCommitment.project_client[0].contact.length > 0
+              ? {
+                  ...updatedCommitment.project_client[0].contact[0],
+                  linked_user: Array.isArray(updatedCommitment.project_client[0].contact[0].linked_user) && updatedCommitment.project_client[0].contact[0].linked_user.length > 0
+                    ? updatedCommitment.project_client[0].contact[0].linked_user[0]
+                    : null,
+                }
+              : null,
+          }
+        : null,
+      currency: Array.isArray(updatedCommitment.currency) && updatedCommitment.currency.length > 0
+        ? updatedCommitment.currency[0]
+        : null,
+    };
+
+    return { success: true, data: transformed as ClientCommitment };
   } catch (err: any) {
     console.error('Unexpected error in updateClientCommitment:', err);
     return { success: false, error: err.message || 'Internal server error' };
@@ -454,26 +522,31 @@ export async function deleteClientCommitment(
       return { success: false, error: 'Forbidden: Project does not belong to organization' };
     }
 
-    // 4. Verify the commitment exists and belongs to this project
+    // 4. Verify the commitment exists and belongs to this project (and is not already deleted)
     const { data: existingCommitment, error: fetchError } = await supabase
       .from('client_commitments')
       .select('id, project_id, organization_id')
       .eq('id', commitmentId)
       .eq('project_id', projectId)
       .eq('organization_id', organizationId)
+      .eq('is_deleted', false)
       .single();
 
     if (fetchError || !existingCommitment) {
       return { success: false, error: 'Commitment not found' };
     }
 
-    // 5. Delete commitment
+    // 5. Soft delete commitment
     const { error: deleteError } = await supabase
       .from('client_commitments')
-      .delete()
+      .update({
+        is_deleted: true,
+        deleted_at: new Date().toISOString(),
+      })
       .eq('id', commitmentId)
       .eq('project_id', projectId)
-      .eq('organization_id', organizationId);
+      .eq('organization_id', organizationId)
+      .eq('is_deleted', false);
 
     if (deleteError) {
       console.error('Error deleting client commitment:', deleteError);
