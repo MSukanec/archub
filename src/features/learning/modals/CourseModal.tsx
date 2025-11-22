@@ -293,6 +293,7 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
     <FormModalLayout 
       onClose={onClose}
       isEditing={true}
+      columns={1}
       headerContent={headerContent}
       editPanel={editPanel}
       footerContent={footerContent}
