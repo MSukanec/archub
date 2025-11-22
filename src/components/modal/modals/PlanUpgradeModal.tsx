@@ -71,9 +71,9 @@ export function PlanUpgradeModal({
           </div>
 
           {/* Right Column - Badge + Título + Descripción */}
-          <div className="flex flex-col justify-center gap-4 px-6 py-6">
+          <div className="flex flex-col justify-center gap-8 px-6 py-6">
             {/* Badge + Título */}
-            <div className="flex flex-col gap-3 items-start">
+            <div className="flex flex-col gap-6 items-start">
               <Badge 
                 className="text-xs px-2.5 py-1 border-0 font-medium"
                 style={{ 
@@ -89,7 +89,7 @@ export function PlanUpgradeModal({
             </div>
 
             {/* Descripción */}
-            <p className="text-sm leading-relaxed" style={{ color: 'hsl(0, 0%, 44%)' }}>
+            <p className="text-sm leading-relaxed" style={{ color: 'hsl(0, 0%, 50%)' }}>
               {featureDescription}
             </p>
             
@@ -113,9 +113,9 @@ export function PlanUpgradeModal({
           </div>
         </div>
 
-        {/* Footer - Sin padding lateral ni bottom */}
+        {/* Footer - Sin padding extra */}
         <div className="pt-2 mt-auto pb-0">
-          <div className="flex gap-2 w-full px-2">
+          <div className="flex gap-2 w-full">
             <Button
               type="button"
               onClick={() => onOpenChange(false)}
