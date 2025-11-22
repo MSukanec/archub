@@ -90,9 +90,9 @@ export async function listCourses(
           seo_keywords,
           landing_sections
         ),
-        enrollments (
+        course_enrollments (
           id,
-          is_active
+          status
         )
       `)
       .eq('is_deleted', false)
@@ -112,9 +112,9 @@ export async function listCourses(
       delete merged.course_details;
       
       // Count only active enrollments
-      const enrollments = Array.isArray(course.enrollments) ? course.enrollments : [];
-      merged.enrolled_count = enrollments.filter((e: any) => e.is_active === true).length;
-      delete merged.enrollments;
+      const enrollments = Array.isArray(course.course_enrollments) ? course.course_enrollments : [];
+      merged.enrolled_count = enrollments.filter((e: any) => e.status === 'active').length;
+      delete merged.course_enrollments;
       
       return merged;
     });
