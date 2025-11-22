@@ -241,3 +241,19 @@ create table public.courses (
 create index IF not exists courses_not_deleted_idx on public.courses using btree (is_deleted) TABLESPACE pg_default
 where
   (is_deleted = false);
+
+  ---------- Tabla COURSE_FAQS:
+
+  create table public.course_faqs (
+    id uuid not null default gen_random_uuid (),
+    course_id uuid not null,
+    question text not null,
+    answer text not null,
+    sort_index integer not null default 0,
+    created_at timestamp with time zone not null default now(),
+    updated_at timestamp with time zone not null default now(),
+    constraint course_faqs_pkey primary key (id),
+    constraint course_faqs_course_id_fkey foreign KEY (course_id) references courses (id) on delete CASCADE
+  ) TABLESPACE pg_default;
+
+  create index IF not exists course_faqs_course_id_sort_idx on public.course_faqs using btree (course_id, sort_index) TABLESPACE pg_default;

@@ -118,10 +118,20 @@ export default function CourseLanding() {
       {/* Landing Sections */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
         <InstructorSection course={course} />
-        <ModulesSection modules={modules} />
+        <ModulesSection 
+          modules={modules} 
+          title={(course.landing_sections as any)?.modules?.title}
+          subtitle={(course.landing_sections as any)?.modules?.subtitle}
+          description={(course.landing_sections as any)?.modules?.description}
+        />
         <LessonsSection modules={modules} />
         <FeaturesSection course={course} />
-        <FAQSection faqs={faqs} />
+        <FAQSection 
+          faqs={faqs}
+          title={(course.landing_sections as any)?.faq?.title}
+          subtitle={(course.landing_sections as any)?.faq?.subtitle}
+          description={(course.landing_sections as any)?.faq?.description}
+        />
         <CTAFooter course={course} />
       </div>
     </CourseLandingLayout>
