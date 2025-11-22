@@ -117,21 +117,55 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
     enabled: !!courseId && !!supabase && modules.length > 0
   });
 
-  // Combine modules with lessons for preview
+  // Load module images for preview
+  const { data: moduleImages = [] } = useQuery({
+    queryKey: ['module-images', courseId],
+    queryFn: async () => {
+      if (!courseId || !supabase || modules.length === 0) return [];
+
+      const moduleIds = modules.map((m: any) => m.id);
+
+      const { data: moduleMediaLinks } = await supabase
+        .from('media_links')
+        .select(`
+          course_module_id,
+          media_files!inner (
+            file_url,
+            is_deleted
+          )
+        `)
+        .in('course_module_id', moduleIds)
+        .eq('category', 'module_image')
+        .eq('media_files.is_deleted', false);
+
+      return moduleMediaLinks || [];
+    },
+    enabled: !!courseId && !!supabase && modules.length > 0
+  });
+
+  // Combine modules with lessons and images for preview
   const modulesWithLessons: ModuleWithLessons[] = useMemo(() => {
     return modules.map((module: any) => {
       const moduleLessons = lessons.filter((lesson: any) => lesson.module_id === module.id);
       const totalDuration = moduleLessons.reduce((sum: number, lesson: any) => {
         return sum + (lesson.duration_sec || 0);
       }, 0);
+
+      // Find module image
+      const mediaLink: any = moduleImages.find((link: any) => link.course_module_id === module.id);
+      const mediaFile = mediaLink?.media_files;
+      const moduleImageUrl = mediaFile 
+        ? (Array.isArray(mediaFile) ? mediaFile[0]?.file_url : mediaFile.file_url) 
+        : null;
       
       return {
         ...module,
         lessons: moduleLessons,
-        total_duration_min: Math.round(totalDuration / 60)
+        total_duration_min: Math.round(totalDuration / 60),
+        module_image_url: moduleImageUrl
       };
     });
-  }, [modules, lessons]);
+  }, [modules, lessons, moduleImages]);
 
   // Load course data into form when available
   useEffect(() => {

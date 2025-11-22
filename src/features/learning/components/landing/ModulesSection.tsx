@@ -62,31 +62,32 @@ export function ModulesSection({
 
                   {/* Module Content */}
                   <div className="p-6">
-                    {/* Module Header */}
-                    <div className="flex items-start gap-3 mb-3">
-                      <span className="flex-shrink-0 px-2 py-1 bg-primary/10 text-primary text-xs font-bold rounded">
+                    {/* Module Header - 16px with accent color */}
+                    <div className="flex items-start gap-2 mb-4" style={{ fontSize: '16px', color: 'var(--accent)' }}>
+                      <span className="font-bold">
                         MÓDULO {String(idx + 1).padStart(2, '0')}
                       </span>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span>·</span>
+                      <div className="flex items-center gap-3">
                         <span className="flex items-center gap-1">
-                          <BookOpen className="w-3.5 h-3.5" />
+                          <BookOpen className="w-4 h-4" />
                           {module.lessons?.length || 0} lecciones
                         </span>
                         <span className="flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" />
+                          <Clock className="w-4 h-4" />
                           {formatMinutesToTime(module.total_duration_min || 0)}
                         </span>
                       </div>
                     </div>
 
-                    {/* Module Title */}
-                    <h3 className="text-lg font-semibold mb-3 group-hover:text-primary transition-colors">
+                    {/* Module Title - 36px */}
+                    <h3 className="font-semibold mb-4 group-hover:text-primary transition-colors" style={{ fontSize: '36px', lineHeight: '1.2' }}>
                       {module.title}
                     </h3>
 
-                    {/* Module Description */}
+                    {/* Module Description - No truncation */}
                     {module.description && (
-                      <p className="text-sm text-muted-foreground line-clamp-3">
+                      <p className="text-sm text-muted-foreground">
                         {module.description}
                       </p>
                     )}
