@@ -42,6 +42,60 @@ const clientCommitmentSchema = z.object({
   installments_distribution: z.enum(['equal', 'custom']).optional(),
   index_type: z.enum(['cac', 'uvi', 'ipc', 'custom_index']).optional(),
   index_frequency: z.enum(['monthly', 'quarterly']).optional(),
+}).superRefine((data, ctx) => {
+  // Validaciones para installments_fixed e installments_indexed
+  if (data.commitment_method === 'installments_fixed' || data.commitment_method === 'installments_indexed') {
+    if (!data.installments_count || data.installments_count <= 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "El número de cuotas es requerido y debe ser mayor a 0",
+        path: ["installments_count"]
+      });
+    }
+    
+    if (!data.installments_frequency || data.installments_frequency === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "La frecuencia de cuotas es requerida",
+        path: ["installments_frequency"]
+      });
+    }
+    
+    if (!data.installments_start_date || data.installments_start_date === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "La fecha de inicio de cuotas es requerida",
+        path: ["installments_start_date"]
+      });
+    }
+    
+    if (!data.installments_distribution || data.installments_distribution === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "El tipo de distribución de cuotas es requerido",
+        path: ["installments_distribution"]
+      });
+    }
+  }
+  
+  // Validaciones adicionales para installments_indexed
+  if (data.commitment_method === 'installments_indexed') {
+    if (!data.index_type || data.index_type === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "El tipo de índice es requerido",
+        path: ["index_type"]
+      });
+    }
+    
+    if (!data.index_frequency || data.index_frequency === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "La frecuencia de indexación es requerida",
+        path: ["index_frequency"]
+      });
+    }
+  }
 })
 
 type ClientCommitmentForm = z.infer<typeof clientCommitmentSchema>
