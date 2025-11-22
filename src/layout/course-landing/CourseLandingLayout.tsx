@@ -217,20 +217,13 @@ function TransparentHeaderLayout({
       </header>
       
       <main>
-        {/* Full-width Hero Slot */}
-        {heroSlot && (
-          <div className="w-full">
-            {heroSlot}
-          </div>
-        )}
-
-        {/* Main Content Area */}
         {stickyContent ? (
           // Layout with sticky sidebar for desktop
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* Main Content - 8 columns on desktop */}
-              <div className="lg:col-span-8">
+              <div className="lg:col-span-8 space-y-16">
+                {heroSlot}
                 {children}
               </div>
               
@@ -244,7 +237,14 @@ function TransparentHeaderLayout({
           </div>
         ) : (
           // Full-width layout without sticky sidebar
-          children
+          <>
+            {heroSlot && (
+              <div className="w-full">
+                {heroSlot}
+              </div>
+            )}
+            {children}
+          </>
         )}
       </main>
       <PublicFooter />

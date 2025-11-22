@@ -12,23 +12,23 @@ interface HeroSectionProps {
 
 export function HeroSection({ course, stats }: HeroSectionProps) {
   return (
-    <section className="relative min-h-[70vh] py-24 flex items-center overflow-hidden">
+    <section className="relative min-h-[500px] py-16 flex items-center overflow-hidden rounded-xl">
       {/* Background Image with Overlay */}
       {course.cover_url ? (
         <>
           <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat rounded-xl"
             style={{ backgroundImage: `url(${course.cover_url})` }}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/70 to-black/50 dark:from-black/90 dark:via-black/80 dark:to-black/60" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/70 to-black/50 dark:from-black/90 dark:via-black/80 dark:to-black/60 rounded-xl" />
         </>
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20 rounded-xl" />
       )}
 
       {/* Content */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="max-w-3xl">
+      <div className="w-full px-6 sm:px-8 lg:px-12 relative z-10">
+        <div className="max-w-2xl">
           {course.badge_text && (
             <Badge variant="secondary" className="px-4 py-2 text-sm font-medium mb-6 bg-primary/90 text-primary-foreground border-0">
               <Award className="w-4 h-4 mr-2 inline" />
