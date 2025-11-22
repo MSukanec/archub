@@ -1,5 +1,3 @@
-import { Link } from 'wouter';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Clock, BookOpen, Award } from 'lucide-react';
 import type { Course } from '@shared/schema';
@@ -36,45 +34,28 @@ export function HeroSection({ course, stats }: HeroSectionProps) {
             </Badge>
           )}
 
-          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight mb-6 text-white dark:text-white">
+          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight mb-6" style={{ color: 'white !important' }}>
             {course.title}
           </h1>
 
-          <p className="text-lg sm:text-xl lg:text-2xl leading-relaxed mb-8 text-gray-100 dark:text-gray-200">
+          <p className="text-lg leading-relaxed mb-8 text-foreground/80" style={{ fontSize: '18px' }}>
             {course.short_description}
           </p>
 
           {/* Stats */}
-          <div className="flex flex-wrap gap-6 mb-8">
+          <div className="flex flex-wrap gap-6">
             <div className="flex items-center gap-2 text-sm sm:text-base">
-              <BookOpen className="w-5 h-5 text-primary" />
-              <span className="font-semibold text-white">{stats.total_modules} Módulos</span>
+              <BookOpen className="w-5 h-5" style={{ color: 'hsl(var(--accent))' }} />
+              <span className="font-semibold text-foreground/80">{stats.total_modules} Módulos</span>
             </div>
             <div className="flex items-center gap-2 text-sm sm:text-base">
-              <CheckCircle className="w-5 h-5 text-primary" />
-              <span className="font-semibold text-white">{stats.total_lessons} Lecciones</span>
+              <CheckCircle className="w-5 h-5" style={{ color: 'hsl(var(--accent))' }} />
+              <span className="font-semibold text-foreground/80">{stats.total_lessons} Lecciones</span>
             </div>
             <div className="flex items-center gap-2 text-sm sm:text-base">
-              <Clock className="w-5 h-5 text-primary" />
-              <span className="font-semibold text-white">{stats.total_duration_formatted} de Contenido</span>
+              <Clock className="w-5 h-5" style={{ color: 'hsl(var(--accent))' }} />
+              <span className="font-semibold text-foreground/80">{stats.total_duration_formatted} de Contenido</span>
             </div>
-          </div>
-
-          {/* CTA */}
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            <Link href="/register">
-              <Button size="lg" className="w-full sm:w-auto px-8 text-lg shadow-lg hover:shadow-xl">
-                Inscribirme Ahora
-              </Button>
-            </Link>
-            {course.price && (
-              <div className="flex flex-col justify-center text-left bg-white/10 dark:bg-white/5 backdrop-blur-sm px-6 py-3 rounded-lg border border-white/20">
-                <span className="text-3xl font-bold text-white">
-                  ${course.price}
-                </span>
-                <span className="text-sm text-gray-200">/ año</span>
-              </div>
-            )}
           </div>
         </div>
       </div>
