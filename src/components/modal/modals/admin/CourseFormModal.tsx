@@ -22,7 +22,6 @@ const courseSchema = z.object({
   slug: z.string().min(1, 'El slug es requerido').regex(/^[a-z0-9-]+$/, 'Solo minúsculas, números y guiones'),
   title: z.string().min(1, 'El título es requerido'),
   short_description: z.string().optional(),
-  long_description: z.string().optional(),
   cover_url: z.string().optional(),
   price: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
     message: 'Debe ser un número válido mayor o igual a 0'
@@ -52,7 +51,6 @@ interface Course {
   slug: string;
   title: string;
   short_description?: string;
-  long_description?: string;
   cover_url?: string;
   price?: number;
   visibility: string;
@@ -95,7 +93,6 @@ export function CourseFormModal({ modalData, onClose }: CourseFormModalProps) {
       slug: '',
       title: '',
       short_description: '',
-      long_description: '',
       cover_url: '',
       price: '0',
       visibility: 'draft',
@@ -124,7 +121,6 @@ export function CourseFormModal({ modalData, onClose }: CourseFormModalProps) {
         slug: course.slug || '',
         title: course.title || '',
         short_description: course.short_description || '',
-        long_description: course.long_description || '',
         cover_url: course.cover_url || '',
         price: course.price?.toString() || '0',
         visibility: (course.visibility as any) || 'draft',
@@ -144,7 +140,6 @@ export function CourseFormModal({ modalData, onClose }: CourseFormModalProps) {
         slug: '',
         title: '',
         short_description: '',
-        long_description: '',
         cover_url: '',
         price: '0',
         visibility: 'draft',
@@ -171,7 +166,6 @@ export function CourseFormModal({ modalData, onClose }: CourseFormModalProps) {
         slug: data.slug,
         title: data.title,
         short_description: data.short_description || null,
-        long_description: data.long_description || null,
         cover_url: data.cover_url || null,
         price: parseFloat(data.price),
         visibility: data.visibility,
@@ -283,20 +277,6 @@ export function CourseFormModal({ modalData, onClose }: CourseFormModalProps) {
                     <FormLabel>Descripción Corta</FormLabel>
                     <FormControl>
                       <Textarea {...field} placeholder="Descripción breve" rows={2} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="long_description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descripción Larga</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} placeholder="Descripción detallada" rows={4} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

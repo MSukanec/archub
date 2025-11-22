@@ -220,30 +220,24 @@ from
 
 ---------- Tabla COURSES:
 
-      create table public.courses (
-        id uuid not null default gen_random_uuid (),
-        slug text not null,
-        title text not null,
-        short_description text null,
-        long_description text null,
-        cover_url text null,
-        is_active boolean not null default true,
-        visibility text not null default 'public'::text,
-        created_by uuid null,
-        created_at timestamp with time zone not null default now(),
-        updated_at timestamp with time zone not null default now(),
-        price numeric null,
-        instructor_name text null,
-        instructor_title text null,
-        instructor_bio text null,
-        instructor_photo_url text null,
-        badge_text text null,
-        highlights text[] null,
-        preview_video_id text null,
-        seo_keywords text[] null,
-        og_image_url text null,
-        constraint courses_pkey primary key (id),
-        constraint courses_slug_key unique (slug),
-        constraint courses_created_by_fkey foreign KEY (created_by) references users (id) on delete set null
-      ) TABLESPACE pg_default;
-      
+create table public.courses (
+  id uuid not null default gen_random_uuid (),
+  slug text not null,
+  title text not null,
+  short_description text null,
+  is_active boolean not null default true,
+  visibility text not null default 'public'::text,
+  created_by uuid null,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  price numeric null,
+  is_deleted boolean not null default false,
+  deleted_at timestamp with time zone null,
+  constraint courses_pkey primary key (id),
+  constraint courses_slug_key unique (slug),
+  constraint courses_created_by_fkey foreign KEY (created_by) references users (id) on delete set null
+) TABLESPACE pg_default;
+
+create index IF not exists courses_not_deleted_idx on public.courses using btree (is_deleted) TABLESPACE pg_default
+where
+  (is_deleted = false);

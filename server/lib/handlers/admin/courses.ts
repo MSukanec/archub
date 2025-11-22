@@ -79,6 +79,7 @@ export async function listCourses(
           landing_sections
         )
       `)
+      .eq('is_deleted', false)
       .order('created_at', { ascending: false });
 
     if (dbError) {
@@ -129,6 +130,7 @@ export async function getCourse(
         )
       `)
       .eq('id', params.id)
+      .eq('is_deleted', false)
       .single();
 
     if (dbError) {
@@ -303,7 +305,7 @@ export async function updateCourse(
 }
 
 /**
- * Delete course
+ * Delete course (soft delete)
  */
 export async function deleteCourse(
   ctx: AdminContext,
@@ -312,7 +314,10 @@ export async function deleteCourse(
   try {
     const { error: dbError } = await ctx.supabase
       .from('courses')
-      .delete()
+      .update({ 
+        is_deleted: true, 
+        deleted_at: new Date().toISOString() 
+      })
       .eq('id', params.id);
 
     if (dbError) {

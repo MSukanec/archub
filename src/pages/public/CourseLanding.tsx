@@ -54,7 +54,7 @@ export default function CourseLanding() {
   // SEO metadata
   const seoProps = {
     title: `${course.title} - Curso Online | Seencel`,
-    description: course.short_description || course.long_description || '',
+    description: course.short_description || '',
     keywords: (course.seo_keywords || []).join(', '),
     ogImage: course.og_image_url || course.cover_url || '',
   };
@@ -81,7 +81,7 @@ export default function CourseLanding() {
             '@context': 'https://schema.org',
             '@type': 'Course',
             name: course.title,
-            description: course.short_description || course.long_description,
+            description: course.short_description,
             provider: {
               '@type': 'Organization',
               name: 'Seencel',

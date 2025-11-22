@@ -20,6 +20,7 @@ export async function fetchCourseLandingBySlug(slug: string) {
     .eq('slug', slug)
     .eq('is_active', true)
     .eq('visibility', 'public')
+    .eq('is_deleted', false)
     .single();
 
   if (courseError) throw new Error(`Course not found: ${courseError.message}`);
@@ -129,6 +130,7 @@ export async function getAllPublicCourses() {
     `)
     .eq('is_active', true)
     .eq('visibility', 'public')
+    .eq('is_deleted', false)
     .order('created_at', { ascending: false });
 
   if (error) throw new Error(`Failed to fetch courses: ${error.message}`);

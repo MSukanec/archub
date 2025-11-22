@@ -1170,14 +1170,16 @@ export const courses = pgTable("courses", {
   slug: text("slug").notNull().unique(),
   title: text("title").notNull(),
   short_description: text("short_description"),
-  long_description: text("long_description"),
-  cover_url: text("cover_url"),
+  cover_url: text("cover_url"), // LEGACY - will be removed after media migration
   is_active: boolean("is_active").notNull().default(true),
   visibility: text("visibility").notNull().default("public"),
   created_by: uuid("created_by"),
   created_at: timestamp("created_at").notNull().defaultNow(),
   updated_at: timestamp("updated_at").notNull().defaultNow(),
   price: numeric("price", { precision: 10, scale: 2 }), // Price in USD (like plans table)
+  // Soft delete
+  is_deleted: boolean("is_deleted").notNull().default(false),
+  deleted_at: timestamp("deleted_at", { withTimezone: true }),
   // 🎓 Instructor fields for landing pages (LEGACY - moved to course_details)
   instructor_name: text("instructor_name"),
   instructor_title: text("instructor_title"),
@@ -1281,6 +1283,8 @@ export const insertCourseSchema = createInsertSchema(courses).omit({
   id: true,
   created_at: true,
   updated_at: true,
+  is_deleted: true,
+  deleted_at: true,
 });
 
 export const insertCourseDetailsSchema = createInsertSchema(course_details).omit({

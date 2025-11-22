@@ -47,7 +47,7 @@ export default function CourseLanding() {
 
   // SEO metadata
   const seoTitle = `${course.title} - Curso Online | Seencel`;
-  const seoDescription = course.short_description || course.long_description || '';
+  const seoDescription = course.short_description || '';
 
   // Set page title (no OG tags needed in dashboard context)
   useEffect(() => {
