@@ -1,6 +1,6 @@
 import { useParams } from 'wouter';
 import { CourseLandingLayout } from '@/layout/course-landing';
-import { useCourseLanding } from '@/features/course-landing';
+import { useCourseLanding, useCourseEnrollment } from '@/features/course-landing';
 import {
   HeroSection,
   InstructorSection,
@@ -14,6 +14,7 @@ import {
 export default function CourseLanding() {
   const { slug } = useParams<{ slug: string }>();
   const { data, isLoading, error } = useCourseLanding(slug || '');
+  const { data: enrollmentData } = useCourseEnrollment(data?.course?.id || '');
 
   const navigationLinks = [
     { label: "Cursos", href: "/cursos" },
@@ -59,8 +60,11 @@ export default function CourseLanding() {
     ogImage: course.og_image_url || course.cover_url || '',
   };
 
+  // Check if user is enrolled
+  const isEnrolled = enrollmentData?.isEnrolled || false;
+
   // Sticky sidebar content (shown in desktop only)
-  const stickyContent = <CourseStickyCard course={course} stats={stats} />;
+  const stickyContent = <CourseStickyCard course={course} stats={stats} isEnrolled={isEnrolled} />;
   
   // Full-width hero section
   const heroSection = <HeroSection course={course} stats={stats} />;

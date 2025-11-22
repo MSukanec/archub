@@ -1,16 +1,40 @@
-import { Link } from 'wouter';
+import { useCallback } from 'react';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { BookOpen, Clock, CheckCircle, Award, MessageCircle, Shield } from 'lucide-react';
+import { BookOpen, Clock, CheckCircle, MessageCircle, Shield } from 'lucide-react';
+import { useAuthStore } from '@/stores/authStore';
 import type { Course } from '@shared/schema';
 import type { CourseStats } from '../types';
 
 interface CourseStickyCardProps {
   course: Course;
   stats: CourseStats;
+  isEnrolled?: boolean;
 }
 
-export function CourseStickyCard({ course, stats }: CourseStickyCardProps) {
+export function CourseStickyCard({ course, stats, isEnrolled = false }: CourseStickyCardProps) {
+  const user = useAuthStore((state) => state.user);
+  const [, navigate] = useLocation();
+
+  // Determine button state and action
+  const handleCTAClick = useCallback(() => {
+    if (isEnrolled) {
+      // User is enrolled - go to course view
+      navigate(`/learning/courses/${course.slug}`);
+    } else if (user) {
+      // User is logged in but not enrolled - go to checkout
+      navigate(`/checkout?course=${course.slug}`);
+    } else {
+      // User is not logged in - go to register
+      navigate('/register');
+    }
+  }, [isEnrolled, user, course.slug, navigate]);
+
+  // Determine button text and variant
+  const buttonText = isEnrolled ? 'CONTINUAR CURSO' : 'INSCRIBIRME';
+  const buttonVariant = isEnrolled ? 'default' : 'default';
+
   return (
     <Card className="overflow-hidden shadow-xl border-2" data-testid="card-course-sticky">
       {/* Course Image */}
@@ -33,7 +57,7 @@ export function CourseStickyCard({ course, stats }: CourseStickyCardProps) {
         </div>
 
         {/* Price */}
-        {course.price && (
+        {course.price && !isEnrolled && (
           <div className="space-y-1">
             <div className="flex items-baseline gap-2">
               <span className="text-4xl font-bold text-primary" data-testid="text-course-price">
@@ -78,27 +102,17 @@ export function CourseStickyCard({ course, stats }: CourseStickyCardProps) {
           )}
         </div>
 
-        {/* CTA Buttons */}
-        <div className="space-y-3 pt-2">
-          <Link href="/register">
-            <Button 
-              size="lg" 
-              className="w-full text-base font-semibold"
-              data-testid="button-enroll"
-            >
-              INSCRIBIRME
-            </Button>
-          </Link>
-          <Link href="/login">
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="w-full text-base font-semibold"
-              data-testid="button-continue"
-            >
-              CONTINUAR CURSO
-            </Button>
-          </Link>
+        {/* CTA Button - Only ONE button shown at a time */}
+        <div className="pt-2">
+          <Button 
+            size="lg" 
+            variant={buttonVariant}
+            className="w-full text-base font-semibold"
+            onClick={handleCTAClick}
+            data-testid={isEnrolled ? "button-continue" : "button-enroll"}
+          >
+            {buttonText}
+          </Button>
         </div>
       </CardContent>
     </Card>
