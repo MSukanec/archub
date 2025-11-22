@@ -34,26 +34,26 @@ export function HeroSection({ course, stats }: HeroSectionProps) {
             </Badge>
           )}
 
-          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight mb-6" style={{ color: 'white !important' }}>
+          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight mb-6 !text-white">
             {course.title}
           </h1>
 
-          <p className="text-lg leading-relaxed mb-8 text-foreground/80" style={{ fontSize: '18px' }}>
+          <p className="text-[18px] leading-relaxed mb-8 text-foreground/80">
             {course.short_description}
           </p>
 
           {/* Stats */}
           <div className="flex flex-wrap gap-6">
             <div className="flex items-center gap-2 text-sm sm:text-base">
-              <BookOpen className="w-5 h-5" style={{ color: 'hsl(var(--accent))' }} />
+              <BookOpen className="w-5 h-5 text-accent" />
               <span className="font-semibold text-foreground/80">{stats.total_modules} Módulos</span>
             </div>
             <div className="flex items-center gap-2 text-sm sm:text-base">
-              <CheckCircle className="w-5 h-5" style={{ color: 'hsl(var(--accent))' }} />
+              <CheckCircle className="w-5 h-5 text-accent" />
               <span className="font-semibold text-foreground/80">{stats.total_lessons} Lecciones</span>
             </div>
             <div className="flex items-center gap-2 text-sm sm:text-base">
-              <Clock className="w-5 h-5" style={{ color: 'hsl(var(--accent))' }} />
+              <Clock className="w-5 h-5 text-accent" />
               <span className="font-semibold text-foreground/80">{stats.total_duration_formatted} de Contenido</span>
             </div>
           </div>
