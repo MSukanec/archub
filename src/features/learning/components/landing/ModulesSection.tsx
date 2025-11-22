@@ -24,18 +24,10 @@ export function ModulesSection({
   subtitle = "CONTENIDO DEL CURSO",
   description = "Contenido estructurado paso a paso para tu aprendizaje profesional"
 }: ModulesSectionProps) {
-  const [openModules, setOpenModules] = useState<Set<string>>(new Set());
+  const [openModuleId, setOpenModuleId] = useState<string | null>(null);
 
   const toggleModule = (moduleId: string) => {
-    setOpenModules((prev) => {
-      const next = new Set(prev);
-      if (next.has(moduleId)) {
-        next.delete(moduleId);
-      } else {
-        next.add(moduleId);
-      }
-      return next;
-    });
+    setOpenModuleId((prev) => (prev === moduleId ? null : moduleId));
   };
 
   if (modules.length === 0) return null;
@@ -55,7 +47,7 @@ export function ModulesSection({
 
             <div className="space-y-4">
           {modules.map((module, idx) => {
-            const isOpen = openModules.has(module.id);
+            const isOpen = openModuleId === module.id;
             return (
               <Collapsible
                 key={module.id}
@@ -66,7 +58,7 @@ export function ModulesSection({
                   <CollapsibleTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="w-full px-6 py-4 h-auto flex items-center justify-between hover:bg-muted/50"
+                      className="w-full px-6 py-3 h-auto flex items-center justify-between hover:bg-muted/50"
                     >
                       <div className="flex items-center gap-4 text-left flex-1">
                         <span className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-base">
@@ -101,7 +93,7 @@ export function ModulesSection({
                       {module.lessons.map((lesson) => (
                         <div
                           key={lesson.id}
-                          className="flex items-center gap-4 px-6 py-4 hover:bg-muted/30 border-b last:border-b-0"
+                          className="flex items-center gap-4 px-6 py-3 hover:bg-muted/30 border-b last:border-b-0"
                         >
                           <div className="flex-shrink-0">
                             <PlayCircle className="w-5 h-5 text-primary" />
