@@ -1095,7 +1095,7 @@ export function Table<T = any>({
                     onClick={() => onRowClick?.(item)}
                   >
                     {selectable && (
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
                         <Checkbox
                           checked={isItemSelected(item)}
                           onCheckedChange={(checked) =>
@@ -1251,7 +1251,7 @@ export function Table<T = any>({
                     onClick={() => onRowClick?.(item)}
                   >
                 {selectable && (
-                  <div className="flex items-center justify-center">
+                  <div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                       checked={isItemSelected(item)}
                       onCheckedChange={(checked) =>

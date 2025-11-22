@@ -365,6 +365,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
           isLoading={isLoading}
           showDoubleHeader={false}
           defaultSort={{ key: 'full_name', direction: 'asc' }}
+          onRowClick={handleView}
           emptyStateConfig={{
             icon: <Users className="h-12 w-12 text-muted-foreground" />,
             title: 'No hay clientes en este proyecto',
@@ -396,7 +397,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             ),
           }}
           primaryRowAction={(client: ProjectClientSummary) => ({
-            icon: Eye,
             onClick: () => handleView(client),
             label: 'Ver cliente',
           })}
