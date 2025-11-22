@@ -71,9 +71,9 @@ export function PlanUpgradeModal({
           </div>
 
           {/* Right Column - Badge + Título + Descripción */}
-          <div className="flex flex-col justify-center gap-4 px-6 py-6">
+          <div className="flex flex-col justify-center gap-2 px-3 py-3">
             {/* Badge + Título */}
-            <div className="flex flex-col gap-3 items-start">
+            <div className="flex flex-col gap-2 items-start">
               <Badge 
                 className="text-xs px-2.5 py-1 border-0 font-medium"
                 style={{ 
@@ -113,9 +113,9 @@ export function PlanUpgradeModal({
           </div>
         </div>
 
-        {/* Footer - Siguiendo patrón de FormModalFooter */}
-        <div className="p-2 mt-auto">
-          <div className="flex gap-2 w-full">
+        {/* Footer - Sin padding lateral ni bottom */}
+        <div className="pt-2 mt-auto pb-0">
+          <div className="flex gap-2 w-full px-2">
             <Button
               type="button"
               variant="secondary"
