@@ -274,30 +274,8 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
             )}
           />
 
-          {/* Row 2: Monto / Moneda */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Monto Comprometido *</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="0.00"
-                      {...field}
-                      value={field.value || ''}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+          {/* Row 2: Moneda / Monto Comprometido / Tipo de Cambio (3 columnas en desktop) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField
               control={form.control}
               name="currency_id"
@@ -325,29 +303,50 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
                 </FormItem>
               )}
             />
-          </div>
 
-          {/* Row 3: Tipo de Cambio */}
-          <FormField
-            control={form.control}
-            name="exchange_rate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tipo de Cambio (opcional)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.0001"
-                    min="0.0001"
-                    placeholder="1.0000"
-                    value={field.value || ''}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 1)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Monto Comprometido *</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      {...field}
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="exchange_rate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de Cambio (opcional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.0001"
+                      min="0.0001"
+                      placeholder="1.0000"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 1)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </form>
       </Form>
     )
