@@ -71,7 +71,7 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
             is_deleted
           )
         `)
-        .eq('module_id', moduleId)
+        .eq('course_module_id', moduleId)
         .eq('category', 'module_image')
         .maybeSingle();
 
@@ -274,7 +274,7 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       const { data: existingLink, error: linkCheckError } = await supabase
         .from('media_links')
         .select('id')
-        .eq('module_id', moduleId)
+        .eq('course_module_id', moduleId)
         .eq('category', 'module_image')
         .maybeSingle();
 
@@ -303,10 +303,9 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
           .from('media_links')
           .insert({
             media_file_id: mediaFileId,
-            module_id: moduleId,
+            course_module_id: moduleId,
             category: 'module_image',
             visibility: 'public',
-            is_public: true,
             created_by: userId
           });
 
@@ -346,7 +345,7 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       const { data: link } = await supabase
         .from('media_links')
         .select('media_file_id')
-        .eq('module_id', moduleId)
+        .eq('course_module_id', moduleId)
         .eq('category', 'module_image')
         .maybeSingle();
 
@@ -359,7 +358,7 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
         await supabase
           .from('media_links')
           .delete()
-          .eq('module_id', moduleId)
+          .eq('course_module_id', moduleId)
           .eq('category', 'module_image');
       }
 
