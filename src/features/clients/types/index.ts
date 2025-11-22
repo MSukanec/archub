@@ -78,7 +78,13 @@ export interface ClientCommitment {
   amount: number;
   currency_id: string;
   exchange_rate: number;
-  commitment_method: 'fixed' | 'installments' | 'work_progress';
+  commitment_method: 'fixed' | 'installments_fixed' | 'installments_indexed' | 'milestones' | 'custom';
+  installments_count?: number | null;
+  installments_frequency?: 'monthly' | 'bimonthly' | 'quarterly' | 'yearly' | null;
+  installments_start_date?: string | null;
+  installments_distribution?: 'equal' | 'custom' | null;
+  index_type?: 'cac' | 'uvi' | 'ipc' | 'custom_index' | null;
+  index_frequency?: 'monthly' | 'quarterly' | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;

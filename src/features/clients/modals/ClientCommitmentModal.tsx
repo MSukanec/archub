@@ -25,6 +25,9 @@ import {
   useCreateClientCommitment, 
   useUpdateClientCommitment 
 } from '@/features/clients/hooks'
+import { InstallmentsPlanSection } from './commitment-sections/InstallmentsPlanSection'
+import { InstallmentsIndexingSection } from './commitment-sections/InstallmentsIndexingSection'
+import { InformationalNotice } from './commitment-sections/InformationalNotice'
 
 const clientCommitmentSchema = z.object({
   created_by: z.string().min(1, 'Creador es requerido'),
@@ -32,7 +35,13 @@ const clientCommitmentSchema = z.object({
   amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
   currency_id: z.string().min(1, 'Moneda es requerida'),
   exchange_rate: z.number().optional(),
-  commitment_method: z.enum(['fixed', 'installments', 'work_progress']),
+  commitment_method: z.enum(['fixed', 'installments_fixed', 'installments_indexed', 'milestones', 'custom']),
+  installments_count: z.number().optional(),
+  installments_frequency: z.enum(['monthly', 'bimonthly', 'quarterly', 'yearly']).optional(),
+  installments_start_date: z.string().optional(),
+  installments_distribution: z.enum(['equal', 'custom']).optional(),
+  index_type: z.enum(['cac', 'uvi', 'ipc', 'custom_index']).optional(),
+  index_frequency: z.enum(['monthly', 'quarterly']).optional(),
 })
 
 type ClientCommitmentForm = z.infer<typeof clientCommitmentSchema>
@@ -83,8 +92,16 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
       currency_id: '',
       exchange_rate: undefined,
       commitment_method: 'fixed',
+      installments_count: undefined,
+      installments_frequency: undefined,
+      installments_start_date: undefined,
+      installments_distribution: undefined,
+      index_type: undefined,
+      index_frequency: undefined,
     }
   })
+
+  const commitmentMethod = form.watch('commitment_method')
 
   const isLoading = currenciesLoading || clientsLoading || membersLoading || ((mode === 'edit' || mode === 'view') && loadingCommitment)
 
@@ -109,6 +126,12 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
         currency_id: existingCommitment.currency_id || '',
         exchange_rate: existingCommitment.exchange_rate || undefined,
         commitment_method: existingCommitment.commitment_method || 'fixed',
+        installments_count: existingCommitment.installments_count || undefined,
+        installments_frequency: existingCommitment.installments_frequency || undefined,
+        installments_start_date: existingCommitment.installments_start_date || undefined,
+        installments_distribution: existingCommitment.installments_distribution || undefined,
+        index_type: existingCommitment.index_type || undefined,
+        index_frequency: existingCommitment.index_frequency || undefined,
       })
     }
   }, [existingCommitment, mode, form, currentMember?.id])
@@ -144,6 +167,12 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
             currency_id: data.currency_id,
             exchange_rate: data.exchange_rate || 1,
             commitment_method: data.commitment_method,
+            installments_count: data.installments_count,
+            installments_frequency: data.installments_frequency,
+            installments_start_date: data.installments_start_date,
+            installments_distribution: data.installments_distribution,
+            index_type: data.index_type,
+            index_frequency: data.index_frequency,
           },
           organizationId,
         })
@@ -155,6 +184,12 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
             currency_id: data.currency_id,
             exchange_rate: data.exchange_rate || 1,
             commitment_method: data.commitment_method,
+            installments_count: data.installments_count,
+            installments_frequency: data.installments_frequency,
+            installments_start_date: data.installments_start_date,
+            installments_distribution: data.installments_distribution,
+            index_type: data.index_type,
+            index_frequency: data.index_frequency,
           },
           projectId,
           organizationId,
@@ -188,10 +223,14 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
     switch (method) {
       case 'fixed':
         return 'Monto fijo'
-      case 'installments':
-        return 'Cuotas'
-      case 'work_progress':
-        return 'Avance de obra'
+      case 'installments_fixed':
+        return 'Cuotas fijas'
+      case 'installments_indexed':
+        return 'Cuotas indexadas'
+      case 'milestones':
+        return 'Por hitos'
+      case 'custom':
+        return 'Personalizado'
       default:
         return method
     }
@@ -374,13 +413,15 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
                 <FormLabel>Método de Compromiso *</FormLabel>
                 <FormControl>
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
+                    <SelectTrigger data-testid="select-commitment-method">
                       <SelectValue placeholder="Seleccionar método" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="fixed">Monto fijo</SelectItem>
-                      <SelectItem value="installments">Cuotas</SelectItem>
-                      <SelectItem value="work_progress">Avance de obra</SelectItem>
+                      <SelectItem value="installments_fixed">Cuotas fijas</SelectItem>
+                      <SelectItem value="installments_indexed">Cuotas indexadas</SelectItem>
+                      <SelectItem value="milestones">Por hitos</SelectItem>
+                      <SelectItem value="custom">Personalizado</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -388,6 +429,23 @@ export function ClientCommitmentModal({ modalData, onClose }: ClientCommitmentMo
               </FormItem>
             )}
           />
+
+          {/* Conditional sections based on commitment method */}
+          {(commitmentMethod === 'installments_fixed' || commitmentMethod === 'installments_indexed') && (
+            <InstallmentsPlanSection form={form} />
+          )}
+
+          {commitmentMethod === 'installments_indexed' && (
+            <InstallmentsIndexingSection form={form} />
+          )}
+
+          {commitmentMethod === 'milestones' && (
+            <InformationalNotice message="Las cuotas serán generadas automáticamente según los hitos del proyecto." />
+          )}
+
+          {commitmentMethod === 'custom' && (
+            <InformationalNotice message="El plan de pagos será definido manualmente después de crear el compromiso." />
+          )}
         </form>
       </Form>
     )

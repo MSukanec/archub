@@ -719,8 +719,14 @@ export const client_commitments = pgTable("client_commitments", {
   currency_id: uuid("currency_id").notNull(),
   exchange_rate: numeric("exchange_rate").notNull(),
   commitment_method: text("commitment_method", { 
-    enum: ["fixed", "installments", "work_progress", "milestone", "custom"] 
+    enum: ["fixed", "installments_fixed", "installments_indexed", "milestones", "custom"] 
   }).notNull().default("fixed"),
+  installments_count: integer("installments_count"),
+  installments_frequency: text("installments_frequency", { enum: ["monthly", "bimonthly", "quarterly", "yearly"] }),
+  installments_start_date: timestamp("installments_start_date", { mode: 'date' }),
+  installments_distribution: text("installments_distribution", { enum: ["equal", "custom"] }),
+  index_type: text("index_type", { enum: ["cac", "uvi", "ipc", "custom_index"] }),
+  index_frequency: text("index_frequency", { enum: ["monthly", "quarterly"] }),
   created_by: uuid("created_by"),
   is_deleted: boolean("is_deleted").notNull().default(false),
   deleted_at: timestamp("deleted_at", { withTimezone: true }),

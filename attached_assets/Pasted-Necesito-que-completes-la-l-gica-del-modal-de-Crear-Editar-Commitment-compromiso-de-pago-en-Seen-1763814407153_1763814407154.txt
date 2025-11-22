@@ -1,0 +1,126 @@
+Necesito que completes la lógica del modal de "Crear/Editar Commitment" (compromiso de pago) en Seencel.
+
+Ya tenemos creado:
+
+- El select “commitment_method”
+- El form con React Hook Form
+- La tabla client_commitments con la columna commitment_method
+
+Ahora quiero que agregues toda la lógica dinámica visual del modal según el método elegido.
+
+IMPORTANTE:
+El archivo donde estás trabajando ya tiene la estructura base. No modifiques lo que ya anda. Solo agrega los bloques condicionales y la UI necesaria. Debe quedar prolijo, modular y siguiendo mis estilos actuales.
+
+────────────────────────────────────
+💡 **REGLA PRINCIPAL**
+Cuando el usuario cambia commitment_method, el modal debe mostrar inputs adicionales según el método.
+
+Los métodos disponibles son:
+
+1) fixed
+2) installments_fixed
+3) installments_indexed
+4) milestones
+5) custom
+
+────────────────────────────────────
+### ✔️ SI commitment_method = "fixed"
+- NO debe aparecer ninguna sección adicional.
+- Mostrar únicamente los campos base:
+  - amount
+  - currency
+  - exchange_rate (solo si corresponde)
+
+────────────────────────────────────
+### ✔️ SI commitment_method = "installments_fixed"
+Agregar una sección nueva llamada “Plan de Cuotas”.
+
+Debe incluir:
+
+1) Número de cuotas  
+   - input number  
+   - min 1  
+
+2) Frecuencia  
+   Select con:
+   - Monthly
+   - Bimonthly
+   - Quarterly
+   - Yearly
+
+3) Fecha de inicio  
+   Date picker simple
+
+4) Distribución  
+   Select:
+   - "equal" (cuotas iguales)
+   - "custom" (montos personalizados, después se edita el schedule)
+
+Implementar usando campos RHF con names:
+- installments_count
+- installments_frequency
+- installments_start_date
+- installments_distribution
+
+Esta sección sólo aparece cuando el method = installments_fixed.
+
+────────────────────────────────────
+### ✔️ SI commitment_method = "installments_indexed"
+Debe mostrar todo lo del caso anterior **más**:
+
+5) Índice de actualización
+   Select:
+   - CAC
+   - UVI
+   - IPC
+   - custom_index (dejar preparado)
+
+6) Frecuencia de indexación
+   Select:
+   - Monthly
+   - Quarterly
+
+Usar names RHF:
+- index_type
+- index_frequency
+
+────────────────────────────────────
+### ✔️ SI commitment_method = "milestones"
+No mostrar inputs adicionales.
+
+Mostrar solamente un bloque informativo:
+
+"Las cuotas serán generadas automáticamente según los hitos del proyecto."
+
+Cuadro gris suave, texto neutro.
+
+────────────────────────────────────
+### ✔️ SI commitment_method = "custom"
+Tampoco mostrar inputs adicionales.
+
+Solo un texto:
+
+"El plan de pagos será definido manualmente después de crear el compromiso."
+
+────────────────────────────────────
+### OTRAS REGLAS IMPORTANTES
+
+✔ Todos los nuevos inputs deben estar dentro de una sección <div className="form-section"> o similar, como venimos haciendo.
+
+✔ El diseño debe seguir mi nuevo sistema de modales:
+- Títulos claros (como h3)
+- Spacing compacto
+- Inputs usando mis CustomInput / CustomSelect (si existen)
+- Nada de estilos inline duplicados
+
+✔ Usar watch() de React Hook Form para saber qué método está seleccionado.
+
+✔ NO generar el schedule todavía — solo preparar la UI y guardar estos valores en el commit.
+
+✔ Cada sección condicional debe ser un pequeño componente interno si el archivo queda muy largo.
+
+✔ NO romper el modal actual y mantener toda la lógica de envío tal como está.
+
+────────────────────────────────────
+
+Cuando termines, mostrámelo como código completo, limpio, bien dividido y con los campos ya integrados al formulario.
