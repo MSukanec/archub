@@ -27,14 +27,17 @@ export default function LearningDashboard() {
   // Usar hook del feature para obtener dashboard optimizado
   const { data: dashboardData, isLoading } = useLearningDashboardFast();
 
-  const { global, courses = [], currentStreak = 0 } = dashboardData || {}
+  const { global, courses = [], featured_course, currentStreak = 0 } = dashboardData || {}
   
   // User has enrollments if they have courses (even if not started yet)
   const hasEnrollments = courses && courses.length > 0;
+  
+  // Use featured course (latest added) for hero, or fallback to first enrolled course
+  const heroCurso = featured_course || (courses.length > 0 ? courses[0] : null);
 
   const coursesSorted = courses
-    .filter(c => c.progress_pct >= 0 && c.progress_pct < 100)
-    .sort((a, b) => b.progress_pct - a.progress_pct)
+    .filter((c: any) => c.progress_pct >= 0 && c.progress_pct < 100)
+    .sort((a: any, b: any) => b.progress_pct - a.progress_pct)
     .slice(0, 3);
 
   const headerProps = {
@@ -70,19 +73,19 @@ export default function LearningDashboard() {
           </p>
         </div>
 
-        {/* Hero Section - Show first available course */}
-        {courses && courses.length > 0 && (
+        {/* Hero Section - Show latest public course (featured) */}
+        {heroCurso && (
           <div 
             className="relative h-[300px] md:h-[400px] rounded-xl overflow-hidden group cursor-pointer"
-            onClick={() => navigate(`/learning/courses/${courses[0].course_slug}`)}
+            onClick={() => navigate(`/learning/courses/${heroCurso.course_slug}`)}
             data-testid="hero-featured-course"
           >
-            {courses[0].cover_url ? (
+            {heroCurso.cover_url ? (
               <>
                 <div 
                   className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                   style={{
-                    backgroundImage: `url(${courses[0].cover_url})`
+                    backgroundImage: `url(${heroCurso.cover_url})`
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
@@ -110,11 +113,13 @@ export default function LearningDashboard() {
                 className="text-4xl md:text-6xl font-bold mb-3 md:mb-4 tracking-tight !text-white" 
                 data-testid="text-hero-title"
               >
-                {courses[0].course_title}
+                {heroCurso.course_title}
               </h1>
               
               <p className="text-sm md:text-base max-w-2xl mb-6" style={{ color: '#9ca3af' }}>
-                {courses[0].done_lessons} de {courses[0].total_lessons} lecciones completadas • {courses[0].progress_pct}% completado
+                {heroCurso.short_description || (heroCurso.done_lessons !== undefined 
+                  ? `${heroCurso.done_lessons} de ${heroCurso.total_lessons} lecciones completadas • ${heroCurso.progress_pct}% completado`
+                  : 'Descubre este curso y desarrolla nuevas habilidades')}
               </p>
               
               <div>
@@ -122,12 +127,12 @@ export default function LearningDashboard() {
                   size="lg"
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate(`/learning/courses/${courses[0].course_slug}`);
+                    navigate(`/learning/courses/${heroCurso.course_slug}`);
                   }}
                   className="group/btn"
                   data-testid="button-continue-course"
                 >
-                  <span>Continuar Curso</span>
+                  <span>{heroCurso.done_lessons !== undefined ? 'Continuar Curso' : 'Ver Curso'}</span>
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
                 </Button>
               </div>
@@ -148,7 +153,7 @@ export default function LearningDashboard() {
             
             {hasEnrollments && coursesSorted.length > 0 ? (
               <div className="space-y-4">
-                {coursesSorted.map((course) => (
+                {coursesSorted.map((course: any) => (
                   <div 
                     key={course.course_id}
                     className="flex flex-col md:flex-row md:items-center gap-4 p-4 rounded-lg border hover:border-accent/50 transition-all cursor-pointer"

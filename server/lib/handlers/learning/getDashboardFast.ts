@@ -1,6 +1,7 @@
 // api/lib/handlers/learning/getDashboardFast.ts
 import type { LearningHandlerContext } from './shared.js';
 import { getAuthenticatedUser } from './shared.js';
+import { supabaseAdmin } from '../../supabase/admin.js';
 
 // Types
 interface Module {
@@ -189,6 +190,13 @@ export interface DashboardFastData {
     done_lessons: number;
     total_lessons: number;
   }>;
+  featured_course: {
+    course_id: string;
+    course_title: string;
+    course_slug: string;
+    cover_url: string | null;
+    short_description: string | null;
+  } | null;
   study: {
     seconds_lifetime: number;
     seconds_this_month: number;
@@ -215,6 +223,7 @@ export async function getDashboardFast(
         data: {
           global: null,
           courses: [],
+          featured_course: null,
           study: { seconds_lifetime: 0, seconds_this_month: 0 },
           currentStreak: 0,
           activeDays: 0,
@@ -240,6 +249,7 @@ export async function getDashboardFast(
         data: {
           global: null,
           courses: [],
+          featured_course: null,
           study: { seconds_lifetime: 0, seconds_this_month: 0 },
           currentStreak: 0,
           activeDays: 0,
@@ -252,10 +262,11 @@ export async function getDashboardFast(
 
     // BULK QUERY 2: Get course cover images
     // Filter by category='course_cover' to get only cover images (not instructor photos, OG images, etc.)
+    // Use admin client to bypass RLS for public course images
     console.log('[getDashboardFast] ============= FETCHING COURSE IMAGES =============');
     console.log('[getDashboardFast] Course IDs:', courseIds);
     
-    const { data: courseImages, error: imagesError } = await supabase
+    const { data: courseImages, error: imagesError } = await supabaseAdmin
       .from('media_links')
       .select(`
         course_id,
@@ -323,6 +334,7 @@ export async function getDashboardFast(
         data: {
           global: null,
           courses: [],
+          featured_course: null,
           study: { seconds_lifetime: 0, seconds_this_month: 0 },
           currentStreak: 0,
           activeDays: 0,
@@ -351,6 +363,7 @@ export async function getDashboardFast(
         data: {
           global: null,
           courses: [],
+          featured_course: null,
           study: { seconds_lifetime: 0, seconds_this_month: 0 },
           currentStreak: 0,
           activeDays: 0,
@@ -389,11 +402,76 @@ export async function getDashboardFast(
     const recentCompletions = computeRecentCompletions(completedLessons);
     const currentStreak = computeStreak(activeDaysSet);
 
+    // FEATURED COURSE: Get the latest added public course (not user-specific)
+    const { data: featuredCourseData } = await supabaseAdmin
+      .from('courses')
+      .select('id, slug, title, short_description')
+      .eq('is_deleted', false)
+      .eq('is_active', true)
+      .eq('visibility', 'public')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    let featuredCourse = null;
+    if (featuredCourseData) {
+      // Get the cover image for the featured course
+      const featuredCoverUrl = courseImageMap.get(featuredCourseData.id) || null;
+      
+      // If not in the map (not enrolled), fetch it
+      if (!featuredCoverUrl) {
+        const { data: featuredImageData } = await supabaseAdmin
+          .from('media_links')
+          .select(`
+            course_id,
+            media_files!inner (
+              file_url,
+              is_deleted
+            )
+          `)
+          .eq('course_id', featuredCourseData.id)
+          .eq('category', 'course_cover')
+          .eq('media_files.is_deleted', false)
+          .limit(1)
+          .single();
+        
+        if (featuredImageData) {
+          const mediaFile = Array.isArray(featuredImageData.media_files) 
+            ? featuredImageData.media_files[0] 
+            : featuredImageData.media_files;
+          featuredCourse = {
+            course_id: featuredCourseData.id,
+            course_title: featuredCourseData.title,
+            course_slug: featuredCourseData.slug,
+            cover_url: mediaFile?.file_url || null,
+            short_description: featuredCourseData.short_description
+          };
+        } else {
+          featuredCourse = {
+            course_id: featuredCourseData.id,
+            course_title: featuredCourseData.title,
+            course_slug: featuredCourseData.slug,
+            cover_url: null,
+            short_description: featuredCourseData.short_description
+          };
+        }
+      } else {
+        featuredCourse = {
+          course_id: featuredCourseData.id,
+          course_title: featuredCourseData.title,
+          course_slug: featuredCourseData.slug,
+          cover_url: featuredCoverUrl,
+          short_description: featuredCourseData.short_description
+        };
+      }
+    }
+
     return {
       success: true,
       data: {
         global: globalProgress,
         courses,
+        featured_course: featuredCourse,
         study: {
           seconds_lifetime: totalStudyTime,
           seconds_this_month: totalStudyTime

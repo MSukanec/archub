@@ -1,6 +1,7 @@
 // api/lib/handlers/learning/getCoursesFull.ts
 import type { LearningHandlerContext } from './shared.js';
 import { getAuthenticatedUser } from './shared.js';
+import { supabaseAdmin } from '../../supabase/admin.js';
 
 export interface Course {
   id: string;
@@ -73,7 +74,8 @@ export async function getCoursesFull(
 
       // Get course cover images
       // Filter by category='course_cover' to get only cover images (not instructor photos, OG images, etc.)
-      supabase
+      // Use admin client to bypass RLS for public course images
+      supabaseAdmin
         .from('media_links')
         .select(`
           course_id,
