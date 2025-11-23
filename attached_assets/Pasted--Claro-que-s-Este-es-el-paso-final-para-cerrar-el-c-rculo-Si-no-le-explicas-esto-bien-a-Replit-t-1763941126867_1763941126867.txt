@@ -1,0 +1,76 @@
+¡Claro que sí! Este es el paso final para cerrar el círculo. Si no le explicas esto bien a Replit, todo el trabajo de arquitectura que hicimos se va a la basura porque empezará a guardar cosas donde no debe.
+
+Aquí tienes un Prompt Maestro diseñado específicamente para un Agente de IA (como el de Replit). Es técnico, estructurado y le da las reglas de negocio "masticadas".
+
+Copia y pega esto en tu chat con Replit:
+
+PROMPT PARA REPLIT
+Role: Actúa como un Arquitecto de Software Senior especializado en Supabase y Node.js. Estamos construyendo el módulo de "Gestión de Archivos" para una SaaS de construcción (Seencel).
+
+Objetivo: Crear una función de backend (server action o API route) robusta para subir archivos que respete estrictamente nuestra arquitectura de 3 Buckets y nuestro esquema de base de datos relacional (media_files y media_links).
+
+1. CONTEXTO DE INFRAESTRUCTURA (Buckets) Tenemos 3 Buckets en Supabase Storage. Debes rutear el archivo al bucket correcto según el "contexto" de la subida:
+
+Bucket A: public-assets (Público)
+
+Uso: Logos, Avatares, UI, Portadas de Marketplace.
+
+Estructura: tenants/{org_id}/branding/, tenants/{org_id}/avatars/, marketplace/courses/.
+
+Bucket B: private-assets (Alta Seguridad)
+
+Uso: Finanzas, Legal, Planos Técnicos, Contenido Privado de Cursos.
+
+Estructura: organizations/{org_id}/finance/, organizations/{org_id}/legal/, organizations/{org_id}/technical/.
+
+Bucket C: social-assets (Híbrido/Red Social)
+
+Uso: Renders, Fotos de Obra, Feed.
+
+Estructura: projects/{org_id}/{project_id}/gallery/, projects/{org_id}/{project_id}/updates/.
+
+2. CONTEXTO DE BASE DE DATOS Ya tengo las tablas creadas.
+
+media_files: Guarda la referencia física (bucket, path, size, type).
+
+media_links: Guarda la relación lógica (si pertenece a un project_id, general_cost_id, contact_id, etc.).
+
+3. ALGORITMO DE SUBIDA (Lógica Obligatoria) Tu función debe recibir: file (el archivo), organization_id, y un objeto context (ej: { entity: 'project_gallery', entity_id: '...', is_public: false }).
+
+Pasos que debe ejecutar tu código:
+
+Sanitización: Generar un nombre de archivo único usando UUID (ej: uuidv4() + extension). Nunca usar el nombre original del archivo para el storage path.
+
+Ruteo: Decidir el bucket y el folder_path basándose en el objeto context (ver reglas de ruteo abajo).
+
+Upload: Subir el archivo a Supabase Storage.
+
+DB Transaction (Paso 1): Insertar registro en tabla media_files.
+
+file_path: La ruta generada en el storage.
+
+file_name: El nombre original (para mostrarlo en la UI).
+
+bucket: El bucket seleccionado.
+
+DB Transaction (Paso 2): Insertar registro en tabla media_links.
+
+Vincular el media_file_id recién creado.
+
+Llenar la columna foránea correcta según el contexto (ej: si es una factura, llenar general_cost_id; si es una foto de obra, llenar project_id).
+
+4. REGLAS DE RUTEO (Tabla de Verdad)
+
+Si context.entity === 'logo' → Bucket: public-assets | Path: tenants/{org_id}/branding/
+
+Si context.entity === 'avatar' → Bucket: public-assets | Path: tenants/{org_id}/avatars/
+
+Si context.entity === 'invoice' (Factura) → Bucket: private-assets | Path: organizations/{org_id}/finance/invoices/
+
+Si context.entity === 'contract' → Bucket: private-assets | Path: organizations/{org_id}/legal/contracts/
+
+Si context.entity === 'project_photo' → Bucket: social-assets | Path: projects/{org_id}/{project_id}/gallery/
+
+Si context.entity === 'site_log' (Bitácora) → Bucket: social-assets | Path: projects/{org_id}/{project_id}/updates/
+
+Output esperado: Genera el código en Typescript/Node.js para esta función de subida, manejando errores (try/catch) para que si falla la inserción en BD, intente borrar el archivo subido al Storage para no dejar basura.
