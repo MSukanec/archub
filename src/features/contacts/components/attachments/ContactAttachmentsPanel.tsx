@@ -26,6 +26,7 @@ import { getAttachmentPublicUrl } from '@/features/contacts/utils';
 import type { ContactAttachment } from '@/features/contacts/types';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useToast } from '@/hooks/use-toast';
+import { compressImage, shouldCompress, formatCompressionStats, type ImagePreset } from '@/lib/imageCompression';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -99,9 +100,53 @@ export function ContactAttachmentsPanel({ contactId, contact, showUpload = true 
     onDrop: async (acceptedFiles) => {
       for (const file of acceptedFiles) {
         try {
+          let fileToUpload = file;
+          
+          // Compress images based on category
+          if (shouldCompress(file)) {
+            const originalSize = file.size;
+            
+            // Determine preset based on category
+            let preset: ImagePreset = 'default';
+            if (selectedCategory === 'photo') {
+              preset = 'avatar';
+            } else if (selectedCategory === 'document') {
+              preset = 'document';
+            }
+            
+            try {
+              fileToUpload = await compressImage(file, preset) as File;
+              
+              // Show compression stats if there was significant reduction
+              if (originalSize !== fileToUpload.size) {
+                toast({
+                  title: "Imagen optimizada",
+                  description: formatCompressionStats(originalSize, fileToUpload.size),
+                });
+              }
+            } catch (compressionError) {
+              console.error('Error compressing image:', compressionError);
+              toast({
+                title: "Advertencia",
+                description: "No se pudo comprimir la imagen, subiendo original",
+                variant: "default"
+              });
+            }
+          }
+          
+          // Validate file size AFTER compression (max 10MB)
+          if (fileToUpload.size > 10 * 1024 * 1024) {
+            toast({
+              title: "Error",
+              description: "El archivo no puede superar los 10MB",
+              variant: "destructive"
+            });
+            continue;
+          }
+          
           await createAttachment.mutateAsync({
             contactId,
-            file: file,
+            file: fileToUpload,
             category: selectedCategory as 'photo' | 'dni_front' | 'dni_back' | 'document' | 'other',
             createdBy: userData?.user?.id || ''
           });

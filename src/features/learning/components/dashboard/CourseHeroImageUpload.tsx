@@ -4,6 +4,7 @@ import { Camera, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { uploadCourseImage, deleteCourseImage, updateCourseImageUrl } from '@/lib/storage/uploadCourseImage';
+import { compressImage, formatCompressionStats } from '@/lib/imageCompression';
 
 interface CourseHeroImageUploadProps {
   courseId: string;
@@ -17,6 +18,7 @@ export default function CourseHeroImageUpload({
   onImageUpdate
 }: CourseHeroImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -82,7 +84,7 @@ export default function CourseHeroImageUpload({
     }
   });
 
-  const handleFileSelect = (files: FileList | null) => {
+  const handleFileSelect = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     
     const file = files[0];
@@ -96,16 +98,54 @@ export default function CourseHeroImageUpload({
       return;
     }
     
-    if (file.size > 10 * 1024 * 1024) {
+    try {
+      setIsCompressing(true);
+      const originalSize = file.size;
+      
+      // Compress image before uploading
+      const compressedFile = await compressImage(file, 'course-cover');
+      
+      setIsCompressing(false);
+      
+      // Validate file size AFTER compression (max 10MB)
+      if (compressedFile.size > 10 * 1024 * 1024) {
+        toast({
+          title: "Error", 
+          description: "La imagen no puede superar los 10MB",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Show compression stats if there was significant reduction
+      if (originalSize !== compressedFile.size) {
+        toast({
+          title: "Imagen optimizada",
+          description: formatCompressionStats(originalSize, compressedFile.size),
+        });
+      }
+      
+      uploadMutation.mutate(compressedFile);
+    } catch (error) {
+      setIsCompressing(false);
       toast({
-        title: "Error", 
-        description: "La imagen no puede superar los 10MB",
-        variant: "destructive"
+        title: "Advertencia",
+        description: "No se pudo comprimir la imagen, se usará el archivo original",
+        variant: "default"
       });
-      return;
+      
+      // Validate file size AFTER compression failure (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "La imagen no puede superar los 10MB",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      uploadMutation.mutate(file);
     }
-    
-    uploadMutation.mutate(file);
   };
 
   const handleDrag = (e: React.DragEvent) => {
@@ -200,11 +240,13 @@ export default function CourseHeroImageUpload({
           </div>
         )}
         
-        {isUploading && (
+        {(isUploading || isCompressing) && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
             <div className="bg-white dark:bg-gray-900 rounded-lg p-4 flex items-center gap-3">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
-              <span className="text-sm font-medium">Subiendo imagen...</span>
+              <span className="text-sm font-medium">
+                {isCompressing ? 'Comprimiendo imagen...' : 'Subiendo imagen...'}
+              </span>
             </div>
           </div>
         )}

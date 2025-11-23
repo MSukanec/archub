@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { uploadProjectImage, deleteProjectImage, updateProjectImageUrl } from '@/features/projects';
+import { compressImage, formatCompressionStats } from '@/lib/imageCompression';
 
 interface ImageUploadAndShowFieldProps {
   projectId?: string;
@@ -26,6 +27,7 @@ export default function ImageUploadAndShowField({
   previewUrl
 }: ImageUploadAndShowFieldProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -109,7 +111,7 @@ export default function ImageUploadAndShowField({
     }
   });
 
-  const handleFileSelect = (files: FileList | null) => {
+  const handleFileSelect = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     
     const file = files[0];
@@ -124,25 +126,62 @@ export default function ImageUploadAndShowField({
       return;
     }
     
-    // Validate file size (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      toast({
-        title: "Error", 
-        description: "La imagen no puede superar los 2MB",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     // Preview mode: just notify parent with file
     if (previewMode && onFileSelect) {
       onFileSelect(file);
       return;
     }
     
-    // Normal mode: upload immediately
+    // Normal mode: compress and upload
     if (projectId && organizationId) {
-      uploadMutation.mutate(file);
+      try {
+        setIsCompressing(true);
+        const originalSize = file.size;
+        
+        // Compress image before uploading
+        const compressedFile = await compressImage(file, 'project-cover');
+        
+        setIsCompressing(false);
+        
+        // Validate file size AFTER compression (max 2MB)
+        if (compressedFile.size > 2 * 1024 * 1024) {
+          toast({
+            title: "Error", 
+            description: "La imagen no puede superar los 2MB",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        // Show compression stats if there was significant reduction
+        if (originalSize !== compressedFile.size) {
+          toast({
+            title: "Imagen optimizada",
+            description: formatCompressionStats(originalSize, compressedFile.size),
+          });
+        }
+        
+        uploadMutation.mutate(compressedFile);
+      } catch (error) {
+        setIsCompressing(false);
+        toast({
+          title: "Advertencia",
+          description: "No se pudo comprimir la imagen, se usará el archivo original",
+          variant: "default"
+        });
+        
+        // Validate file size AFTER compression failure (max 2MB)
+        if (file.size > 2 * 1024 * 1024) {
+          toast({
+            title: "Error",
+            description: "La imagen no puede superar los 2MB",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        uploadMutation.mutate(file);
+      }
     }
   };
 
@@ -254,11 +293,13 @@ export default function ImageUploadAndShowField({
         )}
         
         {/* Loading overlay */}
-        {isUploading && (
+        {(isUploading || isCompressing) && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
             <div className="bg-white rounded-lg p-4 flex items-center gap-3">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
-              <span className="text-sm font-medium">Subiendo imagen...</span>
+              <span className="text-sm font-medium">
+                {isCompressing ? 'Comprimiendo imagen...' : 'Subiendo imagen...'}
+              </span>
             </div>
           </div>
         )}

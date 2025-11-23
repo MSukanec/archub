@@ -15,6 +15,7 @@ import { useDropzone } from 'react-dropzone';
 import { useToast } from "@/hooks/use-toast";
 import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/media/ImageLightbox';
 import { cn } from "@/lib/utils";
+import { compressImage, shouldCompress, formatCompressionStats, type ImagePreset } from '@/lib/imageCompression';
 
 interface FileItem {
   id: string;
@@ -39,6 +40,7 @@ interface UploadMediaFieldProps {
   // Upload configuration
   maxSize?: number; // in bytes, default 50MB
   acceptedTypes?: Record<string, string[]>;
+  imageCompressionPreset?: ImagePreset; // Compression preset for images
   
   // Handlers
   onExistingFileDelete?: (fileId: string) => Promise<void>;
@@ -59,6 +61,7 @@ export function UploadMediaField({
     'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
     'video/*': ['.mp4', '.mov', '.avi', '.mkv']
   },
+  imageCompressionPreset = 'default',
   onExistingFileDelete,
   emptyStateTitle = "No hay archivos adjuntos",
   emptyStateDescription = "Arrastra archivos o haz clic para seleccionar",
@@ -160,15 +163,56 @@ export function UploadMediaField({
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: (acceptedFiles: File[]) => {
-      const newFiles = acceptedFiles.map(file => ({
-        file,
-        title: file.name,
-        description: '',
-        category: 'photo',
-        uploadProgress: 0
-      }));
-      onFilesChange([...filesToUpload, ...newFiles]);
+    onDrop: async (acceptedFiles: File[]) => {
+      const processedFiles = [];
+      
+      for (const file of acceptedFiles) {
+        let fileToUpload = file;
+        
+        // Compress images only
+        if (shouldCompress(file)) {
+          const originalSize = file.size;
+          
+          try {
+            fileToUpload = await compressImage(file, imageCompressionPreset);
+            
+            // Show compression stats if there was significant reduction
+            if (originalSize !== fileToUpload.size) {
+              toast({
+                title: "Imagen optimizada",
+                description: formatCompressionStats(originalSize, fileToUpload.size),
+              });
+            }
+          } catch (compressionError) {
+            console.error('Error compressing image:', compressionError);
+            toast({
+              title: "Advertencia",
+              description: `No se pudo comprimir ${file.name}, subiendo original`,
+              variant: "default"
+            });
+          }
+        }
+        
+        // Validate file size AFTER compression
+        if (fileToUpload.size > maxSize) {
+          toast({
+            title: "Archivo muy grande",
+            description: `${file.name} excede el tamaño máximo de ${formatFileSize(maxSize)}`,
+            variant: "destructive"
+          });
+          continue;
+        }
+        
+        processedFiles.push({
+          file: fileToUpload,
+          title: fileToUpload.name,
+          description: '',
+          category: 'photo',
+          uploadProgress: 0
+        });
+      }
+      
+      onFilesChange([...filesToUpload, ...processedFiles]);
     },
     accept: acceptedTypes,
     maxSize,

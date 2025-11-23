@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { useDropzone } from 'react-dropzone';
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { compressImage, shouldCompress, formatCompressionStats } from '@/lib/imageCompression';
 
 interface FileItem {
   id: string;
@@ -99,11 +100,36 @@ export function UploadSingleFileField({
     }
   };
 
-  const onDrop = (acceptedFiles: File[]) => {
+  const onDrop = async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
 
-    const file = acceptedFiles[0];
+    let file = acceptedFiles[0];
 
+    // Compress images only
+    if (shouldCompress(file)) {
+      const originalSize = file.size;
+      
+      try {
+        file = await compressImage(file, 'default');
+        
+        // Show compression stats if there was significant reduction
+        if (originalSize !== file.size) {
+          toast({
+            title: "Imagen optimizada",
+            description: formatCompressionStats(originalSize, file.size),
+          });
+        }
+      } catch (compressionError) {
+        console.error('Error compressing image:', compressionError);
+        toast({
+          title: "Advertencia",
+          description: "No se pudo comprimir la imagen, subiendo original",
+          variant: "default"
+        });
+      }
+    }
+
+    // Validate file size AFTER compression
     if (file.size > maxSize) {
       toast({
         title: 'Archivo muy grande',

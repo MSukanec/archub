@@ -70,6 +70,7 @@ export function MediaForm({
       filesToUpload={filesToUpload}
       onFilesChange={setFilesToUpload}
       onExistingFileDelete={handleExistingFileDelete}
+      imageCompressionPreset="sitelog-photo"
       emptyStateTitle="No hay archivos adjuntos"
       emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
       uploadButtonText="Subir Archivos"
