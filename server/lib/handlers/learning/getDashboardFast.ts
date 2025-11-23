@@ -217,13 +217,57 @@ export async function getDashboardFast(
     const { supabase } = ctx;
 
     const dbUser = await getAuthenticatedUser(ctx);
+    
+    // FEATURED COURSE: Get the latest added public course (not user-specific)
+    // This is fetched BEFORE any early returns so it's ALWAYS available for the hero section
+    const { data: featuredCourseData } = await supabaseAdmin
+      .from('courses')
+      .select('id, slug, title, short_description')
+      .eq('is_deleted', false)
+      .eq('is_active', true)
+      .eq('visibility', 'public')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    let featuredCourse = null;
+    if (featuredCourseData) {
+      // Fetch cover image for featured course
+      const { data: featuredImageData } = await supabaseAdmin
+        .from('media_links')
+        .select(`
+          course_id,
+          media_files!inner (
+            file_url,
+            is_deleted
+          )
+        `)
+        .eq('course_id', featuredCourseData.id)
+        .eq('category', 'course_cover')
+        .eq('media_files.is_deleted', false)
+        .limit(1)
+        .single();
+      
+      const mediaFile = featuredImageData && (Array.isArray(featuredImageData.media_files) 
+        ? featuredImageData.media_files[0] 
+        : featuredImageData.media_files);
+      
+      featuredCourse = {
+        course_id: featuredCourseData.id,
+        course_title: featuredCourseData.title,
+        course_slug: featuredCourseData.slug,
+        cover_url: mediaFile?.file_url || null,
+        short_description: featuredCourseData.short_description
+      };
+    }
+
     if (!dbUser) {
       return {
         success: true,
         data: {
           global: null,
           courses: [],
-          featured_course: null,
+          featured_course: featuredCourse,
           study: { seconds_lifetime: 0, seconds_this_month: 0 },
           currentStreak: 0,
           activeDays: 0,
@@ -249,7 +293,7 @@ export async function getDashboardFast(
         data: {
           global: null,
           courses: [],
-          featured_course: null,
+          featured_course: featuredCourse,
           study: { seconds_lifetime: 0, seconds_this_month: 0 },
           currentStreak: 0,
           activeDays: 0,
@@ -334,7 +378,7 @@ export async function getDashboardFast(
         data: {
           global: null,
           courses: [],
-          featured_course: null,
+          featured_course: featuredCourse,
           study: { seconds_lifetime: 0, seconds_this_month: 0 },
           currentStreak: 0,
           activeDays: 0,
@@ -363,7 +407,7 @@ export async function getDashboardFast(
         data: {
           global: null,
           courses: [],
-          featured_course: null,
+          featured_course: featuredCourse,
           study: { seconds_lifetime: 0, seconds_this_month: 0 },
           currentStreak: 0,
           activeDays: 0,
@@ -402,69 +446,8 @@ export async function getDashboardFast(
     const recentCompletions = computeRecentCompletions(completedLessons);
     const currentStreak = computeStreak(activeDaysSet);
 
-    // FEATURED COURSE: Get the latest added public course (not user-specific)
-    const { data: featuredCourseData } = await supabaseAdmin
-      .from('courses')
-      .select('id, slug, title, short_description')
-      .eq('is_deleted', false)
-      .eq('is_active', true)
-      .eq('visibility', 'public')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-
-    let featuredCourse = null;
-    if (featuredCourseData) {
-      // Get the cover image for the featured course
-      const featuredCoverUrl = courseImageMap.get(featuredCourseData.id) || null;
-      
-      // If not in the map (not enrolled), fetch it
-      if (!featuredCoverUrl) {
-        const { data: featuredImageData } = await supabaseAdmin
-          .from('media_links')
-          .select(`
-            course_id,
-            media_files!inner (
-              file_url,
-              is_deleted
-            )
-          `)
-          .eq('course_id', featuredCourseData.id)
-          .eq('category', 'course_cover')
-          .eq('media_files.is_deleted', false)
-          .limit(1)
-          .single();
-        
-        if (featuredImageData) {
-          const mediaFile = Array.isArray(featuredImageData.media_files) 
-            ? featuredImageData.media_files[0] 
-            : featuredImageData.media_files;
-          featuredCourse = {
-            course_id: featuredCourseData.id,
-            course_title: featuredCourseData.title,
-            course_slug: featuredCourseData.slug,
-            cover_url: mediaFile?.file_url || null,
-            short_description: featuredCourseData.short_description
-          };
-        } else {
-          featuredCourse = {
-            course_id: featuredCourseData.id,
-            course_title: featuredCourseData.title,
-            course_slug: featuredCourseData.slug,
-            cover_url: null,
-            short_description: featuredCourseData.short_description
-          };
-        }
-      } else {
-        featuredCourse = {
-          course_id: featuredCourseData.id,
-          course_title: featuredCourseData.title,
-          course_slug: featuredCourseData.slug,
-          cover_url: featuredCoverUrl,
-          short_description: featuredCourseData.short_description
-        };
-      }
-    }
+    // Featured course was already fetched at the beginning (before early returns)
+    // No need to fetch it again here
 
     return {
       success: true,
