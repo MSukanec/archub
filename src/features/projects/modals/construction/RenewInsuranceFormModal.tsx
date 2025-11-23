@@ -19,7 +19,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 
 import { useRenewInsurance, useUploadCertificate } from '@/hooks/useInsurances'
-import { Insurance } from '@/services/insurances'
+import { InsuranceStatusRow } from '@/features/personnel/services/insurances'
 
 const renewInsuranceSchema = z.object({
   new_coverage_end: z.date({
@@ -35,7 +35,7 @@ type RenewInsuranceForm = z.infer<typeof renewInsuranceSchema>
 
 interface RenewInsuranceFormModalProps {
   modalData?: {
-    insurance: Insurance
+    insurance: InsuranceStatusRow
   }
   onClose: () => void
 }
@@ -80,17 +80,16 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
       }
 
       const payload = {
-        new_coverage_start: insurance.coverage_end, // El nuevo inicio es el final del anterior
-        new_coverage_end: data.new_coverage_end.toISOString().split('T')[0],
-        new_policy_number: data.new_policy_number || null,
-        new_provider: data.new_provider || null,
-        reminder_days: reminderDays,
-        new_certificate_attachment_id: newCertificateAttachmentId,
-        notes: data.notes || null
+        coverage_start: insurance.coverage_end, // El nuevo inicio es el final del anterior
+        coverage_end: data.new_coverage_end.toISOString().split('T')[0],
+        policy_number: data.new_policy_number || undefined,
+        provider: data.new_provider || undefined,
+        certificate_attachment_id: newCertificateAttachmentId,
+        notes: data.notes || undefined
       }
 
       await renewInsurance.mutateAsync({
-        insuranceId: insurance.id,
+        prevId: insurance.id,
         payload
       })
 
@@ -310,8 +309,8 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
       onLeftClick={onClose}
       rightLabel="Renovar"
       onRightClick={form.handleSubmit(onSubmit)}
-      rightDisabled={renewInsurance.isPending}
-      rightLoading={renewInsurance.isPending}
+      submitDisabled={renewInsurance.isPending}
+      showLoadingSpinner={renewInsurance.isPending}
     />
   )
 

@@ -23,7 +23,7 @@ import { useOrganizationMembers } from '@/features/organization'
 import { useCreateInsurance, useUpdateInsurance, useUploadCertificate } from '@/hooks/useInsurances'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { Insurance } from '@/services/insurances'
+import { Insurance } from '@/features/personnel/services/insurances'
 
 const insuranceSchema = z.object({
   personnel_id: z.string().uuid('Selecciona una persona'),
@@ -328,7 +328,7 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
                         <Calendar
                           mode="single"
                           selected={dateValue}
-                          onSelect={(date) => {
+                          onSelect={(date: Date | undefined) => {
                             if (date) {
                               field.onChange(date);
                             }
@@ -372,7 +372,7 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
                         <Calendar
                           mode="single"
                           selected={dateValue}
-                          onSelect={(date) => {
+                          onSelect={(date: Date | undefined) => {
                             if (date) {
                               field.onChange(date);
                             }

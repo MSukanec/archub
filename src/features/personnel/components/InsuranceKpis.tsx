@@ -1,7 +1,7 @@
 import React from 'react'
 import { Card } from '@/components/ui/card'
 import { Shield, ShieldAlert, ShieldX } from 'lucide-react'
-import { InsuranceStatusRow } from '@/services/insurances'
+import { InsuranceStatusRow } from '@/features/personnel/services/insurances'
 
 interface InsuranceKpisProps {
   data: InsuranceStatusRow[]

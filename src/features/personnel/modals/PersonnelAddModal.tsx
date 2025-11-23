@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useContacts } from '@/hooks/use-contacts';
 import { useToast } from '@/hooks/use-toast';
-import { getAttachmentPublicUrl } from '@/services/contactAttachments';
+import { getAttachmentPublicUrl } from '@/features/contacts/utils';
 import { useProjectPersonnel, useCreatePersonnel, useContactAttachmentsForPersonnel } from '@/features/personnel/hooks';
 
 const personnelFormSchema = z.object({
@@ -239,7 +239,9 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
                         const avatarAttachment = contactAttachments.find(
                           (att: any) => att.id === contact.avatar_attachment_id
                         );
-                        const avatarUrl = avatarAttachment ? getAttachmentPublicUrl(avatarAttachment) : null;
+                        const avatarUrl = avatarAttachment 
+                          ? getAttachmentPublicUrl(avatarAttachment)
+                          : null;
                         const displayName = getDisplayName(contact);
                         const initials = getInitials(contact);
 

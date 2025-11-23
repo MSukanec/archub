@@ -10,3 +10,4 @@ export { createPersonnelRate, type CreatePersonnelRateData } from './createPerso
 export { createPersonnelAttendance, type CreatePersonnelAttendanceData } from './createPersonnelAttendance';
 export { updatePersonnelAttendance, type UpdateAttendanceParams } from './updatePersonnelAttendance';
 export { getContactAttachmentsForPersonnel, type ContactAttachmentForPersonnel } from './getContactAttachmentsForPersonnel';
+export * from './insurances';

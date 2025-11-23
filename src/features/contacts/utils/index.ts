@@ -48,10 +48,10 @@ export function formatContactName(contact: {
 /**
  * Obtiene la URL pública de un adjunto de contacto.
  * 
- * @param attachment - Objeto de adjunto con bucket y path
+ * @param attachment - Objeto de adjunto con bucket y path (solo requiere storage_bucket y storage_path)
  * @returns URL pública del archivo
  */
-export function getAttachmentPublicUrl(attachment: ContactAttachment): string {
+export function getAttachmentPublicUrl(attachment: Pick<ContactAttachment, 'storage_bucket' | 'storage_path'>): string {
   return getPublicUrl(attachment.storage_bucket, attachment.storage_path);
 }
 

@@ -9,7 +9,7 @@ import {
   uploadCertificate,
   type InsuranceFilters,
   type Insurance 
-} from '@/services/insurances'
+} from '@/features/personnel/services/insurances'
 import { useToast } from '@/hooks/use-toast'
 
 export const useInsuranceList = (filters: InsuranceFilters = {}) => {

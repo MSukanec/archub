@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Edit, RotateCcw, Trash2 } from 'lucide-react'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteInsurance } from '@/hooks/useInsurances'
-import { InsuranceStatusRow } from '@/services/insurances'
+import { InsuranceStatusRow } from '@/features/personnel/services/insurances'
 
 interface InsuranceActionsProps {
   insurance: InsuranceStatusRow
@@ -29,7 +29,7 @@ export function InsuranceActions({ insurance }: InsuranceActionsProps) {
   const handleDelete = () => {
     openModal('delete-confirmation', {
       title: 'Eliminar Seguro',
-      message: `¿Estás seguro de que deseas eliminar el seguro ${insurance.insurance_type} de ${insurance.contact.first_name} ${insurance.contact.last_name}?`,
+      message: `¿Estás seguro de que deseas eliminar el seguro ${insurance.insurance_type} de ${insurance.first_name || ''} ${insurance.last_name || ''}?`,
       onConfirm: () => deleteInsurance.mutate(insurance.id)
     })
   }

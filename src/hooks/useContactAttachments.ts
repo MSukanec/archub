@@ -1,11 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   listContactAttachments, 
-  createContactAttachment, 
+  uploadContactAttachment, 
   deleteContactAttachment, 
-  setContactAvatarFromAttachment,
-  ContactAttachment 
-} from '@/services/contactAttachments';
+  setContactAvatar,
+} from '@/features/contacts/services';
+import type { ContactAttachment, ContactAttachmentInput } from '@/features/contacts/types';
 import { useToast } from '@/hooks/use-toast';
 
 export function useContactAttachments(contactId: string) {
@@ -21,7 +21,16 @@ export function useCreateContactAttachment() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: createContactAttachment,
+    mutationFn: ({ contactId, file, category, metadata, createdBy }: {
+      contactId: string;
+      file: File;
+      category: 'dni_front' | 'dni_back' | 'document' | 'photo' | 'other';
+      metadata?: any;
+      createdBy: string;
+    }) => {
+      const input: ContactAttachmentInput = { file, category, metadata };
+      return uploadContactAttachment(contactId, input, createdBy);
+    },
     onSuccess: (data) => {
       // Invalidar cache de adjuntos
       queryClient.invalidateQueries({ queryKey: ['contact-attachments', data.contact_id] });
@@ -79,7 +88,7 @@ export function useSetContactAvatar() {
 
   return useMutation({
     mutationFn: ({ contactId, attachmentId }: { contactId: string; attachmentId: string }) =>
-      setContactAvatarFromAttachment(contactId, attachmentId),
+      setContactAvatar(contactId, attachmentId),
     onSuccess: (_, { contactId }) => {
       // Invalidar cache del contacto específico
       queryClient.invalidateQueries({ queryKey: ['contact', contactId] });

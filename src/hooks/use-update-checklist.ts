@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateHomeChecklist } from '@/services/updateChecklist';
+import { updateHomeChecklist } from '@/features/onboarding/services/checklist';
 
 interface UpdateChecklistParams {
   key: string;

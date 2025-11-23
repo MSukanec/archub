@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button } from '@/components/ui/button'
 import { FileText, Download, Eye } from 'lucide-react'
-import { getCertificatePublicUrl } from '@/services/insurances'
+import { getCertificatePublicUrl } from '@/features/personnel/services/insurances'
 import { useToast } from '@/hooks/use-toast'
 
 interface AttachmentBadgeProps {
