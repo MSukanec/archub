@@ -39,6 +39,7 @@ Preferred communication style: Simple, everyday language.
 - **Access Control**: `PlanRestricted` component system provides comprehensive access control for organization membership and subscription plans (FREE, PRO, TEAMS, ENTERPRISE).
 - **Cost System**: Three-tier cost system (Seencel Cost, Organization Cost, Independent Cost).
 - **Media Uploads**: Unified `UploadImageAndShowField` component for project image uploads with dual-mode support, size limits, drag-and-drop, and inline editing. Client payments now use a scalable `MEDIA_FILES` + `MEDIA_LINKS` architecture for attachments.
+- **Image Compression System**: Client-side automatic image compression using `browser-image-compression` with 6 predefined presets (project-cover, sitelog-photo, course-cover, avatar, document, default). Reduces bandwidth by ~60-80%, speeds up uploads, and cuts storage costs. Implemented across all upload components with robust error handling and size validation. See `prompts/Upload.md` for full documentation.
 - **Public Media Access**: Course images (cover, instructor, OG) use `is_public` flag in `media_links` for public accessibility. Course media automatically marked as public, enabling display on unauthenticated landing pages while keeping organizational media protected.
 - **Project Selector Filtering**: The header project selector (`ProjectSelectorButton`) exclusively displays projects with `status='active'` to enhance usability in large portfolios.
 - **Project Activity Tracking**: `last_active_at` timestamp tracks when a project was last selected, influencing project sorting in active lists.
@@ -64,3 +65,4 @@ Preferred communication style: Simple, everyday language.
 - **OpenAI**: GPT-4o for AI-powered features.
 - **Google Maps Platform**: For location services and interactive maps.
 - **yet-another-react-lightbox**: Unified media lightbox.
+- **browser-image-compression**: Client-side image compression for optimized uploads.
