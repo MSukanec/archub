@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
-import { FormModalHeader } from '../../form/FormModalHeader';
-import { FormModalFooter } from '../../form/FormModalFooter';
-import { FormModalLayout } from '../../form/FormModalLayout';
-import { useModalPanelStore } from '../../form/modalPanelStore';
+import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
+import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
+import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
+import { useModalPanelStore } from '@/components/modal/form/modalPanelStore';
 import { TaskSelectionTable, SelectedTask } from '@/components/ui-custom/TaskSelectionTable';
 import { useBudgetTasks } from '@/hooks/use-budget-tasks';
 import { useCurrentUser } from '@/hooks/use-current-user';

@@ -3,17 +3,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { List } from "lucide-react";
-import { FormModalHeader } from "../../form/FormModalHeader";
-import { FormModalFooter } from "../../form/FormModalFooter";
-import { FormModalLayout } from "../../form/FormModalLayout";
-import FormModalBody from "../../form/FormModalBody";
+import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
+import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
+import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
+import FormModalBody from '@/components/modal/form/FormModalBody';
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useCreateKanbanList, useUpdateKanbanList } from "@/hooks/use-kanban";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/features/organization";
 import { useToast } from "@/hooks/use-toast";
-import { useModalPanelStore } from "../../form/modalPanelStore";
+import { useModalPanelStore } from '@/components/modal/form/modalPanelStore';
 
 const listSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),

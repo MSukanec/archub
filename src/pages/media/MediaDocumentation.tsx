@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { DocumentExplorer } from '@/components/ui-custom/DocumentExplorer';
 import { DocumentInfo } from '@/components/ui-custom/DocumentInfo';
-import { DocumentPreviewModal } from '@/components/modal/modals/project/DocumentPreviewModal';
+import { DocumentPreviewModal } from '@/features/projects';
 import { UnifiedViewer } from '@/components/viewers/UnifiedViewer';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';

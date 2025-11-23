@@ -27,5 +27,6 @@ export * from './components/FinancialStatsSection';
 export * from './components/PartnerStatsSection';
 
 // Modals
-// TODO: Export modals when created
-// export * from './modals/FinancialMovementModal';
+export { MovementModal } from './modals/movements/MovementModal';
+export { MovementModalView } from './modals/movements/MovementModalView';
+export { MovementImportStepModal } from './modals/movements/MovementImportStepModal';

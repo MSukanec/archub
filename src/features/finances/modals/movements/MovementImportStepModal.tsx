@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDropzone } from 'react-dropzone'
 import * as XLSX from 'xlsx'
+// @ts-ignore
 import Papa from 'papaparse'
 import { Upload, FileText, AlertCircle, CheckCircle, X, RefreshCcw, ChevronRight, ArrowRight, Plus } from 'lucide-react'
 import { FormModalLayout, FormModalStepHeader, FormModalStepFooter } from '@/components/modal/form'
@@ -341,7 +342,7 @@ const SMART_COLUMN_MAPPING: { [key: string]: string } = {
   'rate': 'exchange_rate'
 }
 
-export default function MovementImportStepModal({ modalData, onClose }: MovementImportStepModalProps) {
+export function MovementImportStepModal({ modalData, onClose }: MovementImportStepModalProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const [parsedData, setParsedData] = useState<ParsedData | null>(null)
   const [columnMapping, setColumnMapping] = useState<ColumnMapping>({})
@@ -717,7 +718,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       } else {
         // CSV processing
         Papa.parse(file, {
-          complete: (results) => {
+          complete: (results: any) => {
             if (results.data.length > 0) {
               const headers = results.data[0] as string[]
               const rows = results.data.slice(1) as any[][]
@@ -758,7 +759,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
 
   // Dropzone configuration
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    key: dropzoneKey,
     onDrop: (acceptedFiles) => {
       if (acceptedFiles.length > 0) {
         processFile(acceptedFiles[0])
@@ -933,7 +933,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           description: 'Movimiento importado',
           amount: 0,
           movement_date: new Date().toISOString().split('T')[0],
-          organization_id: currentUser.organization.id,
+          organization_id: currentUser.organization?.id,
           project_id: modalData?.projectId || currentUser.preferences?.last_project_id,
           created_by: selectedMember.id, // Use organization_member.id instead of user.id
           is_favorite: false
@@ -1284,7 +1284,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
 
   // Helper function to get available options for each field type
   const getAvailableOptionsForField = (fieldName: string) => {
-    let options = []
+    let options: any[] = []
     switch (fieldName) {
       case 'type_id':
         options = types.map(t => ({ id: t.id, name: t.name }))

@@ -1,29 +1,39 @@
 import { useGlobalModalStore } from './useGlobalModalStore';
 import { FormModalLayout } from './FormModalLayout';
 import { Button } from '@/components/ui/button';
-import { MemberFormModal } from '../modals/organizations/MemberFormModal';
-import { GalleryFormModal } from '../modals/project/GalleryFormModal';
-import { BoardFormModal } from '../modals/organizations/BoardFormModal';
-import { CardFormModal } from '../modals/organizations/CardFormModal';
-import { ListFormModal } from '../modals/organizations/ListFormModal';
-import ContactModal from '../modals/resources/contacts/ContactModal'
-import { ContactModalView } from '../modals/resources/contacts/ContactModalView'
-import { ProjectModal } from '@/features/projects';
+import { 
+  MemberFormModal, 
+  BoardFormModal, 
+  CardFormModal, 
+  ListFormModal, 
+  OrganizationMovementConceptFormModal,
+  PartnerModal 
+} from '@/features/organization';
+import {
+  ProjectModal,
+  GalleryFormModal,
+  DocumentFolderFormModal,
+  DocumentUploadFormModal,
+  BudgetFormModal,
+  BudgetTaskFormModal,
+  ConstructionPhaseFormModal,
+  ConstructionTaskScheduleModal,
+  DependencyConnectionModal,
+  IndirectModal,
+  InsuranceFormModal,
+  RenewInsuranceFormModal,
+  TaskMultiModal,
+  BudgetItemModal
+} from '@/features/projects';
+import { ContactFormModal, ContactModalView } from '@/features/contacts';
 import ClientObligationModal from '../modals/general/clients/ClientObligationModal';
-import { DocumentUploadFormModal } from '../modals/project/DocumentUploadFormModal';
-import { DocumentFolderFormModal } from '../modals/project/DocumentFolderFormModal';
-import { MovementModal } from '../modals/finances/movements/MovementModal'
-import { MovementModalView } from '../modals/finances/movements/MovementModalView';
+import { 
+  MovementModal, 
+  MovementModalView,
+  MovementImportStepModal 
+} from '@/features/finances';
 import MovementConceptFormModal from '../modals/admin/MovementConceptFormModal';
-import { OrganizationMovementConceptFormModal } from '../modals/organizations/OrganizationMovementConceptFormModal';
-
-import MovementImportStepModal from '../modals/finances/movements/MovementImportStepModal';
 import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
-import { BudgetFormModal } from '../modals/construction/BudgetModal';
-import { TaskMultiModal } from '../modals/construction/tasks/TaskMultiModal';
-import { BudgetItemModal } from '../modals/construction/tasks/BudgetItemModal';
-import { ConstructionTaskScheduleModal } from '../modals/construction/ConstructionTaskScheduleModal';
-import { ConstructionPhaseFormModal } from '../modals/construction/ConstructionPhaseFormModal';
 
 import ClientPaymentsModal from '@/features/clients/modals/ClientPaymentsModal';
 import { ClientCommitmentModal } from '@/features/clients/modals/ClientCommitmentModal';
@@ -32,8 +42,6 @@ import { MaterialFormModal } from '../modals/admin/MaterialFormModal'
 import { MaterialCategoryFormModal } from '../modals/admin/MaterialCategoryFormModal';
 import { BrandFormModal } from '../modals/admin/BrandFormModal';
 import { UnitPresentationFormModal } from '../modals/admin/UnitPresentationFormModal';
-import { DependencyConnectionModal } from '../modals/construction/DependencyConnectionModal';
-import { BudgetTaskFormModal } from '../modals/construction/BudgetTaskFormModal';
 import { TaskCategoryFormModal } from '../modals/admin/TaskCategoryFormModal';
 import { TaskDivisionFormModal } from '../modals/admin/TaskDivisionFormModal';
 import { TaskParameterFormModal } from '../modals/admin/TaskParameterFormModal';
@@ -64,15 +72,11 @@ import {
   SubcontractAwardModal,
   SubcontractTaskFormModal,
 } from '@/features/subcontracts';
-import { InsuranceFormModal } from '../modals/construction/InsuranceFormModal';
-import { RenewInsuranceFormModal } from '../modals/construction/RenewInsuranceFormModal';
-import { PartnerModal } from '../modals/organizations/members/PartnerModal';
 import { ProjectClientModal } from '@/features/clients/modals/ClientDataModal';
 import { PDFExporterModal } from '../modals/PDFExporterModal';
 import { ProviderProductModal } from '../modals/providers/ProviderProductModal';
 import { ProductModal } from '../modals/analysis/ProductModal';
 import { AdminProductModal } from '../modals/admin/AdminProductModal';
-import { IndirectModal } from '../modals/construction/IndirectModal';
 import { GeneralCostsModal } from '@/features/general-costs/modals/GeneralCostsModal';
 import { GeneralCostsPaymentModal } from '@/features/general-costs/modals/GeneralCostsPaymentModal';
 import { AdminLaborModal } from '../modals/admin/AdminLaborModal';
@@ -112,8 +116,8 @@ export function ModalFactory() {
       if (data?.viewingContact) {
         return <ContactModalView modalData={data} onClose={closeModal} />;
       }
-      // En cualquier otro caso (crear/editar), mostrar ContactModal
-      return <ContactModal modalData={data || undefined} onClose={closeModal} />;
+      // En cualquier otro caso (crear/editar), mostrar ContactFormModal
+      return <ContactFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'project':
       return <ProjectModal modalData={data || undefined} onClose={closeModal} />;
     case 'project-client':
@@ -135,13 +139,13 @@ export function ModalFactory() {
     case 'budget':
       return <BudgetFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'construction-task':
-      return <TaskMultiModal modalData={data || {}} onClose={closeModal} />;
+      return <TaskMultiModal modalData={data as any || {}} onClose={closeModal} />;
     case 'budget-item':
-      return <BudgetItemModal modalData={data || {}} onClose={closeModal} />;
+      return <BudgetItemModal modalData={data as any || {}} onClose={closeModal} />;
     case 'construction-task-schedule':
-      return <ConstructionTaskScheduleModal modalData={data || {}} onClose={closeModal} />;
+      return <ConstructionTaskScheduleModal modalData={data as any || {}} onClose={closeModal} />;
     case 'construction-phase':
-      return <ConstructionPhaseFormModal modalData={data || {}} onClose={closeModal} />;
+      return <ConstructionPhaseFormModal modalData={data as any || {}} onClose={closeModal} />;
     case 'organization':
       return <OrganizationFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'material-form':
@@ -174,7 +178,7 @@ export function ModalFactory() {
         isLoading={data?.isLoading || false}
       />;
     case 'installment':
-      return <ClientPaymentsModal modalData={data || {}} onClose={closeModal} />;
+      return <ClientPaymentsModal modalData={data as any || {}} onClose={closeModal} />;
     case 'dependency-connection':
       return <DependencyConnectionModal modalData={data || {}} onClose={closeModal} />;
     case 'budget-task-bulk-add':
@@ -227,22 +231,22 @@ export function ModalFactory() {
     case 'add-parameter-to-canvas':
       return <AddParameterToCanvasModal />;
     case 'subcontract':
-      return <SubcontractFormModal modalData={data || {}} onClose={closeModal} />;
+      return <SubcontractFormModal modalData={data as any || {}} />;
     case 'subcontract-bid':
       return <SubcontractBidFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'subcontract-award':
-      return <SubcontractAwardModal modalData={data || undefined} onClose={closeModal} />;
+      return <SubcontractAwardModal modalData={data as any || undefined} onClose={closeModal} />;
     case 'subcontract-task':
       return <SubcontractTaskFormModal modalData={data || undefined} onClose={closeModal} />;
 
     case 'insurance':
       return <InsuranceFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'renew-insurance':
-      return <RenewInsuranceFormModal modalData={data || undefined} onClose={closeModal} />;
+      return <RenewInsuranceFormModal modalData={data as any || undefined} onClose={closeModal} />;
     case 'client-payment':
-      return <ClientPaymentsModal modalData={data || undefined} onClose={closeModal} />;
+      return <ClientPaymentsModal modalData={data as any || undefined} onClose={closeModal} />;
     case 'client-commitment':
-      return <ClientCommitmentModal modalData={data || undefined} onClose={closeModal} />;
+      return <ClientCommitmentModal modalData={data as any || undefined} onClose={closeModal} />;
     case 'clientRole':
       return <ClientRoleModal modalData={data || undefined} onClose={closeModal} />;
     case 'pdf-exporter':
@@ -256,7 +260,7 @@ export function ModalFactory() {
     case 'general-costs':
       return <GeneralCostsModal modalData={data || {}} onClose={closeModal} />;
     case 'general-costs-payment':
-      return <GeneralCostsPaymentModal modalData={data || {}} onClose={closeModal} />;
+      return <GeneralCostsPaymentModal modalData={data as any || {}} onClose={closeModal} />;
     case 'labor-type-form':
       return <AdminLaborModal modalData={data || {}} onClose={closeModal} />;
     case 'cost-modal':

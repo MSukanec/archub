@@ -57,6 +57,20 @@ export { default as ProjectSelectorField } from './components/ProjectSelectorFie
 
 // ============ MODALS ============
 export * from './modals/ProjectModal';
+export { GalleryFormModal } from './modals/GalleryFormModal';
+export { DocumentFolderFormModal } from './modals/DocumentFolderFormModal';
+export { DocumentPreviewModal } from './modals/DocumentPreviewModal';
+export { DocumentUploadFormModal } from './modals/DocumentUploadFormModal';
+export { BudgetFormModal } from './modals/construction/BudgetModal';
+export { BudgetTaskFormModal } from './modals/construction/BudgetTaskFormModal';
+export { ConstructionPhaseFormModal } from './modals/construction/ConstructionPhaseFormModal';
+export { ConstructionTaskScheduleModal } from './modals/construction/ConstructionTaskScheduleModal';
+export { DependencyConnectionModal } from './modals/construction/DependencyConnectionModal';
+export { IndirectModal } from './modals/construction/IndirectModal';
+export { InsuranceFormModal } from './modals/construction/InsuranceFormModal';
+export { RenewInsuranceFormModal } from './modals/construction/RenewInsuranceFormModal';
+export { TaskMultiModal } from './modals/construction/tasks/TaskMultiModal';
+export { BudgetItemModal } from './modals/construction/tasks/BudgetItemModal';
 
 // ============ SUB-FEATURES ============
 // Project Types
