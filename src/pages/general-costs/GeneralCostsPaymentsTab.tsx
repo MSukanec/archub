@@ -13,7 +13,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useGeneralCostsPayments, useDeleteGeneralCostPayment, type GeneralCostPayment } from '@/hooks/use-general-costs-payments';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { GeneralCostPaymentRow } from '@/components/ui/data-row';
+import GeneralCostPaymentRow from '@/features/finances/components/GeneralCostPaymentRow';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext';
 import { useMobile } from '@/hooks/use-mobile';

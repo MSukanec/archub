@@ -1,5 +1,5 @@
 import React from 'react';
-import DataRowCard from '@/components/ui/data-row/DataRowCard';
+import DataRowCard from '@/components/ui-custom/general/DataRowCard';
 import { cn } from '@/lib/utils';
 import { Star, Crown, Zap } from 'lucide-react';
 import { getOrganizationInitials } from '@/utils/initials';

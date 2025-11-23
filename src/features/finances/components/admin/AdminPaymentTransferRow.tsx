@@ -1,4 +1,4 @@
-import DataRowCard from '@/components/ui/data-row/DataRowCard'
+import DataRowCard from '@/components/ui-custom/general/DataRowCard'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { format } from 'date-fns'

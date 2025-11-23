@@ -12,7 +12,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useGeneralCosts } from "@/features/general-costs/hooks/use-general-costs";
 import { useDeleteGeneralCost } from "@/features/general-costs/hooks/use-delete-general-cost";
 import { useGeneralCostsPayments } from "@/hooks/use-general-costs-payments";
-import GeneralCostRow from "@/components/ui/data-row/rows/GeneralCostRow";
+import GeneralCostRow from "@/features/finances/components/GeneralCostRow";
 import type { GeneralCost } from "@/features/general-costs/types";
 import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext';
 import { useMobile } from '@/hooks/use-mobile';

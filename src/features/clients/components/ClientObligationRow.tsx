@@ -1,4 +1,4 @@
-import DataRowCard, { DataRowCardProps } from '../DataRowCard';
+import DataRowCard, { DataRowCardProps } from '@/components/ui-custom/general/DataRowCard';
 
 // Interface para compromiso de cliente basada en la estructura de ClientObligations
 interface ClientObligation {

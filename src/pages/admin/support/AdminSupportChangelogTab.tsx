@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast'
 import { Edit, Trash2, FileText } from 'lucide-react'
 import { formatDateCompact } from '@/lib/date-utils'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import AdminChangelogRow from '@/components/ui/data-row/rows/AdminChangelogRow'
+import AdminChangelogRow from '@/features/users/components/admin/AdminChangelogRow'
 
 interface ChangelogEntry {
   id: string;

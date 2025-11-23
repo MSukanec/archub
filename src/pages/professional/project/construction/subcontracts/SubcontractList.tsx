@@ -14,7 +14,8 @@ import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import { useSubcontracts, useDeleteSubcontract, useSubcontractAnalysis, SubcontractRow } from "@/features/subcontracts";
+import { useSubcontracts, useDeleteSubcontract, useSubcontractAnalysis } from "@/features/subcontracts";
+import SubcontractRow from "@/features/subcontracts/components/SubcontractRow";
 import { useQuery } from '@tanstack/react-query';
 import { useMobile } from '@/hooks/use-mobile';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';

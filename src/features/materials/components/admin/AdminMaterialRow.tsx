@@ -1,5 +1,5 @@
 import React from 'react';
-import DataRowCard from '@/components/ui/data-row/DataRowCard';
+import DataRowCard from '@/components/ui-custom/general/DataRowCard';
 import { Badge } from '@/components/ui/badge';
 
 // Interface para el material usando la estructura actual de materials_view

@@ -1,4 +1,4 @@
-import DataRowCard, { DataRowCardProps } from '../DataRowCard';
+import DataRowCard, { DataRowCardProps } from '@/components/ui-custom/general/DataRowCard';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -44,6 +44,7 @@ interface Movement {
   subcontract?: string;
   client?: string;
   member?: string;
+  personnel?: string;
   indirect?: string;
   general_cost?: string;
   

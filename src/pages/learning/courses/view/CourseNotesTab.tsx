@@ -13,7 +13,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { NoteRow } from '@/components/ui/data-row/rows';
+import NoteRow from '@/features/learning/components/NoteRow';
 
 interface CourseNotesTabProps {
   courseId: string;

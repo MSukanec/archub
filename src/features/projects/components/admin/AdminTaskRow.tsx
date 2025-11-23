@@ -1,5 +1,5 @@
-import DataRowCard, { DataRowCardProps } from '../DataRowCard';
-import { TaskCostPopover } from '@/components/popovers/TaskCostPopover';
+import DataRowCard, { DataRowCardProps } from '@/components/ui-custom/general/DataRowCard';
+import { TaskCostPopover } from '@/features/projects/components/TaskCostPopover';
 import TaskLaborCost from '@/components/construction/TaskLaborCost';
 import TaskMaterialsSubtotal from '@/components/construction/TaskMaterialsSubtotal';
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal';

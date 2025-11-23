@@ -401,7 +401,7 @@ export function EditableParametersTable() {
                   </span>
                 )}
                 {param.hasCircularDependency && (
-                  <AlertTriangle className="h-3 w-3 text-yellow-500" title="Dependencia circular detectada" />
+                  <AlertTriangle className="h-3 w-3 text-yellow-500" />
                 )}
               </div>
             )}

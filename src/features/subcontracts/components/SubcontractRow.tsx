@@ -1,4 +1,4 @@
-import DataRowCard, { DataRowCardProps } from '@/components/ui/data-row/DataRowCard';
+import DataRowCard, { DataRowCardProps } from '@/components/ui-custom/general/DataRowCard';
 
 interface Subcontract {
   id: string;

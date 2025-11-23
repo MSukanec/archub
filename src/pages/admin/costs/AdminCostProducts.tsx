@@ -4,7 +4,7 @@ import { es } from 'date-fns/locale'
 import { toast } from '@/hooks/use-toast'
 import { useProducts, Product, useDeleteProduct } from '@/hooks/use-products'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { AdminProductRow } from '@/features/materials'
+import AdminProductRow from '@/features/materials/components/admin/AdminProductRow'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

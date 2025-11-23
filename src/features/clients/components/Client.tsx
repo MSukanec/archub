@@ -1,4 +1,4 @@
-import DataRowCard from '../DataRowCard';
+import DataRowCard from '@/components/ui-custom/general/DataRowCard';
 import SwipeableCard from '@/layout/mobile/SwipeableCard';
 import { Edit, Trash2, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';

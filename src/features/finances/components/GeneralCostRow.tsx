@@ -1,5 +1,5 @@
 import React from 'react';
-import DataRowCard from '../DataRowCard';
+import DataRowCard from '@/components/ui-custom/general/DataRowCard';
 import SwipeableCard from '@/layout/mobile/SwipeableCard';
 import { Edit, Trash2 } from 'lucide-react';
 import type { GeneralCost } from '@/features/general-costs/types';

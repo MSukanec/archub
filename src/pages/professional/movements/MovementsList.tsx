@@ -39,8 +39,9 @@ import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 
 import { PlanRestricted } from "@/features/users";
 
-import { TransferGroup } from "@/components/ui/data-row";
-import { MovementRow, ConversionRow, TransferRow } from "@/components/ui/data-row";
+import TransferRow, { type TransferGroup } from "@/features/finances/components/TransferRow";
+import MovementRow from "@/features/finances/components/MovementRow";
+import ConversionRow, { type ConversionGroup } from "@/features/finances/components/ConversionRow";
 import SwipeableCard from "@/layout/mobile/SwipeableCard";
 import { Star } from "lucide-react";
 
@@ -130,26 +131,6 @@ interface Movement {
     email: string;
     avatar_url?: string;
   };
-}
-
-interface ConversionGroup {
-  id: string;
-  conversion_group_id: string;
-  movements: Movement[];
-  from_currency: string;
-  to_currency: string;
-  from_amount: number;
-  to_amount: number;
-  description: string;
-  movement_date: string;
-  created_at: string;
-  creator?: {
-    id: string;
-    full_name?: string;
-    email: string;
-    avatar_url?: string;
-  };
-  is_conversion_group: true;
 }
 
 export default function MovementsList() {
@@ -513,14 +494,17 @@ export default function MovementsList() {
     }
   };
 
+  // Type predicate to filter out null/undefined values
+  const notEmpty = <T,>(value: T | null | undefined): value is T => value !== null && value !== undefined;
+
   // Get unique types, categories, and subcategories from actual data
   const availableTypes = useMemo(() => Array.from(
-    new Set(movements.map((m) => m.movement_data?.type?.name).filter(Boolean)),
+    new Set(movements.map((m) => m.movement_data?.type?.name).filter(notEmpty)),
   ), [movements]);
 
   const availableCategories = useMemo(() => Array.from(
     new Set(
-      movements.map((m) => m.movement_data?.category?.name).filter(Boolean),
+      movements.map((m) => m.movement_data?.category?.name).filter(notEmpty),
     ),
   ), [movements]);
 
@@ -528,7 +512,7 @@ export default function MovementsList() {
 
   const availableSubcategories = useMemo(() => Array.from(
     new Set(
-      movements.map((m) => m.movement_data?.subcategory?.name).filter(Boolean),
+      movements.map((m) => m.movement_data?.subcategory?.name).filter(notEmpty),
     ),
   ), [movements]);
 
@@ -541,7 +525,7 @@ export default function MovementsList() {
         movements
           .filter(m => m.movement_data?.category?.name === categoryName)
           .map(m => m.movement_data?.subcategory?.name)
-          .filter(Boolean)
+          .filter(notEmpty)
       )
     );
   };
@@ -550,13 +534,13 @@ export default function MovementsList() {
 
   const availableCurrencies = useMemo(() => Array.from(
     new Set(
-      movements.map((m) => m.movement_data?.currency?.name).filter(Boolean),
+      movements.map((m) => m.movement_data?.currency?.name).filter(notEmpty),
     ),
   ), [movements]);
 
   const availableWallets = useMemo(() => Array.from(
     new Set(
-      movements.map((m) => m.movement_data?.wallet?.name).filter(Boolean),
+      movements.map((m) => m.movement_data?.wallet?.name).filter(notEmpty),
     ),
   ), [movements]);
 
@@ -725,7 +709,9 @@ export default function MovementsList() {
             description: egresoMovement.description,
             movement_date: egresoMovement.movement_date,
             created_at: egresoMovement.created_at,
-            creator: egresoMovement.creator,
+            creator: egresoMovement.creator && 'email' in egresoMovement.creator 
+              ? egresoMovement.creator 
+              : undefined,
             is_conversion_group: true
           };
           result.push(conversionGroup);
@@ -751,7 +737,9 @@ export default function MovementsList() {
             description: egresoMovement.description,
             movement_date: egresoMovement.movement_date,
             created_at: egresoMovement.created_at,
-            creator: egresoMovement.creator,
+            creator: egresoMovement.creator && 'email' in egresoMovement.creator 
+              ? egresoMovement.creator 
+              : undefined,
             is_transfer_group: true
           };
           result.push(transferGroup);
@@ -845,7 +833,7 @@ export default function MovementsList() {
       width: "8%",
       sortable: true,
       sortType: "string" as const,
-      render: (item: Movement | ConversionGroup) => {
+      render: (item: Movement | ConversionGroup | TransferGroup) => {
         // Para grupos de conversión y transferencia, usar el project_id del primer movimiento
         let itemProjectId: string | null = null;
         
@@ -870,7 +858,7 @@ export default function MovementsList() {
       width: "10%",
       sortable: true,
       sortType: "date" as const,
-      render: (item: Movement | ConversionGroup) => {
+      render: (item: Movement | ConversionGroup | TransferGroup) => {
         const displayDate = item.movement_date;
 
         // Formatear fecha
@@ -892,13 +880,13 @@ export default function MovementsList() {
               <AvatarImage src={item.creator?.avatar_url} />
               <AvatarFallback className="text-xs">
                 {item.creator?.full_name?.charAt(0) ||
-                  item.creator?.email?.charAt(0) ||
+                  (item.creator && 'email' in item.creator ? item.creator.email?.charAt(0) : undefined) ||
                   "U"}
               </AvatarFallback>
             </Avatar>
             <span className="text-xs text-muted-foreground truncate">
               {item.creator?.full_name || 
-               item.creator?.email || 
+               (item.creator && 'email' in item.creator ? item.creator.email : undefined) || 
                "Usuario"}
             </span>
           </div>
@@ -918,7 +906,7 @@ export default function MovementsList() {
       width: "8%",
       sortable: true,
       sortType: "string" as const,
-      render: (item: Movement | ConversionGroup) => {
+      render: (item: Movement | ConversionGroup | TransferGroup) => {
         if ('is_conversion_group' in item) {
           return (
             <div className="space-y-0.5">
@@ -1047,9 +1035,10 @@ export default function MovementsList() {
         }
         
         if ('is_transfer_group' in item) {
+          const firstMovement = item.movements[0];
           return (
             <div className="text-xs">
-              <div>{item.currency}</div>
+              <div>{firstMovement?.movement_data?.currency?.code || "USD"}</div>
             </div>
           );
         }

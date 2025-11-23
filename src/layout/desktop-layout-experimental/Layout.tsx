@@ -25,8 +25,8 @@ import { useProjectAccentColor } from "@/hooks/use-project-accent-color";
 import { useContentBackground } from "@/hooks/use-content-background";
 import { FloatingAIChat } from "@/components/ui-custom/layout/FloatingAIChat";
 import { FloatingCourseLessons } from "@/features/learning";
-import { InvitationModal } from "@/components/invitations/InvitationModal";
-import { OrganizationRemovedModal } from "@/components/invitations/OrganizationRemovedModal";
+import { InvitationModal } from "@/features/users/modals/InvitationModal";
+import { OrganizationRemovedModal } from "@/features/organization/modals/OrganizationRemovedModal";
 import { usePendingInvitations } from "@/hooks/use-pending-invitations";
 // TEMPORALMENTE DESHABILITADO - GlobalAnnouncement no se usa por ahora
 // import { GlobalAnnouncement, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, AnnouncementProvider } from "@/components/ui-custom/layout/GlobalAnnouncement";

@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { queryClient } from '@/lib/queryClient'
-import { ClientPaymentRow } from '@/components/ui/data-row'
+import ClientPaymentRow from '@/features/clients/components/ClientPaymentRow'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard'
 import {
   useClientPayments,

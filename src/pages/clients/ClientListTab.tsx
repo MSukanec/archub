@@ -15,7 +15,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMobile } from '@/hooks/use-mobile'
-import ClientRow from '@/components/ui/data-row/rows/Client'
+import ClientRow from '@/features/clients/components/Client'
 import {
   useClientDashboard,
   useDeleteProjectClient,

@@ -1,5 +1,5 @@
 import React from 'react';
-import DataRowCard from '@/components/ui/data-row/DataRowCard';
+import DataRowCard from '@/components/ui-custom/general/DataRowCard';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
 
