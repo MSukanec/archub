@@ -6,11 +6,11 @@
 export const LEARNING_QUERY_KEYS = {
   // Dashboard
   dashboard: ['learning', 'dashboard'] as const,
-  dashboardFast: ['learning', 'dashboard', 'fast', 'v2'] as const, // v2: Fixed image loading with supabaseAdmin
+  dashboardFast: ['learning', 'dashboard', 'fast'] as const,
   
   // Courses
   courses: ['learning', 'courses'] as const,
-  coursesFull: ['learning', 'courses', 'full', 'v2'] as const, // v2: Fixed image loading with supabaseAdmin
+  coursesFull: ['learning', 'courses', 'full'] as const,
   course: (courseId: string) => ['learning', 'courses', courseId] as const,
   courseOverview: (courseId: string) => ['learning', 'courses', courseId, 'overview'] as const,
   courseStructure: (courseId: string) => ['learning', 'courses', courseId, 'structure'] as const,
