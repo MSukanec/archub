@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Eye, Edit, Trash2, Phone, Mail, Share2, Building, MapPin, Globe, User, FileText } from 'lucide-react';
-import { ContactAttachmentsPanel } from '@/features/contacts/components/ContactAttachmentsPanel';
+import { ContactAttachmentsPanel } from '@/features/contacts';
 import { cn } from '@/lib/utils';
 
 interface ContactModalViewProps {
@@ -62,7 +62,7 @@ export function ContactModalView({ modalData, onClose, onEdit, onDelete }: Conta
     const name = getDisplayName();
     return name
       .split(' ')
-      .map(word => word.charAt(0))
+      .map((word: string) => word.charAt(0))
       .join('')
       .toUpperCase()
       .slice(0, 2);

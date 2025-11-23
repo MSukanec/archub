@@ -12,7 +12,7 @@ import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
 import { FormSubsectionButton } from "@/components/modal/form/FormSubsectionButton";
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
 import { ContactAttachmentsForm } from "./forms/ContactAttachmentsForm";
-import { ContactAttachmentsPanel } from "@/features/contacts/components/ContactAttachmentsPanel";
+import { ContactAttachmentsPanel } from "@/features/contacts";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

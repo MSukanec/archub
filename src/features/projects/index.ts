@@ -55,6 +55,9 @@ export { default as ProjectItemCard } from './components/ProjectItemCard';
 export { default as ProjectColorAdvanced } from './components/ProjectColorAdvanced';
 export { default as ProjectSelectorField } from './components/ProjectSelectorField';
 
+// Gantt Components
+export * from './components/gantt';
+
 // ============ MODALS ============
 export * from './modals/ProjectModal';
 export { GalleryFormModal } from './modals/GalleryFormModal';

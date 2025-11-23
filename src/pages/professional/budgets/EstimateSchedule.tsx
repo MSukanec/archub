@@ -18,8 +18,7 @@ import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { GanttContainer } from '@/components/gantt/GanttContainer'
-import { GanttRowProps } from '@/components/gantt/types'
+import { GanttContainer, GanttRowProps } from '@/features/projects'
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
 
 import { PlanRestricted } from "@/features/users"

@@ -228,7 +228,7 @@ export function ContactAttachmentsPanel({ contactId, contact, showUpload = true 
 
       {attachments.length === 0 ? (
         <EmptyState
-          icon={FileText}
+          icon={<FileText />}
           title="No hay archivos adjuntos"
           description="Sube archivos usando el área de arriba"
         />

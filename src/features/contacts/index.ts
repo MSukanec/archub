@@ -7,7 +7,7 @@ export * from './mappers';
 export * from './utils';
 
 export { ContactAvatarUploader } from './components/ContactAvatarUploader';
-export { ContactAttachmentsPanel } from './components/ContactAttachmentsPanel';
+export { ContactAttachmentsPanel } from './components/attachments/ContactAttachmentsPanel';
 export { default as ContactRow } from './components/ContactRow';
 export { default as ContactList } from './components/ContactList';
 

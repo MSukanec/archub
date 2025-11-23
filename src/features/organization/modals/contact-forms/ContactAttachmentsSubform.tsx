@@ -1,5 +1,5 @@
 import React from 'react'
-import { ContactAttachmentsPanel } from '@/components/contacts/ContactAttachmentsPanel'
+import { ContactAttachmentsPanel } from '@/features/contacts'
 
 interface ContactAttachmentsSubformProps {
   contactId: string

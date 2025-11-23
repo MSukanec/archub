@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { MapPin, Building2, Navigation, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
-import { GooglePlacesAutocomplete, GoogleMap } from '@/components/google-maps'
+import { GooglePlacesAutocomplete, GoogleMap } from '@/components/ui-custom/integrations/google-maps'
 
 interface ProjectLocationTabProps {
   projectId?: string;
@@ -187,7 +187,7 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
     setLat(newLat);
 
     // If both lat and lng are valid, do reverse geocoding
-    if (newLat !== null && lng !== null && googleMapsApiKey && window.google) {
+    if (newLat !== null && lng !== null && googleMapsApiKey && (window as any).google) {
       await performReverseGeocoding(newLat, lng);
     }
   };
@@ -198,7 +198,7 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
     setLng(newLng);
 
     // If both lat and lng are valid, do reverse geocoding
-    if (lat !== null && newLng !== null && googleMapsApiKey && window.google) {
+    if (lat !== null && newLng !== null && googleMapsApiKey && (window as any).google) {
       await performReverseGeocoding(lat, newLng);
     }
   };
@@ -206,7 +206,7 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
   // Reverse geocoding helper function
   const performReverseGeocoding = async (latitude: number, longitude: number) => {
     try {
-      const geocoder = new google.maps.Geocoder();
+      const geocoder = new (window as any).google.maps.Geocoder();
       const response = await geocoder.geocode({
         location: { lat: latitude, lng: longitude }
       });
@@ -225,7 +225,7 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
         let newCountry = '';
         let newZipCode = '';
 
-        components.forEach((component) => {
+        components.forEach((component: any) => {
           const types = component.types;
           if (types.includes('locality')) {
             newCity = component.long_name;
@@ -255,7 +255,7 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
     setLng(newLng);
 
     // Use the helper function for reverse geocoding
-    if (googleMapsApiKey && window.google) {
+    if (googleMapsApiKey && (window as any).google) {
       await performReverseGeocoding(newLat, newLng);
       toast({
         title: "Ubicación actualizada",
