@@ -81,7 +81,6 @@ export { TaskParameterOptionFormModal } from './modals/admin/TaskParameterOption
 export { ParameterVisibilityConfigModal } from './modals/admin/ParameterVisibilityConfigModal';
 export { AddParameterToCanvasModal } from './modals/admin/AddParameterToCanvasModal';
 export { TaskModal } from './modals/admin/TaskModal';
-export { PDFExporterModal } from './modals/PDFExporterModal';
 
 // ============ SUB-FEATURES ============
 // Project Types

@@ -43,3 +43,6 @@ export { UserQuickAccess } from './components/fields/UserQuickAccess';
 
 // Admin Components
 export { default as AdminUserRow } from './components/admin/AdminUserRow';
+
+// Onboarding Components
+export { Step1UserData } from './components/onboarding/Step1UserData';

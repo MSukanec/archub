@@ -3,7 +3,7 @@ import { FileText, Download, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Chevron
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
-import { PdfDocument } from '@/components/pdf/PdfDocument';
+import { PdfDocument } from '../components/PdfDocument';
 import { PDFDownloadLink, pdf } from '@react-pdf/renderer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { PdfBlock } from '@/components/pdf/types';
+import { PdfBlock } from '../types/types';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';

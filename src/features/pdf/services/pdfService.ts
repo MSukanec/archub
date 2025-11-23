@@ -1,6 +1,6 @@
-import { PdfHeader } from './blocks/PdfHeader';
-import { PdfFooter } from './blocks/PdfFooter';
-import { PdfBudgetTable } from './blocks/PdfBudgetTable';
+import { PdfHeader } from '../components/blocks/PdfHeader';
+import { PdfFooter } from '../components/blocks/PdfFooter';
+import { PdfBudgetTable } from '../components/blocks/PdfBudgetTable';
 
 export const pdfBlocks = {
   header: PdfHeader,

@@ -16,7 +16,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { PDFDownloadLink } from '@react-pdf/renderer';
-import { InvoicePDF } from '@/components/pdf/InvoicePDF';
+import { InvoicePDF } from '@/features/pdf';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser, refreshCurrentUserCache } from '@/hooks/use-current-user';
 import { queryClient, apiRequest } from '@/lib/queryClient';

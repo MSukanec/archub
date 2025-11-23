@@ -89,7 +89,8 @@ import {
   SubcontractTaskFormModal,
 } from '@/features/subcontracts';
 import { ProjectClientModal } from '@/features/clients';
-import { PDFExporterModal, TaskModal } from '@/features/projects';
+import { TaskModal } from '@/features/projects';
+import { PDFExporterModal } from '@/features/pdf';
 import { GeneralCostsModal } from '@/features/general-costs/modals/GeneralCostsModal';
 import { GeneralCostsPaymentModal } from '@/features/general-costs/modals/GeneralCostsPaymentModal';
 import { CourseModal, CourseModuleFormModal, LessonFormModal, CourseEnrollmentModal, CouponFormModal, PaymentMethodModal } from '@/features/learning';

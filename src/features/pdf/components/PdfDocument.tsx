@@ -1,7 +1,7 @@
 import React from 'react';
 import { Document, Page, StyleSheet } from '@react-pdf/renderer';
-import { PdfBlock } from './types';
-import { pdfBlocks } from './pdfService';
+import { PdfBlock } from '../types/types';
+import { pdfBlocks } from '../services/pdfService';
 
 const styles = StyleSheet.create({
   page: {

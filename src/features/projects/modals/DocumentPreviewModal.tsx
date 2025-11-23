@@ -5,7 +5,7 @@ import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Download, ExternalLink, FileText } from 'lucide-react';
-import { PdfViewer } from '@/components/viewers/PdfViewer';
+import { PdfViewer } from '@/features/pdf';
 import { ImageViewer } from '@/components/viewers/ImageViewer';
 
 interface DocumentPreviewModalProps {
