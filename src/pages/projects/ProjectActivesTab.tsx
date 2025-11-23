@@ -12,7 +12,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
-import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
+import { PlanRestricted } from '@/features/users'
 import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
 

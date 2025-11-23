@@ -15,11 +15,10 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useLocation } from 'wouter'
-import { useOrganizationMembers } from '@/features/organization'
+import { useOrganizationMembers, AdminOrganizationRow } from '@/features/organization'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { OrganizationMemberAvatars } from '@/components/ui-custom/general/OrganizationMemberAvatars'
 import { CompactAvatarGroup } from '@/components/ui-custom/general/CompactAvatarGroup'
-import { AdminOrganizationRow } from '@/components/ui/data-row/rows'
 import { useMobile } from '@/hooks/use-mobile'
 
 // Componente para una sola tarjeta de organización

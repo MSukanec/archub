@@ -10,7 +10,7 @@ import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useThemeStore } from "@/stores/themeStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useNavigationStore } from "@/stores/navigationStore";
-import { AuthModal } from "@/components/auth/AuthModal";
+import { AuthModal } from "@/features/users";
 import { Step1UserData } from "@/components/onboarding/Step1UserData";
 import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
 

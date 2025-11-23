@@ -33,7 +33,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useMobileMenuStore } from "./useMobileMenuStore";
 import { useProjects } from "@/hooks/use-projects";
-import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
+import { PlanRestricted } from "@/features/users";
 import { useProjectContext } from "@/stores/projectContext";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";

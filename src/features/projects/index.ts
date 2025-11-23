@@ -71,6 +71,17 @@ export { InsuranceFormModal } from './modals/construction/InsuranceFormModal';
 export { RenewInsuranceFormModal } from './modals/construction/RenewInsuranceFormModal';
 export { TaskMultiModal } from './modals/construction/tasks/TaskMultiModal';
 export { BudgetItemModal } from './modals/construction/tasks/BudgetItemModal';
+export { CostModal } from './modals/construction/tasks/CostModal';
+
+// Admin Modals
+export { TaskCategoryFormModal } from './modals/admin/TaskCategoryFormModal';
+export { TaskDivisionFormModal } from './modals/admin/TaskDivisionFormModal';
+export { TaskParameterFormModal } from './modals/admin/TaskParameterFormModal';
+export { TaskParameterOptionFormModal } from './modals/admin/TaskParameterOptionFormModal';
+export { ParameterVisibilityConfigModal } from './modals/admin/ParameterVisibilityConfigModal';
+export { AddParameterToCanvasModal } from './modals/admin/AddParameterToCanvasModal';
+export { TaskModal } from './modals/admin/TaskModal';
+export { PDFExporterModal } from './modals/PDFExporterModal';
 
 // ============ SUB-FEATURES ============
 // Project Types

@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useThemeStore } from "@/stores/themeStore";
-import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
+import { PlanRestricted } from "@/features/users";
 
 type Props = {
   initialHue?: number | null;

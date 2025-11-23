@@ -42,6 +42,20 @@ export * from './mappers/materialMapper';
 
 // ============ MODALS ============
 export { MaterialModal } from './modals/MaterialModal';
+export { ProviderProductModal } from './modals/ProviderProductModal';
+
+// Admin Modals
+export { MaterialFormModal } from './modals/admin/MaterialFormModal';
+export { MaterialCategoryFormModal } from './modals/admin/MaterialCategoryFormModal';
+export { BrandFormModal } from './modals/admin/BrandFormModal';
+export { AdminProductModal } from './modals/admin/AdminProductModal';
+export { UnitPresentationFormModal } from './modals/admin/UnitPresentationFormModal';
+export { ProductModal } from './modals/admin/ProductModal';
+
+// ============ COMPONENTS ============
+// Admin Components
+export { default as AdminMaterialRow } from './components/admin/AdminMaterialRow';
+export { default as AdminProductRow } from './components/admin/AdminProductRow';
 
 // ============ SUB-FEATURES ============
 // Material Categories

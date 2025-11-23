@@ -3,7 +3,7 @@ import { Layout } from '@/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 
-import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted"
+import { PlanRestricted } from "@/features/users"
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useConstructionMaterials } from '@/features/materials'

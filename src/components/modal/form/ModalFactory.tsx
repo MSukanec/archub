@@ -23,36 +23,53 @@ import {
   InsuranceFormModal,
   RenewInsuranceFormModal,
   TaskMultiModal,
-  BudgetItemModal
+  BudgetItemModal,
+  CostModal,
+  TaskCategoryFormModal,
+  TaskDivisionFormModal,
+  TaskParameterFormModal,
+  TaskParameterOptionFormModal,
+  ParameterVisibilityConfigModal,
+  AddParameterToCanvasModal
 } from '@/features/projects';
 import { ContactFormModal, ContactModalView } from '@/features/contacts';
-import ClientObligationModal from '../modals/general/clients/ClientObligationModal';
+import { 
+  ClientObligationModal,
+  ClientPaymentsModal,
+  ClientCommitmentModal,
+  ClientRoleModal
+} from '@/features/clients';
 import { 
   MovementModal, 
   MovementModalView,
-  MovementImportStepModal 
+  MovementImportStepModal,
+  MovementConceptFormModal,
+  BankTransferReceiptModal,
+  PaymentFormModal
 } from '@/features/finances';
-import MovementConceptFormModal from '../modals/admin/MovementConceptFormModal';
-import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
+import { default as DeleteConfirmationModal } from '@/components/ui-custom/general/DeleteConfirmationModal';
 
-import ClientPaymentsModal from '@/features/clients/modals/ClientPaymentsModal';
-import { ClientCommitmentModal } from '@/features/clients/modals/ClientCommitmentModal';
-import { ClientRoleModal } from '@/features/clients/modals/ClientRoleModal';
-import { MaterialFormModal } from '../modals/admin/MaterialFormModal'
-import { MaterialCategoryFormModal } from '../modals/admin/MaterialCategoryFormModal';
-import { BrandFormModal } from '../modals/admin/BrandFormModal';
-import { UnitPresentationFormModal } from '../modals/admin/UnitPresentationFormModal';
-import { TaskCategoryFormModal } from '../modals/admin/TaskCategoryFormModal';
-import { TaskDivisionFormModal } from '../modals/admin/TaskDivisionFormModal';
-import { TaskParameterFormModal } from '../modals/admin/TaskParameterFormModal';
+import { 
+  MaterialFormModal,
+  MaterialCategoryFormModal,
+  BrandFormModal,
+  UnitPresentationFormModal,
+  AdminProductModal,
+  ProductModal,
+  ProviderProductModal
+} from '@/features/materials';
 
-import { TaskParameterOptionFormModal } from '../modals/admin/TaskParameterOptionFormModal';
-
-import { TaskModal } from '../modals/analysis/TaskModal';
-import { UserFormModal } from '../modals/admin/UserFormModal';
-import { OrganizationFormModal } from '../modals/admin/OrganizationFormModal';
-import { ProfileOrganizationFormModal } from '../modals/profile/ProfileOrganizationFormModal';
-import { ChangelogFormModal } from '../modals/admin/ChangelogFormModal';
+import { OrganizationFormModal, ProfileOrganizationFormModal } from '@/features/organization';
+import { 
+  UserFormModal,
+  ChangelogFormModal,
+  NotificationFormModal,
+  AnnouncementFormModal,
+  SupportConversationStartModal,
+  PlanFormModal,
+  PlanPriceFormModal,
+  DowngradeModal
+} from '@/features/users';
 import { SiteLogModal } from '@/features/sitelog/modals/SiteLogModal';
 import { SiteLogModalView } from '@/features/sitelog/modals/SiteLogModalView';
 import { SiteLogTypeModal } from '@/features/sitelog/modals/SiteLogTypeModal';
@@ -63,34 +80,19 @@ import {
   PersonnelAddModal,
   PersonnelDataModal,
   PersonnelRatesModal,
+  AdminLaborModal,
 } from '@/features/personnel';
-import { ParameterVisibilityConfigModal } from '../modals/admin/ParameterVisibilityConfigModal';
-import { AddParameterToCanvasModal } from '../modals/admin/AddParameterToCanvasModal';
 import {
   SubcontractFormModal,
   SubcontractBidFormModal,
   SubcontractAwardModal,
   SubcontractTaskFormModal,
 } from '@/features/subcontracts';
-import { ProjectClientModal } from '@/features/clients/modals/ClientDataModal';
-import { PDFExporterModal } from '../modals/PDFExporterModal';
-import { ProviderProductModal } from '../modals/providers/ProviderProductModal';
-import { ProductModal } from '../modals/analysis/ProductModal';
-import { AdminProductModal } from '../modals/admin/AdminProductModal';
+import { ProjectClientModal } from '@/features/clients';
+import { PDFExporterModal, TaskModal } from '@/features/projects';
 import { GeneralCostsModal } from '@/features/general-costs/modals/GeneralCostsModal';
 import { GeneralCostsPaymentModal } from '@/features/general-costs/modals/GeneralCostsPaymentModal';
-import { AdminLaborModal } from '../modals/admin/AdminLaborModal';
-import { CostModal } from '../modals/admin/CostModal';
-import { CourseModal, CourseModuleFormModal, LessonFormModal, CourseEnrollmentModal } from '@/features/learning';
-import { CouponFormModal } from '../modals/admin/CouponFormModal';
-import PaymentMethodModal from '../modals/PaymentMethodModal';
-import { NotificationFormModal } from '../modals/admin/NotificationFormModal';
-import BankTransferReceiptModal from '../modals/admin/BankTransferReceiptModal';
-import { AnnouncementFormModal } from '../modals/admin/AnnouncementFormModal';
-import { PaymentFormModal } from '../modals/admin/PaymentFormModal';
-import { SupportConversationStartModal } from '../modals/admin/SupportConversationStartModal';
-import { PlanFormModal } from '../modals/admin/PlanFormModal';
-import { PlanPriceFormModal } from '../modals/admin/PlanPriceFormModal';
+import { CourseModal, CourseModuleFormModal, LessonFormModal, CourseEnrollmentModal, CouponFormModal, PaymentMethodModal } from '@/features/learning';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();

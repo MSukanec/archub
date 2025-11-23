@@ -8,10 +8,10 @@
 
 import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { UserQuickAccess } from "@/components/ui-custom/layout/UserQuickAccess";
-import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
+import { UserQuickAccess } from "@/features/users";
+import { NotificationDropdown } from "@/features/users";
 import { AIPanel } from "@/features/ai";
-import { SupportPanel } from "@/components/support/SupportPanel";
+import { SupportPanel } from "@/features/users";
 import { Bell, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Moon, Sun, Headphones, PanelRightClose, MessageCircle } from "lucide-react";

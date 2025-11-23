@@ -23,7 +23,7 @@ import { useOrganizationWallets, useOrganizationMembers } from '@/features/organ
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/features/projects'
 import { useToast } from '@/hooks/use-toast'
-import UserSelectorField from '@/components/ui-custom/fields/UserSelectorField'
+import { UserSelectorField } from '@/features/users'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 

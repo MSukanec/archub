@@ -38,7 +38,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
+import { PlanRestricted } from "@/features/users";
 import { ExpandableAvatarGroup } from "@/components/ui-custom/ExpandableAvatarGroup";
 import { ProjectSelectorButton } from "./ProjectSelectorButton";
 import { useSidebarStore } from "@/stores/sidebarStore";

@@ -15,7 +15,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useNavigationStore } from '@/stores/navigationStore';
 
-import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
+import { PlanRestricted } from "@/features/users";
 import { ActionBarMobileProvider, useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext';
 import { ActionBarMobile } from '@/layout/mobile/ActionBarMobile';
 

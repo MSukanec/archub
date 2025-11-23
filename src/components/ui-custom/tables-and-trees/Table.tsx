@@ -19,7 +19,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
+import { PlanRestricted } from "@/features/users";
 import {
   Popover,
   PopoverContent,

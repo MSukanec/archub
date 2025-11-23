@@ -10,7 +10,7 @@ import { Check, X, Crown, CreditCard, Folder, HardDrive, Users, Briefcase, Bot }
 import { cn } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { DowngradeModal } from "@/components/modal/modals/DowngradeModal";
+import { DowngradeModal } from "@/features/users";
 import { useQuery } from "@tanstack/react-query";
 
 interface Plan {
@@ -49,7 +49,7 @@ export default function PricingPlan() {
 
   // Fetch billable members count for Teams plan estimation
   const organizationId = userData?.organization?.id;
-  const { data: billableMembersData } = useQuery({
+  const { data: billableMembersData } = useQuery<{ seats: number }>({
     queryKey: ['/api/billing/next-invoice', organizationId],
     enabled: isAuthenticated && !!organizationId
   });

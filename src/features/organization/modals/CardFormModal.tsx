@@ -12,7 +12,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import UserSelectorField from "@/components/ui-custom/fields/UserSelectorField";
+import { UserSelectorField } from "@/features/users";
 import { useCreateKanbanCard, useUpdateKanbanCard } from "@/hooks/use-kanban";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/features/organization";

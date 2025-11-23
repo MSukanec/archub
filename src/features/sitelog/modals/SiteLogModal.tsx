@@ -32,7 +32,7 @@ import { uploadSiteLogFiles } from "@/features/sitelog/services/uploadSiteLogFil
 import { createSiteLog } from '../services/createSiteLog';
 import { updateSiteLog } from '../services/updateSiteLog';
 import { MediaForm } from "./forms/MediaForm";
-import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
+import { PlanRestricted } from "@/features/users";
 import { siteLogSchema, type SiteLogFormData } from '../schemas';
 import type { SiteLogFileInput } from '../types';
 import { useSiteLogTypes } from '../hooks/use-sitelog-types';

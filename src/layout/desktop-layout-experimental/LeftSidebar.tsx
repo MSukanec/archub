@@ -28,8 +28,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
-import { SupportModal } from "@/components/support/SupportModal";
+import { NotificationDropdown } from "@/features/users";
+import { SupportModal } from "@/features/users";
 import { getUnreadCount, subscribeUserNotifications } from '@/lib/notifications';
 import { 
   Settings, 
@@ -70,8 +70,8 @@ import {
 } from "lucide-react";
 import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
-import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { PlanRestricted } from "@/features/users";
+import { NotificationBell } from "@/features/users";
 import { useAuthStore } from "@/stores/authStore";
 
 interface SidebarItem {

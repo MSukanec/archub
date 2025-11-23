@@ -6,8 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/stores/authStore";
 import { ActionBarMobileProvider } from "@/layout/mobile/ActionBarMobileContext";
-import { AuthGuard } from "@/components/ui-custom/security/AuthGuard";
-import { AuthAdmin } from "@/components/ui-custom/security/AuthAdmin";
+import { AuthGuard, AuthAdmin } from "@/features/users";
 
 // Public Pages
 import Landing from "@/pages/public/Landing";

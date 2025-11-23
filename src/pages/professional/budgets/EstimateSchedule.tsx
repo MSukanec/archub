@@ -22,7 +22,7 @@ import { GanttContainer } from '@/components/gantt/GanttContainer'
 import { GanttRowProps } from '@/components/gantt/types'
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
 
-import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted"
+import { PlanRestricted } from "@/features/users"
 
 // Función para limpiar nombres de tareas eliminando códigos y variables
 function cleanTaskDisplayName(name: string): string {

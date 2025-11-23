@@ -30,3 +30,11 @@ export * from './components/PartnerStatsSection';
 export { MovementModal } from './modals/movements/MovementModal';
 export { MovementModalView } from './modals/movements/MovementModalView';
 export { MovementImportStepModal } from './modals/movements/MovementImportStepModal';
+
+// Admin Modals
+export { default as MovementConceptFormModal } from './modals/admin/MovementConceptFormModal';
+export { default as BankTransferReceiptModal } from './modals/admin/BankTransferReceiptModal';
+export { PaymentFormModal } from './modals/admin/PaymentFormModal';
+
+// Admin Components
+export { default as AdminPaymentTransferRow } from './components/admin/AdminPaymentTransferRow';

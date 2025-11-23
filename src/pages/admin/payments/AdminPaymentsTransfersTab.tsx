@@ -12,7 +12,7 @@ import { es } from 'date-fns/locale';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Tabs } from '@/components/ui-custom/Tabs';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import AdminPaymentTransferRow from '@/components/ui/data-row/rows/AdminPaymentTransferRow';
+import { AdminPaymentTransferRow } from '@/features/finances';
 import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext';
 import { useMobile } from '@/hooks/use-mobile';
 

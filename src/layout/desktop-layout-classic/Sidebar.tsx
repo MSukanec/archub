@@ -49,8 +49,8 @@ import {
 } from "lucide-react";
 import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
-import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { PlanRestricted } from "@/features/users";
+import { NotificationBell } from "@/features/users";
 
 interface SidebarItem {
   id: string;

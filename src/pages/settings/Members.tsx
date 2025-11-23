@@ -33,7 +33,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useMobile } from "@/hooks/use-mobile";
-import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
+import { PlanRestricted } from "@/features/users";
 import { useOrganizationMembers } from "@/features/organization";
 import { useActionBarMobile } from "@/layout/mobile/ActionBarMobileContext";
 

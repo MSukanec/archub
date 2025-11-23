@@ -21,3 +21,4 @@ export { PersonnelAddModal } from './modals/PersonnelAddModal';
 export { PersonnelDataModal } from './modals/PersonnelDataModal';
 export { PersonnelAttendanceModal } from './modals/PersonnelAttendanceModal';
 export { PersonnelRatesModal } from './modals/PersonnelRatesModal';
+export { AdminLaborModal } from './modals/admin/AdminLaborModal';

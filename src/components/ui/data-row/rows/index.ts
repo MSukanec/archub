@@ -18,9 +18,6 @@ export { default as ClientPaymentRow } from './ClientPaymentRow';
 export { default as GeneralCostPaymentRow } from './GeneralCostPaymentRow';
 export type { GeneralCostPayment } from './GeneralCostPaymentRow';
 
-export { default as AdminOrganizationRow } from './AdminOrganizationRow';
-export type { Organization } from './AdminOrganizationRow';
-
 export { default as AnalysisTaskRow } from './AnalysisTaskRow';
 
 export { default as LogRow } from './LogRow';
@@ -32,8 +29,6 @@ export { default as ProjectRow } from './ProjectRow';
 
 export { default as AdminCourseCouponRow } from './AdminCourseCouponRow';
 export type { Coupon } from './AdminCourseCouponRow';
-
-export { default as AdminPaymentTransferRow } from './AdminPaymentTransferRow';
 
 export { default as NoteRow } from './NoteRow';
 export { default as MarkerRow } from './MarkerRow';
