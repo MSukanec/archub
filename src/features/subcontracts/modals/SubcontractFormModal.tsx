@@ -139,7 +139,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
               <Calendar
                 mode="single"
                 selected={form.watch('date') ? new Date(form.watch('date')) : undefined}
-                onSelect={(date) => {
+                onSelect={(date: Date | undefined) => {
                   if (date) {
                     form.setValue('date', date.toISOString().split('T')[0]);
                   }
