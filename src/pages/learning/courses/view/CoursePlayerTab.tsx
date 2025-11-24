@@ -345,74 +345,69 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
     : (isPlayingRef.current ? 0 : (currentProgress?.last_position_sec || 0));
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Columnas 1 y 2: Contenido principal (Video, Info, Marcadores en mobile, Apuntes) */}
-      <div className="lg:col-span-2 space-y-6">
-        {currentLesson?.vimeo_video_id ? (
-          <>
-            {/* Video Player */}
-            <VimeoPlayer 
-              vimeoId={currentLesson.vimeo_video_id}
-              initialPosition={initialPosition}
-              onProgress={handleVideoProgress}
-              onPlayerReady={setVimeoPlayer}
-              onSeekApplied={() => {
-                clearPendingSeek();
-              }}
-            />
+    <div className="space-y-6">
+      {/* Video Player - 100% width */}
+      {currentLesson?.vimeo_video_id ? (
+        <>
+          <VimeoPlayer 
+            vimeoId={currentLesson.vimeo_video_id}
+            initialPosition={initialPosition}
+            onProgress={handleVideoProgress}
+            onPlayerReady={setVimeoPlayer}
+            onSeekApplied={() => {
+              clearPendingSeek();
+            }}
+          />
 
-            {/* Card con datos del video */}
-            <div className="bg-card border rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-1">{currentLesson.title}</h2>
-              {currentModule && (
-                <p className="text-sm text-muted-foreground mb-2">{currentModule.title}</p>
-              )}
-              {currentLesson.duration_sec && (
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">
-                  <Clock className="h-4 w-4" />
-                  <span>{formatDuration(currentLesson.duration_sec)}</span>
-                </div>
-              )}
+          {/* Compact Lesson Info Card - 2 rows */}
+          <div className="bg-card border rounded-lg p-4">
+            {/* Row 1: Lesson name | Duration | Action buttons (right) */}
+            <div className="flex items-center justify-between gap-4 mb-2">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <h2 className="text-lg font-semibold truncate">{currentLesson.title}</h2>
+                {currentLesson.duration_sec && (
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap">
+                    <Clock className="h-4 w-4 flex-shrink-0" />
+                    <span>{formatDuration(currentLesson.duration_sec)}</span>
+                  </div>
+                )}
+              </div>
               
-              {/* Línea divisoria */}
-              <hr className="border-t border-border mb-2" />
-              
-              {/* Botones de Acción - Solo iconos */}
-              <div className="flex items-center gap-1">
-                {/* Botón Favorito */}
+              {/* Action buttons inline on the right */}
+              <div className="flex items-center gap-1 flex-shrink-0">
                 {courseId && (
                   <FavoriteButton 
                     lessonId={currentLesson.id}
                     courseId={courseId}
                     isFavorite={currentProgress?.is_favorite || false}
                     variant="icon"
-                    size="lg"
+                    size="sm"
                   />
                 )}
                 
-                {/* Botón Marcar como Completa */}
                 <Button
                   variant="ghost"
-                  size="icon"
+                  size="sm"
                   onClick={handleMarkComplete}
                   disabled={markCompleteMutation.isPending}
                   data-testid="button-mark-complete-inline"
                   title={currentProgress?.is_completed ? 'Desmarcar como Completa' : 'Marcar como Completa'}
                   className={currentProgress?.is_completed ? "text-green-600 hover:text-green-700" : ""}
                 >
-                  <CheckCircle className="w-5 h-5" />
+                  <CheckCircle className="w-4 h-4" />
                 </Button>
               </div>
             </div>
 
-            {/* Card de Marcadores - SOLO EN MOBILE (lg:hidden) */}
-            {activeLessonId && (
-              <div className="lg:hidden bg-card border rounded-lg p-4">
-                <LessonMarkers lessonId={activeLessonId} vimeoPlayer={vimeoPlayer} />
-              </div>
+            {/* Row 2: Module name */}
+            {currentModule && (
+              <p className="text-sm text-muted-foreground">{currentModule.title}</p>
             )}
+          </div>
 
-            {/* Card de Apuntes */}
+          {/* Notes and Markers - Side by side grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Mis Apuntes */}
             {activeLessonId && (
               <div className="bg-card border rounded-lg p-6">
                 <div className="flex items-center gap-2 mb-4">
@@ -425,24 +420,22 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
                 <LessonSummaryNote lessonId={activeLessonId} />
               </div>
             )}
-          </>
-        ) : (
-          <div className="bg-muted/20 rounded-lg border-2 border-dashed border-muted-foreground/20 aspect-video flex items-center justify-center">
-            <div className="text-center">
-              <Play className="h-16 w-16 mx-auto mb-4 text-muted-foreground/40" />
-              <p className="text-lg font-medium text-muted-foreground">
-                {activeLessonId ? 'Esta lección no tiene video disponible' : 'Selecciona una lección para comenzar'}
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
 
-      {/* Columna 3: Marcadores sidebar (sticky) - SOLO EN DESKTOP (hidden lg:block) */}
-      {activeLessonId && currentLesson?.vimeo_video_id && (
-        <div className="hidden lg:block lg:sticky lg:top-4 lg:self-start">
-          <div className="bg-card border rounded-lg p-4">
-            <LessonMarkers lessonId={activeLessonId} vimeoPlayer={vimeoPlayer} />
+            {/* Marcadores */}
+            {activeLessonId && (
+              <div className="bg-card border rounded-lg p-6">
+                <LessonMarkers lessonId={activeLessonId} vimeoPlayer={vimeoPlayer} />
+              </div>
+            )}
+          </div>
+        </>
+      ) : (
+        <div className="bg-muted/20 rounded-lg border-2 border-dashed border-muted-foreground/20 aspect-video flex items-center justify-center">
+          <div className="text-center">
+            <Play className="h-16 w-16 mx-auto mb-4 text-muted-foreground/40" />
+            <p className="text-lg font-medium text-muted-foreground">
+              {activeLessonId ? 'Esta lección no tiene video disponible' : 'Selecciona una lección para comenzar'}
+            </p>
           </div>
         </div>
       )}
