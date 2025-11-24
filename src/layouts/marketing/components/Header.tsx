@@ -176,15 +176,15 @@ export function Header({ navigation }: HeaderProps) {
                 {user ? (
                   <>
                     {/* Dashboard Button */}
-                    <Link href="/home">
-                      <a onClick={() => setMobileMenuOpen(false)}>
+                    <div onClick={() => setMobileMenuOpen(false)}>
+                      <Link href="/home">
                         <MarketingMobileMenuButton
                           icon={Home}
                           label="Dashboard"
                           testId="button-mobile-dashboard"
                         />
-                      </a>
-                    </Link>
+                      </Link>
+                    </div>
 
                     {/* Logout Button */}
                     <MarketingMobileMenuButton
@@ -200,26 +200,26 @@ export function Header({ navigation }: HeaderProps) {
                 ) : (
                   <>
                     {/* Login Button */}
-                    <Link href="/login">
-                      <a onClick={() => setMobileMenuOpen(false)}>
+                    <div onClick={() => setMobileMenuOpen(false)}>
+                      <Link href="/login">
                         <MarketingMobileMenuButton
                           icon={User}
                           label="Iniciar Sesión"
                           testId="button-mobile-login"
                         />
-                      </a>
-                    </Link>
+                      </Link>
+                    </div>
 
                     {/* Register Button */}
-                    <Link href="/register">
-                      <a onClick={() => setMobileMenuOpen(false)}>
+                    <div onClick={() => setMobileMenuOpen(false)}>
+                      <Link href="/register">
                         <MarketingMobileMenuButton
                           icon={User}
                           label="Comenzar Gratis"
                           testId="button-mobile-register"
                         />
-                      </a>
-                    </Link>
+                      </Link>
+                    </div>
                   </>
                 )}
 
@@ -248,18 +248,18 @@ export function Header({ navigation }: HeaderProps) {
                   }
                   
                   return (
-                    <Link
+                    <div 
                       key={item.href}
-                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
                     >
-                      <a onClick={() => setMobileMenuOpen(false)}>
+                      <Link href={item.href}>
                         <MarketingMobileMenuButton
                           icon={ItemIcon}
                           label={item.label}
                           testId={`link-mobile-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                         />
-                      </a>
-                    </Link>
+                      </Link>
+                    </div>
                   );
                 })}
               </nav>

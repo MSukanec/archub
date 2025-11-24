@@ -36,6 +36,7 @@ import { useMobile } from "@/hooks/use-mobile";
 import { PlanRestricted } from "@/features/users";
 import { useOrganizationMembers } from "@/features/organization";
 import { useActionBarMobile } from '@/layouts';
+import { FEATURE_IMAGES } from '@/constants/images';
 
 function getInitials(name: string): string {
   return name
@@ -174,7 +175,7 @@ export default function Members() {
           planRestriction: {
             feature: 'max_members',
             current: organizationMembers.length,
-            modalImage: '/features/ft-members-512.webp',
+            modalImage: FEATURE_IMAGES.MEMBERS,
             modalTitle: 'Alcanzaste el límite de miembros',
             modalDescription: 'Has llegado al máximo de miembros permitidos en tu plan actual. Actualiza a un plan superior para invitar más miembros a tu equipo y gestionar colaboraciones sin restricciones.',
           },
@@ -294,7 +295,7 @@ export default function Members() {
         feature="max_members" 
         current={organizationMembers.length}
         useUpgradeModal={true}
-        modalImage="/features/ft-members-512.webp"
+        modalImage={FEATURE_IMAGES.MEMBERS}
         modalTitle="Alcanzaste el límite de miembros"
         modalDescription="Has llegado al máximo de miembros permitidos en tu plan actual. Actualiza a un plan superior para invitar más miembros a tu equipo y gestionar colaboraciones sin restricciones."
       >

@@ -6,6 +6,7 @@ import { useProjects, useProjectsCount } from '@/features/projects'
 import { Folder, Plus } from 'lucide-react'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { PlanRestricted } from '@/features/users'
+import { FEATURE_IMAGES } from '@/constants/images'
 import ProjectActivesTab from './ProjectActivesTab'
 import ProjectListTab from './ProjectListTab'
 import ProjectSettingsTab from './ProjectSettingsTab'
@@ -35,7 +36,7 @@ export default function Projects() {
         current={projectsCount}
         functionName="Crear Proyecto"
         useUpgradeModal={true}
-        modalImage="/features/ft-projects-512.webp"
+        modalImage={FEATURE_IMAGES.PROJECTS}
         modalTitle="Alcanzaste el límite de proyectos"
         modalDescription="Has llegado al máximo de proyectos permitidos en tu plan actual. Actualiza a un plan superior para crear proyectos ilimitados y gestionar tu negocio sin restricciones."
       >
