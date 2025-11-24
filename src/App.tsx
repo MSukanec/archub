@@ -5,7 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/stores/authStore";
-import { ActionBarMobileProvider } from "@/layout/mobile/ActionBarMobileContext";
+import { ActionBarMobileProvider } from "@/layouts";
 import { AuthGuard, AuthAdmin } from "@/features/users";
 
 // Public Pages

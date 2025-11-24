@@ -16,8 +16,8 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useNavigationStore } from '@/stores/navigationStore';
 
 import { PlanRestricted } from "@/features/users";
-import { ActionBarMobileProvider, useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext';
-import { ActionBarMobile } from '@/layout/mobile/ActionBarMobile';
+import { ActionBarMobileProvider, useActionBarMobile } from '@/layouts';
+import { ActionBarMobile } from '@/layouts';
 
 import { Card } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';

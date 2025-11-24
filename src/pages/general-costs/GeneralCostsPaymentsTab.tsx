@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import GeneralCostPaymentRow from '@/features/finances/components/GeneralCostPaymentRow';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
-import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext';
+import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 
 export default function GeneralCostsPaymentsTab() {

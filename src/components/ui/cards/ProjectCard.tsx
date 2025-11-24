@@ -14,7 +14,7 @@ import {
   Trash2,
   Edit
 } from 'lucide-react';
-import SwipeableCard from '@/layout/mobile/SwipeableCard';
+import { SwipeableCard } from '@/layouts';
 
 // Project status configurations
 const projectStatuses = {

@@ -5,7 +5,7 @@ import { DashboardLayout as Layout } from "@/layouts";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext';
+import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 import { useNavigationStore } from '@/stores/navigationStore';
 

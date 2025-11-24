@@ -42,7 +42,7 @@ import { PlanRestricted } from "@/features/users";
 import TransferRow, { type TransferGroup } from "@/features/finances/components/TransferRow";
 import MovementRow from "@/features/finances/components/MovementRow";
 import ConversionRow, { type ConversionGroup } from "@/features/finances/components/ConversionRow";
-import SwipeableCard from "@/layout/mobile/SwipeableCard";
+import { SwipeableCard } from '@/layouts';
 import { Star } from "lucide-react";
 
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
@@ -56,7 +56,7 @@ import { useProjectsMap } from "@/features/projects";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import { useActionBarMobile } from "@/layout/mobile/ActionBarMobileContext";
+import { useActionBarMobile } from '@/layouts';
 import { useMobile } from "@/hooks/use-mobile";
 import { useProjectContext } from "@/stores/projectContext";
 import { FILTER_LABELS } from "@/layout/constants/actionBarConstants";

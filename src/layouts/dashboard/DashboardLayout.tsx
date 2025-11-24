@@ -16,10 +16,8 @@ import {
   useCourseSidebarStore,
 } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
-import { ActionBarMobile } from "@/layout/mobile/ActionBarMobile";
-import { useActionBarMobile } from "@/layout/mobile/ActionBarMobileContext";
+import { ActionBarMobile, useActionBarMobile, HeaderMobile } from '@/layouts';
 import { useMobile } from "@/hooks/use-mobile";
-import { HeaderMobile } from "@/layout/mobile/HeaderMobile";
 import { CourseSidebar } from "@/layout/CourseSidebar";
 import { useProjectAccentColor } from "@/features/projects";
 import { useContentBackground } from "@/hooks/use-content-background";

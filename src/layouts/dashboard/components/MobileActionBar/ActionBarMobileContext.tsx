@@ -7,7 +7,6 @@ interface ActionBarAction {
   label: string
   onClick: () => void
   variant?: 'primary' | 'secondary'
-  // Plan restriction props (optional)
   planRestriction?: {
     feature: string
     current: number
@@ -18,11 +17,11 @@ interface ActionBarAction {
 }
 
 interface ActionBarActions {
-  home?: ActionBarAction       // Inicio (nuevo)
-  search?: ActionBarAction     // Search
-  create?: ActionBarAction     // Crear (principal)
-  filter?: ActionBarAction     // Filtros
-  notifications?: ActionBarAction  // Notificaciones (nuevo)
+  home?: ActionBarAction
+  search?: ActionBarAction
+  create?: ActionBarAction
+  filter?: ActionBarAction
+  notifications?: ActionBarAction
 }
 
 interface ActionBarMobileContextType {
@@ -31,17 +30,14 @@ interface ActionBarMobileContextType {
   clearActions: () => void
   showActionBar: boolean
   setShowActionBar: (show: boolean) => void
-  // Search popover state
   showSearchPopover: boolean
   setShowSearchPopover: (show: boolean) => void
   searchValue: string
   setSearchValue: (value: string) => void
-  // Filter popover state
   showFilterPopover: boolean
   setShowFilterPopover: (show: boolean) => void
   filterConfig?: any
   setFilterConfig: (config: any) => void
-  // Notifications popover state
   showNotificationsPopover: boolean
   setShowNotificationsPopover: (show: boolean) => void
 }
@@ -52,15 +48,12 @@ export function ActionBarMobileProvider({ children }: { children: ReactNode }) {
   const [actions, setActions] = useState<ActionBarActions>({})
   const [showActionBar, setShowActionBar] = useState(false)
   
-  // Search state
   const [showSearchPopover, setShowSearchPopover] = useState(false)
   const [searchValue, setSearchValue] = useState('')
   
-  // Filter state
   const [showFilterPopover, setShowFilterPopover] = useState(false)
   const [filterConfig, setFilterConfig] = useState<any>(null)
   
-  // Notifications state
   const [showNotificationsPopover, setShowNotificationsPopover] = useState(false)
 
   const clearActions = () => {
@@ -104,4 +97,3 @@ export function useActionBarMobile() {
   }
   return context
 }
-

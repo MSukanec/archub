@@ -14,7 +14,7 @@ import { useDeleteGeneralCost } from "@/features/general-costs/hooks/use-delete-
 import { useGeneralCostsPayments } from "@/hooks/use-general-costs-payments";
 import GeneralCostRow from "@/features/finances/components/GeneralCostRow";
 import type { GeneralCost } from "@/features/general-costs/types";
-import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext';
+import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 
 interface GeneralCostsListProps {

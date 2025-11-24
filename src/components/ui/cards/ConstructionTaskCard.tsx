@@ -1,6 +1,6 @@
 import React from 'react';
 import { Edit, Trash2 } from 'lucide-react';
-import SwipeableCard from '@/layout/mobile/SwipeableCard';
+import { SwipeableCard } from '@/layouts';
 
 type ConstructionTaskCardProps = {
   task: {

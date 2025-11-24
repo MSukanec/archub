@@ -9,7 +9,7 @@ import { DollarSign, TrendingUp, CreditCard, Inbox, Search, Filter, Bell, Plus }
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext';
+import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 
 interface Payment {

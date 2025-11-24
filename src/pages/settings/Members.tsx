@@ -35,7 +35,7 @@ import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore
 import { useMobile } from "@/hooks/use-mobile";
 import { PlanRestricted } from "@/features/users";
 import { useOrganizationMembers } from "@/features/organization";
-import { useActionBarMobile } from "@/layout/mobile/ActionBarMobileContext";
+import { useActionBarMobile } from '@/layouts';
 
 function getInitials(name: string): string {
   return name

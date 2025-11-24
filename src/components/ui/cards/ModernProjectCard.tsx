@@ -11,7 +11,7 @@ import {
   Edit
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import SwipeableCard from '@/layout/mobile/SwipeableCard';
+import { SwipeableCard } from '@/layouts';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { getProjectInitials } from '@/utils/initials';
 import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage';

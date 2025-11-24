@@ -23,6 +23,10 @@ export { ActionBar } from "./dashboard/components/Topbar/ActionBar";
 export { ProjectSelectorButton } from "./dashboard/components/Topbar/ProjectSelectorButton";
 export { OrganizationSelectorButton } from "./dashboard/components/Topbar/OrganizationSelectorButton";
 
+// Dashboard Components - Mobile
+export * from './dashboard/components/MobileMenu';
+export * from './dashboard/components/MobileActionBar';
+
 // Layout utilities
 export { 
   type WidthMode, 

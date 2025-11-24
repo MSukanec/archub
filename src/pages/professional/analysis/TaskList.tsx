@@ -9,7 +9,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useDeleteGeneratedTask } from '@/hooks/use-generated-tasks'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import AnalysisTaskRow from '@/features/projects/components/AnalysisTaskRow'
-import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext'
+import { useActionBarMobile } from '@/layouts'
 import { useMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 import { useLocation } from 'wouter'

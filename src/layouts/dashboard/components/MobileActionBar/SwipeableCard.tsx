@@ -71,7 +71,6 @@ export default function SwipeableCard({
     const velocity = info.velocity.x;
     const offset = info.offset.x;
 
-    // Más sensible: solo requiere 25% del ancho o velocidad moderada
     const swipeToOpen = offset < -totalActionWidth * 0.25 || velocity < -300;
 
     if (swipeToOpen) {
@@ -95,7 +94,6 @@ export default function SwipeableCard({
 
   return (
     <div className="relative overflow-hidden">
-      {/* Acciones detrás del contenido */}
       <motion.div
         className="absolute right-0 top-0 bottom-0 flex"
         style={{ opacity: actionOpacity, scale: actionScale }}
@@ -124,7 +122,6 @@ export default function SwipeableCard({
         ))}
       </motion.div>
 
-      {/* Contenido principal (sin onClick externo) */}
       <motion.div
         drag="x"
         dragConstraints={{ left: -totalActionWidth, right: 0 }}

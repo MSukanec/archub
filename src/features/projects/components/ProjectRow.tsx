@@ -1,5 +1,5 @@
 import DataRowCard from '@/components/ui-custom/general/DataRowCard';
-import SwipeableCard from '@/layout/mobile/SwipeableCard';
+import { SwipeableCard } from '@/layouts';
 import { Edit, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';

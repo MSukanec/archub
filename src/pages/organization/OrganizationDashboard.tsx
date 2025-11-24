@@ -27,7 +27,7 @@ import { useProjectContext } from '@/stores/projectContext';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useToast } from '@/hooks/use-toast';
 import type { UserData } from "@/hooks/use-current-user";
-import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext';
+import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/lib/supabase';
 import { format } from "date-fns";

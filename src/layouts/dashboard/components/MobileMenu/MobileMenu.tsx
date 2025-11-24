@@ -54,7 +54,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const [expandedProjectSelector, setExpandedProjectSelector] = useState(false);
   const [expandedOrganizationSelector, setExpandedOrganizationSelector] = useState(false);
   
-  // Bloquear scroll del body cuando el menú está abierto
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => {
@@ -64,27 +63,22 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
   const queryClient = useQueryClient();
 
-  // Obtener organizaciones y proyectos
   const currentOrganization = userData?.organization;
   const { data: projectsData } = useProjects(currentOrganization?.id);
   
-  // Obtener el proyecto actual para mostrar su nombre
   const currentProject = projectsData?.find((p: any) => p.id === selectedProjectId);
   const currentProjectName = currentProject?.name || "Seleccionar proyecto";
   const isAdmin = useIsAdmin();
   const { toast } = useToast();
 
-  // Obtener notificaciones para el badge
   const { data: notifications } = useQuery<any[]>({
     queryKey: ['/api/notifications'],
     enabled: !!userData?.user?.id,
   });
   const unreadCount = Array.isArray(notifications) ? notifications.filter((n: any) => !n.read_at).length : 0;
 
-  // Contador de mensajes sin leer (solo para admins)
   const { data: unreadSupportCount = 0 } = useUnreadSupportMessages();
 
-  // Project selection mutation
   const projectMutation = useMutation({
     mutationFn: async (projectId: string) => {
       if (!supabase || !userData?.user?.id || !userData?.organization?.id) {
@@ -114,14 +108,13 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     }
   });
 
-  // Function to check if a button is active
   const isButtonActive = (href: string) => {
     if (!href || href === '#') return false;
     if (href === '/organization/dashboard') {
       return location === '/organization/dashboard';
     }
     if (href.startsWith('http')) {
-      return false; // External links are never "active"
+      return false;
     }
     return location === href || location.startsWith(href + '/');
   };
@@ -131,11 +124,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     projectMutation.mutate(projectId);
   };
 
-  // Usuario info para settings
   const organizationName = userData?.organization?.name || 'Organización';
   const userFullName = userData?.user?.full_name || userData?.user?.first_name || 'Usuario';
 
-  // Obtener items de navegación usando config compartida
   const navigationItems = getNavigationItems({
     sidebarLevel: sidebarLevel as SidebarLevel,
     selectedProjectId,
@@ -164,9 +155,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Main Menu Panel */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Header */}
           <div className="flex items-center h-14 px-4 border-b border-[var(--main-sidebar-border)] bg-[var(--main-sidebar-bg)]">
             {sidebarLevel !== 'general' ? (
               <>
@@ -204,19 +193,15 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             )}
           </div>
 
-          {/* Navigation Menu - Scrollable */}
           <div className="flex-1 overflow-y-auto">
             <nav>
               {sidebarLevel === 'general' ? (
-                /* MENU GENERAL - NIVEL 1 - Dynamic rendering using CONTEXT_BUTTONS */
                 <>
                   {CONTEXT_BUTTONS.map((contextButton) => {
-                    // Skip admin button if user is not admin
                     if (contextButton.adminOnly && !isAdmin) {
                       return null;
                     }
 
-                    // Handle "general" button (Inicio)
                     if (contextButton.id === 'general') {
                       const isActive = contextButton.href ? isButtonActive(contextButton.href) : false;
                       return (
@@ -237,7 +222,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       );
                     }
 
-                    // Handle project button with validation
                     if (contextButton.id === 'project') {
                       const hasProjects = projectsData && projectsData.length > 0;
                       const isActive = contextButton.href ? isButtonActive(contextButton.href) : 
@@ -278,11 +262,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       return button;
                     }
 
-                    // Determine if button is active based on current location
                     const isActive = contextButton.href ? isButtonActive(contextButton.href) :
                       location.startsWith(`/${contextButton.id}`);
 
-                    // Handle navigation
                     const handleClick = () => {
                       setSidebarLevel(contextButton.id);
                     };
@@ -299,7 +281,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       />
                     );
 
-                    // Wrap in PlanRestricted if needed
                     if (contextButton.restricted) {
                       return (
                         <PlanRestricted key={contextButton.id} reason={contextButton.restricted}>
@@ -312,19 +293,15 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                   })}
                 </>
               ) : (
-                /* MENU ESPECÍFICO - NIVEL 2 */
                 <>
                   {navigationItems.map((entry, index) => {
-                    // Type guard: check if entry is NavigationSection
                     if ('type' in entry && entry.type === 'section') {
                       const section = entry as NavigationSection;
                       return (
                         <div key={`section-${index}`}>
-                          {/* Section Title */}
                           <div className="px-4 py-2 text-xs font-medium uppercase tracking-wider text-[var(--main-sidebar-fg)] opacity-60">
                             {section.title}
                           </div>
-                          {/* Section Items */}
                           {section.items.map((item) => {
                             const isActive = isButtonActive(item.href);
                             const isExternal = item.href.startsWith('http');
@@ -364,7 +341,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       );
                     }
                     
-                    // Otherwise it's a NavigationItem
                     const item = entry as NavigationItem;
                     const isActive = isButtonActive(item.href);
                     const dividerInfo = getDividerInfo(sidebarLevel as SidebarLevel, item, index);
@@ -391,7 +367,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     
                     return (
                       <div key={item.id}>
-                        {/* Divisor de sección */}
                         {dividerInfo.show && (
                           <div className="px-4 py-2 text-xs font-medium uppercase tracking-wider text-[var(--main-sidebar-fg)] opacity-60">
                             {dividerInfo.text}
@@ -413,12 +388,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             </nav>
           </div>
 
-          {/* Footer con selector contextual y avatar */}
           <div className="p-4 border-t border-[var(--main-sidebar-border)]">
             <div className="flex items-center gap-3">
-              {/* Selector contextual según sidebarLevel */}
               {sidebarLevel === 'organization' && (
-                /* Selector de Organizaciones */
                 <div className="flex-1 relative">
                   <button
                     onClick={() => setExpandedOrganizationSelector(!expandedOrganizationSelector)}
@@ -435,7 +407,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     )} />
                   </button>
                   
-                  {/* Lista de organizaciones expandida */}
                   {expandedOrganizationSelector && (
                     <div className="absolute bottom-full left-0 right-0 mb-1 border-0 rounded-lg shadow-lg max-h-40 overflow-y-auto z-10" style={{ backgroundColor: 'hsl(0, 0%, 20%)' }}>
                       <button
@@ -452,7 +423,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
               )}
 
               {sidebarLevel === 'project' && (
-                /* Selector de Proyectos */
                 <div className="flex-1 relative">
                   <button
                     onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
@@ -469,7 +439,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     )} />
                   </button>
                   
-                  {/* Lista de proyectos expandida */}
                   {expandedProjectSelector && (
                     <div className="absolute bottom-full left-0 right-0 mb-1 border-0 rounded-lg shadow-lg max-h-40 overflow-y-auto z-10" style={{ backgroundColor: 'hsl(0, 0%, 20%)' }}>
                       {projectsData?.map((project: any) => (
@@ -489,12 +458,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 </div>
               )}
 
-              {/* Spacer para admin, community, learning, settings, user (sin selector) */}
               {(sidebarLevel === 'admin' || sidebarLevel === 'community' || sidebarLevel === 'learning' || sidebarLevel === 'general' || sidebarLevel === 'settings' || sidebarLevel === 'user') && (
                 <div className="flex-1" />
               )}
 
-              {/* Avatar del usuario con badge de notificaciones */}
               <div className="relative">
                 <Avatar 
                   className="h-12 w-12 cursor-pointer hover:opacity-80 transition-opacity border-0 ring-0"

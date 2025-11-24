@@ -5,7 +5,7 @@ import { Users, Search, Filter, UserPlus, Bell } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
-import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext';
+import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';

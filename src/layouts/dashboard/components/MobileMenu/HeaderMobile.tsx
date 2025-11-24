@@ -63,15 +63,12 @@ export function HeaderMobile({
   return (
     <>
       <div className="md:hidden sticky top-0 z-50 bg-[var(--card-bg)] border-b border-[var(--card-border)]">
-        {/* Main Header Row */}
         <div className="flex items-center justify-between h-14 px-4">
-          {/* Left: Title - Clickable */}
           <button 
             onClick={() => navigate('/mode-selection')}
             className="flex-1 flex items-center justify-start px-2 cursor-pointer hover:opacity-80 transition-opacity"
           >
             <div className="flex items-center space-x-3">
-              {/* Siempre mostrar icono - usar el prop o el automático */}
               <div className="flex-shrink-0">
                 {icon ? (
                   <div className="text-[var(--accent)]">
@@ -87,7 +84,6 @@ export function HeaderMobile({
             </div>
           </button>
 
-          {/* Right: Menu */}
           <div className="flex items-center gap-2">
             <Menu 
               className="w-6 h-6 text-[var(--layout-text)] cursor-pointer hover:text-[var(--accent)] transition-colors" 
@@ -96,7 +92,6 @@ export function HeaderMobile({
           </div>
         </div>
 
-        {/* Tabs Row */}
         {tabs && tabs.length > 0 && (
           <div className="px-4 pb-3">
             <div className="flex gap-2 overflow-x-auto scrollbar-hide">
@@ -120,12 +115,10 @@ export function HeaderMobile({
         )}
       </div>
 
-      {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <MobileMenu isOpen={isMobileMenuOpen} onClose={closeMenu} />
       )}
 
-      {/* Content */}
       {children && (
         <div className="md:hidden">
           {children}

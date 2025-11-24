@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button'
 import { PlanRestricted } from '@/features/users'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext'
+import { useActionBarMobile } from '@/layouts'
 import { useMobile } from '@/hooks/use-mobile'
 import ProjectRow from '@/features/projects/components/ProjectRow'
 

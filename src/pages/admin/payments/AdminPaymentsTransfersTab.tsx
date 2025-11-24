@@ -13,7 +13,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Tabs } from '@/components/ui-custom/Tabs';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import AdminPaymentTransferRow from '@/features/finances/components/admin/AdminPaymentTransferRow';
-import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext';
+import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 
 interface BankTransferPayment {

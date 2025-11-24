@@ -11,7 +11,7 @@ import {
   BottomSheetFooter,
   BottomSheetTitle 
 } from '@/components/ui/bottom-sheet'
-import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext'
+import { useActionBarMobile } from './ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
 import { Search, Filter, Home, Bell, Lock } from 'lucide-react'
 import { useLocation } from 'wouter'
@@ -34,7 +34,6 @@ export function ActionBarMobile() {
   const isMobile = useMobile()
   const searchInputRef = useRef<HTMLInputElement>(null)
   
-  // Focus search input when popover opens - always run this hook
   useEffect(() => {
     if (showSearchPopover && searchInputRef.current) {
       setTimeout(() => searchInputRef.current?.focus(), 100)
@@ -68,7 +67,6 @@ export function ActionBarMobile() {
 
   return (
     <>
-      {/* Search BottomSheet */}
       <BottomSheet open={showSearchPopover} onOpenChange={setShowSearchPopover}>
         <BottomSheetContent>
           <BottomSheetHeader>
@@ -94,7 +92,6 @@ export function ActionBarMobile() {
         </BottomSheetContent>
       </BottomSheet>
 
-      {/* Filter BottomSheet */}
       {filterConfig && (
         <BottomSheet open={showFilterPopover} onOpenChange={setShowFilterPopover}>
           <BottomSheetContent>
@@ -151,7 +148,6 @@ export function ActionBarMobile() {
         </BottomSheet>
       )}
 
-      {/* Notifications BottomSheet */}
       <BottomSheet open={showNotificationsPopover} onOpenChange={setShowNotificationsPopover}>
         <BottomSheetContent>
           <BottomSheetHeader>
@@ -170,7 +166,6 @@ export function ActionBarMobile() {
         </BottomSheetContent>
       </BottomSheet>
 
-      {/* Action Bar */}
       <div 
         className="fixed bottom-0 left-0 right-0 z-40 px-4 py-3"
         style={{ 
@@ -179,9 +174,7 @@ export function ActionBarMobile() {
           borderTopWidth: '1px'
         }}
       >
-        {/* 5 slots when create action exists, 4 slots when it doesn't */}
         <div className={`flex items-center justify-between ${actions.create ? 'px-4' : 'px-8'}`}>
-          {/* Slot 1: Home - Always navigates to dashboard */}
           <button
             onClick={() => navigate('/dashboard')}
             className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors group"
@@ -194,7 +187,6 @@ export function ActionBarMobile() {
             />
           </button>
 
-          {/* Slot 2: Search */}
           {actions.search && (
             <button
               onClick={handleSearchClick}
@@ -209,7 +201,6 @@ export function ActionBarMobile() {
             </button>
           )}
 
-          {/* Slot 3: Create (Central, only if exists) */}
           {actions.create && (
             actions.create.planRestriction ? (
               <PlanRestricted 
@@ -242,7 +233,6 @@ export function ActionBarMobile() {
             )
           )}
 
-          {/* Slot 4: Filter */}
           {actions.filter && (
             <button
               onClick={handleFilterClick}
@@ -257,7 +247,6 @@ export function ActionBarMobile() {
             </button>
           )}
 
-          {/* Slot 5: Notifications */}
           {actions.notifications && (
             <button
               onClick={handleNotificationsClick}
@@ -277,5 +266,4 @@ export function ActionBarMobile() {
   )
 }
 
-// Legacy export for backward compatibility during transition
 export const MobileActionBar = ActionBarMobile

@@ -13,7 +13,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { PlanRestricted } from '@/features/users'
-import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext'
+import { useActionBarMobile } from '@/layouts'
 import { useMobile } from '@/hooks/use-mobile'
 
 export default function ProjectActives() {
