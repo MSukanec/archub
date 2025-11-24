@@ -175,21 +175,10 @@ export function UploadMultiFileField({
           
           try {
             fileToUpload = await compressImage(file, imageCompressionPreset);
-            
-            // Show compression stats if there was significant reduction
-            if (originalSize !== fileToUpload.size) {
-              toast({
-                title: "Imagen optimizada",
-                description: formatCompressionStats(originalSize, fileToUpload.size),
-              });
-            }
+            // Compresión hecha silenciosamente en drag. Toast de confirmación se muestra en submit si es necesario.
           } catch (compressionError) {
             console.error('Error compressing image:', compressionError);
-            toast({
-              title: "Advertencia",
-              description: `No se pudo comprimir ${file.name}, subiendo original`,
-              variant: "default"
-            });
+            // Continúa con el archivo original sin mostrar error en el drag
           }
         }
         

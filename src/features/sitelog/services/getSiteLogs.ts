@@ -1,5 +1,25 @@
 import { supabase } from '@/lib/supabase';
 
+async function getSignedUrl(bucket: string, path: string): Promise<string | null> {
+  if (!supabase) return null;
+  
+  try {
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .createSignedUrl(path, 3600);
+    
+    if (error) {
+      console.error('Error creating signed URL:', error);
+      return null;
+    }
+    
+    return data?.signedUrl || null;
+  } catch (error) {
+    console.error('Error in getSignedUrl:', error);
+    return null;
+  }
+}
+
 /**
  * Obtiene todas las bitácoras con sus relaciones completas.
  * 
@@ -97,6 +117,7 @@ export async function getSiteLogs(projectId: string | undefined, organizationId:
         file_name,
         file_type,
         file_size,
+        file_path,
         bucket
       )
     `)
@@ -107,39 +128,60 @@ export async function getSiteLogs(projectId: string | undefined, organizationId:
     console.error('Error loading sitelog files:', filesError);
   }
 
-  const data = logsData.map(log => ({
-    ...log,
-    creator: log.creator?.user ? {
-      id: log.creator.user.id,
-      full_name: log.creator.user.full_name,
-      avatar_url: log.creator.user.avatar_url
-    } : null,
-    attendees: attendeesData?.filter(attendee => attendee.site_log_id === log.id) || [],
-    // Mapear archivos de la nueva arquitectura al formato esperado
-    files: filesData
+  // Generar signed URLs para archivos en private-assets
+  const data = await Promise.all(logsData.map(async (log) => {
+    const logFiles = filesData
       ?.filter(link => link.site_log_id === log.id && link.media_files)
       .map((link: any) => {
         const mediaFile = Array.isArray(link.media_files) ? link.media_files[0] : link.media_files;
         if (!mediaFile) return null;
         
-        // Usar el título personalizado si está en metadata, sino usar file_name
         const displayName = link.metadata?.custom_file_name || mediaFile.file_name;
         
         return {
           id: mediaFile.id,
-          link_id: link.id, // ID del link para poder eliminar
+          link_id: link.id,
           file_url: mediaFile.file_url,
-          file_name: displayName, // Título personalizado o nombre original
+          file_name: displayName,
           file_type: mediaFile.file_type,
           file_size: mediaFile.file_size,
           bucket: mediaFile.bucket,
+          file_path: mediaFile.file_path || mediaFile.file_name, // Para generar signed URL si es necesario
           description: link.description,
           category: link.category,
           position: link.position,
           created_at: link.created_at
         };
       })
-      .filter(file => file !== null) || []
+      .filter(file => file !== null) || [];
+
+    // Generar signed URLs para archivos privados
+    const filesWithUrls = await Promise.all(
+      logFiles.map(async (file: any) => {
+        let displayUrl = file.file_url;
+        
+        if (file.bucket === 'private-assets' && file.file_path) {
+          const signedUrl = await getSignedUrl(file.bucket, file.file_path);
+          displayUrl = signedUrl || file.file_url;
+        }
+        
+        return {
+          ...file,
+          file_url: displayUrl
+        };
+      })
+    );
+
+    return {
+      ...log,
+      creator: log.creator?.user ? {
+        id: log.creator.user.id,
+        full_name: log.creator.user.full_name,
+        avatar_url: log.creator.user.avatar_url
+      } : null,
+      attendees: attendeesData?.filter(attendee => attendee.site_log_id === log.id) || [],
+      files: filesWithUrls
+    };
   }));
 
   return data || [];
