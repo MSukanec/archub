@@ -101,6 +101,23 @@ export function UnifiedCourseCard({
               </div>
             )}
             
+            {/* Info Button - Secondary */}
+            <Button 
+              variant="outline"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              asChild
+              className="w-full"
+              size="sm"
+              data-testid={`button-course-info-${course.id}`}
+            >
+              <Link href={`/learning/courses/${course.slug}`}>
+                Ver Información
+              </Link>
+            </Button>
+            
             {/* Action Button */}
             <Button 
               onClick={(e) => {
