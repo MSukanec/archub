@@ -14,7 +14,15 @@ Preferred communication style: Simple, everyday language.
 - **Dynamic Color System**: Project-based color theming using `chroma-js` for intelligent color calculations, including dynamic accent colors and organic radial gradients.
 - **Modals**: Responsive Dialog component with standardized patterns using `FormModalLayout`, React Hook Form with Zod validation.
 - **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub with a two-level sidebar system.
-- **Layout Architecture (Nov 24, 2024)**: Consolidated layout system into single `src/layout/desktop/` directory. Eliminated legacy `desktop-layout-classic/` and `desktop-layout-experimental/` folders. Single source of truth for all desktop layout components (Layout, PageLayout, LeftSidebar, RightSidebar, Footer, ActionBar, ProjectSelectorButton, OrganizationSelectorButton, ButtonSidebar, Sidebar, AppLayout, Header, SidebarIconButton, layoutWidth utilities).
+- **Layout Architecture (Nov 24, 2024)**: 
+  - **Migration to Experience-Based Layouts**: Refactored from device-based structure (`src/layout/desktop/`) to experience-based organization (`src/layouts/`). This aligns better with Feature-Sliced Design principles and product domains.
+  - **Dashboard Layout**: Implemented in `src/layouts/dashboard/` with organized subfolders:
+    - `components/Sidebar/`: LeftSidebar, RightSidebar, ButtonSidebar, SidebarIconButton
+    - `components/Topbar/`: Header, Footer, ActionBar, ProjectSelectorButton, OrganizationSelectorButton
+    - Core files: DashboardLayout.tsx (main wrapper), PageLayout.tsx (page-level layout), layoutWidth.ts (utilities)
+  - **Barrel Exports**: Centralized `src/layouts/index.ts` for clean imports (`import { DashboardLayout, PageLayout } from "@/layouts"`)
+  - **Backward Compatibility**: Temporary shim in `src/layout/desktop/index.ts` re-exports from new location to prevent breaking existing imports during gradual migration
+  - **Future Roadmap**: Additional layout types planned: `root/` (global providers), `auth/` (login/register), `marketing/` (landing pages), `workspace/` (viewer mode with minimal UI)
 - **Content Theming System**: Unified CSS theming layer with dynamic background switching via `useContentBackground` hook.
 
 ### Technical Implementations
