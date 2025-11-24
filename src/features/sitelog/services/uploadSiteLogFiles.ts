@@ -51,7 +51,7 @@ export async function uploadSiteLogFiles(
           project_id: projectId,
           sitelog_id: siteLogId,
         },
-        category: 'sitelog_media',
+        category: 'photo',
         description: description || undefined,
         metadata: Object.keys(metadata).length > 0 ? metadata : undefined
       });
