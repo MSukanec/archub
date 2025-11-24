@@ -151,9 +151,9 @@ export default function CheckoutPage() {
     if (courseSlug) {
       supabase
         .from("courses")
-        .eq("is_deleted", false)
         .select("title")
         .eq("slug", courseSlug)
+        .eq("is_deleted", false)
         .single()
         .then(({ data }) => {
           if (data?.title) {
@@ -300,9 +300,9 @@ export default function CheckoutPage() {
 
       const { data: courseData, error: courseError } = await supabase
         .from("courses")
-        .eq("is_deleted", false)
         .select("id")
         .eq("slug", courseSlug)
+        .eq("is_deleted", false)
         .single();
 
       if (courseError || !courseData) {
