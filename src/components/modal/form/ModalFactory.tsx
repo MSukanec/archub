@@ -93,6 +93,7 @@ import { TaskModal } from '@/features/projects';
 import { PDFExporterModal } from '@/features/pdf';
 import { GeneralCostsModal } from '@/features/general-costs/modals/GeneralCostsModal';
 import { GeneralCostsPaymentModal } from '@/features/general-costs/modals/GeneralCostsPaymentModal';
+import { GeneralCostsPaymentViewModal } from '@/features/general-costs/modals/GeneralCostsPaymentViewModal';
 import { CourseModal, CourseModuleFormModal, LessonFormModal, CourseEnrollmentModal, CouponFormModal, PaymentMethodModal } from '@/features/learning';
 
 export function ModalFactory() {
@@ -264,6 +265,8 @@ export function ModalFactory() {
       return <GeneralCostsModal modalData={data || {}} onClose={closeModal} />;
     case 'general-costs-payment':
       return <GeneralCostsPaymentModal modalData={data as any || {}} onClose={closeModal} />;
+    case 'general-costs-payment-view':
+      return <GeneralCostsPaymentViewModal modalData={data as any || {}} onClose={closeModal} />;
     case 'labor-type-form':
       return <AdminLaborModal modalData={data || {}} onClose={closeModal} />;
     case 'cost-modal':

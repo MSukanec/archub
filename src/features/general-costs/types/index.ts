@@ -31,7 +31,7 @@ export interface GeneralCostPayment {
   organization_id: string;
   amount: number;
   currency_id: string;
-  exchange_rate: number;
+  exchange_rate: number | null;
   payment_date: string;
   notes: string | null;
   reference: string | null;
@@ -39,9 +39,35 @@ export interface GeneralCostPayment {
   updated_at: string | null;
   wallet_id: string | null;
   general_cost_id: string | null;
-  status: string;
+  status: 'confirmed' | 'pending' | 'rejected' | 'void';
   created_by: string | null;
   file_url: string | null;
+  currency?: {
+    id: string;
+    name: string;
+    code: string;
+    symbol: string;
+  } | null;
+  wallet?: {
+    id: string;
+    wallets?: {
+      id: string;
+      name: string;
+    } | null;
+  } | null;
+  general_cost?: {
+    id: string;
+    name: string;
+    description: string | null;
+  } | null;
+  creator?: {
+    id: string;
+    users?: {
+      id: string;
+      full_name: string | null;
+      avatar_url: string | null;
+    } | null;
+  } | null;
 }
 
 export interface InsertGeneralCostPayment {

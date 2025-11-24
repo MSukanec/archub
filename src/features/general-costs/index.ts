@@ -22,6 +22,8 @@ export * from './hooks/use-create-general-cost-payment';
 export * from './hooks/use-update-general-cost-payment';
 export * from './hooks/use-delete-general-cost-payment';
 export * from './hooks/use-general-cost-payment';
+export * from './hooks/use-general-cost-payment-media';
 
 export * from './modals/GeneralCostsModal';
 export * from './modals/GeneralCostsPaymentModal';
+export { GeneralCostsPaymentViewModal } from './modals/GeneralCostsPaymentViewModal';

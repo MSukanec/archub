@@ -26,7 +26,11 @@ export async function getGeneralCostPayment(
       *,
       currency:currencies(*),
       wallet:organization_wallets(*, wallets(*)),
-      general_cost:general_costs(*)
+      general_cost:general_costs(*),
+      creator:organization_members!general_costs_payments_created_by_fkey(
+        id,
+        users(id, full_name, avatar_url)
+      )
     `)
     .eq('id', id)
     .eq('organization_id', organizationId)

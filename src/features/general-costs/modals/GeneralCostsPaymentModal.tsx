@@ -13,14 +13,11 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { CalendarIcon, DollarSign, Paperclip } from 'lucide-react'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { Separator } from '@/components/ui/separator'
+import { CalendarIcon, DollarSign } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
-import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { useGeneralCosts } from '../hooks/use-general-costs'
 import { useGeneralCostPayment } from '../hooks/use-general-cost-payment'
 import { useCreateGeneralCostPayment } from '../hooks/use-create-general-cost-payment'
@@ -28,14 +25,14 @@ import { useUpdateGeneralCostPayment } from '../hooks/use-update-general-cost-pa
 import { generalCostPaymentSchema, type GeneralCostPaymentFormData } from '../schemas'
 import { UploadMultiFileField } from '@/components/ui-custom/fields/UploadMultiFileField'
 import { uploadFile, deleteFile } from '@/lib/storage'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { useQueryClient } from '@tanstack/react-query'
+import { useGeneralCostPaymentMedia } from '../hooks/use-general-cost-payment-media'
 
 interface GeneralCostsPaymentModalProps {
   modalData: {
     organizationId: string
     paymentId?: string
-    mode?: 'create' | 'edit' | 'view'
+    mode?: 'create' | 'edit'
   }
   onClose: () => void
 }
@@ -44,36 +41,19 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
   const { organizationId, paymentId, mode = 'create' } = modalData
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
-  const { setPanel } = useModalPanelStore()
   const queryClient = useQueryClient()
 
   const [filesToUpload, setFilesToUpload] = React.useState<any[]>([])
   const [existingFiles, setExistingFiles] = React.useState<any[]>([])
 
-  // Fetch existing payment data for edit/view mode
+  // Fetch existing payment data for edit mode
   const { data: existingPayment, isLoading: loadingPayment } = useGeneralCostPayment(
     paymentId,
     organizationId
   )
 
-  // Fetch existing media files for this payment
-  const { data: mediaFiles = [] } = useQuery({
-    queryKey: ['general-cost-payment-media', paymentId],
-    queryFn: async () => {
-      console.log('[DEBUG] Fetching media files for paymentId:', paymentId, 'mode:', mode)
-      if (!paymentId || !supabase) {
-        console.log('[DEBUG] Skipping fetch - no paymentId or supabase')
-        return []
-      }
-      
-      // NOTE: Currently media_links doesn't have general_cost_payment_id column
-      // Returning empty array until database schema is updated
-      // TODO: Add general_cost_payment_id column to media_links table
-      console.log('[DEBUG] Skipping media files fetch - general_cost_payment_id column not in database')
-      return []
-    },
-    enabled: !!paymentId && (mode === 'edit' || mode === 'view')
-  })
+  // Fetch existing media files for this payment using shared hook
+  const { data: mediaFiles = [] } = useGeneralCostPaymentMedia(mode === 'edit' ? paymentId : undefined)
 
   const form = useForm<GeneralCostPaymentFormData>({
     resolver: zodResolver(generalCostPaymentSchema),
@@ -97,22 +77,11 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
   const { data: members = [] } = useOrganizationMembers(organizationId)
   
   // Loading state for all necessary data
-  const isLoading = currenciesLoading || generalCostsLoading || walletsLoading || ((mode === 'edit' || mode === 'view') && loadingPayment)
-
-  // Set panel mode based on the mode prop
-  React.useEffect(() => {
-    if (mode === 'view') {
-      setPanel('view')
-    } else if (mode === 'edit') {
-      setPanel('edit')
-    } else {
-      setPanel('edit')
-    }
-  }, [setPanel, mode])
+  const isLoading = currenciesLoading || generalCostsLoading || walletsLoading || (mode === 'edit' && loadingPayment)
 
   // Load existing payment data
   React.useEffect(() => {
-    if (existingPayment && (mode === 'edit' || mode === 'view')) {
+    if (existingPayment && mode === 'edit') {
       const paymentDate = existingPayment.payment_date ? new Date(existingPayment.payment_date) : new Date()
       
       form.reset({
@@ -241,9 +210,9 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
       exchange_rate: data.exchange_rate ?? undefined,
       reference: data.reference || null,
       general_cost_id: data.general_cost_id || null,
-      status: data.status || 'confirmed',
+      status: (data.status || 'confirmed') as 'confirmed' | 'pending' | 'rejected' | 'void',
       created_by: currentMember.id,
-      file_url: null, // Deprecated field, now using media_files
+      file_url: null as string | null,
     }
 
     try {
@@ -314,126 +283,6 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
     form.reset()
     onClose()
   }
-
-  // VIEW PANEL - Read-only display of payment information
-  const viewPanel = (
-    <div className="space-y-6">
-      {/* Payment Date and Creator */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <CalendarIcon className="h-4 w-4 text-accent" />
-          {existingPayment?.payment_date ? format(new Date(existingPayment.payment_date), 'dd/MM/yyyy', { locale: es }) : '-'}
-        </div>
-        
-        {/* Creator info */}
-        {existingPayment?.creator && (
-          <div className="flex items-center gap-2">
-            <Avatar className="h-6 w-6">
-              <AvatarImage src={existingPayment.creator.avatar_url || undefined} alt={existingPayment.creator.full_name || ''} />
-              <AvatarFallback className="text-xs">
-                {existingPayment.creator.full_name?.charAt(0) || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <div className="text-sm text-muted-foreground">
-              {existingPayment.creator.full_name}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <Separator />
-
-      {/* Payment Details Grid */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <div className="text-sm font-medium text-muted-foreground">Gasto General</div>
-          <div className="text-sm">{existingPayment?.general_cost?.name || 'Sin categoría'}</div>
-        </div>
-        
-        <div className="space-y-2">
-          <div className="text-sm font-medium text-muted-foreground">Monto</div>
-          <div className="text-sm font-bold">
-            {existingPayment?.currency?.symbol || '$'} {existingPayment?.amount?.toLocaleString('es-AR', { minimumFractionDigits: 2 }) || '0.00'}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <div className="text-sm font-medium text-muted-foreground">Moneda</div>
-          <div className="text-sm">{existingPayment?.currency?.code || '-'}</div>
-        </div>
-
-        <div className="space-y-2">
-          <div className="text-sm font-medium text-muted-foreground">Billetera</div>
-          <div className="text-sm">{existingPayment?.wallet?.wallets?.name || '-'}</div>
-        </div>
-
-        {existingPayment?.exchange_rate && (
-          <div className="space-y-2">
-            <div className="text-sm font-medium text-muted-foreground">Cotización</div>
-            <div className="text-sm">{existingPayment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</div>
-          </div>
-        )}
-
-        <div className="space-y-2">
-          <div className="text-sm font-medium text-muted-foreground">Estado</div>
-          <div className="text-sm">
-            {existingPayment?.status === 'confirmed' ? 'Confirmado' : 
-             existingPayment?.status === 'pending' ? 'Pendiente' : 
-             existingPayment?.status === 'rejected' ? 'Rechazado' : 'Anulado'}
-          </div>
-        </div>
-
-        {existingPayment?.reference && (
-          <div className="space-y-2 col-span-2">
-            <div className="text-sm font-medium text-muted-foreground">Referencia</div>
-            <div className="text-sm">{existingPayment.reference}</div>
-          </div>
-        )}
-      </div>
-
-      {/* Notes */}
-      {existingPayment?.notes && (
-        <>
-          <Separator />
-          <div className="space-y-2">
-            <div className="text-sm font-medium text-muted-foreground">Notas</div>
-            <div className="text-sm bg-muted/20 p-3 rounded-md">{existingPayment.notes}</div>
-          </div>
-        </>
-      )}
-
-      {/* Attachments Gallery */}
-      {existingFiles.length > 0 && (
-        <>
-          <Separator />
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <Paperclip className="h-4 w-4 text-accent" />
-              Archivos Adjuntos ({existingFiles.length})
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {existingFiles.map((file: any) => (
-                <div key={file.id} className="aspect-square rounded overflow-hidden border">
-                  {file.file_type?.startsWith('image') ? (
-                    <img
-                      src={file.file_url}
-                      alt={file.file_name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-muted">
-                      <Paperclip className="h-8 w-8 text-muted-foreground" />
-                      <span className="text-xs ml-2">{file.file_name}</span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  )
 
   // Panel de edición
   const editPanel = () => {
@@ -689,20 +538,8 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
   const headerContent = (
     <FormModalHeader
       icon={DollarSign}
-      title={
-        mode === 'view' 
-          ? `Pago de ${existingPayment?.general_cost?.name || 'Gasto General'}`
-          : mode === 'edit' 
-            ? 'Editar Pago de Gastos Generales'
-            : 'Nuevo Pago de Gastos Generales'
-      }
-      description={
-        mode === 'view'
-          ? `${existingPayment?.currency?.symbol || '$'} ${existingPayment?.amount?.toLocaleString('es-AR', { minimumFractionDigits: 2 }) || '0.00'} - ${existingPayment?.payment_date ? format(new Date(existingPayment.payment_date), 'dd/MM/yyyy') : ''}`
-          : mode === 'edit'
-            ? 'Modifica los datos del pago de gasto general'
-            : 'Registra un nuevo pago de gasto general de la organización'
-      }
+      title={mode === 'edit' ? 'Editar Pago de Gastos Generales' : 'Nuevo Pago de Gastos Generales'}
+      description={mode === 'edit' ? 'Modifica los datos del pago de gasto general' : 'Registra un nuevo pago de gasto general de la organización'}
     />
   )
 
@@ -710,7 +547,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
     form.handleSubmit(onSubmit)()
   }
 
-  const footerContent = mode !== 'view' ? (
+  const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
@@ -718,16 +555,16 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
       onRightClick={handleSubmitClick}
       showLoadingSpinner={createPaymentMutation.isPending || updatePaymentMutation.isPending}
     />
-  ) : null
+  )
 
   return (
     <FormModalLayout
       columns={1}
-      viewPanel={viewPanel}
       editPanel={editPanel()}
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={handleClose}
+      isEditing={true}
     />
   )
 }
