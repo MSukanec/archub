@@ -19,6 +19,7 @@ export interface GeneralCostPayment {
   status: 'confirmed' | 'pending' | 'rejected' | 'void'
   created_by: string | null
   file_url: string | null
+  attachments_count?: number
   general_cost?: {
     id: string
     name: string
@@ -48,6 +49,17 @@ export interface GeneralCostPayment {
     email: string
     avatar_url: string | null
   } | null
+  media_links?: Array<{
+    id: string
+    media_file_id: string
+    media_files: {
+      id: string
+      file_name: string
+      file_type: string
+      bucket: string
+      file_path: string
+    }
+  }>
 }
 
 export function useGeneralCostsPayments(organizationId: string | undefined) {
@@ -96,7 +108,13 @@ export function useGeneralCostsPayments(organizationId: string | undefined) {
         throw error
       }
 
-      return (data || []) as GeneralCostPayment[]
+      // NOTE: Currently media_links doesn't have a general_cost_payment_id column
+      // Temporarily returning 0 for attachments_count until database schema is updated
+      // TODO: Add general_cost_payment_id column to media_links table
+      return (data || []).map(payment => ({
+        ...payment,
+        attachments_count: 0
+      })) as GeneralCostPayment[]
     },
     enabled: !!organizationId,
   })

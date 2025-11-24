@@ -111,6 +111,7 @@ export default function GeneralCostsPaymentsTab() {
 
   const handleEdit = (payment: GeneralCostPayment) => {
     if (!organizationId) return;
+    console.log('[DEBUG] Opening modal in EDIT mode for payment:', payment.id);
     openModal('general-costs-payment', {
       organizationId,
       paymentId: payment.id,
@@ -535,6 +536,13 @@ export default function GeneralCostsPaymentsTab() {
             </div>
           ),
         }}
+        leadingRowAction={(payment: GeneralCostPayment) => 
+          payment.attachments_count && payment.attachments_count > 0 ? {
+            label: `${payment.attachments_count} Adjunto${payment.attachments_count > 1 ? 's' : ''}`,
+            icon: Paperclip,
+            onClick: () => handleView(payment),
+          } : null
+        }
         rowActions={(payment: GeneralCostPayment) => [
           {
             label: 'Editar Pago',

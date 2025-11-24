@@ -13,7 +13,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { CalendarIcon, DollarSign } from 'lucide-react'
+import { CalendarIcon, DollarSign, Paperclip } from 'lucide-react'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Separator } from '@/components/ui/separator'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
@@ -64,75 +66,11 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
         return []
       }
       
-      const { data, error } = await supabase
-        .from('media_links')
-        .select(`
-          id,
-          media_file_id,
-          category,
-          description,
-          media_files (
-            id,
-            file_name,
-            file_type,
-            file_size,
-            file_path,
-            bucket,
-            is_public
-          )
-        `)
-        .eq('general_cost_payment_id', paymentId)
-        .eq('is_deleted', false)
-      
-      if (error) {
-        console.error('[ERROR] Error fetching payment media:', error)
-        return []
-      }
-      
-      console.log('[DEBUG] Media links fetched:', data?.length || 0, 'files')
-      
-      const filesWithUrls = await Promise.all(
-        (data || []).map(async (link: any) => {
-          let fileUrl = null
-          
-          if (link.media_files?.is_public) {
-            fileUrl = supabase.storage
-              .from(link.media_files.bucket)
-              .getPublicUrl(link.media_files.file_path).data.publicUrl
-          } else if (link.media_files?.bucket === 'private-assets' && link.media_files?.file_path) {
-            try {
-              const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-                .from(link.media_files.bucket)
-                .createSignedUrl(link.media_files.file_path, 3600)
-              
-              if (signedUrlError) {
-                console.error('[ERROR] Error generating signed URL:', signedUrlError)
-                fileUrl = null
-              } else {
-                fileUrl = signedUrlData?.signedUrl || null
-              }
-            } catch (error) {
-              console.error('[ERROR] Error creating signed URL:', error)
-              fileUrl = null
-            }
-          }
-          
-          return {
-            id: link.media_file_id,
-            file_name: link.media_files?.file_name,
-            file_type: link.media_files?.file_type,
-            file_size: link.media_files?.file_size,
-            file_url: fileUrl,
-            bucket: link.media_files?.bucket,
-            file_path: link.media_files?.file_path,
-            mime_type: link.media_files?.file_type,
-            isExisting: true
-          }
-        })
-      )
-      
-      console.log('[DEBUG] Files with URLs processed:', filesWithUrls.length)
-      return filesWithUrls
+      // NOTE: Currently media_links doesn't have general_cost_payment_id column
+      // Returning empty array until database schema is updated
+      // TODO: Add general_cost_payment_id column to media_links table
+      console.log('[DEBUG] Skipping media files fetch - general_cost_payment_id column not in database')
+      return []
     },
     enabled: !!paymentId && (mode === 'edit' || mode === 'view')
   })
@@ -377,90 +315,125 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
     onClose()
   }
 
-  // Panel de vista (solo lectura)
-  const paymentWithRelations = existingPayment as any;
-  const viewPanel = existingPayment ? (
+  // VIEW PANEL - Read-only display of payment information
+  const viewPanel = (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <h4 className="font-medium text-foreground mb-2">Fecha de Pago</h4>
-          <span className="text-sm">
-            {existingPayment.payment_date ? format(new Date(existingPayment.payment_date), 'PPP', { locale: es }) : 'No especificada'}
-          </span>
+      {/* Payment Date and Creator */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <CalendarIcon className="h-4 w-4 text-accent" />
+          {existingPayment?.payment_date ? format(new Date(existingPayment.payment_date), 'dd/MM/yyyy', { locale: es }) : '-'}
         </div>
-        <div>
-          <h4 className="font-medium text-foreground mb-2">Monto</h4>
-          <span className="text-sm font-medium">
-            {existingPayment.amount?.toLocaleString()}
-          </span>
-        </div>
-        <div>
-          <h4 className="font-medium text-foreground mb-2">Moneda</h4>
-          <span className="text-sm">
-            {paymentWithRelations.currency?.name || '-'}
-          </span>
-        </div>
-        <div>
-          <h4 className="font-medium text-foreground mb-2">Cotización</h4>
-          <span className="text-sm">
-            {existingPayment.exchange_rate != null
-              ? existingPayment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })
-              : 'No especificada'}
-          </span>
-        </div>
-        <div>
-          <h4 className="font-medium text-foreground mb-2">Billetera</h4>
-          <span className="text-sm">
-            {paymentWithRelations.wallet?.wallets?.name || '-'}
-          </span>
-        </div>
-        <div>
-          <h4 className="font-medium text-foreground mb-2">Gasto General</h4>
-          <span className="text-sm">
-            {paymentWithRelations.general_cost?.name || 'Sin asignar'}
-          </span>
-        </div>
-        <div>
-          <h4 className="font-medium text-foreground mb-2">Estado</h4>
-          <span className="text-sm">
-            {existingPayment.status === 'confirmed' ? 'Confirmado' : 
-             existingPayment.status === 'pending' ? 'Pendiente' :
-             existingPayment.status === 'rejected' ? 'Rechazado' : 'Anulado'}
-          </span>
-        </div>
-        <div>
-          <h4 className="font-medium text-foreground mb-2">Referencia</h4>
-          <span className="text-sm">
-            {existingPayment.reference || '-'}
-          </span>
-        </div>
+        
+        {/* Creator info */}
+        {existingPayment?.creator && (
+          <div className="flex items-center gap-2">
+            <Avatar className="h-6 w-6">
+              <AvatarImage src={existingPayment.creator.avatar_url || undefined} alt={existingPayment.creator.full_name || ''} />
+              <AvatarFallback className="text-xs">
+                {existingPayment.creator.full_name?.charAt(0) || 'U'}
+              </AvatarFallback>
+            </Avatar>
+            <div className="text-sm text-muted-foreground">
+              {existingPayment.creator.full_name}
+            </div>
+          </div>
+        )}
       </div>
-      <div>
-        <h4 className="font-medium text-foreground mb-2">Notas</h4>
-        <p className="text-sm text-muted-foreground">
-          {existingPayment.notes || 'Sin notas'}
-        </p>
-      </div>
-      {existingFiles.length > 0 && (
-        <div>
-          <h4 className="font-medium text-foreground mb-2">Archivos Adjuntos</h4>
-          <div className="space-y-2">
-            {existingFiles.map((file) => (
-              <a 
-                key={file.id}
-                href={file.file_url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="block text-sm text-primary hover:underline"
-              >
-                {file.file_name}
-              </a>
-            ))}
+
+      <Separator />
+
+      {/* Payment Details Grid */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <div className="text-sm font-medium text-muted-foreground">Gasto General</div>
+          <div className="text-sm">{existingPayment?.general_cost?.name || 'Sin categoría'}</div>
+        </div>
+        
+        <div className="space-y-2">
+          <div className="text-sm font-medium text-muted-foreground">Monto</div>
+          <div className="text-sm font-bold">
+            {existingPayment?.currency?.symbol || '$'} {existingPayment?.amount?.toLocaleString('es-AR', { minimumFractionDigits: 2 }) || '0.00'}
           </div>
         </div>
+
+        <div className="space-y-2">
+          <div className="text-sm font-medium text-muted-foreground">Moneda</div>
+          <div className="text-sm">{existingPayment?.currency?.code || '-'}</div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="text-sm font-medium text-muted-foreground">Billetera</div>
+          <div className="text-sm">{existingPayment?.wallet?.wallets?.name || '-'}</div>
+        </div>
+
+        {existingPayment?.exchange_rate && (
+          <div className="space-y-2">
+            <div className="text-sm font-medium text-muted-foreground">Cotización</div>
+            <div className="text-sm">{existingPayment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</div>
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <div className="text-sm font-medium text-muted-foreground">Estado</div>
+          <div className="text-sm">
+            {existingPayment?.status === 'confirmed' ? 'Confirmado' : 
+             existingPayment?.status === 'pending' ? 'Pendiente' : 
+             existingPayment?.status === 'rejected' ? 'Rechazado' : 'Anulado'}
+          </div>
+        </div>
+
+        {existingPayment?.reference && (
+          <div className="space-y-2 col-span-2">
+            <div className="text-sm font-medium text-muted-foreground">Referencia</div>
+            <div className="text-sm">{existingPayment.reference}</div>
+          </div>
+        )}
+      </div>
+
+      {/* Notes */}
+      {existingPayment?.notes && (
+        <>
+          <Separator />
+          <div className="space-y-2">
+            <div className="text-sm font-medium text-muted-foreground">Notas</div>
+            <div className="text-sm bg-muted/20 p-3 rounded-md">{existingPayment.notes}</div>
+          </div>
+        </>
+      )}
+
+      {/* Attachments Gallery */}
+      {existingFiles.length > 0 && (
+        <>
+          <Separator />
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <Paperclip className="h-4 w-4 text-accent" />
+              Archivos Adjuntos ({existingFiles.length})
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {existingFiles.map((file: any) => (
+                <div key={file.id} className="aspect-square rounded overflow-hidden border">
+                  {file.file_type?.startsWith('image') ? (
+                    <img
+                      src={file.file_url}
+                      alt={file.file_name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-muted">
+                      <Paperclip className="h-8 w-8 text-muted-foreground" />
+                      <span className="text-xs ml-2">{file.file_name}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
       )}
     </div>
-  ) : null
+  )
 
   // Panel de edición
   const editPanel = () => {
@@ -715,11 +688,21 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
 
   const headerContent = (
     <FormModalHeader
-      title={mode === 'edit' ? "Editar Pago de Gastos Generales" : "Nuevo Pago de Gastos Generales"}
-      description={mode === 'edit'
-        ? 'Modifica los datos del pago de gasto general seleccionado'
-        : 'Registra un nuevo pago de gasto general de la organización'}
       icon={DollarSign}
+      title={
+        mode === 'view' 
+          ? `Pago de ${existingPayment?.general_cost?.name || 'Gasto General'}`
+          : mode === 'edit' 
+            ? 'Editar Pago de Gastos Generales'
+            : 'Nuevo Pago de Gastos Generales'
+      }
+      description={
+        mode === 'view'
+          ? `${existingPayment?.currency?.symbol || '$'} ${existingPayment?.amount?.toLocaleString('es-AR', { minimumFractionDigits: 2 }) || '0.00'} - ${existingPayment?.payment_date ? format(new Date(existingPayment.payment_date), 'dd/MM/yyyy') : ''}`
+          : mode === 'edit'
+            ? 'Modifica los datos del pago de gasto general'
+            : 'Registra un nuevo pago de gasto general de la organización'
+      }
     />
   )
 
@@ -727,7 +710,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
     form.handleSubmit(onSubmit)()
   }
 
-  const footerContent = (
+  const footerContent = mode !== 'view' ? (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
@@ -735,7 +718,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
       onRightClick={handleSubmitClick}
       showLoadingSpinner={createPaymentMutation.isPending || updatePaymentMutation.isPending}
     />
-  )
+  ) : null
 
   return (
     <FormModalLayout
