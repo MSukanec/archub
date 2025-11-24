@@ -2,6 +2,7 @@
 import type { LearningHandlerContext } from './shared.js';
 import { getAuthenticatedUser } from './shared.js';
 import { supabaseAdmin } from '../../supabase/admin.js';
+import type { BucketName } from '../../../src/lib/storage/types.js';
 
 export interface Course {
   id: string;
@@ -50,7 +51,7 @@ export async function getCoursesFull(
     }
 
     // Execute ALL queries in parallel for maximum speed
-    const [coursesResult, enrollmentsResult, progressResult, courseImagesResult] = await Promise.all([
+    const [coursesResult, enrollmentsResult, progressResult, courseImagesResult, courseDetailsResult] = await Promise.all([
       // Get all active courses
       supabase
         .from('courses')
@@ -72,7 +73,7 @@ export async function getCoursesFull(
         .select('*')
         .eq('user_id', dbUser.id),
 
-      // Get course cover images
+      // Get course cover images from media_links (LEGACY)
       // Filter by category='course_cover' to get only cover images (not instructor photos, OG images, etc.)
       // Use admin client to bypass RLS for public course images
       supabaseAdmin
@@ -87,14 +88,21 @@ export async function getCoursesFull(
         .not('course_id', 'is', null)
         .eq('category', 'course_cover')
         .eq('media_files.is_deleted', false)
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: false }),
+
+      // Get course cover images from course_details (NEW - preferred method)
+      supabaseAdmin
+        .from('course_details')
+        .select('course_id, image_bucket, image_path')
+        .not('image_bucket', 'is', null)
+        .not('image_path', 'is', null)
     ]);
 
     console.log('[getCoursesFull] Courses result:', coursesResult.error ? coursesResult.error : `${coursesResult.data?.length} courses`);
     console.log('[getCoursesFull] Enrollments result:', enrollmentsResult.error ? enrollmentsResult.error : `${enrollmentsResult.data?.length} enrollments`);
     console.log('[getCoursesFull] Progress result:', progressResult.error ? progressResult.error : `${progressResult.data?.length} progress records`);
     console.log('[getCoursesFull] Course images result:', courseImagesResult.error ? courseImagesResult.error : `${courseImagesResult.data?.length} images`);
-    console.log('[getCoursesFull] Course images sample data:', courseImagesResult.data?.slice(0, 2));
+    console.log('[getCoursesFull] Course details result:', courseDetailsResult.error ? courseDetailsResult.error : `${courseDetailsResult.data?.length} details`);
 
     if (coursesResult.error) {
       console.error('Error fetching courses:', coursesResult.error);
@@ -115,9 +123,45 @@ export async function getCoursesFull(
     if (courseImagesResult.error) {
       console.warn('Warning fetching course images:', courseImagesResult.error);
     }
+    if (courseDetailsResult.error) {
+      console.warn('Warning fetching course details:', courseDetailsResult.error);
+    }
 
-    // Build image map - first match per course wins (already sorted)
+    // Build image map - PRIORITIZE course_details over media_links
     const imageMap = new Map<string, string>();
+    
+    // First, populate from course_details (preferred method)
+    if (courseDetailsResult.data) {
+      for (const detail of courseDetailsResult.data) {
+        if (detail.image_bucket && detail.image_path) {
+          try {
+            // Generate URL based on bucket type
+            let imageUrl: string;
+            if (detail.image_bucket === 'public-assets') {
+              // Public bucket: use public URL
+              imageUrl = supabaseAdmin.storage
+                .from(detail.image_bucket)
+                .getPublicUrl(detail.image_path).data.publicUrl;
+            } else {
+              // Private/social bucket: use signed URL
+              const { data, error } = await supabaseAdmin.storage
+                .from(detail.image_bucket)
+                .createSignedUrl(detail.image_path, 3600);
+              
+              if (error || !data?.signedUrl) {
+                throw new Error(`Failed to create signed URL: ${error?.message}`);
+              }
+              imageUrl = data.signedUrl;
+            }
+            imageMap.set(detail.course_id, imageUrl);
+          } catch (error) {
+            console.warn(`Failed to generate URL for course ${detail.course_id}:`, error);
+          }
+        }
+      }
+    }
+    
+    // Then, populate from media_links (LEGACY - only if not already in map)
     if (courseImagesResult.data) {
       for (const img of courseImagesResult.data) {
         if (!imageMap.has(img.course_id)) {
