@@ -42,8 +42,55 @@ export async function handleCreateProject(req: Request, res: Response) {
     const supabase = createAuthenticatedClient(token);
     const ctx: ProjectsContext = { supabase };
 
+    const organization_id = req.body.organization_id;
+
+    // Validate plan limits before creating project
+    if (organization_id) {
+      const { count: projectCount, error: countError } = await supabase
+        .from('projects')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', organization_id)
+        .eq('is_deleted', false);
+
+      if (countError) {
+        console.error('Error counting projects:', countError);
+      } else {
+        const { data: orgData, error: orgError } = await supabase
+          .from('organizations')
+          .select('plan_id, plans(name, features)')
+          .eq('id', organization_id)
+          .single();
+
+        if (!orgError && orgData) {
+          const planName = (orgData as any).plans?.name;
+          const planFeatures = (orgData as any).plans?.features || {};
+          
+          let maxProjects = 2;
+          
+          if (planFeatures.max_projects !== undefined) {
+            maxProjects = planFeatures.max_projects === -1 ? Infinity : planFeatures.max_projects;
+          } else if (planName === 'Teams' || planName === 'TEAMS') {
+            maxProjects = Infinity;
+          } else if (planName === 'Pro' || planName === 'PRO') {
+            maxProjects = 25;
+          } else if (planName === 'Free' || planName === 'FREE') {
+            maxProjects = 2;
+          }
+
+          if (maxProjects !== Infinity && (projectCount || 0) >= maxProjects) {
+            return res.status(403).json({ 
+              error: 'Project limit reached',
+              message: `You have reached the maximum number of projects (${maxProjects}) for your current plan. Please upgrade your plan to create more projects.`,
+              current: projectCount,
+              limit: maxProjects
+            });
+          }
+        }
+      }
+    }
+
     const params: CreateProjectParams = {
-      organization_id: req.body.organization_id,
+      organization_id,
       name: req.body.name,
       status: req.body.status,
       color: req.body.color,
