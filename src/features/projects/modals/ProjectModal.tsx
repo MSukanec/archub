@@ -184,7 +184,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
     reader.readAsDataURL(file);
   };
 
-  // Handle image upload after project creation
+  // Handle image upload after project creation or update
   const handleImageUpload = async (projectId: string) => {
     if (!selectedImageFile || !organizationId) return;
 
@@ -198,15 +198,23 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       // Upload image to storage
       const uploadResult = await uploadProjectImage(selectedImageFile, projectId, organizationId);
       
-      // Update project_data table with new image URL
+      // Update project_data table with new image URL (generates on-demand signed URLs)
       await updateProjectImageUrl(projectId, uploadResult.file_url);
+      
+      // Invalidate queries to refresh project views
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['project', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['project-data', projectId] });
       
       toast({
         title: "Imagen subida",
         description: "La imagen principal se ha guardado correctamente"
       });
+      
+      // Clean up image state after successful upload
+      setSelectedImageFile(null);
+      setImagePreviewUrl(null);
     } catch (error: any) {
-      console.error('Error uploading project image:', error);
       toast({
         title: "Error al subir imagen",
         description: error.message || "No se pudo subir la imagen. Puedes intentarlo más tarde desde los datos del proyecto.",
@@ -278,6 +286,11 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
             organization_id: organizationId,
           }
         });
+
+        // Upload new image if one was selected
+        if (selectedImageFile) {
+          await handleImageUpload(editingProject.id);
+        }
 
         toast({
           title: "Proyecto actualizado",
@@ -471,7 +484,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
             />
           </div>
 
-          {/* Image Upload - Unified component for both creating and editing */}
+          {/* Image Upload - Preview mode for both creating and editing (actual upload happens on form submit) */}
           <div className="space-y-2">
             <FormLabel>
               Imagen Principal
@@ -479,15 +492,12 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
             </FormLabel>
             
             <UploadImageAndShowField
-              projectId={isEditing ? editingProject?.id : undefined}
+              projectId={undefined}
               organizationId={organizationId}
               currentImageUrl={isEditing ? (editingProject?.project_data as any)?.project_image_url || null : null}
-              previewMode={!isEditing}
+              previewMode={true}
               previewUrl={imagePreviewUrl}
-              onFileSelect={!isEditing ? handleFileSelect : undefined}
-              onImageUpdate={isEditing ? () => {
-                queryClient.invalidateQueries({ queryKey: ['projects'] });
-              } : undefined}
+              onFileSelect={handleFileSelect}
             />
           </div>
 
