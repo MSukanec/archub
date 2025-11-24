@@ -85,8 +85,7 @@ export async function handleUpdateProject(req: Request, res: Response) {
       custom_color_hex: req.body.custom_color_hex,
       project_type_id: req.body.project_type_id,
       project_modality_id: req.body.project_modality_id,
-      organization_id: req.body.organization_id,
-      last_active_at: req.body.last_active_at
+      organization_id: req.body.organization_id
     };
 
     const result = await updateProject(ctx, params);
