@@ -241,7 +241,11 @@ export default function ImageUploadAndShowField({
                   type="button"
                   size="sm"
                   variant="default"
-                  onClick={() => document.getElementById('hero-image-input')?.click()}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    document.getElementById('hero-image-input')?.click();
+                  }}
                   disabled={isUploading && !previewMode}
                 >
                   <Camera className="h-4 w-4 mr-1" />
@@ -251,7 +255,11 @@ export default function ImageUploadAndShowField({
                   type="button"
                   size="sm"
                   variant="default"
-                  onClick={handleRemove}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleRemove();
+                  }}
                   disabled={removeMutation.isPending && !previewMode}
                   className="bg-red-500 hover:bg-red-600 text-white"
                 >
@@ -267,6 +275,14 @@ export default function ImageUploadAndShowField({
             <div 
               className="w-full h-full flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-[var(--accent)] hover:border-[var(--accent)]/80 transition-colors rounded-lg"
               onClick={() => document.getElementById('hero-image-input')?.click()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  document.getElementById('hero-image-input')?.click();
+                }
+              }}
+              role="button"
+              tabIndex={0}
             >
               <div className="text-center space-y-4 p-8">
                 <div className="w-16 h-16 mx-auto bg-muted/50 rounded-full flex items-center justify-center border border-muted-foreground/20">
@@ -280,7 +296,16 @@ export default function ImageUploadAndShowField({
                     Formatos: JPG, PNG, WebP • Tamaño máximo: 2MB
                   </p>
                 </div>
-                <Button disabled={isUploading} variant="default">
+                <Button 
+                  type="button"
+                  disabled={isUploading} 
+                  variant="default"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    document.getElementById('hero-image-input')?.click();
+                  }}
+                >
                   <Upload className="h-4 w-4 mr-2" />
                   {isUploading ? 'Subiendo...' : 'Seleccionar Imagen'}
                 </Button>
