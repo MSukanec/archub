@@ -19,7 +19,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui-custom/KPICard';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useProjects, ProjectItemCard } from '@/features/projects';
+import { useProjects, ProjectItemCard, updateProjectLastActive } from '@/features/projects';
 import { useContacts } from '@/features/contacts';
 import { useMovements } from '@/hooks/use-movements';
 import { useUserOrganizationPreferences } from '@/features/organization';
@@ -95,6 +95,11 @@ export default function OrganizationDashboard() {
       // Update both stores: project context and navigation
       setSelectedProject(projectId, organizationId);
       setSidebarLevel('project');
+      
+      // Update last_active_at via backend API (fire and forget)
+      updateProjectLastActive(projectId, organizationId!).catch(err => 
+        console.error('Error updating project last_active_at:', err)
+      );
       
       queryClient.invalidateQueries({ 
         queryKey: ['user-organization-preferences', userData?.user?.id, organizationId] 

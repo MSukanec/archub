@@ -4,9 +4,11 @@ import {
   createProject,
   updateProject,
   deleteProject,
+  updateProjectLastActive,
   type CreateProjectParams,
   type UpdateProjectParams,
-  type DeleteProjectParams
+  type DeleteProjectParams,
+  type UpdateProjectLastActiveParams
 } from '../../lib/handlers/projects/projects.js';
 import type { ProjectsContext } from '../../lib/handlers/projects/shared.js';
 
@@ -126,5 +128,33 @@ export async function handleDeleteProject(req: Request, res: Response) {
   } catch (error: any) {
     console.error('Error in deleteProject controller:', error);
     return res.status(500).json({ error: error.message || 'Failed to delete project' });
+  }
+}
+
+export async function handleUpdateProjectLastActive(req: Request, res: Response) {
+  try {
+    const token = extractToken(req.headers.authorization);
+    if (!token) {
+      return res.status(401).json({ error: 'No authorization token provided' });
+    }
+
+    const supabase = createAuthenticatedClient(token);
+    const ctx: ProjectsContext = { supabase };
+
+    const params: UpdateProjectLastActiveParams = {
+      projectId: req.params.id,
+      organizationId: req.body.organization_id
+    };
+
+    const result = await updateProjectLastActive(ctx, params);
+
+    if (result.success) {
+      return res.status(200).json(result.data);
+    } else {
+      return res.status(400).json({ error: result.error });
+    }
+  } catch (error: any) {
+    console.error('Error in updateProjectLastActive controller:', error);
+    return res.status(500).json({ error: error.message || 'Failed to update project last_active_at' });
   }
 }

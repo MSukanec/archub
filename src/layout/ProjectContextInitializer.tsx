@@ -3,6 +3,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useUserOrganizationPreferences } from '@/features/organization'
 import { useProjectContext } from '@/stores/projectContext'
 import { useHeartbeat } from '@/hooks/use-heartbeat'
+import { updateProjectLastActive } from '@/features/projects'
 
 /**
  * Componente que inicializa automáticamente el proyecto correcto
@@ -32,6 +33,10 @@ export function ProjectContextInitializer() {
       // Esto previene la recarga automática cuando el usuario explícitamente selecciona la vista de organización
       if (lastProjectId && initializedForOrg.current !== currentOrganizationId) {
         setSelectedProject(lastProjectId, currentOrganizationId)
+        // Update last_active_at when auto-loading project (fire and forget)
+        updateProjectLastActive(lastProjectId, currentOrganizationId).catch(err => 
+          console.error('Error updating project last_active_at:', err)
+        );
         initializedForOrg.current = currentOrganizationId
       } else if (!lastProjectId) {
         // Si no hay último proyecto, marcar como inicializado para esta organización

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useProjects, useProjectsCount } from '@/features/projects'
+import { useProjects, useProjectsCount, updateProjectLastActive } from '@/features/projects'
 import { useUserOrganizationPreferences } from '@/features/organization'
 import { Folder, Edit, Trash2, Plus, CheckCircle2, Search, Filter, Bell } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -227,20 +227,17 @@ export default function ProjectList() {
         })
       
       if (error) throw error
-
-      // Update project's last_active_at
-      const { error: projectError } = await supabase
-        .from('projects')
-        .update({ last_active_at: new Date().toISOString() })
-        .eq('id', projectId)
-      
-      if (projectError) throw projectError
       
       return projectId;
     },
     onSuccess: (projectId) => {
       setSelectedProject(projectId, organizationId);
       setSidebarLevel('project');
+      
+      // Update last_active_at via backend API (fire and forget)
+      updateProjectLastActive(projectId, organizationId!).catch(err => 
+        console.error('Error updating project last_active_at:', err)
+      );
       
       queryClient.invalidateQueries({ 
         queryKey: ['user-organization-preferences', userData?.user?.id, organizationId] 

@@ -3,7 +3,8 @@ import type { RouteDeps } from "./_base";
 import {
   handleCreateProject,
   handleUpdateProject,
-  handleDeleteProject
+  handleDeleteProject,
+  handleUpdateProjectLastActive
 } from '../controllers/projects/projects.controller.js';
 import {
   handleListBudgets,
@@ -51,6 +52,9 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
   
   // PATCH /api/projects/:id - Update an existing project
   app.patch("/api/projects/:id", handleUpdateProject);
+  
+  // PUT /api/projects/:id/last-active - Update project last_active_at timestamp
+  app.put("/api/projects/:id/last-active", handleUpdateProjectLastActive);
   
   // DELETE /api/projects/:projectId - Delete a project
   app.delete("/api/projects/:projectId", handleDeleteProject);

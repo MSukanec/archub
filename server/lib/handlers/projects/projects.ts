@@ -44,6 +44,15 @@ export type DeleteProjectResult =
   | { success: true; message: string }
   | { success: false; error: string };
 
+export interface UpdateProjectLastActiveParams {
+  projectId: string;
+  organizationId: string;
+}
+
+export type UpdateProjectLastActiveResult =
+  | { success: true; data: any }
+  | { success: false; error: string };
+
 export async function createProject(
   ctx: ProjectsContext,
   params: CreateProjectParams
@@ -288,5 +297,66 @@ export async function deleteProject(
   } catch (error: any) {
     console.error('Error in deleteProject handler:', error);
     return { success: false, error: error.message || 'Failed to delete project' };
+  }
+}
+
+export async function updateProjectLastActive(
+  ctx: ProjectsContext,
+  params: UpdateProjectLastActiveParams
+): Promise<UpdateProjectLastActiveResult> {
+  try {
+    const { supabase } = ctx;
+
+    if (!params.projectId || !params.organizationId) {
+      return { success: false, error: 'projectId and organizationId are required' };
+    }
+
+    const authResult = await ensureAuth(ctx);
+    if (!authResult.success) {
+      return authResult;
+    }
+
+    const orgAccessResult = await ensureOrganizationAccess(ctx, params.organizationId);
+    if (!orgAccessResult.success) {
+      return orgAccessResult;
+    }
+
+    // Update last_active_at timestamp
+    const { error: projectError } = await supabase
+      .from('projects')
+      .update({
+        last_active_at: new Date().toISOString()
+      })
+      .eq('id', params.projectId)
+      .eq('organization_id', params.organizationId)
+      .eq('is_deleted', false);
+
+    if (projectError) {
+      console.error('Error updating project last_active_at:', projectError);
+      return { success: false, error: 'Failed to update project last_active_at' };
+    }
+
+    // Fetch updated project
+    const { data: updatedProject, error: fetchError } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('id', params.projectId)
+      .eq('is_deleted', false)
+      .maybeSingle();
+
+    if (fetchError) {
+      console.error('Error fetching updated project:', fetchError);
+      return { success: false, error: 'Failed to fetch updated project' };
+    }
+
+    if (!updatedProject) {
+      return { success: false, error: 'Project not found' };
+    }
+
+    return { success: true, data: updatedProject };
+
+  } catch (error: any) {
+    console.error('Error in updateProjectLastActive handler:', error);
+    return { success: false, error: error.message || 'Failed to update project last_active_at' };
   }
 }
