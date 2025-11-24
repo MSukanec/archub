@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Camera, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { uploadCourseImage, deleteCourseImage, updateCourseImageUrl } from '@/lib/storage/uploadCourseImage';
+import { uploadCourseImageToCourseDetails, deleteCourseCoverImage } from '@/lib/storage/uploadCourseImageToCourseDetails';
 import { compressImage, formatCompressionStats } from '@/lib/imageCompression';
 
 interface CourseHeroImageUploadProps {
@@ -26,10 +26,7 @@ export default function CourseHeroImageUpload({
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
       setIsUploading(true);
-      
-      const uploadResult = await uploadCourseImage(file, courseId);
-      await updateCourseImageUrl(courseId, uploadResult.file_url);
-      
+      const uploadResult = await uploadCourseImageToCourseDetails(file, courseId);
       return uploadResult.file_url;
     },
     onSuccess: (imageUrl) => {
@@ -54,16 +51,18 @@ export default function CourseHeroImageUpload({
 
   const removeMutation = useMutation({
     mutationFn: async () => {
-      if (currentImageUrl) {
-        // Remove query string (cache-busting) from URL before extracting extension
-        const cleanUrl = currentImageUrl.split('?')[0];
-        const urlParts = cleanUrl.split('/');
-        const fileName = urlParts[urlParts.length - 1];
-        const extension = fileName.split('.').pop();
-        const filePath = `courses/${courseId}/hero.${extension}`;
-        
-        await deleteCourseImage(filePath, courseId);
-        await updateCourseImageUrl(courseId, null);
+      // Get current image metadata from DB
+      const { data: { session } } = await (await import('@/lib/supabase')).supabase.auth.getSession();
+      if (!session) throw new Error('No session');
+      
+      const { data: courseDetails } = await (await import('@/lib/supabase')).supabase
+        .from('course_details')
+        .select('image_bucket, image_path')
+        .eq('course_id', courseId)
+        .single();
+      
+      if (courseDetails?.image_bucket && courseDetails?.image_path) {
+        await deleteCourseCoverImage(courseId, courseDetails.image_bucket, courseDetails.image_path);
       }
     },
     onSuccess: () => {

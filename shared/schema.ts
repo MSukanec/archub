@@ -1214,6 +1214,9 @@ export const course_details = pgTable("course_details", {
   seo_keywords: text("seo_keywords").array(),
   // 📄 Landing page section customization
   landing_sections: jsonb("landing_sections"),
+  // 🖼️ Course cover image (1:1 relationship - metadata stored here)
+  image_bucket: text("image_bucket"),
+  image_path: text("image_path"),
   created_at: timestamp("created_at").notNull().defaultNow(),
   updated_at: timestamp("updated_at").notNull().defaultNow(),
 });
