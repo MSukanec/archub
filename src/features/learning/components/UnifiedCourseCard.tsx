@@ -1,4 +1,4 @@
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,6 +32,7 @@ export function UnifiedCourseCard({
   progress,
   onViewCourse,
 }: UnifiedCourseCardProps) {
+  const [, navigate] = useLocation();
   const hasProgress = progress && progress.percentage > 0;
   
   // Unified card design - always the same structure
@@ -107,15 +108,13 @@ export function UnifiedCourseCard({
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                navigate(`/cursos/${course.slug}`);
               }}
-              asChild
               className="w-full rounded-lg"
               size="sm"
               data-testid={`button-course-info-${course.id}`}
             >
-              <Link href={`/cursos/${course.slug}`}>
-                Ver Información
-              </Link>
+              Ver Información
             </Button>
             
             {/* Action Button */}
