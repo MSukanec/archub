@@ -23,7 +23,7 @@ Preferred communication style: Simple, everyday language.
     - `components/MobileActionBar/`: ActionBarMobile, ActionBarMobileContext, SwipeableCard, SwipeContainer
     - Core files: DashboardLayout.tsx (main wrapper), PageLayout.tsx (page-level layout), layoutWidth.ts (utilities)
   - **Marketing Layout**: Implemented in `src/layouts/marketing/` for public-facing pages (landing, blog, course catalog):
-    - `components/Header.tsx`: Navbar with transparent and normal variants, auth state handling
+    - `components/Header.tsx`: Unified transparent navbar with `bg-black/30` backdrop-blur, white text/buttons for optimal contrast over any background (light or dark)
     - `components/Footer.tsx`: Comprehensive footer with SEO-friendly links
     - MarketingLayout.tsx: Main layout with SEO meta tags, scroll handling, hero slots, sticky content support
   - **Barrel Exports**: Centralized `src/layouts/index.ts` for clean imports (`import { DashboardLayout, MarketingLayout, ActionBar, MobileMenu } from "@/layouts"`)
