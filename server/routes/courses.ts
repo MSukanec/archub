@@ -1713,8 +1713,9 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       // BULK QUERY 1: Get enrollments with course info
       const { data: enrollments } = await authenticatedSupabase
         .from('course_enrollments')
-        .select('course_id, courses!inner(id, title, slug)')
-        .eq('user_id', dbUser.id);
+        .select('course_id, created_at, courses!inner(id, title, slug)')
+        .eq('user_id', dbUser.id)
+        .order('created_at', { ascending: false });
         
       if (!enrollments || enrollments.length === 0) {
         return res.json({
@@ -1723,11 +1724,23 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
           study: { seconds_lifetime: 0, seconds_this_month: 0 },
           currentStreak: 0,
           activeDays: 0,
-          recentCompletions: []
+          recentCompletions: [],
+          featured_course: null
         });
       }
       
       const courseIds = enrollments.map(e => e.course_id);
+      
+      // BULK QUERY 1.5: Get course details for image data
+      const { data: courseDetailsData } = await authenticatedSupabase
+        .from('course_details')
+        .select('course_id, image_bucket, image_path')
+        .in('course_id', courseIds);
+      
+      // Create a map for quick lookup
+      const courseDetailsMap = new Map(
+        (courseDetailsData || []).map(cd => [cd.course_id, cd])
+      );
       
       // BULK QUERY 2: Get ALL modules for these courses (NO JOINS)
       const { data: modules } = await authenticatedSupabase
@@ -1845,15 +1858,30 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         }
       }
       
-      // Format courses with progress
-      const courses = Array.from(progressByCourse.values()).map(course => ({
-        course_id: course.course_id,
-        course_title: course.title || 'Sin título',
-        course_slug: course.slug || '',
-        progress_pct: course.total > 0 ? Math.round((course.completed / course.total) * 100) : 0,
-        done_lessons: course.completed,
-        total_lessons: course.total
-      }));
+      // Format courses with progress and cover_url
+      const courses = Array.from(progressByCourse.values()).map(course => {
+        const courseObj: any = {
+          course_id: course.course_id,
+          course_title: course.title || 'Sin título',
+          course_slug: course.slug || '',
+          progress_pct: course.total > 0 ? Math.round((course.completed / course.total) * 100) : 0,
+          done_lessons: course.completed,
+          total_lessons: course.total
+        };
+        
+        // Generate cover_url from course_details
+        const courseDetails = courseDetailsMap.get(course.course_id);
+        if (courseDetails?.image_bucket && courseDetails?.image_path) {
+          const { data } = authenticatedSupabase.storage
+            .from(courseDetails.image_bucket)
+            .getPublicUrl(courseDetails.image_path);
+          if (data?.publicUrl) {
+            courseObj.cover_url = data.publicUrl;
+          }
+        }
+        
+        return courseObj;
+      });
       
       // Calculate global progress
       const globalProgress = totalLessons > 0 ? {
@@ -1885,10 +1913,14 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         }
       }
       
+      // Set featured_course (first enrolled course)
+      const featured_course = courses.length > 0 ? courses[0] : null;
+      
       // Return optimized response
       res.json({
         global: globalProgress,
         courses: courses,
+        featured_course: featured_course,
         study: {
           seconds_lifetime: totalStudyTime,
           seconds_this_month: totalStudyTime
