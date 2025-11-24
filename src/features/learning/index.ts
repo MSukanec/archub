@@ -21,6 +21,7 @@ export * from './services';
 export * from './hooks';
 export * from './components';
 export * from './modals';
+export * from './pages';
 export * from './types';
 export * from './constants';
 export * from './schemas';
