@@ -207,22 +207,12 @@ export default function OrganizationDashboard() {
               <h2 className="text-3xl font-semibold text-foreground">
                 ¡Bienvenido a {organization?.name || 'tu organización'}!
               </h2>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  <span>{format(currentTime, "HH:mm", { locale: es })}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  <span className="capitalize">{format(currentTime, "EEEE, d 'de' MMMM", { locale: es })}</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
 
         {/* KPIs Section - 4 Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* 1. Proyectos Activos */}
           <StatCard href="/projects" data-testid="stat-card-proyectos-activos">
             <div className="flex items-start justify-between">
