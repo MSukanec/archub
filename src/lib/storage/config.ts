@@ -1,0 +1,110 @@
+import type { EntityType, BucketName } from './types';
+import type { ImagePreset } from '@/lib/imageCompression';
+
+interface EntityConfig {
+  bucket: BucketName;
+  basePath: string;
+  compressionPreset: ImagePreset;
+  visibility: 'public' | 'organization' | 'private';
+}
+
+export const ENTITY_CONFIG: Record<EntityType, EntityConfig> = {
+  'user_avatar': {
+    bucket: 'public-assets',
+    basePath: 'users/{user_id}/avatars',
+    compressionPreset: 'avatar',
+    visibility: 'public'
+  },
+  'org_logo': {
+    bucket: 'public-assets',
+    basePath: 'organizations/{org_id}/branding',
+    compressionPreset: 'avatar',
+    visibility: 'public'
+  },
+  'course_cover_public': {
+    bucket: 'public-assets',
+    basePath: 'marketplace/courses',
+    compressionPreset: 'course-cover',
+    visibility: 'public'
+  },
+  'ui_asset': {
+    bucket: 'public-assets',
+    basePath: 'app-ui',
+    compressionPreset: 'default',
+    visibility: 'public'
+  },
+  'invoice': {
+    bucket: 'private-assets',
+    basePath: 'organizations/{org_id}/finance/invoices',
+    compressionPreset: 'document',
+    visibility: 'organization'
+  },
+  'budget': {
+    bucket: 'private-assets',
+    basePath: 'organizations/{org_id}/finance/budgets',
+    compressionPreset: 'document',
+    visibility: 'organization'
+  },
+  'contract': {
+    bucket: 'private-assets',
+    basePath: 'organizations/{org_id}/legal/contracts',
+    compressionPreset: 'document',
+    visibility: 'organization'
+  },
+  'permit': {
+    bucket: 'private-assets',
+    basePath: 'organizations/{org_id}/legal/permits',
+    compressionPreset: 'document',
+    visibility: 'organization'
+  },
+  'technical_plan': {
+    bucket: 'private-assets',
+    basePath: 'organizations/{org_id}/technical/plans',
+    compressionPreset: 'document',
+    visibility: 'organization'
+  },
+  'contact_document': {
+    bucket: 'private-assets',
+    basePath: 'organizations/{org_id}/contacts/documents',
+    compressionPreset: 'document',
+    visibility: 'organization'
+  },
+  'project_photo': {
+    bucket: 'social-assets',
+    basePath: 'projects/{org_id}/{project_id}/gallery',
+    compressionPreset: 'project-cover',
+    visibility: 'organization'
+  },
+  'sitelog_photo': {
+    bucket: 'social-assets',
+    basePath: 'projects/{org_id}/{project_id}/updates',
+    compressionPreset: 'sitelog-photo',
+    visibility: 'organization'
+  },
+  'project_document': {
+    bucket: 'social-assets',
+    basePath: 'projects/{org_id}/{project_id}/documents',
+    compressionPreset: 'document',
+    visibility: 'organization'
+  }
+};
+
+export function getEntityConfig(entity: EntityType): EntityConfig {
+  const config = ENTITY_CONFIG[entity];
+  if (!config) {
+    throw new Error(`Unknown entity type: ${entity}`);
+  }
+  return config;
+}
+
+export function getBucketForEntity(entity: EntityType): BucketName {
+  return getEntityConfig(entity).bucket;
+}
+
+export function getCompressionPreset(entity: EntityType): ImagePreset {
+  return getEntityConfig(entity).compressionPreset;
+}
+
+export function getVisibility(entity: EntityType): 'public' | 'organization' | 'private' {
+  return getEntityConfig(entity).visibility;
+}

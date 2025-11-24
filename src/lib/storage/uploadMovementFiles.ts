@@ -1,10 +1,13 @@
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase';
+import { uploadFile } from './uploadFile';
+import { getMediaFileUrl, getFileUrl } from './getFileUrl';
+import type { UploadContext } from './types';
 
 interface UploadedFile {
-  file_url: string
-  file_type: string
-  original_name: string
-  file_path: string
+  file_url: string;
+  file_type: string;
+  original_name: string;
+  file_path: string;
 }
 
 export async function uploadMovementFiles(
@@ -13,125 +16,128 @@ export async function uploadMovementFiles(
   userId: string,
   organizationId: string
 ): Promise<UploadedFile[]> {
-  const uploadedFiles: UploadedFile[] = []
+  const uploadedFiles: UploadedFile[] = [];
 
   for (const file of files) {
     try {
-      // Validate file first
       if (!file || file.size === 0) {
-        console.error('Archivo vacío o inválido')
-        continue
+        console.error('Archivo vacío o inválido');
+        continue;
       }
 
-      // Generate unique filename
-      const extension = file.name.split('.').pop()
-      const filePath = `${crypto.randomUUID()}.${extension}`
+      console.log('Subiendo archivo de movimiento:', file.name);
 
-      console.log('Subiendo archivo de movimiento:', filePath, file)
+      const isInvoice = file.name.toLowerCase().includes('invoice') || 
+                       file.name.toLowerCase().includes('factura');
 
-      // First, create the database record to satisfy RLS
-      const { data: urlData } = supabase.storage
-        .from('movement-files')
-        .getPublicUrl(filePath)
+      const context: UploadContext = {
+        entity: isInvoice ? 'invoice' : 'contact_document',
+        organization_id: organizationId,
+        user_id: userId,
+        link_to: {
+          movement_id: movementId
+        },
+        category: 'movement_attachment',
+        description: `Attachment for movement ${movementId}`
+      };
 
-      const { error: dbError } = await supabase
-        .from('movement_files')
-        .insert({
-          movement_id: movementId,
-          file_path: filePath,
-          file_name: file.name,
-          file_type: file.type,
-          file_url: urlData.publicUrl,
-          user_id: userId,
-          organization_id: organizationId,
-          visibility: 'organization'
-        })
+      const result = await uploadFile(file, context);
 
-      if (dbError) {
-        console.error('Error insertando registro de archivo en base de datos:', dbError)
-        continue
-      }
+      console.log('Archivo subido exitosamente:', result.file_path);
 
-      // Then upload the actual file to Storage
-      const { data, error } = await supabase.storage
-        .from('movement-files')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        })
-
-      if (error) {
-        console.error('Error subiendo archivo a Storage:', error)
-        
-        // Clean up database record if Storage upload fails
-        await supabase
-          .from('movement_files')
-          .delete()
-          .eq('file_path', filePath)
-        
-        continue
-      }
-
-      console.log('Archivo subido exitosamente:', data)
+      const fileUrl = await getFileUrl(result.bucket, result.file_path);
 
       uploadedFiles.push({
-        file_url: urlData.publicUrl,
+        file_url: fileUrl,
         file_type: file.type,
         original_name: file.name,
-        file_path: filePath
-      })
+        file_path: result.file_path
+      });
     } catch (error) {
-      console.error('Error procesando archivo:', error)
+      console.error('Error procesando archivo:', error);
     }
   }
 
-  return uploadedFiles
+  return uploadedFiles;
 }
 
 export async function getMovementFiles(movementId: string) {
-  if (!supabase) return []
+  if (!supabase) return [];
 
   const { data, error } = await supabase
-    .from('movement_files')
-    .select('*')
+    .from('media_links')
+    .select(`
+      id,
+      description,
+      created_at,
+      media_files!inner (
+        id,
+        file_name,
+        file_url,
+        file_type,
+        file_size,
+        file_path,
+        bucket,
+        is_deleted
+      )
+    `)
     .eq('movement_id', movementId)
-    .order('created_at', { ascending: false })
+    .eq('media_files.is_deleted', false)
+    .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error obteniendo archivos de movimiento:', error)
-    return []
+    console.error('Error obteniendo archivos de movimiento:', error);
+    return [];
   }
 
-  return data || []
+  const filesWithUrls = await Promise.all(
+    (data || []).map(async (link: any) => ({
+      id: link.media_files.id,
+      file_name: link.media_files.file_name,
+      file_url: await getMediaFileUrl(link.media_files),
+      file_type: link.media_files.file_type,
+      file_size: link.media_files.file_size,
+      file_path: link.media_files.file_path,
+      created_at: link.created_at
+    }))
+  );
+
+  return filesWithUrls;
 }
 
 export async function deleteMovementFile(fileId: string, filePath: string) {
-  if (!supabase) return false
+  if (!supabase) return false;
 
   try {
-    // Delete from Storage first
-    const { error: storageError } = await supabase.storage
-      .from('movement-files')
-      .remove([filePath])
+    const { data: mediaFile } = await supabase
+      .from('media_files')
+      .select('bucket')
+      .eq('id', fileId)
+      .single();
 
-    if (storageError) {
-      console.error('Error eliminando archivo de Storage:', storageError)
+    if (mediaFile) {
+      const { error: storageError } = await supabase.storage
+        .from(mediaFile.bucket)
+        .remove([filePath]);
+
+      if (storageError) {
+        console.error('Error eliminando archivo de Storage:', storageError);
+      }
     }
 
-    // Delete from database
     const { error: dbError } = await supabase
-      .from('movement_files')
-      .delete()
-      .eq('id', fileId)
+      .from('media_files')
+      .update({ is_deleted: true })
+      .eq('id', fileId);
 
     if (dbError) {
-      console.error('Error eliminando registro de archivo:', dbError)
-      return false
+      console.error('Error eliminando registro de archivo:', dbError);
+      return false;
     }
 
-    return true
+    return true;
   } catch (error) {
-    console.error('Error eliminando archivo:', error)
-    return false
+    console.error('Error eliminando archivo:', error);
+    return false;
   }
 }

@@ -1,8 +1,69 @@
 import { supabase } from '@/lib/supabase';
+import { uploadFile } from './uploadFile';
+import { getFileUrl } from './getFileUrl';
+import type { UploadContext, BucketName } from './types';
 
 export interface UploadedProjectImage {
   file_url: string;
   file_path: string;
+}
+
+/**
+ * Updates project image metadata with bucket and path (NOT signed URL).
+ * This prevents expiring URLs from being stored in the database.
+ */
+export async function updateProjectImageMetadata(
+  projectId: string,
+  organizationId: string,
+  bucket: BucketName,
+  path: string
+): Promise<void> {
+  const { error } = await supabase
+    .from('project_data')
+    .upsert({
+      project_id: projectId,
+      organization_id: organizationId,
+      image_bucket: bucket,
+      image_path: path,
+      // DO NOT update project_image_url with signed URL - it will expire!
+    }, {
+      onConflict: 'project_id'
+    });
+
+  if (error) {
+    console.error('Error updating project image metadata:', error);
+    throw new Error(`Failed to update project image: ${error.message}`);
+  }
+}
+
+/**
+ * Get project image URL by loading bucket+path from DB and generating signed URL on-demand.
+ */
+export async function getProjectImageUrl(projectId: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('project_data')
+    .select('image_bucket, image_path')
+    .eq('project_id', projectId)
+    .single();
+  
+  if (error || !data?.image_bucket || !data?.image_path) {
+    return null;
+  }
+  
+  return await getFileUrl(data.image_bucket as BucketName, data.image_path);
+}
+
+/**
+ * Get project image URL from existing project data (avoids DB query).
+ */
+export async function getProjectImageUrlFromData(
+  project: { image_bucket?: string | null; image_path?: string | null }
+): Promise<string | null> {
+  if (!project.image_bucket || !project.image_path) {
+    return null;
+  }
+  
+  return await getFileUrl(project.image_bucket as BucketName, project.image_path);
 }
 
 export async function uploadProjectImage(
@@ -11,46 +72,37 @@ export async function uploadProjectImage(
   organizationId: string
 ): Promise<UploadedProjectImage> {
   try {
-    // Validate file
     if (!file || file.size === 0) {
       throw new Error('Archivo vacío o inválido');
     }
 
-    // Validate it's an image
     if (!file.type.startsWith('image/')) {
       throw new Error('Solo se permiten archivos de imagen');
     }
 
-    // Generate file path following the structure: [organization_id]/[project_id]/hero.jpg
-    const extension = file.name.split('.').pop() || 'jpg';
-    const filePath = `${organizationId}/${projectId}/hero.${extension}`;
+    const context: UploadContext = {
+      entity: 'project_photo',
+      organization_id: organizationId,
+      project_id: projectId,
+      link_to: {
+        project_id: projectId
+      },
+      category: 'project_cover',
+      description: 'Project cover image',
+      is_cover: true
+    };
 
-    console.log('Uploading project image:', filePath);
+    const result = await uploadFile(file, context);
 
-    // Upload to Supabase Storage
-    const { error: uploadError } = await supabase.storage
-      .from('project-image')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: true // Replace existing file if it exists
-      });
+    // Save bucket + path (NOT signed URL) to prevent expiration issues
+    await updateProjectImageMetadata(projectId, organizationId, result.bucket, result.file_path);
 
-    if (uploadError) {
-      console.error('Error uploading project image:', uploadError);
-      throw new Error(`Error al subir imagen: ${uploadError.message}`);
-    }
-
-    // Get public URL with cache busting timestamp
-    const { data: urlData } = supabase.storage
-      .from('project-image')
-      .getPublicUrl(filePath);
-
-    // Add timestamp to prevent browser caching of old images
-    const urlWithCacheBust = `${urlData.publicUrl}?t=${Date.now()}`;
+    // Generate temporary URL for immediate display
+    const imageUrl = await getFileUrl(result.bucket, result.file_path);
 
     return {
-      file_url: urlWithCacheBust,
-      file_path: filePath
+      file_url: imageUrl,
+      file_path: result.file_path
     };
   } catch (error) {
     console.error('Error processing project image:', error);
@@ -58,16 +110,39 @@ export async function uploadProjectImage(
   }
 }
 
-export async function deleteProjectImage(filePath: string): Promise<void> {
+export async function deleteProjectImage(
+  projectId: string,
+  organizationId: string,
+  bucket: string,
+  path: string
+): Promise<void> {
   try {
-    const { error } = await supabase.storage
-      .from('project-image')
-      .remove([filePath]);
+    // Delete from storage using provided bucket and path
+    const { error: storageError } = await supabase.storage
+      .from(bucket)
+      .remove([path]);
 
-    if (error) {
-      console.error('Error deleting project image:', error);
-      throw new Error(`Error al eliminar imagen: ${error.message}`);
+    if (storageError) {
+      console.error('Error deleting project image from storage:', storageError);
+      throw new Error(`Error al eliminar imagen: ${storageError.message}`);
     }
+
+    // Mark media file as deleted in database
+    await supabase
+      .from('media_files')
+      .update({ is_deleted: true })
+      .eq('file_path', path)
+      .eq('bucket', bucket);
+
+    // Clean up project_data metadata
+    await supabase
+      .from('project_data')
+      .update({
+        image_bucket: null,
+        image_path: null,
+        project_image_url: null
+      })
+      .eq('project_id', projectId);
   } catch (error) {
     console.error('Error deleting project image:', error);
     throw error;
@@ -79,7 +154,6 @@ export async function updateProjectImageUrl(
   imageUrl: string | null
 ): Promise<void> {
   try {
-    // Get organization_id from the project
     const { data: projectData, error: projectError } = await supabase
       .from('projects')
       .select('organization_id')

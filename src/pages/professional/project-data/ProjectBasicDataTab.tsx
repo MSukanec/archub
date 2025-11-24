@@ -16,6 +16,7 @@ import { useProjectTypes } from '@/hooks/use-project-types'
 import { useProjectModalities } from '@/hooks/use-project-modalities'
 import { ProjectColorAdvanced } from '@/features/projects'
 import ProjectColorPalette from '@/components/projects/ProjectColorPalette'
+import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage'
 
 interface ProjectDataTabProps {
   projectId?: string;
@@ -43,7 +44,6 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
   // Form states - Details
   const [description, setDescription] = useState('')
   const [internalNotes, setInternalNotes] = useState('')
-  const [projectImageUrl, setProjectImageUrl] = useState<string | null>(null)
   
   // Color states
   const [selectedColor, setSelectedColor] = useState<string>('#84cc16')
@@ -233,7 +233,6 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       setProjectModalityId(projectData.project_modality_id || '');
       setDescription(projectData.description || '');
       setInternalNotes(projectData.internal_notes || '');
-      setProjectImageUrl(projectData.project_image_url || null);
     }
 
     // Mark as hydrated AFTER all state updates are queued
@@ -241,6 +240,18 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       setIsHydrated(true);
     }, 100);
   }, [projectInfo, projectData, projectInfoSuccess, projectDataSuccess]);
+
+  // Generate project image URL with auto-refresh (React Query)
+  const { data: projectImageUrl } = useQuery({
+    queryKey: ['project-image-url', activeProjectId, projectData?.image_bucket, projectData?.image_path],
+    queryFn: async () => {
+      if (!projectData?.image_bucket || !projectData?.image_path) return null;
+      return await getProjectImageUrlFromData(projectData);
+    },
+    enabled: !!projectData?.image_bucket && !!projectData?.image_path,
+    refetchInterval: 30 * 60 * 1000,  // Refresh every 30 minutes
+    staleTime: 25 * 60 * 1000,         // Consider stale after 25 minutes
+  });
 
   // Handlers for color changes (NO usar saveProjectColorMutation como dependencia para evitar loops)
   const handlePaletteColorChange = useCallback((color: string) => {
@@ -303,8 +314,13 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
             <UploadImageAndShowField
               projectId={activeProjectId}
               organizationId={organizationId}
-              currentImageUrl={projectImageUrl}
-              onImageUpdate={setProjectImageUrl}
+              currentImageUrl={projectImageUrl ?? null}
+              imageBucket={projectData?.image_bucket}
+              imagePath={projectData?.image_path}
+              onImageUpdate={(url) => {
+                // Invalidate the image URL query to trigger refresh
+                queryClient.invalidateQueries({ queryKey: ['project-image-url', activeProjectId] });
+              }}
             />
           )}
         </div>

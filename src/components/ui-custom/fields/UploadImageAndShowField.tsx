@@ -11,6 +11,8 @@ interface ImageUploadAndShowFieldProps {
   projectId?: string;
   organizationId?: string;
   currentImageUrl?: string | null;
+  imageBucket?: string | null;
+  imagePath?: string | null;
   onImageUpdate?: (imageUrl: string | null) => void;
   previewMode?: boolean;
   onFileSelect?: (file: File | null) => void;
@@ -21,6 +23,8 @@ export default function ImageUploadAndShowField({
   projectId,
   organizationId,
   currentImageUrl,
+  imageBucket,
+  imagePath,
   onImageUpdate,
   previewMode = false,
   onFileSelect,
@@ -40,11 +44,8 @@ export default function ImageUploadAndShowField({
       
       setIsUploading(true);
       
-      // Upload image to storage
+      // Upload image to storage (now saves bucket+path internally)
       const uploadResult = await uploadProjectImage(file, projectId, organizationId);
-      
-      // Update project_data table with new image URL
-      await updateProjectImageUrl(projectId, uploadResult.file_url);
       
       return uploadResult.file_url;
     },
@@ -79,13 +80,9 @@ export default function ImageUploadAndShowField({
         throw new Error('Project ID and Organization ID are required');
       }
       
-      if (currentImageUrl) {
-        // Extract file path from URL for deletion
-        const urlParts = currentImageUrl.split('/');
-        const filePath = `${organizationId}/${projectId}/hero.${urlParts[urlParts.length - 1].split('.').pop()}`;
-        
-        await deleteProjectImage(filePath);
-        await updateProjectImageUrl(projectId, null);
+      // Use metadata (bucket + path) instead of deriving from URL
+      if (imageBucket && imagePath) {
+        await deleteProjectImage(projectId, organizationId, imageBucket, imagePath);
       }
     },
     onSuccess: () => {

@@ -244,6 +244,8 @@ export const project_data = pgTable("project_data", {
   
   // Image
   project_image_url: text("project_image_url"),
+  image_bucket: text("image_bucket"),
+  image_path: text("image_path"),
   
   // Location - Basic Fields
   address: text("address"),

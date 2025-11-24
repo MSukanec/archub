@@ -1,7 +1,128 @@
 # Upload & Image Compression System
 
 ## Overview
-Seencel implements a client-side image compression system that automatically optimizes images before uploading to Supabase Storage. This reduces bandwidth usage, speeds up uploads, and improves overall application performance.
+Seencel implements a comprehensive file upload system with:
+1. **3-Bucket Architecture** for organized, secure storage with proper multi-tenancy
+2. **Client-side Image Compression** that automatically optimizes images before upload
+3. **Unified Upload Function** that handles routing, compression, and database transactions
+4. **media_files + media_links** relational model for flexible file management
+
+This system reduces bandwidth usage, speeds up uploads, improves security, and ensures scalable multi-tenant file organization.
+
+---
+
+## Storage Architecture (3 Buckets)
+
+### Bucket Overview
+
+Seencel uses **3 distinct Supabase Storage buckets**, each with specific security and organizational purposes:
+
+| Bucket | Visibility | Purpose | RLS Policy |
+|--------|-----------|---------|------------|
+| **public-assets** | Public | Marketplace, branding, UI assets, public user avatars | Public read, authenticated write |
+| **private-assets** | Private | Financial docs, legal contracts, sensitive organizational data | Org-scoped RLS |
+| **social-assets** | Hybrid | Project galleries, site log photos, team collaboration content | Project-scoped RLS |
+
+### Bucket Structure & Routing Rules
+
+#### 1. public-assets (Public Bucket)
+
+**Purpose:** Content that needs to be accessible without authentication (marketplace, public profiles, UI assets)
+
+**Structure:**
+```
+public-assets/
+├── users/
+│   └── {user_id}/
+│       └── avatars/          ← User profile pictures
+├── organizations/
+│   └── {org_id}/
+│       ├── branding/          ← Company logos, brand assets
+│       └── public-profiles/   ← Public organization profiles
+├── marketplace/
+│   └── courses/               ← Public course covers, promotional images
+├── app-ui/                    ← App UI assets (empty states, icons)
+└── landing/                   ← Landing page images, marketing
+```
+
+**Entity Routing:**
+- `user_avatar` → `users/{user_id}/avatars/`
+- `org_logo` → `organizations/{org_id}/branding/`
+- `course_cover_public` → `marketplace/courses/`
+- `ui_asset` → `app-ui/`
+
+#### 2. private-assets (Private Bucket)
+
+**Purpose:** Sensitive business documents, financial data, legal contracts (high security, org-scoped access only)
+
+**Structure:**
+```
+private-assets/
+└── organizations/
+    └── {org_id}/
+        ├── finance/
+        │   ├── invoices/      ← Supplier invoices, payment receipts
+        │   ├── budgets/       ← Project budgets, cost estimates
+        │   └── reports/       ← Financial reports
+        ├── legal/
+        │   ├── contracts/     ← Client contracts, subcontractor agreements
+        │   └── permits/       ← Building permits, licenses
+        ├── technical/
+        │   ├── plans/         ← Architectural plans, blueprints
+        │   └── specs/         ← Technical specifications
+        └── contacts/
+            └── documents/     ← Contact attachments (DNI, ID cards, certificates)
+```
+
+**Entity Routing:**
+- `invoice` → `organizations/{org_id}/finance/invoices/`
+- `budget` → `organizations/{org_id}/finance/budgets/`
+- `contract` → `organizations/{org_id}/legal/contracts/`
+- `permit` → `organizations/{org_id}/legal/permits/`
+- `technical_plan` → `organizations/{org_id}/technical/plans/`
+- `contact_document` → `organizations/{org_id}/contacts/documents/`
+
+#### 3. social-assets (Hybrid Bucket)
+
+**Purpose:** Project-related content, team collaboration, construction site documentation (project-scoped visibility)
+
+**Structure:**
+```
+social-assets/
+└── projects/
+    └── {org_id}/
+        └── {project_id}/
+            ├── gallery/       ← Project photos, renders, progress shots
+            ├── updates/       ← Site log photos, daily reports
+            └── documents/     ← Shared project documents
+```
+
+**Entity Routing:**
+- `project_photo` → `projects/{org_id}/{project_id}/gallery/`
+- `sitelog_photo` → `projects/{org_id}/{project_id}/updates/`
+- `project_document` → `projects/{org_id}/{project_id}/documents/`
+
+### Entity Type Reference Table
+
+Complete mapping of all entity types to their bucket destinations:
+
+| Entity Type | Bucket | Base Path | Compression Preset |
+|-------------|--------|-----------|-------------------|
+| `user_avatar` | public-assets | users/{user_id}/avatars/ | avatar |
+| `org_logo` | public-assets | organizations/{org_id}/branding/ | avatar |
+| `course_cover_public` | public-assets | marketplace/courses/ | course-cover |
+| `ui_asset` | public-assets | app-ui/ | default |
+| `invoice` | private-assets | organizations/{org_id}/finance/invoices/ | document |
+| `budget` | private-assets | organizations/{org_id}/finance/budgets/ | document |
+| `contract` | private-assets | organizations/{org_id}/legal/contracts/ | document |
+| `permit` | private-assets | organizations/{org_id}/legal/permits/ | document |
+| `technical_plan` | private-assets | organizations/{org_id}/technical/plans/ | document |
+| `contact_document` | private-assets | organizations/{org_id}/contacts/documents/ | document |
+| `project_photo` | social-assets | projects/{org_id}/{project_id}/gallery/ | project-cover |
+| `sitelog_photo` | social-assets | projects/{org_id}/{project_id}/updates/ | sitelog-photo |
+| `project_document` | social-assets | projects/{org_id}/{project_id}/documents/ | document |
+
+---
 
 ## Architecture
 
@@ -315,6 +436,118 @@ Potential improvements to consider:
 5. **Batch compression:** Optimize multiple images in parallel
 6. **Compression analytics:** Track compression ratios, storage savings
 7. **User preferences:** Allow users to choose quality vs. speed
+
+## Database Migration: Project Image Persistence
+
+### Problem
+
+Previously, `uploadProjectImage()` saved signed URLs (which expire after 1 hour) in `project_data.project_image_url`, causing project cover images to disappear after the URL expired.
+
+### Solution
+
+The system now saves **bucket + path** metadata instead of signed URLs, generating URLs on-demand when rendering. This prevents URL expiration issues.
+
+### Migration Required
+
+To support the new architecture, the `project_data` table needs two additional columns:
+
+```sql
+ALTER TABLE project_data
+ADD COLUMN image_bucket TEXT,
+ADD COLUMN image_path TEXT;
+```
+
+**Columns:**
+- `image_bucket` (text, nullable) - The storage bucket name (e.g., 'social-assets')
+- `image_path` (text, nullable) - The file path within the bucket
+
+### Implementation Details
+
+**1. Schema Updates (shared/schema.ts)**
+```typescript
+export const project_data = pgTable("project_data", {
+  // ... existing fields ...
+  project_image_url: text("project_image_url"),  // Legacy field (may contain expired URLs)
+  image_bucket: text("image_bucket"),             // NEW: Bucket name
+  image_path: text("image_path"),                 // NEW: File path
+  // ... other fields ...
+});
+```
+
+**2. Upload Function (src/lib/storage/uploadProjectImage.ts)**
+
+The `uploadProjectImage()` function now:
+- Saves `bucket` + `path` to `project_data.image_bucket` and `project_data.image_path`
+- Does NOT save signed URLs to `project_data.project_image_url`
+
+```typescript
+export async function updateProjectImageMetadata(
+  projectId: string,
+  organizationId: string,
+  bucket: BucketName,
+  path: string
+): Promise<void> {
+  const { error } = await supabase
+    .from('project_data')
+    .upsert({
+      project_id: projectId,
+      organization_id: organizationId,
+      image_bucket: bucket,
+      image_path: path,
+      // DO NOT update project_image_url with signed URL - it will expire!
+    }, {
+      onConflict: 'project_id'
+    });
+
+  if (error) throw new Error(`Failed to update project image: ${error.message}`);
+}
+```
+
+**3. URL Generation Helpers**
+
+Two helper functions generate signed URLs on-demand:
+
+```typescript
+// From projectId (requires DB query)
+export async function getProjectImageUrl(projectId: string): Promise<string | null>
+
+// From existing project data (no DB query needed)
+export async function getProjectImageUrlFromData(
+  project: { image_bucket?: string | null; image_path?: string | null }
+): Promise<string | null>
+```
+
+**4. Component Usage**
+
+Components now generate URLs on-demand instead of reading `project_image_url`:
+
+```typescript
+// In ProjectBasicDataTab.tsx
+useEffect(() => {
+  if (projectData?.image_bucket && projectData?.image_path) {
+    getProjectImageUrlFromData({
+      image_bucket: projectData.image_bucket,
+      image_path: projectData.image_path
+    }).then(url => setProjectImageUrl(url));
+  }
+}, [projectData]);
+```
+
+### Migration Checklist
+
+- [ ] Run database migration to add `image_bucket` and `image_path` columns
+- [ ] Update existing project images (re-upload or backfill metadata)
+- [ ] Verify project cover images display correctly
+- [ ] Test image upload/deletion functionality
+- [ ] Confirm URLs don't expire after 1 hour
+
+### Benefits
+
+- ✅ Project cover images **never expire**
+- ✅ Metadata (`bucket` + `path`) persisted in database
+- ✅ Signed URLs generated **on-demand** when rendering
+- ✅ **Zero** expired URLs stored in database
+- ✅ Backward compatible (old `project_image_url` still works during migration)
 
 ## Related Documentation
 
