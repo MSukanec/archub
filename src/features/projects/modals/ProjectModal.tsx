@@ -101,10 +101,11 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
   const { currentPanel, setPanel } = useModalPanelStore();
   const { data: userData } = useCurrentUser();
   const { currentOrganizationId } = useProjectContext();
-  const organizationId = currentOrganizationId || undefined;
+  // Fallback chain: currentOrganizationId -> editingProject.organization_id -> userData.organization.id
+  const organizationId = currentOrganizationId || editingProject?.organization_id || userData?.organization?.id;
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
-  const { data: projectTypes = [] } = useProjectTypes();
-  const { data: projectModalities = [] } = useProjectModalities();
+  const { data: projectTypes = [] } = useProjectTypes(organizationId);
+  const { data: projectModalities = [] } = useProjectModalities(organizationId);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
