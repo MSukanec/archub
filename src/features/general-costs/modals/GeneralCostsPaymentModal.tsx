@@ -212,7 +212,6 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
       general_cost_id: data.general_cost_id || null,
       status: (data.status || 'confirmed') as 'confirmed' | 'pending' | 'rejected' | 'void',
       created_by: currentMember.id,
-      file_url: null as string | null,
     }
 
     try {

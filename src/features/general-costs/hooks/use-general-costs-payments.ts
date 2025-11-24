@@ -18,7 +18,6 @@ export interface GeneralCostPayment {
   general_cost_id: string | null
   status: 'confirmed' | 'pending' | 'rejected' | 'void'
   created_by: string | null
-  file_url: string | null
   attachments_count?: number
   general_cost?: {
     id: string
@@ -75,7 +74,20 @@ export function useGeneralCostsPayments(organizationId: string | undefined) {
       const { data, error } = await supabase
         .from('general_costs_payments')
         .select(`
-          *,
+          id,
+          organization_id,
+          amount,
+          currency_id,
+          exchange_rate,
+          payment_date,
+          notes,
+          reference,
+          created_at,
+          updated_at,
+          wallet_id,
+          general_cost_id,
+          status,
+          created_by,
           general_cost:general_costs(
             id,
             name,
@@ -111,10 +123,20 @@ export function useGeneralCostsPayments(organizationId: string | undefined) {
       // NOTE: Currently media_links doesn't have a general_cost_payment_id column
       // Temporarily returning 0 for attachments_count until database schema is updated
       // TODO: Add general_cost_payment_id column to media_links table
-      return (data || []).map(payment => ({
-        ...payment,
-        attachments_count: 0
-      })) as GeneralCostPayment[]
+      return (data || []).map(payment => {
+        // Supabase returns single relations as arrays, convert to single objects
+        const walletData = Array.isArray(payment.wallet) ? payment.wallet[0] : payment.wallet
+        return {
+          ...payment,
+          general_cost: Array.isArray(payment.general_cost) ? payment.general_cost[0] : payment.general_cost,
+          currency: Array.isArray(payment.currency) ? payment.currency[0] : payment.currency,
+          wallet: walletData ? {
+            ...walletData,
+            wallets: Array.isArray(walletData.wallets) ? walletData.wallets[0] : walletData.wallets
+          } : null,
+          attachments_count: 0
+        }
+      }) as unknown as GeneralCostPayment[]
     },
     enabled: !!organizationId,
   })

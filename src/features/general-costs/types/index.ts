@@ -41,7 +41,6 @@ export interface GeneralCostPayment {
   general_cost_id: string | null;
   status: 'confirmed' | 'pending' | 'rejected' | 'void';
   created_by: string | null;
-  file_url: string | null;
   currency?: {
     id: string;
     name: string;
@@ -82,5 +81,4 @@ export interface InsertGeneralCostPayment {
   general_cost_id?: string | null;
   status?: string;
   created_by?: string | null;
-  file_url?: string | null;
 }

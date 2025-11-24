@@ -235,7 +235,7 @@ export function UploadMultiFileField({
         {...getRootProps()}
         className={cn(
           "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
-          isDragActive ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+          isDragActive ? "border-accent bg-accent/5" : "border-accent/50 hover:border-accent"
         )}
       >
         <input {...getInputProps()} />
