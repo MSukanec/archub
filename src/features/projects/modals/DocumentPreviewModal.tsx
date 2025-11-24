@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Download, ExternalLink, FileText } from 'lucide-react';
 import { PdfViewer } from '@/features/pdf';
-import { ImageViewer } from '@/components/viewers/ImageViewer';
+import { ImageViewer } from '@/components/shared/viewers/ImageViewer';
 
 interface DocumentPreviewModalProps {
   document: {
