@@ -6,7 +6,10 @@ import {
   Home, 
   Folder, 
   Plus,
-  ArrowRight
+  ArrowRight,
+  Users,
+  FileText,
+  Users2
 } from "lucide-react";
 import { useLocation } from 'wouter';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -21,6 +24,7 @@ import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent }
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects, ProjectItemCard, updateProjectLastActive } from '@/features/projects';
 import { useContacts } from '@/features/contacts';
+import { useSiteLogs } from '@/features/sitelog/hooks/use-site-logs';
 import { useMovements } from '@/hooks/use-movements';
 import { useUserOrganizationPreferences, USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization';
 import { useProjectContext } from '@/stores/projectContext';
@@ -44,6 +48,7 @@ export default function OrganizationDashboard() {
   const userId = userData?.user?.id;
   const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId || undefined);
   const { data: contacts = [], isLoading: contactsLoading } = useContacts(organizationId);
+  const { data: siteLogs = [], isLoading: siteLogsLoading } = useSiteLogs(undefined, organizationId);
   const { data: movements = [], isLoading: movementsLoading } = useMovements(organizationId, null);
   const { data: userOrgPrefs } = useUserOrganizationPreferences(userId, organizationId);
   const activeProjectId = userOrgPrefs?.last_project_id;
@@ -214,6 +219,73 @@ export default function OrganizationDashboard() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* KPIs Section - 4 Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* 1. Proyectos Activos */}
+          <StatCard href="/projects" data-testid="stat-card-proyectos-activos">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <StatCardTitle>Proyectos Activos</StatCardTitle>
+                <StatCardValue className="mt-2">
+                  {projectsLoading ? '-' : projects.filter(p => p.status === 'active').length}
+                </StatCardValue>
+                <StatCardMeta>
+                  {projectsLoading ? 'Cargando...' : `de ${projects.length} totales`}
+                </StatCardMeta>
+              </div>
+              <Folder className="w-5 h-5 text-muted-foreground opacity-40 mt-1" />
+            </div>
+          </StatCard>
+
+          {/* 2. Contactos */}
+          <StatCard href="/contacts" data-testid="stat-card-contactos">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <StatCardTitle>Contactos</StatCardTitle>
+                <StatCardValue className="mt-2">
+                  {contactsLoading ? '-' : contacts.length}
+                </StatCardValue>
+                <StatCardMeta>
+                  {contactsLoading ? 'Cargando...' : 'Personal y clientes'}
+                </StatCardMeta>
+              </div>
+              <Users className="w-5 h-5 text-muted-foreground opacity-40 mt-1" />
+            </div>
+          </StatCard>
+
+          {/* 3. Bitácoras */}
+          <StatCard href="/projects/sitelog" data-testid="stat-card-bitacoras-org">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <StatCardTitle>Bitácoras</StatCardTitle>
+                <StatCardValue className="mt-2">
+                  {siteLogsLoading ? '-' : siteLogs.length}
+                </StatCardValue>
+                <StatCardMeta>
+                  {siteLogsLoading ? 'Cargando...' : 'Registros totales'}
+                </StatCardMeta>
+              </div>
+              <FileText className="w-5 h-5 text-muted-foreground opacity-40 mt-1" />
+            </div>
+          </StatCard>
+
+          {/* 4. Equipo */}
+          <StatCard data-testid="stat-card-equipo" className="opacity-75 cursor-default hover:shadow-none">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <StatCardTitle>Equipo</StatCardTitle>
+                <StatCardValue className="mt-2">
+                  {contactsLoading ? '-' : contacts.filter((c: any) => c.contact_type === 'staff' || c.contact_type === 'personnel').length}
+                </StatCardValue>
+                <StatCardMeta>
+                  {contactsLoading ? 'Cargando...' : 'Miembros activos'}
+                </StatCardMeta>
+              </div>
+              <Users2 className="w-5 h-5 text-muted-foreground opacity-40 mt-1" />
+            </div>
+          </StatCard>
         </div>
 
         {/* Projects Section - Estilo minimalista */}
