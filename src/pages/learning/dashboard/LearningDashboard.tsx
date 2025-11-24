@@ -48,16 +48,17 @@ export default function LearningDashboard() {
   // Hero section component
   const heroSection = heroCurso && (
     <div 
-      className="relative h-[300px] md:h-96 overflow-hidden w-full"
+      className="relative h-[200px] sm:h-[250px] md:h-96 overflow-hidden w-full"
       data-testid="hero-featured-course"
     >
       {/* Background Image */}
       {heroCurso.cover_url ? (
         <>
           <div 
-            className="absolute inset-0 bg-cover bg-center md:bg-fixed bg-no-repeat motion-reduce:bg-scroll"
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat motion-reduce:bg-scroll"
             style={{
-              backgroundImage: `url(${heroCurso.cover_url})`
+              backgroundImage: `url(${heroCurso.cover_url})`,
+              backgroundPosition: 'center center'
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/60 to-black/100 dark:from-black/30 dark:via-black/70 dark:to-black/100" />
@@ -67,17 +68,17 @@ export default function LearningDashboard() {
       )}
 
       {/* Content */}
-      <div className="relative h-full flex flex-col justify-end px-6 md:px-12 py-6 md:py-12">
+      <div className="relative h-full flex flex-col justify-end px-4 sm:px-6 md:px-12 py-4 sm:py-6 md:py-12">
         <div className="max-w-3xl">
           {/* Badge */}
-          <div className="mb-6">
+          <div className="mb-3 sm:mb-6">
             <Badge 
               style={{ 
                 backgroundColor: 'var(--accent)', 
                 color: 'white',
                 borderColor: 'var(--accent)'
               }}
-              className="text-[10px] md:text-xs font-medium uppercase px-4 py-2"
+              className="text-[9px] sm:text-[10px] md:text-xs font-medium uppercase px-3 sm:px-4 py-1.5 sm:py-2"
               data-testid="badge-featured"
             >
               Destacado
@@ -86,14 +87,14 @@ export default function LearningDashboard() {
           
           {/* Title */}
           <h1 
-            className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 md:mb-6 tracking-tight !text-white" 
+            className="text-lg sm:text-2xl md:text-5xl font-bold mb-2 sm:mb-4 md:mb-6 tracking-tight !text-white line-clamp-2" 
             data-testid="text-hero-title"
           >
             {heroCurso.course_title}
           </h1>
           
           {/* Progress/Description */}
-          <p className="text-sm md:text-base max-w-2xl mb-8 text-[rgb(220,220,220)]">
+          <p className="text-xs sm:text-sm md:text-base max-w-2xl mb-4 sm:mb-8 text-[rgb(220,220,220)] line-clamp-1 sm:line-clamp-2">
             {heroCurso.done_lessons !== undefined 
               ? `${heroCurso.done_lessons} de ${heroCurso.total_lessons} lecciones completadas • ${heroCurso.progress_pct}% completado`
               : heroCurso.short_description || 'Descubre este curso y desarrolla nuevas habilidades'}
@@ -102,16 +103,16 @@ export default function LearningDashboard() {
           {/* CTA Button */}
           <div className="flex gap-3">
             <Button
-              size="lg"
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation();
                 navigate(`/learning/courses/${heroCurso.course_slug}`);
               }}
-              className="group/btn"
+              className="group/btn text-xs sm:text-sm md:text-base"
               data-testid="button-continue-course"
             >
-              <span>{heroCurso.done_lessons !== undefined ? 'Continuar Curso' : 'Ver Curso'}</span>
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+              <span>{heroCurso.done_lessons !== undefined ? 'Continuar' : 'Ver'}</span>
+              <ArrowRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 transition-transform group-hover/btn:translate-x-1" />
             </Button>
           </div>
         </div>
@@ -211,7 +212,7 @@ export default function LearningDashboard() {
   if (isLoading) {
     return (
       <HeroLayout 
-        heroContent={<Skeleton className="h-[300px] md:h-96 w-full" />}
+        heroContent={<Skeleton className="h-[200px] sm:h-[250px] md:h-96 w-full" />}
         mainContent={
           <div className="space-y-6">
             <Skeleton className="h-24 rounded-xl" />
