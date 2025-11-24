@@ -33,19 +33,10 @@ export async function uploadFile(
     }
 
     const isPublicBucket = storagePath.bucket === 'public-assets';
-    let fileUrl: string;
+    let fileUrl: string | null = null;
     
     if (isPublicBucket) {
       fileUrl = supabase.storage.from(storagePath.bucket).getPublicUrl(storagePath.path).data.publicUrl;
-    } else {
-      const { data, error: signedUrlError } = await supabase.storage
-        .from(storagePath.bucket)
-        .createSignedUrl(storagePath.path, 60 * 60 * 24 * 7);
-      
-      if (signedUrlError || !data?.signedUrl) {
-        throw new Error(`Error al generar URL firmada: ${signedUrlError?.message || 'Unknown error'}`);
-      }
-      fileUrl = data.signedUrl;
     }
     
     const isPublic = isPublicBucket || storagePath.bucket === 'social-assets';
