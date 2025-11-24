@@ -19,6 +19,10 @@ export { CourseGrid } from './landing/CourseGrid';
 export { CourseStickyCard } from './landing/CourseStickyCard';
 export { SectionHeader } from './landing/SectionHeader';
 
+// ========== UNIFIED COMPONENTS (PUBLIC + DASHBOARD) ==========
+export { UnifiedCourseCard } from './UnifiedCourseCard';
+export { UnifiedCourseGrid } from './UnifiedCourseGrid';
+
 // ========== DASHBOARD COMPONENTS (STUDENT) ==========
 export { default as CourseHeroImageUpload } from './dashboard/CourseHeroImageUpload';
 export { FavoriteButton } from './dashboard/FavoriteButton';

@@ -1,9 +1,15 @@
 import { MarketingLayout } from '@/layouts';
-import { useAllCourses, CourseGrid } from '@/features/learning';
+import { useAllCourses, UnifiedCourseGrid } from '@/features/learning';
 import { BookOpen } from 'lucide-react';
 
 export default function CourseCatalog() {
   const { data: courses, isLoading, error } = useAllCourses();
+  
+  // Transform courses to UnifiedCourseGrid format
+  const coursesData = courses?.map(course => ({
+    ...course,
+    isEnrolled: false,
+  })) || [];
 
   if (error) {
     return (
@@ -69,7 +75,7 @@ export default function CourseCatalog() {
 
       {/* Courses Grid */}
       <section className="container mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <CourseGrid courses={courses || []} isLoading={isLoading} />
+        <UnifiedCourseGrid courses={coursesData} isLoading={isLoading} />
       </section>
 
       {/* Additional Info Section */}
