@@ -26,9 +26,6 @@ export function CourseSidebar({ modules, lessons, currentLessonId }: CourseSideb
   const [isHovered, setHovered] = useState(false);
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   
-  // DEBUG
-  console.log('[CourseSidebar] Received props:', { modules: modules.length, lessons: lessons.length, currentLessonId });
-  
   const isExpanded = isDocked || isHovered;
 
   // Get courseId from first module

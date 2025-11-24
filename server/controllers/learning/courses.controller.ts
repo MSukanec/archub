@@ -172,8 +172,6 @@ export async function handleGetCourseStructure(req: Request, res: Response) {
   try {
     const { id: courseId } = req.params;
     
-    console.log('[handleGetCourseStructure] courseId:', courseId);
-    
     if (!courseId) {
       return res.status(400).json({ error: 'Course ID is required' });
     }
@@ -181,22 +179,17 @@ export async function handleGetCourseStructure(req: Request, res: Response) {
     // Use authenticated client with user's token
     const token = extractToken(req.headers.authorization);
     if (!token) {
-      console.log('[handleGetCourseStructure] No token provided');
       return res.status(401).json({ error: 'No authorization token provided' });
     }
 
-    console.log('[handleGetCourseStructure] Creating authenticated client');
     const supabase = createAuthenticatedClient(token);
     
     // Get modules for the course
-    console.log('[handleGetCourseStructure] Fetching modules for course:', courseId);
     const { data: modules, error: modulesError } = await supabase
       .from('course_modules')
       .select('*')
       .eq('course_id', courseId)
       .order('sort_index', { ascending: true });
-
-    console.log('[handleGetCourseStructure] Modules result:', { modules: modules?.length || 0, error: modulesError?.message });
 
     if (modulesError) {
       console.error('Error fetching course modules:', modulesError);
@@ -204,21 +197,20 @@ export async function handleGetCourseStructure(req: Request, res: Response) {
     }
 
     if (!modules || modules.length === 0) {
-      console.log('[handleGetCourseStructure] No modules found, returning empty array');
+      // Disable HTTP caching for empty responses
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+      res.set('Pragma', 'no-cache');
       return res.status(200).json([]);
     }
 
     // Get lessons for all modules
     const moduleIds = modules.map((m: any) => m.id);
-    console.log('[handleGetCourseStructure] Fetching lessons for modules:', moduleIds);
     
     const { data: lessons, error: lessonsError } = await supabase
       .from('course_lessons')
       .select('*')
       .in('module_id', moduleIds)
       .order('sort_index', { ascending: true });
-
-    console.log('[handleGetCourseStructure] Lessons result:', { lessons: lessons?.length || 0, error: lessonsError?.message });
 
     if (lessonsError) {
       console.error('Error fetching course lessons:', lessonsError);
@@ -230,13 +222,10 @@ export async function handleGetCourseStructure(req: Request, res: Response) {
       lessons: lessons?.filter((lesson: any) => lesson.module_id === module.id) || []
     }));
 
-    console.log('[handleGetCourseStructure] Structure ready, returning:', structure.length, 'modules');
-    
-    // Disable HTTP caching to ensure fresh data
+    // Set response headers to prevent caching issues
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
     res.set('Pragma', 'no-cache');
     res.set('Expires', '0');
-    res.set('ETag', `"${Date.now()}"`);
     
     res.status(200).json(structure);
   } catch (error: any) {
