@@ -1,17 +1,19 @@
 import { useEffect } from "react";
 import { HeroLayout } from "@/layouts";
 import { 
-  Building2
+  Building2,
+  FileText
 } from "lucide-react";
 
 import { useProjectContext } from '@/stores/projectContext';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useProjects } from '@/features/projects';
+import { useSiteLogs } from '@/features/sitelog/hooks/use-site-logs';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useQuery } from '@tanstack/react-query';
 import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage';
 
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui-custom/KPICard';
 import { Badge } from '@/components/ui/badge';
 
 export default function Project() {
@@ -23,6 +25,9 @@ export default function Project() {
   
   // Get current project
   const currentProject = projects.find(p => p.id === selectedProjectId);
+
+  // Get site logs (bitácoras)
+  const { data: siteLogs = [] } = useSiteLogs(selectedProjectId, organizationId);
 
   // Generate project image URL on-demand with React Query
   const { data: projectImageUrl } = useQuery({
@@ -142,6 +147,35 @@ export default function Project() {
   // Main content - KPIs
   const mainContent = (
     <div className="space-y-6 project-breathing-bg">
+      {/* Bitácoras Card - Full Width */}
+      <div>
+        <StatCard 
+          href="/projects/sitelog"
+          data-testid="stat-card-bitacoras"
+          className="w-full"
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <StatCardTitle>Bitácoras</StatCardTitle>
+              <StatCardValue className="mt-2">{siteLogs.length}</StatCardValue>
+              <StatCardMeta>Últimas 3 entradas</StatCardMeta>
+            </div>
+            <FileText className="w-5 h-5 text-muted-foreground opacity-40 mt-1" />
+          </div>
+          {siteLogs.length > 0 && (
+            <StatCardContent>
+              <div className="space-y-2">
+                {siteLogs.slice(0, 3).map((log: any, idx: number) => (
+                  <div key={idx} className="text-xs text-muted-foreground line-clamp-1">
+                    • {log.title || `Entrada ${idx + 1}`}
+                  </div>
+                ))}
+              </div>
+            </StatCardContent>
+          )}
+        </StatCard>
+      </div>
+
       {/* KPIs Grid - 4 columnas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* 1. Mano de Obra */}
