@@ -48,15 +48,14 @@ export default function LearningDashboard() {
   // Hero section component
   const heroSection = heroCurso && (
     <div 
-      className="relative h-[300px] md:h-1/2 overflow-hidden group cursor-pointer w-full"
-      onClick={() => navigate(`/learning/courses/${heroCurso.course_slug}`)}
+      className="relative h-[300px] md:h-96 overflow-hidden w-full"
       data-testid="hero-featured-course"
     >
       {/* Background Image */}
       {heroCurso.cover_url ? (
         <>
           <div 
-            className="absolute inset-0 bg-cover bg-center md:bg-fixed bg-no-repeat transition-transform duration-700 group-hover:scale-105 motion-reduce:bg-scroll"
+            className="absolute inset-0 bg-cover bg-center md:bg-fixed bg-no-repeat motion-reduce:bg-scroll"
             style={{
               backgroundImage: `url(${heroCurso.cover_url})`
             }}
@@ -212,7 +211,7 @@ export default function LearningDashboard() {
   if (isLoading) {
     return (
       <HeroLayout 
-        heroContent={<Skeleton className="h-[300px] md:h-1/2 w-full" />}
+        heroContent={<Skeleton className="h-[300px] md:h-96 w-full" />}
         mainContent={
           <div className="space-y-6">
             <Skeleton className="h-24 rounded-xl" />
