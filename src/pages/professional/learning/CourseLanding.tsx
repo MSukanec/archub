@@ -3,6 +3,8 @@ import { useEffect } from 'react';
 import { DashboardLayout } from '@/layouts';
 import { 
   useCourseLanding,
+  useCourseEnrollment,
+  useCourseProgress,
   HeroSection,
   InstructorSection,
   ModulesSection,
@@ -15,6 +17,8 @@ import {
 export default function CourseLanding() {
   const { slug } = useParams<{ slug: string }>();
   const { data, isLoading, error } = useCourseLanding(slug || '');
+  const { data: enrollmentData } = useCourseEnrollment(data?.course?.id || '');
+  const { data: progressData } = useCourseProgress(data?.course?.id);
 
   if (isLoading) {
     return (
@@ -50,6 +54,16 @@ export default function CourseLanding() {
   const seoTitle = `${course.title} - Curso Online | Seencel`;
   const seoDescription = course.short_description || '';
 
+  // Check if user is enrolled
+  const isEnrolled = enrollmentData?.isEnrolled || false;
+
+  // Calculate progress percentage
+  const progressPercentage = (() => {
+    if (!progressData || progressData.length === 0) return 0;
+    const completed = progressData.filter(p => p.is_completed).length;
+    return Math.round((completed / progressData.length) * 100);
+  })();
+
   // Set page title (no OG tags needed in dashboard context)
   useEffect(() => {
     document.title = seoTitle;
@@ -60,7 +74,7 @@ export default function CourseLanding() {
       <div className="h-full overflow-y-auto">
         {/* Landing Sections */}
         <div className="space-y-0">
-          <HeroSection course={course} stats={stats} />
+          <HeroSection course={course} stats={stats} isEnrolled={isEnrolled} progressPercentage={progressPercentage} />
           <InstructorSection course={course} />
           <ModulesSection modules={modules} />
           <LessonsSection modules={modules} />

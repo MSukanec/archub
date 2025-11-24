@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { BookOpen, Clock, CheckCircle, MessageCircle, Shield } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import type { Course } from '@shared/schema';
@@ -11,9 +12,10 @@ interface CourseStickyCardProps {
   course: Course;
   stats: CourseStats;
   isEnrolled?: boolean;
+  progressPercentage?: number;
 }
 
-export function CourseStickyCard({ course, stats, isEnrolled = false }: CourseStickyCardProps) {
+export function CourseStickyCard({ course, stats, isEnrolled = false, progressPercentage = 0 }: CourseStickyCardProps) {
   const user = useAuthStore((state) => state.user);
   const [, navigate] = useLocation();
 
@@ -55,6 +57,17 @@ export function CourseStickyCard({ course, stats, isEnrolled = false }: CourseSt
             {course.title}
           </h3>
         </div>
+
+        {/* Progress Bar - Only show when enrolled */}
+        {isEnrolled && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">Progreso</span>
+              <span className="font-semibold">{progressPercentage}%</span>
+            </div>
+            <Progress value={progressPercentage} className="h-2" data-testid="progress-bar" />
+          </div>
+        )}
 
         {/* Price */}
         {course.price && !isEnrolled && (

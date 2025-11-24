@@ -3,6 +3,7 @@ import { MarketingLayout } from '@/layouts';
 import { 
   useCourseLanding, 
   useCourseEnrollment,
+  useCourseProgress,
   HeroSection,
   InstructorSection,
   ModulesSection,
@@ -17,6 +18,7 @@ export default function CourseLanding() {
   const { slug } = useParams<{ slug: string }>();
   const { data, isLoading, error } = useCourseLanding(slug || '');
   const { data: enrollmentData } = useCourseEnrollment(data?.course?.id || '');
+  const { data: progressData } = useCourseProgress(data?.course?.id);
 
   const navigationLinks = [
     { label: "Cursos", href: "/cursos" },
@@ -65,11 +67,18 @@ export default function CourseLanding() {
   // Check if user is enrolled
   const isEnrolled = enrollmentData?.isEnrolled || false;
 
+  // Calculate progress percentage
+  const progressPercentage = (() => {
+    if (!progressData || progressData.length === 0) return 0;
+    const completed = progressData.filter(p => p.is_completed).length;
+    return Math.round((completed / progressData.length) * 100);
+  })();
+
   // Sticky sidebar content (shown in desktop only)
-  const stickyContent = <CourseStickyCard course={course} stats={stats} isEnrolled={isEnrolled} />;
+  const stickyContent = <CourseStickyCard course={course} stats={stats} isEnrolled={isEnrolled} progressPercentage={progressPercentage} />;
   
   // Full-width hero section
-  const heroSection = <HeroSection course={course} stats={stats} />;
+  const heroSection = <HeroSection course={course} stats={stats} isEnrolled={isEnrolled} progressPercentage={progressPercentage} />;
 
   return (
     <MarketingLayout 

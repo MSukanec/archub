@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { CheckCircle, Clock, BookOpen, Award } from 'lucide-react';
 import type { Course } from '@shared/schema';
 import type { CourseStats } from '../../types';
@@ -6,9 +7,11 @@ import type { CourseStats } from '../../types';
 interface HeroSectionProps {
   course: Course;
   stats: CourseStats;
+  isEnrolled?: boolean;
+  progressPercentage?: number;
 }
 
-export function HeroSection({ course, stats }: HeroSectionProps) {
+export function HeroSection({ course, stats, isEnrolled = false, progressPercentage = 0 }: HeroSectionProps) {
   return (
     <section className="relative h-screen flex items-center overflow-hidden">
       {/* Background Image with Parallax (desktop only) */}
@@ -41,6 +44,17 @@ export function HeroSection({ course, stats }: HeroSectionProps) {
           <p className="text-[18px] leading-relaxed mb-8 text-[rgb(220,220,220)]">
             {course.short_description}
           </p>
+
+          {/* Progress Bar - Only show when enrolled */}
+          {isEnrolled && (
+            <div className="mb-8 max-w-xs space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-[rgb(220,220,220)]">Progreso</span>
+                <span className="font-semibold text-[rgb(220,220,220)]">{progressPercentage}%</span>
+              </div>
+              <Progress value={progressPercentage} className="h-2" data-testid="hero-progress-bar" />
+            </div>
+          )}
 
           {/* Stats */}
           <div className="flex flex-wrap gap-6">
