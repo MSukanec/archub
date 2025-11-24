@@ -18,7 +18,7 @@ import { CalendarIcon } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 
-import { useRenewInsurance, useUploadCertificate } from '@/hooks/useInsurances'
+import { useRenewInsurance, useUploadCertificate } from '@/features/personnel'
 import { InsuranceStatusRow } from '@/features/personnel/services/insurances'
 
 const renewInsuranceSchema = z.object({

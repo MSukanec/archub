@@ -20,7 +20,7 @@ import { Calendar } from "@/components/ui/calendar"
 
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/features/organization'
-import { useCreateInsurance, useUpdateInsurance, useUploadCertificate } from '@/hooks/useInsurances'
+import { useCreateInsurance, useUpdateInsurance, useUploadCertificate } from '@/features/personnel'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Insurance } from '@/features/personnel/services/insurances'
