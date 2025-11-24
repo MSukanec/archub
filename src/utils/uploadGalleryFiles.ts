@@ -34,7 +34,6 @@ export async function uploadGalleryFiles(
     try {
       // Validate file first
       if (!file || file.size === 0) {
-        console.warn('Archivo vacío o inválido, saltando:', title);
         return;
       }
 
@@ -48,10 +47,7 @@ export async function uploadGalleryFiles(
         visibility,
         description: description || title, // Usar title como descripción si no hay descripción
       });
-
-      console.log('Archivo subido exitosamente:', title);
     } catch (error) {
-      console.error('Error processing file:', file.name, error);
       throw error;
     }
   });
