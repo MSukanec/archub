@@ -1,4 +1,4 @@
-import { Layout } from '@/layout/desktop/Layout'
+import { DashboardLayout as Layout } from "@/layouts"
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'

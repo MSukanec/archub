@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { FileText, Share2, Copy, MessageCircle, Mail, MapPin, Home, Bell } from 'lucide-react';
-import { Layout } from '@/layout/desktop/Layout';
+import { DashboardLayout as Layout } from "@/layouts";
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useProjectContext } from '@/stores/projectContext';
 import { useQuery } from '@tanstack/react-query';

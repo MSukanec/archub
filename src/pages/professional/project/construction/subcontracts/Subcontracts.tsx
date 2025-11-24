@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Handshake, Plus, Home, Search, Filter, Bell } from "lucide-react";
 
-import { Layout } from '@/layout/desktop/Layout';
+import { DashboardLayout as Layout } from "@/layouts";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';

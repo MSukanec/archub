@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Building } from 'lucide-react'
-import { Layout } from '@/layout/desktop/Layout'
+import { DashboardLayout as Layout } from "@/layouts"
 import { useNavigationStore } from '@/stores/navigationStore'
 
 export default function ConstructionDashboard() {

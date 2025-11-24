@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { BookOpen, Plus } from "lucide-react";
 
-import { Layout } from '@/layout/desktop/Layout';
+import { DashboardLayout as Layout } from "@/layouts";
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
 import { useCurrentUser } from "@/hooks/use-current-user";

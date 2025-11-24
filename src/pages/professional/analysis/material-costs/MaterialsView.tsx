@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { Package } from 'lucide-react';
 
-import { Layout } from '@/layout/desktop/Layout';
+import { DashboardLayout as Layout } from "@/layouts";
 import { MaterialCostsTab } from './MaterialCostsTab';
 import { MaterialBasicDataTab } from './MaterialBasicDataTab';
 import { useMaterial } from "@/features/materials";

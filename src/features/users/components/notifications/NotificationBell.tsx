@@ -9,7 +9,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { NotificationDropdown } from './NotificationDropdown';
-import ButtonSidebar from '@/layout/desktop/ButtonSidebar';
+import { ButtonSidebar as ButtonSidebarDefault } from '@/layouts';
+const ButtonSidebar = ButtonSidebarDefault;
 
 interface NotificationBellProps {
   isExpanded: boolean;

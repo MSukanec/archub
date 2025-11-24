@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Layout } from '@/layout/desktop/Layout'
+import { DashboardLayout as Layout } from "@/layouts"
 import { Plus, CheckSquare, Calendar, Home, Search, Filter, Bell } from 'lucide-react'
 import { useConstructionTasks, useConstructionTasksView, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useConstructionProjectPhases, useUpdatePhasePositions } from '@/hooks/use-construction-phases'

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Package, Plus, RefreshCw } from 'lucide-react';
-import { Layout } from '@/layout/desktop/Layout';
+import { DashboardLayout as Layout } from "@/layouts";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';

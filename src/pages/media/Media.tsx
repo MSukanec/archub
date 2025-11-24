@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Layout } from '@/layout/desktop/Layout';
+import { DashboardLayout as Layout } from "@/layouts";
 import { MediaDocumentation } from './MediaDocumentation';
 import { MediaGallery } from './MediaGallery';
 import { FolderOpen, Upload, Plus } from 'lucide-react';

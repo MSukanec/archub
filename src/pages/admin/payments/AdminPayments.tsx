@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Wallet, Plus } from 'lucide-react';
-import { Layout } from '@/layout/desktop/Layout';
+import { DashboardLayout as Layout } from "@/layouts";
 import { Button } from '@/components/ui/button';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';

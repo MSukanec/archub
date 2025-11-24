@@ -1,4 +1,4 @@
-import { Layout } from '@/layout/desktop/Layout'
+import { DashboardLayout as Layout } from "@/layouts"
 import { useState, useEffect } from 'react'
 import { useCourseListData, type CourseTabFilter } from '@/features/learning'
 import { BookOpen, Clock, ShoppingCart } from 'lucide-react'

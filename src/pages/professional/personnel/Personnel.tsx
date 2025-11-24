@@ -1,4 +1,4 @@
-import { Layout } from '@/layout/desktop/Layout'
+import { DashboardLayout as Layout } from "@/layouts"
 import { useEffect, useState } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'

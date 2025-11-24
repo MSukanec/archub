@@ -3,7 +3,7 @@ import { useParams, useLocation } from "wouter";
 import { Plus, FileText, FileSignature } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
-import { Layout } from '@/layout/desktop/Layout';
+import { DashboardLayout as Layout } from "@/layouts";
 import { SubcontractDashboardView } from './tabs/SubcontractDashboardView';
 import { SubcontractScopeView } from './tabs/SubcontractScopeView';
 import { SubcontractBidsView } from './tabs/SubcontractBidsView';

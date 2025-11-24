@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Layout } from '@/layout/desktop/Layout';
+import { DashboardLayout as Layout } from "@/layouts";
 import { KanbanBox } from '@/components/ui-custom/KanbanBox';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckSquare, Plus, Kanban, Edit, Trash2, List, Search, Filter, X } from 'lucide-react';
-import { ActionBar } from '@/layout/desktop/ActionBar';
+import { ActionBar } from '@/layouts';
 
 import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useUpdateKanbanBoard, useDeleteKanbanBoard, useDeleteKanbanList, useDeleteKanbanCard, useUpdateLastKanbanBoard } from '@/hooks/use-kanban';
 import { useToast } from '@/hooks/use-toast';

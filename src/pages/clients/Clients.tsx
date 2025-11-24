@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Receipt, Plus, Users, Home, Bell, Search, Filter } from 'lucide-react'
-import { Layout } from '@/layout/desktop/Layout'
+import { DashboardLayout as Layout } from "@/layouts"
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import ClientDashboardTab from './ClientDashboardTab'

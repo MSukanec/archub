@@ -11,7 +11,7 @@ import {
 import { useLocation } from 'wouter';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { Layout } from '@/layout/desktop/Layout';
+import { DashboardLayout as Layout } from "@/layouts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';

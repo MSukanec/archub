@@ -1,7 +1,7 @@
 import React from 'react'
 import { FolderX } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Layout } from '@/layout/desktop/Layout'
+import { DashboardLayout as Layout } from "@/layouts"
 import { useProjectContext } from '@/stores/projectContext'
 
 interface RequireProjectWrapperProps {

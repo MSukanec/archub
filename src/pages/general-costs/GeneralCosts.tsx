@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Layout } from '@/layout/desktop/Layout'
+import { DashboardLayout as Layout } from "@/layouts"
 import { useNavigationStore } from '@/stores/navigationStore'
 import { CreditCard, Plus } from 'lucide-react'
 import GeneralCostsList from './GeneralCostsList'

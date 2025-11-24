@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Layout } from '@/layout/desktop/Layout'
+import { DashboardLayout as Layout } from "@/layouts"
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 

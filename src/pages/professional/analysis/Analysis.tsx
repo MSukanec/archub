@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Layout } from '@/layout/desktop/Layout'
+import { DashboardLayout as Layout } from "@/layouts"
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useCurrentUser } from '@/hooks/use-current-user'

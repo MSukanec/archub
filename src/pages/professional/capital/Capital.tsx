@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { TrendingUp, Plus } from 'lucide-react'
 
-import { Layout } from '@/layout/desktop/Layout'
+import { DashboardLayout as Layout } from "@/layouts"
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { Button } from '@/components/ui/button'
 import { useCurrentUser } from '@/hooks/use-current-user'

@@ -4,7 +4,7 @@ import { BookOpen, FolderPlus, FileVideo } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
-import { Layout } from '@/layout/desktop/Layout';
+import { DashboardLayout as Layout } from "@/layouts";
 import AdminCourseDataTab from './view/AdminCourseDataTab';
 import AdminCourseContentTab from './view/AdminCourseContentTab';
 import AdminCourseMarketingTab from './view/AdminCourseMarketingTab';
