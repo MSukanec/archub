@@ -177,7 +177,9 @@ export async function getAllPublicCourses() {
       course_details (
         badge_text,
         instructor_name,
-        instructor_title
+        instructor_title,
+        image_bucket,
+        image_path
       )
     `)
     .eq('is_active', true)
