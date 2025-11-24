@@ -25,6 +25,7 @@ interface HeroLayoutProps {
   children?: React.ReactNode;
   heroContent?: React.ReactNode;
   mainContent?: React.ReactNode;
+  hideAIChat?: boolean;
 }
 
 /**
@@ -33,7 +34,7 @@ interface HeroLayoutProps {
  * - Main content: with sidebar padding, scrollable
  * - Used for: Learning Dashboard, etc.
  */
-export function HeroLayout({ children, heroContent, mainContent }: HeroLayoutProps) {
+export function HeroLayout({ children, heroContent, mainContent, hideAIChat = false }: HeroLayoutProps) {
   const { isDark, setTheme } = useThemeStore();
   const { data } = useCurrentUser();
   const userMode = useUserMode();
@@ -50,7 +51,7 @@ export function HeroLayout({ children, heroContent, mainContent }: HeroLayoutPro
   const contentBackground = useContentBackground();
   
   // Determinar si debería mostrarse el FloatingAIChat
-  const shouldShowAIChat = (() => {
+  const shouldShowAIChat = !hideAIChat && (() => {
     const workRoutes = [
       '/home', '/dashboard', '/organization', '/contacts', '/notifications',
       '/finances', '/calendar', '/projects', '/project', '/clients', '/media',
@@ -126,11 +127,19 @@ function HeroLayoutContent({
           {isMobile ? (
             // Mobile View
             <HeaderMobile>
+              {/* Hero Section in Mobile */}
+              {heroContent && (
+                <div className="w-full">
+                  {heroContent}
+                </div>
+              )}
+              
+              {/* Main Content in Mobile */}
               <main
                 className={`transition-all duration-300 ease-in-out px-4 py-3 pb-12 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
                 style={{ background: contentBackground }}
               >
-                {children}
+                {mainContent || children}
               </main>
             </HeaderMobile>
           ) : (

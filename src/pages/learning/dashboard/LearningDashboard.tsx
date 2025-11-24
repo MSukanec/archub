@@ -230,6 +230,7 @@ export default function LearningDashboard() {
     <HeroLayout 
       heroContent={heroSection}
       mainContent={mainContent}
+      hideAIChat={true}
     />
   )
 }
