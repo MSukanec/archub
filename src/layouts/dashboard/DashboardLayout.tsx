@@ -13,12 +13,10 @@ import { useUserMode } from "@/hooks/use-user-mode";
 import {
   useSidebarStore,
   useSecondarySidebarStore,
-  useCourseSidebarStore,
 } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { ActionBarMobile, useActionBarMobile, HeaderMobile } from '@/layouts';
 import { useMobile } from "@/hooks/use-mobile";
-import { CourseSidebar } from "./components/Sidebar/CourseSidebar";
 import { useProjectAccentColor } from "@/features/projects";
 import { useContentBackground } from "@/hooks/use-content-background";
 import { FloatingAIChat } from "@/components/ui-custom/layout/FloatingAIChat";
@@ -102,7 +100,6 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const isMobile = useMobile();
   const { isDocked, isHovered } = useSidebarStore();
   const { sidebarLevel } = useNavigationStore();
-  const { isVisible: isCourseSidebarVisible, modules, lessons, currentLessonId } = useCourseSidebarStore();
   const [location] = useLocation();
 
 
@@ -169,10 +166,6 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       isDark={isDark}
       showActionBar={showActionBar}
       isDocked={isDocked}
-      isCourseSidebarVisible={isCourseSidebarVisible}
-      modules={modules}
-      lessons={lessons}
-      currentLessonId={currentLessonId}
       shouldShowAIChat={shouldShowAIChat}
       contentBackground={contentBackground}
       userMode={userMode}
@@ -189,10 +182,6 @@ function LayoutContent({
   isDark, 
   showActionBar,
   isDocked,
-  isCourseSidebarVisible,
-  modules,
-  lessons,
-  currentLessonId,
   shouldShowAIChat,
   contentBackground,
   userMode
@@ -259,7 +248,7 @@ function LayoutContent({
 
             {/* Page Content with rounded corners and framing effect */}
             <div className={`flex-1 flex min-h-0 relative ${isDocked ? 'gap-3' : ''}`}>
-              <div className={`flex-1 ${isCourseSidebarVisible ? '' : ''} py-1 overflow-x-hidden`}>
+              <div className="flex-1 py-1 overflow-x-hidden">
                 <main
                   className={`h-full flex flex-col rounded-lg overflow-hidden ${!isDocked ? 'w-full' : ''}`}
                   style={{
@@ -312,18 +301,6 @@ function LayoutContent({
               </main>
               </div>
 
-              {/* Course Sidebar - Right side, only visible when activated */}
-              {isCourseSidebarVisible && !isMobile && (
-                <div className="flex-shrink-0 p-1">
-                  <div className="h-full rounded-lg overflow-hidden">
-                    <CourseSidebar
-                      modules={modules}
-                      lessons={lessons}
-                      currentLessonId={currentLessonId}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
@@ -341,14 +318,7 @@ function LayoutContent({
       {isMobile && <ActionBarMobile />}
       
       {/* Floating Course Lessons - Mobile cuando hay curso activo */}
-      {isMobile && isCourseSidebarVisible && modules.length > 0 && (
-        <FloatingCourseLessons 
-          modules={modules}
-          lessons={lessons}
-          currentLessonId={currentLessonId}
-          courseId={modules[0]?.course_id}
-        />
-      )}
+      {isMobile && <FloatingCourseLessons />}
 
       {/* Pending Invitations Modal - Shows once per session when user has pending invitations */}
       {shouldShowInvitationsModal && (

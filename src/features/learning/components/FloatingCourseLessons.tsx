@@ -5,23 +5,77 @@ import { cn } from '@/lib/utils';
 import { useCoursePlayerStore } from '../stores/coursePlayerStore';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { useLocation, useRoute } from 'wouter';
+import { useCourseSidebarStore } from '@/stores/sidebarStore';
 
-interface FloatingCourseLessonsProps {
-  modules: any[];
-  lessons: any[];
-  currentLessonId?: string;
-  courseId: string;
-}
-
-export function FloatingCourseLessons({ 
-  modules, 
-  lessons, 
-  currentLessonId,
-  courseId 
-}: FloatingCourseLessonsProps) {
+export function FloatingCourseLessons() {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   const goToLesson = useCoursePlayerStore(s => s.goToLesson);
+  const [location] = useLocation();
+  const [match, params] = useRoute('/learning/courses/:courseSlug');
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentTab = urlParams.get('tab');
+  const isOnCoursePlayerTab = match && !!params?.courseSlug && currentTab === 'Reproductor';
+  const courseSlug = isOnCoursePlayerTab ? params?.courseSlug : null;
+  const { currentLessonId: sidebarLessonId, setCurrentLesson } = useCourseSidebarStore();
+  const storeLessonId = useCoursePlayerStore(s => s.currentLessonId);
+  const currentLessonId = storeLessonId || sidebarLessonId || null;
+
+  // Fetch course by slug
+  const { data: course } = useQuery({
+    queryKey: ['course', courseSlug],
+    queryFn: async () => {
+      if (!courseSlug || !supabase) return null;
+      const { data, error } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('is_deleted', false)
+        .eq('slug', courseSlug)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!courseSlug && !!supabase && isOnCoursePlayerTab
+  });
+
+  // Fetch modules
+  const { data: modules = [] } = useQuery({
+    queryKey: ['course-modules', course?.id],
+    queryFn: async () => {
+      if (!course?.id || !supabase) return [];
+      const { data, error } = await supabase
+        .from('course_modules')
+        .select('*')
+        .eq('course_id', course.id)
+        .order('sort_index', { ascending: true });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!course?.id && !!supabase && isOnCoursePlayerTab
+  });
+
+  // Fetch lessons
+  const { data: lessons = [] } = useQuery({
+    queryKey: ['course-lessons-full', course?.id],
+    queryFn: async () => {
+      if (!course?.id || !supabase || modules.length === 0) return [];
+      const moduleIds = modules.map(m => m.id);
+      const { data, error } = await supabase
+        .from('course_lessons')
+        .select('id, module_id, title, vimeo_video_id, duration_sec, free_preview, sort_index, is_active')
+        .in('module_id', moduleIds)
+        .order('sort_index', { ascending: true});
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!course?.id && !!supabase && modules.length > 0 && isOnCoursePlayerTab
+  });
+
+  // Only show if we have data
+  if (!isOnCoursePlayerTab || modules.length === 0) {
+    return null;
+  }
 
   // Auto-expandir el módulo que contiene la lección actual o el primer módulo
   useEffect(() => {
@@ -62,12 +116,12 @@ export function FloatingCourseLessons({
 
   // Fetch progress for all lessons in the course
   const { data: progressData } = useQuery<any[]>({
-    queryKey: ['/api/courses', courseId, 'progress'],
+    queryKey: ['/api/courses', course?.id, 'progress'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return [];
       
-      const res = await fetch(`/api/courses/${courseId}/progress`, {
+      const res = await fetch(`/api/courses/${course?.id}/progress`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         },
@@ -80,7 +134,7 @@ export function FloatingCourseLessons({
       
       return res.json();
     },
-    enabled: !!courseId && !!supabase
+    enabled: !!course?.id && !!supabase && isOnCoursePlayerTab
   });
 
   // Create a map of lesson progress for quick lookup
