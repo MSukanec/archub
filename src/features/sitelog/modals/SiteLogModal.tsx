@@ -566,36 +566,71 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
             }}
           />
           
-          {/* Mini-galería de imágenes */}
+          {/* Mini-galería de imágenes y videos */}
           {(() => {
-            // Filtrar solo imágenes de ambas fuentes
-            const existingImages = siteLogFiles.filter(file => file.file_type === 'image');
-            const newImages = filesToUpload.filter(fileInput => fileInput.file.type.startsWith('image/'));
-            const totalImages = existingImages.length + newImages.length;
+            // Filtrar imágenes y videos de ambas fuentes
+            const existingMedia = siteLogFiles.filter(file => file.file_type === 'image' || file.file_type === 'video');
+            const newMedia = filesToUpload.filter(fileInput => {
+              const type = fileInput.file.type;
+              return type.startsWith('image/') || type.startsWith('video/');
+            });
+            const totalMedia = existingMedia.length + newMedia.length;
             
-            if (totalImages === 0) return null;
+            if (totalMedia === 0) return null;
             
             return (
               <div className="grid grid-cols-5 gap-2">
-                {/* Imágenes existentes */}
-                {existingImages.map((file) => (
-                  <div key={`existing-${file.id}`} className="aspect-square rounded overflow-hidden">
-                    <img
-                      src={file.file_url || ''}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
+                {/* Media existente */}
+                {existingMedia.map((file) => (
+                  <div key={`existing-${file.id}`} className="relative aspect-square rounded overflow-hidden bg-muted">
+                    {file.file_type === 'image' ? (
+                      <img
+                        src={file.file_url || ''}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    ) : file.file_type === 'video' ? (
+                      <>
+                        <video 
+                          src={file.file_url || ''}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                          <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center">
+                            <svg className="w-5 h-5 text-black fill-current ml-0.5" viewBox="0 0 24 24">
+                              <polygon points="5 3 19 12 5 21" />
+                            </svg>
+                          </div>
+                        </div>
+                      </>
+                    ) : null}
                   </div>
                 ))}
                 
-                {/* Imágenes nuevas para subir */}
-                {newImages.map((fileInput, index) => (
-                  <div key={`new-${index}`} className="aspect-square rounded overflow-hidden">
-                    <img
-                      src={URL.createObjectURL(fileInput.file)}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
+                {/* Media nueva para subir */}
+                {newMedia.map((fileInput, index) => (
+                  <div key={`new-${index}`} className="relative aspect-square rounded overflow-hidden bg-muted">
+                    {fileInput.file.type.startsWith('image/') ? (
+                      <img
+                        src={URL.createObjectURL(fileInput.file)}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    ) : fileInput.file.type.startsWith('video/') ? (
+                      <>
+                        <video 
+                          src={URL.createObjectURL(fileInput.file)}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                          <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center">
+                            <svg className="w-5 h-5 text-black fill-current ml-0.5" viewBox="0 0 24 24">
+                              <polygon points="5 3 19 12 5 21" />
+                            </svg>
+                          </div>
+                        </div>
+                      </>
+                    ) : null}
                   </div>
                 ))}
               </div>

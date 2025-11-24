@@ -120,9 +120,10 @@ export default function SitelogRow({
   
   const hasAttachments = totalFiles > 0 || totalAttendees > 0;
 
-  // Filtrar solo imágenes de los archivos
-  const imageFiles = siteLog.files?.filter(file => 
-    file.file_type === 'image' || file.mime_type?.startsWith('image/')
+  // Filtrar imágenes y videos de los archivos
+  const mediaFiles = siteLog.files?.filter(file => 
+    (file.file_type === 'image' || file.file_type === 'video') || 
+    (file.mime_type?.startsWith('image/') || file.mime_type?.startsWith('video/'))
   ) || [];
 
   // Contenido del card usando el nuevo sistema
@@ -153,21 +154,35 @@ export default function SitelogRow({
           )}
         </div>
 
-        {/* Mini-galería de thumbnails (hasta 8 imágenes) */}
-        {imageFiles.length > 0 && (
+        {/* Mini-galería de thumbnails (hasta 8 media) */}
+        {mediaFiles.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1">
-            {imageFiles.slice(0, 8).map((file, index) => (
-              <div key={file.id || index} className="w-6 h-6 rounded-sm overflow-hidden flex-shrink-0">
-                <img
-                  src={file.file_url}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
+            {mediaFiles.slice(0, 8).map((file: any, index: number) => (
+              <div key={file.id || index} className="relative w-6 h-6 rounded-sm overflow-hidden flex-shrink-0 bg-muted">
+                {file.file_type === 'image' || file.mime_type?.startsWith('image/') ? (
+                  <img
+                    src={file.file_url}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                ) : file.file_type === 'video' || file.mime_type?.startsWith('video/') ? (
+                  <>
+                    <video
+                      src={file.file_url}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                      <svg className="w-2.5 h-2.5 text-white fill-current ml-0.5" viewBox="0 0 24 24">
+                        <polygon points="5 3 19 12 5 21" />
+                      </svg>
+                    </div>
+                  </>
+                ) : null}
               </div>
             ))}
-            {imageFiles.length > 8 && (
+            {mediaFiles.length > 8 && (
               <div className="w-6 h-6 bg-muted rounded-sm flex items-center justify-center text-[10px] text-muted-foreground font-medium">
-                +{imageFiles.length - 8}
+                +{mediaFiles.length - 8}
               </div>
             )}
           </div>
