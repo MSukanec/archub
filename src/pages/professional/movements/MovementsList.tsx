@@ -59,7 +59,7 @@ import { queryClient } from "@/lib/queryClient";
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from "@/hooks/use-mobile";
 import { useProjectContext } from "@/stores/projectContext";
-import { MovementKPICardsWithWallets } from "@/components/kpis/MovementKPICardsWithWallets";
+import { MovementKPICardsWithWallets } from "@/features/finances/components/MovementKPICardsWithWallets";
 
 interface Movement {
   id: string;
