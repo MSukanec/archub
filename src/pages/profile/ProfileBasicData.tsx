@@ -13,7 +13,7 @@ import { es } from 'date-fns/locale'
 import { useState, useEffect } from 'react'
 import { useLocation } from 'wouter'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useDebouncedAutoSave } from '@/components/save'
+import { useAutoSave } from '@/hooks/useAutoSave'
 import { useMutation } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
@@ -139,7 +139,7 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
   })
 
   // Set up debounced auto-save with 3 second delay
-  const { isSaving } = useDebouncedAutoSave({
+  const { isSaving } = useAutoSave({
     data: profileData,
     saveFn: async (data) => { await saveProfileMutation.mutateAsync(data); },
     delay: 3000,

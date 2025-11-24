@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton';
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
-import { useDebouncedAutoSave } from '@/components/save';
+import { useAutoSave } from '@/hooks/useAutoSave';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
@@ -304,7 +304,7 @@ export function TaskBasicDataView({
   });
   
   // Auto-save hook para el nombre de la tarea
-  const { isSaving: isSavingName } = useDebouncedAutoSave({
+  const { isSaving: isSavingName } = useAutoSave({
     data: {
       taskName
     },
@@ -316,7 +316,7 @@ export function TaskBasicDataView({
   });
 
   // Auto-save hook para el rubro de la tarea
-  const { isSaving: isSavingRubro } = useDebouncedAutoSave({
+  const { isSaving: isSavingRubro } = useAutoSave({
     data: {
       taskRubro
     },
@@ -328,7 +328,7 @@ export function TaskBasicDataView({
   });
 
   // Auto-save hook para la unidad de la tarea
-  const { isSaving: isSavingUnit } = useDebouncedAutoSave({
+  const { isSaving: isSavingUnit } = useAutoSave({
     data: {
       taskUnit
     },

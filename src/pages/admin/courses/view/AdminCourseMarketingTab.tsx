@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { useDebouncedAutoSave } from '@/components/save/useDebouncedAutoSave';
+import { useAutoSave } from '@/hooks/useAutoSave';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info, GraduationCap, FileText, BookOpen, Palette, Search, HelpCircle, Plus, Pencil, Trash2 } from 'lucide-react';
 import { HeroSection, InstructorSection, ModulesSection, LessonsSection, FAQSection, CourseFaqFormModal } from '@/features/learning';
@@ -358,7 +358,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
   };
 
   // Auto-save hook
-  const { isSaving } = useDebouncedAutoSave({
+  const { isSaving } = useAutoSave({
     data: {
       instructor_name: instructorName || null,
       instructor_title: instructorTitle || null,

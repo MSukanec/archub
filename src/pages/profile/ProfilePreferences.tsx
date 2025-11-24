@@ -3,7 +3,7 @@ import { Switch } from '@/components/ui/switch'
 import { Settings, UserCircle, Palette, Shield, Monitor } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useDebouncedAutoSave } from '@/components/save'
+import { useAutoSave } from '@/hooks/useAutoSave'
 import { useMutation } from '@tanstack/react-query'
 import { queryClient, apiRequest } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
@@ -80,7 +80,7 @@ export function ProfilePreferences({ user }: ProfilePreferencesProps) {
   })
 
   // Set up debounced auto-save with 1 second delay for faster saving
-  const { isSaving } = useDebouncedAutoSave({
+  const { isSaving } = useAutoSave({
     data: settingsData,
     saveFn: async (data) => { await saveSettingsMutation.mutateAsync(data); },
     delay: 1000,

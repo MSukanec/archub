@@ -12,7 +12,7 @@ export interface UseDebouncedAutoSaveReturn {
   lastSavedAt: Date | null;
 }
 
-export function useDebouncedAutoSave<T>({
+export function useAutoSave<T>({
   data,
   saveFn,
   delay = 750,

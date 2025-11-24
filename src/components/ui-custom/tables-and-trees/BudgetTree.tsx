@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useLocation } from 'wouter';
 import { useUpdateBudgetItem } from '@/hooks/use-budget-items';
-import { useDebouncedAutoSave } from '@/components/save';
+import { useAutoSave } from '@/hooks/useAutoSave';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { GripVertical, Calculator, FileText, Copy, Trash2, Info, Plus, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -429,7 +429,7 @@ const BudgetSummaryRow = ({
   const [budgetUpdates, setBudgetUpdates] = useState<{ discount_pct?: number; tax_pct?: number }>({});
 
   // Debounced save function
-  const { isSaving } = useDebouncedAutoSave({
+  const { isSaving } = useAutoSave({
     data: budgetUpdates,
     saveFn: useCallback(async (updates: { discount_pct?: number; tax_pct?: number }) => {
       if (onBudgetUpdate && Object.keys(updates).length > 0) {
@@ -1648,7 +1648,7 @@ export function BudgetTree({
   }, []);
 
   // Use auto-save for quantity changes
-  const { isSaving: isSavingQuantities } = useDebouncedAutoSave({
+  const { isSaving: isSavingQuantities } = useAutoSave({
     data: localQuantities,
     saveFn: saveQuantityChanges,
     delay: 1000, // Wait 1 second after user stops typing
@@ -1656,7 +1656,7 @@ export function BudgetTree({
   });
 
   // Use auto-save for margin changes
-  const { isSaving: isSavingMargins } = useDebouncedAutoSave({
+  const { isSaving: isSavingMargins } = useAutoSave({
     data: localMargins,
     saveFn: saveMarginChanges,
     delay: 750, // Wait 750ms after user stops typing
@@ -1664,7 +1664,7 @@ export function BudgetTree({
   });
 
   // Use auto-save for cost scope changes
-  const { isSaving: isSavingCostScopes } = useDebouncedAutoSave({
+  const { isSaving: isSavingCostScopes } = useAutoSave({
     data: localCostScopes,
     saveFn: saveCostScopeChanges,
     delay: 500, // Wait 500ms after user stops typing (faster for scope changes)

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/lib/supabase'
-import { useDebouncedAutoSave } from '@/components/save'
+import { useAutoSave } from '@/hooks/useAutoSave'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -109,7 +109,7 @@ export default function ProjectLocationTab({ projectId }: ProjectLocationTabProp
   });
 
   // Auto-save hook - enabled ONLY after hydration is complete
-  const { isSaving } = useDebouncedAutoSave({
+  const { isSaving } = useAutoSave({
     data: {
       address_full: addressFull,
       address: address,

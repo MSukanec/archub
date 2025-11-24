@@ -11,7 +11,7 @@ import { PhoneField } from '@/components/ui-custom/fields/PhoneField';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';
 
-import { useDebouncedAutoSave } from '@/components/save';
+import { useAutoSave } from '@/hooks/useAutoSave';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
@@ -155,7 +155,7 @@ export default function OrganizationBasicData() {
     }
   });
 
-  const { isSaving } = useDebouncedAutoSave({
+  const { isSaving } = useAutoSave({
     data: {
       name: organizationName,
       logo_url: logoUrl,

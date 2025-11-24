@@ -3,7 +3,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useUserOrganizationPreferences } from '@/features/organization'
 import { supabase } from '@/lib/supabase'
-import { useDebouncedAutoSave } from '@/components/save'
+import { useAutoSave } from '@/hooks/useAutoSave'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -194,7 +194,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
   });
 
   // Auto-save hook - enabled ONLY after hydration is complete
-  const { isSaving } = useDebouncedAutoSave({
+  const { isSaving } = useAutoSave({
     data: {
       name: projectName,
       code: projectCode,

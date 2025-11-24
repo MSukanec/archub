@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useDebouncedAutoSave } from '@/components/save/useDebouncedAutoSave';
+import { useAutoSave } from '@/hooks/useAutoSave';
 import { FileText, DollarSign, Save } from 'lucide-react';
 import { CourseHeroImageUpload } from '@/features/learning/components';
 
@@ -101,7 +101,7 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
   });
 
   // Auto-save hook
-  const { isSaving } = useDebouncedAutoSave({
+  const { isSaving } = useAutoSave({
     data: {
       title,
       slug,
