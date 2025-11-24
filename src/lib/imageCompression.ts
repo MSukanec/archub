@@ -63,7 +63,6 @@ export async function compressImage(
   preset: ImagePreset = 'default'
 ): Promise<File> {
   if (!shouldCompress(file)) {
-    console.log('[Image Compression] Skipping non-image file:', file.name);
     return file;
   }
 
@@ -72,14 +71,6 @@ export async function compressImage(
   const originalSizeMB = originalSizeKB / 1024;
 
   try {
-    console.log('[Image Compression] Starting compression...');
-    console.log('  - File:', file.name);
-    console.log('  - Preset:', preset);
-    console.log('  - Original size:', originalSizeMB.toFixed(2), 'MB');
-    console.log('  - Target max size:', presetConfig.maxSizeMB, 'MB');
-    console.log('  - Max dimensions:', presetConfig.maxWidthOrHeight, 'px');
-    console.log('  - Quality:', (presetConfig.quality * 100).toFixed(0), '%');
-
     const compressedFile = await imageCompression(file, {
       maxSizeMB: presetConfig.maxSizeMB,
       maxWidthOrHeight: presetConfig.maxWidthOrHeight,
@@ -88,19 +79,8 @@ export async function compressImage(
       preserveExif: presetConfig.preserveExif
     });
 
-    const compressedSizeKB = compressedFile.size / 1024;
-    const compressedSizeMB = compressedSizeKB / 1024;
-    const reductionPercent = ((originalSizeKB - compressedSizeKB) / originalSizeKB) * 100;
-
-    console.log('[Image Compression] Compression complete!');
-    console.log('  - Compressed size:', compressedSizeMB.toFixed(2), 'MB');
-    console.log('  - Reduction:', reductionPercent.toFixed(1), '%');
-    console.log('  - Saved:', (originalSizeMB - compressedSizeMB).toFixed(2), 'MB');
-
     return compressedFile;
   } catch (error) {
-    console.error('[Image Compression] Compression failed:', error);
-    console.log('[Image Compression] Using original file');
     return file;
   }
 }

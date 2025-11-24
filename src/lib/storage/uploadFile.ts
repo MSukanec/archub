@@ -16,13 +16,10 @@ export async function uploadFile(
     
     let processedFile = file;
     if (shouldCompress(file)) {
-      console.log(`[Upload] Compressing file with preset: ${compressionPreset}`);
       processedFile = await compressImage(file, compressionPreset);
     }
 
     const storagePath = buildStoragePath(processedFile, context);
-    
-    console.log(`[Upload] Uploading to ${storagePath.bucket}/${storagePath.path}`);
 
     const { error: uploadError } = await supabase.storage
       .from(storagePath.bucket)
@@ -32,14 +29,24 @@ export async function uploadFile(
       });
 
     if (uploadError) {
-      console.error('[Upload] Storage upload error:', uploadError);
       throw new Error(`Error al subir archivo: ${uploadError.message}`);
     }
 
     const isPublicBucket = storagePath.bucket === 'public-assets';
-    const fileUrl = isPublicBucket
-      ? supabase.storage.from(storagePath.bucket).getPublicUrl(storagePath.path).data.publicUrl
-      : null;
+    let fileUrl: string;
+    
+    if (isPublicBucket) {
+      fileUrl = supabase.storage.from(storagePath.bucket).getPublicUrl(storagePath.path).data.publicUrl;
+    } else {
+      const { data, error: signedUrlError } = await supabase.storage
+        .from(storagePath.bucket)
+        .createSignedUrl(storagePath.path, 60 * 60 * 24 * 7);
+      
+      if (signedUrlError || !data?.signedUrl) {
+        throw new Error(`Error al generar URL firmada: ${signedUrlError?.message || 'Unknown error'}`);
+      }
+      fileUrl = data.signedUrl;
+    }
 
     const fileType = getFileType(file.type);
     
@@ -64,12 +71,9 @@ export async function uploadFile(
       .single();
 
     if (mediaFileError || !mediaFile) {
-      console.error('[Upload] Database insert error:', mediaFileError);
       await supabase.storage.from(storagePath.bucket).remove([storagePath.path]);
       throw new Error(`Error al registrar archivo: ${mediaFileError?.message || 'Unknown error'}`);
     }
-
-    console.log('[Upload] Media file created:', mediaFile.id);
 
     let mediaLinkId: string | undefined;
 
@@ -102,15 +106,12 @@ export async function uploadFile(
         .select()
         .single();
 
-      if (mediaLinkError) {
-        console.error('[Upload] Media link creation error:', mediaLinkError);
-      } else {
+      if (!mediaLinkError) {
         mediaLinkId = mediaLink?.id;
-        console.log('[Upload] Media link created:', mediaLinkId);
       }
     }
 
-    const urlWithCacheBust = fileUrl ? `${fileUrl}?t=${Date.now()}` : null;
+    const urlWithCacheBust = `${fileUrl}?t=${Date.now()}`;
 
     return {
       media_file_id: mediaFile.id,
@@ -120,7 +121,6 @@ export async function uploadFile(
       bucket: storagePath.bucket
     };
   } catch (error) {
-    console.error('[Upload] Upload failed:', error);
     throw error;
   }
 }
@@ -158,10 +158,6 @@ export async function deleteFile(
         .from(mediaFile.bucket)
         .remove([mediaFile.file_path]);
 
-      if (storageError) {
-        console.error('[Delete] Storage deletion error:', storageError);
-      }
-
       await supabase
         .from('media_links')
         .delete()
@@ -185,10 +181,7 @@ export async function deleteFile(
         throw new Error(`Error al marcar archivo como eliminado: ${softDeleteError.message}`);
       }
     }
-
-    console.log(`[Delete] File ${hardDelete ? 'hard' : 'soft'} deleted:`, mediaFileId);
   } catch (error) {
-    console.error('[Delete] Delete failed:', error);
     throw error;
   }
 }

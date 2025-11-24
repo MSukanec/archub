@@ -90,7 +90,6 @@ export async function uploadCourseImage(
       media_file_id: result.media_file_id
     };
   } catch (error) {
-    console.error('Error processing course image:', error);
     throw error;
   }
 }
@@ -109,7 +108,6 @@ export async function deleteCourseImage(filePath: string, courseId?: string): Pr
         .remove([filePath]);
 
       if (error) {
-        console.error('Error deleting course image:', error);
       }
 
       await supabase
@@ -126,7 +124,6 @@ export async function deleteCourseImage(filePath: string, courseId?: string): Pr
       }
     }
   } catch (error) {
-    console.error('Error deleting course image:', error);
     throw error;
   }
 }
@@ -156,7 +153,6 @@ export async function updateCourseImageUrl(
       throw new Error('Failed to update course image URL');
     }
   } catch (error) {
-    console.error('Error updating course image URL:', error);
     throw error;
   }
 }

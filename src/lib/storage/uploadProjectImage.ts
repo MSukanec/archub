@@ -31,7 +31,6 @@ export async function updateProjectImageMetadata(
     });
 
   if (error) {
-    console.error('Error updating project image metadata:', error);
     throw new Error(`Failed to update project image: ${error.message}`);
   }
 }
@@ -109,7 +108,6 @@ export async function uploadProjectImage(
       file_path: result.file_path
     };
   } catch (error) {
-    console.error('Error processing project image:', error);
     throw error;
   }
 }
@@ -127,7 +125,6 @@ export async function deleteProjectImage(
       .remove([path]);
 
     if (storageError) {
-      console.error('Error deleting project image from storage:', storageError);
       throw new Error(`Error al eliminar imagen: ${storageError.message}`);
     }
 
@@ -148,7 +145,6 @@ export async function deleteProjectImage(
       })
       .eq('project_id', projectId);
   } catch (error) {
-    console.error('Error deleting project image:', error);
     throw error;
   }
 }
@@ -166,7 +162,6 @@ export async function updateProjectImageUrl(
       .single();
 
     if (projectError || !projectData) {
-      console.error('Error getting project organization:', projectError);
       throw new Error(`Error al obtener organización del proyecto: ${projectError?.message || 'Proyecto no encontrado'}`);
     }
 
@@ -181,11 +176,9 @@ export async function updateProjectImageUrl(
       });
 
     if (error) {
-      console.error('Error updating project image URL:', error);
       throw new Error(`Error al actualizar URL de imagen: ${error.message}`);
     }
   } catch (error) {
-    console.error('Error updating project image URL:', error);
     throw error;
   }
 }
