@@ -23,11 +23,12 @@ import { useProjectModalities } from "@/features/projects/project-modalities";
 import { useProjectContext } from "@/stores/projectContext";
 import { useToast } from "@/hooks/use-toast";
 import { useUpdateChecklist } from "@/hooks/use-update-checklist";
+import { supabase } from "@/lib/supabase";
 
 // Import feature hooks and services
 import { useCreateProject } from '../hooks/use-create-project';
 import { useUpdateProject } from '../hooks/use-update-project';
-import { uploadProjectImage } from '@/features/projects';
+import { uploadProjectImage, updateProjectLastActive } from '@/features/projects';
 import ProjectColorAdvanced from '../components/ProjectColorAdvanced';
 
 // Paleta de colores predefinidos
@@ -100,7 +101,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
   const { editingProject, isEditing = false } = modalData || {};
   const { currentPanel, setPanel } = useModalPanelStore();
   const { data: userData } = useCurrentUser();
-  const { currentOrganizationId } = useProjectContext();
+  const { currentOrganizationId, setSelectedProject } = useProjectContext();
   // Fallback chain: currentOrganizationId -> editingProject.organization_id -> userData.organization.id
   const organizationId = currentOrganizationId || editingProject?.organization_id || userData?.organization?.id;
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
@@ -318,6 +319,30 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
           ...cleanedData,
         });
 
+        // Make new project active automatically
+        if (newProject.id && userData?.user?.id) {
+          try {
+            await supabase
+              .from('user_organization_preferences')
+              .upsert({
+                user_id: userData.user.id,
+                organization_id: organizationId,
+                last_project_id: newProject.id,
+                updated_at: new Date().toISOString()
+              }, {
+                onConflict: 'user_id,organization_id'
+              });
+            
+            // Update context and update last_active_at
+            setSelectedProject(newProject.id, organizationId);
+            updateProjectLastActive(newProject.id, organizationId).catch(err => 
+              console.error('Error updating project last_active_at:', err)
+            );
+          } catch (error) {
+            console.error('Error setting project as active:', error);
+          }
+        }
+
         // Update checklist for new project
         if (userData?.user?.id) {
           await updateChecklist.mutateAsync({ 
@@ -333,7 +358,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
 
         toast({
           title: "Proyecto creado",
-          description: "El nuevo proyecto ha sido creado exitosamente"
+          description: "El nuevo proyecto ha sido creado exitosamente y está activo"
         });
       }
 
