@@ -28,12 +28,12 @@ export async function getFileUrl(
     }
   }
   
-  // Both public-assets and social-assets use public URLs (no signing needed)
-  if (bucket === 'public-assets' || bucket === 'social-assets') {
+  // public-assets: true public bucket, use public URL
+  if (bucket === 'public-assets') {
     return client.storage.from(bucket).getPublicUrl(path).data.publicUrl;
   }
   
-  // Private buckets require signed URLs
+  // social-assets and private buckets: use signed URLs (RLS controlled)
   const { data, error } = await client.storage
     .from(bucket)
     .createSignedUrl(path, expiresIn);
