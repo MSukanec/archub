@@ -406,11 +406,6 @@ export default function ProjectList() {
     }
   ]
 
-  const getPrimaryRowAction = (project: any) => ({
-    label: 'Ir al Proyecto',
-    onClick: () => handleSelectProject(project.id)
-  })
-
   // Delete project mutation
   const deleteProjectMutation = useMutation({
     mutationFn: async (projectId: string) => {
@@ -491,7 +486,7 @@ export default function ProjectList() {
             columns={columns}
             isLoading={projectsLoading}
             rowActions={getProjectRowActions}
-            primaryRowAction={getPrimaryRowAction}
+            onRowClick={(project) => handleSelectProject(project.id)}
             getIsInactive={(project) => project.status === 'completed'}
             inactiveSeparatorLabel="Proyectos Completados"
             emptyState={
