@@ -103,17 +103,17 @@ export function UnifiedCourseCard({
             
             {/* Info Button - Secondary */}
             <Button 
-              variant="outline"
+              variant="secondary"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
               asChild
-              className="w-full"
+              className="w-full rounded-lg"
               size="sm"
               data-testid={`button-course-info-${course.id}`}
             >
-              <Link href={`/learning/courses/${course.slug}`}>
+              <Link href={`/cursos/${course.slug}`}>
                 Ver Información
               </Link>
             </Button>
