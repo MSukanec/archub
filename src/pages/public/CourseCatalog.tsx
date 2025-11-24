@@ -1,6 +1,5 @@
 import { MarketingLayout } from '@/layouts';
 import { CourseCatalogContent } from '@/features/learning/pages';
-import { BookOpen } from 'lucide-react';
 
 export default function CourseCatalog() {
   return (
@@ -28,13 +27,6 @@ export default function CourseCatalog() {
               Explora nuestro catálogo de cursos profesionales. Aprende a tu ritmo con los mejores instructores
               y desarrolla las habilidades que necesitas para destacar en tu carrera.
             </p>
-
-            <div className="flex flex-wrap justify-center gap-6 pt-4 text-sm">
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-primary" />
-                <span className="font-medium">Acceso ilimitado</span>
-              </div>
-            </div>
           </div>
         </div>
       </section>
