@@ -290,6 +290,9 @@
 }
 
 .dark {
+  /* Scrollbar - discreto en dark theme */
+  color-scheme: dark;
+  
   /* Button Shadows */
   --button-shadow-normal: 0 4px 14px 0 rgba(0, 0, 0, 0.3);
   --button-shadow-hover: 0 8px 20px 0 rgba(0, 0, 0, 0.4);
@@ -1064,4 +1067,49 @@ input[type="number"] {
 [class*="ProjectItemCard"] h3,
 .project-card-title {
   color: white !important;
+}
+/* Scrollbar styling for better appearance in dark mode */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(0, 0%, 30%);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(0, 0%, 40%);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: hsl(0, 0%, 25%);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: hsl(0, 0%, 30%);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-color: hsl(0, 0%, 30%) transparent;
+  scrollbar-width: thin;
+}
+
+.dark * {
+  scrollbar-color: hsl(0, 0%, 25%) transparent;
 }

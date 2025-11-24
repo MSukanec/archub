@@ -102,6 +102,21 @@ export function RightSidebar() {
   const modules = courseStructure;
   const lessons = courseStructure.flatMap(m => m.lessons || []);
 
+  // DEBUG: Log when courseStructure changes
+  useEffect(() => {
+    if (isOnCoursePlayerTab) {
+      console.log('[RightSidebar DEBUG]', {
+        isOnCoursePlayerTab,
+        courseSlug,
+        course: course?.id,
+        courseStructureLength: courseStructure.length,
+        modulesLength: modules.length,
+        lessonsLength: lessons.length,
+        userMode
+      });
+    }
+  }, [courseStructure, isOnCoursePlayerTab, courseSlug, course?.id, userMode, modules.length, lessons.length]);
+
   // Fetch progress for all lessons
   const { data: progressData } = useQuery<any[]>({
     queryKey: ['/api/courses', course?.id, 'progress'],
