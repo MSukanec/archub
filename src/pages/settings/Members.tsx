@@ -13,7 +13,7 @@ import {
   Bell
 } from "lucide-react";
 
-import { Layout } from "@/layout/desktop/Layout";
+import { DashboardLayout as Layout } from "@/layouts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

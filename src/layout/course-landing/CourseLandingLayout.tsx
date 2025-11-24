@@ -11,7 +11,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { PublicFooter } from "@/layout/public/PublicFooter";
-import { Layout } from "@/layout/desktop/Layout";
+import { DashboardLayout as Layout } from "@/layouts";
 import { useAuthStore } from "@/stores/authStore";
 
 interface SEOProps {

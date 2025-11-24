@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Layout } from "@/layout/desktop/Layout";
+import { DashboardLayout as Layout } from "@/layouts";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { Home as HomeIcon } from "lucide-react";
