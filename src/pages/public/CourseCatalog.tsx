@@ -1,6 +1,6 @@
 import { MarketingLayout } from '@/layouts';
 import { useAllCourses, CourseGrid } from '@/features/learning';
-import { BookOpen, GraduationCap } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 
 export default function CourseCatalog() {
   const { data: courses, isLoading, error } = useAllCourses();
@@ -48,12 +48,6 @@ export default function CourseCatalog() {
       <section className="relative bg-gradient-to-br from-background via-background to-muted/20 py-16 sm:py-20 -mx-6 px-6 mb-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center space-y-6">
-            <div className="flex justify-center">
-              <div className="rounded-full bg-primary/10 p-4">
-                <GraduationCap className="w-12 h-12 text-primary" />
-              </div>
-            </div>
-            
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
               Cursos Disponibles
             </h1>
@@ -67,10 +61,6 @@ export default function CourseCatalog() {
               <div className="flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-primary" />
                 <span className="font-medium">Acceso ilimitado</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <GraduationCap className="w-5 h-5 text-primary" />
-                <span className="font-medium">Instructores expertos</span>
               </div>
             </div>
           </div>
