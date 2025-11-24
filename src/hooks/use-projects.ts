@@ -1,6 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 
+// Re-export from feature hooks to avoid duplication and use backend API
+export { useProjects } from '@/features/projects/hooks/use-projects'
+
 interface Project {
   id: string
   name: string
@@ -36,69 +39,6 @@ interface Project {
   }
 }
 
-export function useProjects(organizationId: string | undefined) {
-  return useQuery<Project[]>({
-    queryKey: ['projects', organizationId],
-    queryFn: async () => {
-      if (!supabase || !organizationId) {
-        throw new Error('Organization ID required')
-      }
-
-      const { data, error } = await supabase
-        .from('projects')
-        .select(`
-          *,
-          project_data (
-            project_type_id,
-            project_modality_id,
-            image_bucket,
-            image_path,
-            project_type:project_types(id, name),
-            modality:project_modalities(id, name)
-          )
-        `)
-        .eq('organization_id', organizationId)
-        .eq('is_active', true)
-        .eq('is_deleted', false)
-        .order('created_at', { ascending: false })
-      
-      if (error) {
-        throw error
-      }
-      
-      // Transform the data to match our interface
-      const transformedData = (data || []).map(project => {
-        // Handle project_data which can be an array or object
-        let projectData = null
-        if (project.project_data) {
-          const pd = Array.isArray(project.project_data) ? project.project_data[0] : project.project_data
-          if (pd) {
-            projectData = {
-              project_type_id: pd.project_type_id,
-              project_modality_id: pd.project_modality_id,
-              image_bucket: pd.image_bucket,
-              image_path: pd.image_path,
-              project_type: pd.project_type,
-              project_modality: pd.modality
-            }
-          }
-        }
-        
-        const transformedProject = {
-          ...project,
-          project_data: projectData
-        }
-        
-        return transformedProject
-      })
-
-      return transformedData
-    },
-    enabled: !!organizationId && !!supabase,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  })
-}
-
 // Hook para obtener un proyecto específico
 export function useProject(projectId: string | undefined) {
   return useQuery<Project>({
@@ -110,17 +50,7 @@ export function useProject(projectId: string | undefined) {
 
       const { data, error } = await supabase
         .from('projects')
-        .select(`
-          *,
-          project_data (
-            project_type_id,
-            project_modality_id,
-            image_bucket,
-            image_path,
-            project_type:project_types(id, name),
-            modality:project_modalities(id, name)
-          )
-        `)
+        .select(`*`)
         .eq('id', projectId)
         .eq('is_active', true)
         .eq('is_deleted', false)
@@ -129,29 +59,8 @@ export function useProject(projectId: string | undefined) {
       if (error) {
         throw error
       }
-      
-      // Transform the data to match our interface
-      let projectData = null
-      if (data.project_data) {
-        const pd = Array.isArray(data.project_data) ? data.project_data[0] : data.project_data
-        if (pd) {
-          projectData = {
-            project_type_id: pd.project_type_id,
-            project_modality_id: pd.project_modality_id,
-            image_bucket: pd.image_bucket,
-            image_path: pd.image_path,
-            project_type: pd.project_type,
-            project_modality: pd.modality
-          }
-        }
-      }
-      
-      const transformedProject = {
-        ...data,
-        project_data: projectData
-      }
 
-      return transformedProject
+      return data
     },
     enabled: !!projectId && !!supabase,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -181,7 +90,7 @@ export function useProjectsMap(organizationId: string | undefined) {
       // Transform to a map for easy lookup
       const projectsMap: Record<string, { id: string; name: string; color: string | null }> = {}
       
-      data?.forEach(project => {
+      data?.forEach((project: any) => {
         projectsMap[project.id] = {
           id: project.id,
           name: project.name,
