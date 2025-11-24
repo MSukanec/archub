@@ -30,10 +30,9 @@ import { useRightSidebarStore } from "@/stores/rightSidebarStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useUserMode } from "@/hooks/use-user-mode";
 import { useCourseSidebarStore } from "@/stores/sidebarStore";
-import { useCoursePlayerStore } from "@/features/learning";
+import { useCoursePlayerStore, useCourseStructure } from "@/features/learning";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import { getCourseStructure } from "@/features/learning/services/student/getCourseStructure";
 
 export function RightSidebar() {
   const { isDark, toggleTheme } = useThemeStore();
@@ -88,34 +87,12 @@ export function RightSidebar() {
     enabled: !!courseSlug && !!supabase && isOnCoursePlayerTab
   });
 
-  // Fetch course structure (modules with lessons) using backend endpoint
-  const { data: courseStructure = [] } = useQuery({
-    queryKey: ['course-structure', course?.id],
-    queryFn: async () => {
-      if (!course?.id) return [];
-      return getCourseStructure(course.id);
-    },
-    enabled: !!course?.id && isOnCoursePlayerTab
-  });
+  // Fetch course structure using the same hook as CoursePlayerTab for cache consistency
+  const { data: courseStructure = [] } = useCourseStructure(course?.id);
 
   // Extract modules and lessons from structure
   const modules = courseStructure;
   const lessons = courseStructure.flatMap(m => m.lessons || []);
-
-  // DEBUG: Log when courseStructure changes
-  useEffect(() => {
-    if (isOnCoursePlayerTab) {
-      console.log('[RightSidebar DEBUG]', {
-        isOnCoursePlayerTab,
-        courseSlug,
-        course: course?.id,
-        courseStructureLength: courseStructure.length,
-        modulesLength: modules.length,
-        lessonsLength: lessons.length,
-        userMode
-      });
-    }
-  }, [courseStructure, isOnCoursePlayerTab, courseSlug, course?.id, userMode, modules.length, lessons.length]);
 
   // Fetch progress for all lessons
   const { data: progressData } = useQuery<any[]>({
