@@ -44,7 +44,8 @@ export async function uploadFile(
     const fileType = getFileType(file.type);
     
     const { data: { session } } = await supabase.auth.getSession();
-    const currentUserId = session?.user?.id || context.user_id;
+    // Usar created_by_member_id si se proporciona (organization_member.id), sino usar auth user_id
+    const createdById = context.created_by_member_id || session?.user?.id || context.user_id;
 
     const { data: mediaFile, error: mediaFileError } = await supabase
       .from('media_files')
@@ -58,7 +59,7 @@ export async function uploadFile(
         is_public: isPublic,
         is_deleted: false,
         organization_id: context.organization_id,
-        created_by: currentUserId
+        created_by: createdById
       })
       .select()
       .single();
@@ -94,7 +95,7 @@ export async function uploadFile(
           is_cover: context.is_cover || false,
           position: context.position,
           metadata: context.metadata,
-          created_by: currentUserId
+          created_by: createdById
         })
         .select()
         .single();
