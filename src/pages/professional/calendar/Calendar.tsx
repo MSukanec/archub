@@ -5,7 +5,6 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckSquare, Plus, Kanban, Edit, Trash2, List, Search, Filter, X } from 'lucide-react';
-import { ActionBar } from '@/layouts';
 
 import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useUpdateKanbanBoard, useDeleteKanbanBoard, useDeleteKanbanList, useDeleteKanbanCard, useUpdateLastKanbanBoard } from '@/hooks/use-kanban';
 import { useToast } from '@/hooks/use-toast';
@@ -236,30 +235,6 @@ function CalendarContent() {
   return (
     <Layout headerProps={headerProps} wide={true}>
       <div className="space-y-6">
-        {/* ActionBar Desktop - Solo selector de tableros */}
-      <ActionBar
-        selectedValue={selectedBoard?.name || ''}
-        onValueChange={(boardName: string) => {
-          const board = boards.find(b => b.name === boardName);
-          if (board) {
-            handleBoardChange(board.id);
-          }
-        }}
-        onEdit={() => {
-          if (selectedBoard) {
-            handleEditBoard(selectedBoard)
-          }
-        }}
-        onDelete={() => {
-          if (currentBoardId) {
-            handleDeleteBoard(currentBoardId)
-          }
-        }}
-        placeholder="Selecciona un tablero"
-        options={boards.map(board => ({ value: board.name, label: board.name }))}
-        disabled={boards.length === 0}
-      />
-      
       {selectedBoard && (
         <KanbanBox 
           lists={lists}

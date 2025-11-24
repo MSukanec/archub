@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
-import { ActionBar } from '@/layouts';
 
 import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameterOption, TaskParameterWithOptions } from '@/hooks/use-task-parameters-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -269,15 +268,6 @@ const AdminTaskParameters = () => {
         </div>
       ) : (
         <>
-          <ActionBar
-            selectedValue={selectedParameterId}
-            onValueChange={setSelectedParameterId}
-            onEdit={handleEditParameter}
-            onDelete={handleDeleteParameter}
-            placeholder="Selecciona un parámetro para ver sus opciones"
-            options={parameterOptions}
-          />
-
           <div className="p-6">
             {selectedParameter ? (
               <ParameterValuesTable parameterId={selectedParameter.id} />
