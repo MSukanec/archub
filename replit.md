@@ -13,7 +13,8 @@ Preferred communication style: Simple, everyday language.
 - **Typography System**: Unified Inter Variable Font with Apple-style optical letter-spacing.
 - **Dynamic Color System**: Project-based color theming using `chroma-js` for intelligent color calculations, including dynamic accent colors and organic radial gradients.
 - **Modals**: Responsive Dialog component with standardized patterns using `FormModalLayout`, React Hook Form with Zod validation.
-- **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub, including an experimental two-level sidebar system.
+- **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub with a two-level sidebar system.
+- **Layout Architecture (Nov 24, 2024)**: Consolidated layout system into single `src/layout/desktop/` directory. Eliminated legacy `desktop-layout-classic/` and `desktop-layout-experimental/` folders. Single source of truth for all desktop layout components (Layout, PageLayout, LeftSidebar, RightSidebar, Footer, ActionBar, ProjectSelectorButton, OrganizationSelectorButton, ButtonSidebar, Sidebar, AppLayout, Header, SidebarIconButton, layoutWidth utilities).
 - **Content Theming System**: Unified CSS theming layer with dynamic background switching via `useContentBackground` hook.
 
 ### Technical Implementations
