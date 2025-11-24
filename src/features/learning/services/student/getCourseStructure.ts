@@ -18,6 +18,7 @@ export async function getCourseStructure(
   courseId: string
 ): Promise<CourseModuleWithLessons[]> {
   if (!courseId) {
+    console.log('[getCourseStructure] No courseId provided');
     return [];
   }
 
@@ -26,9 +27,11 @@ export async function getCourseStructure(
     const session = data?.session;
     
     if (!session) {
-      console.error('No active session');
+      console.error('[getCourseStructure] No active session');
       return [];
     }
+
+    console.log('[getCourseStructure] Fetching from /api/courses/' + courseId + '/structure');
 
     const response = await fetch(`/api/courses/${courseId}/structure`, {
       method: 'GET',
@@ -40,14 +43,17 @@ export async function getCourseStructure(
     });
 
     if (!response.ok) {
-      console.error(`Error fetching course structure: ${response.status}`);
+      console.error(`[getCourseStructure] Error: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('[getCourseStructure] Response:', errorText);
       return [];
     }
 
     const structure = await response.json();
+    console.log('[getCourseStructure] Success! Got', structure.length, 'modules');
     return structure;
   } catch (error) {
-    console.error('Error fetching course structure:', error);
+    console.error('[getCourseStructure] Exception:', error);
     return [];
   }
 }
