@@ -1,6 +1,26 @@
 import { supabase } from '@/lib/supabase';
 import type { SitelogGalleryFile } from '../types';
 
+async function getSignedUrl(bucket: string, path: string): Promise<string | null> {
+  if (!supabase) return null;
+  
+  try {
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .createSignedUrl(path, 3600);
+    
+    if (error) {
+      console.error('Error creating signed URL:', error);
+      return null;
+    }
+    
+    return data?.signedUrl || null;
+  } catch (error) {
+    console.error('Error in getSignedUrl:', error);
+    return null;
+  }
+}
+
 /**
  * Obtiene archivos multimedia (fotos y videos) de bitácoras.
  * 
@@ -84,23 +104,30 @@ export async function getSitelogGalleryFiles(
 
     if (!data) return [];
 
-    // Mapear a estructura SitelogGalleryFile con null checks robustos
-    const files: SitelogGalleryFile[] = data
-      .filter((item: any) => {
-        // Validar que existan los datos críticos
-        const mediaFile = Array.isArray(item.media_files) ? item.media_files[0] : item.media_files;
-        const siteLog = Array.isArray(item.site_logs) ? item.site_logs[0] : item.site_logs;
-        return mediaFile && siteLog;
-      })
-      .map((item: any) => {
+    // Filtrar datos válidos primero
+    const filteredData = data.filter((item: any) => {
+      const mediaFile = Array.isArray(item.media_files) ? item.media_files[0] : item.media_files;
+      const siteLog = Array.isArray(item.site_logs) ? item.site_logs[0] : item.site_logs;
+      return mediaFile && siteLog;
+    });
+
+    // Mapear a estructura SitelogGalleryFile con signed URLs para private-assets
+    const files: SitelogGalleryFile[] = await Promise.all(
+      filteredData.map(async (item: any) => {
         const mediaFile = Array.isArray(item.media_files) ? item.media_files[0] : item.media_files;
         const siteLog = Array.isArray(item.site_logs) ? item.site_logs[0] : item.site_logs;
         const project = Array.isArray(item.projects) ? item.projects[0] : item.projects;
         
+        let displayUrl = mediaFile.file_url;
+        
+        if (mediaFile.bucket === 'private-assets' && mediaFile.file_path) {
+          const signedUrl = await getSignedUrl(mediaFile.bucket, mediaFile.file_path);
+          displayUrl = signedUrl || mediaFile.file_url;
+        }
+        
         return {
-          // Datos del archivo (media_files)
           id: mediaFile.id,
-          file_url: mediaFile.file_url,
+          file_url: displayUrl,
           file_name: mediaFile.file_name,
           file_type: mediaFile.file_type,
           file_size: mediaFile.file_size,
@@ -108,7 +135,6 @@ export async function getSitelogGalleryFiles(
           bucket: mediaFile.bucket,
           is_deleted: mediaFile.is_deleted,
           
-          // Datos del link (media_links)
           link_id: item.id,
           project_id: item.project_id || '',
           project_name: project?.name || 'Sin proyecto',
@@ -122,7 +148,6 @@ export async function getSitelogGalleryFiles(
           created_at: item.created_at,
           created_by: item.created_by || 'Desconocido',
           
-          // Datos de la bitácora asociada (para mostrar contexto)
           site_log: {
             id: siteLog.id,
             date: siteLog.log_date,
@@ -130,7 +155,8 @@ export async function getSitelogGalleryFiles(
             type_name: siteLog.site_log_types?.name || 'Sin tipo'
           }
         };
-      });
+      })
+    );
 
     return files;
 
