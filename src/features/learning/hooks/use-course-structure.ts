@@ -17,5 +17,7 @@ export function useCourseStructure(courseId: string | undefined) {
     queryKey: LEARNING_QUERY_KEYS.courseStructure(courseId!),
     queryFn: () => getCourseStructure(courseId!),
     enabled: !!courseId,
+    staleTime: 0, // Always treat as stale to force fresh fetch
+    gcTime: 0, // Don't cache after unmount
   });
 }

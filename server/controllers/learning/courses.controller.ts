@@ -231,6 +231,13 @@ export async function handleGetCourseStructure(req: Request, res: Response) {
     }));
 
     console.log('[handleGetCourseStructure] Structure ready, returning:', structure.length, 'modules');
+    
+    // Disable HTTP caching to ensure fresh data
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    res.set('ETag', `"${Date.now()}"`);
+    
     res.status(200).json(structure);
   } catch (error: any) {
     console.error('Error in handleGetCourseStructure controller:', error);
