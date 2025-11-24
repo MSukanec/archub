@@ -19,6 +19,7 @@ export function useSitelogGallery(
   return useQuery<SitelogGalleryFile[]>({
     queryKey: ['sitelog-gallery', organizationId, projectId],
     queryFn: () => getSitelogGalleryFiles(organizationId, projectId),
-    enabled: !!organizationId
+    enabled: !!organizationId,
+    staleTime: 0
   });
 }

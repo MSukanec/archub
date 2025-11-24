@@ -113,8 +113,11 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['sitelog-files', variables.siteLogId, currentOrganizationId] });
+      queryClient.refetchQueries({ queryKey: ['sitelog-files', variables.siteLogId, currentOrganizationId] });
       queryClient.invalidateQueries({ queryKey: ['site-logs', selectedProjectId, currentOrganizationId] });
-      queryClient.invalidateQueries({ queryKey: ['galleryFiles'] });
+      queryClient.refetchQueries({ queryKey: ['site-logs', selectedProjectId, currentOrganizationId] });
+      queryClient.invalidateQueries({ queryKey: ['sitelog-gallery'] });
+      queryClient.refetchQueries({ queryKey: ['sitelog-gallery'] });
       setFilesToUpload([]);
       toast({
         title: "Archivos subidos",

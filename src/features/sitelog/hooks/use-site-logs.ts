@@ -8,6 +8,7 @@ export function useSiteLogs(
   return useQuery({
     queryKey: ['site-logs', projectId, organizationId],
     queryFn: () => getSiteLogs(projectId, organizationId!),
-    enabled: !!organizationId
+    enabled: !!organizationId,
+    staleTime: 0
   });
 }

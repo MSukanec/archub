@@ -99,8 +99,17 @@ export async function uploadFile(
         .select()
         .single();
 
-      if (!mediaLinkError) {
-        mediaLinkId = mediaLink?.id;
+      if (mediaLinkError) {
+        console.error('Error creating media link:', mediaLinkError, {
+          site_log_id: context.link_to.sitelog_id,
+          course_id: context.link_to.course_id,
+          contact_id: context.link_to.contact_id
+        });
+        throw new Error(`Error al vincular archivo: ${mediaLinkError.message}`);
+      }
+      
+      if (mediaLink) {
+        mediaLinkId = mediaLink.id;
       }
     }
 

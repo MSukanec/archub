@@ -6,7 +6,7 @@ export function useSiteLogFiles(siteLogId?: string, organizationId?: string) {
     queryKey: ['sitelog-files', siteLogId, organizationId],
     queryFn: () => getSiteLogFiles(siteLogId!, organizationId!),
     enabled: !!siteLogId && !!organizationId,
-    staleTime: 2 * 60 * 1000,
+    staleTime: 0,
     gcTime: 5 * 60 * 1000,
   });
 }
