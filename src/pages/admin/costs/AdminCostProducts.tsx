@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from '@/hooks/use-toast'
-import { useProducts, Product, useDeleteProduct } from '@/hooks/use-products'
+import { useProducts, Product, useDeleteProduct } from '@/features/materials'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import AdminProductRow from '@/features/materials/components/admin/AdminProductRow'
 

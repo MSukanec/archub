@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
-import { useProducts, Product, useDeleteProduct } from '@/hooks/use-products'
+import { useProducts, Product, useDeleteProduct } from '@/features/materials'
 import MaterialRow from '@/features/materials/components/MaterialRow'
 import { Package, Edit, Trash2, Copy, ExternalLink, Image } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -11,7 +11,7 @@ import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/media/ImageLightbox'
 import { Checkbox } from '@/components/ui/checkbox'
-import { useProviderProducts, useToggleProviderProduct } from '@/hooks/use-provider-products'
+import { useProviderProducts, useToggleProviderProduct } from '@/features/materials'
 
 export default function ProductList() {
   const [dataType, setDataType] = useState("todos")

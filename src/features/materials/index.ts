@@ -27,6 +27,8 @@ export * from './hooks/use-create-material';
 export * from './hooks/use-update-material';
 export * from './hooks/use-delete-material';
 export * from './hooks/use-construction-materials';
+export * from './hooks/use-products';
+export * from './hooks/use-provider-products';
 
 // ============ TYPES ============
 export * from './types';

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Package } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationCurrencies } from '@/hooks/use-currencies';
-import { useToggleProviderProduct, useProviderProducts } from '@/hooks/use-provider-products';
+import { useToggleProviderProduct, useProviderProducts } from '@/features/materials';
 import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";

@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { CurrencyAmountField } from '@/components/ui-custom/fields/CurrencyAmountField'
 
-import { useCreateProduct, useUpdateProduct, NewProductData } from '@/hooks/use-products'
+import { useCreateProduct, useUpdateProduct, NewProductData } from '@/features/materials'
 import { useBrands, useCreateBrand } from '@/hooks/use-brands'
 import { useMaterials } from '@/features/materials'
 import { useUnits } from '@/hooks/use-units'
