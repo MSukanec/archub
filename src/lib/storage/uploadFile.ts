@@ -14,6 +14,9 @@ export async function uploadFile(
     const config = getEntityConfig(context.entity);
     const compressionPreset = getCompressionPreset(context.entity);
     
+    // Guardar tamaño original para stats de compresión
+    const originalSize = file.size;
+    
     let processedFile = file;
     if (shouldCompress(file)) {
       processedFile = await compressImage(file, compressionPreset);
@@ -115,13 +118,21 @@ export async function uploadFile(
     }
 
     const urlWithCacheBust = `${fileUrl}?t=${Date.now()}`;
+    
+    // Calcular stats de compresión
+    const wasCompressed = originalSize !== processedFile.size;
 
     return {
       media_file_id: mediaFile.id,
       media_link_id: mediaLinkId,
       file_url: urlWithCacheBust,
       file_path: storagePath.path,
-      bucket: storagePath.bucket
+      bucket: storagePath.bucket,
+      compressionStats: {
+        originalSize,
+        compressedSize: processedFile.size,
+        wasCompressed
+      }
     };
   } catch (error) {
     throw error;

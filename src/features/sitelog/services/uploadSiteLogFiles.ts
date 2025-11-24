@@ -1,6 +1,13 @@
 import { uploadFile } from '@/lib/storage';
 import type { SiteLogFileInput } from '../types';
 
+export interface CompressionStats {
+  totalOriginalSize: number;
+  totalCompressedSize: number;
+  filesCompressed: number;
+  totalFiles: number;
+}
+
 /**
  * Sube archivos multimedia y los vincula a una bitácora usando la nueva arquitectura unificada de 3 buckets.
  * 
@@ -18,6 +25,7 @@ import type { SiteLogFileInput } from '../types';
  * @param projectId - ID del proyecto
  * @param organizationId - ID de la organización
  * @param createdByMemberId - ID del organization_member que sube los archivos
+ * @returns CompressionStats con información de los archivos comprimidos
  * @throws {Error} Si falla la subida o creación de registro
  */
 export async function uploadSiteLogFiles(
@@ -26,10 +34,17 @@ export async function uploadSiteLogFiles(
   projectId: string,
   organizationId: string,
   createdByMemberId: string
-): Promise<void> {
+): Promise<CompressionStats> {
   if (!files || files.length === 0) {
     throw new Error('No hay archivos para subir');
   }
+
+  const stats: CompressionStats = {
+    totalOriginalSize: 0,
+    totalCompressedSize: 0,
+    filesCompressed: 0,
+    totalFiles: files.length
+  };
 
   for (const { file, title, description } of files) {
     try {
@@ -42,7 +57,7 @@ export async function uploadSiteLogFiles(
         metadata.custom_file_name = title;
       }
 
-      await uploadFile(file, {
+      const result = await uploadFile(file, {
         entity: 'sitelog_attachment',
         organization_id: organizationId,
         project_id: projectId,
@@ -55,9 +70,20 @@ export async function uploadSiteLogFiles(
         description: description || undefined,
         metadata: Object.keys(metadata).length > 0 ? metadata : undefined
       });
+
+      // Acumular stats
+      if (result.compressionStats) {
+        stats.totalOriginalSize += result.compressionStats.originalSize;
+        stats.totalCompressedSize += result.compressionStats.compressedSize;
+        if (result.compressionStats.wasCompressed) {
+          stats.filesCompressed++;
+        }
+      }
     } catch (error) {
       console.error('Error uploading sitelog file:', error);
       throw error;
     }
   }
+
+  return stats;
 }

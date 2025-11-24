@@ -103,7 +103,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         throw new Error('No se encontró el miembro de la organización para el usuario actual');
       }
 
-      await uploadSiteLogFiles(
+      return await uploadSiteLogFiles(
         files,
         siteLogId,
         selectedProjectId,
@@ -111,7 +111,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         currentMember.id
       );
     },
-    onSuccess: (_data, variables) => {
+    onSuccess: (compressionStats, variables) => {
       queryClient.invalidateQueries({ queryKey: ['sitelog-files', variables.siteLogId, currentOrganizationId] });
       queryClient.refetchQueries({ queryKey: ['sitelog-files', variables.siteLogId, currentOrganizationId] });
       queryClient.invalidateQueries({ queryKey: ['site-logs', selectedProjectId, currentOrganizationId] });
@@ -119,9 +119,21 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       queryClient.invalidateQueries({ queryKey: ['sitelog-gallery'] });
       queryClient.refetchQueries({ queryKey: ['sitelog-gallery'] });
       setFilesToUpload([]);
+      
+      // Mostrar toast con stats de compresión si hay
+      let description = "Los archivos se han subido correctamente a la bitácora.";
+      if (compressionStats && compressionStats.filesCompressed > 0) {
+        const originalMB = (compressionStats.totalOriginalSize / 1024 / 1024).toFixed(2);
+        const compressedMB = (compressionStats.totalCompressedSize / 1024 / 1024).toFixed(2);
+        const reductionPercent = Math.round(
+          ((compressionStats.totalOriginalSize - compressionStats.totalCompressedSize) / compressionStats.totalOriginalSize) * 100
+        );
+        description = `${compressionStats.filesCompressed} imagen(es) optimizada(s): ${originalMB}MB → ${compressedMB}MB (${reductionPercent}% reducción)`;
+      }
+      
       toast({
         title: "Archivos subidos",
-        description: "Los archivos se han subido correctamente a la bitácora."
+        description
       });
     },
     onError: (error: Error) => {

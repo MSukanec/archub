@@ -50,6 +50,11 @@ export interface UploadResult {
   file_url: string | null;
   file_path: string;
   bucket: BucketName;
+  compressionStats?: {
+    originalSize: number;
+    compressedSize: number;
+    wasCompressed: boolean;
+  };
 }
 
 export interface StoragePath {

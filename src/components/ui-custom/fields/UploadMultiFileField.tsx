@@ -167,23 +167,8 @@ export function UploadMultiFileField({
       const processedFiles = [];
       
       for (const file of acceptedFiles) {
-        let fileToUpload = file;
-        
-        // Compress images only
-        if (shouldCompress(file)) {
-          const originalSize = file.size;
-          
-          try {
-            fileToUpload = await compressImage(file, imageCompressionPreset);
-            // Compresión hecha silenciosamente en drag. Toast de confirmación se muestra en submit si es necesario.
-          } catch (compressionError) {
-            console.error('Error compressing image:', compressionError);
-            // Continúa con el archivo original sin mostrar error en el drag
-          }
-        }
-        
-        // Validate file size AFTER compression
-        if (fileToUpload.size > maxSize) {
+        // Validate file size BEFORE processing
+        if (file.size > maxSize) {
           toast({
             title: "Archivo muy grande",
             description: `${file.name} excede el tamaño máximo de ${formatFileSize(maxSize)}`,
@@ -192,9 +177,11 @@ export function UploadMultiFileField({
           continue;
         }
         
+        // Don't compress yet - compression happens on submit/save
+        // Just accept the file as-is and store original file type
         processedFiles.push({
-          file: fileToUpload,
-          title: fileToUpload.name,
+          file: file,
+          title: file.name,
           description: '',
           category: 'attachment',
           uploadProgress: 0
