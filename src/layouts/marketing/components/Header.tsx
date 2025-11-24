@@ -1,13 +1,48 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
-import { Menu, X, Home, LogOut, User } from "lucide-react";
+import { Menu, X, Home, LogOut, User, BookOpen, Sparkles, HelpCircle, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuthStore } from "@/stores/authStore";
 import { createPortal } from "react-dom";
+import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   navigation?: Array<{ label: string; href: string }>;
+}
+
+// Componente de botón estilo dashboard mobile
+function MarketingMobileMenuButton({
+  icon: Icon,
+  label,
+  onClick,
+  href,
+  testId,
+}: {
+  icon: any;
+  label: string;
+  onClick?: () => void;
+  href?: string;
+  testId?: string;
+}) {
+  const content = (
+    <button
+      onClick={onClick}
+      data-testid={testId}
+      className={cn(
+        "w-full flex items-center gap-3 px-4 py-3 text-left transition-colors",
+        "border-b border-[var(--main-sidebar-border)]",
+        "hover:bg-[var(--main-sidebar-button-hover-bg)]"
+      )}
+    >
+      <Icon className="h-5 w-5 text-[var(--main-sidebar-fg)]" />
+      <span className="flex-1 text-base text-[var(--main-sidebar-fg)]">
+        {label}
+      </span>
+    </button>
+  );
+
+  return content;
 }
 
 export function Header({ navigation }: HeaderProps) {
@@ -37,9 +72,24 @@ export function Header({ navigation }: HeaderProps) {
     return name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
   };
 
-  const getUserDisplayName = (user: any) => {
-    if (!user) return "Usuario";
-    return user.user_metadata?.full_name || user.email || "Usuario";
+  const handleNavigate = (href: string) => {
+    setMobileMenuOpen(false);
+    // Si es un anchor, hacer scroll
+    if (href.startsWith('#')) {
+      const element = document.querySelector(href);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
+  const getIconForNavItem = (label: string) => {
+    const lower = label.toLowerCase();
+    if (lower.includes('curso')) return BookOpen;
+    if (lower.includes('característica')) return Sparkles;
+    if (lower.includes('ayuda') || lower.includes('faq')) return HelpCircle;
+    if (lower.includes('contacto')) return Mail;
+    return BookOpen;
   };
 
   const renderAuthActions = () => {
@@ -95,132 +145,126 @@ export function Header({ navigation }: HeaderProps) {
     if (!mobileMenuOpen) return null;
 
     return createPortal(
-      <div className="fixed inset-0 z-50 bg-background">
-        {/* Header del menú móvil */}
-        <div className="h-16 border-b border-border flex items-center justify-between px-6">
-          <Link href="/" className="flex items-center space-x-3">
-            <img 
-              src="/Seencel512_b.png" 
-              alt="Seencel" 
-              className="h-8 w-8 object-contain"
-            />
-            <span className="font-bold text-xl">Seencel</span>
-          </Link>
-          <button
-            onClick={() => setMobileMenuOpen(false)}
-            className="p-2 hover:bg-muted rounded-md transition-colors"
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
-
-        {/* Contenido del menú */}
-        <div className="flex flex-col h-[calc(100%-4rem)] overflow-y-auto">
-          {/* User info section - solo si está logueado */}
-          {user && (
-            <div className="p-6 border-b border-border">
-              <div className="flex items-center gap-3 mb-4">
-                <Avatar className="h-12 w-12 border-2 border-border">
-                  <AvatarImage src={user.user_metadata?.avatar_url} />
-                  <AvatarFallback className="text-sm bg-primary/10">
-                    {getUserInitials(user)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm truncate">{getUserDisplayName(user)}</p>
-                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-                </div>
-              </div>
-
-              {/* Dashboard Button */}
-              <Link href="/home">
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors"
-                >
-                  <Home className="h-5 w-5 text-primary" />
-                  <span className="font-medium text-sm">Dashboard</span>
-                </button>
-              </Link>
-            </div>
-          )}
-
-          {/* Auth actions para usuarios no logueados */}
-          {!loading && !user && (
-            <div className="p-6 border-b border-border space-y-2">
-              <Link href="/login">
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg border border-border hover:bg-muted transition-colors"
-                >
-                  <User className="h-5 w-5" />
-                  <span className="font-medium text-sm">Iniciar Sesión</span>
-                </button>
-              </Link>
-              <Link href="/register">
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                >
-                  <span className="font-medium text-sm">Comenzar Gratis</span>
-                </button>
-              </Link>
-            </div>
-          )}
-
-          {/* Navigation links */}
-          {navigation && navigation.length > 0 && (
-            <nav className="flex-1 p-6 space-y-1">
-              {navigation.map((item) => {
-                const isSamePageAnchor = item.href.startsWith('#') && !item.href.includes('/');
-                
-                if (isSamePageAnchor) {
-                  return (
-                    <a
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                      data-testid={`link-mobile-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                    >
-                      {item.label}
-                    </a>
-                  );
-                }
-                
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <a className="block px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                      data-testid={`link-mobile-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                    >
-                      {item.label}
-                    </a>
-                  </Link>
-                );
-              })}
-            </nav>
-          )}
-
-          {/* Logout button - solo si está logueado */}
-          {user && (
-            <div className="p-6 border-t border-border">
+      <div 
+        className="fixed inset-0" 
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9999 }} 
+        onClick={() => setMobileMenuOpen(false)}
+      >
+        <div 
+          className="fixed inset-0 flex flex-row overflow-hidden"
+          style={{ backgroundColor: 'var(--main-sidebar-bg)' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Header del menú */}
+            <div className="flex items-center h-14 px-4 border-b border-[var(--main-sidebar-border)] bg-[var(--main-sidebar-bg)]">
+              <h1 className="text-lg font-semibold flex-1 !text-white">
+                Menú
+              </h1>
               <button
-                onClick={() => {
-                  logout();
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                data-testid="button-logout-mobile"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 -mr-2 hover:bg-[var(--main-sidebar-button-hover-bg)] rounded-lg transition-colors"
               >
-                <LogOut className="h-5 w-5" />
-                <span>Cerrar sesión</span>
+                <X className="h-5 w-5 text-[var(--main-sidebar-fg)]" />
               </button>
             </div>
-          )}
+
+            {/* Contenido del menú */}
+            <div className="flex-1 overflow-y-auto">
+              <nav>
+                {/* Botones de autenticación */}
+                {user ? (
+                  <>
+                    {/* Dashboard Button */}
+                    <Link href="/home">
+                      <a onClick={() => setMobileMenuOpen(false)}>
+                        <MarketingMobileMenuButton
+                          icon={Home}
+                          label="Dashboard"
+                          testId="button-mobile-dashboard"
+                        />
+                      </a>
+                    </Link>
+
+                    {/* Logout Button */}
+                    <MarketingMobileMenuButton
+                      icon={LogOut}
+                      label="Cerrar sesión"
+                      onClick={() => {
+                        logout();
+                        setMobileMenuOpen(false);
+                      }}
+                      testId="button-mobile-logout"
+                    />
+                  </>
+                ) : (
+                  <>
+                    {/* Login Button */}
+                    <Link href="/login">
+                      <a onClick={() => setMobileMenuOpen(false)}>
+                        <MarketingMobileMenuButton
+                          icon={User}
+                          label="Iniciar Sesión"
+                          testId="button-mobile-login"
+                        />
+                      </a>
+                    </Link>
+
+                    {/* Register Button */}
+                    <Link href="/register">
+                      <a onClick={() => setMobileMenuOpen(false)}>
+                        <MarketingMobileMenuButton
+                          icon={User}
+                          label="Comenzar Gratis"
+                          testId="button-mobile-register"
+                        />
+                      </a>
+                    </Link>
+                  </>
+                )}
+
+                {/* Espacio vacío del tamaño de un botón */}
+                <div className="h-12" />
+
+                {/* Links de navegación */}
+                {navigation && navigation.length > 0 && navigation.map((item) => {
+                  const isSamePageAnchor = item.href.startsWith('#') && !item.href.includes('/');
+                  const ItemIcon = getIconForNavItem(item.label);
+                  
+                  if (isSamePageAnchor) {
+                    return (
+                      <a
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => handleNavigate(item.href)}
+                      >
+                        <MarketingMobileMenuButton
+                          icon={ItemIcon}
+                          label={item.label}
+                          testId={`link-mobile-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                        />
+                      </a>
+                    );
+                  }
+                  
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                    >
+                      <a onClick={() => setMobileMenuOpen(false)}>
+                        <MarketingMobileMenuButton
+                          icon={ItemIcon}
+                          label={item.label}
+                          testId={`link-mobile-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                        />
+                      </a>
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+          </div>
         </div>
       </div>,
       document.body
