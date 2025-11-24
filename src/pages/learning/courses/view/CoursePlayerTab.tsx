@@ -61,6 +61,9 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
   // Get course structure (modules with lessons) using the learning feature hook
   const { data: courseStructure = [], isLoading: structureLoading } = useCourseStructure(courseId);
   
+  // DEBUG
+  console.log('[CoursePlayerTab] courseStructure:', courseStructure);
+  
   // Extract modules and lessons from the structure for compatibility with existing code
   const modules = useMemo(() => {
     return courseStructure.map(({ lessons, ...module }) => module);
@@ -74,6 +77,9 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
       }))
     );
   }, [courseStructure]);
+  
+  // DEBUG
+  console.log('[CoursePlayerTab] modules:', modules.length, 'lessons:', lessons.length);
   
   const modulesLoading = structureLoading;
   const lessonsLoading = structureLoading;
@@ -181,7 +187,9 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
 
   // Activar el sidebar cuando hay datos
   useEffect(() => {
+    console.log('[CoursePlayerTab] useEffect triggered with:', { modules: modules.length, lessons: lessons.length });
     if (modules.length > 0 || lessons.length > 0) {
+      console.log('[CoursePlayerTab] Calling setData with:', { modules: modules.length, lessons: lessons.length });
       setVisible(true);
       setData(modules, lessons);
     }
