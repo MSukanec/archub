@@ -290,15 +290,15 @@ export default function OrganizationDashboard() {
 
         {/* Projects Section - Estilo minimalista */}
         <StatCard href="/projects">
-          <StatCardTitle>Tus Proyectos</StatCardTitle>
+          <StatCardTitle>Proyectos Activos</StatCardTitle>
           <StatCardContent>
             {isLoading || projectsLoading ? (
               <div className="flex items-center justify-center h-64">
                 <LoadingSpinner size="lg" />
               </div>
-            ) : sortedProjects.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {sortedProjects.map((project) => (
+            ) : sortedProjects.filter(p => p.status === 'active').length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {sortedProjects.filter(p => p.status === 'active').map((project) => (
                   <ProjectItemCard
                     key={project.id}
                     project={project}
@@ -315,8 +315,8 @@ export default function OrganizationDashboard() {
             ) : (
               <EmptyState
                 icon={<Folder className="w-12 h-12" />}
-                title="No hay proyectos creados"
-                description="Ve a la página de gestión de proyectos para crear tu primer proyecto"
+                title="No hay proyectos en proceso"
+                description="Ve a la página de gestión de proyectos para cambiar el estado de un proyecto"
                 action={
                   <Button
                     variant="default"
