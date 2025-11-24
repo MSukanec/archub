@@ -47,7 +47,7 @@ export default function LearningDashboard() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps} wide>
+      <Layout hideHeader wide>
         <div className="space-y-6">
           <Skeleton className="h-24 rounded-xl" />
           <Skeleton className="h-[400px] rounded-xl" />
@@ -61,7 +61,7 @@ export default function LearningDashboard() {
   }
 
   return (
-    <Layout headerProps={headerProps} wide>
+    <Layout hideHeader wide>
       <div className="space-y-6">
         {/* Welcome Section */}
         <div className="space-y-2">

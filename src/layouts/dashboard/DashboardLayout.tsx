@@ -39,6 +39,7 @@ interface Tab {
 interface LayoutProps {
   children: React.ReactNode;
   wide?: WidthProp;
+  hideHeader?: boolean;
   headerProps?: {
     icon?: React.ComponentType<any>;
     title?: string;
@@ -92,7 +93,7 @@ interface LayoutProps {
   };
 }
 
-export function Layout({ children, wide = false, headerProps }: LayoutProps) {
+export function Layout({ children, wide = false, hideHeader = false, headerProps }: LayoutProps) {
   const { isDark, setTheme } = useThemeStore();
   const { data } = useCurrentUser();
   const userMode = useUserMode();
@@ -161,6 +162,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
     <LayoutContent 
       children={children}
       wide={wide}
+      hideHeader={hideHeader}
       headerProps={headerProps}
       isMobile={isMobile}
       isDark={isDark}
@@ -177,6 +179,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 function LayoutContent({ 
   children, 
   wide, 
+  hideHeader,
   headerProps, 
   isMobile, 
   isDark, 
@@ -255,7 +258,7 @@ function LayoutContent({
                     background: contentBackground
                   }}
                 >
-                {headerProps ? (
+                {headerProps && !hideHeader ? (
                   <PageLayout
                     icon={headerProps.icon}
                     title={headerProps.title}
