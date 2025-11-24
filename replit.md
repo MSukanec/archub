@@ -15,16 +15,20 @@ Preferred communication style: Simple, everyday language.
 - **Modals**: Responsive Dialog component with standardized patterns using `FormModalLayout`, React Hook Form with Zod validation.
 - **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub with a two-level sidebar system.
 - **Layout Architecture (Nov 24, 2024)**: 
-  - **Migration to Experience-Based Layouts**: Successfully migrated from device-based structure (`src/layout/desktop/` and `src/layout/mobile/`) to experience-based organization (`src/layouts/`). This aligns with Feature-Sliced Design principles and product domains. Migration completed with 85+ files updated and zero compatibility shims.
-  - **Dashboard Layout**: Implemented in `src/layouts/dashboard/` with organized subfolders:
+  - **Migration to Experience-Based Layouts**: Successfully migrated from device-based structure (`src/layout/desktop/`, `src/layout/mobile/`, `src/layout/public/`) to experience-based organization (`src/layouts/`). This aligns with Feature-Sliced Design principles and product domains. Migration completed with 95+ files updated and zero compatibility shims.
+  - **Dashboard Layout**: Implemented in `src/layouts/dashboard/` for authenticated app experiences:
     - `components/Sidebar/`: LeftSidebar, RightSidebar, ButtonSidebar, SidebarIconButton
     - `components/Topbar/`: Header, Footer, ActionBar, ProjectSelectorButton, OrganizationSelectorButton
     - `components/MobileMenu/`: MobileMenu, MobileMenuButton, HeaderMobile, useMobileMenuStore
     - `components/MobileActionBar/`: ActionBarMobile, ActionBarMobileContext, SwipeableCard, SwipeContainer
     - Core files: DashboardLayout.tsx (main wrapper), PageLayout.tsx (page-level layout), layoutWidth.ts (utilities)
-  - **Barrel Exports**: Centralized `src/layouts/index.ts` for clean imports (`import { DashboardLayout, PageLayout, ActionBar, MobileMenu, ActionBarMobile } from "@/layouts"`)
-  - **Migration Status**: ✅ Complete. Legacy `src/layout/desktop/` and `src/layout/mobile/` folders removed. All 85+ consumer files successfully migrated to import from `@/layouts`. Application running without errors.
-  - **Future Roadmap**: Additional layout types planned: `root/` (global providers), `auth/` (login/register), `marketing/` (landing pages), `workspace/` (viewer mode with minimal UI)
+  - **Marketing Layout**: Implemented in `src/layouts/marketing/` for public-facing pages (landing, blog, course catalog):
+    - `components/Header.tsx`: Navbar with transparent and normal variants, auth state handling
+    - `components/Footer.tsx`: Comprehensive footer with SEO-friendly links
+    - MarketingLayout.tsx: Main layout with SEO meta tags, scroll handling, hero slots, sticky content support
+  - **Barrel Exports**: Centralized `src/layouts/index.ts` for clean imports (`import { DashboardLayout, MarketingLayout, ActionBar, MobileMenu } from "@/layouts"`)
+  - **Migration Status**: ✅ Complete. Legacy `src/layout/desktop/`, `src/layout/mobile/`, `src/layout/public/`, and `src/layout/course-landing/` folders removed. All 95+ consumer files successfully migrated to import from `@/layouts`. Application running without errors.
+  - **Future Roadmap**: Additional layout types planned: `root/` (global providers), `auth/` (login/register), `workspace/` (viewer mode with minimal UI)
 - **Content Theming System**: Unified CSS theming layer with dynamic background switching via `useContentBackground` hook.
 
 ### Technical Implementations
