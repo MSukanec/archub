@@ -30,7 +30,7 @@ import Projects from "@/pages/projects/Projects";
 import FinancesCapitalMovements from "@/pages/professional/capital/Capital";
 import OrganizationMovements from "@/pages/professional/movements/Movements";
 import { Clients } from "@/pages/clients/Clients";
-import Project from "@/pages/professional/project/dashboard/Project";
+import Project from "@/pages/project/Project";
 import ProjectData from "@/pages/professional/project-data/ProjectData";
 
 

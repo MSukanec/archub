@@ -21,7 +21,7 @@ Preferred communication style: Simple, everyday language.
     - `components/Topbar/`: Header, Footer, ActionBar, ProjectSelectorButton, OrganizationSelectorButton
     - `components/MobileMenu/`: MobileMenu, MobileMenuButton, HeaderMobile, useMobileMenuStore
     - `components/MobileActionBar/`: ActionBarMobile, ActionBarMobileContext, SwipeableCard, SwipeContainer
-    - Core files: DashboardLayout.tsx (main wrapper), PageLayout.tsx (page-level layout), layoutWidth.ts (utilities)
+    - Core files: DashboardLayout.tsx (main wrapper), PageLayout.tsx (page-level layout), HeroLayout.tsx (pages with full-width hero sections), layoutWidth.ts (utilities)
   - **Marketing Layout**: Implemented in `src/layouts/marketing/` for public-facing pages (landing, blog, course catalog):
     - `components/Header.tsx`: Unified transparent navbar with `bg-black/30` backdrop-blur, white text/buttons for optimal contrast over any background (light or dark)
     - `components/Footer.tsx`: Comprehensive footer with SEO-friendly links
@@ -61,6 +61,18 @@ Preferred communication style: Simple, everyday language.
 - **Project Activity Tracking (Nov 24, 2024)**: `last_active_at` timestamp updated automatically when projects are selected via backend API endpoint `PUT /api/projects/:id/last-active`. Implemented fire-and-forget pattern to avoid blocking UX. Updates triggered from 4 places: ProjectContextInitializer (auto-load), ProjectActivesTab, ProjectListTab, and OrganizationDashboard.
 - **Auto-Active New Projects (Nov 24, 2024)**: When creating new projects, system automatically sets them as `last_project_id` in `user_organization_preferences`, making them immediately active without manual selection. Updates context and `last_active_at` timestamp during project creation.
 - **Hooks Consolidation (Nov 2024)**: Systematic consolidation of React hooks according to Feature-Sliced Design principles. Status: 43% consolidated (21 global hooks + 15 migrated to features), 57% documented for future migration. Eliminated 2 duplicate hooks, migrated hooks to existing features (contacts, projects, materials, personnel, general-costs). Remaining ~50 hooks documented for future feature creation (finances, tasks, design, construction, budgets, kanban, partners). All feature-specific hooks converted to re-exports from their respective features, maintaining backward compatibility. See `/tmp/resumen-consolidacion-hooks.md` for complete documentation.
+- **HeroLayout Pattern (Nov 24, 2024)**: Created specialized `HeroLayout` component for pages featuring full-width hero sections (Type B pages). Architecture:
+  - **Desktop**: Hero (fullwidth, no padding) → Content (with sidebar padding)
+  - **Mobile**: Hero (200px) → Content (with normal padding)
+  - **Features**: `hideAIChat` prop to disable FloatingAIChat on specific pages (e.g., Learning Dashboard, Project Dashboard)
+  - **Pages using HeroLayout**: Learning Dashboard (`src/pages/learning/dashboard/LearningDashboard.tsx`), Project Dashboard (`src/pages/project/Project.tsx`)
+- **Project Dashboard Migration (Nov 24, 2024)**: 
+  - Moved from `src/pages/professional/project/dashboard/` to `src/pages/project/Project.tsx`
+  - Consolidated ProjectDashboard.tsx + Project.tsx into single Project.tsx component
+  - Replaced DashboardLayout with HeroLayout for full-width project hero section
+  - Hero includes: project image (dynamic background), project name, status badge (En Proceso), current time, and date - all styled responsively for mobile/desktop
+  - KPI cards remain below hero section unchanged
+  - Removed old dashboard directory structure
 
 ## External Dependencies
 - **Supabase**: Authentication.
