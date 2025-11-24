@@ -3,8 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Award, Eye, ShoppingCart } from 'lucide-react';
-import type { Course } from '@shared/schema';
+import { BookOpen, Award, Eye } from 'lucide-react';
 
 interface UnifiedCourseCardProps {
   course: {
@@ -25,9 +24,6 @@ interface UnifiedCourseCardProps {
     percentage: number;
   };
   onViewCourse?: () => void;
-  onBuyCourse?: () => void;
-  showCartIcon?: boolean;
-  ctaDisabled?: boolean;
 }
 
 export function UnifiedCourseCard({
@@ -35,67 +31,94 @@ export function UnifiedCourseCard({
   isEnrolled = false,
   progress,
   onViewCourse,
-  onBuyCourse,
-  showCartIcon = false,
-  ctaDisabled = false,
 }: UnifiedCourseCardProps) {
-  const hasProgress = progress && progress.total > 0;
+  const hasProgress = progress && progress.percentage > 0;
   
-  // If user is not enrolled, use public card style
-  if (!isEnrolled) {
-    return (
-      <Link href={`/cursos/${course.slug}`}>
-        <Card 
-          className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer group overflow-hidden"
-          data-testid={`card-course-${course.id}`}
-        >
-          {/* Cover Image */}
-          <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
-            {course.cover_url ? (
-              <img
-                src={course.cover_url}
-                alt={course.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <BookOpen className="w-16 h-16 text-primary/30" />
-              </div>
-            )}
-            {/* Badge Overlay */}
-            {course.badge_text && (
-              <div className="absolute top-3 left-3">
-                <Badge variant="secondary" className="px-3 py-1 shadow-md">
-                  <Award className="w-3 h-3 mr-1.5 inline" />
-                  {course.badge_text}
-                </Badge>
-              </div>
-            )}
+  // Unified card design - always the same structure
+  const cardContent = (
+    <Card 
+      className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer group overflow-hidden"
+      data-testid={`card-course-${course.id}`}
+    >
+      {/* Cover Image */}
+      <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
+        {course.cover_url ? (
+          <img
+            src={course.cover_url}
+            alt={course.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <BookOpen className="w-16 h-16 text-primary/30" />
           </div>
+        )}
+        {/* Badge Overlay */}
+        {course.badge_text && (
+          <div className="absolute top-3 left-3">
+            <Badge variant="secondary" className="px-3 py-1 shadow-md">
+              <Award className="w-3 h-3 mr-1.5 inline" />
+              {course.badge_text}
+            </Badge>
+          </div>
+        )}
+      </div>
 
-          {/* Course Info */}
-          <CardHeader className="pb-3">
-            <h3 className="text-xl font-bold line-clamp-2 group-hover:text-primary transition-colors">
-              {course.title}
-            </h3>
-          </CardHeader>
+      {/* Course Info */}
+      <CardHeader className="pb-3">
+        <h3 className="text-xl font-bold line-clamp-2 group-hover:text-primary transition-colors">
+          {course.title}
+        </h3>
+      </CardHeader>
 
-          <CardContent className="pb-3">
-            {course.short_description && (
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {course.short_description}
-              </p>
+      <CardContent className="pb-3">
+        {course.short_description && (
+          <p className="text-sm text-muted-foreground line-clamp-2">
+            {course.short_description}
+          </p>
+        )}
+        {course.instructor_name && (
+          <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+            <span className="font-medium">Instructor:</span>
+            {course.instructor_name}
+            {course.instructor_title && ` - ${course.instructor_title}`}
+          </p>
+        )}
+      </CardContent>
+
+      {/* Footer - Different content based on enrollment */}
+      <CardFooter className="pt-3 border-t flex-col gap-3">
+        {isEnrolled ? (
+          <>
+            {/* Progress Section */}
+            {hasProgress && (
+              <div className="w-full space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Progreso</span>
+                  <span className="font-semibold">{progress?.percentage}%</span>
+                </div>
+                <Progress value={progress?.percentage || 0} className="h-2" />
+              </div>
             )}
-            {course.instructor_name && (
-              <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                <span className="font-medium">Instructor:</span>
-                {course.instructor_name}
-                {course.instructor_title && ` - ${course.instructor_title}`}
-              </p>
-            )}
-          </CardContent>
-
-          <CardFooter className="pt-3 border-t flex justify-between items-center">
+            
+            {/* Action Button */}
+            <Button 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onViewCourse?.();
+              }}
+              className="w-full gap-2"
+              size="sm"
+              data-testid={`button-view-course-${course.id}`}
+            >
+              <Eye className="w-4 h-4" />
+              {hasProgress ? 'Continuar Curso' : 'Ver Curso'}
+            </Button>
+          </>
+        ) : (
+          /* Not enrolled - show price */
+          <div className="w-full flex justify-between items-center">
             {course.price ? (
               <div className="flex flex-col">
                 <span className="text-2xl font-bold">${course.price}</span>
@@ -107,73 +130,17 @@ export function UnifiedCourseCard({
             <span className="text-sm text-primary font-medium group-hover:underline">
               Ver más →
             </span>
-          </CardFooter>
-        </Card>
-      </Link>
-    );
-  }
-
-  // If user is enrolled, use dashboard card style
-  return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 flex flex-col h-full"
-      data-testid={`card-course-${course.id}`}>
-      
-      {/* Cover Image */}
-      <div 
-        className="h-40 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center cursor-pointer relative overflow-hidden"
-        onClick={onViewCourse}
-      >
-        {course.cover_url ? (
-          <img 
-            src={course.cover_url} 
-            alt={course.title}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-          />
-        ) : (
-          <BookOpen className="h-16 w-16 text-primary/20" />
-        )}
-      </div>
-
-      <div className="p-4 flex-1 flex flex-col">
-        <h3 
-          className="font-semibold text-base mb-3 line-clamp-2 cursor-pointer hover:text-primary transition-colors"
-          onClick={onViewCourse}
-          data-testid={`course-title-${course.id}`}
-        >
-          {course.title}
-        </h3>
-
-        {/* Progress Section */}
-        {hasProgress && (
-          <div className="space-y-2 mb-4 mt-auto">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Progreso</span>
-              <span className="font-semibold">{progress.percentage}%</span>
-            </div>
-            <Progress value={progress.percentage} className="h-2" />
           </div>
         )}
-
-        {!hasProgress && (
-          <div className="mb-4 mt-auto text-xs text-muted-foreground">
-            Inscrito
-          </div>
-        )}
-
-        {/* Action Button */}
-        <div className="w-full">
-          <Button 
-            onClick={onViewCourse}
-            className="w-full gap-2"
-            size="sm"
-            data-testid={`button-view-course-${course.id}`}
-            disabled={ctaDisabled}
-          >
-            <Eye className="w-4 h-4" />
-            {progress?.completed ? 'Continuar Curso' : 'Ver Curso'}
-          </Button>
-        </div>
-      </div>
+      </CardFooter>
     </Card>
   );
+
+  // If not enrolled, wrap in Link
+  if (!isEnrolled) {
+    return <Link href={`/cursos/${course.slug}`}>{cardContent}</Link>;
+  }
+
+  // If enrolled, return card with onClick handler
+  return <div onClick={onViewCourse}>{cardContent}</div>;
 }
