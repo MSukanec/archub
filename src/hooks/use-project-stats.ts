@@ -22,7 +22,7 @@ export function useProjectStats(projectId: string | null) {
       // Get project data (including image) separately
       const { data: projectData } = await supabase
         .from('project_data')
-        .select('project_image_url')
+        .select('image_bucket, image_path')
         .eq('project_id', projectId)
         .single()
 

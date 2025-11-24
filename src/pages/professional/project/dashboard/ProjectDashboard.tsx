@@ -11,6 +11,8 @@ import { useProjectContext } from '@/stores/projectContext';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useProjects } from '@/features/projects';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useQuery } from '@tanstack/react-query';
+import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage';
 
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +28,15 @@ export default function ProjectDashboard() {
   
   // Get current project
   const currentProject = projects.find(p => p.id === selectedProjectId);
+
+  // Generate project image URL on-demand with React Query
+  const { data: projectImageUrl } = useQuery({
+    queryKey: ['project-image', currentProject?.id, currentProject?.project_data?.image_bucket, currentProject?.project_data?.image_path],
+    queryFn: () => getProjectImageUrlFromData(currentProject!.project_data!),
+    enabled: !!currentProject?.project_data?.image_bucket && !!currentProject?.project_data?.image_path,
+    refetchInterval: 30 * 60 * 1000,  // Refresh every 30 min
+    staleTime: 25 * 60 * 1000,         // Stale after 25 min
+  });
 
   // DEBUG: Log to diagnose the issue
   console.log('=== ProjectDashboard DEBUG ===');
@@ -83,9 +94,9 @@ export default function ProjectDashboard() {
         <div className="flex items-center gap-4">
           {/* Project Avatar */}
           <div className="flex-shrink-0">
-            {currentProject.project_data?.project_image_url ? (
+            {projectImageUrl ? (
               <img 
-                src={currentProject.project_data.project_image_url} 
+                src={projectImageUrl} 
                 alt={currentProject.name}
                 className="w-16 h-16 rounded-full object-cover border-2 accent-transition accent-glow"
                 style={{ borderColor: projectColor }}

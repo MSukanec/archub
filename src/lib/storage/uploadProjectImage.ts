@@ -38,6 +38,7 @@ export async function updateProjectImageMetadata(
 
 /**
  * Get project image URL by loading bucket+path from DB and generating signed URL on-demand.
+ * Explicitly passes frontend supabase client to prevent supabaseAdmin from being bundled.
  */
 export async function getProjectImageUrl(projectId: string): Promise<string | null> {
   const { data, error } = await supabase
@@ -50,11 +51,13 @@ export async function getProjectImageUrl(projectId: string): Promise<string | nu
     return null;
   }
   
-  return await getFileUrl(data.image_bucket as BucketName, data.image_path);
+  // Pass supabase client explicitly to prevent supabaseAdmin from being bundled in frontend
+  return await getFileUrl(data.image_bucket as BucketName, data.image_path, 3600, supabase);
 }
 
 /**
  * Get project image URL from existing project data (avoids DB query).
+ * Explicitly passes frontend supabase client to prevent supabaseAdmin from being bundled.
  */
 export async function getProjectImageUrlFromData(
   project: { image_bucket?: string | null; image_path?: string | null }
@@ -63,7 +66,8 @@ export async function getProjectImageUrlFromData(
     return null;
   }
   
-  return await getFileUrl(project.image_bucket as BucketName, project.image_path);
+  // Pass supabase client explicitly to prevent supabaseAdmin from being bundled in frontend
+  return await getFileUrl(project.image_bucket as BucketName, project.image_path, 3600, supabase);
 }
 
 export async function uploadProjectImage(

@@ -1,4 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { getFileUrl } from '@/lib/storage/getFileUrl';
+import type { BucketName } from '@/lib/storage/types';
 
 export interface CommunityHandlerContext {
   supabase: SupabaseClient;
@@ -38,7 +40,7 @@ export async function getProjects(
         organization_id,
         color,
         organizations!inner(id, name, logo_url),
-        project_data!left(lat, lng, address, city, state, country, project_image_url)
+        project_data!left(lat, lng, address, city, state, country, image_bucket, image_path)
       `)
       .eq('is_active', true)
       .eq('is_deleted', false)
@@ -48,34 +50,45 @@ export async function getProjects(
 
     if (error) throw error;
 
-    const projects = (data || [])
-      .map((p: any) => {
-        const pd = Array.isArray(p.project_data) ? p.project_data[0] : p.project_data;
-        
-        const lat = pd?.lat ?? null;
-        const lng = pd?.lng ?? null;
+    const projects = await Promise.all(
+      (data || [])
+        .map(async (p: any) => {
+          const pd = Array.isArray(p.project_data) ? p.project_data[0] : p.project_data;
+          
+          const lat = pd?.lat ?? null;
+          const lng = pd?.lng ?? null;
 
-        if (lat === null || lng === null) {
-          return null;
-        }
+          if (lat === null || lng === null) {
+            return null;
+          }
 
-        return {
-          id: p.id,
-          name: p.name,
-          organizationId: p.organization_id,
-          organizationName: p.organizations.name,
-          organizationLogo: p.organizations.logo_url,
-          color: p.color,
-          lat: Number(lat),
-          lng: Number(lng),
-          address: pd?.address ?? null,
-          city: pd?.city ?? null,
-          state: pd?.state ?? null,
-          country: pd?.country ?? null,
-          imageUrl: pd?.project_image_url ?? null
-        } as CommunityProject;
-      })
-      .filter((p): p is CommunityProject => p !== null);
+          // Generate image URL on-demand from bucket+path
+          let imageUrl: string | null = null;
+          if (pd?.image_bucket && pd?.image_path) {
+            try {
+              imageUrl = await getFileUrl(pd.image_bucket as BucketName, pd.image_path);
+            } catch (error) {
+              console.error('Error generating image URL for project', p.id, error);
+            }
+          }
+
+          return {
+            id: p.id,
+            name: p.name,
+            organizationId: p.organization_id,
+            organizationName: p.organizations.name,
+            organizationLogo: p.organizations.logo_url,
+            color: p.color,
+            lat: Number(lat),
+            lng: Number(lng),
+            address: pd?.address ?? null,
+            city: pd?.city ?? null,
+            state: pd?.state ?? null,
+            country: pd?.country ?? null,
+            imageUrl
+          } as CommunityProject;
+        })
+    ).then(results => results.filter((p): p is CommunityProject => p !== null));
 
     return {
       success: true,

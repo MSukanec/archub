@@ -2,7 +2,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2 } from 'lucide-react';
 import chroma from 'chroma-js';
-import { getProjectImageUrl, getProjectImageSrcSet, getProjectImagePlaceholder } from '@/lib/storage/projectImages';
+import { useQuery } from '@tanstack/react-query';
+import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage';
 
 interface Project {
   id: string;
@@ -22,7 +23,8 @@ interface Project {
     city?: string;
     state?: string;
     country?: string;
-    project_image_url?: string | null;
+    image_bucket?: string | null;
+    image_path?: string | null;
     project_type_id?: string;
     project_modality_id?: string;
     project_type?: {
@@ -68,8 +70,16 @@ export default function ProjectItemCard({
   isActive = false,
   projectColor = 'var(--accent)'
 }: ProjectItemCardProps) {
-  const imageUrl = project.project_data?.project_image_url;
   const statusText = getStatusText(project.status);
+
+  // Generate image URL on-demand from bucket+path with React Query
+  const { data: imageUrl } = useQuery({
+    queryKey: ['project-image', project.id, project.project_data?.image_bucket, project.project_data?.image_path],
+    queryFn: () => getProjectImageUrlFromData(project.project_data!),
+    enabled: !!project.project_data?.image_bucket && !!project.project_data?.image_path,
+    refetchInterval: 30 * 60 * 1000,  // Refresh every 30 min
+    staleTime: 25 * 60 * 1000,         // Stale after 25 min
+  });
   
   // Obtener el color real del proyecto desde el objeto project
   const actualProjectColor = (project as any).use_custom_color && (project as any).custom_color_hex 

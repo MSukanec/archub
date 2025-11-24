@@ -29,7 +29,8 @@ export function transformProjectData(rawProject: any): Project {
       projectData = {
         project_type_id: pd.project_type_id,
         project_modality_id: pd.project_modality_id,
-        project_image_url: pd.project_image_url,
+        image_bucket: pd.image_bucket,
+        image_path: pd.image_path,
         project_type: pd.project_type,
         project_modality: pd.modality
       };
@@ -37,7 +38,8 @@ export function transformProjectData(rawProject: any): Project {
   } else if (
     rawProject.project_type_id || 
     rawProject.project_modality_id || 
-    rawProject.project_image_url ||
+    rawProject.image_bucket ||
+    rawProject.image_path ||
     rawProject.city ||
     rawProject.country ||
     rawProject.start_date ||
@@ -48,7 +50,8 @@ export function transformProjectData(rawProject: any): Project {
     projectData = {
       project_type_id: rawProject.project_type_id,
       project_modality_id: rawProject.project_modality_id,
-      project_image_url: rawProject.project_image_url,
+      image_bucket: rawProject.image_bucket,
+      image_path: rawProject.image_path,
       // Incluir campos adicionales que necesita el UI
       city: rawProject.city,
       country: rawProject.country,
@@ -69,7 +72,8 @@ export function transformProjectData(rawProject: any): Project {
   const { 
     project_type_id, 
     project_modality_id, 
-    project_image_url,
+    image_bucket,
+    image_path,
     project_type_name,
     project_modality_name,
     city,

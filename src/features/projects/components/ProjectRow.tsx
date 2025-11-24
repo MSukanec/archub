@@ -2,6 +2,8 @@ import DataRowCard from '@/components/ui-custom/general/DataRowCard';
 import SwipeableCard from '@/layout/mobile/SwipeableCard';
 import { Edit, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useQuery } from '@tanstack/react-query';
+import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage';
 
 // Interface para el proyecto (usando la estructura real de la app)
 interface Project {
@@ -23,7 +25,8 @@ interface Project {
     city?: string;
     state?: string;
     country?: string;
-    project_image_url?: string | null;
+    image_bucket?: string | null;
+    image_path?: string | null;
     project_type_id?: string;
     project_modality_id?: string;
     project_type?: {
@@ -84,9 +87,17 @@ export default function ProjectRow({
   isActive = false,
   'data-testid': dataTestId
 }: ProjectRowProps) {
-  // Get avatar from project image or use fallback
-  const avatarUrl = project.project_data?.project_image_url || undefined;
   const avatarFallback = getProjectInitials(project.name);
+
+  // Generate image URL on-demand from bucket+path with React Query
+  const { data: avatarUrl } = useQuery({
+    queryKey: ['project-image', project.id, project.project_data?.image_bucket, project.project_data?.image_path],
+    queryFn: () => getProjectImageUrlFromData(project.project_data!),
+    enabled: !!project.project_data?.image_bucket && !!project.project_data?.image_path,
+    refetchInterval: 30 * 60 * 1000,  // Refresh every 30 min
+    staleTime: 25 * 60 * 1000,         // Stale after 25 min
+    select: (data) => data || undefined, // Convert null to undefined for avatarUrl
+  });
 
   // Build metadata string (tipo, modalidad, estado)
   const metadata: string[] = [];

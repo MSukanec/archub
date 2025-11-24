@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -11,10 +10,11 @@ import {
   Trash2,
   Edit
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import SwipeableCard from '@/layout/mobile/SwipeableCard';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { getProjectInitials } from '@/utils/initials';
-import { getProjectImageUrl, getProjectImageSrcSet } from '@/lib/storage/projectImages';
+import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage';
 
 // Project status configurations
 const projectStatuses = {
@@ -36,7 +36,15 @@ interface ModernProjectCardProps {
 
 export default function ModernProjectCard({ project, onEdit, onDelete, onSelect, onNavigateToBasicData, isActiveProject = false }: ModernProjectCardProps) {
   const statusConfig = projectStatuses[project.status as keyof typeof projectStatuses] || projectStatuses.planning;
-  
+
+  // Generate image URL on-demand from bucket+path with React Query
+  const { data: imageUrl } = useQuery({
+    queryKey: ['project-image', project.id, project.project_data?.image_bucket, project.project_data?.image_path],
+    queryFn: () => getProjectImageUrlFromData(project.project_data!),
+    enabled: !!project.project_data?.image_bucket && !!project.project_data?.image_path,
+    refetchInterval: 30 * 60 * 1000,  // Refresh every 30 min
+    staleTime: 25 * 60 * 1000,         // Stale after 25 min
+  });
 
   return (
     <SwipeableCard
@@ -65,14 +73,14 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
         {/* HERO SECTION - Imagen completa con avatar y acciones superpuestas */}
         <div className="relative h-48 w-full">
           {/* Background Image */}
-          {project.project_data?.project_image_url ? (
+          {imageUrl ? (
             <img 
-              src={project.project_data.project_image_url} 
+              src={imageUrl} 
               alt={project.name}
               loading="lazy"
               decoding="async"
               className="w-full h-full object-cover"
-              key={project.project_data.project_image_url}
+              key={imageUrl}
             />
           ) : (
             <div 

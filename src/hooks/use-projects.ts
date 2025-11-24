@@ -15,7 +15,8 @@ interface Project {
   project_data?: {
     project_type_id?: string
     project_modality_id?: string
-    project_image_url?: string
+    image_bucket?: string | null
+    image_path?: string | null
     project_type?: {
       id: string
       name: string
@@ -55,7 +56,8 @@ export function useProjects(organizationId: string | undefined) {
           project_data (
             project_type_id,
             project_modality_id,
-            project_image_url,
+            image_bucket,
+            image_path,
             project_type:project_types(id, name),
             modality:project_modalities(id, name)
           )
@@ -82,7 +84,8 @@ export function useProjects(organizationId: string | undefined) {
             projectData = {
               project_type_id: pd.project_type_id,
               project_modality_id: pd.project_modality_id,
-              project_image_url: pd.project_image_url,
+              image_bucket: pd.image_bucket,
+              image_path: pd.image_path,
               project_type: pd.project_type,
               project_modality: pd.modality
             }
@@ -121,7 +124,8 @@ export function useProject(projectId: string | undefined) {
           project_data (
             project_type_id,
             project_modality_id,
-            project_image_url,
+            image_bucket,
+            image_path,
             project_type:project_types(id, name),
             modality:project_modalities(id, name)
           )
@@ -143,7 +147,8 @@ export function useProject(projectId: string | undefined) {
           projectData = {
             project_type_id: pd.project_type_id,
             project_modality_id: pd.project_modality_id,
-            project_image_url: pd.project_image_url,
+            image_bucket: pd.image_bucket,
+            image_path: pd.image_path,
             project_type: pd.project_type,
             project_modality: pd.modality
           }

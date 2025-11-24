@@ -1,21 +1,38 @@
-import { supabase } from '@/lib/supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { BucketName } from './types';
 
 /**
  * Get a URL for a file in a bucket.
  * - For public buckets: returns permanent public URL
  * - For private/social buckets: generates temporary signed URL
+ * 
+ * Automatically detects environment and uses appropriate Supabase client.
+ * Can also accept a client parameter for explicit control.
  */
 export async function getFileUrl(
   bucket: BucketName,
   path: string,
-  expiresIn: number = 3600 // 1 hour by default
+  expiresIn: number = 3600, // 1 hour by default
+  client?: SupabaseClient  // Optional client parameter
 ): Promise<string> {
-  if (bucket === 'public-assets') {
-    return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+  // If no client provided, detect environment and use appropriate client
+  if (!client) {
+    if (typeof window === 'undefined') {
+      // Backend: use supabaseAdmin
+      const { supabaseAdmin } = await import('@/lib/supabaseAdmin');
+      client = supabaseAdmin;
+    } else {
+      // Frontend: use supabase
+      const { supabase } = await import('@/lib/supabase');
+      client = supabase;
+    }
   }
   
-  const { data, error } = await supabase.storage
+  if (bucket === 'public-assets') {
+    return client.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+  }
+  
+  const { data, error } = await client.storage
     .from(bucket)
     .createSignedUrl(path, expiresIn);
   

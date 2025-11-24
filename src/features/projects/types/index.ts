@@ -89,7 +89,8 @@ export interface UpdateProjectData {
 export interface ProjectStats {
   project: Project & {
     project_data: {
-      project_image_url?: string;
+      image_bucket?: string;
+      image_path?: string;
     } | null;
   };
   totalDocuments: number;

@@ -28,7 +28,8 @@ export async function getProjectById(projectId: string): Promise<Project | null>
       project_data (
         project_type_id,
         project_modality_id,
-        project_image_url,
+        image_bucket,
+        image_path,
         project_type:project_types(id, name),
         modality:project_modalities(id, name)
       )

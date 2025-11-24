@@ -44,7 +44,7 @@ export async function getProjectStats(
   // Get project data (including image) separately
   const { data: projectData, error: projectDataError } = await supabase
     .from('project_data')
-    .select('project_image_url')
+    .select('image_bucket, image_path')
     .eq('project_id', projectId)
     .single();
 

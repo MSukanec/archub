@@ -1,9 +1,10 @@
-import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Edit } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { getProjectInitials } from '@/utils/initials';
+import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage';
 
 // Interface para el proyecto (usando la estructura real de la app)
 interface Project {
@@ -25,7 +26,8 @@ interface Project {
     city?: string;
     state?: string;
     country?: string;
-    project_image_url?: string | null;
+    image_bucket?: string | null;
+    image_path?: string | null;
     project_type_id?: string;
     project_modality_id?: string;
     project_type?: {
@@ -83,10 +85,18 @@ export default function ProjectItem({
   isActive = false,
   projectColor = 'var(--accent)'
 }: ProjectItemProps) {
-  const imageUrl = project.project_data?.project_image_url;
   const initials = getProjectInitials(project.name);
   const statusText = getStatusText(project.status);
   const statusColorClass = getStatusColor(project.status);
+
+  // Generate image URL on-demand from bucket+path with React Query
+  const { data: imageUrl } = useQuery({
+    queryKey: ['project-image', project.id, project.project_data?.image_bucket, project.project_data?.image_path],
+    queryFn: () => getProjectImageUrlFromData(project.project_data!),
+    enabled: !!project.project_data?.image_bucket && !!project.project_data?.image_path,
+    refetchInterval: 30 * 60 * 1000,  // Refresh every 30 min
+    staleTime: 25 * 60 * 1000,         // Stale after 25 min
+  });
 
   return (
     <div
