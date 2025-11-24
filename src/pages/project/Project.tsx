@@ -27,7 +27,7 @@ export default function Project() {
   const currentProject = projects.find(p => p.id === selectedProjectId);
 
   // Get site logs (bitácoras)
-  const { data: siteLogs = [] } = useSiteLogs(selectedProjectId, organizationId);
+  const { data: siteLogs = [] } = useSiteLogs(selectedProjectId || undefined, organizationId || undefined);
 
   // Generate project image URL on-demand with React Query
   const { data: projectImageUrl } = useQuery({
@@ -86,7 +86,7 @@ export default function Project() {
         <div className="max-w-3xl">
           {/* Project Name */}
           <h1 
-            className="text-lg sm:text-2xl md:text-4xl font-bold mb-2 sm:mb-3 md:mb-3 tracking-tight !text-white line-clamp-2" 
+            className="text-xl sm:text-3xl md:text-5xl font-bold mb-2 sm:mb-3 md:mb-3 tracking-tight !text-white line-clamp-2" 
             data-testid="text-project-name"
           >
             {currentProject.name}
@@ -96,7 +96,7 @@ export default function Project() {
           <div className="flex flex-wrap gap-2">
             {currentProject.project_data?.project_type?.name && (
               <Badge 
-                className="text-[7px] sm:text-[8px] md:text-[9px] font-medium px-2 py-0.5"
+                className="text-[14px] sm:text-[16px] md:text-[18px] font-medium px-3 py-1"
                 style={{ 
                   backgroundColor: `${projectColor}40`,
                   color: projectColor,
@@ -111,7 +111,7 @@ export default function Project() {
             
             {currentProject.project_data?.project_modality?.name && (
               <Badge 
-                className="text-[7px] sm:text-[8px] md:text-[9px] font-medium px-2 py-0.5"
+                className="text-[14px] sm:text-[16px] md:text-[18px] font-medium px-3 py-1"
                 style={{ 
                   backgroundColor: `${projectColor}40`,
                   color: projectColor,
@@ -126,7 +126,7 @@ export default function Project() {
             
             {currentProject.status && (
               <Badge 
-                className="text-[7px] sm:text-[8px] md:text-[9px] font-medium px-2 py-0.5"
+                className="text-[14px] sm:text-[16px] md:text-[18px] font-medium px-3 py-1"
                 style={{ 
                   backgroundColor: `${projectColor}40`,
                   color: projectColor,
