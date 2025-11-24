@@ -3,7 +3,7 @@ import { DashboardLayout as Layout } from "@/layouts"
 import { useNavigationStore } from '@/stores/navigationStore'
 import { GraduationCap, ArrowRight, BookOpen } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { StatCard, StatCardTitle, StatCardContent } from '@/components/ui/stat-card'
+import { StatCard, StatCardContent } from '@/components/ui-custom/KPICard'
 import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
@@ -48,9 +48,9 @@ export default function LearningDashboard() {
   if (isLoading) {
     return (
       <Layout hideHeader wide>
-        <div className="flex flex-col">
-          <Skeleton className="h-[300px] md:h-screen w-full" />
-          <div className="space-y-6 p-6">
+        <div className="flex flex-col h-full">
+          <Skeleton className="h-[300px] md:h-1/2 w-full" />
+          <div className="space-y-6 p-6 md:p-12 flex-1">
             <Skeleton className="h-24 rounded-xl" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Skeleton className="h-64 col-span-3" />
@@ -64,11 +64,11 @@ export default function LearningDashboard() {
 
   return (
     <Layout hideHeader wide>
-      <div className="flex flex-col">
-        {/* Hero Section - Full-width, no padding, always first */}
+      <div className="flex flex-col h-full">
+        {/* Hero Section - Full-width, fixed height, no padding */}
         {heroCurso && (
           <div 
-            className="relative h-[300px] md:h-screen overflow-hidden group cursor-pointer w-full"
+            className="relative h-[300px] md:h-1/2 overflow-hidden group cursor-pointer w-full flex-shrink-0"
             onClick={() => navigate(`/learning/courses/${heroCurso.course_slug}`)}
             data-testid="hero-featured-course"
           >
@@ -88,7 +88,7 @@ export default function LearningDashboard() {
             )}
 
             {/* Content */}
-            <div className="relative h-full flex flex-col justify-end p-6 md:p-12 container mx-auto">
+            <div className="relative h-full flex flex-col justify-end px-6 md:px-12 py-6 md:py-12">
               <div className="max-w-3xl">
                 {/* Badge */}
                 <div className="mb-6">
@@ -107,7 +107,7 @@ export default function LearningDashboard() {
                 
                 {/* Title */}
                 <h1 
-                  className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 md:mb-6 tracking-tight !text-white" 
+                  className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 md:mb-6 tracking-tight !text-white" 
                   data-testid="text-hero-title"
                 >
                   {heroCurso.course_title}
@@ -141,15 +141,14 @@ export default function LearningDashboard() {
         )}
 
         {/* Content Section with padding */}
-        <div className="flex-1 p-6 md:p-12 space-y-6">
+        <div className="flex-1 p-6 md:p-12 space-y-6 overflow-y-auto">
           {/* Continue Where You Left Off Section */}
-          <StatCard>
-          <StatCardContent>
-            <StatCardTitle className="mb-4 flex items-center gap-2">
+          <StatCard className="p-6">
+            <div className="mb-4 flex items-center gap-2">
               <BookOpen className="h-5 w-5" />
-              Continúa donde lo dejaste
-            </StatCardTitle>
-            <p className="text-sm text-muted-foreground mb-4">
+              <h3 className="text-sm font-semibold">Continúa donde lo dejaste</h3>
+            </div>
+            <p className="text-sm text-muted-foreground mb-6">
               Retoma tu aprendizaje desde tu última lección
             </p>
             
@@ -225,7 +224,6 @@ export default function LearningDashboard() {
                 }
               />
             )}
-          </StatCardContent>
           </StatCard>
         </div>
       </div>
