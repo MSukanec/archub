@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
-import { DashboardLayout as Layout } from "@/layouts"
+import { HeroLayout } from "@/layouts"
 import { useNavigationStore } from '@/stores/navigationStore'
 import { GraduationCap, ArrowRight, BookOpen } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { StatCard, StatCardContent } from '@/components/ui-custom/KPICard'
+import { StatCard } from '@/components/ui-custom/KPICard'
 import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
@@ -45,112 +45,93 @@ export default function LearningDashboard() {
     icon: GraduationCap,
   }
 
-  if (isLoading) {
-    return (
-      <Layout hideHeader wide>
-        <div className="flex flex-col h-full">
-          <Skeleton className="h-[300px] md:h-1/2 w-full" />
-          <div className="space-y-6 p-6 md:p-12 flex-1">
-            <Skeleton className="h-24 rounded-xl" />
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Skeleton className="h-64 col-span-3" />
-              <Skeleton className="h-64" />
-            </div>
+  // Hero section component
+  const heroSection = heroCurso && (
+    <div 
+      className="relative h-[300px] md:h-1/2 overflow-hidden group cursor-pointer w-full"
+      onClick={() => navigate(`/learning/courses/${heroCurso.course_slug}`)}
+      data-testid="hero-featured-course"
+    >
+      {/* Background Image */}
+      {heroCurso.cover_url ? (
+        <>
+          <div 
+            className="absolute inset-0 bg-cover bg-center md:bg-fixed bg-no-repeat transition-transform duration-700 group-hover:scale-105 motion-reduce:bg-scroll"
+            style={{
+              backgroundImage: `url(${heroCurso.cover_url})`
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/60 to-black/100 dark:from-black/30 dark:via-black/70 dark:to-black/100" />
+        </>
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20" />
+      )}
+
+      {/* Content */}
+      <div className="relative h-full flex flex-col justify-end px-6 md:px-12 py-6 md:py-12">
+        <div className="max-w-3xl">
+          {/* Badge */}
+          <div className="mb-6">
+            <Badge 
+              style={{ 
+                backgroundColor: 'var(--accent)', 
+                color: 'white',
+                borderColor: 'var(--accent)'
+              }}
+              className="text-[10px] md:text-xs font-medium uppercase px-4 py-2"
+              data-testid="badge-featured"
+            >
+              Destacado
+            </Badge>
+          </div>
+          
+          {/* Title */}
+          <h1 
+            className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 md:mb-6 tracking-tight !text-white" 
+            data-testid="text-hero-title"
+          >
+            {heroCurso.course_title}
+          </h1>
+          
+          {/* Progress/Description */}
+          <p className="text-sm md:text-base max-w-2xl mb-8 text-[rgb(220,220,220)]">
+            {heroCurso.done_lessons !== undefined 
+              ? `${heroCurso.done_lessons} de ${heroCurso.total_lessons} lecciones completadas • ${heroCurso.progress_pct}% completado`
+              : heroCurso.short_description || 'Descubre este curso y desarrolla nuevas habilidades'}
+          </p>
+          
+          {/* CTA Button */}
+          <div className="flex gap-3">
+            <Button
+              size="lg"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/learning/courses/${heroCurso.course_slug}`);
+              }}
+              className="group/btn"
+              data-testid="button-continue-course"
+            >
+              <span>{heroCurso.done_lessons !== undefined ? 'Continuar Curso' : 'Ver Curso'}</span>
+              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+            </Button>
           </div>
         </div>
-      </Layout>
-    )
-  }
+      </div>
+    </div>
+  );
 
-  return (
-    <Layout hideHeader wide>
-      <div className="flex flex-col h-full">
-        {/* Hero Section - Full-width, fixed height, no padding */}
-        {heroCurso && (
-          <div 
-            className="relative h-[300px] md:h-1/2 overflow-hidden group cursor-pointer w-full flex-shrink-0"
-            onClick={() => navigate(`/learning/courses/${heroCurso.course_slug}`)}
-            data-testid="hero-featured-course"
-          >
-            {/* Background Image */}
-            {heroCurso.cover_url ? (
-              <>
-                <div 
-                  className="absolute inset-0 bg-cover bg-center md:bg-fixed bg-no-repeat transition-transform duration-700 group-hover:scale-105 motion-reduce:bg-scroll"
-                  style={{
-                    backgroundImage: `url(${heroCurso.cover_url})`
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/60 to-black/100 dark:from-black/30 dark:via-black/70 dark:to-black/100" />
-              </>
-            ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20" />
-            )}
-
-            {/* Content */}
-            <div className="relative h-full flex flex-col justify-end px-6 md:px-12 py-6 md:py-12">
-              <div className="max-w-3xl">
-                {/* Badge */}
-                <div className="mb-6">
-                  <Badge 
-                    style={{ 
-                      backgroundColor: 'var(--accent)', 
-                      color: 'white',
-                      borderColor: 'var(--accent)'
-                    }}
-                    className="text-[10px] md:text-xs font-medium uppercase px-4 py-2"
-                    data-testid="badge-featured"
-                  >
-                    Destacado
-                  </Badge>
-                </div>
-                
-                {/* Title */}
-                <h1 
-                  className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 md:mb-6 tracking-tight !text-white" 
-                  data-testid="text-hero-title"
-                >
-                  {heroCurso.course_title}
-                </h1>
-                
-                {/* Progress/Description */}
-                <p className="text-sm md:text-base max-w-2xl mb-8 text-[rgb(220,220,220)]">
-                  {heroCurso.done_lessons !== undefined 
-                    ? `${heroCurso.done_lessons} de ${heroCurso.total_lessons} lecciones completadas • ${heroCurso.progress_pct}% completado`
-                    : heroCurso.short_description || 'Descubre este curso y desarrolla nuevas habilidades'}
-                </p>
-                
-                {/* CTA Button */}
-                <div className="flex gap-3">
-                  <Button
-                    size="lg"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/learning/courses/${heroCurso.course_slug}`);
-                    }}
-                    className="group/btn"
-                    data-testid="button-continue-course"
-                  >
-                    <span>{heroCurso.done_lessons !== undefined ? 'Continuar Curso' : 'Ver Curso'}</span>
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Content Section with padding */}
-        <div className="flex-1 p-6 md:p-12 space-y-6 overflow-y-auto">
-          {/* Continue Where You Left Off Section */}
-          <StatCard className="p-6">
-            <div className="mb-4 flex items-center gap-2">
-              <BookOpen className="h-5 w-5" />
-              <h3 className="text-sm font-semibold">Continúa donde lo dejaste</h3>
-            </div>
-            <p className="text-sm text-muted-foreground mb-6">
-              Retoma tu aprendizaje desde tu última lección
-            </p>
+  // Main content
+  const mainContent = (
+    <div className="space-y-6">
+      {/* Continue Where You Left Off Section */}
+      <StatCard className="p-6">
+        <div className="mb-4 flex items-center gap-2">
+          <BookOpen className="h-5 w-5" />
+          <h3 className="text-sm font-semibold">Continúa donde lo dejaste</h3>
+        </div>
+        <p className="text-sm text-muted-foreground mb-6">
+          Retoma tu aprendizaje desde tu última lección
+        </p>
             
             {hasEnrollments && coursesSorted.length > 0 ? (
               <div className="space-y-4">
@@ -224,9 +205,31 @@ export default function LearningDashboard() {
                 }
               />
             )}
-          </StatCard>
-        </div>
-      </div>
-    </Layout>
+      </StatCard>
+    </div>
+  );
+
+  if (isLoading) {
+    return (
+      <HeroLayout 
+        heroContent={<Skeleton className="h-[300px] md:h-1/2 w-full" />}
+        mainContent={
+          <div className="space-y-6">
+            <Skeleton className="h-24 rounded-xl" />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Skeleton className="h-64 col-span-3" />
+              <Skeleton className="h-64" />
+            </div>
+          </div>
+        }
+      />
+    )
+  }
+
+  return (
+    <HeroLayout 
+      heroContent={heroSection}
+      mainContent={mainContent}
+    />
   )
 }

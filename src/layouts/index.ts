@@ -8,6 +8,7 @@
 
 // Dashboard Layout exports
 export { Layout as DashboardLayout } from "./dashboard/DashboardLayout";
+export { HeroLayout } from "./dashboard/HeroLayout";
 export { PageLayout } from "./dashboard/PageLayout";
 
 // Dashboard Components - Sidebar
