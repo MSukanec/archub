@@ -15,7 +15,7 @@ import { useProjectContext } from '@/stores/projectContext'
 import { useProjectTypes } from '@/features/projects/project-types'
 import { useProjectModalities } from '@/features/projects/project-modalities'
 import { ProjectColorAdvanced } from '@/features/projects'
-import ProjectColorPalette from '@/components/projects/ProjectColorPalette'
+import { ColorPaletteField } from '@/components/ui-custom/fields/ColorPaletteField'
 import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage'
 
 interface ProjectDataTabProps {
@@ -478,7 +478,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
         <div className="space-y-4">
           <div>
             <Label className="text-sm font-medium mb-3 block">Paleta de colores</Label>
-            <ProjectColorPalette
+            <ColorPaletteField
               selectedColor={selectedColor}
               onColorChange={handlePaletteColorChange}
               disabled={useCustomColor}

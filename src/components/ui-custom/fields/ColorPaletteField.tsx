@@ -11,13 +11,13 @@ const PRESET_COLORS = [
   { hex: '#84cc16', name: 'Lime' },
 ];
 
-type Props = {
+type ColorPaletteFieldProps = {
   selectedColor: string;
   onColorChange: (color: string) => void;
   disabled?: boolean;
 };
 
-export default function ProjectColorPalette({ selectedColor, onColorChange, disabled }: Props) {
+export function ColorPaletteField({ selectedColor, onColorChange, disabled }: ColorPaletteFieldProps) {
   return (
     <div className="flex flex-wrap gap-2">
       {PRESET_COLORS.map((colorOption) => (
