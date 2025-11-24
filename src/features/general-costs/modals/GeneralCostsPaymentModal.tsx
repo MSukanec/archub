@@ -58,7 +58,11 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
   const { data: mediaFiles = [] } = useQuery({
     queryKey: ['general-cost-payment-media', paymentId],
     queryFn: async () => {
-      if (!paymentId || !supabase) return []
+      console.log('[DEBUG] Fetching media files for paymentId:', paymentId, 'mode:', mode)
+      if (!paymentId || !supabase) {
+        console.log('[DEBUG] Skipping fetch - no paymentId or supabase')
+        return []
+      }
       
       const { data, error } = await supabase
         .from('media_links')
@@ -81,9 +85,11 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
         .eq('is_deleted', false)
       
       if (error) {
-        console.error('Error fetching payment media:', error)
+        console.error('[ERROR] Error fetching payment media:', error)
         return []
       }
+      
+      console.log('[DEBUG] Media links fetched:', data?.length || 0, 'files')
       
       const filesWithUrls = await Promise.all(
         (data || []).map(async (link: any) => {
@@ -100,13 +106,13 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
                 .createSignedUrl(link.media_files.file_path, 3600)
               
               if (signedUrlError) {
-                console.error('Error generating signed URL:', signedUrlError)
+                console.error('[ERROR] Error generating signed URL:', signedUrlError)
                 fileUrl = null
               } else {
                 fileUrl = signedUrlData?.signedUrl || null
               }
             } catch (error) {
-              console.error('Error creating signed URL:', error)
+              console.error('[ERROR] Error creating signed URL:', error)
               fileUrl = null
             }
           }
@@ -125,6 +131,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
         })
       )
       
+      console.log('[DEBUG] Files with URLs processed:', filesWithUrls.length)
       return filesWithUrls
     },
     enabled: !!paymentId && (mode === 'edit' || mode === 'view')
@@ -186,9 +193,12 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
 
   // Load existing files
   React.useEffect(() => {
+    console.log('[DEBUG] Loading existing files - mediaFiles:', mediaFiles?.length || 0)
     if (mediaFiles && mediaFiles.length > 0) {
+      console.log('[DEBUG] Setting existingFiles state with', mediaFiles.length, 'files')
       setExistingFiles(mediaFiles)
     } else {
+      console.log('[DEBUG] No mediaFiles found, clearing existingFiles state')
       setExistingFiles([])
     }
   }, [mediaFiles])

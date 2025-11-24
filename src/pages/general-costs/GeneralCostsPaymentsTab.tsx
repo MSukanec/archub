@@ -288,7 +288,7 @@ export default function GeneralCostsPaymentsTab() {
       key: 'payment_date',
       label: 'Fecha de Pago',
       sortable: true,
-      align: 'right' as const,
+      align: 'left' as const,
       render: (payment: GeneralCostPayment) => formatDate(payment.payment_date),
     },
     {
@@ -434,6 +434,7 @@ export default function GeneralCostsPaymentsTab() {
         data={filteredPayments}
         isLoading={isLoading}
         showDoubleHeader={false}
+        onRowClick={(payment) => handleView(payment)}
         renderCard={(payment: GeneralCostPayment) => (
           <GeneralCostPaymentRow
             payment={payment}
@@ -534,15 +535,6 @@ export default function GeneralCostsPaymentsTab() {
             </div>
           ),
         }}
-        leadingRowAction={(payment: GeneralCostPayment) => payment.file_url ? {
-          label: 'Ver Adjunto',
-          icon: Paperclip,
-          onClick: () => window.open(payment.file_url!, '_blank'),
-        } : null}
-        primaryRowAction={(payment: GeneralCostPayment) => ({
-          label: 'Ver',
-          onClick: () => handleView(payment),
-        })}
         rowActions={(payment: GeneralCostPayment) => [
           {
             label: 'Editar Pago',
