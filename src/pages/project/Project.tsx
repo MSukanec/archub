@@ -150,7 +150,6 @@ export default function Project() {
       {/* Bitácoras Card - Full Width */}
       <div>
         <StatCard 
-          href="/projects/sitelog"
           data-testid="stat-card-bitacoras"
           className="w-full"
         >

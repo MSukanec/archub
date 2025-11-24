@@ -256,7 +256,7 @@ export default function OrganizationDashboard() {
           </StatCard>
 
           {/* 3. Bitácoras */}
-          <StatCard href="/projects/sitelog" data-testid="stat-card-bitacoras-org">
+          <StatCard data-testid="stat-card-bitacoras-org">
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <StatCardTitle>Bitácoras</StatCardTitle>
