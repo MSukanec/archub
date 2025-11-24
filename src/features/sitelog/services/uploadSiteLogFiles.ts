@@ -1,4 +1,5 @@
 import { uploadFile } from '@/lib/storage';
+import { supabase } from '@/lib/supabase';
 import type { SiteLogFileInput } from '../types';
 
 /**
@@ -31,6 +32,14 @@ export async function uploadSiteLogFiles(
     throw new Error('No hay archivos para subir');
   }
 
+  // Obtener el user_id de la sesión actual
+  const { data: { session } } = await supabase.auth.getSession();
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    throw new Error('No hay sesión activa. Por favor, inicia sesión nuevamente.');
+  }
+
   for (const { file, title, description } of files) {
     try {
       if (!file || file.size === 0) {
@@ -46,6 +55,7 @@ export async function uploadSiteLogFiles(
         entity: 'sitelog_attachment',
         organization_id: organizationId,
         project_id: projectId,
+        user_id: userId,
         link_to: {
           project_id: projectId,
           sitelog_id: siteLogId,
