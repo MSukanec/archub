@@ -22,8 +22,8 @@ export async function getCoursePriceBySlug(
   // 1. Obtener curso y precio base en USD
   const { data: course, error: courseError } = await supabase
     .from("courses")
-    .eq("is_deleted", false)
     .select("price, is_active")
+    .eq("is_deleted", false)
     .eq("slug", courseSlug)
     .single();
 
