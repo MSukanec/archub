@@ -47,7 +47,7 @@ export default function Project() {
   // Hero section
   const heroSection = currentProject && (
     <div 
-      className="relative h-1/2 overflow-hidden w-full"
+      className="relative h-1/2 md:h-[48vh] overflow-hidden w-full"
       data-testid="hero-project"
     >
       {/* Background Image */}
