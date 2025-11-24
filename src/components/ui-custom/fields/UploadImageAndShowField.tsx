@@ -203,7 +203,9 @@ export default function ImageUploadAndShowField({
     handleFileSelect(e.target.files);
   };
 
-  const displayUrl = previewMode ? previewUrl : currentImageUrl;
+  // In preview mode: show new preview if selected, otherwise show current image
+  // In normal mode: show current image
+  const displayUrl = previewMode ? (previewUrl || currentImageUrl) : currentImageUrl;
   const handleRemove = () => {
     if (previewMode && onFileSelect) {
       onFileSelect(null);
