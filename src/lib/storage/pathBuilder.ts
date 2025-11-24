@@ -12,7 +12,8 @@ export function buildStoragePath(
   basePath = basePath
     .replace('{user_id}', context.user_id || '')
     .replace('{org_id}', context.organization_id || '')
-    .replace('{project_id}', context.project_id || '');
+    .replace('{project_id}', context.project_id || '')
+    .replace('{course_id}', context.course_id || '');
 
   const extension = file.name.split('.').pop() || 'bin';
   const uniqueId = nanoid(10);
@@ -38,7 +39,8 @@ export function buildCoverPath(
   basePath = basePath
     .replace('{user_id}', context.user_id || '')
     .replace('{org_id}', context.organization_id || '')
-    .replace('{project_id}', context.project_id || '');
+    .replace('{project_id}', context.project_id || '')
+    .replace('{course_id}', context.course_id || '');
 
   const extension = file.name.split('.').pop() || 'jpg';
   const fileName = `cover.${extension}`;
@@ -65,5 +67,9 @@ export function validateContext(context: UploadContext): void {
   
   if (config.basePath.includes('{project_id}') && !context.project_id) {
     throw new Error(`project_id is required for entity type: ${context.entity}`);
+  }
+  
+  if (config.basePath.includes('{course_id}') && !context.course_id) {
+    throw new Error(`course_id is required for entity type: ${context.entity}`);
   }
 }

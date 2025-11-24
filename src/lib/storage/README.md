@@ -85,6 +85,22 @@ const result = await uploadFile(file, {
 });
 ```
 
+### Upload a Course Module Image
+```typescript
+import { uploadFile } from '@/lib/storage';
+
+const result = await uploadFile(file, {
+  entity: 'course_module_image',
+  course_id: 'course-123',
+  link_to: { 
+    course_id: 'course-123',
+    course_module_id: 'module-456' 
+  },
+  category: 'module_image',
+  description: 'Module image or GIF'
+});
+```
+
 ### Upload a Project Photo
 ```typescript
 import { uploadFile } from '@/lib/storage';
@@ -127,6 +143,7 @@ await deleteFile('media-file-id-123', true); // Hard delete (removes from storag
 | `user_avatar` | public-assets | avatar |
 | `org_logo` | public-assets | avatar |
 | `course_cover_public` | public-assets | course-cover |
+| `course_module_image` | public-assets | course-cover |
 | `ui_asset` | public-assets | default |
 | `invoice` | private-assets | document |
 | `budget` | private-assets | document |

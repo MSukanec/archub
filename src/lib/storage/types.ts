@@ -21,6 +21,7 @@ export interface UploadContext {
   organization_id?: string;
   user_id?: string;
   project_id?: string;
+  course_id?: string;
   link_to?: {
     project_id?: string;
     contact_id?: string;

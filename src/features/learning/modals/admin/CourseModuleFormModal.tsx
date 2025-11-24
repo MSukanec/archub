@@ -16,6 +16,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
 import { useAdminCourses } from '../../hooks/use-admin-courses';
+import { uploadFile, deleteFile } from '@/lib/storage';
 
 const courseModuleSchema = z.object({
   course_id: z.string().min(1, 'El curso es requerido'),
@@ -197,125 +198,24 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
     }
   });
 
-  const handleImageUpload = async (file: File, moduleId: string) => {
+  const handleImageUpload = async (file: File, moduleId: string, courseId: string) => {
     setIsUploadingImage(true);
     
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const userId = session?.user?.id;
+      // Use unified upload function
+      const result = await uploadFile(file, {
+        entity: 'course_module_image',
+        course_id: courseId,
+        link_to: { 
+          course_id: courseId,
+          course_module_id: moduleId 
+        },
+        category: 'module_image',
+        description: 'Module image or GIF'
+      });
 
-      const extension = file.name.split('.').pop() || 'jpg';
-      const fileName = `module-image.${extension}`;
-      const filePath = `course_modules/${moduleId}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('course-content')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: true
-        });
-
-      if (uploadError) throw new Error(`Error al subir imagen: ${uploadError.message}`);
-
-      const { data: urlData } = supabase.storage
-        .from('course-content')
-        .getPublicUrl(filePath);
-
-      const publicUrl = urlData.publicUrl;
-
-      // Create or update media_files record
-      const { data: existingMediaFile } = await supabase
-        .from('media_files')
-        .select('id')
-        .eq('file_path', filePath)
-        .maybeSingle();
-
-      let mediaFileId: string;
-
-      if (existingMediaFile) {
-        const { data: updatedFile, error: updateError } = await supabase
-          .from('media_files')
-          .update({
-            file_url: publicUrl,
-            file_type: 'image',
-            file_size: file.size,
-            is_public: true,
-            is_deleted: false,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', existingMediaFile.id)
-          .select()
-          .single();
-
-        if (updateError) throw new Error(`Error al actualizar archivo: ${updateError.message}`);
-        mediaFileId = updatedFile.id;
-      } else {
-        const { data: newFile, error: insertError } = await supabase
-          .from('media_files')
-          .insert({
-            bucket: 'course-content',
-            file_path: filePath,
-            file_name: fileName,
-            file_url: publicUrl,
-            file_type: 'image',
-            file_size: file.size,
-            is_public: true,
-            is_deleted: false,
-            created_by: userId
-          })
-          .select()
-          .single();
-
-        if (insertError) throw new Error(`Error al registrar archivo: ${insertError.message}`);
-        mediaFileId = newFile.id;
-      }
-
-      // Create or update media_link
-      const { data: existingLink, error: linkCheckError } = await supabase
-        .from('media_links')
-        .select('id')
-        .eq('course_module_id', moduleId)
-        .eq('category', 'module_image')
-        .maybeSingle();
-
-      if (linkCheckError) {
-        console.error('Error checking existing link:', linkCheckError);
-        throw new Error(`Error verificando link existente: ${linkCheckError.message}`);
-      }
-
-      if (existingLink) {
-        const { error: updateLinkError } = await supabase
-          .from('media_links')
-          .update({
-            media_file_id: mediaFileId,
-            visibility: 'public',
-            is_public: true,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', existingLink.id);
-
-        if (updateLinkError) {
-          console.error('Error updating media_link:', updateLinkError);
-          throw new Error(`Error al actualizar link: ${updateLinkError.message}`);
-        }
-      } else {
-        const { error: insertLinkError } = await supabase
-          .from('media_links')
-          .insert({
-            media_file_id: mediaFileId,
-            course_module_id: moduleId,
-            category: 'module_image',
-            visibility: 'public',
-            created_by: userId
-          });
-
-        if (insertLinkError) {
-          console.error('Error inserting media_link:', insertLinkError);
-          throw new Error(`Error al crear link: ${insertLinkError.message}`);
-        }
-      }
-
-      const urlWithCacheBust = `${publicUrl}?t=${Date.now()}`;
+      // Refresh the image URL with cache bust
+      const urlWithCacheBust = `${result.file_url}?t=${Date.now()}`;
       setModuleImageUrl(urlWithCacheBust);
 
       // Invalidate queries to refetch module data
@@ -342,6 +242,7 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
     setIsUploadingImage(true);
     
     try {
+      // Get the media_file_id from media_link
       const { data: link } = await supabase
         .from('media_links')
         .select('media_file_id')
@@ -349,17 +250,9 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
         .eq('category', 'module_image')
         .maybeSingle();
 
-      if (link) {
-        await supabase
-          .from('media_files')
-          .update({ is_deleted: true })
-          .eq('id', link.media_file_id);
-
-        await supabase
-          .from('media_links')
-          .delete()
-          .eq('course_module_id', moduleId)
-          .eq('category', 'module_image');
+      if (link?.media_file_id) {
+        // Use unified delete function (soft delete)
+        await deleteFile(link.media_file_id, false);
       }
 
       setModuleImageUrl(null);
@@ -495,8 +388,8 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
           accept="image/*"
           onChange={(e) => {
             const file = e.target.files?.[0];
-            if (file && module?.id) {
-              handleImageUpload(file, module.id);
+            if (file && module?.id && module?.course_id) {
+              handleImageUpload(file, module.id, module.course_id);
             }
           }}
           className="hidden"
