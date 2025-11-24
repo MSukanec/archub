@@ -14,7 +14,7 @@ import { useRef, useState, useEffect } from "react";
 import { useLocation, useRoute } from "wouter";
 import { cn } from "@/lib/utils";
 import { AIPanel } from "@/features/ai";
-import { SidebarIconButton } from "../desktop/SidebarIconButton";
+import { SidebarIconButton } from "./SidebarIconButton";
 import { 
   Sparkles, 
   PanelLeftClose,

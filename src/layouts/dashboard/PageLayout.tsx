@@ -40,12 +40,12 @@ import {
 } from "@/components/ui/popover";
 import { PlanRestricted } from "@/features/users";
 import { ExpandableAvatarGroup } from "@/components/ui-custom/ExpandableAvatarGroup";
-import { ProjectSelectorButton } from "./ProjectSelectorButton";
+import { ProjectSelectorButton } from "./components/Topbar/ProjectSelectorButton";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
 import { type WidthProp, resolveWidthMode, getContainerClasses, getHeaderPaddingClasses, getContentPaddingClasses } from "./layoutWidth";
-import { Footer } from "./Footer";
+import { Footer } from "./components/Topbar/Footer";
 
 // Mapeo de rutas a nombres e iconos de páginas (exactamente como en el sidebar)
 const PAGE_CONFIG: Record<string, { name: string; icon: any }> = {

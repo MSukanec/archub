@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 // import { SecondarySidebar } from "./SecondarySidebar";
-import { LeftSidebar } from "./LeftSidebar";
-import { RightSidebar } from "./RightSidebar";
+import { LeftSidebar } from "./components/Sidebar/LeftSidebar";
+import { RightSidebar } from "./components/Sidebar/RightSidebar";
 // Header removed - now handled by sidebar
 // import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
