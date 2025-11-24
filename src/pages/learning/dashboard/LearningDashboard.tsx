@@ -48,12 +48,14 @@ export default function LearningDashboard() {
   if (isLoading) {
     return (
       <Layout hideHeader wide>
-        <div className="space-y-6">
-          <Skeleton className="h-24 rounded-xl" />
-          <Skeleton className="h-[400px] rounded-xl" />
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Skeleton className="h-64 col-span-3" />
-            <Skeleton className="h-64" />
+        <div className="flex flex-col">
+          <Skeleton className="h-[300px] md:h-screen w-full" />
+          <div className="space-y-6 p-6">
+            <Skeleton className="h-24 rounded-xl" />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Skeleton className="h-64 col-span-3" />
+              <Skeleton className="h-64" />
+            </div>
           </div>
         </div>
       </Layout>
@@ -62,86 +64,86 @@ export default function LearningDashboard() {
 
   return (
     <Layout hideHeader wide>
-      <div className="space-y-6">
-        {/* Welcome Section */}
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold">
-            ¡Bienvenido a Capacitaciones, {userData?.user?.email?.split('@')[0] || 'Usuario'}!
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Desarrolla tus habilidades profesionales con nuestros cursos especializados en construcción y diseño arquitectónico.
-          </p>
-        </div>
-
-        {/* Hero Section - Show latest public course (featured) */}
+      <div className="flex flex-col">
+        {/* Hero Section - Full-width, no padding, always first */}
         {heroCurso && (
           <div 
-            className="relative h-[300px] md:h-[400px] rounded-xl overflow-hidden group cursor-pointer"
+            className="relative h-[300px] md:h-screen overflow-hidden group cursor-pointer w-full"
             onClick={() => navigate(`/learning/courses/${heroCurso.course_slug}`)}
             data-testid="hero-featured-course"
           >
+            {/* Background Image */}
             {heroCurso.cover_url ? (
               <>
                 <div 
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                  className="absolute inset-0 bg-cover bg-center md:bg-fixed bg-no-repeat transition-transform duration-700 group-hover:scale-105 motion-reduce:bg-scroll"
                   style={{
                     backgroundImage: `url(${heroCurso.cover_url})`
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/60 to-black/100 dark:from-black/30 dark:via-black/70 dark:to-black/100" />
               </>
             ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/10" />
+              <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20" />
             )}
-            
-            <div className="relative h-full flex flex-col justify-end p-6 md:p-10">
-              <div className="mb-4">
-                <Badge 
-                  style={{ 
-                    backgroundColor: 'var(--accent)', 
-                    color: 'white',
-                    borderColor: 'var(--accent)'
-                  }}
-                  className="text-[10px] md:text-xs font-medium uppercase"
-                  data-testid="badge-featured"
+
+            {/* Content */}
+            <div className="relative h-full flex flex-col justify-end p-6 md:p-12 container mx-auto">
+              <div className="max-w-3xl">
+                {/* Badge */}
+                <div className="mb-6">
+                  <Badge 
+                    style={{ 
+                      backgroundColor: 'var(--accent)', 
+                      color: 'white',
+                      borderColor: 'var(--accent)'
+                    }}
+                    className="text-[10px] md:text-xs font-medium uppercase px-4 py-2"
+                    data-testid="badge-featured"
+                  >
+                    Destacado
+                  </Badge>
+                </div>
+                
+                {/* Title */}
+                <h1 
+                  className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 md:mb-6 tracking-tight !text-white" 
+                  data-testid="text-hero-title"
                 >
-                  Destacado
-                </Badge>
-              </div>
-              
-              <h1 
-                className="text-4xl md:text-6xl font-bold mb-3 md:mb-4 tracking-tight !text-white" 
-                data-testid="text-hero-title"
-              >
-                {heroCurso.course_title}
-              </h1>
-              
-              <p className="text-sm md:text-base max-w-2xl mb-6" style={{ color: '#9ca3af' }}>
-                {heroCurso.short_description || (heroCurso.done_lessons !== undefined 
-                  ? `${heroCurso.done_lessons} de ${heroCurso.total_lessons} lecciones completadas • ${heroCurso.progress_pct}% completado`
-                  : 'Descubre este curso y desarrolla nuevas habilidades')}
-              </p>
-              
-              <div>
-                <Button
-                  size="lg"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/learning/courses/${heroCurso.course_slug}`);
-                  }}
-                  className="group/btn"
-                  data-testid="button-continue-course"
-                >
-                  <span>{heroCurso.done_lessons !== undefined ? 'Continuar Curso' : 'Ver Curso'}</span>
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
-                </Button>
+                  {heroCurso.course_title}
+                </h1>
+                
+                {/* Progress/Description */}
+                <p className="text-sm md:text-base max-w-2xl mb-8 text-[rgb(220,220,220)]">
+                  {heroCurso.done_lessons !== undefined 
+                    ? `${heroCurso.done_lessons} de ${heroCurso.total_lessons} lecciones completadas • ${heroCurso.progress_pct}% completado`
+                    : heroCurso.short_description || 'Descubre este curso y desarrolla nuevas habilidades'}
+                </p>
+                
+                {/* CTA Button */}
+                <div className="flex gap-3">
+                  <Button
+                    size="lg"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/learning/courses/${heroCurso.course_slug}`);
+                    }}
+                    className="group/btn"
+                    data-testid="button-continue-course"
+                  >
+                    <span>{heroCurso.done_lessons !== undefined ? 'Continuar Curso' : 'Ver Curso'}</span>
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Continue Where You Left Off Section */}
-        <StatCard>
+        {/* Content Section with padding */}
+        <div className="flex-1 p-6 md:p-12 space-y-6">
+          {/* Continue Where You Left Off Section */}
+          <StatCard>
           <StatCardContent>
             <StatCardTitle className="mb-4 flex items-center gap-2">
               <BookOpen className="h-5 w-5" />
@@ -224,7 +226,8 @@ export default function LearningDashboard() {
               />
             )}
           </StatCardContent>
-        </StatCard>
+          </StatCard>
+        </div>
       </div>
     </Layout>
   )
