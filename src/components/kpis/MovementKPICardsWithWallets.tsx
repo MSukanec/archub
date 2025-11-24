@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Building2, FolderOpen, DollarSign, Wallet } from "lucide-react";
 import { useWalletCurrencyBalances, CurrencyGroupedData } from "@/hooks/use-wallet-currency-balances";
-import { useIsMobile } from "@/hooks/use-mobile.tsx";
+import { useMobile } from "@/hooks/use-mobile";
 
 interface MovementKPICardsWithWalletsProps {
   organizationId?: string;
@@ -174,7 +174,7 @@ const CurrencyColumn: React.FC<{
 
 export function MovementKPICardsWithWallets({ organizationId, projectId }: MovementKPICardsWithWalletsProps) {
   const { projectBalances, organizationBalances, isLoading } = useWalletCurrencyBalances(organizationId, projectId);
-  const isMobile = useIsMobile();
+  const isMobile = useMobile();
 
   if (isLoading) {
     return (

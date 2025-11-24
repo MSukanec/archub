@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Building2, FolderOpen, DollarSign, Coins } from "lucide-react";
 import { useMovementKPIs, CurrencyBalance } from "@/hooks/use-movement-kpis";
-import { useIsMobile } from "@/hooks/use-mobile.tsx";
+import { useMobile } from "@/hooks/use-mobile";
 
 interface MovementKPICardsProps {
   organizationId?: string;
@@ -51,7 +51,7 @@ const CurrencyBalanceBadge: React.FC<{ balance: CurrencyBalance, index: number, 
 
 export function MovementKPICards({ organizationId, projectId }: MovementKPICardsProps) {
   const { projectBalances, organizationBalances, isLoading } = useMovementKPIs(organizationId, projectId);
-  const isMobile = useIsMobile();
+  const isMobile = useMobile();
 
   if (isLoading) {
     return (

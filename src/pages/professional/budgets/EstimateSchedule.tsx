@@ -14,7 +14,7 @@ import { useConstructionDependencies } from '@/hooks/use-construction-dependenci
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
+import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'

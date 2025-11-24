@@ -6,7 +6,7 @@ import { useConstructionProjectPhases, useUpdatePhasePositions } from '@/hooks/u
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
+import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useActionBarMobile } from '@/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
