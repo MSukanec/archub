@@ -62,17 +62,17 @@ export function ModulesSection({
 
                   {/* Module Content */}
                   <div className="p-6">
-                    {/* Module Header - 16px with accent color */}
-                    <div className="flex items-start gap-2 mb-4" style={{ fontSize: '16px', color: 'var(--accent)' }}>
-                      <span className="font-bold">
+                    {/* Module Header - vertical layout on mobile */}
+                    <div className="mb-4 space-y-2">
+                      <span className="font-bold block" style={{ fontSize: '16px', color: 'var(--accent)' }}>
                         MÓDULO {String(idx + 1).padStart(2, '0')}
                       </span>
-                      <span>·</span>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3" style={{ fontSize: '14px', color: 'var(--accent)' }}>
                         <span className="flex items-center gap-1">
                           <BookOpen className="w-4 h-4" />
                           {module.lessons?.length || 0} lecciones
                         </span>
+                        <span>•</span>
                         <span className="flex items-center gap-1">
                           <Clock className="w-4 h-4" />
                           {formatMinutesToTime(module.total_duration_min || 0)}
