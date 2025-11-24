@@ -105,8 +105,6 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { isVisible: isCourseSidebarVisible, modules, lessons, currentLessonId } = useCourseSidebarStore();
   const [location] = useLocation();
 
-  // DEBUG
-  console.log('[DashboardLayout] Course sidebar store:', { isCourseSidebarVisible, modulesCount: modules.length, lessonsCount: lessons.length, userMode });
 
   // Hook para color dinámico del accent basado en el proyecto activo
   useProjectAccentColor();
@@ -314,9 +312,8 @@ function LayoutContent({
               </main>
               </div>
 
-              {/* Course Sidebar - Right side, only visible when activated 
-                  EN MODO LEARNER: El RightSidebar maneja esto, no renderizar el sidebar viejo */}
-              {isCourseSidebarVisible && !isMobile && userMode !== 'learner' && (
+              {/* Course Sidebar - Right side, only visible when activated */}
+              {isCourseSidebarVisible && !isMobile && (
                 <div className="flex-shrink-0 p-1">
                   <div className="h-full rounded-lg overflow-hidden">
                     <CourseSidebar
