@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -118,6 +118,19 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
+  // Generate current image URL for editing
+  const { data: currentImageUrl } = useQuery({
+    queryKey: ['project-edit-image', editingProject?.id, (editingProject as any)?.project_data?.image_bucket, (editingProject as any)?.project_data?.image_path],
+    queryFn: async () => {
+      if (!(editingProject as any)?.project_data?.image_bucket || !(editingProject as any)?.project_data?.image_path) {
+        return null;
+      }
+      const { getProjectImageUrlFromData } = await import('@/features/projects');
+      return await getProjectImageUrlFromData((editingProject as any).project_data);
+    },
+    enabled: !!editingProject && !!(editingProject as any)?.project_data?.image_bucket && !!(editingProject as any)?.project_data?.image_path,
+  });
+
   // Encontrar el member_id del usuario actual
   const currentUserMember = organizationMembers.find(member => 
     member.user_id === userData?.user?.id
@@ -140,10 +153,13 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
   // Reset form when editing project changes - ALWAYS in edit mode
   useEffect(() => {
     if (editingProject) {
+      const projectTypeId = editingProject.project_data?.project_type_id;
+      const projectModalityId = editingProject.project_data?.project_modality_id;
+      
       form.reset({
         name: editingProject.name,
-        project_type_id: editingProject.project_data?.project_type_id || "",
-        project_modality_id: editingProject.project_data?.project_modality_id || "",
+        project_type_id: projectTypeId || "",
+        project_modality_id: projectModalityId || "",
         status: editingProject.status as "active" | "inactive" | "completed" | "paused",
         color: editingProject.color || "#84cc16",
         use_custom_color: editingProject.use_custom_color || false,
@@ -491,7 +507,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
             <UploadImageAndShowField
               projectId={undefined}
               organizationId={organizationId}
-              currentImageUrl={isEditing ? (editingProject?.project_data as any)?.project_image_url || null : null}
+              currentImageUrl={isEditing ? currentImageUrl || null : null}
               previewMode={true}
               previewUrl={imagePreviewUrl}
               onFileSelect={handleFileSelect}
