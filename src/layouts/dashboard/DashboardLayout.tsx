@@ -105,6 +105,9 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { isVisible: isCourseSidebarVisible, modules, lessons, currentLessonId } = useCourseSidebarStore();
   const [location] = useLocation();
 
+  // DEBUG
+  console.log('[DashboardLayout] Course sidebar store:', { isCourseSidebarVisible, modulesCount: modules.length, lessonsCount: lessons.length, userMode });
+
   // Hook para color dinámico del accent basado en el proyecto activo
   useProjectAccentColor();
   
