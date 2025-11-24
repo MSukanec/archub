@@ -15,13 +15,15 @@ Preferred communication style: Simple, everyday language.
 - **Modals**: Responsive Dialog component with standardized patterns using `FormModalLayout`, React Hook Form with Zod validation.
 - **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub with a two-level sidebar system.
 - **Layout Architecture (Nov 24, 2024)**: 
-  - **Migration to Experience-Based Layouts**: Successfully migrated from device-based structure (`src/layout/desktop/`) to experience-based organization (`src/layouts/`). This aligns with Feature-Sliced Design principles and product domains. Migration completed with 55+ files updated and zero compatibility shims.
+  - **Migration to Experience-Based Layouts**: Successfully migrated from device-based structure (`src/layout/desktop/` and `src/layout/mobile/`) to experience-based organization (`src/layouts/`). This aligns with Feature-Sliced Design principles and product domains. Migration completed with 85+ files updated and zero compatibility shims.
   - **Dashboard Layout**: Implemented in `src/layouts/dashboard/` with organized subfolders:
     - `components/Sidebar/`: LeftSidebar, RightSidebar, ButtonSidebar, SidebarIconButton
     - `components/Topbar/`: Header, Footer, ActionBar, ProjectSelectorButton, OrganizationSelectorButton
+    - `components/MobileMenu/`: MobileMenu, MobileMenuButton, HeaderMobile, useMobileMenuStore
+    - `components/MobileActionBar/`: ActionBarMobile, ActionBarMobileContext, SwipeableCard, SwipeContainer
     - Core files: DashboardLayout.tsx (main wrapper), PageLayout.tsx (page-level layout), layoutWidth.ts (utilities)
-  - **Barrel Exports**: Centralized `src/layouts/index.ts` for clean imports (`import { DashboardLayout, PageLayout, ActionBar, ButtonSidebar } from "@/layouts"`)
-  - **Migration Status**: ✅ Complete. Legacy `src/layout/desktop/` folder removed. All 55+ consumer files successfully migrated to import from `@/layouts`. Application running without errors.
+  - **Barrel Exports**: Centralized `src/layouts/index.ts` for clean imports (`import { DashboardLayout, PageLayout, ActionBar, MobileMenu, ActionBarMobile } from "@/layouts"`)
+  - **Migration Status**: ✅ Complete. Legacy `src/layout/desktop/` and `src/layout/mobile/` folders removed. All 85+ consumer files successfully migrated to import from `@/layouts`. Application running without errors.
   - **Future Roadmap**: Additional layout types planned: `root/` (global providers), `auth/` (login/register), `marketing/` (landing pages), `workspace/` (viewer mode with minimal UI)
 - **Content Theming System**: Unified CSS theming layer with dynamic background switching via `useContentBackground` hook.
 
