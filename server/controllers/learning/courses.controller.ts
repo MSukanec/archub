@@ -167,3 +167,55 @@ export async function handleGetCourseProgress(req: Request, res: Response) {
     return res.status(500).json({ error: error.message || 'Failed to fetch course progress' });
   }
 }
+
+export async function handleGetCourseStructure(req: Request, res: Response) {
+  try {
+    const { id: courseId } = req.params;
+    
+    if (!courseId) {
+      return res.status(400).json({ error: 'Course ID is required' });
+    }
+
+    // Get modules for the course (using admin client for structure, no RLS restrictions)
+    const adminClient = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey);
+    
+    const { data: modules, error: modulesError } = await adminClient
+      .from('course_modules')
+      .select('*')
+      .eq('course_id', courseId)
+      .order('sort_index', { ascending: true });
+
+    if (modulesError) {
+      console.error('Error fetching course modules:', modulesError);
+      throw modulesError;
+    }
+
+    if (!modules || modules.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    // Get lessons for all modules
+    const moduleIds = modules.map((m: any) => m.id);
+    
+    const { data: lessons, error: lessonsError } = await adminClient
+      .from('course_lessons')
+      .select('*')
+      .in('module_id', moduleIds)
+      .order('sort_index', { ascending: true });
+
+    if (lessonsError) {
+      console.error('Error fetching course lessons:', lessonsError);
+    }
+
+    // Combine modules with nested lessons
+    const structure = modules.map((module: any) => ({
+      ...module,
+      lessons: lessons?.filter((lesson: any) => lesson.module_id === module.id) || []
+    }));
+
+    res.status(200).json(structure);
+  } catch (error: any) {
+    console.error('Error in handleGetCourseStructure controller:', error);
+    res.status(500).json({ error: error.message || 'Failed to fetch course structure' });
+  }
+}

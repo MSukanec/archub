@@ -4,7 +4,8 @@ import {
   handleGetCoursesFull,
   handleGetDashboard,
   handleGetDashboardFast,
-  handleGetCourseProgress
+  handleGetCourseProgress,
+  handleGetCourseStructure
 } from '../controllers/learning/courses.controller.js';
 import {
   handleGetLessonNotes,
@@ -29,6 +30,9 @@ export function registerLearningRoutes(app: Express, deps: RouteDeps): void {
   
   // GET /api/courses/:id/progress - Get progress for a specific course
   app.get("/api/courses/:id/progress", handleGetCourseProgress);
+
+  // GET /api/courses/:id/structure - Get course structure (modules and lessons)
+  app.get("/api/courses/:id/structure", handleGetCourseStructure);
 
   // ========== LEARNING - LESSONS ENDPOINTS ==========
   

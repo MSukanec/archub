@@ -1,19 +1,17 @@
-import { supabase } from '@/lib/supabase';
 import type { CourseModuleWithLessons } from '../types';
 
 /**
  * Obtiene la estructura completa de un curso (módulos y lecciones).
  * 
- * Query directa a Supabase que incluye:
+ * Llamada a backend endpoint que incluye:
  * - Módulos del curso (course_modules)
  * - Lecciones de cada módulo (course_lessons)
  * 
- * No incluye progreso del usuario. Útil para mostrar la estructura
- * del curso de forma rápida sin datos de autenticación.
+ * Usa autenticación del backend para acceso seguro.
  * 
  * @param courseId - ID del curso
  * @returns Array de módulos con sus lecciones anidadas
- * @throws {Error} Si falla la query principal de módulos
+ * @throws {Error} Si falla la petición al backend
  */
 export async function getCourseStructure(
   courseId: string
@@ -22,37 +20,23 @@ export async function getCourseStructure(
     return [];
   }
 
-  // Query principal - obtener módulos
-  const { data: modules, error: modulesError } = await supabase
-    .from('course_modules')
-    .select('*')
-    .eq('course_id', courseId)
-    .order('sort_index', { ascending: true });
+  try {
+    const response = await fetch(`/api/courses/${courseId}/structure`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
 
-  if (modulesError) {
-    throw modulesError;
-  }
+    if (!response.ok) {
+      console.error(`Error fetching course structure: ${response.status}`);
+      return [];
+    }
 
-  if (!modules || modules.length === 0) {
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching course structure:', error);
     return [];
   }
-
-  // Query de relaciones - obtener lecciones
-  const moduleIds = modules.map(m => m.id);
-  
-  const { data: lessons, error: lessonsError } = await supabase
-    .from('course_lessons')
-    .select('*')
-    .in('module_id', moduleIds)
-    .order('sort_index', { ascending: true });
-
-  if (lessonsError) {
-    console.error('Error fetching course lessons:', lessonsError);
-  }
-
-  // Combinar datos - anidar lecciones en módulos
-  return modules.map(module => ({
-    ...module,
-    lessons: lessons?.filter(lesson => lesson.module_id === module.id) || []
-  }));
 }
