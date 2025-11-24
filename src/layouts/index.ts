@@ -1,0 +1,34 @@
+/**
+ * Layouts Barrel File
+ * Central export point for all layout components
+ * 
+ * This allows clean imports like:
+ * import { DashboardLayout, PageLayout } from "@/layouts"
+ */
+
+// Dashboard Layout exports
+export { Layout as DashboardLayout } from "./dashboard/DashboardLayout";
+export { PageLayout } from "./dashboard/PageLayout";
+
+// Dashboard Components - Sidebar
+export { LeftSidebar } from "./dashboard/components/Sidebar/LeftSidebar";
+export { RightSidebar } from "./dashboard/components/Sidebar/RightSidebar";
+export { default as ButtonSidebar } from "./dashboard/components/Sidebar/ButtonSidebar";
+export { SidebarIconButton } from "./dashboard/components/Sidebar/SidebarIconButton";
+
+// Dashboard Components - Topbar
+export { Header } from "./dashboard/components/Topbar/Header";
+export { Footer } from "./dashboard/components/Topbar/Footer";
+export { ActionBar } from "./dashboard/components/Topbar/ActionBar";
+export { ProjectSelectorButton } from "./dashboard/components/Topbar/ProjectSelectorButton";
+export { OrganizationSelectorButton } from "./dashboard/components/Topbar/OrganizationSelectorButton";
+
+// Layout utilities
+export { 
+  type WidthMode, 
+  type WidthProp, 
+  resolveWidthMode, 
+  getContainerClasses, 
+  getHeaderPaddingClasses, 
+  getContentPaddingClasses 
+} from "./dashboard/layoutWidth";
