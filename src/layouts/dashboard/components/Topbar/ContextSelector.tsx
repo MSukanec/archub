@@ -11,7 +11,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useUpdateUserOrganizationPreferences } from "@/features/organization";
 import { cn } from "@/lib/utils";
 
-export function ProjectSelectorButton() {
+export function ContextSelector() {
   const { data: projectsLite = [] } = useProjectsLite();
   const { selectedProjectId, setSelectedProject, currentOrganizationId } = useProjectContext();
   const { data: userData } = useCurrentUser();
@@ -71,7 +71,7 @@ export function ProjectSelectorButton() {
           variant="ghost"
           size="sm"
           className="h-8 px-2 text-xs gap-2 border border-border"
-          data-testid="button-project-selector"
+          data-testid="button-context-selector"
         >
           {currentProject ? (
             <Avatar className="h-5 w-5">

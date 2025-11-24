@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ExpandableAvatarGroup } from "@/components/ui-custom/ExpandableAvatarGroup";
-import { ProjectSelectorButton } from "./ProjectSelectorButton";
+import { ContextSelector } from "./ContextSelector";
 
 interface Tab {
   id: string;
@@ -85,7 +85,7 @@ export function Header({
               <ExpandableAvatarGroup organizationId={organizationId} />
             )}
             {showProjectSelector && (
-              <ProjectSelectorButton />
+              <ContextSelector />
             )}
           </div>
         </div>

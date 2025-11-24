@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/popover";
 import { PlanRestricted } from "@/features/users";
 import { ExpandableAvatarGroup } from "@/components/ui-custom/ExpandableAvatarGroup";
-import { ProjectSelectorButton } from "./components/Topbar/ProjectSelectorButton";
+import { ContextSelector } from "./components/Topbar/ContextSelector";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
@@ -357,7 +357,7 @@ export function PageLayout({
               <ExpandableAvatarGroup organizationId={organizationId} />
             )}
             {showProjectSelector && (
-              <ProjectSelectorButton />
+              <ContextSelector />
             )}
             {!showMembers && !showProjectSelector && selector && (
               selector

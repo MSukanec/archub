@@ -20,8 +20,7 @@ export { SidebarIconButton } from "./dashboard/components/Sidebar/SidebarIconBut
 export { Header } from "./dashboard/components/Topbar/Header";
 export { Footer } from "./dashboard/components/Topbar/Footer";
 export { ActionBar } from "./dashboard/components/Topbar/ActionBar";
-export { ProjectSelectorButton } from "./dashboard/components/Topbar/ProjectSelectorButton";
-export { OrganizationSelectorButton } from "./dashboard/components/Topbar/OrganizationSelectorButton";
+export { ContextSelector } from "./dashboard/components/Topbar/ContextSelector";
 
 // Dashboard Components - Mobile
 export * from './dashboard/components/MobileMenu';
