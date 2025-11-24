@@ -73,9 +73,10 @@ export default function ProjectItemCard({
   const statusText = getStatusText(project.status);
 
   // Generate image URL on-demand from bucket+path with React Query
+  // Data comes from projects_view which includes image_bucket, image_path, is_public
   const { data: imageUrl } = useQuery({
     queryKey: ['project-image', project.id, project.project_data?.image_bucket, project.project_data?.image_path],
-    queryFn: () => getProjectImageUrlFromData(project.project_data!),
+    queryFn: () => getProjectImageUrlFromData(project.project_data || {}),
     enabled: !!project.project_data?.image_bucket && !!project.project_data?.image_path,
     refetchInterval: 30 * 60 * 1000,  // Refresh every 30 min
     staleTime: 25 * 60 * 1000,         // Stale after 25 min
