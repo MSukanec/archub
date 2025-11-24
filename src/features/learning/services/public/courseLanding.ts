@@ -39,9 +39,27 @@ export async function fetchCourseLandingBySlug(slug: string) {
       seo_keywords: courseDetails.seo_keywords,
       landing_sections: courseDetails.landing_sections,
     });
+
+    // Generate cover URL from course_details (NEW preferred method)
+    if (courseDetails.image_bucket && courseDetails.image_path) {
+      // Public bucket: use direct public URL
+      if (courseDetails.image_bucket === 'public-assets') {
+        (course as any).cover_url = supabase.storage
+          .from(courseDetails.image_bucket)
+          .getPublicUrl(courseDetails.image_path).data.publicUrl;
+      } else {
+        // Private bucket: would need signed URL (not typical for course covers)
+        const { data } = await supabase.storage
+          .from(courseDetails.image_bucket)
+          .createSignedUrl(courseDetails.image_path, 3600);
+        if (data?.signedUrl) {
+          (course as any).cover_url = data.signedUrl;
+        }
+      }
+    }
   }
 
-  // 1.5. Fetch course media (cover, instructor photo, og_image)
+  // 1.5. Fetch course media (instructor photo, og_image) - ONLY if not from course_details
   const { data: mediaLinks } = await supabase
     .from('media_links')
     .select(`
@@ -58,7 +76,8 @@ export async function fetchCourseLandingBySlug(slug: string) {
   // Attach media URLs to course object
   if (mediaLinks && mediaLinks.length > 0) {
     mediaLinks.forEach((link: any) => {
-      if (link.category === 'course_cover' && link.media_files?.file_url) {
+      // Only use media_links cover if not already set from course_details
+      if (link.category === 'course_cover' && link.media_files?.file_url && !(course as any).cover_url) {
         (course as any).cover_url = link.media_files.file_url;
       } else if (link.category === 'instructor_photo' && link.media_files?.file_url) {
         (course as any).instructor_photo_url = link.media_files.file_url;
@@ -172,7 +191,22 @@ export async function getAllPublicCourses() {
     return [];
   }
 
-  // Fetch cover images for all courses
+  // Build cover URL map from course_details (NEW preferred method)
+  const coverUrlMap = new Map<string, string>();
+  courses.forEach(course => {
+    const courseDetails = (course as any).course_details?.[0] || (course as any).course_details;
+    if (courseDetails?.image_bucket && courseDetails?.image_path) {
+      // Public bucket: use direct public URL
+      if (courseDetails.image_bucket === 'public-assets') {
+        const publicUrl = supabase.storage
+          .from(courseDetails.image_bucket)
+          .getPublicUrl(courseDetails.image_path).data.publicUrl;
+        coverUrlMap.set(course.id, publicUrl);
+      }
+    }
+  });
+
+  // Fetch cover images from media_links (LEGACY fallback)
   const courseIds = courses.map(c => c.id);
   const { data: mediaLinks } = await supabase
     .from('media_links')
@@ -189,13 +223,21 @@ export async function getAllPublicCourses() {
 
   // Attach cover_url and merge course_details
   const coursesWithCovers = courses.map(course => {
-    const coverLink = (mediaLinks || []).find((link: any) => link.course_id === course.id);
-    const mediaFile = Array.isArray(coverLink?.media_files) ? coverLink.media_files[0] : coverLink?.media_files;
+    // Prefer course_details URL over media_links
+    let cover_url = coverUrlMap.get(course.id) || null;
+    
+    // Fallback to media_links if no cover in course_details
+    if (!cover_url) {
+      const coverLink = (mediaLinks || []).find((link: any) => link.course_id === course.id);
+      const mediaFile = Array.isArray(coverLink?.media_files) ? coverLink.media_files[0] : coverLink?.media_files;
+      cover_url = mediaFile?.file_url || null;
+    }
+    
     const courseDetails = (course as any).course_details?.[0] || (course as any).course_details;
     
     return {
       ...course,
-      cover_url: mediaFile?.file_url || null,
+      cover_url,
       badge_text: courseDetails?.badge_text || null,
       instructor_name: courseDetails?.instructor_name || null,
       instructor_title: courseDetails?.instructor_title || null,
