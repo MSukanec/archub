@@ -60,7 +60,12 @@ export default function Project() {
               backgroundPosition: 'center center'
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/60 to-black/100 dark:from-black/30 dark:via-black/70 dark:to-black/100" />
+          <div 
+            className="absolute inset-0 bg-gradient-to-b"
+            style={{
+              backgroundImage: 'linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4), var(--layout-bg))'
+            }}
+          />
         </>
       ) : (
         <div 
@@ -118,8 +123,10 @@ export default function Project() {
               <Badge 
                 className="text-[7px] sm:text-[8px] md:text-[9px] font-medium px-2 py-0.5"
                 style={{ 
-                  backgroundColor: currentProject.status === 'active' ? 'var(--accent)' : '#6b7280',
-                  color: 'white'
+                  backgroundColor: `${projectColor}40`,
+                  color: projectColor,
+                  borderColor: projectColor,
+                  border: '1px solid'
                 }}
                 data-testid="badge-project-status"
               >
