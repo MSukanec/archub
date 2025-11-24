@@ -1668,6 +1668,7 @@ export const media_links = pgTable("media_links", {
   contact_id: uuid("contact_id"),
   course_lesson_id: uuid("course_lesson_id"),
   general_cost_id: uuid("general_cost_id"),
+  general_cost_payment_id: uuid("general_cost_payment_id"),
   client_payment_id: uuid("client_payment_id"),
   course_id: uuid("course_id"),
   course_module_id: uuid("course_module_id"),
