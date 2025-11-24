@@ -50,15 +50,15 @@ export function FAQSection({
                       <CollapsibleTrigger asChild>
                         <Button
                           variant="ghost"
-                          className="w-full px-6 py-5 h-auto flex items-center justify-between hover:bg-muted/50"
+                          className="w-full px-6 py-5 h-auto flex items-start justify-between hover:bg-muted/50"
                         >
-                          <h3 className="text-left font-semibold text-base flex-1">
+                          <h3 className="text-left font-semibold text-base flex-1 whitespace-normal break-words">
                             {faq.question}
                           </h3>
                           {isOpen ? (
-                            <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0 ml-4" />
+                            <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0 ml-4 mt-0.5" />
                           ) : (
-                            <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0 ml-4" />
+                            <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0 ml-4 mt-0.5" />
                           )}
                         </Button>
                       </CollapsibleTrigger>
