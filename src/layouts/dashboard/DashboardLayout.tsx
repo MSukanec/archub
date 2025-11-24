@@ -18,7 +18,7 @@ import {
 import { useNavigationStore } from "@/stores/navigationStore";
 import { ActionBarMobile, useActionBarMobile, HeaderMobile } from '@/layouts';
 import { useMobile } from "@/hooks/use-mobile";
-import { CourseSidebar } from "@/layout/CourseSidebar";
+import { CourseSidebar } from "./components/Sidebar/CourseSidebar";
 import { useProjectAccentColor } from "@/features/projects";
 import { useContentBackground } from "@/hooks/use-content-background";
 import { FloatingAIChat } from "@/components/ui-custom/layout/FloatingAIChat";

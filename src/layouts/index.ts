@@ -39,3 +39,6 @@ export {
 
 // Marketing Layout exports
 export * from './marketing';
+
+// Initializers (global app setup)
+export * from './initializers';
