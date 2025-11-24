@@ -52,7 +52,7 @@ export async function uploadFile(
         bucket: storagePath.bucket,
         file_path: storagePath.path,
         file_name: file.name,
-        file_url: fileUrl,
+        file_url: fileUrl || undefined,
         file_type: fileType,
         file_size: processedFile.size,
         is_public: isPublic,
