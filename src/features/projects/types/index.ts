@@ -84,6 +84,7 @@ export interface UpdateProjectData {
   project_type_id?: string | null;
   project_modality_id?: string | null;
   organization_id: string;
+  last_active_at?: string | null;
 }
 
 export interface ProjectStats {

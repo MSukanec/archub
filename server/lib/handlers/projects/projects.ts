@@ -25,6 +25,7 @@ export interface UpdateProjectParams {
   project_type_id?: string | null;
   project_modality_id?: string | null;
   organization_id?: string;
+  last_active_at?: string | null;
 }
 
 export interface DeleteProjectParams {
@@ -159,16 +160,25 @@ export async function updateProject(
     }
 
     // Update main project
+    const updateData: any = {
+      name: params.name,
+      status: params.status,
+      color: params.color || '#84cc16',
+      use_custom_color: params.use_custom_color || false,
+      custom_color_h: params.custom_color_h || null,
+      custom_color_hex: params.custom_color_hex || null,
+    };
+    
+    // Add last_active_at if provided, or set to current time if status is being activated
+    if (params.last_active_at !== undefined) {
+      updateData.last_active_at = params.last_active_at;
+    } else if (params.status === 'active') {
+      updateData.last_active_at = new Date().toISOString();
+    }
+
     const { error: projectError } = await supabase
       .from('projects')
-      .update({
-        name: params.name,
-        status: params.status,
-        color: params.color || '#84cc16',
-        use_custom_color: params.use_custom_color || false,
-        custom_color_h: params.custom_color_h || null,
-        custom_color_hex: params.custom_color_hex || null,
-      })
+      .update(updateData)
       .eq('id', params.projectId)
       .eq('is_deleted', false);
 

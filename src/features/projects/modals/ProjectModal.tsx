@@ -288,6 +288,8 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       custom_color_hex: data.custom_color_hex || null,
       project_type_id: data.project_type_id || null,
       project_modality_id: data.project_modality_id || null,
+      // Set last_active_at when project is being activated
+      last_active_at: data.status === 'active' ? new Date().toISOString() : null,
     };
 
     try {
