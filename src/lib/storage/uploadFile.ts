@@ -47,6 +47,8 @@ export async function uploadFile(
       }
       fileUrl = data.signedUrl;
     }
+    
+    const isPublic = isPublicBucket || storagePath.bucket === 'social-assets';
 
     const fileType = getFileType(file.type);
     
@@ -62,7 +64,7 @@ export async function uploadFile(
         file_url: fileUrl,
         file_type: fileType,
         file_size: processedFile.size,
-        is_public: isPublicBucket,
+        is_public: isPublic,
         is_deleted: false,
         organization_id: context.organization_id,
         created_by: currentUserId
@@ -95,7 +97,7 @@ export async function uploadFile(
           movement_id: context.link_to.movement_id,
           client_payment_id: context.link_to.client_payment_id,
           visibility,
-          is_public: isPublicBucket,
+          is_public: isPublic,
           category: context.category,
           description: context.description,
           is_cover: context.is_cover || false,
