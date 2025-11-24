@@ -305,16 +305,6 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
   );
 
   const renderImageUploadField = () => {
-    if (!module?.id) {
-      return (
-        <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            Guarda el módulo primero para poder subir una imagen
-          </p>
-        </div>
-      );
-    }
-
     return (
       <div className="space-y-2">
         <div
@@ -484,10 +474,26 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
         />
 
         {/* Tercera fila: Imagen */}
-        <div>
-          <FormLabel>Imagen del Módulo</FormLabel>
-          {renderImageUploadField()}
-        </div>
+        {module?.id ? (
+          <div>
+            <FormLabel>Imagen del Módulo</FormLabel>
+            {renderImageUploadField()}
+          </div>
+        ) : (
+          <div className="rounded-lg border border-dashed border-muted-foreground/30 bg-muted/50 p-6">
+            <div className="flex items-start gap-3">
+              <div className="rounded-full bg-primary/10 p-2">
+                <Upload className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">Imagen del módulo no disponible</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Primero debes guardar el módulo para poder agregar una imagen. Podrás editarlo después para subir la imagen.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </form>
     </Form>
   );
