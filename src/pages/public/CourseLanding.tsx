@@ -1,5 +1,5 @@
 import { useParams } from 'wouter';
-import { CourseLandingLayout } from '@/layout/course-landing';
+import { MarketingLayout } from '@/layouts';
 import { 
   useCourseLanding, 
   useCourseEnrollment,
@@ -26,20 +26,20 @@ export default function CourseLanding() {
 
   if (isLoading) {
     return (
-      <CourseLandingLayout variant="public" headerNavigation={navigationLinks}>
+      <MarketingLayout transparentHeader={true} headerNavigation={navigationLinks}>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center space-y-4">
             <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
             <p className="text-muted-foreground">Cargando curso...</p>
           </div>
         </div>
-      </CourseLandingLayout>
+      </MarketingLayout>
     );
   }
 
   if (error || !data) {
     return (
-      <CourseLandingLayout variant="public" headerNavigation={navigationLinks}>
+      <MarketingLayout transparentHeader={true} headerNavigation={navigationLinks}>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center space-y-4">
             <h1 className="text-2xl font-bold">Curso no encontrado</h1>
@@ -48,7 +48,7 @@ export default function CourseLanding() {
             </p>
           </div>
         </div>
-      </CourseLandingLayout>
+      </MarketingLayout>
     );
   }
 
@@ -72,8 +72,8 @@ export default function CourseLanding() {
   const heroSection = <HeroSection course={course} stats={stats} />;
 
   return (
-    <CourseLandingLayout 
-      variant="public" 
+    <MarketingLayout 
+      transparentHeader={true}
       headerNavigation={navigationLinks}
       seo={seoProps}
       stickyContent={stickyContent}
@@ -134,6 +134,6 @@ export default function CourseLanding() {
         />
         <CTAFooter course={course} />
       </div>
-    </CourseLandingLayout>
+    </MarketingLayout>
   );
 }

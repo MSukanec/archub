@@ -1,4 +1,4 @@
-import { PublicLayout } from '@/layout/public/PublicLayout';
+import { MarketingLayout } from '@/layouts';
 import { useAllCourses, CourseGrid } from '@/features/learning';
 import { BookOpen, GraduationCap } from 'lucide-react';
 
@@ -7,7 +7,7 @@ export default function CourseCatalog() {
 
   if (error) {
     return (
-      <PublicLayout
+      <MarketingLayout
         headerNavigation={[
           { label: "Cursos", href: "/cursos" },
           { label: "Características", href: "/#features" },
@@ -27,12 +27,12 @@ export default function CourseCatalog() {
             </p>
           </div>
         </div>
-      </PublicLayout>
+      </MarketingLayout>
     );
   }
 
   return (
-    <PublicLayout
+    <MarketingLayout
       headerNavigation={[
         { label: "Cursos", href: "/cursos" },
         { label: "Características", href: "/#features" },
@@ -96,6 +96,6 @@ export default function CourseCatalog() {
           </div>
         </section>
       )}
-    </PublicLayout>
+    </MarketingLayout>
   );
 }

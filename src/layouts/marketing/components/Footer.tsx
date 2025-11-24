@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 
-export function PublicFooter() {
+export function Footer() {
   return (
     <footer className="border-t bg-background py-8 mt-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

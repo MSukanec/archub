@@ -12,11 +12,12 @@ import {
 } from "@/components/ui/sheet";
 import { useAuthStore } from "@/stores/authStore";
 
-interface PublicHeaderProps {
+interface HeaderProps {
   navigation?: Array<{ label: string; href: string }>;
+  transparent?: boolean;
 }
 
-export function PublicHeader({ navigation }: PublicHeaderProps) {
+export function Header({ navigation, transparent = false }: HeaderProps) {
   const [open, setOpen] = useState(false);
   const { user, loading, initialized, initialize, logout } = useAuthStore();
 
@@ -36,17 +37,29 @@ export function PublicHeader({ navigation }: PublicHeaderProps) {
     if (loading) return null;
 
     if (user) {
+      const buttonClasses = transparent
+        ? "h-8 px-3 bg-white/10 hover:bg-white/20 text-white border-white/20"
+        : "h-8 px-3";
+      
+      const avatarClasses = transparent
+        ? "h-8 w-8 cursor-pointer border-2 border-white/20"
+        : "h-8 w-8 cursor-pointer";
+      
+      const avatarFallbackClasses = transparent
+        ? "text-xs bg-white/10 text-white"
+        : "text-xs bg-card";
+
       return (
         <div className="flex items-center space-x-3">
           <Link href="/home">
-            <Button size="sm" className="h-8 px-3" data-testid="button-dashboard">
+            <Button size="sm" className={buttonClasses} data-testid="button-dashboard">
               Ingresar
             </Button>
           </Link>
           <div className="flex items-center space-x-2 group relative">
-            <Avatar className="h-8 w-8 cursor-pointer" data-testid="avatar-user">
+            <Avatar className={avatarClasses} data-testid="avatar-user">
               <AvatarImage src={user.user_metadata?.avatar_url} />
-              <AvatarFallback className="text-xs bg-card">
+              <AvatarFallback className={avatarFallbackClasses}>
                 {getUserInitials(user)}
               </AvatarFallback>
             </Avatar>
@@ -61,6 +74,23 @@ export function PublicHeader({ navigation }: PublicHeaderProps) {
               </button>
             </div>
           </div>
+        </div>
+      );
+    }
+
+    if (transparent) {
+      return (
+        <div className="flex items-center space-x-3">
+          <Link href="/login">
+            <Button variant="ghost" size="sm" className="h-8 px-3 text-white hover:bg-white/10" data-testid="button-login">
+              Iniciar Sesión
+            </Button>
+          </Link>
+          <Link href="/register">
+            <Button size="sm" className="h-8 px-3 bg-white text-black hover:bg-white/90" data-testid="button-register">
+              Comenzar Gratis
+            </Button>
+          </Link>
         </div>
       );
     }
@@ -81,25 +111,41 @@ export function PublicHeader({ navigation }: PublicHeaderProps) {
     );
   };
 
+  const headerClasses = transparent
+    ? "fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-black/20"
+    : "sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60";
+
+  const logoTextClasses = transparent
+    ? "font-bold text-xl text-white"
+    : "font-bold text-lg";
+
+  const navLinkClasses = transparent
+    ? "text-sm text-white/80 transition-colors hover:text-white font-medium"
+    : "text-sm text-muted-foreground transition-colors hover:text-foreground";
+
+  const mobileMenuButtonClasses = transparent
+    ? "md:hidden text-white hover:bg-white/10"
+    : "md:hidden";
+
+  const headerHeight = transparent ? "h-16" : "h-14";
+
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-6 h-14 flex items-center justify-between">
+    <header className={headerClasses}>
+      <div className={`container mx-auto px-6 ${headerHeight} flex items-center justify-between`}>
         <div className="flex items-center space-x-8">
           <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer">
             <img 
               src="/Seencel512_b.png" 
               alt="Seencel" 
-              className="h-7 w-7 object-contain"
+              className={transparent ? "h-8 w-8 object-contain" : "h-7 w-7 object-contain"}
             />
-            <span className="font-bold text-lg">Seencel</span>
+            <span className={logoTextClasses}>Seencel</span>
           </Link>
           
           {/* Desktop Navigation */}
           {navigation && navigation.length > 0 && (
             <nav className="hidden md:flex items-center space-x-6">
               {navigation.map((item) => {
-                // Only use <a> for same-page hash anchors (starting with # without /)
-                // Use <Link> for everything else (routes and cross-page hashes like /#features)
                 const isSamePageAnchor = item.href.startsWith('#') && !item.href.includes('/');
                 
                 if (isSamePageAnchor) {
@@ -107,7 +153,7 @@ export function PublicHeader({ navigation }: PublicHeaderProps) {
                     <a 
                       key={item.href}
                       href={item.href} 
-                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      className={navLinkClasses}
                       data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                     >
                       {item.label}
@@ -119,7 +165,7 @@ export function PublicHeader({ navigation }: PublicHeaderProps) {
                   <Link 
                     key={item.href}
                     href={item.href}
-                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    className={navLinkClasses}
                     data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     {item.label}
@@ -138,7 +184,7 @@ export function PublicHeader({ navigation }: PublicHeaderProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="md:hidden"
+                  className={mobileMenuButtonClasses}
                   data-testid="button-mobile-menu"
                 >
                   <Menu className="h-5 w-5" />
@@ -151,8 +197,6 @@ export function PublicHeader({ navigation }: PublicHeaderProps) {
                 </SheetHeader>
                 <nav className="flex flex-col gap-4 mt-8">
                   {navigation.map((item) => {
-                    // Only use <a> for same-page hash anchors (starting with # without /)
-                    // Use <Link> for everything else (routes and cross-page hashes like /#features)
                     const isSamePageAnchor = item.href.startsWith('#') && !item.href.includes('/');
                     
                     if (isSamePageAnchor) {
@@ -186,7 +230,6 @@ export function PublicHeader({ navigation }: PublicHeaderProps) {
             </Sheet>
           )}
 
-          {/* Authentication Actions (automatic) */}
           {renderAuthActions()}
         </div>
       </div>

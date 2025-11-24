@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useLocation } from "wouter";
-import { PublicHeader } from "./PublicHeader";
-import { PublicFooter } from "./PublicFooter";
+import { Header } from "./components/Header";
+import { Footer } from "./components/Footer";
 
 interface SEOProps {
   title: string;
@@ -13,24 +13,29 @@ interface SEOProps {
   twitterImage?: string;
 }
 
-interface PublicLayoutProps {
+interface MarketingLayoutProps {
   children: React.ReactNode;
+  transparentHeader?: boolean;
   headerNavigation?: Array<{ label: string; href: string }>;
   seo?: SEOProps;
+  heroSlot?: React.ReactNode;
+  stickyContent?: React.ReactNode;
 }
 
-export function PublicLayout({ 
+export function MarketingLayout({ 
   children, 
+  transparentHeader = false,
   headerNavigation,
-  seo 
-}: PublicLayoutProps) {
+  seo,
+  heroSlot,
+  stickyContent
+}: MarketingLayoutProps) {
   const [location] = useLocation();
 
   // Handle hash scrolling after SPA navigation
   useEffect(() => {
     const hash = window.location.hash;
     if (hash) {
-      // Small delay to ensure DOM is ready
       setTimeout(() => {
         const element = document.querySelector(hash);
         if (element) {
@@ -38,12 +43,11 @@ export function PublicLayout({
         }
       }, 100);
     } else {
-      // Scroll to top when navigating to a page without hash
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [location]);
 
-  // Handle SEO meta tags
+  // Handle SEO meta tags with proper cleanup
   useEffect(() => {
     if (!seo) return;
 
@@ -51,19 +55,7 @@ export function PublicLayout({
     let metaDescription = document.querySelector('meta[name="description"]');
     const originalDescription = metaDescription?.getAttribute("content") || "";
     
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    const originalOgTitle = ogTitle?.getAttribute("content") || "";
-    
-    const ogDescription = document.querySelector('meta[property="og:description"]');
-    const originalOgDescription = ogDescription?.getAttribute("content") || "";
-    
-    const ogType = document.querySelector('meta[property="og:type"]');
-    const originalOgType = ogType?.getAttribute("content") || "";
-    
-    const ogUrl = document.querySelector('meta[property="og:url"]');
-    const originalOgUrl = ogUrl?.getAttribute("content") || "";
-
-    const createdTags: Element[] = [];
+    const tagTracker = new Map<string, { tag: Element; wasCreated: boolean; originalValue: string }>();
     
     document.title = seo.title;
     
@@ -81,27 +73,35 @@ export function PublicLayout({
     
     const setMetaTag = (property: string, content: string) => {
       let tag = document.querySelector(`meta[property="${property}"]`);
+      const key = `property:${property}`;
+      
       if (tag) {
+        const originalValue = tag.getAttribute("content") || "";
+        tagTracker.set(key, { tag, wasCreated: false, originalValue });
         tag.setAttribute("content", content);
       } else {
         tag = document.createElement("meta");
         tag.setAttribute("property", property);
         tag.setAttribute("content", content);
         document.head.appendChild(tag);
-        createdTags.push(tag);
+        tagTracker.set(key, { tag, wasCreated: true, originalValue: "" });
       }
     };
 
     const setMetaName = (name: string, content: string) => {
       let tag = document.querySelector(`meta[name="${name}"]`);
+      const key = `name:${name}`;
+      
       if (tag) {
+        const originalValue = tag.getAttribute("content") || "";
+        tagTracker.set(key, { tag, wasCreated: false, originalValue });
         tag.setAttribute("content", content);
       } else {
         tag = document.createElement("meta");
         tag.setAttribute("name", name);
         tag.setAttribute("content", content);
         document.head.appendChild(tag);
-        createdTags.push(tag);
+        tagTracker.set(key, { tag, wasCreated: true, originalValue: "" });
       }
     };
 
@@ -133,33 +133,55 @@ export function PublicLayout({
         }
       }
       
-      if (ogTitle) {
-        ogTitle.setAttribute("content", originalOgTitle);
-      }
-      
-      if (ogDescription) {
-        ogDescription.setAttribute("content", originalOgDescription);
-      }
-      
-      if (ogType) {
-        ogType.setAttribute("content", originalOgType);
-      }
-      
-      if (ogUrl) {
-        ogUrl.setAttribute("content", originalOgUrl);
-      }
-      
-      createdTags.forEach(tag => tag.remove());
+      tagTracker.forEach(({ tag, wasCreated, originalValue }) => {
+        if (wasCreated) {
+          tag.remove();
+        } else {
+          tag.setAttribute("content", originalValue);
+        }
+      });
     };
   }, [seo]);
 
+  // Transparent header layout (for course landing pages)
+  if (transparentHeader) {
+    return (
+      <div className="min-h-screen">
+        <Header navigation={headerNavigation} transparent={true} />
+        
+        {/* Floating Sticky Card - Desktop only, positioned absolutely */}
+        {stickyContent && (
+          <div 
+            className="hidden lg:block fixed top-24 z-40"
+            style={{
+              width: '368px',
+              right: 'max(32px, calc((100vw - 1472px) / 2))'
+            }}
+          >
+            <div className="sticky top-24">
+              {stickyContent}
+            </div>
+          </div>
+        )}
+        
+        <main>
+          {heroSlot}
+          {children}
+        </main>
+        
+        <Footer />
+      </div>
+    );
+  }
+
+  // Normal layout (for standard marketing pages)
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <PublicHeader navigation={headerNavigation} />
+      <Header navigation={headerNavigation} transparent={false} />
       <div className="container mx-auto px-6 py-12 flex-1">
         {children}
       </div>
-      <PublicFooter />
+      <Footer />
     </div>
   );
 }

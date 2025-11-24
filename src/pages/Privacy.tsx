@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { PublicLayout } from "@/layout/public/PublicLayout";
+import { MarketingLayout } from "@/layouts";
 
 export default function Privacy() {
   const [activeSection, setActiveSection] = useState("about");
@@ -62,7 +62,7 @@ export default function Privacy() {
   ];
 
   return (
-    <PublicLayout 
+    <MarketingLayout 
       headerNavigation={[
         { label: "Cursos", href: "/cursos" },
         { label: "Características", href: "/#features" },
@@ -636,6 +636,6 @@ export default function Privacy() {
           <ArrowUp className="h-5 w-5" />
         </Button>
       )}
-    </PublicLayout>
+    </MarketingLayout>
   );
 }

@@ -20,7 +20,7 @@ import {
   Zap,
   Package
 } from "lucide-react";
-import { PublicLayout } from "@/layout/public/PublicLayout";
+import { MarketingLayout } from "@/layouts";
 
 const coreFeatures = [
   {
@@ -132,7 +132,7 @@ const capabilities = [
 
 export default function Landing() {
   return (
-    <PublicLayout
+    <MarketingLayout
       headerNavigation={[
         { label: "Cursos", href: "/cursos" },
         { label: "Características", href: "#features" },
@@ -336,6 +336,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-    </PublicLayout>
+    </MarketingLayout>
   );
 }

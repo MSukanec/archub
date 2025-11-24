@@ -36,3 +36,6 @@ export {
   getHeaderPaddingClasses, 
   getContentPaddingClasses 
 } from "./dashboard/layoutWidth";
+
+// Marketing Layout exports
+export * from './marketing';
