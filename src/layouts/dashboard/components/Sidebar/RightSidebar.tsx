@@ -33,6 +33,7 @@ import { useCourseSidebarStore } from "@/stores/sidebarStore";
 import { useCoursePlayerStore } from "@/features/learning";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { getCourseStructure } from "@/features/learning/services/student/getCourseStructure";
 
 export function RightSidebar() {
   const { isDark, toggleTheme } = useThemeStore();
@@ -87,43 +88,19 @@ export function RightSidebar() {
     enabled: !!courseSlug && !!supabase && isOnCoursePlayerTab
   });
 
-  // Fetch course modules using real course ID
-  const { data: modules = [] } = useQuery({
-    queryKey: ['course-modules', course?.id],
+  // Fetch course structure (modules with lessons) using backend endpoint
+  const { data: courseStructure = [] } = useQuery({
+    queryKey: ['course-structure', course?.id],
     queryFn: async () => {
-      if (!course?.id || !supabase) return [];
-      
-      const { data, error } = await supabase
-        .from('course_modules')
-        .select('*')
-        .eq('course_id', course.id)
-        .order('sort_index', { ascending: true });
-        
-      if (error) throw error;
-      return data || [];
+      if (!course?.id) return [];
+      return getCourseStructure(course.id);
     },
-    enabled: !!course?.id && !!supabase && isOnCoursePlayerTab
+    enabled: !!course?.id && isOnCoursePlayerTab
   });
 
-  // Fetch course lessons
-  const { data: lessons = [] } = useQuery({
-    queryKey: ['course-lessons-full', course?.id],
-    queryFn: async () => {
-      if (!course?.id || !supabase || modules.length === 0) return [];
-      
-      const moduleIds = modules.map(m => m.id);
-      
-      const { data, error } = await supabase
-        .from('course_lessons')
-        .select('id, module_id, title, vimeo_video_id, duration_sec, free_preview, sort_index, is_active')
-        .in('module_id', moduleIds)
-        .order('sort_index', { ascending: true});
-        
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!course?.id && !!supabase && modules.length > 0 && isOnCoursePlayerTab
-  });
+  // Extract modules and lessons from structure
+  const modules = courseStructure;
+  const lessons = courseStructure.flatMap(m => m.lessons || []);
 
   // Fetch progress for all lessons
   const { data: progressData } = useQuery<any[]>({
@@ -202,17 +179,6 @@ export function RightSidebar() {
   const showCourseContent = userMode === 'learner' && isOnCoursePlayerTab && modules.length > 0;
   // En modo learner, el panel siempre está expandido. En otros modos, solo cuando activePanel !== null
   const isExpanded = showCourseContent ? true : (activePanel !== null);
-
-  // DEBUG
-  if (isOnCoursePlayerTab && showCourseContent === false) {
-    console.log('[RightSidebar] showCourseContent=false:', { 
-      userMode, 
-      isOnCoursePlayerTab, 
-      modulesLength: modules.length,
-      courseSlug,
-      course: course?.id
-    });
-  }
 
   // 🔒 Por ahora, SOLO mostrar el sidebar en la tab Reproductor (en cualquier modo)
   // Esto oculta el botón de IA en todos los demás lugares
