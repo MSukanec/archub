@@ -18,7 +18,7 @@ import { es } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { z } from 'zod';
-import { useContacts } from '@/hooks/use-contacts';
+import { useContacts } from '@/features/contacts';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies } from '@/hooks/use-currencies';
 import { useOrganizationMembers } from '@/features/organization';
@@ -59,8 +59,9 @@ export function SubcontractBidFormModal({
   const [currentPanel, setCurrentPanel] = useState<'edit' | 'subform'>('edit');
   const [currentSubform, setCurrentSubform] = useState<string | null>(null);
   
-  const { data: members } = useOrganizationMembers(userData?.organization?.id);
-  const { data: contacts, isLoading: isContactsLoading } = useContacts();
+  const organizationId = userData?.organization?.id;
+  const { data: members } = useOrganizationMembers(organizationId);
+  const { data: contacts, isLoading: isContactsLoading } = useContacts(organizationId);
   const { data: currencies, isLoading: isCurrenciesLoading } = useCurrencies();
   
   const [isLoading, setIsLoading] = useState(false);

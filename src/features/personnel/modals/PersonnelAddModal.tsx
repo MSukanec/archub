@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useContacts } from '@/hooks/use-contacts';
+import { useContacts } from '@/features/contacts';
 import { useToast } from '@/hooks/use-toast';
 import { getAttachmentPublicUrl } from '@/features/contacts/utils';
 import { useProjectPersonnel, useCreatePersonnel, useContactAttachmentsForPersonnel } from '@/features/personnel/hooks';
@@ -36,7 +36,8 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
   const { closeModal } = useGlobalModalStore();
   const [, setLocation] = useLocation();
   const { data: currentUser } = useCurrentUser();
-  const { data: contacts = [] } = useContacts();
+  const organizationId = currentUser?.organization?.id;
+  const { data: contacts = [] } = useContacts(organizationId);
   const projectId = currentUser?.preferences?.last_project_id;
   
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
@@ -67,8 +68,6 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
     }
     return '?';
   };
-
-  const organizationId = currentUser?.organization?.id;
 
   // Use feature hook to get assigned personnel
   const { data: projectPersonnel = [], isLoading: isLoadingAssigned } = useProjectPersonnel(

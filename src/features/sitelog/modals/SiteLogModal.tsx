@@ -21,7 +21,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/features/organization";
-import { useContacts } from "@/hooks/use-contacts";
+import { useContacts } from "@/features/contacts";
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
@@ -49,7 +49,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   const { data: currentUser } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId } = useProjectContext();
   const { data: members = [] } = useOrganizationMembers(currentOrganizationId || undefined);
-  const { data: contacts = [] } = useContacts();
+  const { data: contacts = [] } = useContacts(currentOrganizationId);
   
   // Plan features para restricciones
   const currentOrganization = currentUser?.organizations?.find(org => org.id === currentOrganizationId);
