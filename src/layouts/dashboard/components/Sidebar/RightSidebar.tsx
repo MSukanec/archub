@@ -200,7 +200,19 @@ export function RightSidebar() {
 
   // Determine if we should show course content (only in Player tab)
   const showCourseContent = userMode === 'learner' && isOnCoursePlayerTab && modules.length > 0;
-  const isExpanded = showCourseContent ? (isDocked || isHovered) : (activePanel !== null);
+  // En modo learner, el panel siempre está expandido. En otros modos, solo cuando activePanel !== null
+  const isExpanded = showCourseContent ? true : (activePanel !== null);
+
+  // DEBUG
+  if (isOnCoursePlayerTab && showCourseContent === false) {
+    console.log('[RightSidebar] showCourseContent=false:', { 
+      userMode, 
+      isOnCoursePlayerTab, 
+      modulesLength: modules.length,
+      courseSlug,
+      course: course?.id
+    });
+  }
 
   // 🔒 Por ahora, SOLO mostrar el sidebar en la tab Reproductor (en cualquier modo)
   // Esto oculta el botón de IA en todos los demás lugares
