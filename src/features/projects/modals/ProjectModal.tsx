@@ -27,7 +27,7 @@ import { useUpdateChecklist } from "@/hooks/use-update-checklist";
 // Import feature hooks and services
 import { useCreateProject } from '../hooks/use-create-project';
 import { useUpdateProject } from '../hooks/use-update-project';
-import { uploadProjectImage, updateProjectImageUrl } from '@/features/projects';
+import { uploadProjectImage } from '@/features/projects';
 import ProjectColorAdvanced from '../components/ProjectColorAdvanced';
 
 // Paleta de colores predefinidos
@@ -195,11 +195,8 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
         description: "Tu imagen se está procesando",
       });
 
-      // Upload image to storage
-      const uploadResult = await uploadProjectImage(selectedImageFile, projectId, organizationId);
-      
-      // Update project_data table with new image URL (generates on-demand signed URLs)
-      await updateProjectImageUrl(projectId, uploadResult.file_url);
+      // Upload image to storage (automatically updates project_data with image_bucket + image_path)
+      await uploadProjectImage(selectedImageFile, projectId, organizationId);
       
       // Invalidate queries to refresh project views
       queryClient.invalidateQueries({ queryKey: ['projects'] });
