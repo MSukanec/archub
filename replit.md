@@ -44,6 +44,7 @@ Preferred communication style: Simple, everyday language.
 - **Public Media Access**: Course images (cover, instructor, OG) use `is_public` flag in `media_links` for public accessibility. Course media automatically marked as public, enabling display on unauthenticated landing pages while keeping organizational media protected.
 - **Project Selector Filtering**: The header project selector (`ProjectSelectorButton`) exclusively displays projects with `status='active'` to enhance usability in large portfolios.
 - **Project Activity Tracking**: `last_active_at` timestamp tracks when a project was last selected, influencing project sorting in active lists.
+- **Hooks Consolidation (Nov 2024)**: Systematic consolidation of React hooks according to Feature-Sliced Design principles. Status: 43% consolidated (21 global hooks + 15 migrated to features), 57% documented for future migration. Eliminated 2 duplicate hooks, migrated hooks to existing features (contacts, projects, materials, personnel, general-costs). Remaining ~50 hooks documented for future feature creation (finances, tasks, design, construction, budgets, kanban, partners). All feature-specific hooks converted to re-exports from their respective features, maintaining backward compatibility. See `/tmp/resumen-consolidacion-hooks.md` for complete documentation.
 
 ## External Dependencies
 - **Supabase**: Authentication.
