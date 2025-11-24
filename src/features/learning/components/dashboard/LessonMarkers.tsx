@@ -25,7 +25,7 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
   const { data: markers = [], isLoading } = useQuery<CourseLessonNote[]>({
     queryKey: [`/api/lessons/${lessonId}/markers`],
     enabled: !!lessonId,
-    staleTime: 10000, // Cache for 10 seconds
+    staleTime: 0, // Always refetch on invalidation
   });
 
   // Track current video time
