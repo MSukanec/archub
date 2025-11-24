@@ -10,3 +10,12 @@ export { useCreatePersonnelRate } from './use-create-personnel-rate';
 export { useCreatePersonnelAttendance } from './use-create-personnel-attendance';
 export { useUpdatePersonnelAttendance } from './use-update-personnel-attendance';
 export { useContactAttachmentsForPersonnel } from './use-contact-attachments-for-personnel';
+export { 
+  useInsuranceList, 
+  useInsurance, 
+  useCreateInsurance, 
+  useUpdateInsurance, 
+  useDeleteInsurance, 
+  useRenewInsurance, 
+  useUploadCertificate 
+} from './use-insurances';
