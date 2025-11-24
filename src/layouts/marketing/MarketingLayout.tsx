@@ -15,7 +15,6 @@ interface SEOProps {
 
 interface MarketingLayoutProps {
   children: React.ReactNode;
-  transparentHeader?: boolean;
   headerNavigation?: Array<{ label: string; href: string }>;
   seo?: SEOProps;
   heroSlot?: React.ReactNode;
@@ -24,7 +23,6 @@ interface MarketingLayoutProps {
 
 export function MarketingLayout({ 
   children, 
-  transparentHeader = false,
   headerNavigation,
   seo,
   heroSlot,
@@ -143,11 +141,11 @@ export function MarketingLayout({
     };
   }, [seo]);
 
-  // Transparent header layout (for course landing pages)
-  if (transparentHeader) {
+  // Special layout with hero section (for course landing pages)
+  if (heroSlot) {
     return (
       <div className="min-h-screen">
-        <Header navigation={headerNavigation} transparent={true} />
+        <Header navigation={headerNavigation} />
         
         {/* Floating Sticky Card - Desktop only, positioned absolutely */}
         {stickyContent && (
@@ -177,7 +175,7 @@ export function MarketingLayout({
   // Normal layout (for standard marketing pages)
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header navigation={headerNavigation} transparent={false} />
+      <Header navigation={headerNavigation} />
       <div className="container mx-auto px-6 py-12 flex-1">
         {children}
       </div>

@@ -14,10 +14,9 @@ import { useAuthStore } from "@/stores/authStore";
 
 interface HeaderProps {
   navigation?: Array<{ label: string; href: string }>;
-  transparent?: boolean;
 }
 
-export function Header({ navigation, transparent = false }: HeaderProps) {
+export function Header({ navigation }: HeaderProps) {
   const [open, setOpen] = useState(false);
   const { user, loading, initialized, initialize, logout } = useAuthStore();
 
@@ -37,29 +36,17 @@ export function Header({ navigation, transparent = false }: HeaderProps) {
     if (loading) return null;
 
     if (user) {
-      const buttonClasses = transparent
-        ? "h-8 px-3 bg-white/10 hover:bg-white/20 text-white border-white/20"
-        : "h-8 px-3";
-      
-      const avatarClasses = transparent
-        ? "h-8 w-8 cursor-pointer border-2 border-white/20"
-        : "h-8 w-8 cursor-pointer";
-      
-      const avatarFallbackClasses = transparent
-        ? "text-xs bg-white/10 text-white"
-        : "text-xs bg-card";
-
       return (
         <div className="flex items-center space-x-3">
           <Link href="/home">
-            <Button size="sm" className={buttonClasses} data-testid="button-dashboard">
+            <Button size="sm" className="h-8 px-3 bg-white/10 hover:bg-white/20 text-white border-white/20" data-testid="button-dashboard">
               Ingresar
             </Button>
           </Link>
           <div className="flex items-center space-x-2 group relative">
-            <Avatar className={avatarClasses} data-testid="avatar-user">
+            <Avatar className="h-8 w-8 cursor-pointer border-2 border-white/20" data-testid="avatar-user">
               <AvatarImage src={user.user_metadata?.avatar_url} />
-              <AvatarFallback className={avatarFallbackClasses}>
+              <AvatarFallback className="text-xs bg-white/10 text-white">
                 {getUserInitials(user)}
               </AvatarFallback>
             </Avatar>
@@ -78,32 +65,15 @@ export function Header({ navigation, transparent = false }: HeaderProps) {
       );
     }
 
-    if (transparent) {
-      return (
-        <div className="flex items-center space-x-3">
-          <Link href="/login">
-            <Button variant="ghost" size="sm" className="h-8 px-3 text-white hover:bg-white/10" data-testid="button-login">
-              Iniciar Sesión
-            </Button>
-          </Link>
-          <Link href="/register">
-            <Button size="sm" className="h-8 px-3 bg-white text-black hover:bg-white/90" data-testid="button-register">
-              Comenzar Gratis
-            </Button>
-          </Link>
-        </div>
-      );
-    }
-
     return (
       <div className="flex items-center space-x-3">
         <Link href="/login">
-          <Button variant="ghost" size="sm" className="h-8 px-3" data-testid="button-login">
+          <Button variant="ghost" size="sm" className="h-8 px-3 text-white hover:bg-white/10" data-testid="button-login">
             Iniciar Sesión
           </Button>
         </Link>
         <Link href="/register">
-          <Button size="sm" className="h-8 px-3" data-testid="button-register">
+          <Button size="sm" className="h-8 px-3 bg-white text-black hover:bg-white/90" data-testid="button-register">
             Comenzar Gratis
           </Button>
         </Link>
@@ -111,23 +81,10 @@ export function Header({ navigation, transparent = false }: HeaderProps) {
     );
   };
 
-  const headerClasses = transparent
-    ? "fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-black/20"
-    : "sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60";
-
-  const logoTextClasses = transparent
-    ? "font-bold text-xl text-white"
-    : "font-bold text-lg";
-
-  const navLinkClasses = transparent
-    ? "text-sm text-white/80 transition-colors hover:text-white font-medium"
-    : "text-sm text-muted-foreground transition-colors hover:text-foreground";
-
-  const mobileMenuButtonClasses = transparent
-    ? "md:hidden text-white hover:bg-white/10"
-    : "md:hidden";
-
-  const headerHeight = transparent ? "h-16" : "h-14";
+  const headerClasses = "fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-black/30 border-b border-white/10";
+  const headerHeight = "h-16";
+  const logoTextClasses = "font-bold text-xl text-white";
+  const navLinkClasses = "text-sm text-white/80 transition-colors hover:text-white font-medium";
 
   return (
     <header className={headerClasses}>
@@ -137,7 +94,7 @@ export function Header({ navigation, transparent = false }: HeaderProps) {
             <img 
               src="/Seencel512_b.png" 
               alt="Seencel" 
-              className={transparent ? "h-8 w-8 object-contain" : "h-7 w-7 object-contain"}
+              className="h-8 w-8 object-contain"
             />
             <span className={logoTextClasses}>Seencel</span>
           </Link>
@@ -184,7 +141,7 @@ export function Header({ navigation, transparent = false }: HeaderProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={mobileMenuButtonClasses}
+                  className="md:hidden text-white hover:bg-white/10"
                   data-testid="button-mobile-menu"
                 >
                   <Menu className="h-5 w-5" />
