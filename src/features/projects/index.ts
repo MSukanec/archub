@@ -28,6 +28,7 @@ export * from './hooks/use-projects';
 export * from './hooks/use-project';
 export * from './hooks/use-projects-lite';
 export * from './hooks/use-projects-count';
+export * from './hooks/use-projects-map';
 export * from './hooks/use-create-project';
 export * from './hooks/use-update-project';
 export * from './hooks/use-delete-project';

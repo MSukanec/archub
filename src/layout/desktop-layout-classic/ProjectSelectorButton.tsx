@@ -4,7 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { useProjectsLite } from "@/hooks/use-projects-lite";
+import { useProjectsLite } from "@/features/projects";
 import { useProjectContext } from "@/stores/projectContext";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";

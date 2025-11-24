@@ -32,7 +32,7 @@ import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useMobileMenuStore } from "./useMobileMenuStore";
-import { useProjects } from "@/hooks/use-projects";
+import { useProjects } from "@/features/projects";
 import { PlanRestricted } from "@/features/users";
 import { useProjectContext } from "@/stores/projectContext";
 import { useToast } from "@/hooks/use-toast";

@@ -51,7 +51,7 @@ import { useMovements, useToggleMovementFavorite } from "@/hooks/use-movements";
 import { useOrganizationDefaultCurrency, useOrganizationCurrencies } from "@/hooks/use-currencies";
 import { useOrganizationWallets } from "@/features/organization";
 import { useNavigationStore } from "@/stores/navigationStore";
-import { useProjectsMap } from "@/hooks/use-projects";
+import { useProjectsMap } from "@/features/projects";
 
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";

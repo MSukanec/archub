@@ -20,7 +20,7 @@ import { useActionBarMobile } from "@/layout/mobile/ActionBarMobileContext";
 import { useMobile } from "@/hooks/use-mobile";
 import { HeaderMobile } from "@/layout/mobile/HeaderMobile";
 import { CourseSidebar } from "@/layout/CourseSidebar";
-import { useProjectAccentColor } from "@/hooks/use-project-accent-color";
+import { useProjectAccentColor } from "@/features/projects";
 import { useContentBackground } from "@/hooks/use-content-background";
 import { FloatingAIChat } from "@/components/ui-custom/layout/FloatingAIChat";
 import { FloatingCourseLessons } from "@/features/learning";

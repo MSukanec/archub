@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from "@/stores/projectContext";
-import { useProjectsLite } from "@/hooks/use-projects-lite";
+import { useProjectsLite } from "@/features/projects";
 import { useAuthStore } from "@/stores/authStore";
 import { cn } from "@/lib/utils";
 import { Building2, FolderOpen, User, ChevronDown, LogOut, ArrowUpRight, Home, CreditCard } from "lucide-react";
