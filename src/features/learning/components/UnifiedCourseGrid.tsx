@@ -9,7 +9,7 @@ interface CourseWithEnrollment {
   title: string;
   short_description?: string | null;
   cover_url?: string | null;
-  price?: number | null;
+  price?: number | string | null;
   instructor_name?: string | null;
   instructor_title?: string | null;
   badge_text?: string | null;
