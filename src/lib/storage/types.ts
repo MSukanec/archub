@@ -2,6 +2,7 @@ export type EntityType =
   | 'user_avatar'
   | 'org_logo' 
   | 'course_cover_public'
+  | 'course_module_image'
   | 'ui_asset'
   | 'invoice'
   | 'budget'

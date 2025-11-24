@@ -27,6 +27,12 @@ export const ENTITY_CONFIG: Record<EntityType, EntityConfig> = {
     compressionPreset: 'course-cover',
     visibility: 'public'
   },
+  'course_module_image': {
+    bucket: 'public-assets',
+    basePath: 'marketplace/courses/{course_id}/module-images',
+    compressionPreset: 'course-cover',
+    visibility: 'public'
+  },
   'ui_asset': {
     bucket: 'public-assets',
     basePath: 'app-ui',
