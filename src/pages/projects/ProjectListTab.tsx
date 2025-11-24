@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects, useProjectsCount, updateProjectLastActive } from '@/features/projects'
-import { useUserOrganizationPreferences } from '@/features/organization'
+import { useUserOrganizationPreferences, USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization'
 import { Folder, Edit, Trash2, Plus, CheckCircle2, Search, Filter, Bell } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -240,9 +240,13 @@ export default function ProjectList() {
       );
       
       queryClient.invalidateQueries({ 
-        queryKey: ['user-organization-preferences', userData?.user?.id, organizationId] 
+        queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!) 
       });
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      // Force immediate refetch to update UI
+      queryClient.refetchQueries({
+        queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!)
+      });
       
       navigate('/project/dashboard');
       

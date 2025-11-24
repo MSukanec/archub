@@ -22,7 +22,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects, ProjectItemCard, updateProjectLastActive } from '@/features/projects';
 import { useContacts } from '@/features/contacts';
 import { useMovements } from '@/hooks/use-movements';
-import { useUserOrganizationPreferences } from '@/features/organization';
+import { useUserOrganizationPreferences, USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization';
 import { useProjectContext } from '@/stores/projectContext';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useToast } from '@/hooks/use-toast';
@@ -102,9 +102,13 @@ export default function OrganizationDashboard() {
       );
       
       queryClient.invalidateQueries({ 
-        queryKey: ['user-organization-preferences', userData?.user?.id, organizationId] 
+        queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!) 
       });
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      // Force immediate refetch to update UI
+      queryClient.refetchQueries({
+        queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!)
+      });
       
       toast({
         title: "Proyecto seleccionado",

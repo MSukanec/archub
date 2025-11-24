@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects, useProjectsCount, ProjectItemCard, updateProjectLastActive } from '@/features/projects'
-import { useUserOrganizationPreferences } from '@/features/organization'
+import { useUserOrganizationPreferences, USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization'
 import { Folder, Plus, Bell, Search, Filter } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -154,10 +154,14 @@ export default function ProjectActives() {
       );
       
       queryClient.invalidateQueries({ 
-        queryKey: ['user-organization-preferences', userData?.user?.id, organizationId] 
+        queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!) 
       });
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       queryClient.invalidateQueries({ queryKey: ['projects', organizationId] });
+      // Force immediate refetch to update UI
+      queryClient.refetchQueries({
+        queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!)
+      });
       
       // NO navegamos, solo mostramos toast
       toast({
@@ -219,10 +223,14 @@ export default function ProjectActives() {
       
       // Invalidar queries
       queryClient.invalidateQueries({ 
-        queryKey: ['user-organization-preferences', userData?.user?.id, organizationId] 
+        queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!) 
       });
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       queryClient.invalidateQueries({ queryKey: ['projects', organizationId] });
+      // Force immediate refetch to update UI
+      queryClient.refetchQueries({
+        queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!)
+      });
       
       // Navegar al dashboard del proyecto
       navigate('/project/dashboard');
