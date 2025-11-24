@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { nanoid } from 'nanoid'
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
@@ -25,7 +24,9 @@ import { useGeneralCostPayment } from '../hooks/use-general-cost-payment'
 import { useCreateGeneralCostPayment } from '../hooks/use-create-general-cost-payment'
 import { useUpdateGeneralCostPayment } from '../hooks/use-update-general-cost-payment'
 import { generalCostPaymentSchema, type GeneralCostPaymentFormData } from '../schemas'
-import { UploadSingleFileField } from '@/components/ui-custom/fields/UploadSingleFileField'
+import { UploadMultiFileField } from '@/components/ui-custom/fields/UploadMultiFileField'
+import { uploadFile, deleteFile } from '@/lib/storage'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 
 interface GeneralCostsPaymentModalProps {
@@ -42,6 +43,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
   const { setPanel } = useModalPanelStore()
+  const queryClient = useQueryClient()
 
   const [filesToUpload, setFilesToUpload] = React.useState<any[]>([])
   const [existingFiles, setExistingFiles] = React.useState<any[]>([])
@@ -51,6 +53,82 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
     paymentId,
     organizationId
   )
+
+  // Fetch existing media files for this payment
+  const { data: mediaFiles = [] } = useQuery({
+    queryKey: ['general-cost-payment-media', paymentId],
+    queryFn: async () => {
+      if (!paymentId || !supabase) return []
+      
+      const { data, error } = await supabase
+        .from('media_links')
+        .select(`
+          id,
+          media_file_id,
+          category,
+          description,
+          media_files (
+            id,
+            file_name,
+            file_type,
+            file_size,
+            file_path,
+            bucket,
+            is_public
+          )
+        `)
+        .eq('general_cost_payment_id', paymentId)
+        .eq('is_deleted', false)
+      
+      if (error) {
+        console.error('Error fetching payment media:', error)
+        return []
+      }
+      
+      const filesWithUrls = await Promise.all(
+        (data || []).map(async (link: any) => {
+          let fileUrl = null
+          
+          if (link.media_files?.is_public) {
+            fileUrl = supabase.storage
+              .from(link.media_files.bucket)
+              .getPublicUrl(link.media_files.file_path).data.publicUrl
+          } else if (link.media_files?.bucket === 'private-assets' && link.media_files?.file_path) {
+            try {
+              const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+                .from(link.media_files.bucket)
+                .createSignedUrl(link.media_files.file_path, 3600)
+              
+              if (signedUrlError) {
+                console.error('Error generating signed URL:', signedUrlError)
+                fileUrl = null
+              } else {
+                fileUrl = signedUrlData?.signedUrl || null
+              }
+            } catch (error) {
+              console.error('Error creating signed URL:', error)
+              fileUrl = null
+            }
+          }
+          
+          return {
+            id: link.media_file_id,
+            file_name: link.media_files?.file_name,
+            file_type: link.media_files?.file_type,
+            file_size: link.media_files?.file_size,
+            file_url: fileUrl,
+            bucket: link.media_files?.bucket,
+            file_path: link.media_files?.file_path,
+            mime_type: link.media_files?.file_type,
+            isExisting: true
+          }
+        })
+      )
+      
+      return filesWithUrls
+    },
+    enabled: !!paymentId && (mode === 'edit' || mode === 'view')
+  })
 
   const form = useForm<GeneralCostPaymentFormData>({
     resolver: zodResolver(generalCostPaymentSchema),
@@ -103,22 +181,17 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
         reference: existingPayment.reference || '',
         status: existingPayment.status || 'confirmed',
       })
-
-      // Cargar archivo existente si existe
-      if (existingPayment?.file_url) {
-        setExistingFiles([{
-          id: nanoid(),
-          file_name: 'Archivo adjunto',
-          file_url: existingPayment.file_url,
-          file_type: 'document',
-          file_size: 0,
-          isExisting: true
-        }])
-      } else {
-        setExistingFiles([])
-      }
     }
   }, [existingPayment, mode, form])
+
+  // Load existing files
+  React.useEffect(() => {
+    if (mediaFiles && mediaFiles.length > 0) {
+      setExistingFiles(mediaFiles)
+    } else {
+      setExistingFiles([])
+    }
+  }, [mediaFiles])
 
   // Initialize default values for create mode
   React.useEffect(() => {
@@ -149,11 +222,31 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
   const createPaymentMutation = useCreateGeneralCostPayment()
   const updatePaymentMutation = useUpdateGeneralCostPayment()
 
+  const handleExistingFileDelete = async (fileId: string) => {
+    try {
+      await deleteFile(fileId, false) // Soft delete
+      
+      // Invalidate queries
+      queryClient.invalidateQueries({ queryKey: ['general-cost-payment-media', paymentId] })
+      
+      toast({
+        title: 'Archivo eliminado',
+        description: 'El archivo ha sido eliminado correctamente',
+      })
+    } catch (error: any) {
+      toast({
+        title: 'Error al eliminar archivo',
+        description: error.message,
+        variant: 'destructive',
+      })
+    }
+  }
+
   const onSubmit = async (data: GeneralCostPaymentFormData) => {
-    if (!userData?.organization?.id) {
+    if (!userData?.organization?.id || !userData?.user?.id) {
       toast({
         title: 'Error',
-        description: 'Organization ID not found',
+        description: 'Organization ID or User ID not found',
         variant: 'destructive',
       })
       return
@@ -179,7 +272,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
       return
     }
 
-    // Obtener el organization_member.id del usuario actual (patrón de SiteLogModal)
+    // Obtener el organization_member.id del usuario actual
     const currentMember = members.find((m: any) => m.user_id === userData?.user?.id)
     if (!currentMember) {
       toast({
@@ -188,40 +281,6 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
         variant: 'destructive',
       })
       return
-    }
-
-    let fileUrl = existingPayment?.file_url || null
-
-    // Si hay archivos nuevos para subir
-    if (filesToUpload.length > 0) {
-      const file = filesToUpload[0].file
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${nanoid()}.${fileExt}`
-      const filePath = `${fileName}`
-
-      // Subir a Supabase Storage
-      const { error: uploadError } = await supabase!.storage
-        .from('general-cost-payments-attachments')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        })
-
-      if (uploadError) {
-        toast({
-          title: 'Error al subir archivo',
-          description: uploadError.message,
-          variant: 'destructive',
-        })
-        return
-      }
-
-      // Obtener URL pública
-      const { data: urlData } = supabase!.storage
-        .from('general-cost-payments-attachments')
-        .getPublicUrl(filePath)
-
-      fileUrl = urlData.publicUrl
     }
 
     const paymentData = {
@@ -236,10 +295,13 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
       general_cost_id: data.general_cost_id || null,
       status: data.status || 'confirmed',
       created_by: currentMember.id,
-      file_url: fileUrl,
+      file_url: null, // Deprecated field, now using media_files
     }
 
     try {
+      let savedPaymentId = paymentId
+
+      // Create or update payment first
       if (mode === 'edit' && paymentId) {
         await updatePaymentMutation.mutateAsync({
           id: paymentId,
@@ -247,11 +309,56 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
           updates: paymentData,
         })
       } else {
-        await createPaymentMutation.mutateAsync(paymentData)
+        const result = await createPaymentMutation.mutateAsync(paymentData)
+        savedPaymentId = result.id
       }
+
+      // Upload new files if any
+      if (filesToUpload.length > 0 && savedPaymentId) {
+        for (const fileInput of filesToUpload) {
+          try {
+            await uploadFile(fileInput.file, {
+              entity: 'general_cost_payment_attachment',
+              organization_id: userData.organization.id,
+              user_id: userData.user.id,
+              link_to: {
+                general_cost_payment_id: savedPaymentId,
+              },
+              category: 'attachment',
+              description: fileInput.description || fileInput.file.name,
+            })
+          } catch (uploadError: any) {
+            console.error('Error uploading file:', uploadError)
+            toast({
+              title: 'Error al subir archivo',
+              description: uploadError.message,
+              variant: 'destructive',
+            })
+          }
+        }
+        
+        // Invalidate the media query to refresh the file list
+        queryClient.invalidateQueries({ queryKey: ['general-cost-payment-media', savedPaymentId] })
+        
+        // Clear the filesToUpload state
+        setFilesToUpload([])
+      }
+
+      toast({
+        title: mode === 'edit' ? 'Pago actualizado' : 'Pago creado',
+        description: mode === 'edit' 
+          ? 'El pago ha sido actualizado correctamente'
+          : 'El pago ha sido creado correctamente',
+      })
+
       onClose()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving payment:', error)
+      toast({
+        title: 'Error',
+        description: error.message || 'Error al guardar el pago',
+        variant: 'destructive',
+      })
     }
   }
 
@@ -261,7 +368,6 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
   }
 
   // Panel de vista (solo lectura)
-  // Type assertion to access joined relations (currency, wallet, general_cost)
   const paymentWithRelations = existingPayment as any;
   const viewPanel = existingPayment ? (
     <div className="space-y-6">
@@ -325,17 +431,22 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
           {existingPayment.notes || 'Sin notas'}
         </p>
       </div>
-      {existingPayment.file_url && (
+      {existingFiles.length > 0 && (
         <div>
-          <h4 className="font-medium text-foreground mb-2">Archivo Adjunto</h4>
-          <a 
-            href={existingPayment.file_url} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-sm text-primary hover:underline"
-          >
-            Ver archivo
-          </a>
+          <h4 className="font-medium text-foreground mb-2">Archivos Adjuntos</h4>
+          <div className="space-y-2">
+            {existingFiles.map((file) => (
+              <a 
+                key={file.id}
+                href={file.file_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="block text-sm text-primary hover:underline"
+              >
+                {file.file_name}
+              </a>
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -573,17 +684,18 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
             )}
           />
 
-          {/* Row 6: Adjunto */}
+          {/* Row 6: Adjuntos */}
           <div className="space-y-2">
-            <FormLabel>Adjunto (opcional)</FormLabel>
-            <UploadSingleFileField
+            <FormLabel>Adjuntos (opcional)</FormLabel>
+            <UploadMultiFileField
               existingFiles={existingFiles}
               filesToUpload={filesToUpload}
               onFilesChange={setFilesToUpload}
-              emptyStateTitle="Sin archivo adjunto"
-              emptyStateDescription="Arrastra un archivo o haz clic para seleccionar"
+              onExistingFileDelete={handleExistingFileDelete}
+              emptyStateTitle="Sin archivos adjuntos"
+              emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
               newFileBadgeText="Nuevo"
-              maxSize={10 * 1024 * 1024}
+              maxSize={2 * 1024 * 1024}
             />
           </div>
         </form>
@@ -593,7 +705,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
 
   const headerContent = (
     <FormModalHeader
-      title={mode === 'edit' ? "Editar Pago" : "Nuevo Pago"}
+      title={mode === 'edit' ? "Editar Pago de Gastos Generales" : "Nuevo Pago de Gastos Generales"}
       description={mode === 'edit'
         ? 'Modifica los datos del pago de gasto general seleccionado'
         : 'Registra un nuevo pago de gasto general de la organización'}
@@ -609,7 +721,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel={mode === 'edit' ? "Actualizar" : "Guardar Pago"}
+      rightLabel={mode === 'edit' ? "Actualizar Pago" : "Guardar Pago"}
       onRightClick={handleSubmitClick}
       showLoadingSpinner={createPaymentMutation.isPending || updatePaymentMutation.isPending}
     />

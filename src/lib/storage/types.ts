@@ -10,6 +10,7 @@ export type EntityType =
   | 'permit'
   | 'technical_plan'
   | 'contact_document'
+  | 'general_cost_payment_attachment'
   | 'project_photo'
   | 'sitelog_photo'
   | 'project_document';
@@ -26,6 +27,7 @@ export interface UploadContext {
     project_id?: string;
     contact_id?: string;
     general_cost_id?: string;
+    general_cost_payment_id?: string;
     sitelog_id?: string;
     course_id?: string;
     course_module_id?: string;
