@@ -21,20 +21,13 @@ export async function getProjects(organizationId: string): Promise<Project[]> {
     return [];
   }
 
-  // Usar la vista optimizada projects_view que pre-computa los JOINs
-  // PERO incluir explícitamente las columnas de project_data para imágenes, tipo y modalidad
+  // Usar la vista projects_view que ya tiene TODA la información:
+  // - project_type_id, project_type_name
+  // - project_modality_id, project_modality_name
+  // - image_bucket, image_path, is_public
   const { data, error } = await supabase
     .from('projects_view')
-    .select(`
-      *,
-      project_data!left(
-        project_type_id,
-        project_modality_id,
-        image_bucket,
-        image_path,
-        is_public
-      )
-    `)
+    .select('*')
     .eq('organization_id', organizationId)
     .eq('is_active', true)
     .order('created_at', { ascending: false });
