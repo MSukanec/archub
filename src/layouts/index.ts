@@ -18,7 +18,6 @@ export { SidebarIconButton } from "./dashboard/components/Sidebar/SidebarIconBut
 
 // Dashboard Components - Topbar
 export { Header } from "./dashboard/components/Topbar/Header";
-export { Footer } from "./dashboard/components/Topbar/Footer";
 export { ContextSelector } from "./dashboard/components/Topbar/ContextSelector";
 
 // Dashboard Components - Mobile
