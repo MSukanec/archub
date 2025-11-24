@@ -1,12 +1,8 @@
 import { useEffect } from "react";
 import { HeroLayout } from "@/layouts";
 import { 
-  Building2, 
-  Clock, 
-  Calendar
+  Building2
 } from "lucide-react";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
 
 import { useProjectContext } from '@/stores/projectContext';
 import { useNavigationStore } from '@/stores/navigationStore';
@@ -24,8 +20,6 @@ export default function Project() {
   const { data: userData } = useCurrentUser();
   const organizationId = currentOrganizationId || userData?.organization?.id;
   const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId || undefined);
-  
-  const currentTime = new Date();
   
   // Get current project
   const currentProject = projects.find(p => p.id === selectedProjectId);
@@ -53,7 +47,7 @@ export default function Project() {
   // Hero section
   const heroSection = currentProject && (
     <div 
-      className="relative h-[200px] sm:h-[250px] md:h-80 overflow-hidden w-full"
+      className="relative h-1/2 overflow-hidden w-full"
       data-testid="hero-project"
     >
       {/* Background Image */}
@@ -78,42 +72,60 @@ export default function Project() {
       )}
 
       {/* Content */}
-      <div className="relative h-full flex flex-col justify-end px-4 sm:px-6 md:px-12 py-4 sm:py-6 md:py-12">
+      <div className="relative h-full flex flex-col justify-end px-4 sm:px-6 md:px-12 py-4 sm:py-6 md:py-8">
         <div className="max-w-3xl">
-          {/* Badge */}
-          <div className="mb-3 sm:mb-6">
-            {currentProject.status && (
-              <Badge 
-                style={{ 
-                  backgroundColor: currentProject.status === 'active' ? 'var(--accent)' : 'gray',
-                  color: 'white'
-                }}
-                className="text-[9px] sm:text-[10px] md:text-xs font-medium uppercase px-3 sm:px-4 py-1.5 sm:py-2"
-                data-testid="badge-project-status"
-              >
-                {currentProject.status === 'active' ? 'En Proceso' : currentProject.status}
-              </Badge>
-            )}
-          </div>
-          
           {/* Project Name */}
           <h1 
-            className="text-lg sm:text-2xl md:text-5xl font-bold mb-3 sm:mb-4 md:mb-6 tracking-tight !text-white line-clamp-2" 
+            className="text-lg sm:text-2xl md:text-4xl font-bold mb-2 sm:mb-3 md:mb-3 tracking-tight !text-white line-clamp-2" 
             data-testid="text-project-name"
           >
             {currentProject.name}
           </h1>
           
-          {/* Time and Date */}
-          <div className="flex items-center gap-4 text-xs sm:text-sm md:text-base text-[rgb(220,220,220)]">
-            <div className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span>{format(currentTime, "HH:mm", { locale: es })}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="capitalize line-clamp-1">{format(currentTime, "EEEE, d 'de' MMMM", { locale: es })}</span>
-            </div>
+          {/* Badges - Type, Modality, Status */}
+          <div className="flex flex-wrap gap-2">
+            {currentProject.project_data?.project_type?.name && (
+              <Badge 
+                className="text-[7px] sm:text-[8px] md:text-[9px] font-medium px-2 py-0.5"
+                style={{ 
+                  backgroundColor: `${projectColor}40`,
+                  color: projectColor,
+                  borderColor: projectColor,
+                  border: '1px solid'
+                }}
+                data-testid="badge-project-type"
+              >
+                {currentProject.project_data.project_type.name}
+              </Badge>
+            )}
+            
+            {currentProject.project_data?.project_modality?.name && (
+              <Badge 
+                className="text-[7px] sm:text-[8px] md:text-[9px] font-medium px-2 py-0.5"
+                style={{ 
+                  backgroundColor: `${projectColor}40`,
+                  color: projectColor,
+                  borderColor: projectColor,
+                  border: '1px solid'
+                }}
+                data-testid="badge-project-modality"
+              >
+                {currentProject.project_data.project_modality.name}
+              </Badge>
+            )}
+            
+            {currentProject.status && (
+              <Badge 
+                className="text-[7px] sm:text-[8px] md:text-[9px] font-medium px-2 py-0.5"
+                style={{ 
+                  backgroundColor: currentProject.status === 'active' ? 'var(--accent)' : '#6b7280',
+                  color: 'white'
+                }}
+                data-testid="badge-project-status"
+              >
+                {currentProject.status === 'active' ? 'En Proceso' : currentProject.status}
+              </Badge>
+            )}
           </div>
         </div>
       </div>
