@@ -29,6 +29,8 @@ import { supabase } from "@/lib/supabase";
 import { useCreateProject } from '../hooks/use-create-project';
 import { useUpdateProject } from '../hooks/use-update-project';
 import { uploadProjectImage, updateProjectLastActive } from '@/features/projects';
+import { QUERY_KEYS } from '../constants';
+import { USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization';
 import ProjectColorAdvanced from '../components/ProjectColorAdvanced';
 
 // Paleta de colores predefinidos
@@ -319,6 +321,11 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
           ...cleanedData,
         });
 
+        // Force immediate refetch of projects list to show new project
+        await queryClient.refetchQueries({
+          queryKey: [QUERY_KEYS.PROJECTS, organizationId]
+        });
+
         // Make new project active automatically
         if (newProject.id && userData?.user?.id) {
           try {
@@ -338,6 +345,11 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
             updateProjectLastActive(newProject.id, organizationId).catch(err => 
               console.error('Error updating project last_active_at:', err)
             );
+
+            // Force immediate refetch of user preferences to update active status
+            await queryClient.refetchQueries({
+              queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData.user.id, organizationId)
+            });
           } catch (error) {
             console.error('Error setting project as active:', error);
           }
