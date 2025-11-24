@@ -30,7 +30,7 @@ import { useRightSidebarStore } from "@/stores/rightSidebarStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useUserMode } from "@/hooks/use-user-mode";
 import { useCourseSidebarStore } from "@/stores/sidebarStore";
-import { useCoursePlayerStore, useCourseStructure } from "@/features/learning";
+import { useCoursePlayerStore } from "@/features/learning";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 
@@ -87,12 +87,12 @@ export function RightSidebar() {
     enabled: !!courseSlug && !!supabase && isOnCoursePlayerTab
   });
 
-  // Fetch course structure using the same hook as CoursePlayerTab for cache consistency
-  const { data: courseStructure = [] } = useCourseStructure(course?.id);
-
-  // Extract modules and lessons from structure
-  const modules = courseStructure;
-  const lessons = courseStructure.flatMap(m => m.lessons || []);
+  // Get modules and lessons from the course sidebar store (populated by CoursePlayerTab)
+  const { modules: storeModules = [], lessons: storeLessons = [] } = useCourseSidebarStore();
+  
+  // Use store data which is already populated by CoursePlayerTab
+  const modules = storeModules;
+  const lessons = storeLessons;
 
   // Fetch progress for all lessons
   const { data: progressData } = useQuery<any[]>({
