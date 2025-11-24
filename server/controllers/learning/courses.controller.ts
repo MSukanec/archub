@@ -176,10 +176,16 @@ export async function handleGetCourseStructure(req: Request, res: Response) {
       return res.status(400).json({ error: 'Course ID is required' });
     }
 
-    // Get modules for the course (using admin client for structure, no RLS restrictions)
-    const adminClient = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey);
+    // Use authenticated client with user's token
+    const token = extractToken(req.headers.authorization);
+    if (!token) {
+      return res.status(401).json({ error: 'No authorization token provided' });
+    }
+
+    const supabase = createAuthenticatedClient(token);
     
-    const { data: modules, error: modulesError } = await adminClient
+    // Get modules for the course
+    const { data: modules, error: modulesError } = await supabase
       .from('course_modules')
       .select('*')
       .eq('course_id', courseId)
@@ -197,7 +203,7 @@ export async function handleGetCourseStructure(req: Request, res: Response) {
     // Get lessons for all modules
     const moduleIds = modules.map((m: any) => m.id);
     
-    const { data: lessons, error: lessonsError } = await adminClient
+    const { data: lessons, error: lessonsError } = await supabase
       .from('course_lessons')
       .select('*')
       .in('module_id', moduleIds)

@@ -1,3 +1,4 @@
+import { supabase } from '@/lib/supabase';
 import type { CourseModuleWithLessons } from '../types';
 
 /**
@@ -7,7 +8,7 @@ import type { CourseModuleWithLessons } from '../types';
  * - Módulos del curso (course_modules)
  * - Lecciones de cada módulo (course_lessons)
  * 
- * Usa autenticación del backend para acceso seguro.
+ * Usa autenticación del usuario para acceso seguro.
  * 
  * @param courseId - ID del curso
  * @returns Array de módulos con sus lecciones anidadas
@@ -21,11 +22,21 @@ export async function getCourseStructure(
   }
 
   try {
+    const { data } = await supabase.auth.getSession();
+    const session = data?.session;
+    
+    if (!session) {
+      console.error('No active session');
+      return [];
+    }
+
     const response = await fetch(`/api/courses/${courseId}/structure`, {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -33,8 +44,8 @@ export async function getCourseStructure(
       return [];
     }
 
-    const data = await response.json();
-    return data;
+    const structure = await response.json();
+    return structure;
   } catch (error) {
     console.error('Error fetching course structure:', error);
     return [];
