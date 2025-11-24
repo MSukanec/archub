@@ -11,6 +11,7 @@ export type EntityType =
   | 'technical_plan'
   | 'contact_document'
   | 'general_cost_payment_attachment'
+  | 'sitelog_attachment'
   | 'project_photo'
   | 'sitelog_photo'
   | 'project_document';
