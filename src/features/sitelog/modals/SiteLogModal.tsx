@@ -49,7 +49,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   const { data: currentUser } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId } = useProjectContext();
   const { data: members = [] } = useOrganizationMembers(currentOrganizationId || undefined);
-  const { data: contacts = [] } = useContacts(currentOrganizationId);
+  const { data: contacts = [] } = useContacts(currentOrganizationId || undefined);
   
   // Plan features para restricciones
   const currentOrganization = currentUser?.organizations?.find(org => org.id === currentOrganizationId);
@@ -324,7 +324,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
                         <CalendarComponent
                           mode="single"
                           selected={dateValue}
-                          onSelect={(date) => {
+                          onSelect={(date: Date | undefined) => {
                             if (date) {
                               field.onChange(date.toISOString().split('T')[0]);
                             }
@@ -578,7 +578,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
                 {existingImages.map((file) => (
                   <div key={`existing-${file.id}`} className="aspect-square rounded overflow-hidden">
                     <img
-                      src={file.file_url}
+                      src={file.file_url || ''}
                       alt=""
                       className="w-full h-full object-cover"
                     />
