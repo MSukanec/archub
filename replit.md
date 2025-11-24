@@ -75,6 +75,7 @@ Preferred communication style: Simple, everyday language.
   - Hero includes: project image (dynamic background), project name, status badge (En Proceso), current time, and date - all styled responsively for mobile/desktop
   - KPI cards remain below hero section unchanged
   - Removed old dashboard directory structure
+- **Sitelog Attachments Migration (Nov 24, 2024)**: Migrated sitelog photo/video attachments from legacy `project_media` table to unified `media_files` + `media_links` system. Entity type `sitelog_attachment` stored in private-assets bucket at `organizations/{org_id}/projects/{project_id}/sitelogs/`. Both `getSiteLogFiles` and `getSitelogGalleryFiles` now support signed URLs (1-hour expiration) for secure access. Uses `uploadFile` from unified storage instead of legacy `uploadMediaFileV2`. Compression preset: `sitelog-photo` for images.
 
 ## External Dependencies
 - **Supabase**: Authentication.
