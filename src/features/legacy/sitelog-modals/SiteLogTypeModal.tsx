@@ -13,9 +13,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationMembers } from '@/features/organization/hooks/use-organization-members';
-import { createSiteLogType } from '../services/createSiteLogType';
-import { updateSiteLogType } from '../services/updateSiteLogType';
-import type { SiteLogType } from '../services/getSiteLogTypes';
+import { createSiteLogType } from '@/features/sitelog/services/createSiteLogType';
+import { updateSiteLogType } from '@/features/sitelog/services/updateSiteLogType';
+import type { SiteLogType } from '@/features/sitelog/services/getSiteLogTypes';
 
 // Schema de validación
 const siteLogTypeSchema = z.object({
