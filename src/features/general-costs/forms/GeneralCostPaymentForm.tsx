@@ -450,7 +450,6 @@ export default function GeneralCostPaymentForm({ modalData, onClose }: GeneralCo
 
   const [filesToUpload, setFilesToUpload] = React.useState<any[]>([])
   const [existingFiles, setExistingFiles] = React.useState<any[]>([])
-  const lastPaymentIdRef = React.useRef<string | undefined>(undefined)
 
   // Fetch existing payment data for edit/view mode
   const { data: existingPayment, isLoading: loadingPayment } = useGeneralCostPayment(
@@ -486,32 +485,39 @@ export default function GeneralCostPaymentForm({ modalData, onClose }: GeneralCo
 
   // Load existing payment data
   React.useEffect(() => {
-    if (existingPayment && mode !== 'create' && paymentId !== lastPaymentIdRef.current) {
-      lastPaymentIdRef.current = paymentId
-      
-      // Normalize payment_date: convert to local timezone naive date
-      let paymentDate: Date;
-      if (existingPayment.payment_date) {
-        const dateString = existingPayment.payment_date;
-        const [year, month, day] = dateString.split('-').map(Number);
-        paymentDate = new Date(year, month - 1, day);
-      } else {
-        paymentDate = new Date();
-      }
-      
-      form.reset({
-        payment_date: paymentDate,
-        general_cost_id: existingPayment.general_cost_id || '',
-        currency_id: existingPayment.currency_id || '',
-        wallet_id: existingPayment.wallet_id || '',
-        amount: existingPayment.amount || 0,
-        exchange_rate: existingPayment.exchange_rate ?? undefined,
-        notes: existingPayment.notes || '',
-        reference: existingPayment.reference || '',
-        status: existingPayment.status || 'confirmed',
-      })
+    if (!existingPayment || mode === 'create') return;
+
+    if (currenciesLoading || generalCostsLoading || walletsLoading || loadingPayment) {
+      return;
     }
-  }, [existingPayment, mode, paymentId])
+
+    let paymentDate: Date;
+    if (existingPayment.payment_date) {
+      const [year, month, day] = existingPayment.payment_date.split('-').map(Number);
+      paymentDate = new Date(year, month - 1, day);
+    } else {
+      paymentDate = new Date();
+    }
+
+    form.reset({
+      payment_date: paymentDate,
+      general_cost_id: existingPayment.general_cost?.id || '',
+      currency_id: existingPayment.currency?.id || '',
+      wallet_id: existingPayment.wallet?.id || '',
+      amount: existingPayment.amount || 0,
+      exchange_rate: existingPayment.exchange_rate ?? undefined,
+      notes: existingPayment.notes || '',
+      reference: existingPayment.reference || '',
+      status: existingPayment.status || 'confirmed',
+    });
+  }, [
+    existingPayment,
+    mode,
+    currenciesLoading,
+    generalCostsLoading,
+    walletsLoading,
+    loadingPayment,
+  ])
 
   // Load existing files
   React.useEffect(() => {

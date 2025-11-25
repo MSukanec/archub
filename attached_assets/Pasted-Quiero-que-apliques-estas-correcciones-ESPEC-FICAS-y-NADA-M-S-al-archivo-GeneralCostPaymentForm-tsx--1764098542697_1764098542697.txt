@@ -1,0 +1,95 @@
+Quiero que apliques estas correcciones ESPECÍFICAS y NADA MÁS al archivo GeneralCostPaymentForm.tsx.
+
+NO hagas un refactor completo, NO cambies estilos, NO reestructures el modal.  
+Solo corregí estos dos problemas EXACTOS:
+
+────────────────────────────────────────
+❌ PROBLEMA 1: Los valores no se completan al editar
+Causa: El formulario intenta leer campos como:
+existingPayment.general_cost_id
+existingPayment.currency_id
+existingPayment.wallet_id
+
+Pero existingPayment NO tiene esas propiedades.  
+Tiene relaciones anidadas:
+existingPayment.general_cost?.id
+existingPayment.currency?.id
+existingPayment.wallet?.id
+
+✔ Solución requerida:
+Cambiar estos valores en el reset y en cualquier acceso:
+
+general_cost_id: existingPayment.general_cost?.id || ''
+currency_id: existingPayment.currency?.id || ''
+wallet_id: existingPayment.wallet?.id || ''
+
+────────────────────────────────────────
+❌ PROBLEMA 2: El reset del formulario ocurre ANTES de que el formulario esté montado
+Causa: isLoading es true por alguna dependencia, el form NO se renderiza todavía,  
+y React Hook Form ignora el reset inicial.
+
+✔ Solución requerida:
+Modificar el useEffect del reset para que:
+
+1. Espere a que terminen los loadings:
+   - currenciesLoading
+   - generalCostsLoading
+   - walletsLoading
+   - loadingPayment
+
+2. Reseteé el formulario SOLO cuando:
+   - existingPayment existe
+   - mode !== 'create'
+   - NO haya loadings
+
+3. Mantenga la conversión correcta de la fecha.
+
+Código sugerido:
+
+useEffect(() => {
+  if (!existingPayment || mode === 'create') return;
+
+  if (currenciesLoading || generalCostsLoading || walletsLoading || loadingPayment) {
+    return;
+  }
+
+  let paymentDate: Date;
+  if (existingPayment.payment_date) {
+    const [year, month, day] = existingPayment.payment_date.split('-').map(Number);
+    paymentDate = new Date(year, month - 1, day);
+  } else {
+    paymentDate = new Date();
+  }
+
+  form.reset({
+    payment_date: paymentDate,
+    general_cost_id: existingPayment.general_cost?.id || '',
+    currency_id: existingPayment.currency?.id || '',
+    wallet_id: existingPayment.wallet?.id || '',
+    amount: existingPayment.amount || 0,
+    exchange_rate: existingPayment.exchange_rate ?? undefined,
+    notes: existingPayment.notes || '',
+    reference: existingPayment.reference || '',
+    status: existingPayment.status || 'confirmed',
+  });
+}, [
+  existingPayment,
+  mode,
+  currenciesLoading,
+  generalCostsLoading,
+  walletsLoading,
+  loadingPayment,
+]);
+
+────────────────────────────────────────
+📌 IMPORTANTE:
+- NO cambies la estructura del archivo
+- NO renombres componentes
+- NO cambies UI ni estilos
+- NO modifiques lógica adicional
+- Solo implementá EXACTAMENTE estos cambios
+
+────────────────────────────────────────
+Aquí está el archivo para modificar:
+[PEGO AQUÍ EL ARCHIVO GeneralCostPaymentForm.tsx]
+
