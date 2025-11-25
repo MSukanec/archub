@@ -2,8 +2,10 @@ import { useEffect } from "react";
 import { HeroLayout } from "@/layouts";
 import { 
   Building2,
-  FileText
+  FileText,
+  ArrowRight
 } from "lucide-react";
+import { useLocation } from "wouter";
 
 import { useProjectContext } from '@/stores/projectContext';
 import { useNavigationStore } from '@/stores/navigationStore';
@@ -12,11 +14,14 @@ import { useSiteLogs } from '@/features/sitelog/hooks/use-site-logs';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useQuery } from '@tanstack/react-query';
 import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui-custom/KPICard';
 import { Badge } from '@/components/ui/badge';
 
 export default function Project() {
+  const [, navigate] = useLocation();
   const { selectedProjectId, currentOrganizationId } = useProjectContext();
   const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore();
   const { data: userData } = useCurrentUser();
@@ -150,7 +155,8 @@ export default function Project() {
       <div>
         <StatCard 
           data-testid="stat-card-bitacoras"
-          className="w-full"
+          className="w-full cursor-pointer hover:bg-accent/5 transition-colors"
+          onClick={() => navigate('/sitelog')}
         >
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -158,16 +164,56 @@ export default function Project() {
               <StatCardValue className="mt-2">{siteLogs.length}</StatCardValue>
               <StatCardMeta>Últimas 3 entradas</StatCardMeta>
             </div>
-            <FileText className="w-5 h-5 text-muted-foreground opacity-40 mt-1" />
+            <div className="flex flex-col items-end gap-2">
+              <FileText className="w-5 h-5 text-muted-foreground opacity-40 mt-1" />
+              {siteLogs.length > 0 && (
+                <ArrowRight className="w-4 h-4 text-muted-foreground opacity-60" />
+              )}
+            </div>
           </div>
           {siteLogs.length > 0 && (
             <StatCardContent>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {siteLogs.slice(0, 3).map((log: any, idx: number) => (
-                  <div key={idx} className="text-xs text-muted-foreground line-clamp-1">
-                    • {log.title || `Entrada ${idx + 1}`}
+                  <div 
+                    key={idx} 
+                    className="text-xs text-muted-foreground space-y-1"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-foreground">
+                        {formatDistanceToNow(new Date(log.log_date || log.created_at), { 
+                          addSuffix: true,
+                          locale: es 
+                        })}
+                      </span>
+                      {log.site_log_type?.name && (
+                        <Badge 
+                          variant="outline" 
+                          className="text-xs py-0 px-1.5 h-fit"
+                        >
+                          {log.site_log_type.name}
+                        </Badge>
+                      )}
+                    </div>
+                    {log.comments && (
+                      <div className="text-xs text-muted-foreground line-clamp-2">
+                        "{log.comments}"
+                      </div>
+                    )}
+                    {log.creator?.user?.full_name && (
+                      <div className="text-xs text-muted-foreground/70">
+                        por {log.creator.user.full_name}
+                      </div>
+                    )}
                   </div>
                 ))}
+              </div>
+            </StatCardContent>
+          )}
+          {siteLogs.length === 0 && (
+            <StatCardContent>
+              <div className="text-xs text-muted-foreground text-center py-2">
+                Haz clic para crear tu primera entrada
               </div>
             </StatCardContent>
           )}
