@@ -203,7 +203,12 @@ function Calendar({
 
   // Interceptar selección de día para autoClose
   const handleDaySelect = React.useCallback((day: any) => {
-    if (onSelect) {
+    if (onSelect && day) {
+      // Normalizar a timezone local: crear una fecha sin offset UTC
+      // Esto evita que el día seleccionado se corrija por timezone
+      const localDate = new Date(day.getFullYear(), day.getMonth(), day.getDate());
+      (onSelect as any)(localDate);
+    } else if (onSelect) {
       (onSelect as any)(day);
     }
     if (autoClose && day && onClose) {
