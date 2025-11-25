@@ -57,8 +57,10 @@ export default function SitelogMedia() {
           title: 'Éxito',
           description: 'Archivo eliminado correctamente',
         });
-        // Invalidar query de sitelog gallery
+        // Invalidar ambos queries: galería y entradas de bitácora
         queryClient.invalidateQueries({ queryKey: ['sitelog-gallery'] });
+        queryClient.invalidateQueries({ queryKey: ['site-logs'] });
+        queryClient.invalidateQueries({ queryKey: ['sitelog-timeline'] });
       },
       onError: (error) => {
         toast({
