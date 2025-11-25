@@ -4,6 +4,7 @@ import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from "@/components/m
 import { Trash2, AlertTriangle } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 import { ComboBox } from "@/components/ui-custom/fields/ComboBoxWriteField"
 
 interface ReplacementOption {
@@ -13,15 +14,20 @@ interface ReplacementOption {
 
 interface DeleteConfirmationFormProps {
   modalData?: {
-    mode?: 'delete' | 'replace'
+    mode?: 'delete' | 'replace' | 'dangerous'
     title: string
     description: string
     itemName: string
+    itemDetails?: string
+    itemType?: string
     consequences?: string[]
     replacementOptions?: ReplacementOption[]
     currentId?: string
-    onDelete: () => void
+    destructiveActionText?: string
+    onDelete?: () => void
     onReplace?: (newId: string) => void
+    onConfirm?: () => void
+    isLoading?: boolean
   }
   onClose: () => void
 }
@@ -140,23 +146,31 @@ export default function DeleteConfirmationForm({
   const title = modalData?.title || 'Confirmar eliminación'
   const description = modalData?.description || '¿Estás seguro?'
   const itemName = modalData?.itemName || 'elemento'
+  const itemDetails = modalData?.itemDetails
+  const itemType = modalData?.itemType || 'elemento'
   const consequences = modalData?.consequences || []
   const replacementOptions = modalData?.replacementOptions || []
   const currentId = modalData?.currentId
+  const destructiveActionText = modalData?.destructiveActionText || 'Eliminar'
   
   // Callbacks de negocio (vienen del feature)
   const onDelete = modalData?.onDelete
   const onReplace = modalData?.onReplace
+  const onConfirm = modalData?.onConfirm
+  const externalIsLoading = modalData?.isLoading || false
   
   // State local del formulario
   const [actionType, setActionType] = useState<'delete' | 'replace'>('delete')
   const [selectedReplacementId, setSelectedReplacementId] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
+  const [confirmationText, setConfirmationText] = useState<string>('')
 
   const handleSubmit = async () => {
     setIsLoading(true)
     try {
-      if (mode === 'replace') {
+      if (mode === 'dangerous') {
+        await onConfirm?.()
+      } else if (mode === 'replace') {
         if (actionType === 'delete') {
           await onDelete?.()
         } else if (actionType === 'replace' && selectedReplacementId) {
@@ -173,7 +187,11 @@ export default function DeleteConfirmationForm({
   }
 
   const isSubmitDisabled = () => {
-    if (isLoading) return true
+    const finalIsLoading = isLoading || externalIsLoading
+    if (finalIsLoading) return true
+    if (mode === 'dangerous' && confirmationText !== itemName) {
+      return true
+    }
     if (mode === 'replace' && actionType === 'replace' && !selectedReplacementId) {
       return true
     }
@@ -181,10 +199,96 @@ export default function DeleteConfirmationForm({
   }
 
   const getSubmitButtonText = () => {
-    if (isLoading) {
+    const finalIsLoading = isLoading || externalIsLoading
+    if (finalIsLoading) {
+      if (mode === 'dangerous') return `${destructiveActionText}...`
       return actionType === 'replace' ? 'Reemplazando...' : 'Eliminando...'
     }
+    if (mode === 'dangerous') return destructiveActionText
     return actionType === 'replace' ? 'Reemplazar' : 'Eliminar'
+  }
+
+  // Modo DANGEROUS - Requiere escribir el nombre exacto
+  if (mode === 'dangerous') {
+    return (
+      <ModalLayout onClose={popModal} size="md">
+        <ModalHeader 
+          title={title}
+          icon={Trash2}
+        />
+        
+        <ModalBody>
+          <div className="space-y-6">
+            {/* Advertencia principal */}
+            <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
+                <p className="text-sm text-destructive font-medium">
+                  Esta acción no se puede deshacer
+                </p>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {description}
+              </p>
+            </div>
+
+            {/* Detalles del item */}
+            {itemDetails && (
+              <div className="rounded-lg border border-border bg-muted/30 p-3">
+                <p className="text-xs text-muted-foreground mb-1">Vas a eliminar:</p>
+                <p className="text-sm font-semibold">{itemName}</p>
+                <p className="text-xs text-muted-foreground mt-1">{itemDetails}</p>
+              </div>
+            )}
+
+            {/* Consecuencias */}
+            {consequences && consequences.length > 0 && (
+              <div className="rounded-lg border border-warning/25 bg-warning/5 p-4">
+                <p className="text-sm font-semibold text-warning mb-2">¿Qué pasará?</p>
+                <ul className="space-y-1.5">
+                  {consequences.map((consequence, idx) => (
+                    <li key={idx} className="text-sm text-muted-foreground flex gap-2">
+                      <span className="text-warning flex-shrink-0">•</span>
+                      <span>{consequence}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Input de confirmación */}
+            <div className="space-y-2">
+              <Label htmlFor="confirmation-input">
+                Escribe el nombre del {itemType} para confirmar: <span className="font-mono text-destructive font-semibold">{itemName}</span>
+              </Label>
+              <Input
+                id="confirmation-input"
+                placeholder={`Escribe "${itemName}"`}
+                value={confirmationText}
+                onChange={(e) => setConfirmationText(e.target.value)}
+                disabled={isLoading || externalIsLoading}
+                data-testid="input-confirmation"
+              />
+              {confirmationText && confirmationText !== itemName && (
+                <p className="text-xs text-muted-foreground">
+                  Debe coincidir exactamente
+                </p>
+              )}
+            </div>
+          </div>
+        </ModalBody>
+
+        <ModalFooter
+          leftLabel="Cancelar"
+          onLeftClick={popModal}
+          submitText={getSubmitButtonText()}
+          onSubmit={handleSubmit}
+          submitVariant="destructive"
+          isSubmitting={isLoading || externalIsLoading}
+          submitDisabled={isSubmitDisabled()}
+        />
+      </ModalLayout>
+    )
   }
 
   return (
@@ -196,7 +300,7 @@ export default function DeleteConfirmationForm({
       
       <ModalBody>
         <DeleteContent
-          mode={mode}
+          mode={mode as 'delete' | 'replace'}
           description={description}
           itemName={itemName}
           consequences={consequences}
@@ -215,7 +319,7 @@ export default function DeleteConfirmationForm({
         submitText={getSubmitButtonText()}
         onSubmit={handleSubmit}
         submitVariant="destructive"
-        isSubmitting={isLoading}
+        isSubmitting={isLoading || externalIsLoading}
         submitDisabled={isSubmitDisabled()}
       />
     </ModalLayout>
