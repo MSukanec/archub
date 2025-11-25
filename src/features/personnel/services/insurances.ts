@@ -160,48 +160,12 @@ export const renewInsurance = async (
 }
 
 export const uploadCertificate = async (contactId: string, file: File) => {
-  // Upload file to contact-files bucket
-  const fileName = `${Date.now()}-${file.name}`
-  const filePath = `${contactId}/insurance_certificates/${fileName}`
-
-  const { error: uploadError } = await supabase.storage
-    .from('contact-files')
-    .upload(filePath, file)
-
-  if (uploadError) throw uploadError
-
-  // Create attachment record
-  const { data: attachment, error: attachmentError } = await supabase
-    .from('contact_attachments')
-    .insert({
-      contact_id: contactId,
-      storage_bucket: 'contact-files',
-      storage_path: filePath,
-      file_name: file.name,
-      size_bytes: file.size,
-      mime_type: file.type,
-      category: 'document'
-    })
-    .select()
-    .single()
-
-  if (attachmentError) throw attachmentError
-
-  return attachment.id
+  // DEPRECATED: contact_attachments no longer exists
+  // Use media_files + media_links instead
+  throw new Error('uploadCertificate is deprecated. Use media_files + media_links instead.');
 }
 
 export const getCertificatePublicUrl = async (attachmentId: string) => {
-  const { data: attachment, error } = await supabase
-    .from('contact_attachments')
-    .select('storage_path')
-    .eq('id', attachmentId)
-    .single()
-
-  if (error) throw error
-
-  const { data } = supabase.storage
-    .from('contact-files')
-    .getPublicUrl(attachment.storage_path)
-
-  return data.publicUrl
+  // DEPRECATED: contact_attachments no longer exists
+  throw new Error('getCertificatePublicUrl is deprecated. Use media_files + media_links instead.');
 }

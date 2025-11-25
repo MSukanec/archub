@@ -18,18 +18,7 @@ export interface ContactAttachmentForPersonnel {
 export async function getContactAttachmentsForPersonnel(
   avatarAttachmentIds: string[]
 ): Promise<ContactAttachmentForPersonnel[]> {
-  if (!supabase || avatarAttachmentIds.length === 0) {
-    return [];
-  }
-
-  const { data, error } = await supabase
-    .from('contact_attachments')
-    .select('*')
-    .in('id', avatarAttachmentIds);
-
-  if (error) {
-    throw new Error(`Error fetching contact attachments: ${error.message}`);
-  }
-
-  return data || [];
+  // DEPRECATED: contact_attachments table no longer exists
+  // Use media_files + media_links instead
+  return [];
 }
