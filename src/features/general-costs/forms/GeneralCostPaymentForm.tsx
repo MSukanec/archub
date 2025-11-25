@@ -444,7 +444,7 @@ function ViewPanel({
 export default function GeneralCostPaymentForm({ modalData, organizationId: orgIdProp, paymentId: paymentIdProp, mode: modeProp, onClose }: GeneralCostPaymentFormProps) {
   const organizationId = orgIdProp || modalData?.organizationId
   const paymentId = paymentIdProp || modalData?.paymentId
-  const mode = modeProp || modalData?.mode || 'create'
+  const mode = modeProp || modalData?.mode || (paymentId ? 'edit' : 'create')
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
   const queryClient = useQueryClient()
