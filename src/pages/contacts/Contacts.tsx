@@ -269,9 +269,9 @@ export default function Contacts() {
                         onDelete={handleDeleteContact}
                         onClick={(c: any) =>
                           openModal('contact', {
-                            editingContact: c,
-                            isEditing: true,
-                            initialPanel: 'view',
+                            contactId: c.id,
+                            contact: c,
+                            mode: 'view',
                           })
                         }
                       />
