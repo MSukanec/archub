@@ -10,7 +10,11 @@ import { transformProjects } from '../mappers/projectMapper';
  * - Tipo de proyecto (project_types)
  * - Modalidad (project_modalities)
  * 
- * Solo devuelve proyectos activos y no eliminados.
+ * CRÍTICO: Solo devuelve proyectos que cumplen AMBAS condiciones:
+ * - is_active = true (Estado del proyecto)
+ * - is_deleted = false (Soft delete)
+ * 
+ * DEBE ser consistente con getProjectById para evitar inconsistencias en el cache.
  * 
  * @param organizationId - ID de la organización
  * @returns Array de proyectos con todas sus relaciones, o array vacío
@@ -30,6 +34,7 @@ export async function getProjects(organizationId: string): Promise<Project[]> {
     .select('*')
     .eq('organization_id', organizationId)
     .eq('is_active', true)
+    .eq('is_deleted', false)
     .order('created_at', { ascending: false });
   
   if (error) {
