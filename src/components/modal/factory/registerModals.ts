@@ -10,8 +10,7 @@ import { MovementModal, MovementModalView, MovementImportStepModal, MovementConc
 import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConfirmationForm';
 import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPresentationFormModal, AdminProductModal, ProductModal, ProviderProductModal } from '@/features/materials';
 import { UserFormModal, ChangelogFormModal, NotificationFormModal, AnnouncementFormModal, SupportConversationStartModal, PlanFormModal, PlanPriceFormModal, DowngradeModal } from '@/features/users';
-import { SiteLogModal } from '@/features/sitelog/modals/SiteLogModal';
-import { SiteLogModalView } from '@/features/sitelog/modals/SiteLogModalView';
+import SiteLogForm from '@/features/sitelog/forms/SiteLogForm';
 import { SiteLogTypeModal } from '@/features/sitelog/modals/SiteLogTypeModal';
 import { ProjectTypeForm } from '@/features/projects/forms/ProjectTypeForm';
 import { ProjectModalityForm } from '@/features/projects/forms/ProjectModalityForm';
@@ -172,8 +171,14 @@ export function initializeModalRegistry(): void {
   registerModal('subcontract-award', SubcontractAwardModal as any, projectConfig);
   registerModal('subcontract-task', SubcontractTaskFormModal as any, projectConfig);
   
-  registerModal('site-log', SiteLogModal as any, { ...projectConfig, size: 'xl' });
-  registerModal('site-log-view', SiteLogModalView as any, { ...projectConfig, size: 'xl' });
+  registerModal('site-log', SiteLogForm as any, {
+    ...projectConfig,
+    size: 'xl',
+    mapDataToProps: (data) => ({
+      siteLogId: data?.id || data?.data?.id,
+      mode: data?.id || data?.data?.id ? (data?.isEditing ? 'edit' : 'view') : 'create',
+    })
+  });
   registerModal('siteLogType', SiteLogTypeModal as any, adminConfig);
   
   registerModal('course', CourseModal as any, { ...learningConfig, size: 'xl' });
