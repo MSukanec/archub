@@ -61,7 +61,10 @@ export { default as ProjectSelectorField } from './components/ProjectSelectorFie
 // Gantt Components
 export * from './components/gantt';
 
-// ============ MODALS ============
+// ============ FORMS ============
+export { ProjectForm } from './forms/ProjectForm';
+
+// ============ MODALS (Legacy) ============
 export * from './modals/ProjectModal';
 export { GalleryFormModal } from './modals/GalleryFormModal';
 export { DocumentFolderFormModal } from './modals/DocumentFolderFormModal';

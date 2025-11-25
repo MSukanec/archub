@@ -1,7 +1,7 @@
 import { registerModal, ModalConfig } from './registry';
 
 import { MemberFormModal, BoardFormModal, CardFormModal, ListFormModal, OrganizationMovementConceptFormModal, PartnerModal, OrganizationFormModal, ProfileOrganizationFormModal } from '@/features/organization';
-import { ProjectModal, GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal } from '@/features/projects';
+import { ProjectForm, GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal } from '@/features/projects';
 import { ContactFormModal, ContactModalView } from '@/features/contacts';
 import { ClientObligationModal, ClientPaymentsModal, ClientCommitmentModal, ClientRoleModal, ProjectClientModal } from '@/features/clients';
 import { MovementModal, MovementModalView, MovementImportStepModal, MovementConceptFormModal, BankTransferReceiptModal, PaymentFormModal } from '@/features/finances';
@@ -42,7 +42,14 @@ export function initializeModalRegistry(): void {
   registerModal('profile-organization', ProfileOrganizationFormModal as any, organizationConfig);
   registerModal('organization-movement-concept', OrganizationMovementConceptFormModal as any, organizationConfig);
   
-  registerModal('project', ProjectModal as any, { ...projectConfig, size: 'xl' });
+  registerModal('project', ProjectForm as any, { 
+    ...projectConfig, 
+    size: 'lg',
+    mapDataToProps: (data) => ({
+      project: data?.editingProject || data?.project,
+      mode: data?.mode || (data?.isEditing ? 'edit' : (data?.editingProject || data?.project ? 'edit' : 'create')),
+    }),
+  });
   registerModal('gallery', GalleryFormModal as any, projectConfig);
   registerModal('document-folder', DocumentFolderFormModal as any, { ...projectConfig, size: 'md' });
   registerModal('document-upload', DocumentUploadFormModal as any, projectConfig);
