@@ -1194,7 +1194,10 @@ export function Table<T = any>({
                                     {defaultActions.map((action, idx) => (
                                       <DropdownMenuItem
                                         key={idx}
-                                        onClick={action.onClick}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          action.onClick();
+                                        }}
                                         className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent hover:text-black dark:hover:text-white transition-colors"
                                       >
                                         <action.icon className="h-4 w-4" />
@@ -1207,7 +1210,10 @@ export function Table<T = any>({
                                     {destructiveActions.map((action, idx) => (
                                       <DropdownMenuItem
                                         key={idx}
-                                        onClick={action.onClick}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          action.onClick();
+                                        }}
                                         className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent text-foreground hover:text-red-600 dark:hover:text-red-500 transition-colors"
                                       >
                                         <action.icon className="h-4 w-4" />
@@ -1351,7 +1357,10 @@ export function Table<T = any>({
                                 {defaultActions.map((action, idx) => (
                                   <DropdownMenuItem
                                     key={idx}
-                                    onClick={action.onClick}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      action.onClick();
+                                    }}
                                     className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent hover:text-black dark:hover:text-white transition-colors"
                                   >
                                     <action.icon className="h-4 w-4" />
@@ -1364,7 +1373,10 @@ export function Table<T = any>({
                                 {destructiveActions.map((action, idx) => (
                                   <DropdownMenuItem
                                     key={idx}
-                                    onClick={action.onClick}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      action.onClick();
+                                    }}
                                     className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent text-foreground hover:text-red-600 dark:hover:text-red-500 transition-colors"
                                   >
                                     <action.icon className="h-4 w-4" />
@@ -1478,7 +1490,10 @@ export function Table<T = any>({
                             {defaultActions.map((action, idx) => (
                               <DropdownMenuItem
                                 key={idx}
-                                onClick={action.onClick}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  action.onClick();
+                                }}
                                 className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent hover:text-black dark:hover:text-white transition-colors"
                               >
                                 <action.icon className="h-4 w-4" />
@@ -1491,7 +1506,10 @@ export function Table<T = any>({
                             {destructiveActions.map((action, idx) => (
                               <DropdownMenuItem
                                 key={idx}
-                                onClick={action.onClick}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  action.onClick();
+                                }}
                                 className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent text-foreground hover:text-red-600 dark:hover:text-red-500 transition-colors"
                               >
                                 <action.icon className="h-4 w-4" />

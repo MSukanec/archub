@@ -44,7 +44,7 @@ Preferred communication style: Simple, everyday language.
 - **Hooks Consolidation**: Systematic consolidation of React hooks according to Feature-Sliced Design principles.
 - **HeroLayout Pattern**: Specialized `HeroLayout` component for pages with full-width hero sections, used in Learning Dashboard and Project Dashboard.
 - **Sitelog Attachments Migration**: Migrated sitelog photo/video attachments to unified `media_files` + `media_links` system with signed URLs.
-- **General Costs Payment Storage**: Fully integrated general costs payment attachments with unified 3-bucket storage, signed URLs, and proper referential integrity.
+- **General Costs Payment Storage (Nov 25, 2024)**: Fully integrated general costs payment attachments with unified 3-bucket storage, signed URLs, and proper referential integrity. Fixed critical Table component event handling issue where DropdownMenuItem clicks were propagating to `onRowClick`, causing wrong modals to open. Added `e.stopPropagation()` in 3 locations (grouped data desktop, desktop fallback, mobile card view). Implemented proper media loading with `getGeneralCostPaymentFiles` service for signed URL generation and cache management.
 
 ## External Dependencies
 - **Supabase**: Authentication.
