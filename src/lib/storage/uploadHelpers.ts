@@ -1,5 +1,88 @@
 import { uploadFile } from './uploadFile';
 import type { UploadContext, UploadResult } from './types';
+import { supabase } from '@/lib/supabase';
+import { compressImage } from '@/lib/imageCompression';
+import { getFileUrl } from './getFileUrl';
+import type { BucketName } from './types';
+
+/**
+ * Generate unique file path for contact avatar
+ * Path: organizations/{organization_id}/contacts/avatars/{filename}
+ */
+function generateContactAvatarPath(organizationId: string, contactId: string, fileName: string): string {
+  const ext = fileName.split('.').pop() || 'png';
+  const uniqueName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+  return `organizations/${organizationId}/contacts/avatars/${uniqueName}`;
+}
+
+/**
+ * Upload contact avatar directly to storage (no media_files)
+ * Saves URL directly to contacts.contact_avatar_url column
+ */
+export async function uploadContactAvatarDirect(
+  file: File,
+  contactId: string,
+  organizationId: string
+): Promise<{ url: string }> {
+  try {
+    if (!file || file.size === 0) {
+      throw new Error('Archivo vacío o inválido');
+    }
+
+    if (!file.type.startsWith('image/')) {
+      throw new Error('Solo se permiten archivos de imagen');
+    }
+
+    // Compress image before uploading
+    const compressedFile = await compressImage(file, 'avatar');
+    
+    // Validate file size after compression (max 1MB for avatars)
+    if (compressedFile.size > 1 * 1024 * 1024) {
+      throw new Error('La imagen no puede superar 1MB después de la compresión');
+    }
+
+    // Generate unique file path
+    const filePath = generateContactAvatarPath(organizationId, contactId, compressedFile.name);
+    const bucket: BucketName = 'private-assets';
+
+    // Upload to Supabase Storage
+    const { error: uploadError } = await supabase.storage
+      .from(bucket)
+      .upload(filePath, compressedFile, {
+        cacheControl: '3600',
+        upsert: true,
+      });
+
+    if (uploadError) {
+      throw new Error(`Error al subir archivo: ${uploadError.message}`);
+    }
+
+    // Update contact with avatar URL
+    const { error: dbError } = await supabase
+      .from('contacts')
+      .update({ contact_avatar_url: filePath })
+      .eq('id', contactId);
+
+    if (dbError) {
+      // Cleanup: delete file from storage if DB update fails
+      await supabase.storage.from(bucket).remove([filePath]);
+      throw new Error(`Error al guardar avatar: ${dbError.message}`);
+    }
+
+    // Generate signed URL for private assets (expires in 1 hour)
+    const { data, error: urlError } = await supabase.storage
+      .from(bucket)
+      .createSignedUrl(filePath, 3600);
+
+    if (urlError || !data?.signedUrl) {
+      throw new Error(`Error al generar URL: ${urlError?.message || 'No URL generated'}`);
+    }
+
+    return { url: data.signedUrl };
+  } catch (error) {
+    throw error;
+  }
+}
 
 export async function uploadContactDocument(
   file: File,
@@ -109,21 +192,11 @@ export async function uploadOrgLogo(
   return uploadFile(file, context);
 }
 
+// Deprecated: use uploadContactAvatarDirect instead
 export async function uploadContactAvatar(
   file: File,
   contactId: string,
   organizationId: string
-): Promise<UploadResult> {
-  const context: UploadContext = {
-    entity: 'contact_avatar',
-    organization_id: organizationId,
-    link_to: {
-      contact_id: contactId
-    },
-    category: 'avatar',
-    description: 'Contact avatar',
-    is_cover: true
-  };
-
-  return uploadFile(file, context);
+): Promise<{ url: string }> {
+  return uploadContactAvatarDirect(file, contactId, organizationId);
 }
