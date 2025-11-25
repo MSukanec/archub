@@ -79,13 +79,18 @@ export async function replace<Entity>(oldId: string, newId: string): Promise<{ o
 **3. Hook de Delete** (ya existe típicamente):
 ```typescript
 // src/features/<feature>/hooks/use-delete-<entity>.ts
-export function useDelete<Entity>() {
+// ⚠️ IMPORTANTE: Recibe organizationId para invalidar queries relacionadas
+export function useDelete<Entity>(organizationId: string | null) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => delete<Entity>(id),
     onSuccess: () => {
+      // Invalidar AMBAS: la entidad Y sus referencias
       queryClient.invalidateQueries({ 
         queryKey: <QUERY_KEY_FOR_ENTITY_LIST> 
+      })
+      queryClient.invalidateQueries({ 
+        queryKey: <QUERY_KEY_FOR_RELATED_ITEMS_WITH_ORG_ID>(organizationId) 
       })
       toast({ title: 'Eliminado', description: '...' })
     }
@@ -96,18 +101,20 @@ export function useDelete<Entity>() {
 **4. Hook de Replace** (NUEVO):
 ```typescript
 // src/features/<feature>/hooks/use-replace-<entity>.ts
-export function useReplace<Entity>() {
+// ⚠️ IMPORTANTE: Recibe organizationId para invalidar queries correctas
+export function useReplace<Entity>(organizationId: string | null) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ oldId, newId }: { oldId: string; newId: string }) =>
       replace<Entity>(oldId, newId),
     onSuccess: () => {
-      // Invalidar AMBAS queries: la entidad Y sus referencias
+      // Invalidar AMBAS queries con organizationId CORRECTO
+      // Si no pasas organizationId, la invalidation fallará silenciosamente
       queryClient.invalidateQueries({ 
         queryKey: <QUERY_KEY_FOR_ENTITY_LIST> 
       })
       queryClient.invalidateQueries({ 
-        queryKey: <QUERY_KEY_FOR_RELATED_ITEMS> 
+        queryKey: <QUERY_KEY_FOR_RELATED_ITEMS_WITH_ORG_ID>(organizationId) 
       })
       toast({ 
         title: 'Reemplazado',
@@ -129,8 +136,9 @@ import { useReplace<Entity> } from '@/features/<feature>/hooks/use-replace-<enti
 
 export default function <Entity>List() {
   const { openModal } = useGlobalModalStore()
-  const delete<Entity> = useDelete<Entity>()
-  const replace<Entity> = useReplace<Entity>()
+  const organizationId = useCurrentUser().data?.organization?.id || null
+  const delete<Entity> = useDelete<Entity>(organizationId)
+  const replace<Entity> = useReplace<Entity>(organizationId)
   
   const [<entities>] = useQuery(...) // Lista de items
   const [relatedItems] = useQuery(...) // Items relacionados
@@ -204,14 +212,17 @@ Para implementar este patrón en **cualquier feature**:
 
 - [ ] **Servicio de Delete** existe (típicamente ya)
 - [ ] **Servicio de Replace** creado: `src/features/<feature>/services/replace<Entity>.ts`
-- [ ] **Hook de Delete** existe (típicamente ya)
-- [ ] **Hook de Replace** creado: `src/features/<feature>/hooks/use-replace-<entity>.ts`
-- [ ] **Hook importado** en la página
+- [ ] **Hook de Delete** RECIBE `organizationId` como parámetro
+- [ ] **Hook de Replace** RECIBE `organizationId` como parámetro
+- [ ] **Hooks invalidan** AMBAS queries: entidad Y items relacionados
+- [ ] **Hooks invalidan con organizationId CORRECTO** (no `null`)
+- [ ] **Página obtiene organizationId** antes de instanciar hooks
+- [ ] **Página pasa organizationId** a `useDelete<Entity>(organizationId)`
+- [ ] **Página pasa organizationId** a `useReplace<Entity>(organizationId)`
 - [ ] **handleDelete() función** arma: `consequences`, `mode`, `replacementOptions`
 - [ ] **openModal() llamada** con todos los parámetros necesarios
 - [ ] **onDelete callback** ejecuta `delete<Entity>.mutate(id)`
 - [ ] **onReplace callback** ejecuta `replace<Entity>.mutate({ oldId, newId })`
-- [ ] **Query invalidation** toca AMBAS: entidad Y items relacionados
 
 ---
 
@@ -246,9 +257,67 @@ Cuando necesites aplicar este patrón a una página X, di:
 Yo automáticamente:
 1. Buscaré la página y su feature
 2. Crearé/verificaré los servicios de delete + replace
-3. Crearé/verificaré los hooks
-4. Modificaré la página para orquestar el modal correctamente
-5. Verificaré que invalide caches apropiadamente
+3. **Modificaré los hooks para recibir organizationId**
+4. **Verificaré que invaliden AMBAS queries con organizationId correcto**
+5. Modificaré la página para:
+   - Extraer `organizationId` al principio
+   - Pasar `organizationId` a ambos hooks
+   - Orquestar el modal correctamente
+6. **CRÍTICO: Verificaré que los cambios se repliquen en TODAS las pestañas/páginas relacionadas sin necesidad de F5**
+
+---
+
+## 🚨 Cache Invalidation - La Clave del Éxito
+
+Este es el PROBLEMA MÁS COMÚN y causa que los cambios no se vean sin F5.
+
+### El Problema
+En TanStack Query, cada query tiene una **query key única**. Si los keys no coinciden exactamente, la invalidation NO funciona.
+
+```tsx
+// Query A en la tabla de PAGOS
+queryKey: ['general-costs', 'payment', 'org-123']
+
+// Pero invalidamos con...
+invalidateQueries({ queryKey: ['general-costs', 'payment', null] })
+// ❌ Keys no coinciden = NO se invalida
+```
+
+### La Solución
+**SIEMPRE** pasar `organizationId` (o cualquier identifier contextual) a los hooks:
+
+```tsx
+// ✅ EN CUALQUIER PÁGINA
+const organizationId = userData?.organization?.id || null
+
+// ✅ CREAR HOOKS CON EL ID
+const deleteItem = useDeleteItem(organizationId)
+const replaceItem = useReplaceItem(organizationId)
+
+// ✅ EN EL HOOK, INVALIDAR CON EL ID CORRECTO
+export function useDeleteItem(organizationId: string | null) {
+  return useMutation({
+    onSuccess: () => {
+      // Invalidar con el organizationId que tiene la query
+      queryClient.invalidateQueries({
+        queryKey: ['items', 'list', organizationId]  // ✅ CON ORG
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['related', 'list', organizationId]  // ✅ CON ORG
+      })
+    }
+  })
+}
+```
+
+### Por qué sucede
+- Las queries **específicas por organización** incluyen el `organizationId` en su key
+- Si invalidamos sin ese ID, TanStack Query busca keys exactas
+- Las tablas que usan esa query NO se actualizan
+- Usuario hace F5 → query se ejecuta de nuevo con el nuevo ID → ve los cambios
+
+### Patrón Universal
+**Cualquier hook que invalide queries dependientes debe recibir el context ID (organizationId, projectId, etc.)**
 
 ---
 
@@ -284,7 +353,28 @@ const mode = associatedPayments.length > 0 ? 'replace' : 'delete'
 const mode = associatedPayments.length > 0 && otherItems.length > 0 ? 'replace' : 'delete'
 ```
 
-### ❌ Error 4: No filtrar el item actual en replacementOptions
+### ❌ Error 4: No pasar organizationId al hook (CRÍTICO)
+```tsx
+// MALO - Query keys no coinciden, changes no se ven
+const deleteItem = useDeleteItem()
+const replaceItem = useReplaceItem()
+
+// BIEN - organizationId en ambos hooks
+const organizationId = userData?.organization?.id || null
+const deleteItem = useDeleteItem(organizationId)
+const replaceItem = useReplaceItem(organizationId)
+
+// Dentro del hook, usas organizationId para invalidar CORRECTAMENTE:
+queryClient.invalidateQueries({ 
+  queryKey: QUERY_KEYS.relatedList(organizationId)  // ✅ Con org
+})
+// NO:
+queryClient.invalidateQueries({ 
+  queryKey: QUERY_KEYS.relatedList(null)  // ❌ Sin org
+})
+```
+
+### ❌ Error 5: No filtrar el item actual en replacementOptions
 ```tsx
 // MALO - El usuario podría "reemplazar con el mismo"
 const options = items.map(i => ({ label: i.name, value: i.id }))
@@ -295,7 +385,7 @@ const options = items
   .map(i => ({ label: i.name, value: i.id }))
 ```
 
-### ❌ Error 5: Modal con lógica de negocio
+### ❌ Error 6: Modal con lógica de negocio
 ```tsx
 // MALO - El modal ejecuta delete directamente
 onDelete: () => supabase.from('table').delete()

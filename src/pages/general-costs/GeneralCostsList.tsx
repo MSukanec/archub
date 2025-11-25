@@ -25,8 +25,9 @@ interface GeneralCostsListProps {
 export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListProps) {
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
-  const deleteGeneralCost = useDeleteGeneralCost();
-  const replaceGeneralCost = useReplaceGeneralCost();
+  const organizationId = userData?.organization?.id || null;
+  const deleteGeneralCost = useDeleteGeneralCost(organizationId);
+  const replaceGeneralCost = useReplaceGeneralCost(organizationId);
   
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -52,12 +53,10 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
       onNewGeneralCost();
     } else {
       openModal('general-costs', {
-        organizationId: userData?.organization?.id
+        organizationId
       });
     }
   };
-  
-  const organizationId = userData?.organization?.id;
   const { data: generalCosts = [], isLoading } = useGeneralCosts(organizationId || null);
   const { data: payments = [] } = useGeneralCostsPayments(organizationId);
 

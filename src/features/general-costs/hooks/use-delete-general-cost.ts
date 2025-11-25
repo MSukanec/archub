@@ -3,13 +3,15 @@ import { deleteGeneralCost } from '../services/deleteGeneralCost';
 import { GENERAL_COSTS_QUERY_KEYS } from '../constants';
 import { toast } from '@/hooks/use-toast';
 
-export function useDeleteGeneralCost() {
+export function useDeleteGeneralCost(organizationId: string | null) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (generalCostId: string) => deleteGeneralCost(generalCostId),
     onSuccess: () => {
+      // Invalidate both general costs and payments queries with correct organizationId
       queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.lists() });
+      queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.paymentsList(organizationId) });
       
       toast({
         title: 'Gasto general eliminado',
