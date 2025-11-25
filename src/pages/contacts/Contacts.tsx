@@ -1,8 +1,8 @@
 import { DashboardLayout as Layout } from "@/layouts";
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { Users, Search, Filter, UserPlus, Bell } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import { Users, Search, Filter, UserPlus, Bell, Settings } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useActionBarMobile } from '@/layouts';
@@ -19,6 +19,7 @@ import {
   formatContactName,
   groupContactsByLetter,
 } from '@/features/contacts';
+import ContactSettings from './ContactSettings';
 
 export default function Contacts() {
   const [activeTab, setActiveTab] = useState('contacts');
@@ -32,43 +33,48 @@ export default function Contacts() {
   const organizationId = userData?.organization?.id;
   const { data: contacts = [], isLoading: contactsLoading } = useContacts(organizationId);
   const { data: contactTypes = [] } = useContactTypes(organizationId);
-  const deleteContactMutation = useDeleteContact(organizationId!);
+  const deleteContactMutation = useDeleteContact(organizationId || '');
   const { toast } = useToast();
   const { setActions, setShowActionBar, clearActions, setFilterConfig } = useActionBarMobile();
   const isMobile = useMobile();
 
   useEffect(() => {
     if (isMobile) {
-      setActions({
-        search: {
-          id: 'search',
-          icon: Search,
-          label: 'Buscar',
-          onClick: () => {
-            setShowSearch(true);
+      if (activeTab === 'contacts') {
+        setActions({
+          search: {
+            id: 'search',
+            icon: Search,
+            label: 'Buscar',
+            onClick: () => {
+              setShowSearch(true);
+            },
           },
-        },
-        create: {
-          id: 'create',
-          icon: UserPlus,
-          label: 'Crear Contacto',
-          onClick: () => openModal('contact', { isEditing: false }),
-          variant: 'primary',
-        },
-        filter: {
-          id: 'filter',
-          icon: Filter,
-          label: 'Filtros',
-          onClick: () => {},
-        },
-        notifications: {
-          id: 'notifications',
-          icon: Bell,
-          label: 'Notificaciones',
-          onClick: () => {},
-        },
-      });
-      setShowActionBar(true);
+          create: {
+            id: 'create',
+            icon: UserPlus,
+            label: 'Crear Contacto',
+            onClick: () => openModal('contact', { isEditing: false }),
+            variant: 'primary',
+          },
+          filter: {
+            id: 'filter',
+            icon: Filter,
+            label: 'Filtros',
+            onClick: () => {},
+          },
+          notifications: {
+            id: 'notifications',
+            icon: Bell,
+            label: 'Notificaciones',
+            onClick: () => {},
+          },
+        });
+        setShowActionBar(true);
+      } else {
+        clearActions();
+        setShowActionBar(false);
+      }
     }
 
     return () => {
@@ -76,10 +82,10 @@ export default function Contacts() {
         clearActions();
       }
     };
-  }, [isMobile]);
+  }, [isMobile, activeTab, openModal, clearActions, setActions, setShowActionBar]);
 
   useEffect(() => {
-    if (isMobile && contactTypes && contactTypes.length > 0) {
+    if (isMobile && contactTypes && contactTypes.length > 0 && activeTab === 'contacts') {
       setFilterConfig({
         filters: [
           {
@@ -101,14 +107,14 @@ export default function Contacts() {
         },
       });
     }
-  }, [isMobile, contactTypes, filterByType, setFilterConfig]);
+  }, [isMobile, contactTypes, filterByType, setFilterConfig, activeTab]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setSearchValue('');
     setFilterByType('all');
   }, [userData?.preferences?.last_organization_id]);
 
-  const filteredContacts = React.useMemo(() => {
+  const filteredContacts = useMemo(() => {
     let filtered = [...contacts];
 
     if (searchValue) {
@@ -133,7 +139,7 @@ export default function Contacts() {
     return filtered;
   }, [contacts, searchValue, filterByType]);
 
-  const groupedContacts = React.useMemo(() => {
+  const groupedContacts = useMemo(() => {
     return groupContactsByLetter(filteredContacts);
   }, [filteredContacts]);
 
@@ -184,35 +190,37 @@ export default function Contacts() {
     });
   };
 
+  const tabs = [
+    {
+      id: 'contacts',
+      label: 'Lista de Contactos',
+      isActive: activeTab === 'contacts',
+    },
+    {
+      id: 'settings',
+      label: 'Ajustes',
+      isActive: activeTab === 'settings',
+    },
+  ];
+
+  const getActionButton = () => {
+    if (activeTab === 'contacts') {
+      return {
+        label: 'Crear Contacto',
+        icon: UserPlus,
+        onClick: () => openModal('contact', { isEditing: false }),
+      };
+    }
+    return undefined;
+  };
+
   if (isLoading || contactsLoading) {
     return <LoadingSpinner fullScreen size="lg" />;
   }
 
-  if (contacts.length === 0 && !searchValue && filterByType === 'all') {
-    return (
-      <Layout
-        wide={false}
-        headerProps={{
-          icon: Users,
-          title: 'Contactos',
-          description: 'Gestiona los contactos de tu organización',
-          organizationId,
-          showMembers: true,
-          tabs: [
-            {
-              id: 'contacts',
-              label: 'Lista de Contactos',
-              isActive: activeTab === 'contacts',
-            },
-          ],
-          onTabChange: (tabId: string) => setActiveTab(tabId),
-          actionButton: {
-            label: 'Crear Contacto',
-            icon: UserPlus,
-            onClick: () => openModal('contact', { isEditing: false }),
-          },
-        }}
-      >
+  const renderContactsTab = () => {
+    if (contacts.length === 0 && !searchValue && filterByType === 'all') {
+      return (
         <EmptyState
           icon={<Users className="w-8 h-8 text-muted-foreground" />}
           title="Los contactos son la base de tu organización"
@@ -224,44 +232,15 @@ export default function Contacts() {
             </Button>
           }
         />
-      </Layout>
-    );
-  }
+      );
+    }
 
-  return (
-    <Layout
-      wide={false}
-      headerProps={{
-        icon: Users,
-        title: 'Contactos',
-        description: 'Gestiona los contactos de tu organización',
-        pageTitle: 'Contactos',
-        organizationId,
-        showMembers: true,
-        breadcrumb: [
-          { name: 'Organización', href: '/organization/dashboard' },
-          { name: 'Contactos', href: '/contacts' },
-        ],
-        tabs: [
-          {
-            id: 'contacts',
-            label: 'Lista de Contactos',
-            isActive: activeTab === 'contacts',
-          },
-        ],
-        onTabChange: (tabId: string) => setActiveTab(tabId),
-        actionButton: {
-          label: 'Crear Contacto',
-          icon: UserPlus,
-          onClick: () => openModal('contact', { isEditing: false }),
-        },
-      }}
-    >
-      {isMobile ? (
+    if (isMobile) {
+      return (
         <div className="h-full overflow-y-auto scrollbar-hide">
           {filteredContacts.length > 0 ? (
             <div className="space-y-6">
-              {Object.entries(groupedContacts).map(([letter, contacts]) => (
+              {Object.entries(groupedContacts).map(([letter, letterContacts]) => (
                 <div key={letter} className="space-y-3">
                   <div className="flex items-center gap-3">
                     <div className="flex items-center justify-center w-8 h-8 bg-muted rounded-full">
@@ -270,7 +249,7 @@ export default function Contacts() {
                     <div className="flex-1 h-px bg-border"></div>
                   </div>
                   <div className="space-y-2">
-                    {contacts.map((contact) => (
+                    {letterContacts.map((contact) => (
                       <ContactRow
                         key={contact.id}
                         contact={contact as any}
@@ -297,14 +276,50 @@ export default function Contacts() {
             </div>
           )}
         </div>
-      ) : (
-        <ContactList
-          contacts={filteredContacts}
-          onEdit={handleEditContact}
-          onDelete={handleDeleteContact}
-          onRowClick={handleViewContact}
-        />
-      )}
+      );
+    }
+
+    return (
+      <ContactList
+        contacts={filteredContacts}
+        onEdit={handleEditContact}
+        onDelete={handleDeleteContact}
+        onRowClick={handleViewContact}
+      />
+    );
+  };
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'contacts':
+        return renderContactsTab();
+      case 'settings':
+        return <ContactSettings />;
+      default:
+        return renderContactsTab();
+    }
+  };
+
+  return (
+    <Layout
+      wide={false}
+      headerProps={{
+        icon: Users,
+        title: 'Contactos',
+        description: 'Gestiona los contactos de tu organización',
+        pageTitle: 'Contactos',
+        organizationId,
+        showMembers: true,
+        breadcrumb: [
+          { name: 'Organización', href: '/organization/dashboard' },
+          { name: 'Contactos', href: '/contacts' },
+        ],
+        tabs,
+        onTabChange: (tabId: string) => setActiveTab(tabId),
+        actionButton: getActionButton(),
+      }}
+    >
+      {renderTabContent()}
     </Layout>
   );
 }

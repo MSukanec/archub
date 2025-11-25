@@ -10,3 +10,4 @@ export { ContactAvatarUploader } from './components/ContactAvatarUploader';
 export { ContactAttachmentsPanel } from './components/attachments/ContactAttachmentsPanel';
 export { default as ContactRow } from './components/ContactRow';
 export { default as ContactList } from './components/ContactList';
+export { ContactTypeForm } from './forms/ContactTypeForm';
