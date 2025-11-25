@@ -61,7 +61,7 @@ function FormPanel({
   existingFiles: any[]
   filesToUpload: any[]
   setFilesToUpload: (files: any[]) => void
-  handleExistingFileDelete: (fileId: string) => void
+  handleExistingFileDelete: (fileId: string) => Promise<void>
 }) {
   // Move state out of render function (CRITICAL: Fix React Hooks warning)
   const [openDatePicker, setOpenDatePicker] = React.useState(false)
@@ -477,7 +477,7 @@ export default function GeneralCostPaymentForm({ modalData, onClose }: GeneralCo
 
   // Fetch data
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId)
-  const { data: generalCosts, isLoading: generalCostsLoading } = useGeneralCosts(organizationId)
+  const { data: generalCosts, isLoading: generalCostsLoading } = useGeneralCosts(organizationId || null)
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId)
   const { data: members = [] } = useOrganizationMembers(organizationId)
 
