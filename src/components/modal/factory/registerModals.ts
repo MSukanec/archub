@@ -11,7 +11,7 @@ import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConf
 import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPresentationFormModal, AdminProductModal, ProductModal, ProviderProductModal } from '@/features/materials';
 import { UserFormModal, ChangelogFormModal, NotificationFormModal, AnnouncementFormModal, SupportConversationStartModal, PlanFormModal, PlanPriceFormModal, DowngradeModal } from '@/features/users';
 import SiteLogForm from '@/features/sitelog/forms/SiteLogForm';
-import { SiteLogTypeModal } from '@/features/legacy/sitelog-modals/SiteLogTypeModal';
+import { SiteLogTypeForm } from '@/features/sitelog/forms/SiteLogTypeForm';
 import { ProjectTypeForm } from '@/features/projects/forms/ProjectTypeForm';
 import { ProjectModalityForm } from '@/features/projects/forms/ProjectModalityForm';
 import { PersonnelAttendanceModal, PersonnelAddModal, PersonnelDataModal, PersonnelRatesModal, AdminLaborModal } from '@/features/personnel';
@@ -179,7 +179,14 @@ export function initializeModalRegistry(): void {
       mode: data?.mode || (data?.id || data?.data?.id ? (data?.isEditing ? 'edit' : 'view') : 'create'),
     })
   });
-  registerModal('siteLogType', SiteLogTypeModal as any, adminConfig);
+  registerModal('siteLogType', SiteLogTypeForm as any, {
+    ...adminConfig,
+    mapDataToProps: (data) => ({
+      siteLogType: data?.siteLogType,
+      siteLogTypeId: data?.siteLogTypeId,
+      mode: data?.mode || (data?.siteLogType ? 'edit' : 'create'),
+    })
+  });
   
   registerModal('course', CourseModal as any, { ...learningConfig, size: 'xl' });
   registerModal('course-module', CourseModuleFormModal as any, learningConfig);
