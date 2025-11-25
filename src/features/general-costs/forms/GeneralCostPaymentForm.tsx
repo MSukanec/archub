@@ -512,7 +512,7 @@ export default function GeneralCostPaymentForm({ modalData, organizationId: orgI
       reference: existingPayment.reference || '',
       status: (existingPayment.status || 'confirmed') as 'confirmed' | 'pending' | 'rejected' | 'void',
     });
-  }, [existingPayment, mode, form]);
+  }, [existingPayment, mode]);
 
   // Load existing files
   React.useEffect(() => {
@@ -548,7 +548,7 @@ export default function GeneralCostPaymentForm({ modalData, organizationId: orgI
         form.setValue('wallet_id', wallets[0].id)
       }
     }
-  }, [currencies, wallets, mode, paymentId, form])
+  }, [currencies, wallets, mode, paymentId])
 
   // Mutations
   const createPaymentMutation = useCreateGeneralCostPayment()
@@ -695,6 +695,7 @@ export default function GeneralCostPaymentForm({ modalData, organizationId: orgI
       <ModalLayout onClose={handleClose} size="lg">
         <ModalHeader
           title={`Pago de ${existingPayment?.general_cost?.name || 'Gasto General'}`}
+          description={existingPayment?.payment_date ? format(new Date(existingPayment.payment_date), 'dd MMMM yyyy', { locale: es }) : 'Sin fecha'}
           icon={DollarSign}
         />
         <ModalBody>
@@ -709,6 +710,7 @@ export default function GeneralCostPaymentForm({ modalData, organizationId: orgI
     <ModalLayout onClose={handleClose} size="lg">
       <ModalHeader
         title={mode === 'edit' ? 'Editar Pago de Gastos Generales' : 'Nuevo Pago de Gastos Generales'}
+        description={mode === 'edit' ? 'Actualiza los detalles del pago' : 'Registra un nuevo pago de gastos generales'}
         icon={DollarSign}
       />
       <ModalBody>
