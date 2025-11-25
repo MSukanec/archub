@@ -17,8 +17,7 @@ import { PersonnelAttendanceModal, PersonnelAddModal, PersonnelDataModal, Person
 import { SubcontractFormModal, SubcontractBidFormModal, SubcontractAwardModal, SubcontractTaskFormModal } from '@/features/subcontracts';
 import { PDFExporterModal } from '@/features/pdf';
 import { GeneralCostForm } from '@/features/general-costs/forms/GeneralCostForm';
-import { GeneralCostsPaymentModal } from '@/features/general-costs/modals/GeneralCostsPaymentModal';
-import { GeneralCostsPaymentViewModal } from '@/features/general-costs/modals/GeneralCostsPaymentViewModal';
+import GeneralCostPaymentForm from '@/features/general-costs/forms/GeneralCostPaymentForm';
 import { CourseModal, CourseModuleFormModal, LessonFormModal, CourseEnrollmentModal, CouponFormModal, PaymentMethodModal } from '@/features/learning';
 
 const organizationConfig: ModalConfig = { category: 'organization', size: 'md' };
@@ -107,8 +106,14 @@ export function initializeModalRegistry(): void {
       mode: data?.generalCostId ? 'edit' : (data?.mode || 'create')
     })
   });
-  registerModal('general-costs-payment', GeneralCostsPaymentModal as any, financeConfig);
-  registerModal('general-costs-payment-view', GeneralCostsPaymentViewModal as any, financeConfig);
+  registerModal('general-costs-payment', GeneralCostPaymentForm as any, {
+    ...financeConfig,
+    mapDataToProps: (data) => ({
+      organizationId: data?.organizationId,
+      paymentId: data?.paymentId,
+      mode: data?.paymentId ? (data?.mode || 'edit') : (data?.mode || 'create')
+    })
+  });
   
   registerModal('material-form', MaterialFormModal as any, projectConfig);
   registerModal('material-category-form', MaterialCategoryFormModal as any, { ...projectConfig, size: 'md' });
