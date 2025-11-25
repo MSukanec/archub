@@ -1,17 +1,11 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { useGlobalModalStore } from "@/components/modal"
-import { useModalPanelStore } from "@/components/modal"
-import { FormModalLayout } from "@/components/modal"
-
-import { FormModalFooter } from "@/components/modal"
-import { FormModalHeader } from "@/components/modal"
-import { FormModalBody } from "@/components/modal"
+import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from "@/components/modal"
 import { Trash2, AlertTriangle } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { ComboBox } from "@/components/ui-custom/fields/ComboBoxWriteField"
-import { Button } from "@/components/ui/button"
 
 interface ReplacementOption {
   label: string
@@ -19,118 +13,61 @@ interface ReplacementOption {
 }
 
 interface DeleteConfirmationModalProps {
-  mode?: 'simple' | 'dangerous' | 'replace'
-  title: string
-  description: string
-  itemName?: string
-  itemType?: string // Tipo de elemento (ej: "concepto", "material", "categoría", etc.)
-  itemDetails?: string // Detalles adicionales del elemento (ej: "Tipo: Vivienda, Estado: En proceso")
-  destructiveActionText?: string
+  modalData?: {
+    mode?: 'simple' | 'dangerous' | 'replace'
+    title?: string
+    description?: string
+    itemName?: string
+    itemType?: string
+    itemDetails?: string
+    destructiveActionText?: string
+    replacementOptions?: ReplacementOption[]
+    currentCategoryId?: string
+  }
+  onClose: () => void
   onConfirm?: () => void
   onDelete?: () => void
   onReplace?: (newId: string) => void
-  replacementOptions?: ReplacementOption[]
-  currentCategoryId?: string
   isLoading?: boolean
 }
 
-export default function DeleteConfirmationModal({
-  mode = 'simple',
-  title,
+// Subcomponente: Contenido del modal de eliminación
+function DeleteContent({
+  mode,
   description,
   itemName,
-  itemType = "elemento",
+  itemType,
   itemDetails,
-  destructiveActionText = "Eliminar",
-  onConfirm,
-  onDelete,
-  onReplace,
-  replacementOptions = [],
+  actionType,
+  setActionType,
+  selectedReplacementId,
+  setSelectedReplacementId,
+  inputValue,
+  setInputValue,
+  replacementOptions,
   currentCategoryId,
-  isLoading = false
-}: DeleteConfirmationModalProps) {
-  const { closeModal } = useGlobalModalStore()
-  const [actionType, setActionType] = useState<'delete' | 'replace'>('delete')
-  const [selectedReplacementId, setSelectedReplacementId] = useState<string>('')
-  const [inputValue, setInputValue] = useState<string>('')
-
-  // Always set to edit panel since this is a form modal
-  const { setPanel } = useModalPanelStore()
-  
-  useEffect(() => {
-    setPanel('edit')  // Always edit for form modals as per README.md
-  }, [setPanel])
-
-  const handleSubmit = () => {
-    if (mode === 'simple') {
-      const confirmFunction = onConfirm || onDelete
-      if (confirmFunction) {
-        confirmFunction()
-        closeModal()
-      }
-    } else if (mode === 'dangerous') {
-      if (inputValue.trim() === (itemName || '').trim()) {
-        const confirmFunction = onConfirm || onDelete
-        if (confirmFunction) {
-          confirmFunction()
-          closeModal()
-        }
-      }
-    } else if (mode === 'replace') {
-      if (actionType === 'delete' && onDelete) {
-        onDelete()
-        closeModal()
-      } else if (actionType === 'replace' && onReplace && selectedReplacementId) {
-        onReplace(selectedReplacementId)
-        closeModal()
-      }
-    }
-  }
-
-  const handleCancel = () => {
-    closeModal()
-  }
-
-  // Filtrar opciones para no mostrar la categoría actual
+}: {
+  mode: 'simple' | 'dangerous' | 'replace'
+  description: string
+  itemName?: string
+  itemType?: string
+  itemDetails?: string
+  actionType: 'delete' | 'replace'
+  setActionType: (value: 'delete' | 'replace') => void
+  selectedReplacementId: string
+  setSelectedReplacementId: (value: string) => void
+  inputValue: string
+  setInputValue: (value: string) => void
+  replacementOptions: ReplacementOption[]
+  currentCategoryId?: string
+}) {
   const filteredReplacementOptions = replacementOptions.filter(
     option => option.value !== currentCategoryId
   )
 
-  const getSubmitButtonText = () => {
-    if (isLoading) {
-      if (mode === 'replace') {
-        return actionType === 'delete' ? 'Eliminando...' : 'Reemplazando...'
-      }
-      return 'Eliminando...'
-    }
-    
-    if (mode === 'replace') {
-      return actionType === 'delete' ? `Eliminar ${itemType}` : `Reemplazar ${itemType}`
-    }
-    
-    return destructiveActionText
-  }
-
-  const isSubmitDisabled = () => {
-    if (isLoading) return true
-    
-    // En modo dangerous, requiere escribir el nombre exacto
-    if (mode === 'dangerous') {
-      return inputValue.trim() !== (itemName || '').trim()
-    }
-    
-    if (mode === 'replace' && actionType === 'replace') {
-      return !selectedReplacementId
-    }
-    
-    return false
-  }
-
-  const viewPanel = null; // Not needed for delete confirmation
-
-  const editPanel = (
+  return (
     <div className="space-y-6">
-      {/* 1. Sección: Advertencia */}
+      {/* Advertencia inicial */}
       <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
         <div className="flex items-center gap-2 mb-2">
           <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
@@ -143,10 +80,10 @@ export default function DeleteConfirmationModal({
         </p>
       </div>
 
-      {/* Dangerous mode - Write to confirm */}
+      {/* Modo DANGEROUS - Escribir para confirmar */}
       {mode === 'dangerous' && itemName && (
         <div className="space-y-4">
-          {/* 2. Tarjeta con datos del elemento */}
+          {/* Tarjeta con datos del elemento */}
           <div className="rounded-lg border border-border bg-card p-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10 flex-shrink-0">
@@ -165,7 +102,7 @@ export default function DeleteConfirmationModal({
             </div>
           </div>
 
-          {/* 3. Instrucciones + Input */}
+          {/* Input para confirmar */}
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">
               Para eliminar, escribí <span className="font-semibold text-foreground font-mono">{itemName}</span> abajo
@@ -182,7 +119,7 @@ export default function DeleteConfirmationModal({
         </div>
       )}
 
-      {/* Replace mode controls */}
+      {/* Modo REPLACE - Opciones de acción */}
       {mode === 'replace' && (
         <div className="space-y-4">
           <div className="space-y-2">
@@ -211,65 +148,134 @@ export default function DeleteConfirmationModal({
               />
             </div>
           )}
-        </div>
-      )}
 
-      {/* Warning message for simple mode */}
-      {mode === 'simple' && (
-        <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
-            <p className="text-sm text-destructive font-medium">
-              Esta acción no se puede deshacer
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Warning message for replace mode */}
-      {mode === 'replace' && (
-        <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
-            <p className="text-sm text-destructive font-medium">
-              {actionType === 'replace' 
-                ? `Esta acción reemplazará todos los usos del ${itemType} actual`
-                : 'Esta acción no se puede deshacer'
-              }
-            </p>
+          {/* Advertencia para modo replace */}
+          <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
+              <p className="text-sm text-destructive font-medium">
+                {actionType === 'replace' 
+                  ? `Esta acción reemplazará todos los usos del ${itemType} actual`
+                  : 'Esta acción no se puede deshacer'
+                }
+              </p>
+            </div>
           </div>
         </div>
       )}
     </div>
-  );
+  )
+}
 
-  const headerContent = (
-    <FormModalHeader 
-      title={title}
-      icon={Trash2}
-    />
-  );
+export default function DeleteConfirmationModal({
+  modalData,
+  onClose,
+  onConfirm,
+  onDelete,
+  onReplace,
+  isLoading = false
+}: DeleteConfirmationModalProps) {
+  const { popModal } = useGlobalModalStore()
+  
+  const mode = modalData?.mode || 'simple'
+  const title = modalData?.title || 'Confirmar eliminación'
+  const description = modalData?.description || '¿Estás seguro que querés continuar?'
+  const itemName = modalData?.itemName
+  const itemType = modalData?.itemType || 'elemento'
+  const itemDetails = modalData?.itemDetails
+  const destructiveActionText = modalData?.destructiveActionText || 'Eliminar'
+  const replacementOptions = modalData?.replacementOptions || []
+  const currentCategoryId = modalData?.currentCategoryId
 
-  const footerContent = (
-    <FormModalFooter
-      cancelText="Cancelar"
-      onLeftClick={handleCancel}
-      submitText={getSubmitButtonText()}
-      onSubmit={handleSubmit}
-      submitVariant="destructive"
-      submitDisabled={isSubmitDisabled()}
-      showLoadingSpinner={isLoading}
-    />
-  );
+  const [actionType, setActionType] = useState<'delete' | 'replace'>('delete')
+  const [selectedReplacementId, setSelectedReplacementId] = useState<string>('')
+  const [inputValue, setInputValue] = useState<string>('')
+
+  const handleDelete = () => {
+    if (mode === 'simple') {
+      const confirmFunction = onConfirm || onDelete
+      confirmFunction?.()
+      popModal()
+    } else if (mode === 'dangerous') {
+      if (inputValue.trim() === (itemName || '').trim()) {
+        const confirmFunction = onConfirm || onDelete
+        confirmFunction?.()
+        popModal()
+      }
+    } else if (mode === 'replace') {
+      if (actionType === 'delete' && onDelete) {
+        onDelete()
+        popModal()
+      } else if (actionType === 'replace' && onReplace && selectedReplacementId) {
+        onReplace(selectedReplacementId)
+        popModal()
+      }
+    }
+  }
+
+  const getSubmitButtonText = () => {
+    if (isLoading) {
+      if (mode === 'replace') {
+        return actionType === 'delete' ? 'Eliminando...' : 'Reemplazando...'
+      }
+      return 'Eliminando...'
+    }
+    
+    if (mode === 'replace') {
+      return actionType === 'delete' ? `Eliminar ${itemType}` : `Reemplazar ${itemType}`
+    }
+    
+    return destructiveActionText
+  }
+
+  const isSubmitDisabled = () => {
+    if (isLoading) return true
+    
+    if (mode === 'dangerous') {
+      return inputValue.trim() !== (itemName || '').trim()
+    }
+    
+    if (mode === 'replace' && actionType === 'replace') {
+      return !selectedReplacementId
+    }
+    
+    return false
+  }
 
   return (
-    <FormModalLayout
-      columns={1}
-      viewPanel={viewPanel}
-      editPanel={editPanel}
-      headerContent={headerContent}
-      footerContent={footerContent}
-      onClose={closeModal}
-    />
-  );
+    <ModalLayout onClose={popModal} size="md">
+      <ModalHeader 
+        title={title}
+        icon={Trash2}
+      />
+      
+      <ModalBody>
+        <DeleteContent
+          mode={mode}
+          description={description}
+          itemName={itemName}
+          itemType={itemType}
+          itemDetails={itemDetails}
+          actionType={actionType}
+          setActionType={setActionType}
+          selectedReplacementId={selectedReplacementId}
+          setSelectedReplacementId={setSelectedReplacementId}
+          inputValue={inputValue}
+          setInputValue={setInputValue}
+          replacementOptions={replacementOptions}
+          currentCategoryId={currentCategoryId}
+        />
+      </ModalBody>
+
+      <ModalFooter
+        leftLabel="Cancelar"
+        onLeftClick={popModal}
+        submitText={getSubmitButtonText()}
+        onSubmit={handleDelete}
+        submitVariant="destructive"
+        isSubmitting={isLoading}
+        submitDisabled={isSubmitDisabled()}
+      />
+    </ModalLayout>
+  )
 }

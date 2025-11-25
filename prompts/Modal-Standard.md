@@ -562,6 +562,43 @@ export function ClientPaymentForm({
 
 ---
 
+## 16. MODALES ESPECIALES - PATRONES
+
+Algunos modales necesitan comportamientos o estilos especiales. Sigue el mismo estándar pero con ajustes mínimos:
+
+### Modal de Eliminación / Confirmación Destructiva
+
+```tsx
+<ModalLayout onClose={popModal} size="md">
+  <ModalHeader 
+    title="Confirmar eliminación"
+    description="Esta acción no se puede deshacer"
+    icon={Trash2}
+  />
+  
+  <ModalBody>
+    {/* Contenido con advertencias */}
+    <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
+      <AlertTriangle className="h-4 w-4 text-destructive" />
+      <p className="text-sm text-destructive">Esta acción no se puede deshacer</p>
+    </div>
+  </ModalBody>
+
+  <ModalFooter
+    leftLabel="Cancelar"
+    onLeftClick={popModal}
+    submitText="Eliminar"
+    onSubmit={handleDelete}
+    submitVariant="destructive"    {/* ← Botón rojo */}
+    submitDisabled={isSubmitDisabled()}
+  />
+</ModalLayout>
+```
+
+**Clave:** El único cambio es `submitVariant="destructive"` en ModalFooter. Todo lo demás sigue el estándar.
+
+---
+
 ## USO DEL PROMPT
 
 Cuando pidas crear o refactorizar un modal:
