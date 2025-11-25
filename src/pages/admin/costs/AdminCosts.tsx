@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Package, Plus, RefreshCw } from 'lucide-react';
 import { DashboardLayout as Layout } from "@/layouts";
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';

@@ -3,7 +3,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from '@/hooks/use-toast'
 import { useUnitPresentations, UnitPresentation, useDeleteUnitPresentation } from '@/hooks/use-unit-presentations'
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useGlobalModalStore } from '@/components/modal'
 import AdminUnitRow from '@/features/materials/components/admin/AdminUnitRow'
 
 import { Button } from '@/components/ui/button'

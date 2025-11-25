@@ -6,9 +6,9 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from "@/stores/projectContext";
-import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
-import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
-import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
+import { FormModalHeader } from "@/components/modal";
+import { FormModalFooter } from "@/components/modal";
+import { FormModalLayout } from "@/components/modal";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 

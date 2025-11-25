@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useDesignDocumentFolders, useDeleteDesignDocumentFolder } from '@/hooks/use-design-document-folders';
 
 import { useDesignDocuments, useDesignDocumentsByFolder, useDeleteDesignDocument } from '@/hooks/use-design-documents';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { format } from 'date-fns';

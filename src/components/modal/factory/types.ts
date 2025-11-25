@@ -4,7 +4,6 @@ export interface ModalData {
   [key: string]: any;
 }
 
-// Nuevos tipos para soporte de modales con pasos múltiples
 export interface StepModalConfig {
   currentStep: number;
   totalSteps: number;

@@ -2,7 +2,7 @@ import { Tag, Plus, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useSiteLogTypes, useDeleteSiteLogType } from '@/features/sitelog/hooks/use-sitelog-types';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
 import type { SiteLogType } from '@/features/sitelog/services/getSiteLogTypes';

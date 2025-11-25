@@ -4,7 +4,7 @@ import { es } from 'date-fns/locale'
 import { toast } from '@/hooks/use-toast'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useGlobalModalStore } from '@/components/modal'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
 import { Button } from '@/components/ui/button'

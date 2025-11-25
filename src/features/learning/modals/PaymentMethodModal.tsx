@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
-import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
-import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
-import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
-import FormModalBody from "@/components/modal/form/FormModalBody";
-import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
+import { useGlobalModalStore } from "@/components/modal";
+import { useModalPanelStore } from "@/components/modal";
+import { FormModalLayout } from "@/components/modal";
+import { FormModalHeader } from "@/components/modal";
+import { FormModalBody } from "@/components/modal";
+import { FormModalFooter } from "@/components/modal";
 import {
   ShoppingCart,
   Copy,

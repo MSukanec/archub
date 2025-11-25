@@ -4,7 +4,7 @@ import { MediaDocumentation } from './MediaDocumentation';
 import { MediaGallery } from './MediaGallery';
 import { FileText, Images, Upload, Plus } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 
 export default function Media() {
   const { setSidebarContext } = useNavigationStore();

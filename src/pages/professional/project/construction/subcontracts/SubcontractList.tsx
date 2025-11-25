@@ -13,7 +13,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from '@/stores/projectContext';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { useSubcontracts, useDeleteSubcontract, useSubcontractAnalysis } from "@/features/subcontracts";
 import SubcontractRow from "@/features/subcontracts/components/SubcontractRow";
 import { useQuery } from '@tanstack/react-query';

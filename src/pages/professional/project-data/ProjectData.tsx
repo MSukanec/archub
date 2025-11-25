@@ -13,7 +13,7 @@ import { BottomSheet, BottomSheetContent, BottomSheetHeader, BottomSheetTitle, B
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 import { useLocation } from 'wouter';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import ProjectBasicDataTab from './ProjectBasicDataTab';
 import ProjectLocationTab from './ProjectLocationTab';
 import ProjectSettingsTab from '@/pages/projects/ProjectSettingsTab';

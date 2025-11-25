@@ -12,7 +12,7 @@ import { SubcontractPaymentsView } from './tabs/SubcontractPaymentsView';
 import { SubcontractHistoryView } from './tabs/SubcontractHistoryView';
 import { useSubcontract } from "@/features/subcontracts";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 
 export default function SubcontractView() {
   const { id } = useParams<{ id: string }>();

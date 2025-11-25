@@ -1,24 +1,21 @@
-// src/components/modal/form/FormModalBody.tsx
-
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-interface FormModalBodyProps {
+interface ModalBodyProps {
   children: ReactNode;
   columns?: number;
   className?: string;
-  paddingX?: string; // Padding horizontal (left/right)
-  paddingY?: string; // Padding vertical (top/bottom)
+  paddingX?: string;
+  paddingY?: string;
 }
 
-export default function FormModalBody({ 
+export default function ModalBody({ 
   children, 
   columns = 2, 
   className,
   paddingX = "px-6",
   paddingY = "py-4"
-}: FormModalBodyProps) {
-  // Determine padding classes
+}: ModalBodyProps) {
   const paddingClasses = className?.includes("p-0") ? "" : `${paddingX} ${paddingY}`;
   
   return (
@@ -34,3 +31,5 @@ export default function FormModalBody({
     </div>
   );
 }
+
+export { ModalBody as FormModalBody };

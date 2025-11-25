@@ -123,7 +123,7 @@ import UserOrganizations from "@/pages/settings/UserOrganizations";
 
 
 import NotFound from "@/pages/public/NotFound";
-import { ModalFactory } from "@/components/modal/form/ModalFactory";
+import { ModalFactory } from "@/components/modal";
 import { PresenceInitializer, ProjectContextInitializer } from "@/layouts/initializers";
 import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
 

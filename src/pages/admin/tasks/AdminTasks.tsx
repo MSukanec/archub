@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ListTodo, Plus } from 'lucide-react';
 import { DashboardLayout as Layout } from "@/layouts";
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import AdminTaskList from './AdminTaskList';
 import AdminTaskCategories from './AdminTaskCategories';
 import AdminTaskDivisions from './AdminTaskDivisions';

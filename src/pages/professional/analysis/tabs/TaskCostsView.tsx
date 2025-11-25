@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { useMobile } from '@/hooks/use-mobile';
 import { useTaskCosts } from '@/hooks/use-task-costs';
 import { useDeleteTaskMaterial } from '@/hooks/use-generated-tasks';

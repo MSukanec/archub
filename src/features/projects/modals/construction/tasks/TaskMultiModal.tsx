@@ -4,10 +4,10 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from "@/lib/supabase";
-import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
-import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
-import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
-import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
+import { FormModalLayout } from "@/components/modal";
+import { FormModalHeader } from "@/components/modal";
+import { FormModalFooter } from "@/components/modal";
+import { useModalPanelStore } from "@/components/modal";
 
 import { ComboBox } from "@/components/ui-custom/fields/ComboBoxWriteField";
 import { Input } from "@/components/ui/input";

@@ -4,7 +4,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { CreditCard, Plus } from 'lucide-react'
 import GeneralCostsList from './GeneralCostsList'
 import GeneralCostsPaymentsTab from './GeneralCostsPaymentsTab'
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useGlobalModalStore } from '@/components/modal'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGeneralCosts } from '@/features/general-costs/hooks/use-general-costs'
 

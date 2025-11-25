@@ -1,20 +1,20 @@
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
-import { StepModalConfig } from './types';
+import { StepModalConfig } from '../factory/types';
 
-interface FormModalStepHeaderProps {
+interface ModalStepHeaderProps {
   title: string;
   icon?: LucideIcon;
   stepConfig?: StepModalConfig;
   className?: string;
 }
 
-export function FormModalStepHeader({
+export function ModalStepHeader({
   title,
   icon: Icon,
   stepConfig,
   className = ""
-}: FormModalStepHeaderProps) {
+}: ModalStepHeaderProps) {
   return (
     <div className={`px-3 py-3 border-b border-[var(--card-border)] ${className}`}>
       <div className="flex items-center gap-3">
@@ -36,3 +36,5 @@ export function FormModalStepHeader({
     </div>
   );
 }
+
+export { ModalStepHeader as FormModalStepHeader };

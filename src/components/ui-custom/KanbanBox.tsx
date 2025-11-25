@@ -11,7 +11,7 @@ import { Plus, MoreHorizontal, List, Edit, Trash2, CheckCircle, Circle, ChevronR
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 
 import { useOrganizationMembers } from '@/features/organization';
 import { useCurrentUser } from '@/hooks/use-current-user';

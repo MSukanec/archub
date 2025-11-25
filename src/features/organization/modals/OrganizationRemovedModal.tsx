@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { AlertCircle, Building2 } from 'lucide-react';
-import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
-import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
-import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
+import { FormModalHeader } from '@/components/modal';
+import { FormModalFooter } from '@/components/modal';
+import { FormModalLayout } from '@/components/modal';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';

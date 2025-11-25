@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Edit, Trash2, Building, Crown } from 'lucide-react';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 
 import { useToast } from '@/hooks/use-toast';
 import AdminOrganizationRow from '@/features/organization/components/admin/AdminOrganizationRow';

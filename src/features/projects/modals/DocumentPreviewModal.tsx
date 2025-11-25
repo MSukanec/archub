@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
-import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
-import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
+import { FormModalLayout } from '@/components/modal';
+import { FormModalHeader } from '@/components/modal';
+import { FormModalFooter } from '@/components/modal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Download, ExternalLink, FileText } from 'lucide-react';

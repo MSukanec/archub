@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { DashboardLayout as Layout } from "@/layouts"
 import { useNavigationStore } from '@/stores/navigationStore'
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useGlobalModalStore } from '@/components/modal'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { BarChart3, CheckSquare, Package2, Users, Plus } from 'lucide-react'
 import TaskList from './TaskList'

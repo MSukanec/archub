@@ -20,9 +20,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
-import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
-import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
+import { FormModalLayout } from "@/components/modal";
+import { FormModalHeader } from "@/components/modal";
+import { FormModalFooter } from "@/components/modal";
 
 const budgetItemSchema = z.object({
   task_id: z.string().min(1, "Debe seleccionar una tarea"),

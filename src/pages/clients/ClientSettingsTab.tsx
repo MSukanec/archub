@@ -2,7 +2,7 @@ import { Users, Plus, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useClientRoles, useDeleteClientRole } from '@/features/clients';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
 import type { ClientRole } from '@/features/clients/types';

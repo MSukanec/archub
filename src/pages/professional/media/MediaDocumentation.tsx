@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { cn } from '@/lib/utils';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { useDesignDocuments } from '@/hooks/use-design-documents';
 import { FileText, FolderOpen, Clock, Upload, Plus, BookOpen } from 'lucide-react';
 import { format } from 'date-fns';

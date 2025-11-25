@@ -1,12 +1,56 @@
-# Guía para Crear Modales en Archub
+# Guía para Crear Modales en Seencel
+
+## 📁 ARQUITECTURA DE CARPETAS
+
+La carpeta `src/components/modal/` está organizada siguiendo estándares empresariales:
+
+```
+src/components/modal/
+├── foundation/          # Componentes base del modal (UI primitivos)
+│   ├── ModalLayout.tsx         # Layout principal que combina header/body/footer
+│   ├── ModalHeader.tsx         # Cabecera con título, ícono, descripción
+│   ├── ModalBody.tsx           # Cuerpo scrolleable
+│   ├── ModalFooter.tsx         # Pie con botones de acción
+│   ├── ModalStepHeader.tsx     # Header para modales multi-paso
+│   ├── ModalStepFooter.tsx     # Footer para modales multi-paso
+│   ├── ModalSectionButton.tsx  # Botón para subsecciones
+│   └── index.ts
+├── state/               # Estado global (Zustand stores)
+│   ├── globalModalStore.ts     # Store para abrir/cerrar modales
+│   ├── panelStore.ts           # Store para paneles (view/edit/subform)
+│   └── index.ts
+├── factory/             # Factory pattern para registro de modales
+│   ├── ModalFactory.tsx        # Renderiza el modal correcto según type
+│   ├── types.ts                # Tipos de modales y datos
+│   └── index.ts
+├── utils/               # Utilidades
+│   ├── ModalErrorBoundary.tsx  # Manejo de errores
+│   ├── modal-readiness.tsx     # Hook para verificar datos listos
+│   └── modal-best-practices.tsx
+└── index.ts             # Barrel export principal
+```
+
+## 🎯 CONCEPTO CLAVE: Modal vs Form
+
+**CRÍTICO:** Entender la diferencia:
+
+- **Modal** = CONTENEDOR visual (caja, overlay, estructura)
+- **Form** = CONTENIDO (campos, validaciones, lógica de negocio)
+
+Los componentes `Modal*` son primitivos UI reutilizables. Los forms son el contenido que va DENTRO del modal. Esta separación permite:
+1. Reutilizar la misma estructura visual en diferentes contextos
+2. Cambiar el contenido sin modificar el contenedor
+3. Mantener la consistencia visual en toda la aplicación
+
+---
 
 ## 🚨 REGLAS FUNDAMENTALES - LEER ANTES DE CREAR UN MODAL
 
 ### ✅ Lo que SÍ debemos usar:
 
-1. **FormModalLayout** - SIEMPRE usar este wrapper
-2. **FormModalHeader** - SIEMPRE incluir con título, ícono Y DESCRIPCIÓN
-3. **FormModalFooter** - SIEMPRE para botones de acción
+1. **ModalLayout** - SIEMPRE usar este wrapper
+2. **ModalHeader** - SIEMPRE incluir con título, ícono Y DESCRIPCIÓN
+3. **ModalFooter** - SIEMPRE para botones de acción
 4. **React Hook Form** con `useForm` de `react-hook-form`
 5. **Zod** para validación con `zodResolver`
 6. **useMutation** de React Query - NO async/await directo
@@ -18,7 +62,7 @@
 2. ❌ NO usar `useEffect` con `setPanel('edit')` a menos que sea necesario
 3. ❌ NO hacer llamadas async/await directas en onSubmit
 4. ❌ NO olvidar invalidar queries después de mutar
-5. ❌ NO olvidar la prop `description` en FormModalHeader
+5. ❌ NO olvidar la prop `description` en ModalHeader
 6. ❌ NO crear modales sin seguir este patrón exacto
 
 ---
@@ -206,15 +250,15 @@ const createMutation = useMutation({
 
 ---
 
-## ⚠️ REGLA CRÍTICA: isEditing en FormModalLayout
+## ⚠️ REGLA CRÍTICA: isEditing en ModalLayout
 
-**SIEMPRE** que uses `FormModalLayout` para un modal de formulario CRUD (crear/editar), DEBES incluir `isEditing={true}`.
+**SIEMPRE** que uses `ModalLayout` para un modal de formulario CRUD (crear/editar), DEBES incluir `isEditing={true}`.
 
 ### ❌ ERROR COMÚN - Modal vacío:
 
 ```typescript
 return (
-  <FormModalLayout
+  <ModalLayout
     headerContent={headerContent}
     editPanel={editPanel}      // ← Tienes editPanel
     footerContent={footerContent}
@@ -228,7 +272,7 @@ return (
 
 ```typescript
 return (
-  <FormModalLayout
+  <ModalLayout
     columns={1}
     viewPanel={<div></div>}
     editPanel={editPanel}
@@ -242,7 +286,7 @@ return (
 
 ### ¿Por qué es necesario?
 
-`FormModalLayout` tiene dos modos:
+`ModalLayout` tiene dos modos:
 - `isEditing={false}` (default): Muestra `viewPanel` (para visualización)
 - `isEditing={true}`: Muestra `editPanel` (para formularios)
 
@@ -263,7 +307,7 @@ export function MiFormModal({ modalData, onClose }: MiFormModalProps) {
   );
 
   const headerContent = (
-    <FormModalHeader 
+    <ModalHeader 
       title={isEditing ? 'Editar' : 'Nuevo'}
       description="Descripción"
       icon={MiIcono}
@@ -271,7 +315,7 @@ export function MiFormModal({ modalData, onClose }: MiFormModalProps) {
   );
 
   const footerContent = (
-    <FormModalFooter
+    <ModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
       rightLabel={isEditing ? 'Guardar' : 'Crear'}
@@ -281,7 +325,7 @@ export function MiFormModal({ modalData, onClose }: MiFormModalProps) {
   );
 
   return (
-    <FormModalLayout
+    <ModalLayout
       columns={1}
       viewPanel={<div></div>}
       editPanel={editPanel}
@@ -342,9 +386,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { IconName } from 'lucide-react'; // Cambiar IconName por el ícono apropiado
-import { FormModalHeader } from '../../form/FormModalHeader';
-import { FormModalFooter } from '../../form/FormModalFooter';
-import { FormModalLayout } from '../../form/FormModalLayout';
+import { ModalHeader } from '../../form/ModalHeader';
+import { ModalFooter } from '../../form/ModalFooter';
+import { ModalLayout } from '../../form/ModalLayout';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -594,7 +638,7 @@ export function MyModal({ modalData, onClose }: MyModalProps) {
 
   // 11. HEADER CON TÍTULO, ÍCONO Y DESCRIPCIÓN
   const headerContent = (
-    <FormModalHeader 
+    <ModalHeader 
       title={entity ? 'Editar Elemento' : 'Nuevo Elemento'}
       description={entity ? 'Actualiza la información del elemento' : 'Crea un nuevo elemento en el sistema'}
       icon={IconName}
@@ -603,7 +647,7 @@ export function MyModal({ modalData, onClose }: MyModalProps) {
 
   // 12. FOOTER CON BOTONES
   const footerContent = (
-    <FormModalFooter
+    <ModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
       rightLabel={entity ? 'Actualizar' : 'Crear'}
@@ -613,7 +657,7 @@ export function MyModal({ modalData, onClose }: MyModalProps) {
 
   // 13. LAYOUT FINAL
   return (
-    <FormModalLayout
+    <ModalLayout
       columns={1}
       viewPanel={<div></div>} // Panel vacío si no hay vista previa
       editPanel={editPanel}
@@ -638,8 +682,8 @@ Antes de dar por terminado un modal, verificar:
 - [ ] ✅ NUNCA usa queries directas `supabase.from().select()` dentro del modal
 
 **Estructura:**
-- [ ] ✅ Usa `FormModalLayout`, `FormModalHeader`, `FormModalFooter`
-- [ ] ✅ FormModalHeader tiene `title`, `description` e `icon`
+- [ ] ✅ Usa `ModalLayout`, `ModalHeader`, `ModalFooter`
+- [ ] ✅ ModalHeader tiene `title`, `description` e `icon`
 - [ ] ✅ Usa `useForm` con `zodResolver`
 - [ ] ✅ Props correctas: `modalData` y `onClose`
 
@@ -688,7 +732,7 @@ Para modales que **NO usan formularios** sino que permiten **seleccionar items d
 2. **Usan Table o List** con `onRowClick` para capturar la selección
 3. **Acción ocurre al hacer click** - No hay botón "Guardar/Crear"
 4. **Footer solo tiene "Cancelar"** - No tiene `rightLabel` porque la acción ya ocurrió
-5. **DEBEN forzar panel 'edit'** - Usar `isEditing={true}` en FormModalLayout
+5. **DEBEN forzar panel 'edit'** - Usar `isEditing={true}` en ModalLayout
 
 ### Template de Selection Modal:
 
@@ -698,9 +742,9 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { FormModalHeader } from '../../form/FormModalHeader';
-import { FormModalFooter } from '../../form/FormModalFooter';
-import { FormModalLayout } from '../../form/FormModalLayout';
+import { ModalHeader } from '../../form/ModalHeader';
+import { ModalFooter } from '../../form/ModalFooter';
+import { ModalLayout } from '../../form/ModalLayout';
 import { useGlobalModalStore } from '../../form/useGlobalModalStore';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { IconName } from 'lucide-react';
@@ -788,7 +832,7 @@ export function MySelectionModal({ projectId, onClose }: MySelectionModalProps) 
   );
 
   const headerContent = (
-    <FormModalHeader
+    <ModalHeader
       title="Seleccionar Item"
       description="Selecciona un item de la lista para agregarlo"
       icon={IconName}
@@ -796,7 +840,7 @@ export function MySelectionModal({ projectId, onClose }: MySelectionModalProps) 
   );
 
   const footerContent = (
-    <FormModalFooter
+    <ModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
       showLoadingSpinner={isLoading}
@@ -804,7 +848,7 @@ export function MySelectionModal({ projectId, onClose }: MySelectionModalProps) 
   );
 
   return (
-    <FormModalLayout
+    <ModalLayout
       columns={1}
       editPanel={editPanel}
       headerContent={headerContent}
@@ -833,7 +877,7 @@ export function MySelectionModal({ projectId, onClose }: MySelectionModalProps) 
 - [ ] ✅ Usa `Table` con `onRowClick` o similar
 - [ ] ✅ `useMutation` para la acción de selección
 - [ ] ✅ Footer solo tiene `leftLabel="Cancelar"` (no rightLabel)
-- [ ] ✅ `FormModalLayout` tiene `isEditing={true}`
+- [ ] ✅ `ModalLayout` tiene `isEditing={true}`
 - [ ] ✅ `handleClose` llama a `closeModal()` y `onClose()`
 - [ ] ✅ Loading state mientras ejecuta la mutation
 - [ ] ✅ Toast de éxito y error
@@ -1000,9 +1044,9 @@ const createMutation = useMutation({
 
 ## ⚠️ Errores Comunes a Evitar
 
-1. **Olvidar la descripción en FormModalHeader**
-   - ❌ `<FormModalHeader title="Título" icon={Icon} />`
-   - ✅ `<FormModalHeader title="Título" description="Descripción clara" icon={Icon} />`
+1. **Olvidar la descripción en ModalHeader**
+   - ❌ `<ModalHeader title="Título" icon={Icon} />`
+   - ✅ `<ModalHeader title="Título" description="Descripción clara" icon={Icon} />`
 
 2. **Usar async/await en lugar de useMutation**
    - ❌ `const onSubmit = async (data) => { await supabase... }`
@@ -1056,7 +1100,7 @@ const createMutation = useMutation({
 6. Crear editPanel con Form y FormFields
 7. Crear headerContent con título, descripción e ícono
 8. Crear footerContent con botones
-9. Retornar FormModalLayout con todo conectado
+9. Retornar ModalLayout con todo conectado
 10. Probar crear, editar y cerrar
 
 ---
@@ -1089,13 +1133,13 @@ Los **subforms** son paneles secundarios dentro de un modal que permiten editar 
 
 ---
 
-### ⚡ Funcionalidad AUTOMÁTICA de FormModalLayout
+### ⚡ Funcionalidad AUTOMÁTICA de ModalLayout
 
-`FormModalLayout` **automáticamente maneja** la navegación de subforms sin código adicional:
+`ModalLayout` **automáticamente maneja** la navegación de subforms sin código adicional:
 
 #### 1️⃣ **Auto-Back Button en Headers**
 
-Cuando `currentPanel === 'subform'`, FormModalLayout:
+Cuando `currentPanel === 'subform'`, ModalLayout:
 - ✅ Detecta automáticamente que estás en un subform
 - ✅ Inyecta `showBackButton={true}` al header
 - ✅ Inyecta `onBackClick={() => setPanel('edit')}` para volver al panel principal
@@ -1103,14 +1147,14 @@ Cuando `currentPanel === 'subform'`, FormModalLayout:
 **NO necesitas agregar esto manualmente:**
 ```typescript
 // ❌ CÓDIGO VIEJO (ya no necesario)
-<FormModalHeader
+<ModalHeader
   title="Fotos y Videos"
-  showBackButton={true}              // ← FormModalLayout lo agrega automáticamente
-  onBackClick={() => setPanel('edit')} // ← FormModalLayout lo agrega automáticamente
+  showBackButton={true}              // ← ModalLayout lo agrega automáticamente
+  onBackClick={() => setPanel('edit')} // ← ModalLayout lo agrega automáticamente
 />
 
 // ✅ CÓDIGO NUEVO (más limpio)
-<FormModalHeader
+<ModalHeader
   title="Fotos y Videos"
   description="Adjunta archivos multimedia"
   icon={Camera}
@@ -1120,7 +1164,7 @@ Cuando `currentPanel === 'subform'`, FormModalLayout:
 
 #### 2️⃣ **Auto-Navigation en Footer Buttons**
 
-Cuando `currentPanel === 'subform'`, FormModalLayout:
+Cuando `currentPanel === 'subform'`, ModalLayout:
 - ✅ Sobrescribe `onLeftClick` (Cancelar) → Vuelve a `edit` en lugar de cerrar modal
 - ✅ Envuelve `onRightClick` (Submit) → Ejecuta acción original + Vuelve a `edit`
 
@@ -1251,9 +1295,9 @@ const getHeaderConfig = () => {
     const config = subformHeaders[currentSubform || ''];
     if (!config) return null;
 
-    // NO agregues showBackButton ni onBackClick - FormModalLayout lo hace automáticamente
+    // NO agregues showBackButton ni onBackClick - ModalLayout lo hace automáticamente
     return (
-      <FormModalHeader
+      <ModalHeader
         icon={config.icon}
         title={config.title}
         description={config.description}
@@ -1263,7 +1307,7 @@ const getHeaderConfig = () => {
 
   // Header por defecto para edit
   return (
-    <FormModalHeader
+    <ModalHeader
       icon={FileText}
       title="Nueva Bitácora"
       description="Crear una nueva entrada en la bitácora"
@@ -1277,13 +1321,13 @@ const getHeaderConfig = () => {
 ```typescript
 const getFooterConfig = () => {
   if (currentPanel === 'subform') {
-    // FormModalLayout maneja automáticamente la navegación
+    // ModalLayout maneja automáticamente la navegación
     // Solo define los textos y acciones de datos
     return {
       cancelText: "Cancelar",
-      onLeftClick: closeModal, // ← FormModalLayout lo convertirá a setPanel('edit')
+      onLeftClick: closeModal, // ← ModalLayout lo convertirá a setPanel('edit')
       submitText: "Guardar",
-      onSubmit: () => {}, // ← Datos ya están en estado, FormModalLayout vuelve a edit
+      onSubmit: () => {}, // ← Datos ya están en estado, ModalLayout vuelve a edit
       showLoadingSpinner: false
     };
   }
@@ -1305,7 +1349,7 @@ const footerConfig = getFooterConfig();
 
 ```typescript
 return (
-  <FormModalLayout 
+  <ModalLayout 
     onClose={closeModal}
     columns={1}
     viewPanel={viewPanel}
@@ -1317,7 +1361,7 @@ return (
     }
     headerContent={getHeaderConfig()}
     footerContent={
-      <FormModalFooter
+      <ModalFooter
         cancelText={footerConfig.cancelText}
         onLeftClick={footerConfig.onLeftClick}
         onSubmit={footerConfig.onSubmit}
@@ -1428,7 +1472,7 @@ export function MediaForm({ filesToUpload, setFilesToUpload, siteLogFiles }: Pro
 - [ ] ✅ Footer del panel principal maneja submit real a BD
 
 **Layout:**
-- [ ] ✅ `FormModalLayout` recibe prop `subformPanel` con lógica condicional
+- [ ] ✅ `ModalLayout` recibe prop `subformPanel` con lógica condicional
 - [ ] ✅ Cada subform se mapea correctamente según `currentSubform`
 
 **UX Automática (verificar que funcione):**
@@ -1459,12 +1503,12 @@ Este modal tiene:
 ### 🚫 Errores Comunes con Subforms
 
 1. **Agregar `showBackButton` manualmente en headers de subforms**
-   - ❌ `<FormModalHeader showBackButton={true} onBackClick={...} />`
-   - ✅ Omitir estas props - FormModalLayout las inyecta automáticamente
+   - ❌ `<ModalHeader showBackButton={true} onBackClick={...} />`
+   - ✅ Omitir estas props - ModalLayout las inyecta automáticamente
 
 2. **Cerrar el modal al hacer submit en subform**
    - ❌ `onSubmit: closeModal` en footer de subform
-   - ✅ `onSubmit: () => {}` - FormModalLayout maneja la navegación
+   - ✅ `onSubmit: () => {}` - ModalLayout maneja la navegación
 
 3. **No usar estado local para datos de subforms**
    - ❌ Guardar a BD inmediatamente al cambiar subform

@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { HierarchicalTree } from '@/components/ui-custom/tables-and-trees/HierarchicalTree';
 
 import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
 const AdminTaskCategories = () => {

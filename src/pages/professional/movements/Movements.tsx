@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { DashboardLayout as Layout } from "@/layouts";
 import { DollarSign, Plus } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 
 // Import the existing components
 import MovementsList from './MovementsList';

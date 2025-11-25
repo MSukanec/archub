@@ -11,7 +11,7 @@ import {
   Edit,
   Trash2
 } from 'lucide-react';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { useDesignDocumentFolders } from '@/hooks/use-design-document-folders';
 import { useDesignDocumentsByFolder } from '@/hooks/use-design-documents';
 import { format } from 'date-fns';

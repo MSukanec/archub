@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
-import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
-import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
+import { FormModalLayout } from '@/components/modal';
+import { FormModalHeader } from '@/components/modal';
+import { FormModalFooter } from '@/components/modal';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -11,7 +11,7 @@ import { Settings, ArrowRight } from 'lucide-react';
 import { useParameterAsChild, useDependencyOptions, useSaveDependencyOptions } from '@/hooks/use-dependency-options';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 
 export function ParameterVisibilityConfigModal() {
   const { data: modalData, type: modalType, open, closeModal } = useGlobalModalStore();

@@ -3,9 +3,9 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton';
+import { FormSubsectionButton } from '@/components/modal';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { useLocation } from 'wouter';
 import { useDeleteMaterial } from '@/features/materials';
 import { Badge } from '@/components/ui/badge';

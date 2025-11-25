@@ -10,7 +10,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useDeleteBudget } from '@/hooks/use-budgets'
 import { useToast } from '@/hooks/use-toast'
 import { useProjectContext } from '@/stores/projectContext'
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useGlobalModalStore } from '@/components/modal'
 import { useLocation } from 'wouter'
 
 interface BudgetItemsProps {

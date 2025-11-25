@@ -6,7 +6,7 @@ import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 
 interface SubcontractAwardedViewProps {

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Edit, RotateCcw, Trash2 } from 'lucide-react'
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useGlobalModalStore } from '@/components/modal'
 import { useDeleteInsurance } from '@/features/personnel'
 import { InsuranceStatusRow } from '@/features/personnel/services/insurances'
 

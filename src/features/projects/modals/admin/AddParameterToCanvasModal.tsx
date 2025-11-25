@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
-import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
-import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { FormModalLayout } from '@/components/modal';
+import { FormModalHeader } from '@/components/modal';
+import { FormModalFooter } from '@/components/modal';
+import { useGlobalModalStore } from '@/components/modal';
 import { Plus } from 'lucide-react';
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
 import { Label } from '@/components/ui/label';

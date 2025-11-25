@@ -10,10 +10,10 @@ import { useDesignDocumentFolders } from '@/hooks/use-design-document-folders';
 
 import { useCreateDesignDocumentFolder } from '@/hooks/use-design-document-folders';
 import { useCreateDesignDocument, useDesignDocuments } from '@/hooks/use-design-documents';
-import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
-import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
-import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
-import { useModalPanelStore } from '@/components/modal/form/modalPanelStore';
+import { FormModalLayout } from '@/components/modal';
+import { FormModalHeader } from '@/components/modal';
+import { FormModalFooter } from '@/components/modal';
+import { useModalPanelStore } from '@/components/modal';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, Form } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';

@@ -12,8 +12,7 @@ interface BreadcrumbItem {
   current?: boolean;
 }
 
-interface FormModalHeaderProps {
-  // PROPIEDADES EXISTENTES MEJORADAS
+interface ModalHeaderProps {
   /** Título principal del modal */
   title?: string;
   /** Descripción o subtítulo */
@@ -30,8 +29,6 @@ interface FormModalHeaderProps {
   showBackButton?: boolean;
   /** Callback para botón de retroceso */
   onBackClick?: () => void;
-  
-  // NUEVAS PROPIEDADES AVANZADAS
   
   /** Estado de readiness del modal */
   readinessState?: ModalReadinessState;
@@ -99,8 +96,7 @@ interface FormModalHeaderProps {
   onToggleEdit?: () => void;
 }
 
-export function FormModalHeader({
-  // Propiedades existentes
+export function ModalHeader({
   title,
   description,
   icon: Icon,
@@ -110,7 +106,6 @@ export function FormModalHeader({
   showBackButton,
   onBackClick,
   
-  // Nuevas propiedades avanzadas
   readinessState,
   breadcrumbs = [],
   breadcrumbSeparator = '/',
@@ -128,9 +123,8 @@ export function FormModalHeader({
   onTitleClick,
   isEditing = false,
   onToggleEdit,
-}: FormModalHeaderProps) {
+}: ModalHeaderProps) {
   
-  // DETERMINAR ICONO DE ESTADO
   const getStatusIcon = () => {
     if (readinessState && readinessState.isLoading) {
       return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />;
@@ -150,10 +144,8 @@ export function FormModalHeader({
     }
   };
 
-  // CREAR ELEMENTO DE HEADING DINÁMICO
   const HeadingComponent = `h${headingLevel}` as keyof JSX.IntrinsicElements;
   
-  // MANEJO DE TECLADO PERSONALIZADO
   React.useEffect(() => {
     if (keyboardActions.length === 0) return;
     
@@ -190,7 +182,6 @@ export function FormModalHeader({
       role="banner"
       aria-labelledby={headerId}
     >
-      {/* BREADCRUMBS */}
       {breadcrumbs.length > 0 && (
         <nav 
           aria-label="Breadcrumb" 
@@ -234,10 +225,8 @@ export function FormModalHeader({
         </nav>
       )}
 
-      {/* HEADER PRINCIPAL */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          {/* BOTÓN DE RETROCESO */}
           {showBackButton && onBackClick && (
             <Button
               variant={backButtonVariant}
@@ -253,18 +242,14 @@ export function FormModalHeader({
             </Button>
           )}
 
-          {/* ACCIONES IZQUIERDA */}
           {leftActions && <div className="shrink-0">{leftActions}</div>}
 
-          {/* TÍTULO Y DESCRIPCIÓN */}
           {title && (
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              {/* ICONO DE ESTADO */}
               <div className="shrink-0">
                 {getStatusIcon()}
               </div>
 
-              {/* CONTENIDO PRINCIPAL */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <HeadingComponent 
@@ -279,7 +264,6 @@ export function FormModalHeader({
                     {title}
                   </HeadingComponent>
                   
-                  {/* INDICADOR DE EDICIÓN */}
                   {isEditing && (
                     <Badge variant="outline" className="text-xs">
                       Editando
@@ -287,7 +271,6 @@ export function FormModalHeader({
                   )}
                 </div>
                 
-                {/* DESCRIPCIÓN */}
                 {description && (
                   <p 
                     className="text-xs text-[var(--text-muted)] leading-tight mt-0.5 line-clamp-2"
@@ -297,7 +280,6 @@ export function FormModalHeader({
                   </p>
                 )}
                 
-                {/* MENSAJE DE ESTADO */}
                 {statusMessage && (
                   <p 
                     className={cn(
@@ -317,9 +299,7 @@ export function FormModalHeader({
           )}
         </div>
 
-        {/* SECCIÓN DERECHA */}
         <div className="flex items-center gap-2 shrink-0">
-          {/* PROGRESO */}
           {progress && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               {progress.showNumbers && (
@@ -337,7 +317,6 @@ export function FormModalHeader({
             </div>
           )}
 
-          {/* BADGES DE ESTADO */}
           {statusBadges.map((badge, index) => (
             <Badge 
               key={index} 
@@ -349,7 +328,6 @@ export function FormModalHeader({
             </Badge>
           ))}
 
-          {/* BOTÓN TOGGLE EDICIÓN */}
           {onToggleEdit && (
             <Button
               variant="outline"
@@ -364,10 +342,8 @@ export function FormModalHeader({
             </Button>
           )}
 
-          {/* ACCIONES DERECHA */}
           {rightActions && <div>{rightActions}</div>}
 
-          {/* ATAJOS DE TECLADO (SI ESTÁN HABILITADOS) */}
           {showKeyboardShortcuts && keyboardActions.length > 0 && (
             <div className="text-xs text-muted-foreground">
               <Button variant="ghost" size="sm" disabled className="text-xs px-2">
@@ -379,7 +355,6 @@ export function FormModalHeader({
         </div>
       </div>
 
-      {/* INDICADOR DE READINESS ERROR */}
       {readinessState?.hasError && (
         <div className="mt-2 flex items-center gap-2 text-xs text-red-600 bg-red-50 dark:bg-red-950/20 px-2 py-1 rounded">
           <AlertCircle className="h-3 w-3" />
@@ -398,3 +373,5 @@ export function FormModalHeader({
     </header>
   );
 }
+
+export { ModalHeader as FormModalHeader };

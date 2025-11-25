@@ -17,8 +17,8 @@ import { getUserByAuthId } from '@/lib/supabase-helpers';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { queryClient } from '@/lib/queryClient';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
-import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
+import { FormModalLayout } from '@/components/modal';
+import { FormModalHeader } from '@/components/modal';
 import { formatTime } from '@/lib/date-utils';
 
 interface SupportMessage {

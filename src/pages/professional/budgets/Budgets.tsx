@@ -5,7 +5,7 @@ import { useConstructionTasks, useConstructionTasksView, useDeleteConstructionTa
 import { useConstructionProjectPhases, useUpdatePhasePositions } from '@/hooks/use-construction-phases'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useGlobalModalStore } from '@/components/modal'
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useActionBarMobile } from '@/layouts'

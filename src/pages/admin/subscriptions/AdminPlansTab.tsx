@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { Inbox, Search, Bell, Edit, Trash2 } from 'lucide-react';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 

@@ -1,19 +1,18 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { StepModalFooterConfig } from './types';
+import { StepModalFooterConfig } from '../factory/types';
 
-interface FormModalStepFooterProps {
+interface ModalStepFooterProps {
   config: StepModalFooterConfig;
   className?: string;
 }
 
-export function FormModalStepFooter({
+export function ModalStepFooter({
   config,
   className = ""
-}: FormModalStepFooterProps) {
+}: ModalStepFooterProps) {
   const { cancelAction, previousAction, nextAction, submitAction, customActions } = config;
 
-  // Determinar el layout según las acciones disponibles
   const hasCancel = !!cancelAction;
   const hasPrevious = !!previousAction;
   const hasNext = !!nextAction;
@@ -84,3 +83,5 @@ export function FormModalStepFooter({
     </div>
   );
 }
+
+export { ModalStepFooter as FormModalStepFooter };

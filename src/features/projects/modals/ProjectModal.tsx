@@ -6,10 +6,10 @@ import { z } from "zod";
 import { FolderPlus, Check } from "lucide-react";
 import chroma from "chroma-js";
 
-import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
-import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
-import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
-import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
+import { FormModalLayout } from "@/components/modal";
+import { FormModalHeader } from "@/components/modal";
+import { FormModalFooter } from "@/components/modal";
+import { useModalPanelStore } from "@/components/modal";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

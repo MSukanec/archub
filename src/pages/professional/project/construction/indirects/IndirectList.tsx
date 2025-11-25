@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from '@/stores/projectContext';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { useMobile } from '@/hooks/use-mobile';
 import { useIndirectCosts } from '@/hooks/use-indirect-costs';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';

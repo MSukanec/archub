@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Home, Search, Plus, Filter, Bell, FileText } from "lucide-react";
 import { useLocation } from "wouter";
 
-import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
+import { useGlobalModalStore } from "@/components/modal";
 import { useMobile } from "@/hooks/use-mobile";
 import SitelogRow from "@/features/sitelog/components/SitelogRow";
 import { useActionBarMobile } from '@/layouts';

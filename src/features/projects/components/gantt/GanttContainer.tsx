@@ -7,7 +7,7 @@ import { GanttTimelineBar } from './GanttTimelineBar';
 import { GanttDependencies } from './GanttDependencies';
 import { GanttContainerProps, GanttRowProps, calculateResolvedEndDate } from './types';
 import { useConstructionDependencies } from '@/hooks/use-construction-dependencies';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 
 export function GanttContainer({ 
   data, 

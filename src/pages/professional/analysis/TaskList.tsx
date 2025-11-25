@@ -5,7 +5,7 @@ import { TableIcon, Edit, Trash2, Copy, Search, Filter, Plus, Home, Bell, Grid3X
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useGlobalModalStore } from '@/components/modal'
 import { useDeleteGeneratedTask } from '@/hooks/use-generated-tasks'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import AnalysisTaskRow from '@/features/projects/components/AnalysisTaskRow'

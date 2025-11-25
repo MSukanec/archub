@@ -5,10 +5,10 @@ import { z } from 'zod';
 import { Users, Search, UserPlus } from 'lucide-react';
 import { useLocation } from 'wouter';
 
-import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
-import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
-import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { FormModalLayout } from '@/components/modal';
+import { FormModalHeader } from '@/components/modal';
+import { FormModalFooter } from '@/components/modal';
+import { useGlobalModalStore } from '@/components/modal';
 
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';

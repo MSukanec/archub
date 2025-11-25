@@ -10,9 +10,9 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
-import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
-import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
+import { FormModalLayout } from '@/components/modal'
+import { FormModalHeader } from '@/components/modal'
+import { FormModalFooter } from '@/components/modal'
 
 import { CascadingSelect } from '@/components/ui-custom/fields/CascadingSelectField'
 import { format } from 'date-fns'

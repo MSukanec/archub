@@ -9,7 +9,7 @@ import { es } from 'date-fns/locale';
 import { useLocation } from 'wouter';
 import { useCourseSidebarStore } from '@/stores/sidebarStore';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import MarkerRow from '@/features/learning/components/MarkerRow';

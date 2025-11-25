@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
-import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
-import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
+import { FormModalLayout } from '@/components/modal';
+import { FormModalHeader } from '@/components/modal';
+import { FormModalFooter } from '@/components/modal';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,7 +23,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies } from '@/hooks/use-currencies';
 import { useOrganizationMembers } from '@/features/organization';
 import { useSubcontractTasks } from '../hooks';
-import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton';
+import { FormSubsectionButton } from '@/components/modal';
 import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/lib/supabase';
 

@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { Edit, Trash2, Bell } from 'lucide-react'
 import { formatDateCompact } from '@/lib/date-utils'
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useGlobalModalStore } from '@/components/modal'
 
 interface Notification {
   id: string;

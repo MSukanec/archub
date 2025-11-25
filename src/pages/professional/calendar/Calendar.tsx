@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 
 import { useKanbanStore } from '@/stores/kanbanStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { useNavigationStore } from '@/stores/navigationStore';
 
 import { PlanRestricted } from "@/features/users";

@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { FileText, Download, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, GripVertical, BookOpen, Heading, Table, FileBarChart, Calculator, FileSignature, Settings, Calendar } from 'lucide-react';
-import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
-import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
-import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
+import { FormModalLayout } from '@/components/modal';
+import { FormModalHeader } from '@/components/modal';
+import { FormModalFooter } from '@/components/modal';
 import { PdfDocument } from '../components/PdfDocument';
 import { PDFDownloadLink, pdf } from '@react-pdf/renderer';
 import { Button } from '@/components/ui/button';

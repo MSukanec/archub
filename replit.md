@@ -12,7 +12,7 @@ Preferred communication style: Simple, everyday language.
 - **Design System**: "new-york" style with a neutral color palette, dark mode, reusable UI components using `shadcn/ui` and Tailwind CSS.
 - **Typography System**: Unified Inter Variable Font with Apple-style optical letter-spacing.
 - **Dynamic Color System**: Project-based color theming using `chroma-js` for intelligent color calculations, including dynamic accent colors and organic radial gradients.
-- **Modals**: Responsive Dialog component with standardized patterns using `FormModalLayout`, React Hook Form with Zod validation.
+- **Modal Architecture (Nov 25, 2024)**: Enterprise-grade modal system with clear separation between Modal (container) and Form (content). Organized in `src/components/modal/` with `foundation/` (ModalLayout, ModalHeader, ModalFooter, ModalBody), `state/` (globalModalStore, panelStore), `factory/` (ModalFactory, types), and `utils/` (ModalErrorBoundary, modal-readiness). Uses React Hook Form with Zod validation. Legacy aliases maintained for backwards compatibility.
 - **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub with a two-level sidebar system.
 - **Layout Architecture**: Migrated to experience-based layouts (`src/layouts/`) including Dashboard Layout (authenticated app) and Marketing Layout (public-facing pages).
 - **Content Theming System**: Unified CSS theming layer with dynamic background switching via `useContentBackground` hook.

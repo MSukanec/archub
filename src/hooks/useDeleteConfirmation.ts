@@ -1,4 +1,4 @@
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useGlobalModalStore } from '@/components/modal'
 
 interface ReplacementOption {
   label: string

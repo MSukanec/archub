@@ -17,9 +17,9 @@
 
 import { useModalReadiness, buildScopedQueryKey, QUERY_KEY_PATTERNS } from './modal-readiness';
 import { ModalErrorBoundary } from './ModalErrorBoundary';
-import { FormModalLayout } from '../form/FormModalLayout';
-import { FormModalHeader } from '../form/FormModalHeader';
-import { FormModalFooter } from '../form/FormModalFooter';
+import { ModalLayout as FormModalLayout } from '../foundation/ModalLayout';
+import { ModalHeader as FormModalHeader } from '../foundation/ModalHeader';
+import { ModalFooter as FormModalFooter } from '../foundation/ModalFooter';
 
 // =====================================================
 // 📋 TABLA DE CONTENIDOS

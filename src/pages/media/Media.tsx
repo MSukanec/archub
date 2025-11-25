@@ -4,7 +4,7 @@ import { MediaDocumentation } from './MediaDocumentation';
 import { MediaGallery } from './MediaGallery';
 import { FolderOpen, Upload, Plus } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { useProjectContext } from '@/stores/projectContext';
 
 export default function Media() {

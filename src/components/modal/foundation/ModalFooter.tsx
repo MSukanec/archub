@@ -4,28 +4,23 @@ import { Button } from "@/components/ui/button";
 
 type ButtonVariant = "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
 
-interface FormModalFooterProps {
-  // API Legacy (mantener compatibilidad)
+interface ModalFooterProps {
   leftLabel?: string;
   onLeftClick?: () => void;
   rightLabel?: string;
   onRightClick?: () => void;
   
-  // Botón del medio (para eliminar, etc.)
   middleLabel?: string;
   onMiddleClick?: () => void;
   middleVariant?: ButtonVariant;
   middleDisabled?: boolean;
   
-  // API simplificada para casos comunes
   cancelText?: string;
   submitText?: string;
   onSubmit?: () => void;
   submitVariant?: ButtonVariant;
   submitDisabled?: boolean;
   showLoadingSpinner?: boolean;
-  
-  // NUEVAS PROPIEDADES AVANZADAS
   
   /** Estado de readiness del modal (from useModalReadiness) */
   readinessState?: {
@@ -80,20 +75,17 @@ interface FormModalFooterProps {
   }>;
 }
 
-export function FormModalFooter({
-  // Legacy API
+export function ModalFooter({
   leftLabel,
   onLeftClick,
   rightLabel,
   onRightClick,
   
-  // Botón del medio
   middleLabel,
   onMiddleClick,
   middleVariant = "destructive",
   middleDisabled = false,
   
-  // API simplificada
   cancelText,
   submitText,
   onSubmit,
@@ -101,7 +93,6 @@ export function FormModalFooter({
   submitDisabled = false,
   showLoadingSpinner = false,
   
-  // Nuevas propiedades avanzadas
   readinessState,
   canSubmit,
   isSubmitting = false,
@@ -114,42 +105,35 @@ export function FormModalFooter({
   autoFocusSubmit = false,
   minLoadingTime = 500,
   customActions = [],
-}: FormModalFooterProps) {
+}: ModalFooterProps) {
   
   const submitButtonRef = useRef<HTMLButtonElement>(null);
   const [minLoadingActive, setMinLoadingActive] = useState(false);
   const [lastSubmitTime, setLastSubmitTime] = useState<number>(0);
   const doubleSubmitTimeoutRef = useRef<NodeJS.Timeout>();
   
-  // Si usamos la nueva API, usa esos valores (mantener compatibilidad)
   const finalLeftLabel = cancelText || leftLabel;
   const finalRightLabel = submitText || rightLabel;
   const finalOnLeftClick = onLeftClick;
   const finalOnRightClick = onSubmit || onRightClick;
   
-  // LÓGICA DE CANSUBMIT ROBUSTA
   const computeCanSubmit = useCallback((): boolean => {
-    // 1. Verificar readiness del modal
     if (readinessState && (!readinessState.isReady || readinessState.hasError)) {
       return false;
     }
     
-    // 2. Verificar estado de submitting
     if (isSubmitting || formState?.isSubmitting) {
       return false;
     }
     
-    // 3. Verificar función de validación custom
     if (canSubmit && !canSubmit()) {
       return false;
     }
     
-    // 4. Verificar validación de form (react-hook-form)
     if (formState && !formState.isValid) {
       return false;
     }
     
-    // 5. Verificar props legacy
     if (submitDisabled) {
       return false;
     }
@@ -159,18 +143,15 @@ export function FormModalFooter({
   
   const currentCanSubmit = computeCanSubmit();
   
-  // PREVENCIÓN DE DOUBLE-SUBMIT
   const handleSubmitClick = useCallback(() => {
     const now = Date.now();
     
-    // Prevenir double-submit rápido (dentro de 1 segundo)
     if (now - lastSubmitTime < 1000) {
-      console.warn('FormModalFooter: Double-submit prevented');
+      console.warn('ModalFooter: Double-submit prevented');
       return;
     }
     
     if (!currentCanSubmit) {
-      // Determinar la razón del bloqueo
       let reason = 'Unknown reason';
       if (readinessState && !readinessState.isReady) reason = 'Modal not ready';
       else if (readinessState && readinessState.hasError) reason = 'Modal has errors';
@@ -185,7 +166,6 @@ export function FormModalFooter({
     
     setLastSubmitTime(now);
     
-    // Activar loading mínimo para evitar flickering
     if (minLoadingTime > 0) {
       setMinLoadingActive(true);
       doubleSubmitTimeoutRef.current = setTimeout(() => {
@@ -196,7 +176,6 @@ export function FormModalFooter({
     finalOnRightClick?.();
   }, [currentCanSubmit, lastSubmitTime, finalOnRightClick, onDisabledSubmitAttempt, readinessState, isSubmitting, formState, canSubmit, submitDisabled, minLoadingTime]);
   
-  // ENTER KEY SUPPORT
   useEffect(() => {
     if (preventEnterSubmit) return;
     
@@ -208,7 +187,6 @@ export function FormModalFooter({
         !event.altKey &&
         currentCanSubmit
       ) {
-        // Solo actuar si el foco no está en un textarea o select
         const activeElement = document.activeElement as HTMLElement;
         const isTextarea = activeElement?.tagName?.toLowerCase() === 'textarea';
         const isSelect = activeElement?.getAttribute('role') === 'combobox';
@@ -224,14 +202,12 @@ export function FormModalFooter({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [preventEnterSubmit, currentCanSubmit, handleSubmitClick]);
   
-  // AUTO-FOCUS SUBMIT BUTTON
   useEffect(() => {
     if (autoFocusSubmit && currentCanSubmit && submitButtonRef.current) {
       submitButtonRef.current.focus();
     }
   }, [autoFocusSubmit, currentCanSubmit]);
   
-  // Cleanup timeouts
   useEffect(() => {
     return () => {
       if (doubleSubmitTimeoutRef.current) {
@@ -240,18 +216,15 @@ export function FormModalFooter({
     };
   }, []);
   
-  // DETERMINAR ESTADOS DE LOADING
   const isLoading = showLoadingSpinner || isSubmitting || formState?.isSubmitting || readinessState?.isLoading || minLoadingActive;
   const loadingDisplay = isLoading ? loadingText : finalRightLabel;
   
-  // DETERMINAR NÚMERO DE ERRORES DE VALIDACIÓN
   const validationErrorCount = showValidationErrors && formState?.errors 
     ? Object.keys(formState.errors).length 
     : 0;
   
   return (
     <div className="p-2 border-t border-[var(--card-border)] mt-auto relative z-0">
-      {/* Mostrar errores de validación si está habilitado */}
       {showValidationErrors && validationErrorCount > 0 && (
         <div className="px-2 py-1 text-xs text-destructive bg-destructive/10 rounded mb-2">
           {validationErrorCount} error{validationErrorCount > 1 ? 'es' : ''} de validación
@@ -259,7 +232,6 @@ export function FormModalFooter({
       )}
       
       <div className="flex gap-2 w-full">
-        {/* BOTONES PERSONALIZADOS */}
         {customActions.map((action, index) => (
           <Button
             key={index}
@@ -283,10 +255,8 @@ export function FormModalFooter({
           </Button>
         ))}
         
-        {/* LAYOUT ESTÁNDAR DE BOTONES */}
         {finalLeftLabel && finalOnLeftClick ? (
           <>
-            {/* Botón Cancelar */}
             <Button
               type="button"
               variant="secondary"
@@ -297,7 +267,6 @@ export function FormModalFooter({
               {finalLeftLabel}
             </Button>
             
-            {/* Botón del medio (ej: Eliminar) */}
             {middleLabel && onMiddleClick && (
               <Button
                 type="button"
@@ -310,7 +279,6 @@ export function FormModalFooter({
               </Button>
             )}
             
-            {/* Botón Submit principal */}
             <Button
               ref={submitButtonRef}
               type="button"
@@ -331,7 +299,6 @@ export function FormModalFooter({
             </Button>
           </>
         ) : (
-          /* Botón Submit único */
           <Button
             ref={submitButtonRef}
             type="button"
@@ -355,3 +322,5 @@ export function FormModalFooter({
     </div>
   );
 }
+
+export { ModalFooter as FormModalFooter };

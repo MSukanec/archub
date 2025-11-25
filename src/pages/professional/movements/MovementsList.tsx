@@ -45,7 +45,7 @@ import ConversionRow, { type ConversionGroup } from "@/features/finances/compone
 import { SwipeableCard } from '@/layouts';
 import { Star } from "lucide-react";
 
-import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
+import { useGlobalModalStore } from "@/components/modal";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMovements, useToggleMovementFavorite } from "@/hooks/use-movements";
 import { useOrganizationDefaultCurrency, useOrganizationCurrencies } from "@/hooks/use-currencies";

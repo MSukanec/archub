@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Trash2, HandHeart } from 'lucide-react';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation } from '@tanstack/react-query';
 import { usePartners } from '@/hooks/use-partners';

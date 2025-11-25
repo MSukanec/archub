@@ -10,10 +10,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 
-import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
-import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
-import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { FormModalLayout } from "@/components/modal";
+import { FormModalHeader } from "@/components/modal";
+import { FormModalFooter } from "@/components/modal";
+import { useGlobalModalStore } from '@/components/modal';
 import { useCreateTaskParameterOption, useUpdateTaskParameterOption, TaskParameterOption } from '@/hooks/use-task-parameters-admin';
 import { useTopLevelCategories, useUnits } from '@/hooks/use-task-categories';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

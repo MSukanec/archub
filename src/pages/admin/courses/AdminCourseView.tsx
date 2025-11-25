@@ -9,7 +9,7 @@ import AdminCourseDataTab from './view/AdminCourseDataTab';
 import AdminCourseContentTab from './view/AdminCourseContentTab';
 import AdminCourseMarketingTab from './view/AdminCourseMarketingTab';
 import { Button } from '@/components/ui/button';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 
 export default function AdminCourseView() {
   const { id } = useParams<{ id: string }>();

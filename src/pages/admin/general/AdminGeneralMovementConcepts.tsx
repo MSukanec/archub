@@ -14,7 +14,7 @@ import {
   MovementConceptAdmin 
 } from '@/hooks/use-movement-concepts-admin';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 
 const AdminGeneralMovementConcepts = () => {
   const { data: userData } = useCurrentUser();

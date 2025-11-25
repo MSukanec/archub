@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { useGeneralCosts } from "@/features/general-costs/hooks/use-general-costs";
 import { useDeleteGeneralCost } from "@/features/general-costs/hooks/use-delete-general-cost";
 import { useGeneralCostsPayments } from "@/hooks/use-general-costs-payments";

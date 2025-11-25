@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-interface FormSubsectionButtonProps {
+interface ModalSectionButtonProps {
   icon: React.ReactNode;
   title: string;
   description: string;
@@ -14,7 +14,7 @@ interface FormSubsectionButtonProps {
   showPlusIcon?: boolean;
 }
 
-export function FormSubsectionButton({
+export function ModalSectionButton({
   icon,
   title,
   description,
@@ -23,7 +23,7 @@ export function FormSubsectionButton({
   disabled = false,
   variant = 'default',
   showPlusIcon = false
-}: FormSubsectionButtonProps) {
+}: ModalSectionButtonProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -35,7 +35,6 @@ export function FormSubsectionButton({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Main Button */}
       <button
         type="button"
         onClick={(e) => {
@@ -56,7 +55,6 @@ export function FormSubsectionButton({
           isHovered && !disabled && (variant === 'destructive' ? "border-destructive shadow-sm" : "border-accent shadow-sm")
         )}
       >
-        {/* Icon */}
         <div className={cn(
           "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center",
           variant === 'destructive' ? "bg-destructive/10" : "bg-accent/10"
@@ -69,7 +67,6 @@ export function FormSubsectionButton({
           </div>  
         </div>
 
-        {/* Content */}
         <div className="flex-1 min-w-0">
           <div className={cn(
             "font-medium text-sm transition-colors duration-200",
@@ -83,7 +80,6 @@ export function FormSubsectionButton({
           </div>
         </div>
 
-        {/* Conditional Plus Icon */}
         {showPlusIcon && (
           <div className="flex-shrink-0">
             <Plus className={cn(
@@ -96,3 +92,5 @@ export function FormSubsectionButton({
     </div>
   );
 }
+
+export { ModalSectionButton as FormSubsectionButton };

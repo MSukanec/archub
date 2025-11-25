@@ -9,7 +9,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from '@/stores/projectContext';
 import { useSiteLogs } from "@/features/sitelog/hooks/use-site-logs";
 import { useNavigationStore } from '@/stores/navigationStore';
-import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
+import { useGlobalModalStore } from "@/components/modal";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 

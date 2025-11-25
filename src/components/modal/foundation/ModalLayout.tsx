@@ -2,12 +2,12 @@ import React, { ReactNode, useEffect, useRef, useCallback, useState, cloneElemen
 import { X, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useModalPanelStore } from "./modalPanelStore";
-import FormModalBody from "./FormModalBody";
+import { useModalPanelStore } from "../state/panelStore";
+import ModalBody from "./ModalBody";
 import { ModalErrorBoundary } from "../utils/ModalErrorBoundary";
 import { ModalReadinessState } from "../utils/modal-readiness";
 
-interface FormModalLayoutProps {
+interface ModalLayoutProps {
   viewPanel?: ReactNode;
   editPanel?: ReactNode;
   subformPanel?: ReactNode;
@@ -17,7 +17,6 @@ interface FormModalLayoutProps {
   className?: string;
   columns?: number;
   
-  // PROPIEDADES EXISTENTES MEJORADAS
   /** Contenido para modales de pasos múltiples */
   stepContent?: ReactNode;
   /** Inicializar en modo edición automáticamente */
@@ -28,8 +27,6 @@ interface FormModalLayoutProps {
   wide?: boolean;
   /** Modal pantalla completa */
   fullscreen?: boolean;
-  
-  // NUEVAS PROPIEDADES AVANZADAS
   
   /** Estado de readiness del modal */
   readinessState?: ModalReadinessState;
@@ -80,8 +77,7 @@ interface FormModalLayoutProps {
   ariaDescription?: string;
 }
 
-export function FormModalLayout({
-  // Propiedades existentes
+export function ModalLayout({
   viewPanel,
   editPanel,
   subformPanel,
@@ -96,7 +92,6 @@ export function FormModalLayout({
   wide = false,
   fullscreen = false,
   
-  // Nuevas propiedades avanzadas
   readinessState,
   preventEscapeClose = false,
   preventClickOutsideClose = true,
@@ -113,7 +108,7 @@ export function FormModalLayout({
   modalId = `modal-${Date.now()}`,
   ariaLabel,
   ariaDescription,
-}: FormModalLayoutProps) {
+}: ModalLayoutProps) {
   
   const { currentPanel, setPanel } = useModalPanelStore();
   const modalRef = useRef<HTMLDivElement>(null);
@@ -121,12 +116,10 @@ export function FormModalLayout({
   const [focusableElements, setFocusableElements] = useState<HTMLElement[]>([]);
   const lastActiveElement = useRef<HTMLElement | null>(null);
 
-  // Guardar el elemento activo antes de abrir el modal
   useEffect(() => {
     lastActiveElement.current = document.activeElement as HTMLElement;
     
     return () => {
-      // Restaurar focus al elemento anterior cuando se cierre el modal
       if (lastActiveElement.current && lastActiveElement.current.focus) {
         setTimeout(() => {
           lastActiveElement.current?.focus();
@@ -135,7 +128,6 @@ export function FormModalLayout({
     };
   }, []);
 
-  // GESTIÓN DE PANEL MEJORADA
   const effectivePanel = forcedPanel || currentPanel;
   
   useEffect(() => {
@@ -158,7 +150,6 @@ export function FormModalLayout({
     }
   }, [effectivePanel, onPanelChange]);
 
-  // PREVENIR SCROLL DEL BODY
   useEffect(() => {
     const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = 'hidden';
@@ -168,7 +159,6 @@ export function FormModalLayout({
     };
   }, []);
 
-  // GESTIÓN DE ELEMENTOS FOCUSABLES PARA TRAP FOCUS
   useEffect(() => {
     if (!trapFocus || !modalRef.current) return;
 
@@ -194,7 +184,6 @@ export function FormModalLayout({
 
     updateFocusableElements();
     
-    // Actualizar lista cuando cambie el contenido
     const observer = new MutationObserver(updateFocusableElements);
     observer.observe(modalRef.current, { 
       childList: true, 
@@ -206,7 +195,6 @@ export function FormModalLayout({
     return () => observer.disconnect();
   }, [trapFocus, effectivePanel]);
 
-  // FOCUS INICIAL
   useEffect(() => {
     const setInitialFocus = () => {
       if (initialFocusRef?.current) {
@@ -224,20 +212,16 @@ export function FormModalLayout({
       }
     };
 
-    // Delay para asegurar que el DOM esté listo
     const timeoutId = setTimeout(setInitialFocus, 100);
     return () => clearTimeout(timeoutId);
   }, [initialFocusRef, autoFocusFirstInput, focusableElements, effectivePanel]);
 
-  // LÓGICA DE CIERRE MEJORADA
   const attemptClose = useCallback(() => {
-    // Verificar si se puede cerrar
     if (canClose && !canClose()) {
       onClosePrevented?.('Custom validation failed');
       return false;
     }
 
-    // Verificar cambios sin guardar
     if (hasUnsavedChanges) {
       const confirmed = window.confirm(unsavedChangesMessage);
       if (!confirmed) {
@@ -256,17 +240,14 @@ export function FormModalLayout({
     onClose();
   }, [attemptClose, setPanel, onClose]);
 
-  // MANEJO DE TECLADO MEJORADO
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // ESC para cerrar
       if (event.key === 'Escape' && !preventEscapeClose) {
         event.preventDefault();
         handleClose();
         return;
       }
 
-      // ENTER para submit (solo si readiness state permite)
       if (
         event.key === 'Enter' &&
         onSubmit &&
@@ -286,18 +267,15 @@ export function FormModalLayout({
         }
       }
 
-      // TAB para trap focus
       if (event.key === 'Tab' && trapFocus && focusableElements.length > 0) {
         const currentIndex = focusableElements.indexOf(event.target as HTMLElement);
         
         if (event.shiftKey) {
-          // Shift + Tab (hacia atrás)
           if (currentIndex <= 0) {
             event.preventDefault();
             focusableElements[focusableElements.length - 1]?.focus();
           }
         } else {
-          // Tab (hacia adelante)
           if (currentIndex >= focusableElements.length - 1) {
             event.preventDefault();
             focusableElements[0]?.focus();
@@ -317,7 +295,6 @@ export function FormModalLayout({
     focusableElements,
   ]);
 
-  // CLICK FUERA DEL MODAL
   const handleOverlayClick = useCallback((event: React.MouseEvent) => {
     if (preventClickOutsideClose) return;
     
@@ -326,7 +303,6 @@ export function FormModalLayout({
     }
   }, [preventClickOutsideClose, handleClose]);
 
-  // OBTENER PANEL ACTUAL
   const getCurrentPanel = () => {
     if (stepContent) {
       return stepContent;
@@ -344,7 +320,6 @@ export function FormModalLayout({
     }
   };
 
-  // RENDERIZADO CON ERROR BOUNDARY Y MEJORAS DE ACCESSIBILITY - NUEVO LAYOUT DERECHA
   const modalContent = (
     <div 
       ref={overlayRef}
@@ -365,9 +340,7 @@ export function FormModalLayout({
         data-modal-content
         data-testid={`modal-content-${modalId}`}
         className={cn(
-          // Base: fullscreen en mobile
           "fixed inset-0 flex flex-col bg-background shadow-lg transition ease-in-out duration-250",
-          // Desktop: modal centrado con altura dinámica (1.5x más ancho)
           "md:inset-auto md:top-1/2 md:left-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2",
           "md:w-auto md:min-w-[750px] md:max-w-[90vw] md:max-h-[90vh] md:border md:rounded-lg",
           enableAnimations && "animate-in fade-in-0 zoom-in-95 md:slide-in-from-bottom-4 duration-200",
@@ -375,7 +348,6 @@ export function FormModalLayout({
         )}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Descripción aria-describedby (oculta visualmente) */}
         {ariaDescription && (
           <div 
             id={`${modalId}-description`} 
@@ -385,7 +357,6 @@ export function FormModalLayout({
           </div>
         )}
 
-        {/* Indicador de cambios sin guardar */}
         {hasUnsavedChanges && (
           <div className="bg-warning/10 border-b border-warning/20 px-4 py-2 flex items-center gap-2">
             <AlertCircle className="h-4 w-4 text-warning" />
@@ -395,10 +366,8 @@ export function FormModalLayout({
           </div>
         )}
 
-        {/* Header */}
         {headerContent && (
           <div className="shrink-0 relative">
-            {/* Auto-inject back button for subforms */}
             {effectivePanel === 'subform' && isValidElement(headerContent) ? (
               cloneElement(headerContent, {
                 showBackButton: (headerContent.props as any).showBackButton ?? true,
@@ -420,32 +389,26 @@ export function FormModalLayout({
           </div>
         )}
 
-        {/* Current Panel Content con readiness gates */}
         <div className="flex-1 overflow-auto">
           {readinessState && !readinessState.isReady ? (
             <readinessState.LoadingGate>
-              {/* Este contenido se muestra cuando no está ready */}
               <div className="p-8"></div>
             </readinessState.LoadingGate>
           ) : (
-            <FormModalBody 
+            <ModalBody 
               columns={columns} 
               data-testid={`modal-body-${modalId}`}
             >
               {getCurrentPanel()}
-            </FormModalBody>
+            </ModalBody>
           )}
         </div>
 
-        {/* Footer */}
         {footerContent && (
           <div className="shrink-0" data-testid={`modal-footer-${modalId}`}>
-            {/* Auto-handle subform navigation: Cancelar → vuelve a edit, Submit → ejecuta + vuelve a edit */}
             {effectivePanel === 'subform' && isValidElement(footerContent) ? (
               cloneElement(footerContent, {
-                // Sobrescribir onLeftClick para volver a edit (Cancelar)
                 onLeftClick: () => setPanel('edit'),
-                // Envolver onRightClick/onSubmit para ejecutar original + volver a edit (Submit)
                 onRightClick: (footerContent.props as any).onRightClick 
                   ? () => {
                       (footerContent.props as any).onRightClick?.();
@@ -478,3 +441,5 @@ export function FormModalLayout({
     </ModalErrorBoundary>
   );
 }
+
+export { ModalLayout as FormModalLayout };

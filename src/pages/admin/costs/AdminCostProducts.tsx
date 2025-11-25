@@ -3,7 +3,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from '@/hooks/use-toast'
 import { useProducts, Product, useDeleteProduct } from '@/features/materials'
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useGlobalModalStore } from '@/components/modal'
 import AdminProductRow from '@/features/materials/components/admin/AdminProductRow'
 
 import { Button } from '@/components/ui/button'

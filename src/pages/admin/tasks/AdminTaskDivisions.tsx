@@ -20,7 +20,7 @@ interface CategoryTreeNode {
 }
 
 import { useTaskDivisionsAdmin, useAllTaskDivisions, useDeleteTaskDivision, useUpdateTaskDivisionsOrder, useUpdateTaskDivision, TaskDivisionAdmin } from '@/hooks/use-task-divisions-admin';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { toast } from '@/hooks/use-toast';
 
 const AdminTaskDivisions = () => {

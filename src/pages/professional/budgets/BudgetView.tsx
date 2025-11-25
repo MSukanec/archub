@@ -7,7 +7,7 @@ import { BudgetListTab } from './view/BudgetListTab';
 import { BudgetMaterialsTab } from './view/BudgetMaterialsTab';
 import { useBudgets } from "@/hooks/use-budgets";
 import { useBudgetItems, useCreateBudgetItem, useDeleteBudgetItem } from "@/hooks/use-budget-items";
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { useProjectContext } from '@/stores/projectContext';
 
 export default function BudgetView() {

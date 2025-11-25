@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { ModalType, ModalData } from './types';
+import { ModalType, ModalData } from '../factory/types';
 
 interface GlobalModalState {
   open: boolean;

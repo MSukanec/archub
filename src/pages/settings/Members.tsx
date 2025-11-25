@@ -31,7 +31,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
+import { useGlobalModalStore } from "@/components/modal";
 import { useMobile } from "@/hooks/use-mobile";
 import { PlanRestricted } from "@/features/users";
 import { useOrganizationMembers } from "@/features/organization";

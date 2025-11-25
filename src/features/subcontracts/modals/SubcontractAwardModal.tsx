@@ -1,7 +1,7 @@
 import React from 'react';
-import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
-import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
-import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
+import { FormModalLayout } from '@/components/modal';
+import { FormModalHeader } from '@/components/modal';
+import { FormModalFooter } from '@/components/modal';
 import { Badge } from '@/components/ui/badge';
 import { Trophy, Building, Calendar, DollarSign, FileText } from 'lucide-react';
 import { format } from 'date-fns';

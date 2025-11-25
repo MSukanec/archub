@@ -6,7 +6,7 @@ import { DashboardLayout as Layout } from "@/layouts";
 import { TaskCostsView } from './tabs/TaskCostsView';
 import { TaskBasicDataView } from './tabs/TaskBasicDataView';
 import { useGeneratedTask } from "@/hooks/use-generated-tasks";
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 
 export default function TaskView() {
   const { id } = useParams<{ id: string }>();

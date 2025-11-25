@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useMovements } from '@/hooks/use-movements'
 import { supabase } from '@/lib/supabase'
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useGlobalModalStore } from '@/components/modal'
 import { useToast } from '@/hooks/use-toast'
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
 

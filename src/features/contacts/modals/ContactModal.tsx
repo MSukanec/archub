@@ -6,11 +6,11 @@ import { z } from "zod";
 import { UserPlus, User, Mail, Phone, Building2, MapPin, FileText, Search, Check, X, Link, Unlink, Link2, MessageCircle, Share2, Building, Upload, Trash2, FileUp, Eye, Edit } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
-import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
-import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
-import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
-import { FormSubsectionButton } from "@/components/modal/form/FormSubsectionButton";
-import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
+import { FormModalLayout } from "@/components/modal";
+import { FormModalHeader } from "@/components/modal";
+import { FormModalFooter } from "@/components/modal";
+import { FormSubsectionButton } from "@/components/modal";
+import { useModalPanelStore } from "@/components/modal";
 import { ContactAttachmentsForm } from "./forms/ContactAttachmentsForm";
 import { ContactAttachmentsPanel } from "@/features/contacts";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";

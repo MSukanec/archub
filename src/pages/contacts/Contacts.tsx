@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import {

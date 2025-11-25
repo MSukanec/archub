@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Callout } from '@/components/ui-custom/general/Callout';
-import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { FormSubsectionButton } from '@/components/modal';
+import { useGlobalModalStore } from '@/components/modal';
 
 interface SubcontractDashboardViewProps {
   subcontract: any;

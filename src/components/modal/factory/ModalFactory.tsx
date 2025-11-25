@@ -1,5 +1,5 @@
-import { useGlobalModalStore } from './useGlobalModalStore';
-import { FormModalLayout } from './FormModalLayout';
+import { useGlobalModalStore } from '../state/globalModalStore';
+import { ModalLayout } from '../foundation/ModalLayout';
 import { Button } from '@/components/ui/button';
 import { 
   MemberFormModal, 
@@ -116,11 +116,9 @@ export function ModalFactory() {
     case 'list':
       return <ListFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'contact':
-      // Si está en modo vista, mostrar ContactModalView
       if (data?.viewingContact) {
         return <ContactModalView modalData={data} onClose={closeModal} />;
       }
-      // En cualquier otro caso (crear/editar), mostrar ContactFormModal
       return <ContactFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'project':
       return <ProjectModal modalData={data || undefined} onClose={closeModal} />;

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { useParameterDependenciesTree, ParameterDependencyNode, ParameterDependencyChild } from '@/hooks/use-parameter-dependencies-tree'
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useGlobalModalStore } from '@/components/modal'
 
 interface DependencyNodeProps {
   node: ParameterDependencyNode

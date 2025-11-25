@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { Edit, Trash2, FileText } from 'lucide-react'
 import { formatDateCompact } from '@/lib/date-utils'
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useGlobalModalStore } from '@/components/modal'
 import AdminChangelogRow from '@/features/users/components/admin/AdminChangelogRow'
 
 interface ChangelogEntry {

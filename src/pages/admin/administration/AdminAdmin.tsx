@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Settings, Plus } from 'lucide-react';
 import { DashboardLayout as Layout } from "@/layouts";
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import AdminAdminDashboard from './AdminAdminDashboard';
 import AdminAdminOrganizations from './AdminAdminOrganizations';
 import AdminAdminUsers from './AdminAdminUsers';

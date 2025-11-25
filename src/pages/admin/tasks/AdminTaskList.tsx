@@ -12,7 +12,7 @@ import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import AdminTaskRow from '@/features/projects/components/admin/AdminTaskRow'
 import { useMobile } from '@/hooks/use-mobile'
 
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useGlobalModalStore } from '@/components/modal'
 import { useGeneratedTasks, useDeleteGeneratedTask, useTaskUsageCount, type GeneratedTask } from '@/hooks/use-generated-tasks'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'

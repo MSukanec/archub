@@ -1,7 +1,7 @@
-import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
-import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
-import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
-import { ModalData } from "@/components/modal/form/types";
+import { FormModalLayout } from "@/components/modal";
+import { FormModalHeader } from "@/components/modal";
+import { FormModalFooter } from "@/components/modal";
+import { ModalData } from "@/components/modal";
 import { Link, Trash2 } from "lucide-react";
 import { useDeleteConstructionDependency } from "@/hooks/use-construction-dependencies";
 import { toast } from "@/hooks/use-toast";

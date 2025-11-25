@@ -4,7 +4,7 @@ import { TrendingUp, Plus, Home, Search, Filter, Bell } from "lucide-react";
 import { DashboardLayout as Layout } from "@/layouts";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from '@/stores/projectContext';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 import { useNavigationStore } from '@/stores/navigationStore';

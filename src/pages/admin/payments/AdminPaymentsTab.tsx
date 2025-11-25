@@ -8,7 +8,7 @@ import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/componen
 import { DollarSign, TrendingUp, CreditCard, Inbox, Search, Filter, Bell, Plus } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 

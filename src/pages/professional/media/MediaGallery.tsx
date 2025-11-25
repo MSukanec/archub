@@ -2,7 +2,7 @@ import React from 'react';
 import { Gallery as GalleryComponent } from '@/components/ui-custom/media/Gallery';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Button } from '@/components/ui/button';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useGlobalModalStore } from '@/components/modal';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
