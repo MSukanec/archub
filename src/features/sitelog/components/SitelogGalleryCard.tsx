@@ -46,7 +46,7 @@ export function SitelogGalleryCard({ files }: SitelogGalleryCardProps) {
         </div>
         
         {/* Quick Stats Grid */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 md:grid-cols-2 gap-4">
           {/* Images */}
           <div className="flex items-center gap-2" data-testid="stat-images">
             <Image className="h-4 w-4 text-muted-foreground" />

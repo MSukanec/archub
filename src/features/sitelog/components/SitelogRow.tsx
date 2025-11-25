@@ -156,9 +156,9 @@ export default function SitelogRow({
 
         {/* Mini-galería de thumbnails (hasta 8 media) */}
         {mediaFiles.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-1">
+          <div className="flex flex-wrap gap-2 mt-2">
             {mediaFiles.slice(0, 8).map((file: any, index: number) => (
-              <div key={file.id || index} className="relative w-6 h-6 rounded-sm overflow-hidden flex-shrink-0 bg-muted">
+              <div key={file.id || index} className="relative w-12 h-12 md:w-6 md:h-6 rounded-sm overflow-hidden flex-shrink-0 bg-muted">
                 {file.file_type === 'image' || file.mime_type?.startsWith('image/') ? (
                   <img
                     src={file.file_url}
@@ -181,7 +181,7 @@ export default function SitelogRow({
               </div>
             ))}
             {mediaFiles.length > 8 && (
-              <div className="w-6 h-6 bg-muted rounded-sm flex items-center justify-center text-[10px] text-muted-foreground font-medium">
+              <div className="w-12 h-12 md:w-6 md:h-6 bg-muted rounded-sm flex items-center justify-center text-[10px] text-muted-foreground font-medium">
                 +{mediaFiles.length - 8}
               </div>
             )}
