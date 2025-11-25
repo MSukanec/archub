@@ -64,11 +64,11 @@ export default function ContactSettings() {
       consequences: consequences.length > 0 ? consequences : undefined,
       replacementOptions: mode === 'replace' ? replacementOptions : undefined,
       currentId: type.id,
-      onDelete: () => {
-        deleteMutation.mutate(type.id);
+      onDelete: async () => {
+        await deleteMutation.mutateAsync(type.id);
       },
-      onReplace: (newId: string) => {
-        replaceMutation.mutate({ oldTypeId: type.id, newTypeId: newId, organizationId });
+      onReplace: async (newId: string) => {
+        await replaceMutation.mutateAsync({ oldTypeId: type.id, newTypeId: newId, organizationId });
       }
     });
   };

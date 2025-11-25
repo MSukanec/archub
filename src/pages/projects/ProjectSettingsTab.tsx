@@ -73,9 +73,8 @@ export default function ProjectSettingsTab() {
   const handleDeleteType = (type: ProjectType) => {
     if (!organizationId) return;
 
-    // Find projects using this type
-    // Since we don't have project data here, we'll check the count differently
-    const otherTypes = projectTypes.filter((t: ProjectType) => t.id !== type.id && t.organization_id === organizationId);
+    // Find all other types (system or custom) that can be used as replacements
+    const otherTypes = projectTypes.filter((t: ProjectType) => t.id !== type.id);
     const hasReplacements = otherTypes.length > 0;
     
     // Determine mode: if there are other types, use 'replace', else use 'delete'
@@ -104,11 +103,11 @@ export default function ProjectSettingsTab() {
       consequences: consequences.length > 0 ? consequences : undefined,
       replacementOptions: mode === 'replace' ? replacementOptions : undefined,
       currentId: type.id,
-      onDelete: () => {
-        deleteTypeMutation.mutate({ typeId: type.id, organizationId });
+      onDelete: async () => {
+        await deleteTypeMutation.mutateAsync({ typeId: type.id, organizationId });
       },
-      onReplace: (newId: string) => {
-        replaceTypeMutation.mutate({ oldTypeId: type.id, newTypeId: newId, organizationId });
+      onReplace: async (newId: string) => {
+        await replaceTypeMutation.mutateAsync({ oldTypeId: type.id, newTypeId: newId, organizationId });
       }
     });
   };
@@ -126,8 +125,8 @@ export default function ProjectSettingsTab() {
       return;
     }
 
-    // Find modalities using this one
-    const otherModalities = projectModalities.filter((m: ProjectModality) => m.id !== modality.id && m.organization_id === organizationId);
+    // Find all other modalities (system or custom) that can be used as replacements
+    const otherModalities = projectModalities.filter((m: ProjectModality) => m.id !== modality.id);
     const hasReplacements = otherModalities.length > 0;
     
     // Determine mode: if there are other modalities, use 'replace', else use 'delete'
@@ -156,11 +155,11 @@ export default function ProjectSettingsTab() {
       consequences: consequences.length > 0 ? consequences : undefined,
       replacementOptions: mode === 'replace' ? replacementOptions : undefined,
       currentId: modality.id,
-      onDelete: () => {
-        deleteModalityMutation.mutate({ modalityId: modality.id, organizationId });
+      onDelete: async () => {
+        await deleteModalityMutation.mutateAsync({ modalityId: modality.id, organizationId });
       },
-      onReplace: (newId: string) => {
-        replaceModalityMutation.mutate({ oldModalityId: modality.id, newModalityId: newId, organizationId });
+      onReplace: async (newId: string) => {
+        await replaceModalityMutation.mutateAsync({ oldModalityId: modality.id, newModalityId: newId, organizationId });
       }
     });
   };
