@@ -5,9 +5,10 @@ import { ProjectForm } from '@/features/projects';
 import { GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal } from '@/features/legacy';
 import ContactForm from '@/features/contacts/forms/ContactForm';
 import { ContactTypeForm } from '@/features/contacts/forms/ContactTypeForm';
-import { ClientObligationModal, ClientCommitmentModal, ClientRoleModal } from '@/features/clients';
+import { ClientObligationModal, ClientCommitmentModal } from '@/features/clients';
 import { ClientForm } from '@/features/clients/forms/ClientForm';
 import ClientPaymentForm from '@/features/clients/forms/ClientPaymentForm';
+import ClientRoleForm from '@/features/clients/forms/ClientRoleForm';
 import { MovementModal, MovementModalView, MovementImportStepModal, MovementConceptFormModal, BankTransferReceiptModal, PaymentFormModal } from '@/features/finances';
 import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConfirmationForm';
 import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPresentationFormModal, AdminProductModal, ProductModal, ProviderProductModal } from '@/features/materials';
@@ -151,7 +152,14 @@ export function initializeModalRegistry(): void {
     })
   });
   registerModal('client-commitment', ClientCommitmentModal as any, financeConfig);
-  registerModal('clientRole', ClientRoleModal as any, generalConfig);
+  registerModal('clientRole', ClientRoleForm as any, { 
+    ...generalConfig, 
+    size: 'sm',
+    mapDataToProps: (data) => ({
+      clientRole: data?.clientRole,
+      mode: data?.clientRole ? (data?.mode || 'edit') : (data?.mode || 'create')
+    })
+  });
   
   registerModal('movement', MovementModal as any, financeConfig);
   registerModal('movements-view', MovementModalView as any, financeConfig);
