@@ -132,8 +132,23 @@ function FormPanel({
   currentAvatarUrl?: string;
 }) {
   const linkedUser = contact?.linked_user || foundUser;
-  const displayName = contact?.full_name || `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || 'Sin nombre';
-  const initials = displayName
+  
+  // Estado local para actualizar el nombre en tiempo real (onBlur)
+  const [displayNameLive, setDisplayNameLive] = useState<string>(
+    contact?.full_name || `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || 'Sin nombre'
+  );
+  
+  // Observar cambios en los campos nombre y apellido
+  const firstName = form.watch('first_name');
+  const lastName = form.watch('last_name');
+  
+  // Actualizar el nombre cuando el usuario sale del campo (onBlur)
+  const handleNameBlur = () => {
+    const newName = `${firstName || ''} ${lastName || ''}`.trim() || 'Sin nombre';
+    setDisplayNameLive(newName);
+  };
+  
+  const initials = displayNameLive
     .split(' ')
     .map(word => word.charAt(0))
     .join('')
@@ -147,7 +162,7 @@ function FormPanel({
         <AvatarUploader
           avatarUrl={currentAvatarUrl}
           initials={initials}
-          displayName={displayName}
+          displayName={displayNameLive}
           onAvatarSelect={onAvatarChange}
           isUploading={avatarUploading}
         />
@@ -188,7 +203,11 @@ function FormPanel({
                 <FormControl>
                   <Input 
                     placeholder="Nombre" 
-                    {...field} 
+                    {...field}
+                    onBlur={(e) => {
+                      field.onBlur();
+                      handleNameBlur();
+                    }}
                     disabled={!!contact?.linked_user}
                     data-testid="input-first-name"
                   />
@@ -207,7 +226,11 @@ function FormPanel({
                 <FormControl>
                   <Input 
                     placeholder="Apellido" 
-                    {...field} 
+                    {...field}
+                    onBlur={(e) => {
+                      field.onBlur();
+                      handleNameBlur();
+                    }}
                     disabled={!!contact?.linked_user}
                     data-testid="input-last-name"
                   />
