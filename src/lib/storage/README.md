@@ -1,226 +1,184 @@
-# Storage Architecture - 3 Buckets System
+# Storage System
 
-This directory contains the complete implementation of Seencel's 3-bucket storage architecture.
+Organized storage architecture with separated concerns for different upload types and utilities.
 
-## Architecture Overview
+## Directory Structure
 
-The system uses 3 distinct Supabase Storage buckets for organized, secure multi-tenant file storage:
-
-- **public-assets**: Public content (marketplace, branding, user avatars, course covers)
-- **private-assets**: Sensitive business documents (invoices, contracts, permits, financial data)
-- **social-assets**: Project-related content (galleries, site logs, collaboration files)
-
-## Core Files
-
-### `types.ts`
-Defines all TypeScript types and interfaces:
-- `EntityType`: All supported entity types (13 types)
-- `BucketName`: The 3 bucket names
-- `UploadContext`: Upload configuration
-- `UploadResult`: Upload response structure
-- `StoragePath`: Path generation result
-
-### `config.ts`
-Entity configuration mapping:
-- Maps each EntityType to its bucket, path template, compression preset, and visibility
-- Provides helper functions: `getEntityConfig()`, `getBucketForEntity()`, `getCompressionPreset()`
-
-### `pathBuilder.ts`
-Storage path generation:
-- `buildStoragePath()`: Generates unique file paths with templates
-- `buildCoverPath()`: Generates predictable cover image paths
-- `validateContext()`: Validates required context fields
-
-### `uploadFile.ts`
-Centralized upload function:
-- **Main function**: `uploadFile(file, context)` - handles entire upload pipeline
-- Integrates compression (via `imageCompression.ts`)
-- Routes to correct bucket based on entity type
-- Creates `media_files` record
-- Creates `media_links` record (if `link_to` provided)
-- Full error handling and rollback
-- **Delete function**: `deleteFile(mediaFileId, hardDelete)` - soft or hard delete
-
-### `uploadHelpers.ts`
-Convenience wrapper functions:
-- `uploadContactDocument()`
-- `uploadSitelogPhoto()`
-- `uploadProjectDocument()`
-- `uploadInvoice()`
-- `uploadUserAvatar()`
-- `uploadOrgLogo()`
-
-### `index.ts`
-Main export file - exports all functions and types
-
-## Migration Status
-
-### ✅ Completed (New Architecture)
-- `uploadCourseImage.ts` - Uses unified uploadFile with cover deduplication
-- `uploadProjectImage.ts` - Uses unified uploadFile for project covers
-- `uploadMovementFiles.ts` - Uses unified uploadFile for movement attachments
-
-### 🔄 Partial Integration
-- Contact attachments - Uses legacy `contact_attachments` table (can migrate to `media_files/media_links`)
-- Sitelog photos - Uses `UploadMediaField` component (already has compression, can integrate with unified upload)
-
-### 📋 Future Enhancements
-- User avatars - Create dedicated upload function
-- Organization logos - Create dedicated upload function
-- UI assets - Create upload function for app assets
-- Signed URLs - Implement private file access via signed URLs
-
-## Usage Examples
-
-### Upload a Course Cover
-```typescript
-import { uploadFile } from '@/lib/storage';
-
-const result = await uploadFile(file, {
-  entity: 'course_cover_public',
-  link_to: { course_id: 'abc-123' },
-  category: 'course_cover',
-  description: 'Course cover image',
-  is_cover: true
-});
+```
+src/lib/storage/
+├── core/                           # Core unified upload functionality
+│   ├── uploadFile.ts              # Universal upload handler (media_files + media_links)
+│   ├── getFileUrl.ts              # URL generation with signed URLs support
+│   ├── types.ts                   # Shared types (UploadContext, BucketName, etc)
+│   ├── config.ts                  # Entity configs, compression presets, visibility rules
+│   ├── pathBuilder.ts             # Path generation logic
+│   └── index.ts                   # Core barrel export
+│
+├── uploads/                        # Entity-specific upload functions
+│   ├── course.ts                  # Course image uploads (to course_details)
+│   ├── project.ts                 # Project image uploads (to project_data)
+│   ├── movement.ts                # Movement file uploads (re-exports from legacy)
+│   └── index.ts                   # Uploads barrel export
+│
+├── utils/                         # Utility functions (not uploads)
+│   ├── projectImages.ts           # Image transformations, srcset, placeholders
+│   └── index.ts                   # Utils barrel export
+│
+├── legacy/                        # Deprecated functions (backward compatibility only)
+│   ├── uploadCourseImage.deprecated.ts        # Old media_files architecture (unused)
+│   ├── uploadMovementFiles.deprecated.ts      # Old movement upload (still used, needs migration)
+│   └── index.ts
+│
+├── setupBucketPolicies.ts         # Bucket policy configuration
+├── uploadHelpers.ts               # Legacy helpers (review for deprecation)
+├── index.ts                       # Main barrel export
+└── README.md                      # This file
 ```
 
-### Upload a Course Module Image
+## Usage
+
+### Core Uploads (Recommended for New Features)
+
+Use the unified `uploadFile()` for all new uploads. It handles:
+- Automatic image compression
+- 3-bucket system (public-assets, private-assets, social-assets)
+- Unified media_files + media_links storage
+- Signed URL generation for private files
+
 ```typescript
 import { uploadFile } from '@/lib/storage';
 
 const result = await uploadFile(file, {
-  entity: 'course_module_image',
-  course_id: 'course-123',
-  link_to: { 
-    course_id: 'course-123',
-    course_module_id: 'module-456' 
+  entity: 'sitelog_attachment',
+  organization_id: orgId,
+  project_id: projectId,
+  created_by_member_id: memberId,
+  link_to: {
+    sitelog_id: siteLogId,
+    project_id: projectId
   },
-  category: 'module_image',
-  description: 'Module image or GIF'
+  category: 'photo',
+  description: 'Site log photo'
 });
 ```
 
-### Upload a Project Photo
-```typescript
-import { uploadFile } from '@/lib/storage';
+### Entity-Specific Uploads (Legacy Architectures)
 
-const result = await uploadFile(file, {
-  entity: 'project_photo',
-  organization_id: 'org-123',
-  project_id: 'proj-456',
-  link_to: { project_id: 'proj-456' },
-  category: 'gallery',
-  description: 'Project progress photo'
+For courses and projects, use specialized functions that handle metadata differently:
+
+```typescript
+// Courses (metadata in course_details)
+import { uploadCourseImageToCourseDetails } from '@/lib/storage';
+const result = await uploadCourseImageToCourseDetails(file, courseId);
+
+// Projects (metadata in project_data)
+import { uploadProjectImage } from '@/lib/storage';
+const result = await uploadProjectImage(file, projectId, organizationId);
+```
+
+### Image Transformations
+
+Apply responsive transformations to project images:
+
+```typescript
+import { getProjectImageUrlTransformed, getProjectImageSrcSet } from '@/lib/storage';
+
+// Get optimized variant (thumbnail, card, hero, original)
+const cardUrl = getProjectImageUrlTransformed(imageUrl, 'card');
+
+// Get responsive srcset for <img>
+const srcset = getProjectImageSrcSet(imageUrl, 'card');
+
+// Get blur placeholder for progressive loading
+const placeholder = getProjectImagePlaceholder(imageUrl);
+```
+
+## Migration Path
+
+### Old Code → New Code
+
+**Before (scattered uploads):**
+```typescript
+// Multiple inconsistent approaches
+import { uploadProjectImage } from '@/lib/storage/uploadProjectImage';
+import { uploadCourseImage } from '@/lib/storage/uploadCourseImage';
+import { uploadMovementFiles } from '@/lib/storage/uploadMovementFiles';
+```
+
+**After (organized, with clear separation):**
+```typescript
+// New uploads use unified core
+import { uploadFile } from '@/lib/storage/core';
+
+// Legacy uploads kept for backward compatibility
+import { uploadProjectImage, uploadCourseImageToCourseDetails } from '@/lib/storage/uploads';
+
+// Utilities for transformation
+import { getProjectImageUrlTransformed } from '@/lib/storage/utils';
+```
+
+## Entity Types Supported
+
+### Core Uploads (uploadFile + media_files + media_links)
+- `sitelog_attachment` - Site log photos/videos/documents
+- `project_photo` - Project gallery photos
+- `general_cost_payment_attachment` - Cost payment documents
+- `contact_document` - Contact supporting documents
+- `course_module_image` - Course module images/GIFs
+- And more... see `config.ts` for full list
+
+### Legacy Uploads (direct metadata storage)
+- `course_cover_public` → course_details.image_bucket/image_path
+- `project_cover` → project_data.image_bucket/image_path
+- Movements → movement_attachments
+
+## Buckets
+
+| Bucket | Access | Use Case | URL Type |
+|--------|--------|----------|----------|
+| **public-assets** | Public | Course covers, public images | Public URLs |
+| **private-assets** | Private | Site logs, internal documents | Signed URLs (1-hour) |
+| **social-assets** | Public | Project covers, social sharing | Public URLs |
+
+## Best Practices
+
+1. **Always use uploadFile() for new features** - It's the modern, consistent approach
+2. **Respect entity configurations** - Different entities have different compression presets and buckets
+3. **Sign private URLs on-demand** - getFileUrl() handles this automatically
+4. **Use transformation utils for images** - Don't hardcode image variants
+5. **Document custom uploads** - If adding a new entity, update config.ts with its rules
+
+## Adding a New Entity Upload
+
+1. Add entity type to `core/types.ts`
+2. Add config to `core/config.ts` (compression preset, bucket, visibility rules)
+3. Use `uploadFile()` with the new entity type
+4. If special metadata handling needed, create `uploads/entityName.ts`
+
+Example:
+```typescript
+// core/config.ts
+getEntityConfig('contract_document') => {
+  bucket: 'private-assets',
+  visibility: 'private'
+}
+
+// Then use:
+await uploadFile(file, {
+  entity: 'contract_document',
+  organization_id: orgId,
+  link_to: { contact_id: contactId }
 });
 ```
 
-### Upload an Invoice
-```typescript
-import { uploadInvoice } from '@/lib/storage/uploadHelpers';
+## Deprecated Files
 
-const result = await uploadInvoice(file, 'org-123', 'movement-789');
-```
+- `uploadCourseImage.ts` - Uses old media_files architecture, not referenced in codebase
+- `uploadMovementFiles.ts` - Still used but marked for migration to uploadFile()
+- `uploadHelpers.ts` - Legacy helpers, review for consolidation
 
-### Delete a File (Soft Delete)
-```typescript
-import { deleteFile } from '@/lib/storage';
+## Related
 
-await deleteFile('media-file-id-123', false); // Soft delete (is_deleted = true)
-```
-
-### Delete a File (Hard Delete)
-```typescript
-import { deleteFile } from '@/lib/storage';
-
-await deleteFile('media-file-id-123', true); // Hard delete (removes from storage + DB)
-```
-
-## Entity Type → Bucket Mapping
-
-| Entity Type | Bucket | Compression Preset |
-|-------------|--------|-------------------|
-| `user_avatar` | public-assets | avatar |
-| `org_logo` | public-assets | avatar |
-| `course_cover_public` | public-assets | course-cover |
-| `course_module_image` | public-assets | course-cover |
-| `ui_asset` | public-assets | default |
-| `invoice` | private-assets | document |
-| `budget` | private-assets | document |
-| `contract` | private-assets | document |
-| `permit` | private-assets | document |
-| `technical_plan` | private-assets | document |
-| `contact_document` | private-assets | document |
-| `project_photo` | social-assets | project-cover |
-| `sitelog_photo` | social-assets | sitelog-photo |
-| `project_document` | social-assets | document |
-
-## Database Schema Integration
-
-### `media_files` table
-Stores file metadata:
-- `id`, `bucket`, `file_path`, `file_url`
-- `file_name`, `file_type`, `file_size`
-- `is_public`, `is_deleted`
-- `organization_id`, `created_by`
-
-### `media_links` table
-Links files to entities:
-- `media_file_id` (FK to media_files)
-- Entity FKs: `project_id`, `contact_id`, `course_id`, `sitelog_id`, etc.
-- `category`, `description`, `is_cover`, `position`
-- `visibility` ('public' | 'organization' | 'private')
-
-## Security & RLS
-
-- **public-assets**: Public read, authenticated write
-- **private-assets**: Organization-scoped RLS (only members can access)
-- **social-assets**: Project-scoped RLS (project members can access)
-
-Row-Level Security policies should be configured in Supabase for each bucket.
-
-## Performance & Optimization
-
-### Image Compression
-All images are automatically compressed before upload using presets:
-- **avatar**: 512px, 90% quality, 0.3MB max
-- **course-cover**: 1920px, 90% quality, 1.2MB max
-- **project-cover**: 1920px, 85% quality, 1.0MB max
-- **sitelog-photo**: 1280px, 80% quality, 0.8MB max
-- **document**: 2048px, 85% quality, 1.5MB max (preserves EXIF)
-
-### Caching
-- All uploads use `cacheControl: '3600'` (1 hour)
-- Public URLs include cache-busting timestamps
-
-## Error Handling
-
-All upload functions:
-- Validate context before upload
-- Compress images if applicable
-- Upload to storage
-- Create database records
-- **Rollback on failure**: Delete storage file if DB insert fails
-- Log all errors with `console.error`
-- Throw descriptive errors to caller
-
-## Testing Checklist
-
-When adding new entity types or modifying upload logic:
-
-- [ ] Test file upload to correct bucket
-- [ ] Verify `media_files` record created
-- [ ] Verify `media_links` record created (if applicable)
-- [ ] Test image compression (check console logs)
-- [ ] Test error handling (simulate storage failure)
-- [ ] Test rollback (simulate DB failure after upload)
-- [ ] Test soft delete
-- [ ] Test hard delete
-- [ ] Verify no orphaned files in storage
-- [ ] Check browser console for errors
-
-## Related Documentation
-
-- `/prompts/Upload.md` - Complete upload system documentation
-- `/src/lib/imageCompression.ts` - Image compression implementation
-- `/src/lib/supabase/storage.ts` - Storage helpers
+- `/shared/schema.ts` - Media tables schema (media_files, media_links)
+- `@/lib/imageCompression` - Compression utilities
+- `@/lib/supabase/storage` - Low-level Supabase storage helpers

@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { getFileUrl } from '@/lib/storage/getFileUrl';
-import type { BucketName } from '@/lib/storage/types';
+import { getFileUrl } from '../../../src/lib/storage/core/getFileUrl';
+import type { BucketName } from '../../../src/lib/storage/core/types';
 
 export interface CommunityHandlerContext {
   supabase: SupabaseClient;

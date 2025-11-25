@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { compressImage } from '@/lib/imageCompression';
-import { getFileUrl } from './getFileUrl';
-import type { BucketName } from './types';
+import { getFileUrl } from '../core/getFileUrl';
+import type { BucketName } from '../core/types';
 
 export interface UploadedProjectImage {
   file_url: string;

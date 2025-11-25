@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase';
-import { uploadFile } from './uploadFile';
-import { getMediaFileUrl, getFileUrl } from './getFileUrl';
-import type { UploadContext } from './types';
+import { uploadFile } from '../core/uploadFile';
+import { getMediaFileUrl, getFileUrl } from '../core/getFileUrl';
+import type { UploadContext } from '../core/types';
 
 interface UploadedFile {
   file_url: string;
