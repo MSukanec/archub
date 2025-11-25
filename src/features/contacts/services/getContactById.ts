@@ -44,20 +44,10 @@ export async function getContactById(
     return null;
   }
 
-  const { data: attachments, error: attachmentsError } = await supabase
-    .from('contact_attachments')
-    .select('count')
-    .eq('contact_id', contactId);
-
-  if (attachmentsError) {
-    console.error('Error fetching attachment count:', attachmentsError);
-  }
-
   return {
     ...contact,
     contact_types: contact.contact_type_links
       ?.map((link: any) => link.contact_types)
       .filter((type: any) => type && !type.is_deleted) || [],
-    attachments_count: attachments?.length || 0,
   };
 }

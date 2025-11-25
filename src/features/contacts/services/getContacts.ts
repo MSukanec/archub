@@ -42,25 +42,10 @@ export async function getContacts(
     return [];
   }
 
-  const { data: attachmentCounts, error: attachmentsError } = await supabase
-    .from('contact_attachments')
-    .select('contact_id')
-    .in('contact_id', contacts.map(c => c.id));
-
-  if (attachmentsError) {
-    console.error('Error fetching attachment counts:', attachmentsError);
-  }
-
-  const countsByContact = (attachmentCounts || []).reduce((acc, item) => {
-    acc[item.contact_id] = (acc[item.contact_id] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
   return contacts.map(contact => ({
     ...contact,
     contact_types: contact.contact_type_links
       ?.map((link: any) => link.contact_types)
       .filter((type: any) => type && !type.is_deleted) || [],
-    attachments_count: countsByContact[contact.id] || 0,
   }));
 }
