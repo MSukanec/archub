@@ -450,6 +450,7 @@ export default function GeneralCostPaymentForm({ modalData, onClose }: GeneralCo
 
   const [filesToUpload, setFilesToUpload] = React.useState<any[]>([])
   const [existingFiles, setExistingFiles] = React.useState<any[]>([])
+  const lastResetPaymentIdRef = React.useRef<string | undefined>(undefined)
 
   // Fetch existing payment data for edit/view mode
   const { data: existingPayment, isLoading: loadingPayment } = useGeneralCostPayment(
@@ -460,46 +461,19 @@ export default function GeneralCostPaymentForm({ modalData, onClose }: GeneralCo
   // Fetch existing media files
   const { data: mediaFiles = [] } = useGeneralCostPaymentMedia(mode !== 'create' ? paymentId : undefined)
 
-  // Build defaultValues based on existingPayment to avoid infinite loops
-  const defaultValues = React.useMemo(() => {
-    if (!existingPayment || mode === 'create') {
-      return {
-        payment_date: new Date(),
-        general_cost_id: '',
-        currency_id: '',
-        wallet_id: '',
-        amount: 0,
-        exchange_rate: undefined,
-        notes: '',
-        reference: '',
-        status: 'confirmed' as const,
-      }
-    }
-
-    let paymentDate: Date
-    if (existingPayment.payment_date) {
-      const [year, month, day] = existingPayment.payment_date.split('-').map(Number)
-      paymentDate = new Date(year, month - 1, day)
-    } else {
-      paymentDate = new Date()
-    }
-
-    return {
-      payment_date: paymentDate,
-      general_cost_id: existingPayment.general_cost?.id || '',
-      currency_id: existingPayment.currency?.id || '',
-      wallet_id: existingPayment.wallet?.id || '',
-      amount: existingPayment.amount || 0,
-      exchange_rate: existingPayment.exchange_rate ?? undefined,
-      notes: existingPayment.notes || '',
-      reference: existingPayment.reference || '',
-      status: existingPayment.status || 'confirmed',
-    }
-  }, [existingPayment, mode])
-
   const form = useForm<GeneralCostPaymentFormData>({
     resolver: zodResolver(generalCostPaymentSchema),
-    defaultValues,
+    defaultValues: {
+      payment_date: new Date(),
+      general_cost_id: '',
+      currency_id: '',
+      wallet_id: '',
+      amount: 0,
+      exchange_rate: undefined,
+      notes: '',
+      reference: '',
+      status: 'confirmed',
+    },
   })
 
   // Fetch data
@@ -509,6 +483,36 @@ export default function GeneralCostPaymentForm({ modalData, onClose }: GeneralCo
   const { data: members = [] } = useOrganizationMembers(organizationId)
 
   const isLoading = currenciesLoading || generalCostsLoading || walletsLoading || (mode !== 'create' && loadingPayment)
+
+  // Reset form when existingPayment data is loaded
+  React.useEffect(() => {
+    if (!existingPayment || mode === 'create') return;
+    
+    // Only reset once per paymentId
+    if (paymentId === lastResetPaymentIdRef.current) return;
+    lastResetPaymentIdRef.current = paymentId;
+
+    let paymentDate: Date;
+    if (existingPayment.payment_date) {
+      const [year, month, day] = existingPayment.payment_date.split('-').map(Number);
+      paymentDate = new Date(year, month - 1, day);
+    } else {
+      paymentDate = new Date();
+    }
+
+    form.reset({
+      payment_date: paymentDate,
+      general_cost_id: existingPayment.general_cost?.id || '',
+      currency_id: existingPayment.currency?.id || '',
+      wallet_id: existingPayment.wallet?.id || '',
+      amount: existingPayment.amount || 0,
+      exchange_rate: existingPayment.exchange_rate ?? undefined,
+      notes: existingPayment.notes || '',
+      reference: existingPayment.reference || '',
+      status: existingPayment.status || 'confirmed',
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existingPayment, mode, paymentId]);
 
   // Load existing files
   React.useEffect(() => {
