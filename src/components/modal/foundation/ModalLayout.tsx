@@ -29,7 +29,8 @@ interface ModalLayoutProps {
   headerContent?: ReactNode;
   footerContent?: ReactNode;
   className?: string;
-  columns?: number;
+  /** Número de columnas en desktop (1 por defecto, mobile siempre 1) */
+  columns?: 1 | 2;
   
   /** Contenido para modales de pasos múltiples */
   stepContent?: ReactNode;
@@ -110,7 +111,7 @@ export function ModalLayout({
   headerContent,
   footerContent,
   className,
-  columns = 2,
+  columns = 1,
   stepContent,
   isEditing = false,
   onSubmit,

@@ -62,7 +62,7 @@ import {
 
 ### ModalLayout
 - Contenedor principal con portal, animaciones, focus trap
-- Recibe `onClose` y `size`
+- Recibe `onClose`, `size`, y opcionalmente `columns`
 
 ### ModalHeader
 - Título, subtítulo, ícono, actions
@@ -71,10 +71,28 @@ import {
 ### ModalBody
 - Contenido scrolleable
 - No paddings manuales, no scroll manual
+- **Columnas:** Por defecto 1 columna. Mobile SIEMPRE 1 columna.
 
 ### ModalFooter
 - Botones de acción
 - No divs intermedios
+
+---
+
+## 3.1 COLUMNAS EN EL BODY
+
+**REGLA:**
+- **Default:** 1 columna
+- **Mobile:** SIEMPRE 1 columna (automático)
+- **Desktop:** 1 o 2 según el modal
+
+Para modales con forms extensos, puedes usar 2 columnas en desktop:
+
+```tsx
+<ModalLayout onClose={onClose} size="lg" columns={2}>
+```
+
+Esto hace que en desktop los campos se muestren en 2 columnas (lado a lado), pero en mobile sigue siendo 1 columna.
 
 ---
 

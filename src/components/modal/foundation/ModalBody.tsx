@@ -11,7 +11,7 @@ interface ModalBodyProps {
 
 export default function ModalBody({ 
   children, 
-  columns = 2, 
+  columns = 1, 
   className,
   paddingX = "px-6",
   paddingY = "py-4"
