@@ -1,7 +1,8 @@
 import { registerModal, ModalConfig } from './registry';
 
 import { MemberFormModal, BoardFormModal, CardFormModal, ListFormModal, OrganizationMovementConceptFormModal, PartnerModal, OrganizationFormModal, ProfileOrganizationFormModal } from '@/features/organization';
-import { ProjectForm, GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal } from '@/features/projects';
+import { ProjectForm } from '@/features/projects';
+import { GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal } from '@/features/legacy';
 import { ContactFormModal, ContactModalView } from '@/features/contacts';
 import { ClientObligationModal, ClientPaymentsModal, ClientCommitmentModal, ClientRoleModal, ProjectClientModal } from '@/features/clients';
 import { MovementModal, MovementModalView, MovementImportStepModal, MovementConceptFormModal, BankTransferReceiptModal, PaymentFormModal } from '@/features/finances';

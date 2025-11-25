@@ -26,12 +26,8 @@ import { useUpdateChecklist } from "@/hooks/use-update-checklist";
 import { supabase } from "@/lib/supabase";
 
 // Import feature hooks and services
-import { useCreateProject } from '../hooks/use-create-project';
-import { useUpdateProject } from '../hooks/use-update-project';
-import { uploadProjectImage, updateProjectLastActive } from '@/features/projects';
-import { QUERY_KEYS } from '../constants';
+import { useCreateProject, useUpdateProject, uploadProjectImage, updateProjectLastActive, QUERY_KEYS, ProjectColorAdvanced } from '@/features/projects';
 import { USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization';
-import ProjectColorAdvanced from '../components/ProjectColorAdvanced';
 
 // Paleta de colores predefinidos
 const PRESET_COLORS = [
