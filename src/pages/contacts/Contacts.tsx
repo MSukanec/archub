@@ -160,7 +160,7 @@ export default function Contacts() {
       mode: 'dangerous',
       title: 'Eliminar contacto',
       description:
-        'Esta acción marcará el contacto como eliminado (soft delete). El contacto no se mostrará en la lista pero se mantendrá en la base de datos.',
+        'El contacto será archivado y desaparecerá de tus listas. Todos tus datos vinculados (proyectos, pagos, registros) permanecerán intactos, pero ya no mostrarán referencia a este contacto. Nada se perderá, solo se ocultará el vínculo. Puedes restaurar el contacto cuando lo necesites.',
       itemName: contactName,
       destructiveActionText: 'Eliminar contacto',
       onDelete: () => {
