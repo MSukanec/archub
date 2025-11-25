@@ -159,3 +159,7 @@ where
 create index IF not exists idx_media_links_is_public on public.media_links using btree (is_public) TABLESPACE pg_default
 where
   (is_public = true);
+
+create index IF not exists idx_media_links_created_by on public.media_links using btree (created_by) TABLESPACE pg_default
+where
+  (created_by is not null);
