@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
+import { Edit, Trash2 } from 'lucide-react';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
-import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
 import ContactAvatar from './ContactAvatar';
 import type { ContactWithRelations } from '@/features/contacts/types';
@@ -136,22 +136,8 @@ export default function ContactList({
           {contact.company_name || '—'}
         </span>
       )
-    },
-    {
-      key: "actions" as const,
-      label: "Acciones",
-      sortable: false,
-      width: "120px",
-      render: (contact: ContactWithRelations) => (
-        <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-          <TableActionButtons
-            onEdit={() => onEdit(contact)}
-            onDelete={() => onDelete(contact)}
-          />
-        </div>
-      )
     }
-  ], [onEdit, onDelete]);
+  ], []);
   
   return (
     <div className="space-y-6">
@@ -189,6 +175,19 @@ export default function ContactList({
         data={sortedContacts}
         columns={columns}
         onRowClick={onRowClick}
+        rowActions={(contact) => [
+          {
+            icon: Edit,
+            label: 'Editar',
+            onClick: () => onEdit(contact)
+          },
+          {
+            icon: Trash2,
+            label: 'Eliminar',
+            onClick: () => onDelete(contact),
+            variant: 'destructive' as const
+          }
+        ]}
         emptyStateConfig={{
           title: "No hay contactos",
           description: "Comienza creando tu primer contacto"
