@@ -146,7 +146,7 @@ export function ModalLayout({
   const lastActiveElement = useRef<HTMLElement | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
-  const resolvedSize: ModalSize = size || (fullscreen ? 'full' : wide ? 'xl' : 'md');
+  const resolvedSize: ModalSize = size || (fullscreen ? 'full' : wide ? 'xl' : 'lg');
 
   useEffect(() => {
     setIsMounted(true);

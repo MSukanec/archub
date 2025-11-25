@@ -154,8 +154,8 @@ if (isView) {
 | Size | Ancho |
 |------|-------|
 | `sm` | 400px |
-| `md` | 550px (default) |
-| `lg` | 750px |
+| `md` | 550px |
+| `lg` | 750px **(default)** |
 | `xl` | 1000px |
 | `full` | 100% |
 
