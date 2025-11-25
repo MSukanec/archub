@@ -17,7 +17,7 @@ import { useUpdateGeneralCost } from '@/features/general-costs/hooks/use-update-
 import { useGeneralCost } from '@/features/general-costs/hooks/use-general-cost'
 import { generalCostSchema, type GeneralCostFormData } from '../schemas'
 
-interface GeneralCostsModalProps {
+interface GeneralCostFormProps {
   modalData?: {
     organizationId?: string
     generalCostId?: string
@@ -26,7 +26,7 @@ interface GeneralCostsModalProps {
   mode?: 'create' | 'edit' | 'view'
 }
 
-export function GeneralCostsModal({ modalData, onClose, mode = 'create' }: GeneralCostsModalProps) {
+export function GeneralCostForm({ modalData, onClose, mode = 'create' }: GeneralCostFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   const { data: userData } = useCurrentUser()

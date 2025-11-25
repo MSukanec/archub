@@ -16,7 +16,7 @@ import { ProjectModalityModal } from '@/features/projects/project-modalities/mod
 import { PersonnelAttendanceModal, PersonnelAddModal, PersonnelDataModal, PersonnelRatesModal, AdminLaborModal } from '@/features/personnel';
 import { SubcontractFormModal, SubcontractBidFormModal, SubcontractAwardModal, SubcontractTaskFormModal } from '@/features/subcontracts';
 import { PDFExporterModal } from '@/features/pdf';
-import { GeneralCostsModal } from '@/features/general-costs/modals/GeneralCostsModal';
+import { GeneralCostForm } from '@/features/general-costs/forms/GeneralCostForm';
 import { GeneralCostsPaymentModal } from '@/features/general-costs/modals/GeneralCostsPaymentModal';
 import { GeneralCostsPaymentViewModal } from '@/features/general-costs/modals/GeneralCostsPaymentViewModal';
 import { CourseModal, CourseModuleFormModal, LessonFormModal, CourseEnrollmentModal, CouponFormModal, PaymentMethodModal } from '@/features/learning';
@@ -98,7 +98,7 @@ export function initializeModalRegistry(): void {
   registerModal('payment', PaymentFormModal as any, financeConfig);
   registerModal('bank-transfer-receipt', BankTransferReceiptModal as any, { ...financeConfig, size: 'md' });
   
-  registerModal('general-costs', GeneralCostsModal as any, { 
+  registerModal('general-costs', GeneralCostForm as any, { 
     ...financeConfig, 
     size: 'md',
     mapDataToProps: (data) => ({

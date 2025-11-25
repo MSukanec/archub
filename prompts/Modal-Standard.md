@@ -6,24 +6,32 @@ Este documento es LA LEY para crear o refactorizar cualquier modal en Seencel.
 
 ## 1. NOMBRE Y ESTRUCTURA DEL ARCHIVO
 
-El modal debe existir como un único archivo:
+El modal debe existir como un único archivo con la convención internacional:
 
 ```
 <Entidad>Form.tsx
 ```
 
-Ejemplos:
-- `ClientPaymentForm.tsx`
-- `GeneralCostsPaymentForm.tsx`
-- `TaskForm.tsx`
-- `ContactForm.tsx`
+**UBICACIÓN: La carpeta DEBE ser `forms`, NO `modals`**
+
+Ejemplos correctos:
+- `src/features/clients/forms/ClientPaymentForm.tsx`
+- `src/features/general-costs/forms/GeneralCostForm.tsx`
+- `src/features/projects/forms/TaskForm.tsx`
+- `src/features/contacts/forms/ContactForm.tsx`
 
 Si existen archivos duplicados como:
 - `ClientPaymentModal.tsx`
 - `ClientPaymentEditModal.tsx`
 - `ClientPaymentViewModal.tsx`
 
-**Debes eliminarlos y unificarlos en uno solo:** `ClientPaymentForm.tsx`
+**Debes eliminarlos y unificarlos en uno solo:** `ClientPaymentForm.tsx` EN LA CARPETA `forms`
+
+**IMPORTANTE:** Al refactorizar, siempre:
+1. Crea la carpeta `forms` si no existe
+2. Renombra el archivo a `<Entidad>Form.tsx`
+3. Elimina la carpeta `modals` (o los archivos viejos)
+4. Actualiza las importaciones en `registerModals.ts`
 
 ---
 
@@ -190,7 +198,7 @@ Después de crear/modificar el modal, registrarlo en `registerModals.ts`:
 
 ```typescript
 // src/components/modal/factory/registerModals.ts
-import { MyEntityForm } from '@/features/my-feature/modals/MyEntityForm';
+import { MyEntityForm } from '@/features/my-feature/forms/MyEntityForm';
 
 registerModal('my-entity', MyEntityForm, {
   category: 'project',      // admin | project | finance | organization | learning | general
@@ -327,7 +335,7 @@ Después de crear/refactorizar:
 ## 13. EJEMPLO COMPLETO
 
 ```tsx
-// src/features/clients/modals/ClientPaymentForm.tsx
+// src/features/clients/forms/ClientPaymentForm.tsx
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { Button } from '@/components/ui/button';
 
