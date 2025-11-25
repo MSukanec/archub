@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Receipt } from 'lucide-react'
 
-import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
+import { ModalLayout, ModalHeader, ModalFooter } from '@/components/modal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -115,95 +115,99 @@ export function GeneralCostForm({ modalData, onClose, mode = 'create' }: General
     }
   }
 
-  // VIEW MODE
-  if (isView && existingGeneralCost) {
-    return (
-      <ModalLayout onClose={onClose} size="md">
-        <ModalHeader 
-          title="Detalle de Gasto General" 
-          description="Información completa del concepto de gasto"
-          icon={Receipt}
-        />
-        <ModalBody>
-          <div className="space-y-6">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Nombre</p>
-              <p className="font-medium">{existingGeneralCost.name}</p>
-            </div>
-            {existingGeneralCost.description && (
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Descripción</p>
-                <p className="text-sm">{existingGeneralCost.description}</p>
-              </div>
-            )}
-          </div>
-        </ModalBody>
-      </ModalLayout>
-    )
-  }
+  // VIEW MODE - Render as edit panel
+  const viewPanel = isView && existingGeneralCost ? (
+    <div className="space-y-4">
+      <div>
+        <p className="text-sm text-muted-foreground mb-1">Nombre</p>
+        <p className="font-medium">{existingGeneralCost.name}</p>
+      </div>
+      {existingGeneralCost.description && (
+        <div>
+          <p className="text-sm text-muted-foreground mb-1">Descripción</p>
+          <p className="text-sm">{existingGeneralCost.description}</p>
+        </div>
+      )}
+    </div>
+  ) : null
 
   // CREATE / EDIT MODE
-  return (
-    <ModalLayout onClose={onClose} size="md">
-      <ModalHeader 
-        title={isCreate ? 'Nuevo Gasto General' : 'Editar Gasto General'}
-        description={isCreate 
-          ? 'Agrega un nuevo concepto de gasto general para tu organización' 
-          : 'Modifica los datos del gasto general'}
-        icon={Receipt}
-      />
-      <ModalBody>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Nombre */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Ej: Servicios administrativos, Gastos de oficina, etc."
-                      {...field}
-                      data-testid="input-general-cost-name"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+  const editPanel = (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Nombre */}
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Ej: Servicios administrativos, Gastos de oficina, etc."
+                  {...field}
+                  data-testid="input-general-cost-name"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-            {/* Descripción */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Descripción detallada del gasto general..."
-                      rows={3}
-                      {...field}
-                      data-testid="textarea-general-cost-description"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </form>
-        </Form>
-      </ModalBody>
-      <ModalFooter
-        leftLabel="Cancelar"
-        onLeftClick={onClose}
-        rightLabel={isCreate ? 'Crear' : 'Actualizar'}
-        onRightClick={form.handleSubmit(onSubmit)}
-        isSubmitting={isSubmitting}
-        submitDisabled={isSubmitting}
-      />
-    </ModalLayout>
+        {/* Descripción */}
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Descripción detallada del gasto general..."
+                  rows={3}
+                  {...field}
+                  data-testid="textarea-general-cost-description"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
+  )
+
+  const headerContent = (
+    <ModalHeader 
+      title={isView ? 'Detalle de Gasto General' : (isCreate ? 'Nuevo Gasto General' : 'Editar Gasto General')}
+      description={isView 
+        ? 'Información completa del concepto de gasto'
+        : (isCreate 
+          ? 'Agrega un nuevo concepto de gasto general para tu organización' 
+          : 'Modifica los datos del gasto general')}
+      icon={Receipt}
+    />
+  )
+
+  const footerContent = isView ? null : (
+    <ModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={onClose}
+      rightLabel={isCreate ? 'Crear' : 'Actualizar'}
+      onRightClick={form.handleSubmit(onSubmit)}
+      isSubmitting={isSubmitting}
+      submitDisabled={isSubmitting}
+    />
+  )
+
+  return (
+    <ModalLayout 
+      size="md"
+      onClose={onClose}
+      headerContent={headerContent}
+      editPanel={viewPanel || editPanel}
+      footerContent={footerContent}
+      isEditing={!isView}
+    />
   )
 }
