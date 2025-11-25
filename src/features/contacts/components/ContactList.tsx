@@ -4,31 +4,32 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { Phone, MessageCircle, Eye } from 'lucide-react';
-import type { ContactWithRelations, ContactType } from '@/features/contacts/types';
+import { Phone, MessageCircle } from 'lucide-react';
+import type { ContactWithRelations } from '@/features/contacts/types';
 
 interface ContactListProps {
   contacts: ContactWithRelations[];
   onEdit: (contact: ContactWithRelations) => void;
   onDelete: (contact: ContactWithRelations) => void;
   onRowClick?: (contact: ContactWithRelations) => void;
-  filterByType?: string;
-  setFilterByType?: (value: string) => void;
-  contactTypes?: ContactType[];
 }
 
 export default function ContactList({ 
   contacts, 
   onEdit, 
   onDelete,
-  onRowClick,
-  filterByType = 'all',
-  setFilterByType,
-  contactTypes = []
+  onRowClick
 }: ContactListProps) {
+  // Sort contacts alphabetically by name
+  const sortedContacts = useMemo(() => {
+    return [...contacts].sort((a, b) => {
+      const nameA = `${a.first_name || ''} ${a.last_name || ''}`.trim().toLowerCase();
+      const nameB = `${b.first_name || ''} ${b.last_name || ''}`.trim().toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+  }, [contacts]);
   
   const kpis = useMemo(() => {
     const totalContacts = contacts.length;
@@ -55,38 +56,29 @@ export default function ContactList({
   
   const columns = useMemo(() => [
     {
-      key: "avatar" as const,
-      label: "Avatar",
-      sortable: false,
-      width: "80px",
-      render: (contact: ContactWithRelations) => (
-        <div className="flex items-center justify-center">
-          {contact.linked_user ? (
-            <Avatar className="w-10 h-10">
-              <AvatarImage src={contact.linked_user.avatar_url || undefined} />
-              <AvatarFallback>
-                {contact.linked_user.full_name?.charAt(0) || 'U'}
-              </AvatarFallback>
-            </Avatar>
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-medium">
-              {contact.first_name?.charAt(0) || 'C'}
-            </div>
-          )}
-        </div>
-      )
-    },
-    {
       key: "first_name" as const,
       label: "Nombre",
-      sortable: true,
-      sortType: "string" as const,
+      sortable: false,
       render: (contact: ContactWithRelations) => {
         const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || '—';
         
         return (
-          <div className="font-semibold text-sm">
-            {fullName}
+          <div className="flex items-center gap-3">
+            {contact.linked_user ? (
+              <Avatar className="w-10 h-10 flex-shrink-0">
+                <AvatarImage src={contact.linked_user.avatar_url || undefined} />
+                <AvatarFallback>
+                  {contact.linked_user.full_name?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-medium flex-shrink-0">
+                {contact.first_name?.charAt(0) || 'C'}
+              </div>
+            )}
+            <span className="font-semibold text-sm">
+              {fullName}
+            </span>
           </div>
         );
       }
@@ -205,8 +197,6 @@ export default function ContactList({
             onDelete={() => onDelete(contact)}
             editLabel="Editar contacto"
             deleteLabel="Eliminar contacto"
-            deleteTitle="¿Eliminar contacto?"
-            deleteDescription={`¿Estás seguro de que quieres eliminar a ${contact.first_name || 'este contacto'}? Esta acción no se puede deshacer.`}
           />
         </div>
       )
@@ -245,31 +235,14 @@ export default function ContactList({
         </StatCard>
       </div>
 
-      {setFilterByType && (
-        <div className="flex items-center gap-4">
-          <Select value={filterByType} onValueChange={setFilterByType}>
-            <SelectTrigger className="w-64">
-              <SelectValue placeholder="Filtrar por tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los tipos</SelectItem>
-              {contactTypes.map((type) => (
-                <SelectItem key={type.id} value={type.id}>
-                  {type.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
       <Table
-        data={contacts}
+        data={sortedContacts}
         columns={columns}
         onRowClick={onRowClick}
-        emptyMessage="No hay contactos disponibles"
-        searchable
-        searchPlaceholder="Buscar contactos..."
+        emptyStateConfig={{
+          title: "No hay contactos",
+          description: "Comienza creando tu primer contacto"
+        }}
       />
     </div>
   );

@@ -273,7 +273,7 @@ export default function Contacts() {
                     {contacts.map((contact) => (
                       <ContactRow
                         key={contact.id}
-                        contact={contact}
+                        contact={contact as any}
                         onEdit={handleEditContact}
                         onDelete={handleDeleteContact}
                         onClick={(c: any) =>
@@ -303,9 +303,6 @@ export default function Contacts() {
           onEdit={handleEditContact}
           onDelete={handleDeleteContact}
           onRowClick={handleViewContact}
-          filterByType={filterByType}
-          setFilterByType={setFilterByType}
-          contactTypes={contactTypes}
         />
       )}
     </Layout>
