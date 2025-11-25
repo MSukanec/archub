@@ -75,6 +75,20 @@ export default function GeneralCostsPaymentsTab() {
     });
   }, [allPayments, filterWallet, filterCurrency, filterGeneralCost, filterStatus]);
 
+  // Sort by payment_date DESC, then by created_at DESC
+  const sortedPayments = useMemo(() => {
+    return [...filteredPayments].sort((a, b) => {
+      // Primero por payment_date (más reciente primero)
+      const dateComparison = new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime();
+      if (dateComparison !== 0) return dateComparison;
+      
+      // Si tienen la misma fecha de pago, por created_at (más nuevo primero)
+      const createdAtA = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const createdAtB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return createdAtB - createdAtA;
+    });
+  }, [filteredPayments]);
+
   // Calculate metrics
   const metricsData = useMemo(() => {
     let latestPaymentDate: string | null = null;
@@ -433,7 +447,7 @@ export default function GeneralCostsPaymentsTab() {
 
       <Table
         columns={columns}
-        data={filteredPayments}
+        data={sortedPayments}
         isLoading={isLoading}
         showDoubleHeader={false}
         onRowClick={(payment) => handleView(payment)}
