@@ -3,6 +3,7 @@ import { getProjectTypes } from '../services/getProjectTypes';
 import { createProjectType, type CreateProjectTypeData } from '../services/createProjectType';
 import { updateProjectType, type UpdateProjectTypeData } from '../services/updateProjectType';
 import { deleteProjectType } from '../services/deleteProjectType';
+import { replaceProjectType } from '../services/replaceProjectType';
 
 export function useProjectTypes(organizationId?: string) {
   return useQuery({
@@ -51,6 +52,20 @@ export function useDeleteProjectType() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['project-types', variables.organizationId] });
       queryClient.invalidateQueries({ queryKey: ['project-types'] });
+    },
+  });
+}
+
+export function useReplaceProjectType() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ oldTypeId, newTypeId, organizationId }: { oldTypeId: string; newTypeId: string; organizationId: string }) => 
+      replaceProjectType(oldTypeId, newTypeId, organizationId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['project-types', variables.organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['project-types'] });
+      queryClient.invalidateQueries({ queryKey: ['projects', variables.organizationId] });
     },
   });
 }

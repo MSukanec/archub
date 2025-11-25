@@ -27,10 +27,12 @@ export * from './services/getProjectModalities';
 export * from './services/createProjectModality';
 export * from './services/updateProjectModality';
 export * from './services/deleteProjectModality';
+export * from './services/replaceProjectModality';
 export * from './services/getProjectTypes';
 export * from './services/createProjectType';
 export * from './services/updateProjectType';
 export * from './services/deleteProjectType';
+export * from './services/replaceProjectType';
 
 // ============ HOOKS ============
 export * from './hooks/use-projects';

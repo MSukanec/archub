@@ -1,7 +1,7 @@
 import { Tag, Edit2, Trash2, Layers, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useProjectTypes, useDeleteProjectType, useProjectModalities, useDeleteProjectModality } from '@/features/projects';
+import { useProjectTypes, useDeleteProjectType, useReplaceProjectType, useProjectModalities, useDeleteProjectModality, useReplaceProjectModality } from '@/features/projects';
 import type { ProjectType, ProjectModality } from '@/features/projects';
 import { useGlobalModalStore } from '@/components/modal';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
@@ -15,8 +15,11 @@ export default function ProjectSettingsTab() {
   
   const { data: projectTypes = [], isLoading: typesLoading } = useProjectTypes(organizationId);
   const { data: projectModalities = [], isLoading: modalitiesLoading } = useProjectModalities(organizationId);
+  
   const deleteTypeMutation = useDeleteProjectType();
+  const replaceTypeMutation = useReplaceProjectType();
   const deleteModalityMutation = useDeleteProjectModality();
+  const replaceModalityMutation = useReplaceProjectModality();
 
   // Separar tipos del sistema y de la organización
   const systemTypes = projectTypes.filter(type => type.organization_id === null);
@@ -70,29 +73,42 @@ export default function ProjectSettingsTab() {
   const handleDeleteType = (type: ProjectType) => {
     if (!organizationId) return;
 
-    openModal('delete-confirmation', {
-      mode: 'simple',
-      title: '¿Eliminar tipo de proyecto?',
-      description: `Se eliminará el tipo "${type.name}". Los proyectos existentes con este tipo no se verán afectados.`,
-      onConfirm: async () => {
-        try {
-          await deleteTypeMutation.mutateAsync({
-            typeId: type.id,
-            organizationId
-          });
+    // Find projects using this type
+    // Since we don't have project data here, we'll check the count differently
+    const otherTypes = projectTypes.filter((t: ProjectType) => t.id !== type.id && t.organization_id === organizationId);
+    const hasReplacements = otherTypes.length > 0;
+    
+    // Determine mode: if there are other types, use 'replace', else use 'delete'
+    const mode = hasReplacements ? 'replace' : 'delete';
+    
+    const replacementOptions = otherTypes
+      .sort((a: ProjectType, b: ProjectType) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
+      .map((t: ProjectType) => ({
+        label: t.name,
+        value: t.id
+      }));
 
-          toast({
-            title: 'Tipo eliminado',
-            description: 'El tipo de proyecto se eliminó correctamente'
-          });
-        } catch (error) {
-          console.error('Error deleting project type:', error);
-          toast({
-            title: 'Error',
-            description: 'No se pudo eliminar el tipo de proyecto',
-            variant: 'destructive'
-          });
-        }
+    const consequences = [
+      `Todos los proyectos con este tipo quedarán sin tipo de proyecto`,
+      mode === 'replace' 
+        ? 'Puedes reemplazarlos con otro tipo o dejarlos sin referencia'
+        : ''
+    ].filter(Boolean);
+
+    openModal('delete-confirmation', {
+      mode,
+      title: 'Eliminar tipo de proyecto',
+      description: `¿Estás seguro de que quieres eliminar "${type.name}"?`,
+      itemName: type.name,
+      itemType: 'tipo de proyecto',
+      consequences: consequences.length > 0 ? consequences : undefined,
+      replacementOptions: mode === 'replace' ? replacementOptions : undefined,
+      currentId: type.id,
+      onDelete: () => {
+        deleteTypeMutation.mutate({ typeId: type.id, organizationId });
+      },
+      onReplace: (newId: string) => {
+        replaceTypeMutation.mutate({ oldTypeId: type.id, newTypeId: newId, organizationId });
       }
     });
   };
@@ -110,29 +126,41 @@ export default function ProjectSettingsTab() {
       return;
     }
 
-    openModal('delete-confirmation', {
-      mode: 'simple',
-      title: '¿Eliminar modalidad de proyecto?',
-      description: `Se eliminará la modalidad "${modality.name}". Los proyectos existentes con esta modalidad no se verán afectados.`,
-      onConfirm: async () => {
-        try {
-          await deleteModalityMutation.mutateAsync({
-            modalityId: modality.id,
-            organizationId
-          });
+    // Find modalities using this one
+    const otherModalities = projectModalities.filter((m: ProjectModality) => m.id !== modality.id && m.organization_id === organizationId);
+    const hasReplacements = otherModalities.length > 0;
+    
+    // Determine mode: if there are other modalities, use 'replace', else use 'delete'
+    const mode = hasReplacements ? 'replace' : 'delete';
+    
+    const replacementOptions = otherModalities
+      .sort((a: ProjectModality, b: ProjectModality) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
+      .map((m: ProjectModality) => ({
+        label: m.name,
+        value: m.id
+      }));
 
-          toast({
-            title: 'Modalidad eliminada',
-            description: 'La modalidad de proyecto se eliminó correctamente'
-          });
-        } catch (error) {
-          console.error('Error deleting project modality:', error);
-          toast({
-            title: 'Error',
-            description: 'No se pudo eliminar la modalidad de proyecto',
-            variant: 'destructive'
-          });
-        }
+    const consequences = [
+      `Todos los proyectos con esta modalidad quedarán sin modalidad de proyecto`,
+      mode === 'replace' 
+        ? 'Puedes reemplazarlos con otra modalidad o dejarlos sin referencia'
+        : ''
+    ].filter(Boolean);
+
+    openModal('delete-confirmation', {
+      mode,
+      title: 'Eliminar modalidad de proyecto',
+      description: `¿Estás seguro de que quieres eliminar "${modality.name}"?`,
+      itemName: modality.name,
+      itemType: 'modalidad de proyecto',
+      consequences: consequences.length > 0 ? consequences : undefined,
+      replacementOptions: mode === 'replace' ? replacementOptions : undefined,
+      currentId: modality.id,
+      onDelete: () => {
+        deleteModalityMutation.mutate({ modalityId: modality.id, organizationId });
+      },
+      onReplace: (newId: string) => {
+        replaceModalityMutation.mutate({ oldModalityId: modality.id, newModalityId: newId, organizationId });
       }
     });
   };

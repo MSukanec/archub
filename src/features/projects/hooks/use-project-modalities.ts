@@ -3,6 +3,7 @@ import { getProjectModalities } from '../services/getProjectModalities';
 import { createProjectModality, type CreateProjectModalityData } from '../services/createProjectModality';
 import { updateProjectModality, type UpdateProjectModalityData } from '../services/updateProjectModality';
 import { deleteProjectModality } from '../services/deleteProjectModality';
+import { replaceProjectModality } from '../services/replaceProjectModality';
 
 export function useProjectModalities(organizationId?: string) {
   return useQuery({
@@ -51,6 +52,20 @@ export function useDeleteProjectModality() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['project-modalities', variables.organizationId] });
       queryClient.invalidateQueries({ queryKey: ['project-modalities'] });
+    },
+  });
+}
+
+export function useReplaceProjectModality() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ oldModalityId, newModalityId, organizationId }: { oldModalityId: string; newModalityId: string; organizationId: string }) => 
+      replaceProjectModality(oldModalityId, newModalityId, organizationId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['project-modalities', variables.organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['project-modalities'] });
+      queryClient.invalidateQueries({ queryKey: ['projects', variables.organizationId] });
     },
   });
 }
