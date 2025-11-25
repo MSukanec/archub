@@ -34,8 +34,8 @@ export default function ContactSettings() {
   const handleDeleteType = (type: ContactType) => {
     if (!organizationId) return;
 
-    // Find other types in organization
-    const otherTypes = contactTypes.filter((t: ContactType) => t.id !== type.id && t.organization_id === organizationId);
+    // Find all other types (system or custom) that can be used as replacements
+    const otherTypes = contactTypes.filter((t: ContactType) => t.id !== type.id);
     const hasReplacements = otherTypes.length > 0;
     
     // Determine mode: if there are other types, use 'replace', else use 'delete'
