@@ -1,33 +1,87 @@
 # Guía para Crear Modales en Seencel
 
-## 📁 ARQUITECTURA DE CARPETAS
+## 📁 ARQUITECTURA DE CARPETAS (v2.0 - Enterprise SaaS Level)
 
-La carpeta `src/components/modal/` está organizada siguiendo estándares empresariales:
+La carpeta `src/components/modal/` está organizada siguiendo estándares de Linear, Vercel, Notion y Airtable:
 
 ```
 src/components/modal/
 ├── foundation/          # Componentes base del modal (UI primitivos)
-│   ├── ModalLayout.tsx         # Layout principal que combina header/body/footer
+│   ├── ModalLayout.tsx         # Layout principal (portal, animaciones, focus trap)
 │   ├── ModalHeader.tsx         # Cabecera con título, ícono, descripción
 │   ├── ModalBody.tsx           # Cuerpo scrolleable
 │   ├── ModalFooter.tsx         # Pie con botones de acción
-│   ├── ModalStepHeader.tsx     # Header para modales multi-paso
-│   ├── ModalStepFooter.tsx     # Footer para modales multi-paso
+│   ├── ModalStepHeader.tsx     # Header para modales multi-paso (wizard)
+│   ├── ModalStepFooter.tsx     # Footer para modales multi-paso (wizard)
 │   ├── ModalSectionButton.tsx  # Botón para subsecciones
+│   ├── DrawerBase.tsx          # ✨ NUEVO: Drawer para mobile (slide-up)
 │   └── index.ts
 ├── state/               # Estado global (Zustand stores)
-│   ├── globalModalStore.ts     # Store para abrir/cerrar modales
+│   ├── globalModalStore.ts     # ✨ MEJORADO: Stack de modales, pushModal, popModal, closeAll
 │   ├── panelStore.ts           # Store para paneles (view/edit/subform)
 │   └── index.ts
 ├── factory/             # Factory pattern para registro de modales
-│   ├── ModalFactory.tsx        # Renderiza el modal correcto según type
+│   ├── ModalFactory.tsx        # ✨ MEJORADO: Usa Registry pattern (no switch/case)
+│   ├── registry.ts             # ✨ NUEVO: Diccionario de modales type-safe
+│   ├── registerModals.ts       # ✨ NUEVO: Registro de todos los 70+ modales
 │   ├── types.ts                # Tipos de modales y datos
 │   └── index.ts
 ├── utils/               # Utilidades
-│   ├── ModalErrorBoundary.tsx  # Manejo de errores
+│   ├── ModalErrorBoundary.tsx  # Manejo de errores con recovery
 │   ├── modal-readiness.tsx     # Hook para verificar datos listos
-│   └── modal-best-practices.tsx
+│   └── modal-best-practices.tsx # Documentación de patrones
 └── index.ts             # Barrel export principal
+```
+
+## 🆕 CARACTERÍSTICAS v2.0
+
+### 1. Modal Stacking (Modales Apilados)
+```typescript
+import { useGlobalModalStore } from '@/components/modal';
+
+// Abrir modal encima de otro (confirmaciones, sub-modales)
+const { pushModal, popModal, closeAll } = useGlobalModalStore();
+
+pushModal('delete-confirmation', { onConfirm: handleDelete });
+popModal(); // Cierra solo el superior
+closeAll(); // Cierra todos los modales
+```
+
+### 2. Tamaños de Modal
+```typescript
+<ModalLayout
+  size="md" // 'sm' | 'md' | 'lg' | 'xl' | 'full'
+  // sm: 400px, md: 550px (default), lg: 750px, xl: 1000px, full: 100%
+>
+```
+
+### 3. DrawerBase para Mobile
+```typescript
+import { DrawerBase } from '@/components/modal';
+
+<DrawerBase
+  isOpen={isOpen}
+  onClose={onClose}
+  snapPoint="auto" // 'auto' | 'half' | 'full'
+  showDragHandle={true}
+  dismissible={true}
+>
+  {/* Contenido */}
+</DrawerBase>
+```
+
+### 4. Portal Rendering
+Los modales ahora se renderizan via `createPortal` en `document.body`, garantizando correcto z-index stacking.
+
+### 5. Registry Pattern
+```typescript
+import { registerModal, getModal, hasModal } from '@/components/modal';
+
+// Registrar un nuevo modal
+registerModal('my-new-modal', MyNewModalComponent, { category: 'project' });
+
+// Verificar si existe
+if (hasModal('my-new-modal')) { ... }
 ```
 
 ## 🎯 CONCEPTO CLAVE: Modal vs Form

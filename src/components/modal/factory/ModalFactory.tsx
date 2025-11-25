@@ -6,16 +6,26 @@ import { ContactModalView } from '@/features/contacts';
 
 initializeModalRegistry();
 
+/**
+ * Modales que usan `data` en lugar de `modalData` como prop
+ */
 const DATA_PROP_MODALS: ModalType[] = ['site-log', 'personnel'];
 
+/**
+ * Modales que NO reciben onClose porque manejan su propio cierre internamente
+ * o usan useGlobalModalStore directamente
+ */
 const NO_ONCLOSE_MODALS: ModalType[] = [
   'delete-confirmation',
   'task-parameter-option',
   'parameter-visibility-config',
   'add-parameter-to-canvas',
-  'subcontract',
 ];
 
+/**
+ * Genera las props correctas para cada tipo de modal.
+ * Este mapeo asegura que cada modal reciba exactamente las props que espera.
+ */
 function getModalProps(
   type: ModalType,
   data: ModalData | null,
@@ -24,12 +34,14 @@ function getModalProps(
   const baseData = data || {};
   
   switch (type) {
+    // Organization modals with specific props
     case 'member':
       return { editingMember: baseData.editingMember, onClose };
     
     case 'partner':
       return { editingPartner: baseData.editingPartner, onClose };
     
+    // Delete confirmation has many custom props
     case 'delete-confirmation':
       return {
         mode: baseData.mode || 'dangerous',
@@ -45,6 +57,7 @@ function getModalProps(
         isLoading: baseData.isLoading || false,
       };
     
+    // Payment modals with specific props
     case 'payment-method':
       return {
         courseSlug: baseData.courseSlug || '',
@@ -57,23 +70,30 @@ function getModalProps(
         paymentId: baseData.paymentId || '',
       };
     
+    // Parameter modals that don't need onClose
     case 'task-parameter-option':
       return { modalType: 'task-parameter-option' };
     
     case 'parameter-visibility-config':
     case 'add-parameter-to-canvas':
       return {};
+    
+    // Subcontract uses modalData (typed as any) - needs onClose for success/cancel handlers
+    case 'subcontract':
+      return { modalData: baseData, onClose };
+    
+    // Site log and personnel use `data` prop instead of `modalData`
+    case 'site-log':
+    case 'personnel':
+      return { data: baseData, onClose };
+    
+    // Default: most modals use modalData + onClose
+    default:
+      if (NO_ONCLOSE_MODALS.includes(type)) {
+        return { modalData: baseData };
+      }
+      return { modalData: baseData, onClose };
   }
-  
-  if (DATA_PROP_MODALS.includes(type)) {
-    return { data: baseData };
-  }
-  
-  if (NO_ONCLOSE_MODALS.includes(type)) {
-    return { modalData: baseData };
-  }
-  
-  return { modalData: baseData, onClose };
 }
 
 function getSpecialComponent(
