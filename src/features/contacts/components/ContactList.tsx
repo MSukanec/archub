@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
+import ContactAvatar from './ContactAvatar';
 import type { ContactWithRelations } from '@/features/contacts/types';
 
 interface ContactListProps {
@@ -61,18 +61,7 @@ export default function ContactList({
         
         return (
           <div className="flex items-center gap-3">
-            {contact.linked_user ? (
-              <Avatar className="w-10 h-10 flex-shrink-0">
-                <AvatarImage src={contact.linked_user.avatar_url || undefined} />
-                <AvatarFallback>
-                  {contact.linked_user.full_name?.charAt(0) || 'U'}
-                </AvatarFallback>
-              </Avatar>
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-medium flex-shrink-0">
-                {contact.first_name?.charAt(0) || 'C'}
-              </div>
-            )}
+            <ContactAvatar contact={contact} size="md" />
             <span className="font-semibold text-sm">
               {fullName}
             </span>
