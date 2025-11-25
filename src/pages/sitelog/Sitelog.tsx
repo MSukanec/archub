@@ -114,7 +114,7 @@ export default function Sitelog() {
   };
 
   const handleViewSiteLog = (siteLog: any) => {
-    openModal('site-log-view', { viewingSiteLog: siteLog });
+    openModal('site-log', { id: siteLog.id, data: siteLog, mode: 'view' });
   };
 
   const handleEditSiteLog = (siteLog: any) => {

@@ -176,7 +176,7 @@ export function initializeModalRegistry(): void {
     size: 'xl',
     mapDataToProps: (data) => ({
       siteLogId: data?.id || data?.data?.id,
-      mode: data?.id || data?.data?.id ? (data?.isEditing ? 'edit' : 'view') : 'create',
+      mode: data?.mode || (data?.id || data?.data?.id ? (data?.isEditing ? 'edit' : 'view') : 'create'),
     })
   });
   registerModal('siteLogType', SiteLogTypeModal as any, adminConfig);
