@@ -83,7 +83,6 @@ export async function getAllFinancialMovements(
               location,
               notes,
               national_id,
-              avatar_attachment_id,
               avatar_updated_at,
               is_local,
               display_name_override,

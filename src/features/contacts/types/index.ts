@@ -11,7 +11,8 @@ export interface Contact {
   notes: string | null;
   national_id: string | null;
   linked_user_id: string | null;
-  avatar_attachment_id: string | null;
+  image_bucket: string | null;
+  image_path: string | null;
   avatar_updated_at: string | null;
   is_local: boolean | null;
   display_name_override: string | null;
