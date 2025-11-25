@@ -486,7 +486,16 @@ export default function GeneralCostPaymentForm({ modalData, onClose }: GeneralCo
   // Load existing payment data
   React.useEffect(() => {
     if (existingPayment && mode !== 'create') {
-      const paymentDate = existingPayment.payment_date ? new Date(existingPayment.payment_date) : new Date()
+      // Normalize payment_date: convert to local timezone naive date
+      let paymentDate: Date;
+      if (existingPayment.payment_date) {
+        const dateString = existingPayment.payment_date;
+        const [year, month, day] = dateString.split('-').map(Number);
+        paymentDate = new Date(year, month - 1, day);
+      } else {
+        paymentDate = new Date();
+      }
+      
       form.reset({
         payment_date: paymentDate,
         general_cost_id: existingPayment.general_cost_id || '',
@@ -499,7 +508,7 @@ export default function GeneralCostPaymentForm({ modalData, onClose }: GeneralCo
         status: existingPayment.status || 'confirmed',
       })
     }
-  }, [existingPayment, mode, form])
+  }, [existingPayment, mode])
 
   // Load existing files
   React.useEffect(() => {
