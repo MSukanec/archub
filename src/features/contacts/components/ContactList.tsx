@@ -4,9 +4,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
-import { Phone, MessageCircle } from 'lucide-react';
 import type { ContactWithRelations } from '@/features/contacts/types';
 
 interface ContactListProps {
@@ -109,45 +106,11 @@ export default function ContactList({
       label: "Teléfono",
       sortable: true,
       sortType: "string" as const,
-      render: (contact: ContactWithRelations) => {
-        if (!contact.phone) {
-          return <span className="text-sm text-muted-foreground">—</span>;
-        }
-        
-        const cleanPhone = contact.phone.replace(/[\s\-\(\)]/g, '');
-        
-        return (
-          <Popover>
-            <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
-              <button className="text-sm text-foreground hover:text-accent hover:underline transition-colors cursor-pointer text-left">
-                {contact.phone}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-2" align="start">
-              <div className="flex flex-col gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="justify-start gap-2 h-8"
-                  onClick={() => window.location.href = `tel:${cleanPhone}`}
-                >
-                  <Phone className="h-4 w-4" />
-                  Llamar
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="justify-start gap-2 h-8 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950"
-                  onClick={() => window.open(`https://wa.me/${cleanPhone}`, '_blank')}
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  WhatsApp
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-        );
-      }
+      render: (contact: ContactWithRelations) => (
+        <span className="text-sm">
+          {contact.phone || '—'}
+        </span>
+      )
     },
     {
       key: "contact_types" as const,
