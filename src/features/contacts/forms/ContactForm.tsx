@@ -778,29 +778,19 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
     try {
       setAvatarUploading(true);
       
-      // Compress the image
-      const compressed = await compressImage(file, 'avatar');
+      // Upload to storage (already updates DB and returns signed URL)
+      const result = await uploadContactAvatar(file, editingContact.id, organizationId);
       
-      // Upload to storage
-      const result = await uploadContactAvatar(compressed, editingContact.id, organizationId);
+      // Update local state with new avatar URL
+      setContactAvatarUrl(result.url);
       
-      if (result.file_url) {
-        // Update contact with new avatar URL
-        const { error } = await supabase
-          .from('contacts')
-          .update({ contact_avatar_url: result.file_url })
-          .eq('id', editingContact.id);
-        
-        if (error) throw error;
-        
-        setContactAvatarUrl(result.file_url);
-        queryClient.invalidateQueries({ queryKey: CONTACT_QUERY_KEYS.all });
-        
-        toast({
-          title: 'Avatar actualizado',
-          description: 'La foto de perfil ha sido actualizada exitosamente'
-        });
-      }
+      // Invalidate queries to refresh contact data
+      queryClient.invalidateQueries({ queryKey: CONTACT_QUERY_KEYS.all });
+      
+      toast({
+        title: 'Avatar actualizado',
+        description: 'La foto de perfil ha sido actualizada exitosamente'
+      });
     } catch (error: any) {
       toast({
         title: 'Error',
