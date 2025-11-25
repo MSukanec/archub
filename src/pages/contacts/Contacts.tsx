@@ -33,7 +33,7 @@ export default function Contacts() {
   const organizationId = userData?.organization?.id;
   const { data: contacts = [], isLoading: contactsLoading } = useContacts(organizationId);
   const { data: contactTypes = [] } = useContactTypes(organizationId);
-  const deleteContactMutation = useDeleteContact(organizationId || '');
+  const deleteContactMutation = useDeleteContact();
   const { toast } = useToast();
   const { setActions, setShowActionBar, clearActions, setFilterConfig } = useActionBarMobile();
   const isMobile = useMobile();
@@ -160,31 +160,43 @@ export default function Contacts() {
   };
 
   const handleDeleteContact = (contact: any) => {
+    if (!organizationId) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo eliminar el contacto. Intenta de nuevo.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     const contactName = formatContactName(contact);
 
     showDeleteConfirmation({
       mode: 'dangerous',
       title: 'Eliminar contacto',
       description:
-        'El contacto será archivado y desaparecerá de tus listas. Todos tus datos vinculados (proyectos, pagos, registros) permanecerán intactos, pero ya no mostrarán referencia a este contacto. Nada se perderá, solo se ocultará el vínculo. Puedes restaurar el contacto cuando lo necesites.',
+        'El contacto dejará de aparecer en tus listas. Todos tus datos vinculados (proyectos, pagos, registros) permanecerán intactos y seguros.',
       itemName: contactName,
       destructiveActionText: 'Eliminar contacto',
       onDelete: () => {
-        deleteContactMutation.mutate(contact.id, {
-          onSuccess: () => {
-            toast({
-              title: 'Contacto eliminado',
-              description: 'El contacto ha sido eliminado correctamente',
-            });
-          },
-          onError: (error: Error) => {
-            toast({
-              title: 'Error',
-              description: error.message || 'No se pudo eliminar el contacto',
-              variant: 'destructive',
-            });
-          },
-        });
+        deleteContactMutation.mutate(
+          { contactId: contact.id, organizationId },
+          {
+            onSuccess: () => {
+              toast({
+                title: 'Contacto eliminado',
+                description: 'El contacto ha sido eliminado correctamente',
+              });
+            },
+            onError: (error: Error) => {
+              toast({
+                title: 'Error',
+                description: error.message || 'No se pudo eliminar el contacto',
+                variant: 'destructive',
+              });
+            },
+          }
+        );
       },
       isLoading: deleteContactMutation.isPending,
     });
