@@ -158,8 +158,6 @@ export default function ContactList({
           <TableActionButtons
             onEdit={() => onEdit(contact)}
             onDelete={() => onDelete(contact)}
-            editLabel="Editar contacto"
-            deleteLabel="Eliminar contacto"
           />
         </div>
       )
