@@ -48,10 +48,18 @@ interface ModalProps {
 El componente debe comportarse según `mode`:
 
 ```typescript
-const isCreate = mode === "create";
-const isEdit = mode === "edit";
-const isView = mode === "view";
+// ✅ CORRECTO: Usar mode directamente en condiciones
+if (mode === "view") { ... }
+if (mode === "edit") { ... }
+if (mode === "create") { ... }
+
+// ❌ EVITAR: Crear variables booleanas intermedias
+// const isCreate = mode === "create";
+// const isEdit = mode === "edit";
+// const isView = mode === "view";
 ```
+
+**¿POR QUÉ?** Una única fuente de verdad evita duplicaciones y hace el código más claro.
 
 ---
 
@@ -71,6 +79,7 @@ import {
 ### ModalLayout
 - Contenedor principal con portal, animaciones, focus trap
 - Recibe `onClose`, `size`, y opcionalmente `columns`
+- **IMPORTANTE:** Si pasas `children`, el contenido DEBE incluir `<ModalHeader>`, `<ModalBody>`, `<ModalFooter>` (sin `ModalLayout` que las envuelva de nuevo)
 
 ### ModalHeader
 - Título, subtítulo, ícono, actions
@@ -79,6 +88,7 @@ import {
 ### ModalBody
 - Contenido scrolleable
 - No paddings manuales, no scroll manual
+- **CRÍTICO:** Cuando usas la nueva API (children), el `ModalBody` debe estar DENTRO del JSX. El `ModalLayout` NO lo añade automáticamente si hay children.
 - **Columnas:** Por defecto 1 columna. Mobile SIEMPRE 1 columna.
 
 ### ModalFooter
@@ -140,7 +150,76 @@ El modal **NO PUEDE**:
 
 ---
 
-## 5. UN ÚNICO COMPONENTE PARA CREATE, EDIT Y VIEW
+## 5. SUBCOMPONENTES INTERNOS PARA ORGANIZAR EL JSX
+
+**NOVEDAD (Nov 25, 2024):** Usar subcomponentes internos para separar la lógica de edición/creación de la vista, mejorando legibilidad y mantenibilidad.
+
+### Estructura recomendada
+
+```tsx
+// Subcomponente: Formulario para create/edit
+function FormPanel({
+  form,
+  onSubmit,
+}: {
+  form: ReturnType<typeof useForm<MyFormData>>;
+  onSubmit: (data: MyFormData) => void;
+}) {
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Campos del formulario */}
+      </form>
+    </Form>
+  );
+}
+
+// Subcomponente: Vista de lectura
+function ViewPanel({ data }: { data: any }) {
+  return (
+    <div className="space-y-4">
+      {/* Mostrar datos sin inputs */}
+    </div>
+  );
+}
+
+export function MyEntityForm({ modalData, onClose, mode = "create" }: MyEntityFormProps) {
+  const form = useForm<MyFormData>({ ... });
+  
+  return (
+    <ModalLayout onClose={onClose} size="md">
+      <ModalHeader title={getTitle(mode)} description={getDescription(mode)} />
+      
+      <ModalBody>
+        {mode === "view" ? (
+          <ViewPanel data={modalData} />
+        ) : (
+          <FormPanel form={form} onSubmit={onSubmit} />
+        )}
+      </ModalBody>
+
+      {mode !== "view" && (
+        <ModalFooter
+          leftLabel="Cancelar"
+          onLeftClick={onClose}
+          rightLabel={mode === "create" ? "Crear" : "Actualizar"}
+          onRightClick={form.handleSubmit(onSubmit)}
+        />
+      )}
+    </ModalLayout>
+  );
+}
+```
+
+**VENTAJAS:**
+- ✅ Separación clara entre lógica de formulario y visualización
+- ✅ Mejor lectura del componente principal
+- ✅ Reutilizable en otros lugares si es necesario
+- ✅ No necesita Zustand ni state externo
+
+---
+
+## 6. UN ÚNICO COMPONENTE PARA CREATE, EDIT Y VIEW
 
 ### CREATE
 - Campos vacíos
@@ -162,7 +241,7 @@ En modo VIEW:
 - Se muestra una vista estética (ViewPanel)
 
 ```tsx
-if (isView) {
+if (mode === "view") {
   return (
     <ModalLayout onClose={onClose} size="lg">
       <ModalHeader title={data.name} />
@@ -176,7 +255,7 @@ if (isView) {
 
 ---
 
-## 6. TAMAÑOS DE MODAL
+## 7. TAMAÑOS DE MODAL
 
 ```typescript
 <ModalLayout size="lg" onClose={onClose}>
@@ -192,7 +271,7 @@ if (isView) {
 
 ---
 
-## 7. REGISTRAR EN EL REGISTRY
+## 8. REGISTRAR EN EL REGISTRY
 
 Después de crear/modificar el modal, registrarlo en `registerModals.ts`:
 
@@ -212,7 +291,7 @@ registerModal('my-entity', MyEntityForm, {
 
 ---
 
-## 8. ABRIR EL MODAL
+## 9. ABRIR EL MODAL
 
 ```typescript
 import { useGlobalModalStore } from '@/components/modal';
@@ -241,7 +320,7 @@ closeAll();                                           // Cierra todos
 
 ---
 
-## 9. DIRTY FORM BLOCKING
+## 10. DIRTY FORM BLOCKING
 
 Para formularios con cambios sin guardar:
 
@@ -257,7 +336,7 @@ clearBlockClose();
 
 ---
 
-## 10. MOBILE (DrawerBase)
+## 11. MOBILE (DrawerBase)
 
 El sistema detecta automáticamente mobile y usa `DrawerBase`:
 
@@ -275,7 +354,7 @@ El sistema detecta automáticamente mobile y usa `DrawerBase`:
 
 ---
 
-## 11. ARQUITECTURA DE CARPETAS
+## 12. ARQUITECTURA DE CARPETAS
 
 ```
 src/components/modal/
@@ -300,7 +379,7 @@ src/components/modal/
 
 ---
 
-## 11.1 REFACTORIZACIÓN DE MODALS EXISTENTES
+## 13. REFACTORIZACIÓN DE MODALS EXISTENTES
 
 Cuando refactorices un modal existente (consolidar múltiples archivos en uno):
 
@@ -312,9 +391,16 @@ Cuando refactorices un modal existente (consolidar múltiples archivos en uno):
 - [ ] Verificar que VIEW mode NO use inputs disabled (usa ViewPanel en su lugar)
 - [ ] Revisar control de columnas: ¿Necesita campos inline? (grid interno, NO `columns={2}`)
 
+**CHECKLIST DE ARQUITECTURA NUEVA (Nov 25, 2024):**
+- [ ] ¿Usas variables booleanas (`isCreate`, `isEdit`, `isView`)? **ELIMÍNALAS**, usa `mode` directamente
+- [ ] ¿Tiene subcomponentes internos (`FormPanel`, `ViewPanel`)? **AGREGA SI NO EXISTEN** para separar lógica
+- [ ] ¿Pasas `children` a `ModalLayout`? **ASEGÚRATE** de que incluyen `<ModalBody>` explícitamente
+- [ ] ¿Usas props legacy (`editPanel`, `headerContent`, `footerContent`)? **MIGRA** a la nueva API (children JSX)
+- [ ] ¿El componente tiene lógica de múltiples paneles? **REFACTORIZA** en `FormPanel` y `ViewPanel` internos
+
 ---
 
-## 12. CHECKLIST QA
+## 14. CHECKLIST QA
 
 Después de crear/refactorizar:
 
@@ -329,15 +415,79 @@ Después de crear/refactorizar:
 - [ ] Borrar archivos viejos (edit-modal, view-modal, etc.)
 - [ ] Quitar código muerto y console.logs
 - [ ] Actualizar registerModals.ts
+- [ ] Verificar padding correcto (no duplicado)
 
 ---
 
-## 13. EJEMPLO COMPLETO
+## 15. EJEMPLO COMPLETO (NUEVO PATRÓN)
 
 ```tsx
 // src/features/clients/forms/ClientPaymentForm.tsx
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { CreditCard } from 'lucide-react';
+
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
-import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { clientPaymentSchema, type ClientPaymentFormData } from '../schemas';
+
+// Subcomponente: Formulario para create/edit
+function FormPanel({
+  form,
+  onSubmit,
+}: {
+  form: ReturnType<typeof useForm<ClientPaymentFormData>>;
+  onSubmit: (data: ClientPaymentFormData) => void;
+}) {
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="amount"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Monto</FormLabel>
+              <FormControl>
+                <Input type="number" placeholder="0.00" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="date"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Fecha</FormLabel>
+              <FormControl>
+                <Input type="date" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
+  );
+}
+
+// Subcomponente: Vista de lectura
+function ViewPanel({ data }: { data: any }) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <p className="text-sm text-muted-foreground">Monto</p>
+        <p className="font-medium">${data.amount}</p>
+      </div>
+      <div>
+        <p className="text-sm text-muted-foreground">Fecha</p>
+        <p className="font-medium">{new Date(data.date).toLocaleDateString()}</p>
+      </div>
+    </div>
+  );
+}
 
 interface ClientPaymentFormProps {
   modalData?: { paymentId?: string; clientId?: string };
@@ -345,36 +495,66 @@ interface ClientPaymentFormProps {
   mode?: "create" | "edit" | "view";
 }
 
-export function ClientPaymentForm({ modalData, onClose, mode = "create" }: ClientPaymentFormProps) {
-  const isCreate = mode === "create";
-  const isEdit = mode === "edit";
-  const isView = mode === "view";
+export function ClientPaymentForm({ 
+  modalData, 
+  onClose, 
+  mode = "create" 
+}: ClientPaymentFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const form = useForm<ClientPaymentFormData>({
+    resolver: zodResolver(clientPaymentSchema),
+    defaultValues: { amount: '', date: '' }
+  });
 
-  const title = isCreate ? "Nuevo Pago" : isEdit ? "Editar Pago" : "Detalle del Pago";
+  const onSubmit = async (data: ClientPaymentFormData) => {
+    setIsSubmitting(true);
+    try {
+      // Lógica de submit
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-  // VIEW MODE
-  if (isView) {
-    return (
-      <ModalLayout onClose={onClose} size="lg">
-        <ModalHeader title={title} />
-        <ModalBody>
-          <PaymentViewPanel data={modalData} />
-        </ModalBody>
-      </ModalLayout>
-    );
-  }
+  const getHeader = () => {
+    switch (mode) {
+      case "view":
+        return { title: "Detalle del Pago", description: "Información del pago realizado" };
+      case "edit":
+        return { title: "Editar Pago", description: "Actualiza los detalles del pago" };
+      case "create":
+      default:
+        return { title: "Nuevo Pago", description: "Registra un nuevo pago de cliente" };
+    }
+  };
 
-  // CREATE / EDIT MODE
+  const header = getHeader();
+
   return (
-    <ModalLayout onClose={onClose} size="lg">
-      <ModalHeader title={title} />
+    <ModalLayout onClose={onClose} size="md">
+      <ModalHeader 
+        title={header.title}
+        description={header.description}
+        icon={CreditCard}
+      />
+      
       <ModalBody>
-        <PaymentForm data={modalData} mode={mode} />
+        {mode === "view" ? (
+          <ViewPanel data={modalData} />
+        ) : (
+          <FormPanel form={form} onSubmit={onSubmit} />
+        )}
       </ModalBody>
-      <ModalFooter>
-        <Button variant="outline" onClick={onClose}>Cancelar</Button>
-        <Button>{isCreate ? "Crear" : "Guardar cambios"}</Button>
-      </ModalFooter>
+
+      {mode !== "view" && (
+        <ModalFooter
+          leftLabel="Cancelar"
+          onLeftClick={onClose}
+          rightLabel={mode === "create" ? "Crear" : "Guardar cambios"}
+          onRightClick={form.handleSubmit(onSubmit)}
+          isSubmitting={isSubmitting}
+        />
+      )}
     </ModalLayout>
   );
 }
@@ -388,5 +568,5 @@ Cuando pidas crear o refactorizar un modal:
 
 ```
 Replit, lee prompts/Modal-Standard.md y aplícalo a:
-src/features/clients/modals/ClientPaymentModal.tsx
+src/features/clients/forms/ClientPaymentForm.tsx
 ```
