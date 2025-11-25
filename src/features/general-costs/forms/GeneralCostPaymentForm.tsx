@@ -450,6 +450,7 @@ export default function GeneralCostPaymentForm({ modalData, onClose }: GeneralCo
 
   const [filesToUpload, setFilesToUpload] = React.useState<any[]>([])
   const [existingFiles, setExistingFiles] = React.useState<any[]>([])
+  const resetTrackerRef = React.useRef<string | undefined>(undefined)
 
   // Fetch existing payment data for edit/view mode
   const { data: existingPayment, isLoading: loadingPayment } = useGeneralCostPayment(
@@ -487,9 +488,10 @@ export default function GeneralCostPaymentForm({ modalData, onClose }: GeneralCo
   React.useEffect(() => {
     if (!existingPayment || mode === 'create') return;
 
-    if (currenciesLoading || generalCostsLoading || walletsLoading || loadingPayment) {
-      return;
-    }
+    // Only reset once per paymentId to prevent infinite loops
+    if (paymentId === resetTrackerRef.current) return;
+
+    resetTrackerRef.current = paymentId;
 
     let paymentDate: Date;
     if (existingPayment.payment_date) {
@@ -510,14 +512,7 @@ export default function GeneralCostPaymentForm({ modalData, onClose }: GeneralCo
       reference: existingPayment.reference || '',
       status: existingPayment.status || 'confirmed',
     });
-  }, [
-    existingPayment,
-    mode,
-    currenciesLoading,
-    generalCostsLoading,
-    walletsLoading,
-    loadingPayment,
-  ])
+  }, [existingPayment, mode, paymentId])
 
   // Load existing files
   React.useEffect(() => {
