@@ -7,6 +7,7 @@ export * from './use-contact-types';
 export * from './use-create-contact-type';
 export * from './use-update-contact-type';
 export * from './use-delete-contact-type';
+export * from './use-replace-contact-type';
 export * from './use-contact-attachments';
 export * from './use-upload-attachment';
 export * from './use-create-contact-attachment';

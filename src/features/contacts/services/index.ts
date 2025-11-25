@@ -7,6 +7,7 @@ export * from './getContactTypes';
 export * from './createContactType';
 export * from './updateContactType';
 export * from './softDeleteContactType';
+export * from './replaceContactType';
 export * from './upsertContactTypeLinks';
 export * from './listContactAttachments';
 export * from './uploadContactAttachment';

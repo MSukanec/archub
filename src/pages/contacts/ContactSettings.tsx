@@ -1,7 +1,7 @@
 import { Tag, Plus, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useContactTypes, useDeleteContactType } from '@/features/contacts';
+import { useContactTypes, useDeleteContactType, useReplaceContactType } from '@/features/contacts';
 import { useGlobalModalStore } from '@/components/modal';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
@@ -15,6 +15,7 @@ export default function ContactSettings() {
   
   const { data: contactTypes = [], isLoading } = useContactTypes(organizationId);
   const deleteMutation = useDeleteContactType(organizationId || '');
+  const replaceMutation = useReplaceContactType();
 
   const systemTypes = contactTypes.filter((type: ContactType) => type.organization_id === null);
   const customTypes = contactTypes.filter((type: ContactType) => type.organization_id !== null);
@@ -33,26 +34,41 @@ export default function ContactSettings() {
   const handleDeleteType = (type: ContactType) => {
     if (!organizationId) return;
 
-    openModal('delete-confirmation', {
-      mode: 'simple',
-      title: '¿Eliminar tipo de contacto?',
-      description: `Se eliminará el tipo "${type.name}". Los contactos existentes con este tipo mantendrán su información, pero ya no mostrarán esta categoría.`,
-      onConfirm: async () => {
-        try {
-          await deleteMutation.mutateAsync(type.id);
+    // Find other types in organization
+    const otherTypes = contactTypes.filter((t: ContactType) => t.id !== type.id && t.organization_id === organizationId);
+    const hasReplacements = otherTypes.length > 0;
+    
+    // Determine mode: if there are other types, use 'replace', else use 'delete'
+    const mode = hasReplacements ? 'replace' : 'delete';
+    
+    const replacementOptions = otherTypes
+      .sort((a: ContactType, b: ContactType) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
+      .map((t: ContactType) => ({
+        label: t.name,
+        value: t.id
+      }));
 
-          toast({
-            title: 'Tipo eliminado',
-            description: 'El tipo de contacto se eliminó correctamente'
-          });
-        } catch (error) {
-          console.error('Error deleting contact type:', error);
-          toast({
-            title: 'Error',
-            description: 'No se pudo eliminar el tipo de contacto',
-            variant: 'destructive'
-          });
-        }
+    const consequences = [
+      `Todos los contactos con este tipo quedarán sin esta categoría`,
+      mode === 'replace' 
+        ? 'Puedes reemplazarlos con otro tipo o dejarlos sin referencia'
+        : ''
+    ].filter(Boolean);
+
+    openModal('delete-confirmation', {
+      mode,
+      title: 'Eliminar tipo de contacto',
+      description: `¿Estás seguro de que quieres eliminar "${type.name}"?`,
+      itemName: type.name,
+      itemType: 'tipo de contacto',
+      consequences: consequences.length > 0 ? consequences : undefined,
+      replacementOptions: mode === 'replace' ? replacementOptions : undefined,
+      currentId: type.id,
+      onDelete: () => {
+        deleteMutation.mutate(type.id);
+      },
+      onReplace: (newId: string) => {
+        replaceMutation.mutate({ oldTypeId: type.id, newTypeId: newId, organizationId });
       }
     });
   };
