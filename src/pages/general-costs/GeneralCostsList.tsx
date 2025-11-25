@@ -153,9 +153,10 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
     // Determinar el modo: si hay pagos y hay otros conceptos disponibles, usar 'replace'
     const mode = associatedPayments.length > 0 && hasReplacements ? 'replace' : 'delete';
     
-    // Preparar opciones de reemplazo
+    // Preparar opciones de reemplazo (ordenadas alfabéticamente)
     const replacementOptions = generalCosts
       .filter(gc => gc.id !== generalCost.id)
+      .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
       .map(gc => ({
         label: gc.name,
         value: gc.id

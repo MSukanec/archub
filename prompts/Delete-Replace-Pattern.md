@@ -164,11 +164,13 @@ export default function <Entity>List() {
       }
     }
     
-    // PASO 4: Armar opciones de reemplazo
-    const replacementOptions = otherItems.map(e => ({
-      label: e.name, // o el campo que identifique al item
-      value: e.id
-    }))
+    // PASO 4: Armar opciones de reemplazo (ORDENADAS ALFABÉTICAMENTE)
+    const replacementOptions = otherItems
+      .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
+      .map(e => ({
+        label: e.name, // o el campo que identifique al item
+        value: e.id
+      }))
     
     // PASO 5: Abrir modal con toda la data
     openModal('delete-confirmation', {
