@@ -1,0 +1,170 @@
+Necesito que revises toda la arquitectura de modals del proyecto SEENCEL y la refactorices por completo siguiendo estas reglas:
+
+------------------------------------------------------
+🎯 OBJETIVO GENERAL
+------------------------------------------------------
+Construir un SISTEMA DE MODALES GLOBAL, PROFESIONAL, ESCALABLE Y REUTILIZABLE, igual a los de Linear, Vercel, Notion o Airtable.
+
+Quiero tener:
+- 1 Modal Base PERFECTO (nivel SaaS)
+- 1 Modal Provider global
+- 1 Registro central de modals (ModalRegistry)
+- 1 Store global (Zustand) para abrir/cerrar modals
+- Renderizado mediante portal
+- Soporte para stack de modals (modals apilados)
+- Soporte para props dinámicas y type-safe
+- Modo “panel”, “fullscreen”, “wizard” y “drawer mobile”
+- Integración con dark/light mode sin duplicar estilos
+- Separación TOTAL entre UI y lógica de negocio
+- Limpieza de código viejo, duplicado, experimental u obsoleto
+
+------------------------------------------------------
+📌 PRIMERA TAREA: REVISAR LO EXISTENTE
+------------------------------------------------------
+1. Revisá todos los modals actuales que existen en el proyecto.
+2. Identificá duplicaciones, inconsistencias, estilos repetidos,
+   imports rotos, modals que se abren desde una página, etc.
+3. Hacé una lista interna de TODO lo que está mal o que debe modernizarse.
+4. Eliminá o refactorizá todo lo que no sirva para un sistema global.
+
+------------------------------------------------------
+📌 MODAL BASE: LO QUE TIENE QUE TENER
+------------------------------------------------------
+Construir un componente <ModalBase /> con:
+
+- Overlay con animación
+- Animaciones de entrada/salida (scale+fade estilo Linear)
+- Focus trap
+- Cerrar con ESC (opcional)
+- Cerrar clic afuera (opcional)
+- Portal a document.body
+- Tamaños: sm | md | lg | xl | fullscreen
+- Sticky footer opcional
+- Dark/light 100% con variables CSS
+- Scroll interno SOLO en el body
+- Header limpio con botón cerrar (X)
+- Footer con acciones
+- Variantes mobile: auto-detectar mobile y usar <DrawerBase />
+
+TODOS los modals del sistema deben usar este ModalBase.
+
+------------------------------------------------------
+📌 MODAL STORE (Zustand)
+------------------------------------------------------
+Crear un store global con:
+
+- isOpen
+- stack: array de modals abiertos
+- type: string con el identificador del modal
+- props: object dinámico con los datos del modal
+- funciones:
+   - openModal(type, props?)
+   - closeModal()
+   - closeAll()
+   - pushModal(type, props?)    // apilar uno encima
+   - popModal()                 // cerrar sólo el superior
+
+Debe ser completamente type-safe con TypeScript.
+
+------------------------------------------------------
+📌 MODAL REGISTRY
+------------------------------------------------------
+Crear un archivo:
+src/components/modals/ModalRegistry.ts
+
+Contendrá un diccionario:
+{
+   CREATE_PROJECT: <CreateProjectModal />,
+   EDIT_CLIENT: <EditClientModal />,
+   PAYMENT_MATERIAL: <PaymentMaterialModal />,
+   IMPORT_MATCHER: <UniversalMatcherModal />,
+   ...
+}
+
+Cada modal se referencia por KEY, no por import local.
+
+------------------------------------------------------
+📌 MODAL PROVIDER
+------------------------------------------------------
+Crear src/providers/ModalProvider.tsx
+
+Hará:
+- Escuchar el store
+- Tomar el “modal actual”
+- Buscar el componente real en el Registry
+- Renderizarlo dentro de ModalBase
+- Soportar stack (renderizar múltiples modals)
+- Manejar esc y backdrop click
+
+El provider debe montarse en App.tsx o Layout.tsx.
+
+------------------------------------------------------
+📌 SEPARACIÓN ABSOLUTA UI / NEGOCIO
+------------------------------------------------------
+En "src/components/ui/" deben estar:
+- ModalBase
+- DrawerBase
+- ModalHeader
+- ModalBody
+- ModalFooter
+- Animaciones
+- Primitivos UI
+
+EN "src/components/modals/" deben estar:
+- CreateProjectModal
+- EditPaymentModal
+- UniversalMatcherModal
+- WizardModal
+- etc.
+
+NO puede haber lógica de modal dentro de una página.
+
+------------------------------------------------------
+📌 LIMPIAR TODO EL CÓDIGO QUE:
+------------------------------------------------------
+- duplique modals
+- tenga estilos hardcodeados
+- esté repetido entre modals
+- tenga imports cruzados
+- abra modals directamente desde páginas
+- tenga overlay manual
+- no use el sistema global
+- ya no sea necesario
+
+------------------------------------------------------
+📌 AGREGAR FUNCIONALIDADES FUTURAS:
+------------------------------------------------------
+Dejá preparado el sistema para:
+
+1. Wizard Modals (pasos internos)
+2. Drawer en mobile (si el ancho < X)
+3. Modals disparados por query params (?modal=xxx)
+4. Confirmaciones internas (stack)
+5. Universal Import Matcher (IA)
+
+No hace falta implementarlos todos ahora,
+pero dejá el sistema preparado para soportarlos.
+
+------------------------------------------------------
+📌 UNIVERSAL IMPORT MATCHER (PREPARACIÓN)
+------------------------------------------------------
+Dejá una carpeta:
+src/components/modals/matcher/
+
+Y un componente vacío:
+UniversalMatcherModal.tsx
+
+Debe poder:
+- recibir props dinámicas (entityType, fields, etc)
+- renderizar cualquier form dentro
+- conectarse a IA luego (lo haremos más adelante)
+
+------------------------------------------------------
+📌 ENTREGA
+------------------------------------------------------
+Hacé todo el refactor limpiamente.
+No rompas funcionalidad existente.
+Actualizá imports.
+Probá que abrir modals siga funcionando.
+Migrá todos los modals al sistema global.
+Dejá TODO impecable, escalable y limpio.
