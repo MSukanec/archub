@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
-import { LucideIcon, ArrowLeft, Loader2, AlertCircle, CheckCircle, Info } from 'lucide-react';
+import { LucideIcon, ArrowLeft, Loader2, AlertCircle, CheckCircle, Info, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ModalReadinessState } from '../utils/modal-readiness';
@@ -94,6 +94,12 @@ interface ModalHeaderProps {
   
   /** Callback para alternar modo edición */
   onToggleEdit?: () => void;
+  
+  /** Callback para cerrar el modal (botón X en la esquina) */
+  onClose?: () => void;
+  
+  /** Mostrar botón de cierre X */
+  showCloseButton?: boolean;
 }
 
 export function ModalHeader({
@@ -123,6 +129,8 @@ export function ModalHeader({
   onTitleClick,
   isEditing = false,
   onToggleEdit,
+  onClose,
+  showCloseButton = true,
 }: ModalHeaderProps) {
   
   const getStatusIcon = () => {
@@ -351,6 +359,20 @@ export function ModalHeader({
                 Atajos disponibles
               </Button>
             </div>
+          )}
+
+          {showCloseButton && onClose && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              disabled={disabled}
+              className="h-8 w-8 p-0"
+              data-testid="modal-close-button"
+              aria-label="Cerrar modal"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           )}
         </div>
       </div>

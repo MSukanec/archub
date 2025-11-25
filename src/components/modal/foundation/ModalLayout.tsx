@@ -429,25 +429,19 @@ export function ModalLayout({
         )}
 
         {headerContent && (
-          <div className="shrink-0 relative">
-            {effectivePanel === 'subform' && isValidElement(headerContent) ? (
+          <div className="shrink-0">
+            {isValidElement(headerContent) ? (
               cloneElement(headerContent, {
-                showBackButton: (headerContent.props as any).showBackButton ?? true,
-                onBackClick: (headerContent.props as any).onBackClick ?? (() => setPanel('edit')),
+                ...(effectivePanel === 'subform' && {
+                  showBackButton: (headerContent.props as any).showBackButton ?? true,
+                  onBackClick: (headerContent.props as any).onBackClick ?? (() => setPanel('edit')),
+                }),
+                onClose: handleClose,
+                showCloseButton: true,
               } as any)
             ) : (
               headerContent
             )}
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={handleClose}
-              className="absolute top-1/2 right-4 transform -translate-y-1/2"
-              data-testid={`modal-close-button-${modalId}`}
-              aria-label="Cerrar modal"
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         )}
 
