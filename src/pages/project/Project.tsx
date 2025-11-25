@@ -7,7 +7,7 @@ import {
 
 import { useProjectContext } from '@/stores/projectContext';
 import { useNavigationStore } from '@/stores/navigationStore';
-import { useProjects } from '@/features/projects';
+import { useProject } from '@/features/projects/hooks/use-project';
 import { useSiteLogs } from '@/features/sitelog/hooks/use-site-logs';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useQuery } from '@tanstack/react-query';
@@ -21,10 +21,9 @@ export default function Project() {
   const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore();
   const { data: userData } = useCurrentUser();
   const organizationId = currentOrganizationId || userData?.organization?.id;
-  const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId || undefined);
   
-  // Get current project
-  const currentProject = projects.find(p => p.id === selectedProjectId);
+  // Get current project by ID (fetches only this specific project)
+  const { data: currentProject, isLoading: projectLoading } = useProject(selectedProjectId || undefined);
 
   // Get site logs (bitácoras)
   const { data: siteLogs = [] } = useSiteLogs(selectedProjectId || undefined, organizationId || undefined);
@@ -233,7 +232,7 @@ export default function Project() {
     );
   }
 
-  if (projectsLoading) {
+  if (projectLoading) {
     return (
       <HeroLayout hideAIChat>
         <div className="flex items-center justify-center h-64">
