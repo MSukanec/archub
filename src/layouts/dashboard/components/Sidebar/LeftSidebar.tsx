@@ -482,7 +482,7 @@ export function LeftSidebar() {
                   {/* Logo */}
                   <div className="h-[32px] flex items-center justify-center w-8 mb-3">
                     <img 
-                      src="/Seencel512.png" 
+                      src="/seencel-logo-192.png" 
                       alt="Seencel Logo" 
                       className="h-8 w-auto object-contain"
                     />

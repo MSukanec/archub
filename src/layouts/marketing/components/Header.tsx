@@ -283,7 +283,7 @@ export function Header({ navigation }: HeaderProps) {
           <div className="flex items-center space-x-8">
             <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer">
               <img 
-                src="/Seencel512_b.png" 
+                src="/seencel-logo-192.png" 
                 alt="Seencel" 
                 className="h-8 w-8 object-contain"
               />

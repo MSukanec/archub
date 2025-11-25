@@ -8,7 +8,7 @@ export function Footer() {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <img 
-                src="/Seencel512_b.png" 
+                src="/seencel-logo-192.png" 
                 alt="Seencel" 
                 className="h-8 w-8 object-contain"
               />
