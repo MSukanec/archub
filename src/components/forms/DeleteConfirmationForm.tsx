@@ -257,10 +257,13 @@ export default function DeleteConfirmationForm({
             )}
 
             {/* Input de confirmación */}
-            <div className="space-y-2">
+            <div className="space-y-4">
               <Label htmlFor="confirmation-input">
-                Escribe el nombre del {itemType} para confirmar: <span className="font-mono text-destructive font-semibold">{itemName}</span>
+                Escribe el nombre del {itemType} para confirmar:
               </Label>
+              <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
+                <p className="text-lg font-mono font-semibold text-destructive">{itemName}</p>
+              </div>
               <Input
                 id="confirmation-input"
                 placeholder={`Escribe "${itemName}"`}
